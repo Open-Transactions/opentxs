@@ -22,11 +22,11 @@
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -41,7 +41,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -49,6 +48,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -586,7 +586,7 @@ auto BlockchainAccountActivity::Send(
     Scale scale,
     std::span<const PaymentCode> notify) const noexcept -> bool
 {
-    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
+    const auto& definition = display::GetDefinition(blockchain_to_unit(chain_));
 
     if (const auto value = definition.Import(amount, scale); value) {
 
@@ -623,7 +623,7 @@ auto BlockchainAccountActivity::ValidateAddress(
 auto BlockchainAccountActivity::ValidateAmount(
     const UnallocatedCString& text) const noexcept -> UnallocatedCString
 {
-    const auto& definition = display::GetDefinition(BlockchainToUnit(chain_));
+    const auto& definition = display::GetDefinition(blockchain_to_unit(chain_));
 
     if (const auto value = definition.Import(text); value) {
 

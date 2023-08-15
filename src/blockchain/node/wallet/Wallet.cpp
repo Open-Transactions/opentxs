@@ -21,10 +21,10 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"   // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Log.hpp"

@@ -34,7 +34,16 @@ class Crypto;
 
 namespace blockchain
 {
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
@@ -43,12 +52,9 @@ namespace internal
 class Transaction;
 }  // namespace internal
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
-
-namespace block
-{
-class TransactionHash;
-}  // namespace block
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace identifier
@@ -65,7 +71,7 @@ class Transaction
 {
 public:
     virtual auto asBitcoin() const noexcept
-        -> const bitcoin::block::internal::Transaction&;
+        -> const protocol::bitcoin::base::block::internal::Transaction&;
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
         alloc::Default alloc) const noexcept -> Set<identifier::Nym>;
@@ -93,7 +99,8 @@ public:
     virtual auto Print(const api::Crypto& crypto, alloc::Default alloc)
         const noexcept -> CString;
 
-    virtual auto asBitcoin() noexcept -> bitcoin::block::internal::Transaction&;
+    virtual auto asBitcoin() noexcept
+        -> protocol::bitcoin::base::block::internal::Transaction&;
 
     virtual ~Transaction() = default;
 };

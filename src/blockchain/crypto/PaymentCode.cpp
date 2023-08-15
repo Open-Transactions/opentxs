@@ -266,7 +266,7 @@ PaymentCode::PaymentCode(
 auto PaymentCode::account_already_exists(const rLock&) const noexcept -> bool
 {
     const auto existing = api_.Storage().Bip47ChannelsByChain(
-        parent_.NymID(), BlockchainToUnit(chain_));
+        parent_.NymID(), blockchain_to_unit(chain_));
 
     return 0 < existing.count(id_);
 }

@@ -28,10 +28,10 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep

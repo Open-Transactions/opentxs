@@ -10,15 +10,15 @@
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
@@ -127,7 +127,7 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
 auto Filters::LoadFilter(
     const cfilter::Type type,
     const ReadView block,
-    alloc::Strategy alloc) const noexcept -> blockchain::GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     return common_.LoadFilter(type, block, alloc);
 }
@@ -135,7 +135,7 @@ auto Filters::LoadFilter(
 auto Filters::LoadFilters(
     const cfilter::Type type,
     std::span<const block::Hash> blocks,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
     return common_.LoadFilters(type, blocks, alloc);
 }

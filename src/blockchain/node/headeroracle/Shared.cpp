@@ -17,13 +17,13 @@
 
 #include "blockchain/node/UpdateTransaction.hpp"
 #include "blockchain/node/headeroracle/HeaderJob.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -31,12 +31,12 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"    // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"

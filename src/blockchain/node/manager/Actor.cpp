@@ -763,7 +763,7 @@ auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
                     auto& sKey = *sweep.mutable_key();
                     sKey.set_version(sweep_key_version_);
                     sKey.set_chain(translate(
-                        UnitToClaim(BlockchainToUnit(shared_.Chain()))));
+                        UnitToClaim(blockchain_to_unit(shared_.Chain()))));
                     sKey.set_nym(nymID.asBase58(api_.Crypto()));
                     sKey.set_subaccount(subaccount.asBase58(api_.Crypto()));
                     sKey.set_subchain(static_cast<std::uint32_t>(subchain));

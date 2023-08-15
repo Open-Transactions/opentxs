@@ -87,10 +87,11 @@ auto json_is_escaped_unicode(const boost::json::string& in) noexcept -> bool
 auto parse(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void
 {
     if (0u == in.size()) {
-        out.data_ = ot::blockchain::ethereum::rlp::Null{};
+        out.data_ = ot::blockchain::protocol::ethereum::base::rlp::Null{};
     } else {
         const auto view = boost::json::string_view{in};
         out.data_ = api.Factory().DataFromBytes({view.data(), view.size()});
@@ -100,7 +101,8 @@ auto parse(
 auto parse(
     const opentxs::api::Session& api,
     const boost::json::value& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void
 {
     switch (in.kind()) {
         using Type = boost::json::kind;
@@ -121,7 +123,8 @@ auto parse(
         } break;
         case Type::array: {
             const auto& array = in.as_array();
-            auto items = ot::blockchain::ethereum::rlp::Sequence{};
+            auto items =
+                ot::blockchain::protocol::ethereum::base::rlp::Sequence{};
 
             for (const auto& item : array) {
                 auto& subnode = items.emplace_back();
@@ -139,10 +142,11 @@ auto parse(
 auto parse(
     const opentxs::api::Session& api,
     std::int64_t in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void
 {
     if (0 == in) {
-        out.data_ = ot::blockchain::ethereum::rlp::Null{};
+        out.data_ = ot::blockchain::protocol::ethereum::base::rlp::Null{};
     } else {
         namespace mp = boost::multiprecision;
         const auto number = mp::checked_cpp_int{in};
@@ -159,7 +163,8 @@ auto parse(
 auto parse_as_bigint(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void
 {
     const auto string = std::string{in.c_str()}.substr(1);
     namespace mp = boost::multiprecision;
@@ -176,7 +181,8 @@ auto parse_as_bigint(
 auto parse_as_escaped_unicode(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void
 {
     // TODO find a better way than hard coding known values from the test
     // vectors

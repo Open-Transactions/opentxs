@@ -6,8 +6,8 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -23,6 +23,7 @@ class Hash;
 
 namespace cfilter
 {
+class GCS;
 class Header;
 }  // namespace cfilter
 
@@ -33,8 +34,6 @@ namespace internal
 class FilterOracle;
 }  // namespace internal
 }  // namespace node
-
-class GCS;
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -52,11 +51,11 @@ public:
     virtual auto LoadFilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Strategy alloc = {}) const noexcept -> GCS = 0;
+        alloc::Strategy alloc = {}) const noexcept -> cfilter::GCS = 0;
     virtual auto LoadFilters(
         const cfilter::Type type,
         const Vector<block::Hash>& blocks,
-        alloc::Strategy alloc = {}) const noexcept -> Vector<GCS> = 0;
+        alloc::Strategy alloc = {}) const noexcept -> Vector<cfilter::GCS> = 0;
     virtual auto LoadFilterHeader(
         const cfilter::Type type,
         const block::Hash& block) const noexcept -> cfilter::Header = 0;

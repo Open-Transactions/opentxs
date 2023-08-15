@@ -11,10 +11,8 @@
 #include <stdexcept>
 #include <utility>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -31,8 +29,8 @@ struct State::Imp {
         : chain_(chain)
         , position_(std::move(position))
     {
-        if (0 == opentxs::blockchain::DefinedChains().count(chain_)) {
-            throw std::runtime_error{"invalid chain"};
+        if (false == opentxs::blockchain::is_defined(chain_)) {
+            throw std::runtime_error{"undefined chain"};
         }
     }
     Imp() noexcept = delete;

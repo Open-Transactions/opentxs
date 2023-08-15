@@ -11,13 +11,13 @@
 #include <functional>
 #include <utility>
 
-#include "internal/blockchain/bitcoin/bloom/Types.hpp"
+#include "internal/blockchain/bloom/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -36,8 +36,16 @@ namespace block
 {
 class Block;
 }  // namespace block
-class BloomFilter;
+
+namespace bloom
+{
+class Filter;
+}  // namespace bloom
+
+namespace cfilter
+{
 class GCS;
+}  // namespace cfilter
 }  // namespace blockchain
 
 namespace display
@@ -118,7 +126,7 @@ struct SerializedBloomFilter {
 
     SerializedBloomFilter(
         const std::uint32_t tweak,
-        const BloomUpdateFlag update,
+        const bloom::UpdateFlag update,
         const std::size_t functionCount) noexcept;
     SerializedBloomFilter() noexcept;
 };
@@ -150,7 +158,6 @@ auto Grind(const std::function<void()> function) noexcept -> void;
 auto Serialize(const Type chain, const cfilter::Type type) noexcept(false)
     -> std::uint8_t;
 auto Serialize(const block::Position& position) noexcept -> Space;
-auto Ticker(const Type chain) noexcept -> UnallocatedCString;
 }  // namespace opentxs::blockchain::internal
 
 namespace opentxs::factory
@@ -158,32 +165,32 @@ namespace opentxs::factory
 auto BloomFilter(
     const api::Session& api,
     const std::uint32_t tweak,
-    const blockchain::BloomUpdateFlag update,
+    const blockchain::bloom::UpdateFlag update,
     const std::size_t targets,
-    const double falsePositiveRate) -> blockchain::BloomFilter*;
+    const double falsePositiveRate) -> blockchain::bloom::Filter*;
 auto BloomFilter(const api::Session& api, const Data& serialized)
-    -> blockchain::BloomFilter*;
+    -> blockchain::bloom::Filter*;
 auto GCS(
     const api::Session& api,
     const std::uint8_t bits,
     const std::uint32_t fpRate,
     const ReadView key,
     const Vector<ByteArray>& elements,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const blockchain::block::Block& block,
     alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> blockchain::GCS;
+    alloc::Default monotonic) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
     const proto::GCS& serialized,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
     const ReadView serialized,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
     const std::uint8_t bits,
@@ -191,11 +198,11 @@ auto GCS(
     const ReadView key,
     const std::uint32_t filterElementCount,
     const ReadView filter,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
     const blockchain::cfilter::Type type,
     const ReadView key,
     ReadView encoded,
-    alloc::Default alloc) noexcept -> blockchain::GCS;
+    alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 }  // namespace opentxs::factory

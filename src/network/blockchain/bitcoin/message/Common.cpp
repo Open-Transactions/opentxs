@@ -20,14 +20,14 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep

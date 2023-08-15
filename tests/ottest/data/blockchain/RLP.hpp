@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string_view>
 
-#include "internal/blockchain/ethereum/RLP.hpp"
+#include "internal/blockchain/protocol/ethereum/base/RLP.hpp"
 
 namespace ot = opentxs;
 
@@ -28,7 +28,7 @@ namespace ottest
 {
 struct OPENTXS_EXPORT RLPVector {
     ot::CString name_{};
-    ot::blockchain::ethereum::rlp::Node node_{};
+    ot::blockchain::protocol::ethereum::base::rlp::Node node_{};
     ot::ByteArray encoded_{};
 };
 
@@ -46,21 +46,26 @@ OPENTXS_EXPORT auto json_is_escaped_unicode(
 OPENTXS_EXPORT auto parse(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void;
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void;
 OPENTXS_EXPORT auto parse(
     const opentxs::api::Session& api,
     const boost::json::value& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void;
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void;
 OPENTXS_EXPORT auto parse(
     const opentxs::api::Session& api,
     std::int64_t in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void;
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void;
 OPENTXS_EXPORT auto parse_as_bigint(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void;
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void;
 OPENTXS_EXPORT auto parse_as_escaped_unicode(
     const opentxs::api::Session& api,
     const boost::json::string& in,
-    opentxs::blockchain::ethereum::rlp::Node& out) noexcept -> void;
+    opentxs::blockchain::protocol::ethereum::base::rlp::Node& out) noexcept
+    -> void;
 }  // namespace ottest

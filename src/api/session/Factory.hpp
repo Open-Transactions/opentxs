@@ -36,13 +36,13 @@
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -413,39 +413,39 @@ public:
         const blockchain::Type chain,
         std::span<const ReadView> data,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2MS(
         const blockchain::Type chain,
         const std::uint8_t M,
         const std::uint8_t N,
         std::span<const opentxs::crypto::asymmetric::key::EllipticCurve*> keys,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2PK(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2PKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2SH(
         const blockchain::Type chain,
-        const blockchain::bitcoin::block::Script& script,
+        const blockchain::protocol::bitcoin::base::block::Script& script,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2WPKH(
         const blockchain::Type chain,
         const opentxs::crypto::asymmetric::key::EllipticCurve& key,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BitcoinScriptP2WSH(
         const blockchain::Type chain,
-        const blockchain::bitcoin::block::Script& script,
+        const blockchain::protocol::bitcoin::base::block::Script& script,
         alloc::Default alloc) const noexcept
-        -> blockchain::bitcoin::block::Script final;
+        -> blockchain::protocol::bitcoin::base::block::Script final;
     auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,

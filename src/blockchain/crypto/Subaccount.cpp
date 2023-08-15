@@ -87,7 +87,7 @@ Subaccount::Subaccount(
           convert(api, serialized.spent()),
           out)
 {
-    if (UnitToBlockchain(ClaimToUnit(translate(serialized.chain()))) !=
+    if (unit_to_blockchain(ClaimToUnit(translate(serialized.chain()))) !=
         chain_) {
         throw std::runtime_error("Wrong account type");
     }
@@ -341,7 +341,7 @@ auto Subaccount::serialize_common(
     out.set_version(BlockchainAccountDataVersion);
     out.set_id(id_.asBase58(api_.Crypto()));
     out.set_revision(revision_.load());
-    out.set_chain(translate(UnitToClaim(BlockchainToUnit(chain_))));
+    out.set_chain(translate(UnitToClaim(blockchain_to_unit(chain_))));
 
     for (const auto& [coin, data] : unspent_) {
         auto converted = Activity{coin, data.first, data.second};

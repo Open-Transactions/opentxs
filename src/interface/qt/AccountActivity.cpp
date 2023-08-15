@@ -123,7 +123,7 @@ auto AccountActivityQt::getAmountValidator() const noexcept -> AmountValidator*
 
 auto AccountActivityQt::getChain() const noexcept -> int
 {
-    return static_cast<int>(UnitToBlockchain(imp_->parent_.Unit()));
+    return static_cast<int>(unit_to_blockchain(imp_->parent_.Unit()));
 }
 
 auto AccountActivityQt::getDepositAddress(const int chain) const noexcept

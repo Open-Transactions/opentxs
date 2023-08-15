@@ -5,13 +5,8 @@
 
 #pragma once
 
-#include <cstdint>
-#include <optional>  // IWYU pragma: keep
-#include <tuple>
-
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -44,7 +39,6 @@ OPENTXS_EXPORT auto BlockHash(
 OPENTXS_EXPORT auto BlockHasher(
     const api::Crypto& crypto,
     const Type chain) noexcept -> opentxs::crypto::Hasher;
-OPENTXS_EXPORT auto DefinedChains() noexcept -> const UnallocatedSet<Type>&;
 OPENTXS_EXPORT auto FilterHash(
     const api::Crypto& crypto,
     const Type chain,
@@ -56,8 +50,6 @@ OPENTXS_EXPORT auto FilterHasher(
 OPENTXS_EXPORT auto HashToNumber(ReadView hex) noexcept -> UnallocatedCString;
 OPENTXS_EXPORT auto HashToNumber(const Data& hash) noexcept
     -> UnallocatedCString;
-OPENTXS_EXPORT auto HasSegwit(const Type type) noexcept -> bool;
-OPENTXS_EXPORT auto IsTestnet(const Type type) noexcept -> bool;
 OPENTXS_EXPORT auto MerkleHash(
     const api::Crypto& crypto,
     const Type chain,
@@ -102,9 +94,6 @@ OPENTXS_EXPORT auto ScriptHashSegwit(
 OPENTXS_EXPORT auto ScriptHasherSegwit(
     const api::Crypto& crypto,
     const Type chain) noexcept -> opentxs::crypto::Hasher;
-OPENTXS_EXPORT auto SupportedChains() noexcept -> const UnallocatedSet<Type>&;
-OPENTXS_EXPORT auto TickerSymbol(const Type type) noexcept
-    -> UnallocatedCString;
 OPENTXS_EXPORT auto TransactionHash(
     const api::Crypto& crypto,
     const Type chain,

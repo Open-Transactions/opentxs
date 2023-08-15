@@ -16,8 +16,8 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "ottest/data/blockchain/Bip158.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"

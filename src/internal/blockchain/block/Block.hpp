@@ -11,8 +11,8 @@
 #include <span>
 
 #include "internal/blockchain/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -27,7 +27,18 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class Hash;
+class Header;
+class Transaction;
+}  // namespace block
+
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
@@ -36,14 +47,9 @@ namespace internal
 class Block;
 }  // namespace internal
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
-
-namespace block
-{
-class Hash;
-class Header;
-class Transaction;
-}  // namespace block
+}  // namespace protocol
 }  // namespace blockchain
 
 class Log;
@@ -57,7 +63,7 @@ class Block
 {
 public:
     virtual auto asBitcoin() const noexcept
-        -> const bitcoin::block::internal::Block&;
+        -> const protocol::bitcoin::base::block::internal::Block&;
     virtual auto CalculateSize() const noexcept -> std::size_t;
     virtual auto ContainsHash(const TransactionHash& hash) const noexcept
         -> bool;
@@ -88,7 +94,8 @@ public:
     virtual auto Serialize(Writer&& bytes) const noexcept -> bool;
     virtual auto size() const noexcept -> std::size_t;
 
-    virtual auto asBitcoin() noexcept -> bitcoin::block::internal::Block&;
+    virtual auto asBitcoin() noexcept
+        -> protocol::bitcoin::base::block::internal::Block&;
 
     virtual ~Block() = default;
 };

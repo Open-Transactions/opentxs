@@ -23,7 +23,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -115,7 +114,7 @@ auto UnitList::process_blockchain_balance(const Message& message) noexcept
     const auto& chainFrame = body[1];
 
     try {
-        process_unit(BlockchainToUnit(chainFrame.as<blockchain::Type>()));
+        process_unit(blockchain_to_unit(chainFrame.as<blockchain::Type>()));
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Invalid chain").Flush();
 
@@ -152,7 +151,7 @@ auto UnitList::startup() noexcept -> void
 
     for (const auto& id : accounts) { process_account(id); }
 
-    for (const auto& chain : blockchain::SupportedChains()) {
+    for (const auto& chain : blockchain::supported_chains()) {
         if (0 < api_.Crypto()
                     .Blockchain()
                     .SubaccountList(primary_id_, chain)

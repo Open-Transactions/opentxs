@@ -10,12 +10,12 @@
 
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -68,11 +68,11 @@ public:
     auto LoadFilter(
         const cfilter::Type type,
         const ReadView block,
-        alloc::Strategy alloc) const noexcept -> blockchain::GCS;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS;
     auto LoadFilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>;
     auto LoadFilterHash(const cfilter::Type type, const ReadView block)
         const noexcept -> cfilter::Hash;
     auto LoadFilterHeader(const cfilter::Type type, const ReadView block)

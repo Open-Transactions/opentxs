@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "internal/blockchain/ethereum/RLP.hpp"
+#include "internal/blockchain/protocol/ethereum/base/RLP.hpp"
 #include "ottest/data/blockchain/RLP.hpp"
 #include "ottest/fixtures/common/OneClientSession.hpp"
 
@@ -41,7 +41,7 @@ TEST_F(OneClientSession, Encode)
 
 TEST_F(OneClientSession, Decode)
 {
-    namespace rlp = ot::blockchain::ethereum::rlp;
+    namespace rlp = ot::blockchain::protocol::ethereum::base::rlp;
 
     for (const auto& item : GetRLPVectors(client_1_)) {
         const auto node = rlp::Node::Decode(client_1_, item.encoded_.Bytes());

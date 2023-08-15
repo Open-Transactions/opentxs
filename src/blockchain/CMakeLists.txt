@@ -3,31 +3,26 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_subdirectory(bitcoin)
 add_subdirectory(block)
+add_subdirectory(bloom)
+add_subdirectory(cfilter)
 add_subdirectory(crypto)
-add_subdirectory(ethereum)
 add_subdirectory(node)
+add_subdirectory(params)
+add_subdirectory(protocol)
 add_subdirectory(token)
 add_subdirectory(work)
 
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(database)
-  add_subdirectory(pkt)
 endif()
 
 libopentxs_add_public_header("blockchain" "Blockchain.hpp")
 libopentxs_add_public_header("blockchain" "BlockchainType.hpp")
+libopentxs_add_public_header("blockchain" "Category.hpp")
 libopentxs_add_public_header("blockchain" "Types.hpp")
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/Params.hpp"
-    "Json.cpp"
-    "Json.hpp"
-    "Params.cpp"
-)
+target_sources(opentxs-common PRIVATE "Common.cpp")
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_SOURCE_DIR}/generated/blockchain/xxd"
 )

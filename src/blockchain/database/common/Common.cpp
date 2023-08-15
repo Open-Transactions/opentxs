@@ -6,8 +6,8 @@
 #include "internal/blockchain/database/common/Common.hpp"  // IWYU pragma: associated
 
 #include <ankerl/unordered_dense.h>
+#include <span>
 
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -17,7 +17,7 @@ constexpr auto sync_map_ = [] {
     constexpr auto offset{65536};
     auto map = ankerl::unordered_dense::map<Chain, SyncTableData>{};
 
-    for (const auto& chain : opentxs::blockchain::DefinedChains()) {
+    for (const auto& chain : opentxs::blockchain::defined_chains()) {
         auto& [table, name] = map[chain];
         table = offset + static_cast<int>(chain);
         name = print(chain);

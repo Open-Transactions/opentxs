@@ -172,7 +172,8 @@ auto Regtest_fixture_simple::MineBlocks(
     Height ancestor,
     unsigned block_number,
     unsigned transaction_number,
-    unsigned amount) noexcept -> opentxs::blockchain::bitcoin::block::Header
+    unsigned amount) noexcept
+    -> opentxs::blockchain::protocol::bitcoin::base::block::Header
 {
 
     auto target = ancestor + block_number;
@@ -214,7 +215,7 @@ auto Regtest_fixture_simple::MineBlocks(
     std::size_t block_number,
     const Generator& gen,
     ot::UnallocatedVector<Transaction> extra) noexcept
-    -> opentxs::blockchain::bitcoin::block::Header
+    -> opentxs::blockchain::protocol::bitcoin::base::block::Header
 {
     const auto handle = miner_.Network().Blockchain().GetChain(test_chain_);
 

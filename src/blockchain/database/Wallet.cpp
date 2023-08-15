@@ -13,9 +13,9 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"

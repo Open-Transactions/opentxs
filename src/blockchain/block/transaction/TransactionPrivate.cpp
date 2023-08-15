@@ -7,9 +7,9 @@
 
 #include <utility>
 
-#include "blockchain/bitcoin/block/transaction/TransactionPrivate.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
+#include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -26,31 +26,32 @@ TransactionPrivate::TransactionPrivate(
 }
 
 auto TransactionPrivate::asBitcoinPrivate() const noexcept
-    -> const bitcoin::block::TransactionPrivate*
+    -> const protocol::bitcoin::base::block::TransactionPrivate*
 {
-    static const auto blank = bitcoin::block::TransactionPrivate{{}};
+    static const auto blank =
+        protocol::bitcoin::base::block::TransactionPrivate{{}};
 
     return std::addressof(blank);
 }
 
 auto TransactionPrivate::asBitcoinPrivate() noexcept
-    -> bitcoin::block::TransactionPrivate*
+    -> protocol::bitcoin::base::block::TransactionPrivate*
 {
-    static auto blank = bitcoin::block::TransactionPrivate{{}};
+    static auto blank = protocol::bitcoin::base::block::TransactionPrivate{{}};
 
     return std::addressof(blank);
 }
 
 auto TransactionPrivate::asBitcoinPublic() const noexcept
-    -> const bitcoin::block::Transaction&
+    -> const protocol::bitcoin::base::block::Transaction&
 {
-    return bitcoin::block::Transaction::Blank();
+    return protocol::bitcoin::base::block::Transaction::Blank();
 }
 
 auto TransactionPrivate::asBitcoinPublic() noexcept
-    -> bitcoin::block::Transaction&
+    -> protocol::bitcoin::base::block::Transaction&
 {
-    return bitcoin::block::Transaction::Blank();
+    return protocol::bitcoin::base::block::Transaction::Blank();
 }
 
 auto TransactionPrivate::Reset(block::Transaction& tx) noexcept -> void

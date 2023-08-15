@@ -22,6 +22,8 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common
     PRIVATE
       "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/bitcoin/Factory.hpp"
+      "Inventory.cpp"
+      "Inventory.hpp"
       "Peer.cpp"
       "Peer.hpp"
       "Peer.tpp"

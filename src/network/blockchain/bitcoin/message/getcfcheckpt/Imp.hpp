@@ -16,8 +16,8 @@
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
 #include "network/blockchain/bitcoin/message/getcfcheckpt/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Types.hpp"
 

@@ -11,7 +11,7 @@
 #include "internal/network/blockchain/bitcoin/message/Cfilter.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/cfilter/Imp.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -23,7 +23,7 @@ auto BitcoinP2PCfilter(
     const blockchain::Type chain,
     const blockchain::cfilter::Type type,
     const blockchain::block::Hash& hash,
-    const blockchain::GCS& filter,
+    const blockchain::cfilter::GCS& filter,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Cfilter
 {

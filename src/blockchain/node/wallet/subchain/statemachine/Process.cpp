@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
@@ -21,6 +20,7 @@
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"

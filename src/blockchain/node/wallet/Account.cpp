@@ -365,7 +365,7 @@ auto Account::Imp::process_contact(
     auto codes = Set<opentxs::PaymentCode>{monotonic};
     codes.clear();
     const auto nyms = contact.Nyms();
-    const auto published = contact.PaymentCodes(BlockchainToUnit(chain_));
+    const auto published = contact.PaymentCodes(blockchain_to_unit(chain_));
     const auto parse_nym = [&, this](const auto& id) {
         if (const auto nym = api_.Wallet().Nym(id); nym) {
             codes.emplace(nym->PaymentCodePublic());

@@ -17,9 +17,9 @@
 #include "blockchain/node/stats/Imp.hpp"
 #include "blockchain/node/stats/Shared.hpp"
 #include "internal/api/session/Client.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -27,7 +27,6 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -90,7 +89,7 @@ auto BlockchainImp::Disable(const Chain type) const noexcept -> bool
 auto BlockchainImp::disable(const Lock& lock, const Chain type) const noexcept
     -> bool
 {
-    if (0 == opentxs::blockchain::SupportedChains().count(type)) {
+    if (false == opentxs::blockchain::is_supported(type)) {
         LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 
         return false;
@@ -118,7 +117,7 @@ auto BlockchainImp::enable(
     const Chain type,
     const std::string_view seednode) const noexcept -> bool
 {
-    if (0 == opentxs::blockchain::SupportedChains().count(type)) {
+    if (false == opentxs::blockchain::is_supported(type)) {
         LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 
         return false;
@@ -291,7 +290,7 @@ auto BlockchainImp::start(
     const bool startWallet) const noexcept -> bool
 {
     if (Chain::UnitTest != type) {
-        if (0 == opentxs::blockchain::SupportedChains().count(type)) {
+        if (false == opentxs::blockchain::is_supported(type)) {
             LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
 
             return false;

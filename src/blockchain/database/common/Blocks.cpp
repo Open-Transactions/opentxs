@@ -8,14 +8,13 @@
 #include <stdexcept>
 
 #include "blockchain/database/common/Bulk.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -137,7 +136,7 @@ struct Blocks::Imp {
         , lmdb_(lmdb)
         , bulk_(bulk)
     {
-        for (const auto chain : SupportedChains()) { check_genesis(chain); }
+        for (const auto chain : supported_chains()) { check_genesis(chain); }
     }
 
 private:

@@ -9,7 +9,7 @@
 #include <memory>
 #include <span>
 
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

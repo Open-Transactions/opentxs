@@ -14,8 +14,8 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep

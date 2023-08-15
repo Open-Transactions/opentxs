@@ -13,7 +13,6 @@
 
 #include "interface/qt/SendMonitor.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"
-#include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -80,7 +79,7 @@ public:
     }
     auto DisplayUnit() const noexcept -> UnallocatedCString final
     {
-        return blockchain::internal::Ticker(chain_);
+        return ticker_symbol(chain_);
     }
     auto Name() const noexcept -> UnallocatedCString final
     {
@@ -128,7 +127,7 @@ public:
     }
     auto Unit() const noexcept -> UnitType final
     {
-        return BlockchainToUnit(chain_);
+        return blockchain_to_unit(chain_);
     }
     auto ValidateAddress(const UnallocatedCString& text) const noexcept
         -> bool final;

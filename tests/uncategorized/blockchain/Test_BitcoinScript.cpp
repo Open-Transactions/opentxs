@@ -13,13 +13,13 @@
 #include <span>
 #include <string_view>
 
-#include "internal/blockchain/bitcoin/block/Factory.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "ottest/Basic.hpp"  // IWYU pragma: keep
 
 namespace ottest
 {
-namespace b = ot::blockchain::bitcoin::block;
+namespace b = ot::blockchain::protocol::bitcoin::base::block;
 
 using Script = b::Script;
 using Position = b::script::Position;
@@ -875,7 +875,8 @@ static auto byte_array(const ot::Space& in) noexcept
 }
 
 constexpr auto chain_{ot::blockchain::Type::Bitcoin};
-using Position = ot::blockchain::bitcoin::block::script::Position;
+using Position =
+    ot::blockchain::protocol::bitcoin::base::block::script::Position;
 
 TEST(Test_BitcoinScript, opcodes_general)
 {

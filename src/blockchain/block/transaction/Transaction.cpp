@@ -10,8 +10,8 @@
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -67,17 +67,19 @@ Transaction::Transaction(Transaction&& rhs, allocator_type alloc) noexcept
 }
 
 auto Transaction::asBitcoin() const& noexcept
-    -> const bitcoin::block::Transaction&
+    -> const protocol::bitcoin::base::block::Transaction&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Transaction::asBitcoin() & noexcept -> bitcoin::block::Transaction&
+auto Transaction::asBitcoin() & noexcept
+    -> protocol::bitcoin::base::block::Transaction&
 {
     return imp_->asBitcoinPublic();
 }
 
-auto Transaction::asBitcoin() && noexcept -> bitcoin::block::Transaction
+auto Transaction::asBitcoin() && noexcept
+    -> protocol::bitcoin::base::block::Transaction
 {
     return std::exchange(imp_, nullptr);
 }

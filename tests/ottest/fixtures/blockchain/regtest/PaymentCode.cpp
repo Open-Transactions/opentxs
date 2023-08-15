@@ -278,7 +278,7 @@ auto Regtest_payment_code::CheckTXODBBob() const noexcept -> bool
 }
 
 auto Regtest_payment_code::ExtractElements(
-    const ot::blockchain::bitcoin::block::Block& block) noexcept
+    const ot::blockchain::protocol::bitcoin::base::block::Block& block) noexcept
     -> ot::blockchain::block::Elements
 {
     return block.Internal().ExtractElements(FilterType::ES, {});

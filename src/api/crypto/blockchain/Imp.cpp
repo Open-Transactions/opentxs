@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -31,10 +31,8 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
@@ -47,6 +45,7 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
@@ -305,7 +304,7 @@ auto Blockchain::Imp::AssignContact(
 
     auto lock = Lock{nym_mutex(nymID)};
 
-    const auto chain = UnitToBlockchain(
+    const auto chain = unit_to_blockchain(
         api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
@@ -345,7 +344,7 @@ auto Blockchain::Imp::AssignLabel(
 
     auto lock = Lock{nym_mutex(nymID)};
 
-    const auto chain = UnitToBlockchain(
+    const auto chain = unit_to_blockchain(
         api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
@@ -1039,7 +1038,7 @@ auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
             throw std::out_of_range(error);
         }
 
-        return wallets_.Get(UnitToBlockchain(type));
+        return wallets_.Get(unit_to_blockchain(type));
     }();
     const auto& account = wallet.Account(nymID);
     const auto& subaccount =
@@ -1081,7 +1080,7 @@ auto Blockchain::Imp::HDSubaccount(
         throw std::out_of_range(error);
     }
 
-    auto& wallet = wallets_.Get(UnitToBlockchain(type));
+    auto& wallet = wallets_.Get(unit_to_blockchain(type));
     auto& account = wallet.Account(nymID);
 
     return account.GetHD().at(accountID);
@@ -1231,7 +1230,7 @@ auto Blockchain::Imp::NewHDSubaccount(
     auto accountPath = proto::HDPath{};
     init_path(
         api_.Factory().Internal().SeedID(nymPath.seed()),
-        BlockchainToUnit(derivationChain),
+        blockchain_to_unit(derivationChain),
         HDIndex{nymPath.child(1), Bip32Child::HARDENED},
         standard,
         accountPath);
@@ -1269,7 +1268,7 @@ auto Blockchain::Imp::NewHDSubaccount(
 
 auto Blockchain::Imp::NewNym(const identifier::Nym& id) const noexcept -> void
 {
-    for (const auto& chain : opentxs::blockchain::SupportedChains()) {
+    for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain).Account(id);
     }
 }
@@ -1480,7 +1479,7 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
         throw std::out_of_range(error);
     }
 
-    auto& wallet = wallets_.Get(UnitToBlockchain(type));
+    auto& wallet = wallets_.Get(unit_to_blockchain(type));
     auto& account = wallet.Account(nymID);
 
     return account.GetPaymentCode().at(accountID);
@@ -1668,7 +1667,7 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
 auto Blockchain::Imp::Start(std::shared_ptr<const api::Session> api) noexcept
     -> void
 {
-    for (const auto& chain : opentxs::blockchain::SupportedChains()) {
+    for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain);
     }
 }
@@ -1708,7 +1707,7 @@ auto Blockchain::Imp::validate_nym(const identifier::Nym& nymID) const noexcept
 auto Blockchain::Imp::Wallet(const opentxs::blockchain::Type chain) const
     noexcept(false) -> const opentxs::blockchain::crypto::Wallet&
 {
-    if (0 == opentxs::blockchain::DefinedChains().count(chain)) {
+    if (false == opentxs::blockchain::is_defined(chain)) {
         throw std::runtime_error("Invalid chain");
     }
 

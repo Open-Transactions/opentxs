@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/block/Header.hpp"  // IWYU pragma: associated
 
-#include "internal/blockchain/bitcoin/block/Header.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Header.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -16,14 +16,15 @@
 namespace opentxs::blockchain::block::internal
 {
 auto Header::asBitcoin() const noexcept
-    -> const bitcoin::block::internal::Header&
+    -> const protocol::bitcoin::base::block::internal::Header&
 {
-    return bitcoin::block::internal::Header::Blank();
+    return protocol::bitcoin::base::block::internal::Header::Blank();
 }
 
-auto Header::asBitcoin() noexcept -> bitcoin::block::internal::Header&
+auto Header::asBitcoin() noexcept
+    -> protocol::bitcoin::base::block::internal::Header&
 {
-    return bitcoin::block::internal::Header::Blank();
+    return protocol::bitcoin::base::block::internal::Header::Blank();
 }
 
 auto Header::CompareToCheckpoint(const block::Position&) noexcept -> void {}

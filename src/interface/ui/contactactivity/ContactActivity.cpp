@@ -34,10 +34,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -1000,8 +999,8 @@ auto ContactActivity::update_payment_codes() noexcept -> bool
 
     OT_ASSERT(contact);
 
-    for (const auto chain : blockchain::DefinedChains()) {
-        auto type = BlockchainToUnit(chain);
+    for (const auto chain : blockchain::defined_chains()) {
+        auto type = blockchain_to_unit(chain);
         auto code = contact->PaymentCode(type);
 
         if (code.empty()) { continue; }

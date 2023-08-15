@@ -10,8 +10,8 @@
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"

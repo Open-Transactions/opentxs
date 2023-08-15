@@ -5,6 +5,7 @@
 
 #include "api/crypto/blockchain/Wallets.hpp"  // IWYU pragma: associated
 
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/crypto/Factory.hpp"
@@ -12,7 +13,6 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -104,8 +104,8 @@ auto Wallets::populate(const Lock& lock) const noexcept -> void
     const auto nyms = api_.Storage().LocalNyms();
     auto exists = Set<opentxs::blockchain::Type>{};
 
-    for (const auto chain : opentxs::blockchain::SupportedChains()) {
-        const auto unit = BlockchainToUnit(chain);
+    for (const auto chain : opentxs::blockchain::supported_chains()) {
+        const auto unit = blockchain_to_unit(chain);
 
         for (const auto& nymID : nyms) {
             const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);

@@ -9,11 +9,11 @@
 #include <string_view>
 #include <utility>
 
-#include "blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"

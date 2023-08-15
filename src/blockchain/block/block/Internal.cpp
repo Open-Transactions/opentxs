@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "internal/blockchain/bitcoin/block/Block.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
@@ -16,14 +16,16 @@
 
 namespace opentxs::blockchain::block::internal
 {
-auto Block::asBitcoin() const noexcept -> const bitcoin::block::internal::Block&
+auto Block::asBitcoin() const noexcept
+    -> const protocol::bitcoin::base::block::internal::Block&
 {
-    return bitcoin::block::internal::Block::Blank();
+    return protocol::bitcoin::base::block::internal::Block::Blank();
 }
 
-auto Block::asBitcoin() noexcept -> bitcoin::block::internal::Block&
+auto Block::asBitcoin() noexcept
+    -> protocol::bitcoin::base::block::internal::Block&
 {
-    return bitcoin::block::internal::Block::Blank();
+    return protocol::bitcoin::base::block::internal::Block::Blank();
 }
 
 auto Block::CalculateSize() const noexcept -> std::size_t { return {}; }

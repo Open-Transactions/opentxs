@@ -38,14 +38,6 @@ class Crypto;
 
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Transaction;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 namespace internal
@@ -57,6 +49,20 @@ class Transaction;
 class TransactionHash;
 class TransactionPrivate;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Transaction;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace identifier
@@ -99,7 +105,8 @@ public:
 
     [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-    auto asBitcoin() const& noexcept -> const bitcoin::block::Transaction&;
+    auto asBitcoin() const& noexcept
+        -> const protocol::bitcoin::base::block::Transaction&;
     auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,
         allocator_type alloc) const noexcept -> Set<identifier::Nym>;
@@ -127,8 +134,8 @@ public:
     auto Print(const api::Crypto& crypto, allocator_type alloc) const noexcept
         -> CString;
 
-    auto asBitcoin() & noexcept -> bitcoin::block::Transaction&;
-    auto asBitcoin() && noexcept -> bitcoin::block::Transaction;
+    auto asBitcoin() & noexcept -> protocol::bitcoin::base::block::Transaction&;
+    auto asBitcoin() && noexcept -> protocol::bitcoin::base::block::Transaction;
     auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Transaction&;
     auto swap(Transaction& rhs) noexcept -> void;

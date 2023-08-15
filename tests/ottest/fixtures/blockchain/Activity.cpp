@@ -10,8 +10,8 @@
 #include <memory>
 #include <regex>
 
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

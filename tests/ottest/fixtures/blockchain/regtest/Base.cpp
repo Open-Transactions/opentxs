@@ -16,7 +16,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
@@ -826,7 +826,8 @@ auto Regtest_fixture_base::TestUTXOs(
             EXPECT_EQ(output.Value(), exAmount);
 
             const auto& script = output.Script();
-            using enum ot::blockchain::bitcoin::block::script::Position;
+            using enum ot::blockchain::protocol::bitcoin::base::block::script::
+                Position;
             out &= (script.Role() == Output);
 
             EXPECT_EQ(script.Role(), Output);

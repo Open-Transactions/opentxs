@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/cfilter/Hash.hpp"
 
 #pragma once
 
@@ -18,7 +18,7 @@
 #include "blockchain/node/filteroracle/Data.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -41,6 +41,7 @@ class Position;
 
 namespace cfilter
 {
+class GCS;
 class Hash;
 class Header;
 }  // namespace cfilter
@@ -56,8 +57,6 @@ class HeaderOracle;
 class Manager;
 struct Endpoints;
 }  // namespace node
-
-class GCS;
 }  // namespace blockchain
 
 namespace network
@@ -101,18 +100,18 @@ public:
     auto LoadCfilter(
         const cfilter::Type type,
         const block::Hash& block,
-        alloc::Strategy alloc) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS;
     auto LoadCfilterHash(const block::Hash& block, const Data& data)
         const noexcept -> cfilter::Hash;
     auto LoadCfilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>;
     auto ProcessBlock(
         const cfilter::Type type,
         const block::Block& block,
         alloc::Default alloc,
-        alloc::Default monotonic) const noexcept -> GCS;
+        alloc::Default monotonic) const noexcept -> cfilter::GCS;
     auto Tips() const noexcept -> std::pair<block::Position, block::Position>;
     auto ValidateAgainstCheckpoint(
         const block::Position& block,
@@ -182,7 +181,7 @@ private:
         const cfilter::Type type,
         const block::Block& block,
         alloc::Default alloc,
-        alloc::Default monotonic) noexcept -> GCS;
+        alloc::Default monotonic) noexcept -> cfilter::GCS;
 
     auto broadcast_cfilter_tip(
         const cfilter::Type type,
@@ -215,7 +214,7 @@ private:
         const cfilter::Type type,
         const block::Hash& block,
         const Data& data,
-        alloc::Strategy alloc) const noexcept -> GCS;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS;
     auto load_cfilter_hash(
         const cfilter::Type type,
         const block::Hash& block,
@@ -224,7 +223,7 @@ private:
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
         const Data& data,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>;
     auto process_sync_data(
         const block::Hash& prior,
         std::span<const block::Hash> hashes,

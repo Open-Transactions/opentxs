@@ -14,10 +14,10 @@
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/bloom/BloomFilter.hpp"
-#include "internal/blockchain/bitcoin/bloom/BloomUpdateFlag.hpp"
-#include "internal/blockchain/bitcoin/cfilter/GCS.hpp"
+#include "internal/blockchain/bloom/Filter.hpp"
+#include "internal/blockchain/bloom/UpdateFlag.hpp"
+#include "internal/blockchain/cfilter/GCS.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -231,7 +231,7 @@ TEST_F(Test_Filters, bloom_filter)
     const auto object4(ot::ByteArray{s4.data(), s4.length()});
 
     ot::OTBloomFilter pFilter{ot::factory::BloomFilter(
-        api_, 9873485, ot::blockchain::BloomUpdateFlag::None, 5, 0.001)};
+        api_, 9873485, ot::blockchain::bloom::UpdateFlag::None, 5, 0.001)};
 
     pFilter->AddElement(object1);
     pFilter->AddElement(object4);
@@ -577,7 +577,7 @@ TEST_F(Test_Filters, test_set_intersection)
     }();
 
     const auto targets = [&] {
-        auto out = ot::blockchain::GCS::Targets{};
+        auto out = ot::blockchain::cfilter::Targets{};
         out.reserve(subset.size());
         std::transform(
             subset.begin(),

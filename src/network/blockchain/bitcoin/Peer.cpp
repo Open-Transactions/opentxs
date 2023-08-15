@@ -19,10 +19,7 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
-#include "blockchain/bitcoin/Inventory.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Peer.hpp"
 #include "internal/blockchain/node/Config.hpp"
@@ -34,6 +31,8 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
@@ -69,16 +68,15 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/Peer.tpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -86,6 +84,9 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -224,13 +225,13 @@ Peer::Peer(
     }())
     , nonce_(nonce)
     , inv_block_([&] {
-        using Type = opentxs::blockchain::bitcoin::Inventory::Type;
+        using Type = Inventory::Type;
         // TODO do some chains use MsgWitnessBlock?
 
         return Type::MsgBlock;
     }())
     , inv_tx_([&] {
-        using Type = opentxs::blockchain::bitcoin::Inventory::Type;
+        using Type = Inventory::Type;
 
         if (opentxs::blockchain::params::get(chain_).SupportsSegwit()) {
 
@@ -360,37 +361,10 @@ auto Peer::get_local_services(
     auto output = Set<opentxs::network::blockchain::bitcoin::Service>{alloc};
     output.clear();
 
-    switch (network) {
-        case Chain::Bitcoin:
-        case Chain::Bitcoin_testnet3:
-        case Chain::Litecoin:
-        case Chain::Litecoin_testnet4:
-        case Chain::PKT:
-        case Chain::PKT_testnet: {
-            output.emplace(Witness);
-        } break;
-        case Chain::BitcoinCash:
-        case Chain::BitcoinCash_testnet3:
-        case Chain::BitcoinCash_testnet4:
-        case Chain::BitcoinSV:
-        case Chain::BitcoinSV_testnet3:
-        case Chain::eCash:
-        case Chain::eCash_testnet3: {
-            output.emplace(BitcoinCash);
-        } break;
-        case Chain::Dash:
-        case Chain::Dash_testnet3:
-        case Chain::UnknownBlockchain:
-        case Chain::Ethereum:
-        case Chain::Ethereum_ropsten:
-        case Chain::Ethereum_goerli:
-        case Chain::Ethereum_sepolia:
-        case Chain::Ethereum_holesovice:
-        case Chain::Casper:
-        case Chain::Casper_testnet:
-        case Chain::UnitTest:
-        default: {
-        }
+    if (has_segwit(network)) { output.emplace(Witness); }
+
+    if (is_descended_from(associated_mainnet(network), Chain::BitcoinCash)) {
+        output.emplace(BitcoinCash);
     }
 
     switch (config.profile_) {
@@ -507,7 +481,7 @@ auto Peer::process_addresses(
 }
 
 auto Peer::process_block_hash(
-    const opentxs::blockchain::bitcoin::Inventory& inv,
+    const Inventory& inv,
     allocator_type monotonic) noexcept -> bool
 {
     const auto block = opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
@@ -535,10 +509,10 @@ auto Peer::process_block_hash(
 }
 
 auto Peer::process_block_hashes(
-    std::span<opentxs::blockchain::bitcoin::Inventory> hashes,
+    std::span<Inventory> hashes,
     allocator_type monotonic) noexcept -> void
 {
-    auto unseen = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    auto unseen = Vector<Inventory>{monotonic};
     unseen.reserve(hashes.size());
     unseen.clear();
 
@@ -942,7 +916,7 @@ auto Peer::process_protocol(
     const auto type = message.Type();
     const auto hashes = header_oracle_.BestHashes(startHeight, stopHash);
     const auto data = [&] {
-        auto out = Vector<opentxs::blockchain::GCS>{get_allocator()};
+        auto out = Vector<opentxs::blockchain::cfilter::GCS>{get_allocator()};
         out.reserve(count);
         out.clear();
 
@@ -986,8 +960,8 @@ auto Peer::process_protocol(
     allocator_type monotonic) noexcept(false) -> void
 {
     const auto& log = log_;
-    using enum opentxs::blockchain::bitcoin::Inventory::Type;
-    auto notFound = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+    using enum Inventory::Type;
+    auto notFound = Vector<Inventory>{monotonic};
     notFound.clear();
 
     for (const auto& inv : message.get()) {
@@ -1214,7 +1188,7 @@ auto Peer::process_protocol(
 {
     const auto& log = log_;
     auto data = message.get();
-    using Inv = opentxs::blockchain::bitcoin::Inventory;
+    using Inv = Inventory;
     auto blocks = Vector<Inv>{monotonic};
     blocks.reserve(data.size());
     blocks.clear();
@@ -1228,7 +1202,7 @@ auto Peer::process_protocol(
             " hash ")
             .asHex(hash)
             .Flush();
-        using enum opentxs::blockchain::bitcoin::Inventory::Type;
+        using enum Inventory::Type;
 
         switch (inv.type_) {
             case MsgBlock:
@@ -1389,40 +1363,25 @@ auto Peer::process_protocol(
 
     if (Dir::incoming == dir_) { transmit_protocol_version(monotonic); }
 
-    switch (chain_) {
-        case Bitcoin:
-        case Bitcoin_testnet3:
-        case BitcoinCash:
-        case BitcoinCash_testnet3:
-        case BitcoinCash_testnet4:
-        case Litecoin:
-        case Litecoin_testnet4:
-        case BitcoinSV:
-        case BitcoinSV_testnet3:
-        case eCash:
-        case eCash_testnet3:
-        case Dash:
-        case Dash_testnet3:
-        case UnitTest: {
+    using enum opentxs::blockchain::Category;
+
+    switch (category(chain_)) {
+        case output_based: {
             if (protocol_ >= 70015) { transmit_protocol_sendaddr2(monotonic); }
         } break;
-        case UnknownBlockchain:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case PKT:
-        case PKT_testnet:
+        case unknown_category:
+        case balance_based:
         default: {
         }
     }
 
     transmit_protocol_verack(monotonic);
-
     handshake_.got_version_ = true;
     check_handshake(monotonic);
 }
 
 auto Peer::process_transaction_hashes(
-    std::span<opentxs::blockchain::bitcoin::Inventory> invs,
+    std::span<Inventory> invs,
     allocator_type monotonic) noexcept -> void
 {
     const auto& log = log_;
@@ -1442,7 +1401,7 @@ auto Peer::process_transaction_hashes(
     OT_ASSERT(hashes.size() == mempool.size());
 
     auto unseen = [&] {
-        auto out = Vector<opentxs::blockchain::bitcoin::Inventory>{monotonic};
+        auto out = Vector<Inventory>{monotonic};
         out.reserve(hashes.size());
         out.clear();
 
@@ -1491,7 +1450,7 @@ auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
 
         return out;
     }();
-    using opentxs::blockchain::bitcoin::Inventory;
+    using bitcoin::Inventory;
     auto items = [&] {
         auto out = Vector<Inventory>{monotonic};
         out.reserve(missing.size());
@@ -1625,7 +1584,7 @@ auto Peer::transmit_block_hash(
     opentxs::blockchain::block::Hash&& hash,
     allocator_type monotonic) noexcept -> void
 {
-    using Inv = opentxs::blockchain::bitcoin::Inventory;
+    using Inv = Inventory;
 
     transmit_protocol_inv(Inv{inv_block_, std::move(hash)}, monotonic);
 }
@@ -1673,7 +1632,7 @@ auto Peer::transmit_protocol_cfheaders(
 auto Peer::transmit_protocol_cfilter(
     opentxs::blockchain::cfilter::Type type,
     const opentxs::blockchain::block::Hash& hash,
-    const opentxs::blockchain::GCS& filter,
+    const opentxs::blockchain::cfilter::GCS& filter,
     allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Cfilter;
@@ -1707,16 +1666,16 @@ auto Peer::transmit_protocol_getcfilters(
 }
 
 auto Peer::transmit_protocol_getdata(
-    opentxs::blockchain::bitcoin::Inventory&& inv,
+    Inventory&& inv,
     allocator_type monotonic) noexcept -> void
 {
-    using opentxs::blockchain::bitcoin::Inventory;
+    using bitcoin::Inventory;
     auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
     transmit_protocol_getdata(items, monotonic);
 }
 
 auto Peer::transmit_protocol_getdata(
-    std::span<opentxs::blockchain::bitcoin::Inventory> items,
+    std::span<Inventory> items,
     allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Getdata;
@@ -1778,16 +1737,16 @@ auto Peer::transmit_protocol_headers(
 }
 
 auto Peer::transmit_protocol_inv(
-    opentxs::blockchain::bitcoin::Inventory&& inv,
+    Inventory&& inv,
     allocator_type monotonic) noexcept -> void
 {
-    using opentxs::blockchain::bitcoin::Inventory;
+    using bitcoin::Inventory;
     auto items = move_construct<Inventory>(span_from_object(inv), monotonic);
     transmit_protocol_inv(items, monotonic);
 }
 
 auto Peer::transmit_protocol_inv(
-    std::span<opentxs::blockchain::bitcoin::Inventory> inv,
+    std::span<Inventory> inv,
     allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Inv;
@@ -1801,7 +1760,7 @@ auto Peer::transmit_protocol_mempool(allocator_type monotonic) noexcept -> void
 }
 
 auto Peer::transmit_protocol_notfound(
-    std::span<opentxs::blockchain::bitcoin::Inventory> payload,
+    std::span<Inventory> payload,
     allocator_type monotonic) noexcept -> void
 {
     using Type = message::internal::Notfound;
@@ -1877,7 +1836,7 @@ auto Peer::transmit_request_blocks(
 {
     auto blocks = [&] {
         const auto& data = job.Get();
-        using opentxs::blockchain::bitcoin::Inventory;
+        using bitcoin::Inventory;
         auto out = Vector<Inventory>{monotonic};
         out.reserve(data.size());
         out.clear();
@@ -1913,7 +1872,7 @@ auto Peer::transmit_request_peers(allocator_type monotonic) noexcept -> void
 auto Peer::transmit_txid(const Txid& txid, allocator_type monotonic) noexcept
     -> void
 {
-    using Inv = opentxs::blockchain::bitcoin::Inventory;
+    using Inv = Inventory;
     transmit_protocol_inv(Inv{inv_tx_, txid.Bytes()}, monotonic);
 }
 

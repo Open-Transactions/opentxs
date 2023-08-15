@@ -32,13 +32,13 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
@@ -98,7 +98,7 @@ auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
     auto reason =
         api_.Factory().PasswordPrompt("Verifying / updating contact data");
     auto mNym = api_.Wallet().mutable_Nym(owner_, reason);
-    const auto type = BlockchainToUnit(chain_);
+    const auto type = blockchain_to_unit(chain_);
     const auto existing = mNym.PaymentCode(type);
     const auto expected = UnallocatedCString{pc_display_};
 

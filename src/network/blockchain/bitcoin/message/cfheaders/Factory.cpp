@@ -11,7 +11,7 @@
 #include "internal/network/blockchain/bitcoin/message/Cfheaders.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/cfheaders/Imp.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"

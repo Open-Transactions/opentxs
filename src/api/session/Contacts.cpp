@@ -1251,7 +1251,7 @@ auto Contacts::PaymentCodeToContact(
         {
             auto contactE = mutable_contact(lock, contactID);
             auto& c = contactE->get();
-            const auto chain = BlockchainToUnit(currency);
+            const auto chain = blockchain_to_unit(currency);
             const auto existing = c.PaymentCode(chain);
             c.AddPaymentCode(code, existing.empty(), chain);
         }

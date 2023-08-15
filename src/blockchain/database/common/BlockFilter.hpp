@@ -11,7 +11,7 @@
 #include <tuple>
 
 #include "internal/blockchain/database/common/Common.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -39,6 +39,11 @@ namespace block
 class Hash;
 }  // namespace block
 
+namespace cfilter
+{
+class GCS;
+}  // namespace cfilter
+
 namespace database
 {
 namespace common
@@ -46,8 +51,6 @@ namespace common
 class Bulk;
 }  // namespace common
 }  // namespace database
-
-class GCS;
 }  // namespace blockchain
 
 namespace proto
@@ -87,11 +90,11 @@ public:
     auto LoadCfilter(
         const cfilter::Type type,
         const ReadView blockHash,
-        alloc::Strategy alloc) const noexcept -> opentxs::blockchain::GCS;
+        alloc::Strategy alloc) const noexcept -> cfilter::GCS;
     auto LoadCfilters(
         const cfilter::Type type,
         std::span<const block::Hash> blocks,
-        alloc::Strategy alloc) const noexcept -> Vector<GCS>;
+        alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>;
     auto LoadCfilterHash(
         const cfilter::Type type,
         const ReadView blockHash,

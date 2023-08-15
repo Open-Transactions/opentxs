@@ -26,8 +26,6 @@
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
@@ -42,6 +40,8 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Progress.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Rescan.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -57,17 +57,13 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -75,6 +71,11 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -898,7 +899,7 @@ auto SubchainStateData::scan(
 
     if (blocks.empty()) { throw std::runtime_error{""}; }
 
-    auto filterPromise = std::promise<Vector<GCS>>{};
+    auto filterPromise = std::promise<Vector<cfilter::GCS>>{};
     auto filterFuture = filterPromise.get_future();
     RunJob([me = shared_from_this(), &filterPromise, &blocks] {
         auto alloc = me->get_allocator();
@@ -1386,7 +1387,7 @@ auto SubchainStateData::supported_scripts(const crypto::Element& element)
     const noexcept -> UnallocatedVector<ScriptForm>
 {
     auto out = UnallocatedVector<ScriptForm>{};
-    using enum bitcoin::block::script::Pattern;
+    using enum protocol::bitcoin::base::block::script::Pattern;
     out.emplace_back(api_, element, chain_, PayToPubkey);
     out.emplace_back(api_, element, chain_, PayToPubkeyHash);
     out.emplace_back(api_, element, chain_, PayToWitnessPubkeyHash);

@@ -32,21 +32,21 @@ extern "C" {
 #include <type_traits>
 #include <utility>
 
-#include "blockchain/pkt/block/block/Imp.hpp"
-#include "internal/blockchain/bitcoin/block/Types.hpp"
-#include "internal/blockchain/pkt/block/Types.hpp"
+#include "blockchain/protocol/bitcoin/pkt/block/block/Imp.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/pkt/block/Types.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
-#include "opentxs/blockchain/bitcoin/block/Input.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"
-#include "opentxs/blockchain/bitcoin/block/Pattern.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Block.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -58,7 +58,8 @@ namespace be = boost::endian;
 namespace opentxs::crypto::implementation
 {
 struct PacketCrypt::Imp {
-    using PktBlock = blockchain::pkt::block::implementation::Block;
+    using PktBlock =
+        blockchain::protocol::bitcoin::pkt::block::implementation::Block;
     using Context = std::unique_ptr<
         ::PacketCrypt_ValidateCtx_t,
         decltype(&::ValidateCtx_destroy)>;
@@ -85,8 +86,8 @@ struct PacketCrypt::Imp {
                 throw std::runtime_error{"Invalid coinbase"};
             }
 
-            const auto height =
-                blockchain::bitcoin::block::internal::DecodeBip34(coinbase);
+            const auto height = blockchain::protocol::bitcoin::base::block::
+                internal::DecodeBip34(coinbase);
 
             if (0 > height) {
                 throw std::runtime_error{"Failed to decode coinbase"};
@@ -109,7 +110,7 @@ struct PacketCrypt::Imp {
 
             const auto& serializedProof = [&]() -> const auto& {
                 static constexpr auto proofType =
-                    blockchain::pkt::block::ProofType{0x01};
+                    blockchain::protocol::bitcoin::pkt::block::ProofType{0x01};
 
                 for (const auto& [type, payload] : block.GetProofs()) {
                     if (proofType == type) { return payload; }
@@ -173,7 +174,8 @@ struct PacketCrypt::Imp {
             auto commitment = [&]() -> Commitment {
                 for (const auto& output : tx.Outputs()) {
                     const auto& script = output.Script();
-                    using enum blockchain::bitcoin::block::script::Pattern;
+                    using enum blockchain::protocol::bitcoin::base::block::
+                        script::Pattern;
 
                     if (NullData != script.Type()) { continue; }
 
@@ -239,7 +241,8 @@ PacketCrypt::PacketCrypt(const blockchain::node::HeaderOracle& oracle) noexcept
 }
 
 auto PacketCrypt::Validate(
-    const blockchain::bitcoin::block::Block& block) const noexcept -> bool
+    const blockchain::protocol::bitcoin::base::block::Block& block)
+    const noexcept -> bool
 {
     const auto* p = dynamic_cast<const Imp::PktBlock*>(&block);
 

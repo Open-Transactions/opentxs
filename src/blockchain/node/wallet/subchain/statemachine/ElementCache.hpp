@@ -13,10 +13,10 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"

@@ -67,7 +67,7 @@ auto BlockchainAccountActivity::Send(
         const auto& network = handle.get();
         const auto recipient = api_.Factory().PaymentCodeFromBase58(address);
         const auto& definition =
-            display::GetDefinition(BlockchainToUnit(chain_));
+            display::GetDefinition(blockchain_to_unit(chain_));
         const auto amount = definition.Import(input, scale);
 
         if (false == amount.has_value()) {

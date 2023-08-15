@@ -20,14 +20,6 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Header;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 namespace internal
@@ -41,6 +33,20 @@ class HeaderPrivate;
 class NumericHash;
 class Position;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Header;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 
 class Work;
 }  // namespace blockchain
@@ -78,7 +84,8 @@ public:
 
     [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-    auto asBitcoin() const& noexcept -> const bitcoin::block::Header&;
+    auto asBitcoin() const& noexcept
+        -> const protocol::bitcoin::base::block::Header&;
     auto Difficulty() const noexcept -> blockchain::Work;
     auto get_allocator() const noexcept -> allocator_type final;
     auto Hash() const noexcept -> const block::Hash&;
@@ -99,8 +106,8 @@ public:
     auto Valid() const noexcept -> bool;
     auto Work() const noexcept -> blockchain::Work;
 
-    auto asBitcoin() & noexcept -> bitcoin::block::Header&;
-    auto asBitcoin() && noexcept -> bitcoin::block::Header;
+    auto asBitcoin() & noexcept -> protocol::bitcoin::base::block::Header&;
+    auto asBitcoin() && noexcept -> protocol::bitcoin::base::block::Header;
     auto get_deleter() noexcept -> delete_function final;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Header&;
     auto swap(Header& rhs) noexcept -> void;

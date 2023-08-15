@@ -13,17 +13,17 @@
 #include <functional>
 #include <iosfwd>
 #include <mutex>
+#include <span>
 #include <sstream>
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -43,7 +43,7 @@ auto AccountName(const blockchain::Type chain) noexcept -> UnallocatedCString
 {
     auto out = std::stringstream{};
     out << "On chain ";
-    out << blockchain::TickerSymbol(chain);
+    out << ticker_symbol(chain);
     out << " (this device)";
 
     return out.str();
@@ -55,7 +55,7 @@ auto Chain(const api::Session& api, const identifier::Nym& id) noexcept
     static const auto data = [&] {
         auto out = UnallocatedMap<identifier::Nym, blockchain::Type>{};
 
-        for (const auto& chain : blockchain::DefinedChains()) {
+        for (const auto& chain : blockchain::defined_chains()) {
             out.emplace(IssuerID(api, chain), chain);
         }
 
@@ -77,7 +77,7 @@ auto Chain(const api::Session& api, const identifier::Notary& id) noexcept
     static const auto data = [&] {
         auto out = UnallocatedMap<identifier::Notary, blockchain::Type>{};
 
-        for (const auto& chain : blockchain::DefinedChains()) {
+        for (const auto& chain : blockchain::defined_chains()) {
             out.emplace(NotaryID(api, chain), chain);
         }
 
@@ -101,7 +101,7 @@ auto Chain(
         auto out =
             UnallocatedMap<identifier::UnitDefinition, blockchain::Type>{};
 
-        for (const auto& chain : blockchain::DefinedChains()) {
+        for (const auto& chain : blockchain::defined_chains()) {
             out.emplace(UnitID(api, chain), chain);
         }
 
@@ -185,7 +185,7 @@ auto UnitID(const api::Session& api, const blockchain::Type chain) noexcept
     auto& output = it->second;
 
     try {
-        const auto preimage = TickerSymbol(chain);
+        const auto preimage = ticker_symbol(chain);
         output = api.Factory().UnitIDFromPreimage(preimage);
     } catch (...) {
     }

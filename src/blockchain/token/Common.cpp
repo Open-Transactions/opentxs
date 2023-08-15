@@ -16,8 +16,8 @@
 #include "internal/core/Factory.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/bitcoin/block/Opcodes.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/token/CashtokenCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
@@ -39,8 +39,8 @@ auto Value::bytes(
     -> std::size_t
 {
     using namespace opentxs::network::blockchain::bitcoin;
-    static constexpr auto marker =
-        sizeof(std::underlying_type<bitcoin::block::script::OP>::type);
+    static constexpr auto marker = sizeof(
+        std::underlying_type<protocol::bitcoin::base::block::script::OP>::type);
     static constexpr auto category = decltype(category_)::payload_size_;
     static constexpr auto bitfield = sizeof(marker_type);
     static_assert(marker + category + bitfield == 34_uz);
@@ -84,7 +84,7 @@ auto Value::has_commitment() const noexcept -> bool
 auto Value::Serialize(Writer&& out) const noexcept(false) -> void
 {
     using namespace opentxs::network::blockchain::bitcoin;
-    using bitcoin::block::script::OP;
+    using protocol::bitcoin::base::block::script::OP;
     static constexpr auto marker =
         static_cast<std::underlying_type<OP>::type>(OP::PREFIX_TOKEN);
     const auto bitfield = [this] {
@@ -198,7 +198,7 @@ auto deserialize(const proto::BlockchainTransactionOutput& in) noexcept(false)
 auto deserialize(ReadView& in, std::optional<Value>& out) noexcept(false)
     -> void
 {
-    using bitcoin::block::script::OP;
+    using protocol::bitcoin::base::block::script::OP;
     static constexpr auto marker =
         static_cast<std::underlying_type<OP>::type>(OP::PREFIX_TOKEN);
     out.reset();

@@ -17,10 +17,10 @@
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -54,7 +54,7 @@ public:
     auto Match(
         const std::string_view procedure,
         const Log& log,
-        const Vector<GCS>& cfilters,
+        const Vector<cfilter::GCS>& cfilters,
         std::atomic_bool& atLeastOnce,
         wallet::MatchCache::Results& results,
         MatchResults& matched,
@@ -101,7 +101,7 @@ private:
     auto match(
         const std::string_view procedure,
         const Log& log,
-        const Vector<GCS>& cfilters,
+        const Vector<cfilter::GCS>& cfilters,
         std::atomic_bool& atLeastOnce,
         const std::size_t job,
         wallet::MatchCache::Results& results,
@@ -111,7 +111,7 @@ private:
         const std::string_view procedure,
         const Log& log,
         const block::Position& position,
-        const GCS& cfilter,
+        const cfilter::GCS& cfilter,
         const BlockTarget& targets,
         const BlockData& prehashed,
         AsyncResults& cache,

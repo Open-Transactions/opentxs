@@ -11,10 +11,10 @@
 #include "internal/blockchain/node/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -86,7 +86,7 @@ auto FilterOracle::Init(
 auto FilterOracle::LoadFilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Strategy alloc) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     return shared_.LoadCfilter(type, block.Bytes(), alloc);
 }
@@ -94,7 +94,7 @@ auto FilterOracle::LoadFilter(
 auto FilterOracle::LoadFilters(
     const cfilter::Type type,
     const Vector<block::Hash>& blocks,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
     return shared_.LoadCfilters(type, blocks, alloc);
 }

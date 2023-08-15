@@ -22,7 +22,7 @@
 
 #include "core/paymentcode/Preimage.hpp"
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"

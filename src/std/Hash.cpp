@@ -12,12 +12,10 @@
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -25,6 +23,8 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"

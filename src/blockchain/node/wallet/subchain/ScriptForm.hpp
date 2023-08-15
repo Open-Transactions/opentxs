@@ -6,8 +6,8 @@
 #pragma once
 
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Script.hpp"
-#include "opentxs/blockchain/bitcoin/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -34,13 +34,13 @@ namespace opentxs::blockchain::node::wallet
 class ScriptForm
 {
 public:
-    using Type = bitcoin::block::script::Pattern;
+    using Type = protocol::bitcoin::base::block::script::Pattern;
 
     bool segwit_;
     Type primary_;
     Type secondary_;
     UnallocatedVector<ReadView> element_;
-    bitcoin::block::Script script_;
+    protocol::bitcoin::base::block::Script script_;
 
     ScriptForm(
         const api::Session& api,

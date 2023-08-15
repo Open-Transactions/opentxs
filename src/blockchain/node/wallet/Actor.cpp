@@ -21,8 +21,8 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep

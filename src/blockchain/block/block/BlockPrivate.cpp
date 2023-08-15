@@ -7,9 +7,9 @@
 
 #include <utility>
 
-#include "blockchain/bitcoin/block/block/BlockPrivate.hpp"
-#include "opentxs/blockchain/bitcoin/block/Block.hpp"
+#include "blockchain/protocol/bitcoin/base/block/block/BlockPrivate.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Block.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -24,29 +24,31 @@ BlockPrivate::BlockPrivate(const BlockPrivate&, allocator_type alloc) noexcept
 }
 
 auto BlockPrivate::asBitcoinPrivate() const noexcept
-    -> const bitcoin::block::BlockPrivate*
+    -> const protocol::bitcoin::base::block::BlockPrivate*
 {
-    static const auto blank = bitcoin::block::BlockPrivate{{}};
+    static const auto blank = protocol::bitcoin::base::block::BlockPrivate{{}};
 
     return std::addressof(blank);
 }
 
-auto BlockPrivate::asBitcoinPrivate() noexcept -> bitcoin::block::BlockPrivate*
+auto BlockPrivate::asBitcoinPrivate() noexcept
+    -> protocol::bitcoin::base::block::BlockPrivate*
 {
-    static auto blank = bitcoin::block::BlockPrivate{{}};
+    static auto blank = protocol::bitcoin::base::block::BlockPrivate{{}};
 
     return std::addressof(blank);
 }
 
 auto BlockPrivate::asBitcoinPublic() const noexcept
-    -> const bitcoin::block::Block&
+    -> const protocol::bitcoin::base::block::Block&
 {
-    return bitcoin::block::Block::Blank();
+    return protocol::bitcoin::base::block::Block::Blank();
 }
 
-auto BlockPrivate::asBitcoinPublic() noexcept -> bitcoin::block::Block&
+auto BlockPrivate::asBitcoinPublic() noexcept
+    -> protocol::bitcoin::base::block::Block&
 {
-    return bitcoin::block::Block::Blank();
+    return protocol::bitcoin::base::block::Block::Blank();
 }
 
 auto BlockPrivate::Reset(block::Block& header) noexcept -> void

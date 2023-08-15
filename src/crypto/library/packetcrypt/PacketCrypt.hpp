@@ -14,18 +14,24 @@ namespace opentxs
 {
 namespace blockchain
 {
+namespace node
+{
+class HeaderOracle;
+}  // namespace node
+
+namespace protocol
+{
 namespace bitcoin
+{
+namespace base
 {
 namespace block
 {
 class Block;
 }  // namespace block
+}  // namespace base
 }  // namespace bitcoin
-
-namespace node
-{
-class HeaderOracle;
-}  // namespace node
+}  // namespace protocol
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -35,8 +41,8 @@ namespace opentxs::crypto::implementation
 class PacketCrypt final : public blockchain::block::Validator
 {
 public:
-    auto Validate(const blockchain::bitcoin::block::Block& block) const noexcept
-        -> bool final;
+    auto Validate(const blockchain::protocol::bitcoin::base::block::Block&
+                      block) const noexcept -> bool final;
 
     PacketCrypt(const blockchain::node::HeaderOracle& oracle) noexcept;
     PacketCrypt() = delete;

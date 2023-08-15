@@ -27,8 +27,8 @@ extern "C" {
 
 #include "blockchain/database/common/Database.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -43,14 +43,13 @@ extern "C" {
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/FilterType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -139,7 +138,7 @@ SyncPrivate::SyncPrivate(
     , tips_([&] {
         auto output = Tips{get_allocator()};
 
-        for (const auto chain : opentxs::blockchain::DefinedChains()) {
+        for (const auto chain : opentxs::blockchain::defined_chains()) {
             output.emplace(chain, -1);
         }
 
@@ -176,7 +175,7 @@ SyncPrivate::SyncPrivate(
         return out;
     }())
 {
-    for (const auto chain : opentxs::blockchain::SupportedChains()) {
+    for (const auto chain : opentxs::blockchain::supported_chains()) {
         import_genesis(chain);
     }
 

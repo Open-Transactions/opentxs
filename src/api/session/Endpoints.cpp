@@ -9,11 +9,11 @@
 
 #include <functional>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -110,7 +110,7 @@ Endpoints::Endpoints(const api::Crypto& api, const int instance) noexcept
     , otdht_blockchain_([&] {
         auto out = BlockchainMap{};
 
-        for (const auto& chain : opentxs::blockchain::DefinedChains()) {
+        for (const auto& chain : opentxs::blockchain::defined_chains()) {
             out.emplace(
                 chain,
                 build_inproc_path(

@@ -16,7 +16,6 @@
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/ConnectionMode.hpp"     // IWYU pragma: keep
@@ -260,13 +259,13 @@ Options::Imp::Imp(const Imp& rhs) noexcept = default;
 auto Options::Imp::convert(std::string_view value) const noexcept(false)
     -> blockchain::Type
 {
-    static const auto& chains = blockchain::DefinedChains();
+    static const auto& chains = blockchain::defined_chains();
     static const auto names = [] {
         auto out = Map<CString, blockchain::Type>{};
 
         for (const auto& chain : chains) {
             // TODO add allocated or string_view version of TickerSymbol
-            out.emplace(lower(TickerSymbol(chain).c_str()), chain);
+            out.emplace(lower(ticker_symbol(chain).c_str()), chain);
         }
 
         return out;
@@ -282,7 +281,7 @@ auto Options::Imp::convert(std::string_view value) const noexcept(false)
         auto temp = UnallocatedCString{value};  // TODO
         const auto candidate = static_cast<blockchain::Type>(std::stoi(temp));
 
-        if (0 < chains.count(candidate)) { return candidate; }
+        if (blockchain::is_defined(candidate)) { return candidate; }
     } catch (...) {
     }
 

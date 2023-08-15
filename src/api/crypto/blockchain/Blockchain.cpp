@@ -13,13 +13,13 @@
 #include "api/crypto/blockchain/Imp.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/crypto/Null.hpp"
-#include "internal/blockchain/Params.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"

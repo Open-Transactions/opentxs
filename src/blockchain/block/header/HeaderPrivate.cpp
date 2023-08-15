@@ -7,9 +7,9 @@
 
 #include <utility>
 
-#include "blockchain/bitcoin/block/header/HeaderPrivate.hpp"
-#include "opentxs/blockchain/bitcoin/block/Header.hpp"
+#include "blockchain/protocol/bitcoin/base/block/header/HeaderPrivate.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -26,30 +26,31 @@ HeaderPrivate::HeaderPrivate(
 }
 
 auto HeaderPrivate::asBitcoinPrivate() const noexcept
-    -> const bitcoin::block::HeaderPrivate*
+    -> const protocol::bitcoin::base::block::HeaderPrivate*
 {
-    static const auto blank = bitcoin::block::HeaderPrivate{{}};
+    static const auto blank = protocol::bitcoin::base::block::HeaderPrivate{{}};
 
     return std::addressof(blank);
 }
 
 auto HeaderPrivate::asBitcoinPrivate() noexcept
-    -> bitcoin::block::HeaderPrivate*
+    -> protocol::bitcoin::base::block::HeaderPrivate*
 {
-    static auto blank = bitcoin::block::HeaderPrivate{{}};
+    static auto blank = protocol::bitcoin::base::block::HeaderPrivate{{}};
 
     return std::addressof(blank);
 }
 
 auto HeaderPrivate::asBitcoinPublic() const noexcept
-    -> const bitcoin::block::Header&
+    -> const protocol::bitcoin::base::block::Header&
 {
-    return bitcoin::block::Header::Blank();
+    return protocol::bitcoin::base::block::Header::Blank();
 }
 
-auto HeaderPrivate::asBitcoinPublic() noexcept -> bitcoin::block::Header&
+auto HeaderPrivate::asBitcoinPublic() noexcept
+    -> protocol::bitcoin::base::block::Header&
 {
-    return bitcoin::block::Header::Blank();
+    return protocol::bitcoin::base::block::Header::Blank();
 }
 
 auto HeaderPrivate::Reset(block::Header& header) noexcept -> void

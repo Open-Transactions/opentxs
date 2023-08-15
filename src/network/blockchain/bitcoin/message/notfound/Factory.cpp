@@ -8,9 +8,9 @@
 #include <exception>
 #include <optional>
 
-#include "blockchain/bitcoin/Inventory.hpp"
 #include "internal/network/blockchain/bitcoin/message/Notfound.hpp"
 #include "internal/util/PMR.hpp"
+#include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/message/notfound/Imp.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -21,7 +21,7 @@ namespace opentxs::factory
 auto BitcoinP2PNotfound(
     const api::Session& api,
     const blockchain::Type chain,
-    std::span<blockchain::bitcoin::Inventory> payload,
+    std::span<network::blockchain::bitcoin::Inventory> payload,
     alloc::Default alloc) noexcept
     -> network::blockchain::bitcoin::message::internal::Notfound
 {
@@ -34,7 +34,8 @@ auto BitcoinP2PNotfound(
             api,
             chain,
             std::nullopt,
-            move_construct<blockchain::bitcoin::Inventory>(payload, alloc));
+            move_construct<network::blockchain::bitcoin::Inventory>(
+                payload, alloc));
     } catch (const std::exception& e) {
         LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 

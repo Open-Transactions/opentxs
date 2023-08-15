@@ -9,7 +9,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Getcfcheckpt.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

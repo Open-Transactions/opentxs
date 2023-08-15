@@ -14,26 +14,26 @@
 #include <stdexcept>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/filteroracle/BlockIndexer.hpp"
 #include "internal/blockchain/node/filteroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/GCS.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Hash.hpp"
-#include "opentxs/blockchain/bitcoin/cfilter/Header.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/cfilter/Hash.hpp"
+#include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -528,7 +528,7 @@ auto Shared::load_cfheader(
 auto Shared::LoadCfilter(
     const cfilter::Type type,
     const block::Hash& block,
-    alloc::Strategy alloc) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -540,7 +540,7 @@ auto Shared::load_cfilter(
     const cfilter::Type type,
     const block::Hash& block,
     const Data& data,
-    alloc::Strategy alloc) const noexcept -> GCS
+    alloc::Strategy alloc) const noexcept -> cfilter::GCS
 {
     return data.DB().LoadFilter(type, block.Bytes(), alloc);
 }
@@ -548,7 +548,7 @@ auto Shared::load_cfilter(
 auto Shared::LoadCfilters(
     const cfilter::Type type,
     std::span<const block::Hash> blocks,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
     auto handle = data_.lock_shared();
     const auto& data = *handle;
@@ -560,7 +560,7 @@ auto Shared::load_cfilters(
     const cfilter::Type type,
     std::span<const block::Hash> blocks,
     const Data& data,
-    alloc::Strategy alloc) const noexcept -> Vector<GCS>
+    alloc::Strategy alloc) const noexcept -> Vector<cfilter::GCS>
 {
     return data.DB().LoadFilters(type, blocks, alloc);
 }
@@ -654,7 +654,7 @@ auto Shared::ProcessBlock(
     const cfilter::Type filterType,
     const block::Block& block,
     alloc::Default alloc,
-    alloc::Default monotonic) const noexcept -> GCS
+    alloc::Default monotonic) const noexcept -> cfilter::GCS
 {
     return process_block(api_, filterType, block, alloc, monotonic);
 }
@@ -664,7 +664,7 @@ auto Shared::process_block(
     const cfilter::Type filterType,
     const block::Block& block,
     alloc::Default alloc,
-    alloc::Default monotonic) noexcept -> GCS
+    alloc::Default monotonic) noexcept -> cfilter::GCS
 {
     const auto& id = block.ID();
     const auto params = blockchain::internal::GetFilterParams(filterType);

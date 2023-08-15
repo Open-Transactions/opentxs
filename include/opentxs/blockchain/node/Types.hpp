@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/bitcoin/block/Block.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/protocol/bitcoin/base/block/Block.hpp"
 
 #pragma once
 
@@ -20,20 +20,26 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace bitcoin
-{
-namespace block
-{
-class Output;
-}  // namespace block
-}  // namespace bitcoin
-
 namespace block
 {
 class Block;
 class Outpoint;
 class TransactionHash;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Output;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -51,7 +57,7 @@ enum class TxoTag : std::uint16_t;    // IWYU pragma: keep
 using BlockResult = std::shared_future<block::Block>;
 using BlockResults = Vector<BlockResult>;
 using SendOutcome = std::pair<SendResult, block::TransactionHash>;
-using UTXO = std::pair<block::Outpoint, bitcoin::block::Output>;
+using UTXO = std::pair<block::Outpoint, protocol::bitcoin::base::block::Output>;
 
 OPENTXS_EXPORT auto print(SendResult) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(TxoState) noexcept -> std::string_view;

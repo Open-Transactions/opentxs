@@ -8,8 +8,8 @@
 #include <opentxs/opentxs.hpp>
 #include <string_view>
 
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

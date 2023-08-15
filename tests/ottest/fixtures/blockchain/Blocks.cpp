@@ -11,11 +11,11 @@
 #include <span>
 
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/blockchain/Params.hpp"
-#include "internal/blockchain/bitcoin/Bitcoin.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/opentxs.hpp"
@@ -71,9 +71,9 @@ auto BlockchainBlocks::CheckTxids(
     opentxs::blockchain::Type chain,
     const opentxs::ReadView bytes) const noexcept -> bool
 {
-    using opentxs::blockchain::bitcoin::EncodedTransaction;
     using opentxs::blockchain::block::Hash;
     using opentxs::blockchain::block::Parser;
+    using opentxs::blockchain::protocol::bitcoin::base::EncodedTransaction;
     using namespace opentxs::literals;
     const auto& crypto = ot_.Crypto();
     auto block = opentxs::blockchain::block::Block{};

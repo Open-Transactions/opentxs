@@ -8,8 +8,8 @@
 #include <cstddef>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Bytes.hpp"

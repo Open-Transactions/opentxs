@@ -22,8 +22,8 @@
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Wallet.hpp"
-#include "internal/blockchain/bitcoin/block/Transaction.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Object.hpp"
@@ -48,9 +48,9 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/blockchain/bitcoin/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"

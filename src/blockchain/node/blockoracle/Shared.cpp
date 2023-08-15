@@ -19,7 +19,6 @@
 
 #include "blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/blockchain/Params.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/database/Block.hpp"
 #include "internal/blockchain/database/Database.hpp"
@@ -30,6 +29,7 @@
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"

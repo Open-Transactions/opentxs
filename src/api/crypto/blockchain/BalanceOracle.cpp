@@ -29,7 +29,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -271,7 +270,7 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
             __LINE__);
     }};
     const auto unsupported =
-        (0 == opentxs::blockchain::SupportedChains().count(chain)) &&
+        (false == opentxs::blockchain::is_supported(chain)) &&
         (Chain::UnitTest != chain);
 
     if (unsupported) { return; }
