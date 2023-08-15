@@ -64,11 +64,14 @@ if(WIN32)
   set(OT_USE_PSTL_DEFAULT ON)
   set(OT_PSTL_NEEDS_TBB_DEFAULT OFF)
   set(OT_WITH_TBB_DEFAULT OFF)
+  set(OT_BOOST_STACKTRACE_ADDR2LINE_DEFAULT OFF)
 elseif(
   UNIX
   AND NOT APPLE
   AND NOT ANDROID
 )
+  set(OT_BOOST_STACKTRACE_ADDR2LINE_DEFAULT ON)
+
   if(CMAKE_CXX_COMPILER_ID
      MATCHES
      Clang
@@ -88,6 +91,13 @@ else()
   set(OT_USE_PSTL_DEFAULT OFF)
   set(OT_PSTL_NEEDS_TBB_DEFAULT OFF)
   set(OT_WITH_TBB_DEFAULT ON)
+endif()
+
+if(NOT
+   DEFINED
+   BOOST_STACKTRACE_ADDR2LINE_LOCATION
+)
+  set(BOOST_STACKTRACE_ADDR2LINE_LOCATION "/usr/bin/addr2line")
 endif()
 
 # -----------------------------------------------------------------------------
@@ -241,6 +251,11 @@ option(
   OT_BOOST_JSON_HEADER_ONLY
   "Compile boost::json library as part of opentxs instead of linking to an externally compiled version"
   ON
+)
+option(
+  OT_BOOST_STACKTRACE_ADDR2LINE
+  "Configure boost::stacktrace to use addr2line for line numbers"
+  ${OT_BOOST_STACKTRACE_ADDR2LINE_DEFAULT}
 )
 option(
   OT_INSTALL_HEADERS
