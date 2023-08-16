@@ -250,7 +250,7 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
                  {u8"photons"_cstr,
                   DisplayScale("", u8"photons"_cstr, {{10, 2}}, 0, 0)},
              })},
-        {UnitType::Tnltx,
+        {UnitType::Tnltc,
          DisplayDefinition(
              u8"tnLTC"_cstr,
              0,

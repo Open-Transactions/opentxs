@@ -442,7 +442,7 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Tnbch:
         case Tnbtc:
         case Tnxrp:
-        case Tnltx:
+        case Tnltc:
         case Tnxem:
         case Tndash:
         case Tnmaid:

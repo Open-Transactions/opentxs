@@ -65,7 +65,7 @@ enum class UnitType : std::uint32_t {
     Tnbtc = 43,
     Tnbch = 44,
     Tnxrp = 45,
-    Tnltx = 46,
+    Tnltc = 46,
     Tnxem = 47,
     Tndash = 48,
     Tnmaid = 49,

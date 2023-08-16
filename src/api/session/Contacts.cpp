@@ -545,7 +545,7 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Sek:
                 case identity::wot::claim::ClaimType::Tnbtc:
                 case identity::wot::claim::ClaimType::Tnxrp:
-                case identity::wot::claim::ClaimType::Tnltx:
+                case identity::wot::claim::ClaimType::Tnltc:
                 case identity::wot::claim::ClaimType::Tnxem:
                 case identity::wot::claim::ClaimType::Tndash:
                 case identity::wot::claim::ClaimType::Tnmaid:
@@ -1577,7 +1577,7 @@ auto Contacts::update(const identity::Nym& nym) const
         case Sek:
         case Tnbtc:
         case Tnxrp:
-        case Tnltx:
+        case Tnltc:
         case Tnxem:
         case Tndash:
         case Tnmaid:

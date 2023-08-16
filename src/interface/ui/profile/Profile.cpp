@@ -271,7 +271,7 @@ auto Profile::AddClaim(
                 case identity::wot::claim::ClaimType::Sek:
                 case identity::wot::claim::ClaimType::Tnbtc:
                 case identity::wot::claim::ClaimType::Tnxrp:
-                case identity::wot::claim::ClaimType::Tnltx:
+                case identity::wot::claim::ClaimType::Tnltc:
                 case identity::wot::claim::ClaimType::Tnxem:
                 case identity::wot::claim::ClaimType::Tndash:
                 case identity::wot::claim::ClaimType::Tnmaid:

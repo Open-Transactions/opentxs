@@ -170,7 +170,7 @@ enum class ClaimType : std::uint32_t {
     Sek = 154,
     Tnbtc = 155,
     Tnxrp = 156,
-    Tnltx = 157,
+    Tnltc = 157,
     Tnxem = 158,
     Tndash = 159,
     Tnmaid = 160,
