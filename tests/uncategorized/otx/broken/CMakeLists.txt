@@ -6,9 +6,9 @@
 add_opentx_test(ottest-otx-broken Test_Basic.cpp)
 add_opentx_test(ottest-otx-broken-addcontact Test_AddContact.cpp)
 add_opentx_test(ottest-otx-broken-deposit Test_DepositCheques.cpp)
-add_opentx_test(ottest-otx-broken-pair Test_Pair.cpp)
+# add_opentx_test(ottest-otx-broken-pair Test_Pair.cpp)
 
 set_tests_properties(ottest-otx-broken PROPERTIES DISABLED TRUE)
 set_tests_properties(ottest-otx-broken-addcontact PROPERTIES DISABLED TRUE)
 set_tests_properties(ottest-otx-broken-deposit PROPERTIES DISABLED TRUE)
-set_tests_properties(ottest-otx-broken-pair PROPERTIES DISABLED TRUE)
+# set_tests_properties(ottest-otx-broken-pair PROPERTIES DISABLED TRUE)

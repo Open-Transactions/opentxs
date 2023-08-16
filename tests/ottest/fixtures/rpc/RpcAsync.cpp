@@ -41,23 +41,24 @@ namespace ot = opentxs;
 
 int RpcAsync::sender_session_{0};
 int RpcAsync::receiver_session_{0};
-identifier::Generic RpcAsync::destination_account_id_{
+ot::identifier::Generic RpcAsync::destination_account_id_{
     ot::identifier::Generic::Factory()};
 int RpcAsync::intro_server_{0};
 std::unique_ptr<OTZMQListenCallback> RpcAsync::notification_callback_{nullptr};
 std::unique_ptr<OTZMQSubscribeSocket> RpcAsync::notification_socket_{nullptr};
-identifier::Nym RpcAsync::receiver_nym_id_{ot::identifier::Nym::Factory()};
-identifier::Nym RpcAsync::sender_nym_id_{ot::identifier::Nym::Factory()};
+ot::identifier::Nym RpcAsync::receiver_nym_id_{ot::identifier::Nym::Factory()};
+ot::identifier::Nym RpcAsync::sender_nym_id_{ot::identifier::Nym::Factory()};
 int RpcAsync::server_{0};
-identifier::UnitDefinition RpcAsync::unit_definition_id_{
+ot::identifier::UnitDefinition RpcAsync::unit_definition_id_{
     ot::identifier::UnitDefinition::Factory()};
-identifier::Generic RpcAsync::workflow_id_{ot::identifier::Generic::Factory()};
-identifier::Notary RpcAsync::intro_server_id_{
+ot::identifier::Generic RpcAsync::workflow_id_{
+    ot::identifier::Generic::Factory()};
+ot::identifier::Notary RpcAsync::intro_server_id_{
     ot::identifier::Notary::Factory()};
-identifier::Notary RpcAsync::server_id_{ot::identifier::Notary::Factory()};
+ot::identifier::Notary RpcAsync::server_id_{ot::identifier::Notary::Factory()};
 RpcAsync::PushChecker RpcAsync::push_checker_{};
 std::promise<ot::UnallocatedVector<bool>> RpcAsync::push_received_{};
-UnallocatedVector<bool> RpcAsync::push_results_{};
+ot::UnallocatedVector<bool> RpcAsync::push_results_{};
 std::size_t RpcAsync::push_results_count_{0};
 
 RpcAsync::RpcAsync()
@@ -81,11 +82,11 @@ bool RpcAsync::check_push_results(const ot::UnallocatedVector<bool>& results)
         results.cbegin(), results.cend(), [](bool result) { return result; });
 }
 
-proto::RPCCommand RpcAsync::init(proto::RPCCommandType commandtype)
+ot::proto::RPCCommand RpcAsync::init(ot::proto::RPCCommandType commandtype)
 {
     auto cookie = ot::identifier::Generic::Random()->str();
 
-    proto::RPCCommand command;
+    ot::proto::RPCCommand command;
     command.set_version(COMMAND_VERSION);
     command.set_cookie(cookie);
     command.set_type(commandtype);
@@ -116,7 +117,7 @@ std::size_t RpcAsync::get_index(const std::int32_t instance)
     return (instance - (instance % 2)) / 2;
 }
 
-const api::Session& RpcAsync::get_session(const std::int32_t instance)
+const ot::api::Session& RpcAsync::get_session(const std::int32_t instance)
 {
     auto is_server = instance % 2;
 
@@ -135,7 +136,7 @@ void RpcAsync::process_notification(
     if (1 < incoming.Body().size()) { return; }
 
     const auto& frame = incoming.Body().at(0);
-    const auto rpcpush = proto::Factory<proto::RPCPush>(frame);
+    const auto rpcpush = ot::proto::Factory<proto::RPCPush>(frame);
 
     if (push_checker_) {
         push_results_.emplace_back(push_checker_(rpcpush));
@@ -159,22 +160,22 @@ void RpcAsync::process_notification(
 
 bool RpcAsync::default_push_callback(const ot::proto::RPCPush& push)
 {
-    if (false == proto::Validate(push, VERBOSE)) { return false; }
+    if (false == ot::proto::Validate(push, VERBOSE)) { return false; }
 
-    if (proto::RPCPUSH_TASK != push.type()) { return false; }
+    if (ot::proto::RPCPUSH_TASK != push.type()) { return false; }
 
     auto& task = push.taskcomplete();
 
     if (false == task.result()) { return false; }
 
-    if (proto::RPCRESPONSE_SUCCESS != task.code()) { return false; }
+    if (ot::proto::RPCRESPONSE_SUCCESS != task.code()) { return false; }
 
     return true;
 }
 
 void RpcAsync::setup()
 {
-    const api::Context& ot = OTTestEnvironment::GetOT();
+    const ot::api::Context& ot = OTTestEnvironment::GetOT();
 
     auto& intro_server = ot.StartNotarySession(
         ArgList(), static_cast<int>(ot.NotarySessionCount()), true);
@@ -191,16 +192,16 @@ void RpcAsync::setup()
     intro_server_id_ =
         ot::identifier::Notary::Factory(intro_server_contract->ID()->str());
     auto cookie = ot::identifier::Generic::Random()->str();
-    proto::RPCCommand command;
+    ot::proto::RPCCommand command;
     command.set_version(COMMAND_VERSION);
     command.set_cookie(cookie);
-    command.set_type(proto::RPCCOMMAND_ADDCLIENTSESSION);
+    command.set_type(ot::proto::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
     auto response = ot.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(ot::proto::Validate(response, VERBOSE));
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(ot::proto::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     auto& senderClient =
         ot.Client(static_cast<int>(get_index(response.session())));
@@ -208,13 +209,13 @@ void RpcAsync::setup()
 
     cookie = ot::identifier::Generic::Random()->str();
     command.set_cookie(cookie);
-    command.set_type(proto::RPCCOMMAND_ADDCLIENTSESSION);
+    command.set_type(ot::proto::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
     response = ot.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(ot::proto::Validate(response, VERBOSE));
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(ot::proto::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     auto& receiverClient =
         ot.Client(static_cast<int>(get_index(response.session())));

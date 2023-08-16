@@ -3,13 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_subdirectory(broken)
-
 target_sources(
   opentxs-testlib
   PRIVATE
+    "AddContact.cpp"
+    "AddContact.hpp"
     "Basic.cpp"
     "Basic.hpp"
-    "Messages.cpp"
-    "Messages.hpp"
+    "DepositCheques.cpp"
+    "DepositCheques.hpp"
 )

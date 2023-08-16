@@ -6,6 +6,7 @@
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"  // IWYU pragma: associated
 
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
 
 namespace opentxs::blockchain::node::internal
 {
