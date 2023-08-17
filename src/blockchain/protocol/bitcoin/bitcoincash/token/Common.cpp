@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/blockchain/token/Types.hpp"  // IWYU pragma: associated
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>
 #include <Cashtoken.pb.h>
@@ -18,7 +18,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "opentxs/blockchain/token/CashtokenCapability.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Capability.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -26,7 +26,7 @@
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
-namespace opentxs::blockchain::token::cashtoken
+namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
 auto Value::Bytes() const noexcept -> std::size_t
 {
@@ -150,9 +150,10 @@ auto Value::View() const noexcept -> cashtoken::View
         has_commitment() ? commitment_->Bytes() : ReadView{},
         has_amount() ? std::addressof(*amount_) : nullptr};
 }
-}  // namespace opentxs::blockchain::token::cashtoken
+}  // namespace
+   // opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 
-namespace opentxs::blockchain::token::cashtoken
+namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
 auto deserialize(const proto::BlockchainTransactionOutput& in) noexcept(false)
     -> std::optional<Value>
@@ -269,4 +270,5 @@ auto deserialize(ReadView& in, std::optional<Value>& out) noexcept(false)
         val.amount_.emplace(*value);
     }
 }
-}  // namespace opentxs::blockchain::token::cashtoken
+}  // namespace
+   // opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken

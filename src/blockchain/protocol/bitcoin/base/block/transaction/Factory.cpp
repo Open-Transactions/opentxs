@@ -25,7 +25,7 @@
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/token/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"

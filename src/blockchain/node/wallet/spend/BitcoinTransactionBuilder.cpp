@@ -47,7 +47,7 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/token/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"

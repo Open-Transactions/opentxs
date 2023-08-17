@@ -49,7 +49,8 @@ auto Output::Blank() noexcept -> Output&
     return blank;
 }
 
-auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+auto Output::Cashtoken() const noexcept
+    -> const bitcoincash::token::cashtoken::View*
 {
     return imp_->Cashtoken();
 }

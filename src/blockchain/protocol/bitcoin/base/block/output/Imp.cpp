@@ -70,7 +70,7 @@ Output::Output(
     block::Position minedPosition,
     node::TxoState state,
     UnallocatedSet<node::TxoTag> tags,
-    std::optional<const token::cashtoken::Value> cashtoken,
+    std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : OutputPrivate(alloc)
     , chain_(chain)
@@ -108,7 +108,7 @@ Output::Output(
     const std::size_t size,
     const ReadView in,
     const VersionNumber version,
-    std::optional<const token::cashtoken::Value> cashtoken,
+    std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : Output(
           chain,
@@ -139,7 +139,7 @@ Output::Output(
     block::Script script,
     Set<crypto::Key>&& keys,
     const VersionNumber version,
-    std::optional<const token::cashtoken::Value> cashtoken,
+    std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
     allocator_type alloc) noexcept(false)
     : Output(
           chain,
@@ -223,7 +223,8 @@ auto Output::CalculateSize() const noexcept -> std::size_t
     });
 }
 
-auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+auto Output::Cashtoken() const noexcept
+    -> const bitcoincash::token::cashtoken::View*
 {
     if (cashtoken_.has_value()) {
 

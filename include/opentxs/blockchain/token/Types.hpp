@@ -7,31 +7,6 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/util/Types.hpp"
-
-// NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace opentxs
-{
-class Amount;
-}  // namespace opentxs
-// NOLINTEND(modernize-concat-nested-namespaces)
-
-namespace opentxs::blockchain::token::cashtoken
-{
-enum class Capability : std::uint8_t;  // IWYU pragma: export
-
-struct OPENTXS_EXPORT View {
-    ReadView category_id_{};
-    bool nft_{};
-    Capability capability_{};
-    ReadView commitment_{};
-    const Amount* amount_{};
-
-    auto HasAmount() const noexcept -> bool { return nullptr != amount_; }
-};
-}  // namespace opentxs::blockchain::token::cashtoken
-
 namespace opentxs::blockchain::token
 {
 enum class Type : std::uint32_t;  // IWYU pragma: export

@@ -47,9 +47,9 @@ class OutputPrivate;
 class Script;
 }  // namespace block
 }  // namespace base
-}  // namespace bitcoin
-}  // namespace protocol
 
+namespace bitcoincash
+{
 namespace token
 {
 namespace cashtoken
@@ -57,6 +57,9 @@ namespace cashtoken
 struct View;
 }  // namespace cashtoken
 }  // namespace token
+}  // namespace bitcoincash
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 class Amount;
@@ -74,7 +77,8 @@ public:
 
     operator bool() const noexcept { return IsValid(); }
 
-    auto Cashtoken() const noexcept -> const token::cashtoken::View*;
+    auto Cashtoken() const noexcept
+        -> const bitcoincash::token::cashtoken::View*;
     auto get_allocator() const noexcept -> allocator_type final;
     auto HasCashtoken() const noexcept -> bool
     {

@@ -31,7 +31,8 @@ auto Output::AssociatedRemoteContacts(
 
 auto Output::CalculateSize() const noexcept -> std::size_t { return {}; }
 
-auto Output::Cashtoken() const noexcept -> const token::cashtoken::View*
+auto Output::Cashtoken() const noexcept
+    -> const bitcoincash::token::cashtoken::View*
 {
     return nullptr;
 }

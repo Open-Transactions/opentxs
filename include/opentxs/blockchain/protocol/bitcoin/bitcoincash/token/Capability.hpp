@@ -7,13 +7,14 @@
 
 #include <type_traits>
 
-#include "opentxs/blockchain/token/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 
-namespace opentxs::blockchain::token::cashtoken
+namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
 enum class Capability : std::underlying_type<Capability>::type {
     none = 0,
     mutable_token = 1,
     minting = 2,
 };
-}  // namespace opentxs::blockchain::token::cashtoken
+}  // namespace
+   // opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
