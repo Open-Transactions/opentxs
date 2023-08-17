@@ -7,22 +7,8 @@ syntax = "proto2";
 
 package opentxs.proto;
 option java_package = "org.opentransactions.proto";
-option java_outer_classname = "OTContactEnums";
+option java_outer_classname = "OTContactItemType";
 option optimize_for = LITE_RUNTIME;
-
-enum ContactSectionName {
-    CONTACTSECTION_ERROR = 0;
-    CONTACTSECTION_SCOPE = 1;
-    CONTACTSECTION_IDENTIFIER = 2;
-    CONTACTSECTION_ADDRESS = 3;
-    CONTACTSECTION_COMMUNICATION = 4;
-    CONTACTSECTION_PROFILE = 5;
-    CONTACTSECTION_RELATIONSHIP = 6;
-    CONTACTSECTION_DESCRIPTOR = 7;
-    CONTACTSECTION_EVENT = 8;
-    CONTACTSECTION_CONTRACT = 9;
-    CONTACTSECTION_PROCEDURE = 10;
-}
 
 enum ContactItemType {
     CITEMTYPE_ERROR = 0;
@@ -459,17 +445,3 @@ enum ContactItemType {
     CITEMTYPE_ETHEREUM_SEPOLIA = 431;
     CITEMTYPE_ETHEREUM_HOLESOVICE = 432;
 }
-
-enum ContactItemAttribute {
-    CITEMATTR_ERROR = 0;
-    CITEMATTR_ACTIVE = 1;
-    CITEMATTR_PRIMARY = 2;
-    CITEMATTR_LOCAL = 3;
-}
-
-enum VerificationKind {
-    VERIFICATIONKIND_ERROR = 0;
-    VERIFICATIONKIND_AFFIRM = 1;
-    VERIFICATIONKIND_NEUTRAL = 2;
-    VERIFICATIONKIND_REFUTE = 3;
-};

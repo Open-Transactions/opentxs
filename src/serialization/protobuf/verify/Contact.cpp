@@ -5,6 +5,10 @@
 
 #include "internal/serialization/protobuf/Contact.hpp"  // IWYU pragma: associated
 
+#include <ContactItemAttribute.pb.h>
+#include <ContactItemType.pb.h>
+#include <ContactSectionName.pb.h>
+
 namespace opentxs::proto
 {
 auto AllowedItemAttributes() noexcept -> const ItemAttributeMap&

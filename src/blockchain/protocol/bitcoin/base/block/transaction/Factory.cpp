@@ -10,7 +10,7 @@
 #include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionInput.pb.h>
 #include <BlockchainTransactionOutput.pb.h>
-#include <ContactEnums.pb.h>
+#include <ContactItemType.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <array>

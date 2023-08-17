@@ -7,14 +7,12 @@ syntax = "proto2";
 
 package opentxs.proto;
 option java_package = "org.opentransactions.proto";
-option java_outer_classname = "OTContactSection";
+option java_outer_classname = "OTContactItemAttribute";
 option optimize_for = LITE_RUNTIME;
 
-import public "ContactSectionName.proto";
-import public "ContactItem.proto";
-
-message ContactSection {
-    optional uint32 version = 1;
-    optional ContactSectionName name = 2;	// see ContactEnums.proto
-    repeated ContactItem item = 3;
+enum ContactItemAttribute {
+    CITEMATTR_ERROR = 0;
+    CITEMATTR_ACTIVE = 1;
+    CITEMATTR_PRIMARY = 2;
+    CITEMATTR_LOCAL = 3;
 }

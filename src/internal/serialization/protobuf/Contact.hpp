@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <ContactEnums.pb.h>  // IWYU pragma: export
 #include <ankerl/unordered_dense.h>
 #include <frozen/unordered_map.h>
 #include <cstdint>
@@ -14,6 +13,18 @@
 #include <utility>
 
 #include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+enum ContactItemAttribute : int;
+enum ContactItemType : int;
+enum ContactSectionName : int;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::proto
 {

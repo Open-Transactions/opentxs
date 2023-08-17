@@ -3,18 +3,21 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+
 #include "internal/serialization/protobuf/verify/BlockchainTransaction.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionInput.pb.h>
 #include <BlockchainTransactionOutput.pb.h>
+#include <ContactItemType.pb.h>
+#include <ContactSectionName.pb.h>
 #include <cstdint>
 #include <limits>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainTransactionInput.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/BlockchainTransactionOutput.hpp"  // IWYU pragma: keep

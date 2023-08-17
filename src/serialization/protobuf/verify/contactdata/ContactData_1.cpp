@@ -8,8 +8,8 @@
 #include "internal/serialization/protobuf/verify/ContactData.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>
-#include <ContactEnums.pb.h>
 #include <ContactSection.pb.h>
+#include <ContactSectionName.pb.h>
 #include <cstdint>
 #include <stdexcept>
 #include <utility>

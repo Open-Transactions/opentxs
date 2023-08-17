@@ -5,7 +5,6 @@
 
 #include "internal/identity/wot/verification/Types.hpp"  // IWYU pragma: associated
 
-#include <ContactEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>

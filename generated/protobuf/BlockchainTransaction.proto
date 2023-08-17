@@ -12,7 +12,7 @@ option optimize_for = LITE_RUNTIME;
 
 import public "BlockchainTransactionInput.proto";
 import public "BlockchainTransactionOutput.proto";
-import public "ContactEnums.proto";
+import public "ContactItemType.proto";
 
 message BlockchainTransaction {
     optional uint32 version = 1;

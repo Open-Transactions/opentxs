@@ -10,9 +10,9 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTVerificationItem";
 option optimize_for = LITE_RUNTIME;
 
-import public "ContactEnums.proto";
 import public "Identifier.proto";
 import public "Signature.proto";
+import public "VerificationKind.proto";
 
 message VerificationItem
 {

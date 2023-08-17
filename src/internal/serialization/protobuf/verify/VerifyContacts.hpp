@@ -11,6 +11,18 @@
 #include "internal/serialization/protobuf/Basic.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+enum ContactItemAttribute : int;
+enum ContactItemType : int;
+enum ContactSectionName : int;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
 namespace opentxs::proto
 {
 using namespace std::literals;

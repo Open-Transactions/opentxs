@@ -11,7 +11,7 @@ option java_outer_classname = "OTBlockchainAccountData";
 option optimize_for = LITE_RUNTIME;
 
 import public "BlockchainActivity.proto";
-import public "ContactEnums.proto";
+import public "ContactItemType.proto";
 
 message BlockchainAccountData {
     optional uint32 version = 1;

@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/StorageContactAddressIndex.hpp"  // IWYU pragma: associated
 
-#include <ContactEnums.pb.h>
+#include <ContactSectionName.pb.h>
 #include <StorageContactAddressIndex.pb.h>
 
 #include "internal/serialization/protobuf/Proto.hpp"

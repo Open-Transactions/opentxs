@@ -5,7 +5,9 @@
 
 #include "internal/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
 
-#include <ContactEnums.pb.h>
+#include <ContactItemAttribute.pb.h>
+#include <ContactItemType.pb.h>
+#include <ContactSectionName.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>

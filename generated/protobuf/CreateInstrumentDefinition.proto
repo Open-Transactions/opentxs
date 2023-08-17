@@ -10,7 +10,7 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTCreateInstrumentDefinition";
 option optimize_for = LITE_RUNTIME;
 
-import public "ContactEnums.proto";
+import public "ContactItemType.proto";
 
 message CreateInstrumentDefinition {
     optional uint32 version = 1;
@@ -18,5 +18,5 @@ message CreateInstrumentDefinition {
     optional string symbol = 3;				// unit of account symbol
     optional bytes redemptionincrement = 4;
     optional string terms = 5;				// formal legal description
-    optional ContactItemType unitofaccount = 6;	// see ContactEnums.proto
+    optional ContactItemType unitofaccount = 6;	// see ContactItemType.proto
 }

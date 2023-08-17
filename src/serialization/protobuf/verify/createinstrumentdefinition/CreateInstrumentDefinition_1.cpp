@@ -5,6 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/CreateInstrumentDefinition.hpp"  // IWYU pragma: associated
 
+#include <ContactSectionName.pb.h>
 #include <CreateInstrumentDefinition.pb.h>
 #include <ankerl/unordered_dense.h>
 

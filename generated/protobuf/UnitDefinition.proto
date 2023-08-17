@@ -11,7 +11,6 @@ option java_outer_classname = "OTUnitDefinition";
 option optimize_for = LITE_RUNTIME;
 
 import public "BasketParams.proto";
-import public "ContactEnums.proto";
 import public "ContractEnums.proto";
 import public "CurrencyParams.proto";
 import public "EquityParams.proto";
