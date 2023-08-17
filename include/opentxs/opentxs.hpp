@@ -96,6 +96,7 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"  // IWYU pragma: export
 #include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Capability.hpp"  // IWYU pragma: export
 #include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"  // IWYU pragma: export
+#include "opentxs/blockchain/token/Descriptor.hpp"    // IWYU pragma: export
 #include "opentxs/blockchain/token/TokenType.hpp"     // IWYU pragma: export
 #include "opentxs/blockchain/token/Types.hpp"         // IWYU pragma: export
 #include "opentxs/core/AccountType.hpp"               // IWYU pragma: export

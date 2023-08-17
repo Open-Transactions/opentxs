@@ -16,6 +16,17 @@ enum class Type : std::underlying_type<Type>::type {
     null = 0,
     slp = 1,
     cashtoken = 2,
+    erc20 = 3,
+    erc721 = 4,
+    erc1155 = 5,
+    erc4626 = 6,
+    eos = 7,
+    nep5 = 8,
+    nep11 = 9,
+    nep17 = 10,
+    tzip7 = 11,
+    tzip12 = 12,
+    trc20 = 13,
     unknown = std::numeric_limits<std::underlying_type<Type>::type>::max(),
 };
 }  // namespace opentxs::blockchain::token

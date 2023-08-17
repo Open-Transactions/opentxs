@@ -3,11 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstring>
 #include <iterator>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -26,6 +28,7 @@
 #include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/token/Descriptor.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -202,6 +205,32 @@ auto hash<opentxs::blockchain::params::ChainData::ZMQParams>::operator()(
         opentxs::ReadView{
             reinterpret_cast<const char*>(std::addressof(bip44)),
             sizeof(bip44)});
+}
+
+auto hash<opentxs::blockchain::token::Descriptor>::operator()(
+    const opentxs::blockchain::token::Descriptor& data) const noexcept
+    -> std::size_t
+{
+    using Host = std::underlying_type<decltype(data.host_)>::type;
+    using Token = std::underlying_type<decltype(data.type_)>::type;
+    using Buffer = boost::endian::little_uint32_buf_t;
+
+    static_assert(sizeof(Host) == sizeof(Buffer));
+    static_assert(sizeof(Token) == sizeof(Buffer));
+
+    const auto host = Buffer{static_cast<Host>(data.host_)};
+    const auto type = Buffer{static_cast<Token>(data.type_)};
+    auto key = opentxs::crypto::sodium::SiphashKey{};
+
+    static_assert((sizeof(host) + sizeof(type)) < sizeof(key));
+
+    std::memcpy(key.data(), std::addressof(host), sizeof(host));
+    std::memcpy(
+        std::next(key.data(), sizeof(host)),
+        std::addressof(type),
+        sizeof(type));
+
+    return opentxs::crypto::sodium::Siphash(key, data.id_.Bytes());
 }
 
 auto hash<opentxs::contract::peer::Reply>::operator()(

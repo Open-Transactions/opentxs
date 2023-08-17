@@ -6,8 +6,13 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
+
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::token
 {
 enum class Type : std::uint32_t;  // IWYU pragma: export
+
+OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::token
