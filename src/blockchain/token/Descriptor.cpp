@@ -22,16 +22,23 @@ auto operator<=>(const Descriptor& lhs, const Descriptor& rhs) noexcept
 {
     using namespace std;
 
-    if (const auto v = lhs.host_ <=> rhs.host_; strong_ordering::equal != v) {
+    // TODO this can be improved after XCode 15 and Android NDK 26
 
-        return v;
+    if (lhs.host_ < rhs.host_) {
+
+        return strong_ordering::less;
+    } else if (lhs.host_ > rhs.host_) {
+
+        return strong_ordering::greater;
+    } else if (lhs.type_ < rhs.type_) {
+
+        return strong_ordering::less;
+    } else if (lhs.type_ > rhs.type_) {
+
+        return strong_ordering::greater;
+    } else {
+
+        return lhs.id_ <=> rhs.id_;
     }
-
-    if (const auto v = lhs.type_ <=> rhs.type_; strong_ordering::equal != v) {
-
-        return v;
-    }
-
-    return lhs.id_ <=> rhs.id_;
 }
 }  // namespace opentxs::blockchain::token

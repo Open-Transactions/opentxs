@@ -446,7 +446,7 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Tnxem:
         case Tndash:
         case Tnmaid:
-        case Tnlsk:
+        case reserved1:
         case Tndoge:
         case Tnxmr:
         case Tnwaves:
@@ -473,17 +473,17 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         }
         case Error:
         case Xrp:
-        case Dao:
+        case erc20_eth_dao:
         case Xem:
         case Maid:
-        case Lsk:
-        case Dgd:
+        case erc20_eth_lsk:
+        case erc20_eth_dgd:
         case Xmr:
         case Waves:
         case Nxt:
         case Sc:
         case Steem:
-        case Amp:
+        case erc20_eth_amp:
         case Xlm:
         case Fct:
         case Bts:
@@ -509,89 +509,89 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Sek:
         case Bnb:
         case Sol:
-        case Usdt:
+        case erc20_eth_usdt:
         case Ada:
         case Dot:
-        case Usdc:
-        case Shib:
+        case erc20_eth_usdc:
+        case erc20_eth_shib:
         case Luna:
         case Avax:
-        case Uni:
-        case Link:
-        case Wbtc:
-        case Busd:
+        case erc20_eth_uni:
+        case erc20_eth_link:
+        case erc20_eth_wbtc:
+        case erc20_eth_busd:
         case MatiC:
         case Algo:
         case Vet:
-        case Axs:
+        case erc20_eth_axs:
         case Icp:
-        case Cro:
+        case erc20_eth_cro:
         case Atom:
         case Theta:
         case Fil:
         case Trx:
-        case Ftt:
+        case erc20_eth_ftt:
         case Etc:
         case Ftm:
-        case Dai:
-        case Btcb:
+        case erc20_eth_dai:
+        case bep2_bnb_btcb:
         case Egld:
         case Hbar:
         case Xtz:
-        case Mana:
+        case erc20_eth_mana:
         case Near:
-        case Grt:
-        case Cake:
+        case erc20_eth_grt:
+        case bsc20_bsc_cake:
         case Eos:
         case Flow:
-        case Aave:
+        case erc20_eth_aave:
         case Klay:
         case Ksm:
         case Miota:
         case Hnt:
         case Rune:
-        case Leo:
+        case erc20_eth_leo:
         case Neo:
         case One:
         case Qnt:
-        case Ust:
-        case Mkr:
-        case Enj:
+        case erc20_eth_ust:
+        case erc20_eth_mkr:
+        case erc20_eth_enj:
         case Chz:
         case Ar:
         case Stx:
-        case Btt:
-        case Hot:
-        case Sand:
-        case Omg:
+        case trc20_tron_btt:
+        case erc20_eth_hot:
+        case erc20_eth_sand:
+        case erc20_eth_omg:
         case Celo:
         case Zec:
-        case Comp:
+        case erc20_eth_comp:
         case Tfuel:
         case Kda:
-        case Lrc:
+        case erc20_eth_lrc:
         case Qtum:
-        case Crv:
+        case erc20_eth_crv:
         case Ht:
-        case Nexo:
-        case Sushi:
-        case Kcs:
-        case Bat:
+        case erc20_eth_nexo:
+        case erc20_eth_sushi:
+        case erc20_eth_kcs:
+        case erc20_eth_bat:
         case Okb:
         case Dcr:
         case Icx:
         case Rvn:
         case Scrt:
-        case Rev:
-        case Audio:
+        case erc20_eth_rev:
+        case erc20_eth_audio:
         case Zil:
-        case Tusd:
-        case Yfi:
+        case erc20_eth_tusd:
+        case erc20_eth_yfi:
         case Mina:
-        case Perp:
+        case erc20_eth_perp:
         case Xdc:
-        case Tel:
-        case Snx:
+        case erc20_eth_tel:
+        case erc20_eth_snx:
         case Btg:
         case Afn:
         case All:
