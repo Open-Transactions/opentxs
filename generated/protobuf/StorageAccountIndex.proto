@@ -10,7 +10,7 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTStorageAccountIndex";
 option optimize_for = LITE_RUNTIME;
 
-import public "ContactEnums.proto";
+import public "ContactItemType.proto";
 
 message StorageAccountIndex
 {

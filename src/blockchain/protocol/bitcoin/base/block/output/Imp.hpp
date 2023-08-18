@@ -21,7 +21,7 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/token/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -31,7 +31,7 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "opentxs/blockchain/token/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -110,7 +110,8 @@ public:
         const api::session::Client& api,
         Set<identifier::Generic>& output) const noexcept -> void final;
     auto CalculateSize() const noexcept -> std::size_t final;
-    auto Cashtoken() const noexcept -> const token::cashtoken::View* final;
+    auto Cashtoken() const noexcept
+        -> const bitcoincash::token::cashtoken::View* final;
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> OutputPrivate* final
     {
@@ -217,7 +218,7 @@ public:
         const std::size_t size,
         const ReadView script,
         const VersionNumber version,
-        std::optional<const token::cashtoken::Value> cashtoken,
+        std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
         allocator_type alloc) noexcept(false);
     Output(
         const blockchain::Type chain,
@@ -226,7 +227,7 @@ public:
         block::Script script,
         Set<crypto::Key>&& keys,
         const VersionNumber version,
-        std::optional<const token::cashtoken::Value> cashtoken,
+        std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
         allocator_type alloc) noexcept(false);
     Output(
         const blockchain::Type chain,
@@ -239,7 +240,7 @@ public:
         block::Position minedPosition,
         node::TxoState state,
         UnallocatedSet<node::TxoTag> tags,
-        std::optional<const token::cashtoken::Value> cashtoken,
+        std::optional<const bitcoincash::token::cashtoken::Value> cashtoken,
         allocator_type alloc) noexcept(false);
     Output() = delete;
     Output(const Output&, allocator_type alloc) noexcept;
@@ -322,8 +323,8 @@ private:
     const std::uint32_t index_;
     const Amount value_;
     const block::Script script_;
-    const std::optional<const token::cashtoken::Value> cashtoken_;
-    const token::cashtoken::View cashtoken_view_;
+    const std::optional<const bitcoincash::token::cashtoken::Value> cashtoken_;
+    const bitcoincash::token::cashtoken::View cashtoken_view_;
     mutable Cache cache_;
     mutable GuardedData guarded_;
 

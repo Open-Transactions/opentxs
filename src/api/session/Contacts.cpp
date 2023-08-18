@@ -507,19 +507,19 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Eth:
                 case identity::wot::claim::ClaimType::Xrp:
                 case identity::wot::claim::ClaimType::Ltc:
-                case identity::wot::claim::ClaimType::Dao:
+                case identity::wot::claim::ClaimType::erc20_eth_dao:
                 case identity::wot::claim::ClaimType::Xem:
                 case identity::wot::claim::ClaimType::Dash:
                 case identity::wot::claim::ClaimType::Maid:
-                case identity::wot::claim::ClaimType::Lsk:
+                case identity::wot::claim::ClaimType::erc20_eth_lsk:
                 case identity::wot::claim::ClaimType::Doge:
-                case identity::wot::claim::ClaimType::Dgd:
+                case identity::wot::claim::ClaimType::erc20_eth_dgd:
                 case identity::wot::claim::ClaimType::Xmr:
                 case identity::wot::claim::ClaimType::Waves:
                 case identity::wot::claim::ClaimType::Nxt:
                 case identity::wot::claim::ClaimType::Sc:
                 case identity::wot::claim::ClaimType::Steem:
-                case identity::wot::claim::ClaimType::Amp:
+                case identity::wot::claim::ClaimType::erc20_eth_amp:
                 case identity::wot::claim::ClaimType::Xlm:
                 case identity::wot::claim::ClaimType::Fct:
                 case identity::wot::claim::ClaimType::Bts:
@@ -545,11 +545,11 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Sek:
                 case identity::wot::claim::ClaimType::Tnbtc:
                 case identity::wot::claim::ClaimType::Tnxrp:
-                case identity::wot::claim::ClaimType::Tnltx:
+                case identity::wot::claim::ClaimType::Tnltc:
                 case identity::wot::claim::ClaimType::Tnxem:
                 case identity::wot::claim::ClaimType::Tndash:
                 case identity::wot::claim::ClaimType::Tnmaid:
-                case identity::wot::claim::ClaimType::Tnlsk:
+                case identity::wot::claim::ClaimType::reserved1:
                 case identity::wot::claim::ClaimType::Tndoge:
                 case identity::wot::claim::ClaimType::Tnxmr:
                 case identity::wot::claim::ClaimType::Tnwaves:
@@ -582,42 +582,42 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Regtest:
                 case identity::wot::claim::ClaimType::Bnb:
                 case identity::wot::claim::ClaimType::Sol:
-                case identity::wot::claim::ClaimType::Usdt:
+                case identity::wot::claim::ClaimType::erc20_eth_usdt:
                 case identity::wot::claim::ClaimType::Ada:
                 case identity::wot::claim::ClaimType::Dot:
-                case identity::wot::claim::ClaimType::Usdc:
-                case identity::wot::claim::ClaimType::Shib:
+                case identity::wot::claim::ClaimType::erc20_eth_usdc:
+                case identity::wot::claim::ClaimType::erc20_eth_shib:
                 case identity::wot::claim::ClaimType::Luna:
                 case identity::wot::claim::ClaimType::Avax:
-                case identity::wot::claim::ClaimType::Uni:
-                case identity::wot::claim::ClaimType::Link:
-                case identity::wot::claim::ClaimType::Wbtc:
-                case identity::wot::claim::ClaimType::Busd:
+                case identity::wot::claim::ClaimType::erc20_eth_uni:
+                case identity::wot::claim::ClaimType::erc20_eth_link:
+                case identity::wot::claim::ClaimType::erc20_eth_wbtc:
+                case identity::wot::claim::ClaimType::erc20_eth_busd:
                 case identity::wot::claim::ClaimType::Matic:
                 case identity::wot::claim::ClaimType::Algo:
                 case identity::wot::claim::ClaimType::Vet:
-                case identity::wot::claim::ClaimType::Axs:
+                case identity::wot::claim::ClaimType::erc20_eth_axs:
                 case identity::wot::claim::ClaimType::Icp:
-                case identity::wot::claim::ClaimType::Cro:
+                case identity::wot::claim::ClaimType::erc20_eth_cro:
                 case identity::wot::claim::ClaimType::Atom:
                 case identity::wot::claim::ClaimType::Theta:
                 case identity::wot::claim::ClaimType::Fil:
                 case identity::wot::claim::ClaimType::Trx:
-                case identity::wot::claim::ClaimType::Ftt:
+                case identity::wot::claim::ClaimType::erc20_eth_ftt:
                 case identity::wot::claim::ClaimType::Etc:
                 case identity::wot::claim::ClaimType::Ftm:
-                case identity::wot::claim::ClaimType::Dai:
-                case identity::wot::claim::ClaimType::Btcb:
+                case identity::wot::claim::ClaimType::erc20_eth_dai:
+                case identity::wot::claim::ClaimType::bep2_bnb_btcb:
                 case identity::wot::claim::ClaimType::Egld:
                 case identity::wot::claim::ClaimType::Hbar:
                 case identity::wot::claim::ClaimType::Xtz:
-                case identity::wot::claim::ClaimType::Mana:
+                case identity::wot::claim::ClaimType::erc20_eth_mana:
                 case identity::wot::claim::ClaimType::Near:
-                case identity::wot::claim::ClaimType::Grt:
-                case identity::wot::claim::ClaimType::Cake:
+                case identity::wot::claim::ClaimType::erc20_eth_grt:
+                case identity::wot::claim::ClaimType::bsc20_bsc_cake:
                 case identity::wot::claim::ClaimType::Eos:
                 case identity::wot::claim::ClaimType::Flow:
-                case identity::wot::claim::ClaimType::Aave:
+                case identity::wot::claim::ClaimType::erc20_eth_aave:
                 case identity::wot::claim::ClaimType::Klay:
                 case identity::wot::claim::ClaimType::Ksm:
                 case identity::wot::claim::ClaimType::Xec:
@@ -625,48 +625,48 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Hnt:
                 case identity::wot::claim::ClaimType::Rune:
                 case identity::wot::claim::ClaimType::Bsv:
-                case identity::wot::claim::ClaimType::Leo:
+                case identity::wot::claim::ClaimType::erc20_eth_leo:
                 case identity::wot::claim::ClaimType::Neo:
                 case identity::wot::claim::ClaimType::One:
                 case identity::wot::claim::ClaimType::Qnt:
-                case identity::wot::claim::ClaimType::Ust:
-                case identity::wot::claim::ClaimType::Mkr:
-                case identity::wot::claim::ClaimType::Enj:
+                case identity::wot::claim::ClaimType::erc20_eth_ust:
+                case identity::wot::claim::ClaimType::erc20_eth_mkr:
+                case identity::wot::claim::ClaimType::erc20_eth_enj:
                 case identity::wot::claim::ClaimType::Chz:
                 case identity::wot::claim::ClaimType::Ar:
                 case identity::wot::claim::ClaimType::Stx:
-                case identity::wot::claim::ClaimType::Btt:
-                case identity::wot::claim::ClaimType::Hot:
-                case identity::wot::claim::ClaimType::Sand:
-                case identity::wot::claim::ClaimType::Omg:
+                case identity::wot::claim::ClaimType::trc20_tron_btt:
+                case identity::wot::claim::ClaimType::erc20_eth_hot:
+                case identity::wot::claim::ClaimType::erc20_eth_sand:
+                case identity::wot::claim::ClaimType::erc20_eth_omg:
                 case identity::wot::claim::ClaimType::Celo:
                 case identity::wot::claim::ClaimType::Zec:
-                case identity::wot::claim::ClaimType::Comp:
+                case identity::wot::claim::ClaimType::erc20_eth_comp:
                 case identity::wot::claim::ClaimType::Tfuel:
                 case identity::wot::claim::ClaimType::Kda:
-                case identity::wot::claim::ClaimType::Lrc:
+                case identity::wot::claim::ClaimType::erc20_eth_lrc:
                 case identity::wot::claim::ClaimType::Qtum:
-                case identity::wot::claim::ClaimType::Crv:
+                case identity::wot::claim::ClaimType::erc20_eth_crv:
                 case identity::wot::claim::ClaimType::Ht:
-                case identity::wot::claim::ClaimType::Nexo:
-                case identity::wot::claim::ClaimType::Sushi:
-                case identity::wot::claim::ClaimType::Kcs:
-                case identity::wot::claim::ClaimType::Bat:
+                case identity::wot::claim::ClaimType::erc20_eth_nexo:
+                case identity::wot::claim::ClaimType::erc20_eth_sushi:
+                case identity::wot::claim::ClaimType::erc20_eth_kcs:
+                case identity::wot::claim::ClaimType::erc20_eth_bat:
                 case identity::wot::claim::ClaimType::Okb:
                 case identity::wot::claim::ClaimType::Dcr:
                 case identity::wot::claim::ClaimType::Icx:
                 case identity::wot::claim::ClaimType::Rvn:
                 case identity::wot::claim::ClaimType::Scrt:
-                case identity::wot::claim::ClaimType::Rev:
-                case identity::wot::claim::ClaimType::Audio:
+                case identity::wot::claim::ClaimType::erc20_eth_rev:
+                case identity::wot::claim::ClaimType::erc20_eth_audio:
                 case identity::wot::claim::ClaimType::Zil:
-                case identity::wot::claim::ClaimType::Tusd:
-                case identity::wot::claim::ClaimType::Yfi:
+                case identity::wot::claim::ClaimType::erc20_eth_tusd:
+                case identity::wot::claim::ClaimType::erc20_eth_yfi:
                 case identity::wot::claim::ClaimType::Mina:
-                case identity::wot::claim::ClaimType::Perp:
+                case identity::wot::claim::ClaimType::erc20_eth_perp:
                 case identity::wot::claim::ClaimType::Xdc:
-                case identity::wot::claim::ClaimType::Tel:
-                case identity::wot::claim::ClaimType::Snx:
+                case identity::wot::claim::ClaimType::erc20_eth_tel:
+                case identity::wot::claim::ClaimType::erc20_eth_snx:
                 case identity::wot::claim::ClaimType::Btg:
                 case identity::wot::claim::ClaimType::Afn:
                 case identity::wot::claim::ClaimType::All:
@@ -1539,19 +1539,19 @@ auto Contacts::update(const identity::Nym& nym) const
         case Eth:
         case Xrp:
         case Ltc:
-        case Dao:
+        case erc20_eth_dao:
         case Xem:
         case Dash:
         case Maid:
-        case Lsk:
+        case erc20_eth_lsk:
         case Doge:
-        case Dgd:
+        case erc20_eth_dgd:
         case Xmr:
         case Waves:
         case Nxt:
         case Sc:
         case Steem:
-        case Amp:
+        case erc20_eth_amp:
         case Xlm:
         case Fct:
         case Bts:
@@ -1577,11 +1577,11 @@ auto Contacts::update(const identity::Nym& nym) const
         case Sek:
         case Tnbtc:
         case Tnxrp:
-        case Tnltx:
+        case Tnltc:
         case Tnxem:
         case Tndash:
         case Tnmaid:
-        case Tnlsk:
+        case reserved1:
         case Tndoge:
         case Tnxmr:
         case Tnwaves:
@@ -1614,42 +1614,42 @@ auto Contacts::update(const identity::Nym& nym) const
         case Regtest:
         case Bnb:
         case Sol:
-        case Usdt:
+        case erc20_eth_usdt:
         case Ada:
         case Dot:
-        case Usdc:
-        case Shib:
+        case erc20_eth_usdc:
+        case erc20_eth_shib:
         case Luna:
         case Avax:
-        case Uni:
-        case Link:
-        case Wbtc:
-        case Busd:
+        case erc20_eth_uni:
+        case erc20_eth_link:
+        case erc20_eth_wbtc:
+        case erc20_eth_busd:
         case Matic:
         case Algo:
         case Vet:
-        case Axs:
+        case erc20_eth_axs:
         case Icp:
-        case Cro:
+        case erc20_eth_cro:
         case Atom:
         case Theta:
         case Fil:
         case Trx:
-        case Ftt:
+        case erc20_eth_ftt:
         case Etc:
         case Ftm:
-        case Dai:
-        case Btcb:
+        case erc20_eth_dai:
+        case bep2_bnb_btcb:
         case Egld:
         case Hbar:
         case Xtz:
-        case Mana:
+        case erc20_eth_mana:
         case Near:
-        case Grt:
-        case Cake:
+        case erc20_eth_grt:
+        case bsc20_bsc_cake:
         case Eos:
         case Flow:
-        case Aave:
+        case erc20_eth_aave:
         case Klay:
         case Ksm:
         case Xec:
@@ -1657,48 +1657,48 @@ auto Contacts::update(const identity::Nym& nym) const
         case Hnt:
         case Rune:
         case Bsv:
-        case Leo:
+        case erc20_eth_leo:
         case Neo:
         case One:
         case Qnt:
-        case Ust:
-        case Mkr:
-        case Enj:
+        case erc20_eth_ust:
+        case erc20_eth_mkr:
+        case erc20_eth_enj:
         case Chz:
         case Ar:
         case Stx:
-        case Btt:
-        case Hot:
-        case Sand:
-        case Omg:
+        case trc20_tron_btt:
+        case erc20_eth_hot:
+        case erc20_eth_sand:
+        case erc20_eth_omg:
         case Celo:
         case Zec:
-        case Comp:
+        case erc20_eth_comp:
         case Tfuel:
         case Kda:
-        case Lrc:
+        case erc20_eth_lrc:
         case Qtum:
-        case Crv:
+        case erc20_eth_crv:
         case Ht:
-        case Nexo:
-        case Sushi:
-        case Kcs:
-        case Bat:
+        case erc20_eth_nexo:
+        case erc20_eth_sushi:
+        case erc20_eth_kcs:
+        case erc20_eth_bat:
         case Okb:
         case Dcr:
         case Icx:
         case Rvn:
         case Scrt:
-        case Rev:
-        case Audio:
+        case erc20_eth_rev:
+        case erc20_eth_audio:
         case Zil:
-        case Tusd:
-        case Yfi:
+        case erc20_eth_tusd:
+        case erc20_eth_yfi:
         case Mina:
-        case Perp:
+        case erc20_eth_perp:
         case Xdc:
-        case Tel:
-        case Snx:
+        case erc20_eth_tel:
+        case erc20_eth_snx:
         case Btg:
         case Afn:
         case All:

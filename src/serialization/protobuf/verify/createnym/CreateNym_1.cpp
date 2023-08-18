@@ -5,6 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/CreateNym.hpp"  // IWYU pragma: associated
 
+#include <ContactSectionName.pb.h>
 #include <CreateNym.pb.h>
 #include <ankerl/unordered_dense.h>
 

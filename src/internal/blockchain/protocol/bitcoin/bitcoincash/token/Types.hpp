@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/blockchain/token/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -39,7 +39,7 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::token::cashtoken
+namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
 struct Value {
     using marker_type = std::uint8_t;
@@ -74,4 +74,5 @@ auto deserialize(const proto::BlockchainTransactionOutput& in) noexcept(false)
     -> std::optional<Value>;
 auto deserialize(ReadView& bytes, std::optional<Value>& out) noexcept(false)
     -> void;
-}  // namespace opentxs::blockchain::token::cashtoken
+}  // namespace
+   // opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken

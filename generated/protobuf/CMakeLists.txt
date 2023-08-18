@@ -53,10 +53,12 @@ set(PROTO_SOURCES
     ConsensusEnums.proto
     Contact.proto
     ContactData.proto
-    ContactEnums.proto
     ContactEvent.proto
     ContactItem.proto
+    ContactItemAttribute.proto
+    ContactItemType.proto
     ContactSection.proto
+    ContactSectionName.proto
     Context.proto
     ContractEnums.proto
     CreateInstrumentDefinition.proto
@@ -169,6 +171,7 @@ set(PROTO_SOURCES
     VerificationGroup.proto
     VerificationIdentity.proto
     VerificationItem.proto
+    VerificationKind.proto
     VerificationOffer.proto
     VerificationReply.proto
     VerificationRequest.proto
@@ -284,10 +287,12 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<ConsensusEnums.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<Contact.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ContactData.pb.h$<ANGLE-R>>"
-    "$<$<COMPILE_LANGUAGE:CXX>:<ContactEnums.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ContactEvent.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ContactItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<ContactItemAttribute.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<ContactItemType.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ContactSection.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<ContactSectionName.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<Context.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ContractEnums.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<CreateInstrumentDefinition.pb.h$<ANGLE-R>>"
@@ -400,6 +405,7 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationGroup.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationIdentity.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<VerificationKind.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationOffer.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationReply.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<VerificationRequest.pb.h$<ANGLE-R>>"

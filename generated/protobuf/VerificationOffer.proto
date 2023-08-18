@@ -11,7 +11,6 @@ option java_outer_classname = "OTVerificationOffer";
 option optimize_for = LITE_RUNTIME;
 
 import public "Claim.proto";
-import public "ContactEnums.proto";
 import public "VerificationItem.proto";
 import public "Identifier.proto";
 

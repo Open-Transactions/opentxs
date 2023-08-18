@@ -8,8 +8,8 @@
 #include "internal/identity/wot/claim/Factory.hpp"  // IWYU pragma: associated
 
 #include <Claim.pb.h>
-#include <ContactEnums.pb.h>
 #include <ContactItem.pb.h>
+#include <ContactItemAttribute.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <optional>

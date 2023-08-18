@@ -10,7 +10,7 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTContactSection";
 option optimize_for = LITE_RUNTIME;
 
-import public "ContactEnums.proto";
+import public "ContactSectionName.proto";
 import public "ContactItem.proto";
 
 message ContactSection {

@@ -68,9 +68,9 @@ class TransactionPrivate;
 
 struct EncodedTransaction;
 }  // namespace base
-}  // namespace bitcoin
-}  // namespace protocol
 
+namespace bitcoincash
+{
 namespace token
 {
 namespace cashtoken
@@ -78,6 +78,9 @@ namespace cashtoken
 struct Value;
 }  // namespace cashtoken
 }  // namespace token
+}  // namespace bitcoincash
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace crypto
@@ -292,7 +295,8 @@ auto BitcoinTransactionOutput(
     const std::uint32_t index,
     const opentxs::Amount& value,
     blockchain::protocol::bitcoin::base::block::Script script,
-    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
+    std::optional<const blockchain::protocol::bitcoin::bitcoincash::token::
+                      cashtoken::Value> cashtoken,
     const UnallocatedSet<blockchain::crypto::Key>& keys,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Output;
@@ -302,7 +306,8 @@ auto BitcoinTransactionOutput(
     const opentxs::Amount& value,
     const network::blockchain::bitcoin::CompactSize& cs,
     const ReadView script,
-    std::optional<const blockchain::token::cashtoken::Value> cashtoken,
+    std::optional<const blockchain::protocol::bitcoin::bitcoincash::token::
+                      cashtoken::Value> cashtoken,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Output;
 auto BitcoinTransactionOutput(

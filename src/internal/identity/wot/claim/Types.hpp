@@ -3,15 +3,23 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
-
 #pragma once
 
 #include "opentxs/identity/wot/claim/Types.hpp"
 
-#include <ContactEnums.pb.h>
-
 #include "opentxs/util/Numbers.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace proto
+{
+enum ContactItemAttribute : int;
+enum ContactItemType : int;
+enum ContactSectionName : int;
+}  // namespace proto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs
 {

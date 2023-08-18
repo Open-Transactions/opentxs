@@ -5,7 +5,7 @@
 
 #include "internal/serialization/protobuf/verify/Faucet.hpp"  // IWYU pragma: associated
 
-#include <ContactEnums.pb.h>
+#include <ContactSectionName.pb.h>
 #include <Faucet.pb.h>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"

@@ -6,7 +6,7 @@
 #include "internal/serialization/protobuf/verify/BlockchainWalletKey.hpp"  // IWYU pragma: associated
 
 #include <BlockchainWalletKey.pb.h>
-#include <ContactEnums.pb.h>
+#include <ContactSectionName.pb.h>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

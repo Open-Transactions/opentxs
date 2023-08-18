@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <ContactEnums.pb.h>
+#include <VerificationKind.pb.h>
 
 #include "opentxs/identity/wot/verification/Types.hpp"
 

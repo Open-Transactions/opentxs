@@ -3,11 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+
 #include "opentxs/identity/wot/claim/Data.hpp"  // IWYU pragma: associated
 
 #include <ContactData.pb.h>
 #include <ContactItem.pb.h>
+#include <ContactItemType.pb.h>
 #include <ContactSection.pb.h>
+#include <ContactSectionName.pb.h>
 #include <ankerl/unordered_dense.h>
 #include <algorithm>
 #include <iterator>

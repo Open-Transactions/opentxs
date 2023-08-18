@@ -672,7 +672,7 @@ auto Chains() noexcept -> const ChainMap&
                      blockchain::Type::Litecoin,
                      output_based,
                      std::nullopt,
-                     opentxs::UnitType::Tnltx,
+                     opentxs::UnitType::Tnltc,
                      TESTNET,
                      LITECOIN,
                      testnet4,

@@ -5,7 +5,7 @@
 
 #include "interface/ui/profile/ProfileSection.hpp"  // IWYU pragma: associated
 
-#include <ContactEnums.pb.h>
+#include <ContactItemType.pb.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>

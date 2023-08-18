@@ -3,8 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"  // IWYU pragma: associated
 
+#include <ContactItemAttribute.pb.h>
+#include <ContactItemType.pb.h>
 #include <ankerl/unordered_dense.h>
 #include <algorithm>
 #include <iterator>

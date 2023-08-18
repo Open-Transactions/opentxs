@@ -13,7 +13,7 @@
 #include <optional>
 #include <utility>
 
-#include "internal/blockchain/token/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -163,7 +163,8 @@ struct EncodedInput final : opentxs::implementation::Allocated {
 struct EncodedOutput final : opentxs::implementation::Allocated {
     be::little_uint64_buf_t value_;
     CompactSize cs_;
-    std::optional<token::cashtoken::Value> cashtoken_;
+    std::optional<protocol::bitcoin::bitcoincash::token::cashtoken::Value>
+        cashtoken_;
     ByteArray script_;
 
     auto size() const noexcept -> std::size_t;
