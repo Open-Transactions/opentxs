@@ -7,30 +7,24 @@
 
 #pragma once
 
+#include <cs_shared_guarded.h>
 #include <chrono>
 #include <filesystem>
+#include <shared_mutex>
 #include <string_view>
 
 #include "BoostIostreams.hpp"
-#include "internal/util/Flag.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/storage/Plugin.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
+#include "util/storage/drivers/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
@@ -38,6 +32,8 @@ namespace storage
 {
 class Config;
 }  // namespace storage
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,22 +41,17 @@ namespace fs = std::filesystem;
 
 namespace opentxs::storage::driver::filesystem
 {
-// Simple filesystem implementation of opentxs::storage
-class Common : public implementation::Plugin
+class Common : public storage::implementation::Driver
 {
-private:
-    using ot_super = Plugin;
-
 public:
-    auto LoadFromBucket(
-        const UnallocatedCString& key,
-        UnallocatedCString& value,
-        const bool bucket) const -> bool override;
-    auto LoadRoot() const -> UnallocatedCString override;
-    auto StoreRoot(const bool commit, const UnallocatedCString& hash) const
-        -> bool override;
+    auto Load(const Log& logger, const Hash& key, Search order, Writer& value)
+        const noexcept -> bool final;
+    auto LoadRoot() const noexcept -> Hash final;
 
-    void Cleanup() override;
+    auto Commit(const Hash& root, Transaction data, Bucket bucket)
+        const noexcept -> bool final;
+    auto EmptyBucket(Bucket bucket) const noexcept -> bool final;
+    auto Store(Transaction data, Bucket bucket) const noexcept -> bool final;
 
     Common() = delete;
     Common(const Common&) = delete;
@@ -71,23 +62,39 @@ public:
     ~Common() override;
 
 protected:
-    const fs::path folder_;
-    OTFlag ready_;
+    struct Data {
+        const fs::path folder_;
 
-    auto sync(const fs::path& path) const -> bool;
+        Data(const fs::path& folder) noexcept
+            : folder_(folder)
+        {
+        }
+        Data() = delete;
+        Data(const Data&) = delete;
+        Data(Data&&) = delete;
+        auto operator=(const Data&) -> Data& = delete;
+        auto operator=(Data&&) -> Data& = delete;
+    };
 
-    Common(
-        const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
-        const storage::Config& config,
-        const UnallocatedCString& folder,
-        const Flag& bucket);
-
-private:
     using DescriptorType = boost::iostreams::file_descriptor_sink;
     using File = boost::iostreams::stream<DescriptorType>;
 
+    static auto finalize_write(
+        const fs::path& directory,
+        const fs::path& filename,
+        File& file,
+        ReadView data) noexcept(false) -> void;
+    static auto sync(const fs::path& path) noexcept -> bool;
+
+    auto init() noexcept(false) -> void;
+    virtual auto init(Data& data) noexcept(false) -> void;
+
+    Common(
+        const api::Crypto& crypto,
+        const storage::Config& config,
+        const std::filesystem::path& folder) noexcept;
+
+private:
     class FileDescriptor
     {
     public:
@@ -109,30 +116,37 @@ private:
         auto good() const noexcept -> bool;
     };
 
-    virtual auto calculate_path(
-        std::string_view key,
-        bool bucket,
-        fs::path& directory) const noexcept -> fs::path = 0;
-    virtual auto prepare_read(const UnallocatedCString& input) const
-        -> UnallocatedCString;
-    virtual auto prepare_write(const UnallocatedCString& input) const
-        -> UnallocatedCString;
-    auto read_file(const UnallocatedCString& filename) const
-        -> UnallocatedCString;
-    virtual auto root_filename() const -> fs::path = 0;
-    auto store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket) const -> bool override;
-    auto sync(File& file) const -> bool;
-    auto sync(DescriptorType::handle_type) const -> bool;
-    auto write_file(
-        const UnallocatedCString& directory,
-        const UnallocatedCString& filename,
-        const UnallocatedCString& contents) const -> bool;
+    using GuardedData = libguarded::shared_guarded<Data, std::shared_mutex>;
 
-    void Cleanup_Common();
-    void Init_Common();
+    mutable GuardedData data_;
+
+    static auto sync(DescriptorType::handle_type) noexcept -> bool;
+    static auto sync(File& file) noexcept -> bool;
+
+    virtual auto calculate_path(
+        const Data& data,
+        std::string_view key,
+        Bucket bucket,
+        fs::path& directory) const noexcept -> fs::path = 0;
+    virtual auto do_write(
+        const fs::path& directory,
+        const fs::path& filename,
+        File& file,
+        ReadView data) const noexcept(false) -> void;
+    virtual auto empty_bucket(const Data& data, Bucket bucket) const
+        noexcept(false) -> bool = 0;
+    virtual auto finalize_read(UnallocatedCString&& input) const noexcept(false)
+        -> UnallocatedCString;
+    auto read_file(const fs::path& filename) const noexcept
+        -> UnallocatedCString;
+    auto read_file(const fs::path& filename, Writer&& out) const noexcept
+        -> bool;
+    virtual auto root_filename(const Data& data) const noexcept -> fs::path = 0;
+    auto store(Data& data, Transaction values, Bucket bucket) const noexcept
+        -> bool;
+    auto write_file(
+        const fs::path& directory,
+        const fs::path& filename,
+        ReadView contents) const noexcept -> bool;
 };
 }  // namespace opentxs::storage::driver::filesystem

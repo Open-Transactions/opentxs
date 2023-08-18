@@ -81,7 +81,6 @@ auto CryptoConfig(const api::Settings& settings) noexcept
 auto Encode(const api::Crypto& crypto) noexcept
     -> std::unique_ptr<api::crypto::Encode>;
 auto Hash(
-    const api::crypto::Encode& encode,
     const crypto::HashingProvider& sha,
     const crypto::HashingProvider& blake,
     const crypto::Pbkdf2& pbkdf2,

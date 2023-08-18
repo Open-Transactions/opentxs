@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -21,6 +22,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -100,8 +102,9 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
         auto output = std::unique_ptr<Message>{};
         auto raw = UnallocatedCString{};
         auto alias = UnallocatedCString{};
-        const bool loaded = api_.Storage().Load(
-            nym, id.asBase58(api_.Crypto()), box, raw, alias, true);
+        using enum opentxs::storage::ErrorReporting;
+        const bool loaded =
+            api_.Storage().Internal().Load(nym, id, box, raw, alias, silent);
 
         if (false == loaded) {
             LogError()(OT_PRETTY_CLASS())("Failed to load message ")(

@@ -5,64 +5,55 @@
 
 #pragma once
 
+#include <cs_shared_guarded.h>
+#include <array>
+#include <shared_mutex>
+#include <string_view>
+
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/storage/Types.hpp"
+#include "util/storage/drivers/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
 namespace storage
 {
+namespace lmdb
+{
+class Transaction;
+}  // namespace lmdb
+
 class Config;
 }  // namespace storage
 
-class Flag;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::driver
 {
-// LMDB implementation of opentxs::storage
-class LMDB final : public virtual implementation::Plugin,
-                   public virtual storage::Driver
+class LMDB final : public virtual storage::implementation::Driver
 {
 public:
-    auto EmptyBucket(const bool bucket) const -> bool final;
-    auto LoadFromBucket(
-        const UnallocatedCString& key,
-        UnallocatedCString& value,
-        const bool bucket) const -> bool final;
-    auto LoadRoot() const -> UnallocatedCString final;
-    auto StoreRoot(const bool commit, const UnallocatedCString& hash) const
-        -> bool final;
+    auto Description() const noexcept -> std::string_view final;
+    auto Load(const Log& logger, const Hash& key, Search order, Writer& value)
+        const noexcept -> bool final;
+    auto LoadRoot() const noexcept -> Hash final;
 
-    void Cleanup() final;
-    void Cleanup_LMDB();
+    auto Commit(const Hash& root, Transaction data, Bucket bucket)
+        const noexcept -> bool final;
+    auto EmptyBucket(Bucket bucket) const noexcept -> bool final;
+    auto Store(Transaction data, Bucket bucket) const noexcept -> bool final;
 
-    LMDB(
-        const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
-        const storage::Config& config,
-        const Flag& bucket);
+    LMDB(const api::Crypto& crypto, const storage::Config& config);
     LMDB() = delete;
     LMDB(const LMDB&) = delete;
     LMDB(LMDB&&) = delete;
@@ -72,24 +63,37 @@ public:
     ~LMDB() final;
 
 private:
-    using ot_super = Plugin;
+    struct Data {
+    private:
+        const lmdb::TableNames table_names_;
 
-    enum Table {
-        Control = 0,
-        A = 1,
-        B = 2,
+    public:
+        enum Table {
+            Control = 0,
+            A = 1,
+            B = 2,
+        };
+
+        lmdb::Database lmdb_;
+
+        static auto get_search(Search order) noexcept -> std::array<Table, 2>;
+        static auto get_table(Bucket bucket) noexcept -> Table;
+
+        Data(const storage::Config& config) noexcept;
+        Data(const Data&) = delete;
+        Data(Data&&) = delete;
+        auto operator=(const Data&) -> Data& = delete;
+        auto operator=(Data&&) -> Data& = delete;
     };
 
-    const lmdb::TableNames table_names_;
-    lmdb::Database lmdb_;
+    using GuardedData = libguarded::shared_guarded<Data, std::shared_mutex>;
 
-    auto get_table(const bool bucket) const -> Table;
+    mutable GuardedData data_;
+
     auto store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket) const -> bool final;
-
-    void Init_LMDB();
+        Data& data,
+        lmdb::Transaction& tx,
+        Transaction values,
+        Bucket bucket) const noexcept -> bool;
 };
 }  // namespace opentxs::storage::driver

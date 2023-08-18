@@ -6,23 +6,31 @@
 #pragma once
 
 #include <StorageEnums.pb.h>
+#include <atomic>
 #include <cstdint>
-#include <cstdlib>
-#include <functional>
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
+#include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "internal/util/storage/drivers/Plugin.hpp"
+#include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/storage/Plugin.hpp"
+#include "opentxs/util/Writer.hpp"
+#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -47,36 +55,27 @@ class StorageItemHash;
 
 namespace storage
 {
-class Driver;
+namespace tree
+{
 class Root;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
-using keyFunction = std::function<bool(const UnallocatedCString&)>;
-/** A set of metadata associated with a stored object
- *  * string: hash
- *  * string: alias
- *  * uint64: revision
- *  * bool:   private
- */
-using Metadata =
-    std::tuple<UnallocatedCString, UnallocatedCString, std::uint64_t, bool>;
-/** Maps a logical id to the stored metadata for the object
- *  * string: id of the stored object
- *  * Metadata: metadata for the stored object
- */
-using Index = UnallocatedMap<UnallocatedCString, Metadata>;
+using enum ErrorReporting;
 
 class Node
 {
 public:
+    auto Dump(Vector<Hash>& out) const noexcept -> bool;
     virtual auto List() const -> ObjectList;
-    virtual auto Migrate(const Driver& to) const -> bool;
-    auto Root() const -> UnallocatedCString;
+    auto Root() const -> Hash;
     auto UpgradeLevel() const -> VersionNumber;
+
+    auto Upgrade() noexcept -> bool;
 
     Node() = delete;
     Node(const Node&) = delete;
@@ -88,99 +87,71 @@ public:
 
 protected:
     template <class T>
-    auto store_proto(
-        const Lock& lock,
-        const T& data,
-        const UnallocatedCString& id,
-        std::string_view alias,
-        UnallocatedCString& plaintext) -> bool
+    auto LoadProto(
+        const Hash& hash,
+        std::shared_ptr<T>& serialized,
+        ErrorReporting checking) const noexcept -> bool
     {
-        OT_ASSERT(verify_write_lock(lock));
+        auto raw = UnallocatedCString{};
+        const auto loaded = plugin_.Load(hash, checking, writer(raw), nullptr);
+        auto valid{false};
 
-        auto& metadata = item_map_[id];
-        auto& hash = std::get<0>(metadata);
+        if (loaded) {
+            serialized = proto::DynamicFactory<T>(raw.data(), raw.size());
 
-        if (!driver_.StoreProto<T>(data, hash, plaintext)) { return false; }
+            OT_ASSERT(serialized);
 
-        if (!alias.empty()) { std::get<1>(metadata) = alias; }
-
-        return save(lock);
-    }
-
-    template <class T>
-    auto store_proto(
-        const T& data,
-        const UnallocatedCString& id,
-        std::string_view alias,
-        UnallocatedCString& plaintext) -> bool
-    {
-        Lock lock(write_lock_);
-
-        return store_proto(lock, data, id, alias, plaintext);
-    }
-
-    template <class T>
-    auto store_proto(
-        const T& data,
-        const UnallocatedCString& id,
-        std::string_view alias) -> bool
-    {
-        UnallocatedCString notUsed;
-
-        return store_proto<T>(data, id, alias, notUsed);
-    }
-
-    template <class T>
-    auto load_proto(
-        const UnallocatedCString& id,
-        std::shared_ptr<T>& output,
-        UnallocatedCString& alias,
-        const bool checking) const -> bool
-    {
-        if (id.empty()) { return false; }
-
-        Lock lock(write_lock_);
-        const auto& it = item_map_.find(id);
-        const bool exists = (item_map_.end() != it);
-
-        if (!exists) {
-            if (!checking) {
-                std::cout << __func__ << ": Error: item with id " << id
-                          << " does not exist." << std::endl;
-            }
+            valid = proto::Validate<T>(*serialized, VERBOSE);
+        } else {
 
             return false;
         }
 
-        alias = std::get<1>(it->second);
+        if (!valid) {
+            if (loaded) {
+                LogError()(": Specified object was located but could not be "
+                           "validated.")
+                    .Flush();
+                LogError()(": Hash: ")(hash).Flush();
+                LogError()(": Size: ")(raw.size()).Flush();
+            } else {
 
-        return driver_.LoadProto<T>(std::get<0>(it->second), output, checking);
+                LogDetail()("Specified object is missing.").Flush();
+                LogDetail()("Hash: ")(hash).Flush();
+                LogDetail()("Size: ")(raw.size()).Flush();
+            }
+        }
+
+        OT_ASSERT(valid);
+
+        return valid;
     }
 
     template <class T>
-    void map(const std::function<void(const T&)> input) const
+    auto StoreProto(const T& data, Hash& key, UnallocatedCString& plaintext)
+        const noexcept -> bool
     {
-        Lock lock(write_lock_);
-        const auto copy = item_map_;
-        lock.unlock();
+        if (false == proto::Validate<T>(data, VERBOSE)) { return false; }
 
-        for (const auto& it : copy) {
-            const auto& hash = std::get<0>(it.second);
-            std::shared_ptr<T> serialized;
+        plaintext = proto::ToString(data);
 
-            if (Node::BLANK_HASH == hash) { continue; }
-
-            if (driver_.LoadProto<T>(hash, serialized, false)) {
-                input(*serialized);
-            }
-        }
+        return plugin_.Store(plaintext, key);
     }
 
+    template <class T>
+    auto StoreProto(const T& data, Hash& key) const noexcept -> bool
+    {
+        auto notUsed = UnallocatedCString{};
+
+        return StoreProto<T>(data, key, notUsed);
+    }
+
+protected:
     template <class T>
     auto check_revision(
         const UnallocatedCString& method,
         const std::uint64_t incoming,
-        Metadata& metadata) -> bool
+        Metadata& metadata) const noexcept -> bool
     {
         const auto& hash = std::get<0>(metadata);
         auto& revision = std::get<2>(metadata);
@@ -192,12 +163,11 @@ protected:
         // ...so we have to load the object just to be sure
         if (0 == revision) {
             std::shared_ptr<T> existing{nullptr};
+            using enum ErrorReporting;
 
-            if (false == driver_.LoadProto(hash, existing, false)) {
-                LogError()(method)(__func__)(": Unable to load object.")
-                    .Flush();
-
-                abort();
+            if (false == LoadProto(hash, existing, verbose)) {
+                LogAbort()(method)(__func__)(": Unable to load object.")
+                    .Abort();
             }
 
             revision = extract_revision(*existing);
@@ -205,93 +175,167 @@ protected:
 
         return (incoming > revision);
     }
-
-protected:
-    friend storage::Root;
-
-    static const UnallocatedCString BLANK_HASH;
-
-    const api::Crypto& crypto_;
-    const api::session::Factory& factory_;
-    const Driver& driver_;
-    VersionNumber version_;
-    VersionNumber original_version_;
-    mutable UnallocatedCString root_;
-    mutable std::mutex write_lock_;
-    mutable Index item_map_;
-
-    static auto normalize_hash(const UnallocatedCString& hash)
-        -> UnallocatedCString;
-
-    auto check_hash(const UnallocatedCString& hash) const -> bool;
-    auto extract_revision(const proto::Contact& input) const -> std::uint64_t;
-    auto extract_revision(const proto::Nym& input) const -> std::uint64_t;
-    auto extract_revision(const proto::Seed& input) const -> std::uint64_t;
-    auto get_alias(const UnallocatedCString& id) const -> UnallocatedCString;
-    auto load_raw(
-        const UnallocatedCString& id,
-        UnallocatedCString& output,
+    template <class T>
+    auto load_proto(
+        const identifier::Generic& id,
+        std::shared_ptr<T>& output,
         UnallocatedCString& alias,
-        const bool checking) const -> bool;
-    auto migrate(const UnallocatedCString& hash, const Driver& to) const
-        -> bool;
-    virtual auto save(const Lock& lock) const -> bool = 0;
-    void serialize_index(
-        const VersionNumber version,
-        const UnallocatedCString& id,
-        const Metadata& metadata,
-        proto::StorageItemHash& output,
-        const proto::StorageHashType type = proto::STORAGEHASH_PROTO) const;
-
-    virtual void blank(const VersionNumber version);
-    template <typename Serialized>
-    auto init_version(
-        const VersionNumber version,
-        const Serialized& serialized) noexcept -> bool
+        ErrorReporting checking) const noexcept -> bool
     {
-        original_version_ = serialized.version();
+        if (id.empty()) { return false; }
 
-        // Upgrade version
-        if (version > original_version_) {
-            LogError()("opentxs::storage::Node::")(__func__)(
-                ": Upgrading to version ")(version)
-                .Flush();
-            version_ = version;
+        Lock lock(write_lock_);
+        const auto& it = item_map_.find(id);
+        const bool exists = (item_map_.end() != it);
 
-            return true;
-        } else {
-            version_ = original_version_;
+        if (false == exists) {
+            using enum ErrorReporting;
+
+            if (verbose == checking) {
+                LogError()(OT_PRETTY_CLASS())("Error: item with id ")(
+                    id, crypto_)(" does not exist.")
+                    .Flush();
+            }
 
             return false;
         }
+
+        alias = std::get<1>(it->second);
+
+        return LoadProto<T>(std::get<0>(it->second), output, checking);
     }
-    auto delete_item(const UnallocatedCString& id) -> bool;
-    auto delete_item(const Lock& lock, const UnallocatedCString& id) -> bool;
-    auto set_alias(const UnallocatedCString& id, std::string_view alias)
+
+    template <class T>
+    auto store_proto(
+        const Lock& lock,
+        const T& data,
+        const identifier::Generic& id,
+        std::string_view alias,
+        UnallocatedCString& plaintext) noexcept -> bool
+    {
+        OT_ASSERT(verify_write_lock(lock));
+
+        auto& metadata = item_map_[id];
+        auto& hash = std::get<0>(metadata);
+
+        if (false == StoreProto<T>(data, hash, plaintext)) { return false; }
+
+        if (false == alias.empty()) { std::get<1>(metadata) = alias; }
+
+        return save(lock);
+    }
+    template <class T>
+    auto store_proto(
+        const T& data,
+        const identifier::Generic& id,
+        std::string_view alias,
+        UnallocatedCString& plaintext) noexcept -> bool
+    {
+        Lock lock(write_lock_);
+
+        return store_proto(lock, data, id, alias, plaintext);
+    }
+    template <class T>
+    auto store_proto(
+        const T& data,
+        const identifier::Generic& id,
+        std::string_view alias) noexcept -> bool
+    {
+        UnallocatedCString notUsed;
+
+        return store_proto<T>(data, id, alias, notUsed);
+    }
+
+protected:
+    friend tree::Root;
+
+    static constexpr auto storage_item_hash_version_ = VersionNumber{2};
+
+    const api::Crypto& crypto_;
+    const api::session::Factory& factory_;
+    const driver::Plugin& plugin_;
+    const UnallocatedCString name_;
+    const VersionNumber desired_version_;
+    DeferredConstruction<VersionNumber> original_version_;
+    std::atomic<VersionNumber> version_;
+    mutable Hash root_;
+    mutable std::mutex write_lock_;
+    mutable Index item_map_;
+
+    auto copy(const Log& log, const Index& in, Vector<Hash>& out) const noexcept
+        -> void;
+    virtual auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
         -> bool;
-    void set_hash(
-        const VersionNumber version,
-        const UnallocatedCString& id,
-        const UnallocatedCString& hash,
+    auto extract_revision(const proto::Contact& input) const -> std::uint64_t;
+    auto extract_revision(const proto::Nym& input) const -> std::uint64_t;
+    auto extract_revision(const proto::Seed& input) const -> std::uint64_t;
+    auto get_alias(const identifier::Generic& id) const -> UnallocatedCString;
+    auto load_raw(
+        const identifier::Generic& id,
+        UnallocatedCString& output,
+        UnallocatedCString& alias,
+        ErrorReporting checking) const -> bool;
+    virtual auto save(const Lock& lock) const -> bool = 0;
+    auto serialize_index(
+        const identifier::Generic& id,
+        const Hash& hash,
+        ReadView alias,
         proto::StorageItemHash& output,
-        const proto::StorageHashType type = proto::STORAGEHASH_PROTO) const;
+        const proto::StorageHashType type =
+            proto::STORAGEHASH_PROTO) const noexcept -> void;
+    auto serialize_index(
+        const identifier::Generic& id,
+        const Metadata& metadata,
+        proto::StorageItemHash& output,
+        const proto::StorageHashType type = proto::STORAGEHASH_PROTO) const
+        -> void;
+
+    virtual auto blank() noexcept -> void;
+    auto delete_item(const identifier::Generic& id) -> bool;
+    auto delete_item(const Lock& lock, const identifier::Generic& id) -> bool;
+    auto set_alias(const identifier::Generic& id, std::string_view alias)
+        -> bool;
+    auto set_hash(
+        const identifier::Generic& id,
+        const Hash& hash,
+        proto::StorageItemHash& output,
+        const proto::StorageHashType type =
+            proto::STORAGEHASH_PROTO) const noexcept -> void;
     auto store_raw(
         const UnallocatedCString& data,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::string_view alias) -> bool;
     auto store_raw(
         const Lock& lock,
         const UnallocatedCString& data,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::string_view alias) -> bool;
     auto verify_write_lock(const Lock& lock) const -> bool;
 
-    virtual void init(const UnallocatedCString& hash) = 0;
+    virtual void init(const Hash& hash) = 0;
+    auto init_map(
+        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+            items) noexcept -> void;
+    auto init_map(
+        const Lock& lock,
+        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+            items) noexcept -> void;
+    auto init_map(const Lock& lock, const proto::StorageItemHash& item) noexcept
+        -> void;
+    auto init_map(
+        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>& in,
+        Index& out) noexcept -> void;
+    auto init_map(const proto::StorageItemHash& in, Index& out) const noexcept
+        -> void;
+    auto set_original_version(VersionNumber version) noexcept -> VersionNumber;
+    virtual auto upgrade(const Lock& lock) noexcept -> bool = 0;
 
     Node(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& key);
+        const driver::Plugin& storage,
+        const Hash& root,
+        UnallocatedCString name,
+        VersionNumber desired) noexcept(false);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

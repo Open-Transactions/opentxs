@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include <cs_plain_guarded.h>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string_view>
 #include <utility>
 
@@ -58,6 +60,7 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
+
 class Contact;
 class PaymentCode;
 }  // namespace opentxs
@@ -131,12 +134,15 @@ private:
     using ContactMap = UnallocatedMap<identifier::Generic, ContactLock>;
     using ContactNameMap =
         UnallocatedMap<identifier::Generic, UnallocatedCString>;
+    using OptionalContactNameMap = std::optional<ContactNameMap>;
+    using GuardedContactNameMap =
+        libguarded::plain_guarded<OptionalContactNameMap>;
 
     const api::session::Client& api_;
     mutable std::recursive_mutex lock_{};
     std::weak_ptr<const crypto::Blockchain> blockchain_;
     mutable ContactMap contact_map_{};
-    mutable ContactNameMap contact_name_map_;
+    mutable GuardedContactNameMap contact_name_map_;
     OTZMQPublishSocket publisher_;
     opentxs::network::zeromq::Pipeline pipeline_;
     Timer timer_;
@@ -158,6 +164,8 @@ private:
         -> std::shared_ptr<const opentxs::Contact>;
     auto contact(const rLock& lock, const identifier::Generic& id) const
         -> std::shared_ptr<const opentxs::Contact>;
+    auto contact_name_map(OptionalContactNameMap& value) const noexcept
+        -> ContactNameMap&;
     void import_contacts(const rLock& lock);
     auto init(const std::shared_ptr<const crypto::Blockchain>& blockchain)
         -> void final;

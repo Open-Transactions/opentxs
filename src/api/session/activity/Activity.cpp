@@ -21,6 +21,7 @@
 
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
@@ -109,10 +110,10 @@ auto Activity::activity_preload_thread(
     const identifier::Nym nymID,
     const std::size_t count) const noexcept -> void
 {
-    auto threads = api_.Storage().ThreadList(nymID, false);
+    auto threads = api_.Storage().Internal().ThreadList(nymID, false);
 
     for (const auto& it : threads) {
-        const auto& threadID = it.first;
+        const auto threadID = api_.Factory().IdentifierFromBase58(it.first);
         thread_preload_thread(
             api_.Factory().PasswordPrompt(reason), nymID, threadID, 0, count);
     }
@@ -129,7 +130,8 @@ auto Activity::add_blockchain_transaction(
     LogTrace()(OT_PRETTY_CLASS())("transaction ")(txid.asHex())(
         " is associated with ")(incoming.size())(" contacts")
         .Flush();
-    const auto existing = api_.Storage().BlockchainThreadMap(nym, txid);
+    const auto existing =
+        api_.Storage().Internal().BlockchainThreadMap(nym, txid);
     auto added = UnallocatedVector<identifier::Generic>{};
     auto removed = UnallocatedVector<identifier::Generic>{};
     std::set_difference(
@@ -150,13 +152,11 @@ auto Activity::add_blockchain_transaction(
     for (const auto& thread : added) {
         if (thread.empty()) { continue; }
 
-        const auto sThreadID = thread.asBase58(api_.Crypto());
-
-        if (verify_thread_exists(nym, sThreadID)) {
+        if (verify_thread_exists(nym, thread)) {
             auto saved{true};
             std::for_each(
                 std::begin(chains), std::end(chains), [&](const auto& chain) {
-                    saved &= api_.Storage().Store(
+                    saved &= api_.Storage().Internal().Store(
                         nym, thread, chain, txid, tx.asBitcoin().Timestamp());
                 });
 
@@ -174,7 +174,7 @@ auto Activity::add_blockchain_transaction(
         auto saved{true};
         const auto c = tx.Chains({});  // TODO allocator
         std::for_each(std::begin(c), std::end(c), [&](const auto& chain) {
-            saved &= api_.Storage().RemoveBlockchainThreadItem(
+            saved &= api_.Storage().Internal().RemoveBlockchainThreadItem(
                 nym, thread, chain, txid);
         });
 
@@ -184,7 +184,7 @@ auto Activity::add_blockchain_transaction(
     }
 
     if (0 == incoming.size()) {
-        api_.Storage().UnaffiliatedBlockchainTransaction(nym, txid);
+        api_.Storage().Internal().UnaffiliatedBlockchainTransaction(nym, txid);
     }
 
     const auto proto = tx.Internal().asBitcoin().Serialize(api_);
@@ -244,19 +244,18 @@ auto Activity::AddPaymentEvent(
     Time time) const noexcept -> bool
 {
     auto lock = eLock(shared_lock_);
-    const auto sthreadID = threadID.asBase58(api_.Crypto());
 
-    if (false == verify_thread_exists(nymID, sthreadID)) { return false; }
+    if (false == verify_thread_exists(nymID, threadID)) { return false; }
 
-    const bool saved = api_.Storage().Store(
+    const bool saved = api_.Storage().Internal().Store(
         nymID,
-        sthreadID,
-        itemID.asBase58(api_.Crypto()),
+        threadID,
+        itemID,
         Clock::to_time_t(time),
         {},
         {},
         type,
-        workflowID.asBase58(api_.Crypto()));
+        workflowID);
 
     if (saved) { publish(nymID, threadID); }
 
@@ -265,13 +264,14 @@ auto Activity::AddPaymentEvent(
 
 auto Activity::Cheque(
     const identifier::Nym& nym,
-    [[maybe_unused]] const UnallocatedCString& id,
-    const UnallocatedCString& workflowID) const noexcept -> Activity::ChequeData
+    const identifier::Generic& workflowID) const noexcept
+    -> Activity::ChequeData
 {
     auto output =
         ChequeData{nullptr, api_.Factory().InternalSession().UnitDefinition()};
     auto& [cheque, contract] = output;
-    auto [type, state] = api_.Storage().PaymentWorkflowState(nym, workflowID);
+    auto [type, state] =
+        api_.Storage().Internal().PaymentWorkflowState(nym, workflowID);
     [[maybe_unused]] const auto& notUsed = state;
 
     switch (type) {
@@ -295,9 +295,9 @@ auto Activity::Cheque(
 
     auto workflow = proto::PaymentWorkflow{};
 
-    if (false == api_.Storage().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym, api_.Crypto())(" can not be loaded.")
+    if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
+        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
+            " for nym ")(nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -324,13 +324,14 @@ auto Activity::Cheque(
 auto Activity::Transfer(
     const identifier::Nym& nym,
     [[maybe_unused]] const UnallocatedCString& id,
-    const UnallocatedCString& workflowID) const noexcept
+    const identifier::Generic& workflowID) const noexcept
     -> Activity::TransferData
 {
     auto output = TransferData{
         nullptr, api_.Factory().InternalSession().UnitDefinition()};
     auto& [transfer, contract] = output;
-    auto [type, state] = api_.Storage().PaymentWorkflowState(nym, workflowID);
+    auto [type, state] =
+        api_.Storage().Internal().PaymentWorkflowState(nym, workflowID);
 
     switch (type) {
         case otx::client::PaymentWorkflowType::OutgoingTransfer:
@@ -354,9 +355,9 @@ auto Activity::Transfer(
 
     auto workflow = proto::PaymentWorkflow{};
 
-    if (false == api_.Storage().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym, api_.Crypto())(" can not be loaded")
+    if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
+        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
+            " for nym ")(nym, api_.Crypto())(" can not be loaded")
             .Flush();
 
         return output;
@@ -374,7 +375,7 @@ auto Activity::Transfer(
         return output;
     }
 
-    const auto unit = api_.Storage().AccountContract(
+    const auto unit = api_.Storage().Internal().AccountContract(
         api_.Factory().AccountIDFromBase58(workflow.account(0)));
 
     if (unit.empty()) {
@@ -442,7 +443,7 @@ auto Activity::Mail(
     const identifier::Nym& nym,
     const Message& mail,
     const otx::client::StorageBox box,
-    const UnallocatedCString& text) const noexcept -> UnallocatedCString
+    const UnallocatedCString& text) const noexcept -> identifier::Generic
 {
     auto id = identifier::Generic{};
     mail.CalculateContractID(id);
@@ -473,34 +474,33 @@ auto Activity::Mail(
     auto lock = eLock(shared_lock_);
     const auto& alias = contact->Label();
     const auto& contactID = contact->ID();
-    const auto threadID = contactID.asBase58(api_.Crypto());
 
-    if (false == verify_thread_exists(nym, threadID)) { return {}; }
+    if (false == verify_thread_exists(nym, contactID)) { return {}; }
 
-    const bool saved = api_.Storage().Store(
-        nym, threadID, itemID, mail.time_, alias, data, box);
+    const bool saved = api_.Storage().Internal().Store(
+        nym, contactID, id, mail.time_, alias, data, box, {});
 
     if (saved) {
         publish(nym, contactID);
 
-        return itemID;
+        return id;
     }
 
-    return "";
+    return {};
 }
 
 auto Activity::Mail(
     const identifier::Nym& nym,
     const otx::client::StorageBox box) const noexcept -> ObjectList
 {
-    return api_.Storage().NymBoxList(nym, box);
+    return api_.Storage().Internal().NymBoxList(nym, box);
 }
 
 auto Activity::Mail(
     const identifier::Nym& nym,
     const Message& mail,
     const otx::client::StorageBox box,
-    const PeerObject& text) const noexcept -> UnallocatedCString
+    const PeerObject& text) const noexcept -> identifier::Generic
 {
     return Mail(nym, mail, box, [&]() -> UnallocatedCString {
         if (const auto& out = text.Message(); out) {
@@ -518,7 +518,7 @@ auto Activity::MailRemove(
     const identifier::Generic& id,
     const otx::client::StorageBox box) const noexcept -> bool
 {
-    return api_.Storage().RemoveNymBoxItem(nym, box, id);
+    return api_.Storage().Internal().RemoveNymBoxItem(nym, box, id);
 }
 
 auto Activity::MarkRead(
@@ -526,10 +526,8 @@ auto Activity::MarkRead(
     const identifier::Generic& threadId,
     const identifier::Generic& itemId) const noexcept -> bool
 {
-    const UnallocatedCString thread = threadId.asBase58(api_.Crypto());
-    const UnallocatedCString item = itemId.asBase58(api_.Crypto());
-
-    return api_.Storage().SetReadState(nymId, thread, item, false);
+    return api_.Storage().Internal().SetReadState(
+        nymId, threadId, itemId, false);
 }
 
 auto Activity::MarkUnread(
@@ -537,10 +535,8 @@ auto Activity::MarkUnread(
     const identifier::Generic& threadId,
     const identifier::Generic& itemId) const noexcept -> bool
 {
-    const UnallocatedCString thread = threadId.asBase58(api_.Crypto());
-    const UnallocatedCString item = itemId.asBase58(api_.Crypto());
-
-    return api_.Storage().SetReadState(nymId, thread, item, true);
+    return api_.Storage().Internal().SetReadState(
+        nymId, threadId, itemId, true);
 }
 
 auto Activity::nym_to_contact(const identifier::Nym& nymID) const noexcept
@@ -554,11 +550,12 @@ auto Activity::nym_to_contact(const identifier::Nym& nymID) const noexcept
 auto Activity::PaymentText(
     const identifier::Nym& nym,
     const UnallocatedCString& id,
-    const UnallocatedCString& workflowID) const noexcept
+    const identifier::Generic& workflowID) const noexcept
     -> std::shared_ptr<const UnallocatedCString>
 {
     std::shared_ptr<UnallocatedCString> output;
-    auto [type, state] = api_.Storage().PaymentWorkflowState(nym, workflowID);
+    auto [type, state] =
+        api_.Storage().Internal().PaymentWorkflowState(nym, workflowID);
     [[maybe_unused]] const auto& notUsed = state;
 
     switch (type) {
@@ -591,9 +588,9 @@ auto Activity::PaymentText(
 
     auto workflow = proto::PaymentWorkflow{};
 
-    if (false == api_.Storage().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nym, api_.Crypto())(" can not be loaded.")
+    if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
+        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
+            " for nym ")(nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -604,7 +601,7 @@ auto Activity::PaymentText(
         case otx::client::PaymentWorkflowType::IncomingCheque:
         case otx::client::PaymentWorkflowType::OutgoingInvoice:
         case otx::client::PaymentWorkflowType::IncomingInvoice: {
-            auto chequeData = Cheque(nym, id, workflowID);
+            auto chequeData = Cheque(nym, workflowID);
             const auto& [cheque, contract] = chequeData;
 
             OT_ASSERT(cheque);
@@ -675,13 +672,12 @@ auto Activity::PreloadThread(
     const std::size_t count,
     const PasswordPrompt& reason) const noexcept -> void
 {
-    const UnallocatedCString thread = threadID.asBase58(api_.Crypto());
     std::thread preload(
         &Activity::thread_preload_thread,
         this,
         api_.Factory().PasswordPrompt(reason),
         nymID,
-        thread,
+        threadID,
         start,
         count);
     preload.detach();
@@ -721,8 +717,7 @@ auto Activity::Thread(
 {
     auto lock = sLock(shared_lock_);
 
-    if (false ==
-        api_.Storage().Load(nymID, threadID.asBase58(api_.Crypto()), output)) {
+    if (false == api_.Storage().Internal().Load(nymID, threadID, output)) {
         return false;
     }
 
@@ -737,8 +732,7 @@ auto Activity::Thread(
     auto lock = sLock(shared_lock_);
 
     auto serialized = proto::StorageThread{};
-    if (false == api_.Storage().Load(
-                     nymID, threadID.asBase58(api_.Crypto()), serialized)) {
+    if (false == api_.Storage().Internal().Load(nymID, threadID, serialized)) {
         return false;
     }
 
@@ -748,15 +742,15 @@ auto Activity::Thread(
 auto Activity::thread_preload_thread(
     PasswordPrompt reason,
     const identifier::Nym nymID,
-    const UnallocatedCString threadID,
+    const identifier::Generic threadID,
     const std::size_t start,
     const std::size_t count) const noexcept -> void
 {
     auto thread = proto::StorageThread{};
 
-    if (false == api_.Storage().Load(nymID, threadID, thread)) {
+    if (false == api_.Storage().Internal().Load(nymID, threadID, thread)) {
         LogError()(OT_PRETTY_CLASS())("Unable to load thread ")(
-            threadID)(" for nym ")(nymID, api_.Crypto())
+            threadID, api_.Crypto())(" for nym ")(nymID, api_.Crypto())
             .Flush();
 
         return;
@@ -785,7 +779,7 @@ auto Activity::thread_preload_thread(
             case otx::client::StorageBox::MAILINBOX:
             case otx::client::StorageBox::MAILOUTBOX: {
                 LogTrace()(OT_PRETTY_CLASS())("Preloading item ")(item.id())(
-                    " in thread ")(threadID)
+                    " in thread ")(threadID, api_.Crypto())
                     .Flush();
                 mail_.GetText(
                     nymID,
@@ -813,21 +807,21 @@ auto Activity::ThreadPublisher(const identifier::Nym& nym) const noexcept
 auto Activity::Threads(const identifier::Nym& nymID, const bool unreadOnly)
     const noexcept -> ObjectList
 {
-    auto output = api_.Storage().ThreadList(nymID, unreadOnly);
+    auto output = api_.Storage().Internal().ThreadList(nymID, unreadOnly);
 
     for (auto& it : output) {
-        const auto& threadID = it.first;
+        const auto threadID = api_.Factory().IdentifierFromBase58(it.first);
         auto& label = it.second;
 
         if (label.empty()) {
-            auto contact =
-                contact_.Contact(api_.Factory().IdentifierFromBase58(threadID));
+            auto contact = contact_.Contact(threadID);
 
             if (contact) {
                 const auto& name = contact->Label();
 
                 if (label != name) {
-                    api_.Storage().SetThreadAlias(nymID, threadID, name);
+                    api_.Storage().Internal().SetThreadAlias(
+                        nymID, threadID, name);
                     label = name;
                 }
             }
@@ -842,11 +836,11 @@ auto Activity::UnreadCount(const identifier::Nym& nym) const noexcept
 {
     auto output = 0_uz;
 
-    const auto& threads = api_.Storage().ThreadList(nym, true);
+    const auto& threads = api_.Storage().Internal().ThreadList(nym, true);
 
     for (const auto& it : threads) {
-        const auto& threadId = it.first;
-        output += api_.Storage().UnreadCount(nym, threadId);
+        const auto& threadId = api_.Factory().IdentifierFromBase58(it.first);
+        output += api_.Storage().Internal().UnreadCount(nym, threadId);
     }
 
     return output;
@@ -854,17 +848,17 @@ auto Activity::UnreadCount(const identifier::Nym& nym) const noexcept
 
 auto Activity::verify_thread_exists(
     const identifier::Nym& nym,
-    const UnallocatedCString& thread) const noexcept -> bool
+    const identifier::Generic& thread) const noexcept -> bool
 {
-    const auto list = api_.Storage().ThreadList(nym, false);
+    const auto list = api_.Storage().Internal().ThreadList(nym, false);
 
     for (const auto& it : list) {
-        const auto& id = it.first;
+        const auto id = api_.Factory().IdentifierFromBase58(it.first);
 
         if (id == thread) { return true; }
     }
 
-    return api_.Storage().CreateThread(nym, thread, {thread});
+    return api_.Storage().Internal().CreateThread(nym, thread, {thread});
 }
 
 Activity::~Activity() = default;

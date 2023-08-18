@@ -22,6 +22,7 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
@@ -604,7 +605,7 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
         LogAbort()(OT_PRETTY_CLASS())("Invalid serialized seed").Abort();
     }
 
-    if (false == storage_->Store(id_, proto)) {
+    if (false == storage_->Internal().Store(id_, proto)) {
         LogError()(OT_PRETTY_CLASS())("Failed to store seed.").Flush();
 
         return false;

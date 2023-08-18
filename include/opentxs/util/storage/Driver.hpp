@@ -6,62 +6,41 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Log;
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage
 {
 class Driver
 {
 public:
-    virtual auto EmptyBucket(const bool bucket) const -> bool = 0;
-
+    virtual auto Description() const noexcept -> std::string_view = 0;
     virtual auto Load(
-        const UnallocatedCString& key,
-        const bool checking,
-        UnallocatedCString& value) const -> bool = 0;
-    virtual auto LoadFromBucket(
-        const UnallocatedCString& key,
-        UnallocatedCString& value,
-        const bool bucket) const -> bool = 0;
+        const Log& logger,
+        const Hash& key,
+        Search order,
+        Writer& value) const noexcept -> bool = 0;
+    virtual auto LoadRoot() const noexcept -> Hash = 0;
 
-    virtual auto Store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket) const -> bool = 0;
-    virtual auto Store(
-        const bool isTransaction,
-        const UnallocatedCString& value,
-        UnallocatedCString& key) const -> bool = 0;
-
-    virtual auto Migrate(const UnallocatedCString& key, const Driver& to) const
+    virtual auto Commit(const Hash& root, Transaction data, Bucket bucket)
+        const noexcept -> bool = 0;
+    virtual auto EmptyBucket(Bucket bucket) const noexcept -> bool = 0;
+    virtual auto Store(Transaction data, Bucket bucket) const noexcept
         -> bool = 0;
 
-    virtual auto LoadRoot() const -> UnallocatedCString = 0;
-    virtual auto StoreRoot(const bool commit, const UnallocatedCString& hash)
-        const -> bool = 0;
-
     virtual ~Driver() = default;
-
-    template <class T>
-    auto LoadProto(
-        const UnallocatedCString& hash,
-        std::shared_ptr<T>& serialized,
-        const bool checking = false) const -> bool;
-
-    template <class T>
-    auto StoreProto(
-        const T& data,
-        UnallocatedCString& key,
-        UnallocatedCString& plaintext) const -> bool;
-
-    template <class T>
-    auto StoreProto(const T& data, UnallocatedCString& key) const -> bool;
-
-    template <class T>
-    auto StoreProto(const T& data) const -> bool;
 
     Driver(const Driver&) = delete;
     Driver(Driver&&) = delete;

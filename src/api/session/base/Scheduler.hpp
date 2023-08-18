@@ -6,7 +6,6 @@
 #pragma once
 
 #include <chrono>
-#include <thread>
 
 #include "internal/util/Lockable.hpp"
 #include "opentxs/api/Context.hpp"
@@ -15,14 +14,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Storage;
-}  // namespace session
-}  // namespace api
-
 class Flag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -60,15 +51,6 @@ public:
     ~Scheduler() override;
 
 protected:
-    void Start(const api::session::Storage* const storage);
-
     Scheduler(const api::Context& parent, Flag& running);
-
-private:
-    std::thread periodic_;
-
-    virtual void storage_gc_hook() = 0;
-
-    void thread();
 };
 }  // namespace opentxs::api::session

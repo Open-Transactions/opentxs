@@ -9,7 +9,9 @@
 #include <memory>
 #include <mutex>
 
-#include "opentxs/util/Container.hpp"
+#include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,13 +39,20 @@ class PeerReply;
 
 namespace storage
 {
-class Driver;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
 class Nym;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class PeerReplies final : public Node
 {
@@ -51,7 +60,7 @@ public:
     auto Load(
         const identifier::Generic& id,
         std::shared_ptr<proto::PeerReply>& output,
-        const bool checking) const -> bool;
+        ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::Generic& id) -> bool;
     auto Store(const proto::PeerReply& data) -> bool;
@@ -67,14 +76,15 @@ public:
 private:
     friend Nym;
 
-    void init(const UnallocatedCString& hash) final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
     auto serialize() const -> proto::StorageNymList;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     PeerReplies(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& hash);
+        const driver::Plugin& storage,
+        const Hash& hash);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

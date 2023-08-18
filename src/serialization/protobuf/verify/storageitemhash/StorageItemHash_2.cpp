@@ -5,38 +5,20 @@
 
 #include "internal/serialization/protobuf/verify/StorageItemHash.hpp"  // IWYU pragma: associated
 
-#include <StorageEnums.pb.h>
 #include <StorageItemHash.pb.h>
 
+#include "internal/serialization/protobuf/verify/Identifier.hpp"  // IWYU pragma: keep
+#include "internal/serialization/protobuf/verify/VerifyStorage.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
 {
 auto CheckProto_2(const StorageItemHash& input, const bool silent) -> bool
 {
-    if (!input.has_itemid()) { FAIL_1("missing id"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.itemid().size()) {
-        FAIL_1("invalid id");
-    }
-
-    if (!input.has_hash()) { FAIL_1("missing hash"); }
-
-    if (MIN_PLAUSIBLE_IDENTIFIER > input.hash().size()) {
-        FAIL_1("invalid hash");
-    }
-
-    if (!input.has_type()) { FAIL_1("missing type"); }
-
-    switch (input.type()) {
-        case STORAGEHASH_PROTO:
-        case STORAGEHASH_RAW: {
-        } break;
-        case STORAGEHASH_ERROR:
-        default: {
-            FAIL_1("invalid type");
-        }
-    }
+    OPTIONAL_IDENTIFIER(item_id_base58);
+    CHECK_IDENTIFIER(hash);
+    CHECK_EXISTS(type);
+    OPTIONAL_SUBOBJECT(id, StorageItemHashAllowedIdentifier());
 
     return true;
 }

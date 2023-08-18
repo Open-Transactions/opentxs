@@ -10,9 +10,14 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <string_view>
 
 #include "internal/util/Mutex.hpp"
+#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -28,20 +33,22 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace identifier
-{
-class UnitDefinition;
-}  // namespace identifier
-
 namespace storage
 {
-class Driver;
-class Tree;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
+class Trunk;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Notary final : public Node
 {
@@ -51,12 +58,12 @@ public:
     auto CheckSpent(
         const identifier::UnitDefinition& unit,
         const MintSeries series,
-        const UnallocatedCString& key) const -> bool;
+        std::string_view key) const -> bool;
 
     auto MarkSpent(
         const identifier::UnitDefinition& unit,
         const MintSeries series,
-        const UnallocatedCString& key) -> bool;
+        std::string_view key) -> bool;
 
     Notary() = delete;
     Notary(const Notary&) = delete;
@@ -67,33 +74,35 @@ public:
     ~Notary() final = default;
 
 private:
-    friend Tree;
-    using SeriesMap = UnallocatedMap<MintSeries, UnallocatedCString>;
-    using UnitMap = UnallocatedMap<UnallocatedCString, SeriesMap>;
+    friend Trunk;
+    using SeriesMap = UnallocatedMap<MintSeries, Hash>;
+    using UnitMap = UnallocatedMap<identifier::UnitDefinition, SeriesMap>;
 
-    UnallocatedCString id_;
+    identifier::Notary id_;
 
     mutable UnitMap mint_map_;
 
     auto create_list(
-        const UnallocatedCString& unitID,
+        const identifier::UnitDefinition& unitID,
         const MintSeries series,
-        std::shared_ptr<proto::SpentTokenList>& output) const
-        -> UnallocatedCString;
+        std::shared_ptr<proto::SpentTokenList>& output) const -> Hash;
+    auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
+        -> bool final;
     auto get_or_create_list(
         const Lock& lock,
-        const UnallocatedCString& unitID,
+        const identifier::UnitDefinition& unitID,
         const MintSeries series) const -> proto::SpentTokenList;
     auto save(const Lock& lock) const -> bool final;
     auto serialize() const -> proto::StorageNotary;
 
-    void init(const UnallocatedCString& hash) final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Notary(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& key,
-        const UnallocatedCString& id);
+        const driver::Plugin& storage,
+        const Hash& key,
+        const identifier::Notary& id);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

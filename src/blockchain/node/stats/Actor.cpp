@@ -113,7 +113,11 @@ Actor::Actor(
 {
 }
 
-auto Actor::do_shutdown() noexcept -> void {}
+auto Actor::do_shutdown() noexcept -> void
+{
+    shared_.reset();
+    api_p_.reset();
+}
 
 auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {

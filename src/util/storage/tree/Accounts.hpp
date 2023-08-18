@@ -11,12 +11,14 @@
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -34,13 +36,20 @@ class Crypto;
 
 namespace storage
 {
-class Driver;
-class Tree;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
+class Trunk;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Accounts final : public Node
 {
@@ -66,17 +75,18 @@ public:
         -> UnallocatedSet<identifier::Account>;
     auto AccountsByUnit(const UnitType unit) const
         -> UnallocatedSet<identifier::Account>;
-    auto Alias(const UnallocatedCString& id) const -> UnallocatedCString;
+    auto Alias(const identifier::Account& id) const -> UnallocatedCString;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Account& id,
         UnallocatedCString& output,
         UnallocatedCString& alias,
-        const bool checking) const -> bool;
+        ErrorReporting checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
-    auto SetAlias(const UnallocatedCString& id, std::string_view alias) -> bool;
+    auto Delete(const identifier::Account& id) -> bool;
+    auto SetAlias(const identifier::Account& id, std::string_view alias)
+        -> bool;
     auto Store(
-        const UnallocatedCString& id,
+        const identifier::Account& id,
         const UnallocatedCString& data,
         std::string_view alias,
         const identifier::Nym& ownerNym,
@@ -95,7 +105,7 @@ public:
     ~Accounts() final = default;
 
 private:
-    friend Tree;
+    friend Trunk;
 
     using NymIndex =
         UnallocatedMap<identifier::Nym, UnallocatedSet<identifier::Account>>;
@@ -161,13 +171,14 @@ private:
         const identifier::Notary& server,
         const identifier::UnitDefinition& contract,
         const UnitType unit) -> bool;
-    void init(const UnallocatedCString& hash) final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const Lock& lock) const -> bool final;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Accounts(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& key);
+        const driver::Plugin& storage,
+        const Hash& key);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

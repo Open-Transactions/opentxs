@@ -8,29 +8,23 @@
 #include <StorageRoot.pb.h>
 #include <atomic>
 #include <cstdint>
-#include <future>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "internal/util/Editor.hpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/tree/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
-#include "util/storage/tree/Tree.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
 namespace session
 {
 namespace imp
@@ -46,119 +40,83 @@ class Crypto;
 
 namespace storage
 {
-class Driver;
-class Tree;
-
 namespace driver
 {
-class Multiplex;
+namespace implementation
+{
+class Plugin;
+}  // namespace implementation
+
+class Plugin;
 }  // namespace driver
+
+namespace tree
+{
+class Trunk;
+}  // namespace tree
+
+class Driver;
 }  // namespace storage
+
+class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Root final : public Node
 {
 public:
-    auto Tree() const -> const storage::Tree&;
+    static auto CheckSequence(
+        const Log& log,
+        const Hash& hash,
+        const storage::Driver& driver) noexcept -> std::uint64_t;
 
-    auto mutable_Tree() -> Editor<storage::Tree>;
+    auto GCStatus() const noexcept -> GCParams;
+    auto Trunk() const -> const tree::Trunk&;
 
-    auto Migrate(const Driver& to) const -> bool final;
-    auto Save(const Driver& to) const -> bool;
+    auto mutable_Trunk() -> Editor<tree::Trunk>;
+
+    auto FinishGC(bool success) noexcept -> void;
     auto Sequence() const -> std::uint64_t;
+    auto StartGC() noexcept -> std::optional<GCParams>;
 
+    Root(
+        const api::Crypto& crypto,
+        const api::session::Factory& factory,
+        const driver::Plugin& storage,
+        const Hash& hash,
+        std::atomic<Bucket>& bucket) noexcept(false);
     Root() = delete;
     Root(const Root&) = delete;
     Root(Root&&) = delete;
     auto operator=(const Root&) -> Root = delete;
     auto operator=(Root&&) -> Root = delete;
 
-    ~Root() final = default;
+    ~Root() final;
 
 private:
-    using ot_super = Node;
-    friend opentxs::storage::driver::Multiplex;
+    friend driver::implementation::Plugin;
     friend api::session::imp::Storage;
-
-    class GC : public std::enable_shared_from_this<GC>
-    {
-    public:
-        enum class CheckState {
-            Resume,
-            Skip,
-            Start,
-        };
-
-        auto Serialize(proto::StorageRoot& out) const noexcept -> void;
-
-        auto Check(const UnallocatedCString root) noexcept -> CheckState;
-        auto Cleanup() noexcept -> void;
-        auto Init(
-            const UnallocatedCString& root,
-            bool resume,
-            std::uint64_t last) noexcept -> void;
-        auto Resume(bool fromBucket) noexcept -> bool;
-        auto Run(const bool from, const Driver& to, SimpleCallback cb) noexcept
-            -> bool;
-        auto Start(bool fromBucket) noexcept -> bool;
-
-        GC(const api::network::Asio& asio,
-           const api::Crypto& crypto,
-           const api::session::Factory& factory,
-           const Driver& driver,
-           const std::int64_t interval) noexcept;
-
-        ~GC();
-
-    private:
-        const api::network::Asio& asio_;
-        const api::Crypto& crypto_;
-        const api::session::Factory& factory_;
-        const Driver& driver_;
-        const std::uint64_t interval_;
-        mutable std::mutex lock_;
-        OTFlag running_;
-        OTFlag resume_;
-        UnallocatedCString root_;
-        std::atomic<std::uint64_t> last_;
-        std::promise<bool> promise_;
-        std::shared_future<bool> future_;
-
-        auto collect_garbage(
-            const bool from,
-            const Driver* to,
-            const SimpleCallback done) noexcept -> void;
-    };
 
     static constexpr auto current_version_ = VersionNumber{3};
 
-    Flag& current_bucket_;
+    std::atomic<Bucket>& current_bucket_;
     mutable std::atomic<std::uint64_t> sequence_;
-    mutable std::shared_ptr<GC> gc_;
-    UnallocatedCString tree_root_;
+    GCParams gc_params_;
+    Hash tree_root_;
     mutable std::mutex tree_lock_;
-    mutable std::unique_ptr<storage::Tree> tree_;
+    mutable std::unique_ptr<tree::Trunk> tree_;
 
+    auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
+        -> bool final;
     auto serialize(const Lock&) const -> proto::StorageRoot;
-    auto tree() const -> storage::Tree*;
+    auto trunk() const -> tree::Trunk*;
 
-    void blank(const VersionNumber version) final;
-    void cleanup() const;
-    void init(const UnallocatedCString& hash) final;
-    auto save(const Lock& lock, const Driver& to) const -> bool;
+    auto blank() noexcept -> void final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const Lock& lock) const -> bool final;
-    void save(storage::Tree* tree, const Lock& lock);
-
-    Root(
-        const api::network::Asio& asio,
-        const api::Crypto& crypto,
-        const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& hash,
-        const std::int64_t interval,
-        Flag& bucket);
+    auto save(tree::Trunk* tree, const Lock& lock) -> void;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

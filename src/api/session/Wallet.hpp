@@ -28,6 +28,7 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
@@ -131,6 +132,8 @@ class String;
 
 namespace opentxs::api::session::imp
 {
+using opentxs::storage::ErrorReporting;
+
 class Wallet : virtual public internal::Wallet, public Lockable
 {
 public:
@@ -294,7 +297,7 @@ public:
         const identifier::Nym& nym,
         const identifier::Notary& server,
         const identifier::UnitDefinition& unit,
-        const bool checking) const -> const otx::blind::Purse& final;
+        bool checking) const -> const otx::blind::Purse& final;
     auto mutable_Purse(
         const identifier::Nym& nym,
         const identifier::Notary& server,
@@ -549,10 +552,10 @@ private:
         const identifier::Nym& nym,
         const identifier::Notary& server,
         const identifier::UnitDefinition& unit,
-        const bool checking) const -> PurseMap::mapped_type&;
+        ErrorReporting checking) const -> PurseMap::mapped_type&;
     void save(
         const PasswordPrompt& reason,
-        const UnallocatedCString id,
+        const identifier::Account& id,
         std::unique_ptr<opentxs::Account>& in,
         eLock& lock,
         bool success) const;

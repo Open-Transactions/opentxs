@@ -17,14 +17,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace crypto
-{
-class Encode;
-}  // namespace crypto
-}  // namespace api
-
 namespace crypto
 {
 class Dash;
@@ -60,10 +52,6 @@ public:
         const opentxs::crypto::HashType hashType,
         const opentxs::network::zeromq::Frame& data,
         Writer&& destination) const noexcept -> bool final;
-    auto Digest(
-        const std::uint32_t type,
-        const ReadView data,
-        Writer&& destination) const noexcept -> bool final;
     auto HMAC(
         const opentxs::crypto::HashType type,
         const ReadView key,
@@ -92,7 +80,6 @@ public:
         Writer&& writer) const noexcept -> bool final;
 
     Hash(
-        const api::crypto::Encode& encode,
         const opentxs::crypto::HashingProvider& sha,
         const opentxs::crypto::HashingProvider& blake,
         const opentxs::crypto::Pbkdf2& pbkdf2,
@@ -106,7 +93,6 @@ public:
     ~Hash() final;
 
 private:
-    const api::crypto::Encode& encode_;
     const opentxs::crypto::HashingProvider& sha_;
     const opentxs::crypto::HashingProvider& blake_;
     const opentxs::crypto::Pbkdf2& pbkdf2_;

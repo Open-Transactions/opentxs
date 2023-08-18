@@ -14,6 +14,7 @@
 #include "core/contract/peer/reply/outbailment/OutbailmentPrivate.hpp"
 #include "core/contract/peer/reply/storesecret/StoreSecretPrivate.hpp"
 #include "core/contract/peer/reply/verification/VerificationPrivate.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/reply/Bailment.hpp"
 #include "opentxs/core/contract/peer/reply/BailmentNotice.hpp"

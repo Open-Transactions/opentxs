@@ -12,8 +12,9 @@
 #include <StorageContactNymIndex.pb.h>
 #include <StorageContacts.pb.h>
 #include <StorageIDList.pb.h>
-#include <StorageItemHash.pb.h>
+#include <atomic>
 #include <cstdlib>
+#include <stdexcept>
 #include <tuple>
 
 #include "internal/identity/wot/claim/Types.hpp"
@@ -21,7 +22,9 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Contact.hpp"
 #include "internal/serialization/protobuf/verify/StorageContacts.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
@@ -29,35 +32,35 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Contacts::Contacts(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), CurrentVersion)
     , merge_()
     , merged_()
     , nym_contact_index_()
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(CurrentVersion);
+        blank();
     }
 }
 
-auto Contacts::Alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Contacts::Alias(const identifier::Generic& id) const -> UnallocatedCString
 {
     return get_alias(id);
 }
 
-auto Contacts::Delete(const UnallocatedCString& id) -> bool
+auto Contacts::Delete(const identifier::Generic& id) -> bool
 {
     return delete_item(id);
 }
@@ -90,41 +93,46 @@ void Contacts::extract_nyms(const Lock& lock, const proto::Contact& data) const
     }
 }
 
-void Contacts::init(const UnallocatedCString& hash)
+auto Contacts::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StorageContacts> serialized{nullptr};
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageContacts>{};
 
-    if (false == bool(serialized)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load contact index file.")
-            .Flush();
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-        abort();
-    }
+        switch (set_original_version(proto.version())) {
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.contact());
 
-    init_version(CurrentVersion, *serialized);
+                for (const auto& parent : proto.merge()) {
+                    auto& list =
+                        merge_[factory_.IdentifierFromBase58(parent.id())];
 
-    for (const auto& parent : serialized->merge()) {
-        auto& list = merge_[parent.id()];
+                    for (const auto& id : parent.list()) {
+                        list.emplace(factory_.IdentifierFromBase58(id));
+                    }
+                }
 
-        for (const auto& id : parent.list()) { list.emplace(id); }
-    }
+                reverse_merged();
 
-    reverse_merged();
+                // NOTE the address field is no longer used
 
-    for (const auto& it : serialized->contact()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
-    }
+                for (const auto& index : proto.nym()) {
+                    const auto contact =
+                        factory_.IdentifierFromBase58(index.contact());
 
-    // NOTE the address field is no longer used
-
-    for (const auto& index : serialized->nym()) {
-        const auto contact = factory_.IdentifierFromBase58(index.contact());
-
-        for (const auto& nym : index.nym()) {
-            nym_contact_index_[factory_.NymIDFromBase58(nym)] = contact;
+                    for (const auto& nym : index.nym()) {
+                        nym_contact_index_[factory_.NymIDFromBase58(nym)] =
+                            contact;
+                    }
+                }
+            }
         }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
@@ -134,25 +142,26 @@ auto Contacts::List() const -> ObjectList
 
     for (const auto& it : merged_) {
         const auto& child = it.first;
-        list.remove_if([&](const auto& i) { return i.first == child; });
+        list.remove_if(
+            [&](const auto& i) { return i.first == child.asBase58(crypto_); });
     }
 
     return list;
 }
 
 auto Contacts::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::shared_ptr<proto::Contact>& output,
     UnallocatedCString& alias,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     const auto& normalized = nomalize_id(id);
 
     return load_proto<proto::Contact>(normalized, output, alias, checking);
 }
 
-auto Contacts::nomalize_id(const UnallocatedCString& input) const
-    -> const UnallocatedCString&
+auto Contacts::nomalize_id(const identifier::Generic& input) const
+    -> const identifier::Generic&
 {
     Lock lock(write_lock_);
 
@@ -182,25 +191,26 @@ void Contacts::reconcile_maps(const Lock& lock, const proto::Contact& data)
         abort();
     }
 
-    const auto& contactID = data.id();
+    const auto contactID = factory_.IdentifierFromBase58(data.id());
 
     for (const auto& merged : data.merged()) {
+        const auto id = factory_.IdentifierFromBase58(merged);
         auto& list = merge_[contactID];
-        list.emplace(merged);
-        merged_[merged].assign(contactID);
+        list.emplace(id);
+        merged_[id] = contactID;
     }
 
     const auto& newParent = data.mergedto();
 
     if (false == newParent.empty()) {
-        UnallocatedCString oldParent{};
+        auto oldParent = identifier::Generic{};
         const auto it = merged_.find(contactID);
 
         if (merged_.end() != it) { oldParent = it->second; }
 
         if (false == oldParent.empty()) { merge_[oldParent].erase(contactID); }
 
-        merge_[newParent].emplace(contactID);
+        merge_[factory_.IdentifierFromBase58(newParent)].emplace(contactID);
     }
 
     reverse_merged();
@@ -212,7 +222,7 @@ void Contacts::reverse_merged()
         const auto& parentID = parent.first;
         const auto& list = parent.second;
 
-        for (const auto& childID : list) { merged_[childID].assign(parentID); }
+        for (const auto& childID : list) { merged_[childID] = parentID; }
     }
 }
 
@@ -228,7 +238,7 @@ auto Contacts::save(const Lock& lock) const -> bool
 
     if (false == proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Contacts::Save() const -> bool
@@ -248,19 +258,20 @@ auto Contacts::serialize() const -> proto::StorageContacts
         const auto& list = parent.second;
         auto& item = *serialized.add_merge();
         item.set_version(MergeIndexVersion);
-        item.set_id(parentID);
+        item.set_id(parentID.asBase58(crypto_));
 
-        for (const auto& child : list) { item.add_list(child); }
+        for (const auto& child : list) {
+            item.add_list(child.asBase58(crypto_));
+        }
     }
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
-            serialize_index(
-                version_, item.first, item.second, *serialized.add_contact());
+            serialize_index(item.first, item.second, *serialized.add_contact());
         }
     }
 
@@ -286,7 +297,7 @@ auto Contacts::serialize() const -> proto::StorageContacts
     return serialized;
 }
 
-auto Contacts::SetAlias(const UnallocatedCString& id, std::string_view alias)
+auto Contacts::SetAlias(const identifier::Generic& id, std::string_view alias)
     -> bool
 {
     const auto& normalized = nomalize_id(id);
@@ -300,7 +311,7 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
 
     Lock lock(write_lock_);
 
-    const UnallocatedCString id = data.id();
+    const auto id = factory_.IdentifierFromBase58(data.id());
     const auto incomingRevision = data.revision();
     const bool existingKey = (item_map_.end() != item_map_.find(id));
     auto& metadata = item_map_[id];
@@ -318,7 +329,7 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
         }
     }
 
-    if (false == driver_.StoreProto(data, hash)) { return false; }
+    if (false == StoreProto(data, hash)) { return false; }
 
     if (false == alias.empty()) {
         std::get<1>(metadata) = alias;
@@ -333,4 +344,18 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
 
     return save(lock);
 }
-}  // namespace opentxs::storage
+
+auto Contacts::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

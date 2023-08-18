@@ -11,6 +11,7 @@
 #include <iterator>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 
 namespace ot = opentxs;
@@ -214,7 +215,7 @@ TEST_F(RPC_fixture, issuer_accounts)
         const auto& api = ot_.ClientSession(0);
         const auto& issuer = *local_nym_map_.at(0).begin();
         const auto nym = api.Factory().NymIDFromBase58(issuer);
-        const auto ids = api.Storage().AccountsByOwner(nym);
+        const auto ids = api.Storage().Internal().AccountsByOwner(nym);
         std::transform(
             ids.begin(),
             ids.end(),
@@ -270,7 +271,7 @@ TEST_F(RPC_fixture, user_accounts)
     const auto expected = [&] {
         auto out = ot::UnallocatedSet<ot::UnallocatedCString>{};
         const auto& api = ot_.ClientSession(1);
-        const auto ids = api.Storage().AccountList();
+        const auto ids = api.Storage().Internal().AccountList();
         std::transform(
             ids.begin(),
             ids.end(),
@@ -370,7 +371,7 @@ TEST_F(RPC_fixture, filter_nym_match)
         auto out = ot::UnallocatedSet<ot::UnallocatedCString>{};
         const auto& api = ot_.ClientSession(1);
         const auto nym = api.Factory().NymIDFromBase58(filterNym);
-        const auto ids = api.Storage().AccountsByOwner(nym);
+        const auto ids = api.Storage().Internal().AccountsByOwner(nym);
         std::transform(
             ids.begin(),
             ids.end(),

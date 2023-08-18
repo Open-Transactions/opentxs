@@ -10,6 +10,7 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -38,7 +39,7 @@ AccountActivity::AccountActivity(
         try {
 
             return api.Wallet().Internal().UnitDefinition(
-                api.Storage().AccountContract(account_id_));
+                api.Storage().Internal().AccountContract(account_id_));
         } catch (...) {
 
             return api.Factory().InternalSession().UnitDefinition();
@@ -48,7 +49,7 @@ AccountActivity::AccountActivity(
         try {
 
             return api.Wallet().Internal().Server(
-                api.Storage().AccountServer(account_id_));
+                api.Storage().Internal().AccountServer(account_id_));
         } catch (...) {
 
             return api.Factory().InternalSession().ServerContract();

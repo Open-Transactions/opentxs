@@ -25,14 +25,12 @@
 namespace opentxs::api::session::base
 {
 Storage::Storage(
-    const Flag& running,
     Options&& args,
     const api::Session& session,
     const api::session::Endpoints& endpoints,
     const api::Crypto& crypto,
     const api::Settings& config,
     const api::Legacy& legacy,
-    const api::network::Asio& asio,
     const opentxs::network::zeromq::Context& zmq,
     const std::filesystem::path& dataFolder,
     std::unique_ptr<api::session::Factory> factory)
@@ -41,12 +39,8 @@ Storage::Storage(
     , data_folder_(dataFolder)
     , storage_config_(legacy, config_, args_, dataFolder)
     , factory_p_(std::move(factory))
-    , storage_(opentxs::factory::StorageAPI(
-          crypto,
-          asio,
-          *factory_p_,
-          running,
-          storage_config_))
+    , storage_(
+          opentxs::factory::StorageAPI(crypto, *factory_p_, storage_config_))
     , crypto_p_(factory::SessionCryptoAPI(
           const_cast<api::Crypto&>(crypto),
           session,

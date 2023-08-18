@@ -22,6 +22,7 @@
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -265,7 +266,7 @@ PaymentCode::PaymentCode(
 
 auto PaymentCode::account_already_exists(const rLock&) const noexcept -> bool
 {
-    const auto existing = api_.Storage().Bip47ChannelsByChain(
+    const auto existing = api_.Storage().Internal().Bip47ChannelsByChain(
         parent_.NymID(), blockchain_to_unit(chain_));
 
     return 0 < existing.count(id_);
@@ -422,7 +423,8 @@ auto PaymentCode::save(const rLock& lock) const noexcept -> bool
         }
     }
 
-    const bool saved = api_.Storage().Store(parent_.NymID(), id_, serialized);
+    const bool saved =
+        api_.Storage().Internal().Store(parent_.NymID(), id_, serialized);
 
     if (false == saved) {
         LogError()(OT_PRETTY_CLASS())("Failed to save PaymentCode account")

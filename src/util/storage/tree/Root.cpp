@@ -9,142 +9,153 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
+#include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/StorageRoot.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Time.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "internal/util/storage/drivers/Plugin.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
-#include "util/storage/tree/Tree.hpp"
+#include "util/storage/tree/Trunk.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Root::Root(
-    const api::network::Asio& asio,
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash,
-    const std::int64_t interval,
-    Flag& bucket)
-    : ot_super(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash,
+    std::atomic<Bucket>& bucket)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
     , current_bucket_(bucket)
     , sequence_()
-    , gc_(std::make_shared<GC>(asio, crypto_, factory_, driver_, interval))
+    , gc_params_()
     , tree_root_()
     , tree_lock_()
     , tree_()
 {
-    OT_ASSERT(gc_);
-
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(current_version_);
+        blank();
     }
 }
 
-void Root::blank(const VersionNumber version)
+auto Root::blank() noexcept -> void
 {
-    Node::blank(version);
-    current_bucket_.Off();
+    Node::blank();
+    current_bucket_.store(Bucket::left);
     sequence_.store(0);
-    tree_root_ = Node::BLANK_HASH;
+    tree_root_ = NullHash{};
 }
 
-void Root::cleanup() const { gc_->Cleanup(); }
-
-void Root::init(const UnallocatedCString& hash)
+auto Root::CheckSequence(
+    const Log& log,
+    const Hash& hash,
+    const storage::Driver& driver) noexcept -> std::uint64_t
 {
-    auto data = std::shared_ptr<proto::StorageRoot>{};
+    try {
+        auto bytes = ""s;
+        auto write = writer(bytes);
+        const auto loaded = driver.Load(log, hash, {}, write);
 
-    if (!driver_.LoadProto(hash, data)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load root object file.")
-            .Flush();
-        OT_FAIL;
+        if (false == loaded) {
+
+            throw std::runtime_error{
+                "failed to load hash "s.append(to_string(hash))
+                    .append(" using ")
+                    .append(driver.Description())
+                    .append(" driver")};
+        }
+
+        const auto proto =
+            proto::Factory<proto::StorageRoot>(bytes.data(), bytes.size());
+
+        return proto.sequence();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_STATIC(Root))(e.what()).Flush();
+
+        return {};
+    }
+}
+
+auto Root::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
+    const noexcept -> bool
+{
+    if (false == is_valid(root_)) { return true; }
+
+    if (false == Node::dump(lock, log, out)) { return false; }
+
+    if (is_valid(tree_root_)) {
+        if (false == trunk()->dump(lock, log, out)) { return false; }
     }
 
-    if (init_version(current_version_, *data)) {
-        switch (current_version_) {
-            case 3u: {
-                blank(current_version_);
-            } break;
+    return true;
+}
+
+auto Root::FinishGC(bool success) noexcept -> void
+{
+    auto lock = Lock{write_lock_};
+    gc_params_.running_ = false;
+
+    if (success) { gc_params_.last_ = Clock::now(); }
+
+    save(lock);
+}
+
+auto Root::GCStatus() const noexcept -> GCParams
+{
+    auto lock = Lock{write_lock_};
+
+    return gc_params_;
+}
+
+auto Root::init(const Hash& hash) noexcept(false) -> void
+{
+    auto p = std::shared_ptr<proto::StorageRoot>{};
+
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
+
+        switch (set_original_version(proto.version())) {
+            case 3u:
+            case 2u:
+            case 1u:
             default: {
+                current_bucket_.store(static_cast<Bucket>(proto.altlocation()));
+                sequence_.store(proto.sequence());
+                tree_root_ = read(proto.items());
+                gc_params_.running_ = proto.gc();
+                gc_params_.last_ = convert_stime(proto.lastgc());
+                gc_params_.root_ = read(proto.gcroot());
+                gc_params_.from_ = next(current_bucket_.load());
             }
         }
     } else {
-        current_bucket_.Set(data->altlocation());
-        sequence_.store(data->sequence());
-        tree_root_ = normalize_hash(data->items());
-
-        if (auto root = normalize_hash(data->gcroot());
-            Node::check_hash(root)) {
-            gc_->Init(root, data->gc(), data->lastgc());
-        } else {
-            gc_->Init({}, false, data->lastgc());
-        }
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
-auto Root::Migrate(const Driver& to) const -> bool
+auto Root::mutable_Trunk() -> Editor<tree::Trunk>
 {
-    try {
-        const auto bucket = [&] {
-            auto lock = Lock{write_lock_};
-            auto out{false};
+    std::function<void(tree::Trunk*, Lock&)> callback =
+        [&](tree::Trunk* in, Lock& lock) -> void { this->save(in, lock); };
 
-            switch (gc_->Check(tree()->Root())) {
-                case GC::CheckState::Resume: {
-                    out = !current_bucket_;
-                } break;
-                case GC::CheckState::Start: {
-                    out = current_bucket_.Toggle();
-                    save(lock);
-                    driver_.StoreRoot(true, root_);
-                } break;
-                case GC::CheckState::Skip:
-                default: {
-
-                    throw std::runtime_error{
-                        "garbage collection not necessary"};
-                }
-            }
-
-            return out;
-        }();
-
-        return gc_->Run(bucket, to, [this] {
-            auto lock = Lock{write_lock_};
-            save(lock);
-            driver_.StoreRoot(true, root_);
-        });
-    } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return false;
-    }
-}
-
-auto Root::mutable_Tree() -> Editor<storage::Tree>
-{
-    std::function<void(storage::Tree*, Lock&)> callback =
-        [&](storage::Tree* in, Lock& lock) -> void { this->save(in, lock); };
-
-    return {write_lock_, tree(), callback};
-}
-
-auto Root::save(const Lock& lock, const Driver& to) const -> bool
-{
-    OT_ASSERT(verify_write_lock(lock));
-
-    auto serialized = serialize(lock);
-
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
-
-    return to.StoreProto(serialized, root_);
+    return {write_lock_, trunk(), callback};
 }
 
 auto Root::save(const Lock& lock) const -> bool
@@ -152,11 +163,14 @@ auto Root::save(const Lock& lock) const -> bool
     OT_ASSERT(verify_write_lock(lock));
 
     sequence_++;
+    auto serialized = serialize(lock);
 
-    return save(lock, driver_);
+    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+
+    return StoreProto(serialized, root_);
 }
 
-void Root::save(storage::Tree* tree, const Lock& lock)
+auto Root::save(tree::Trunk* tree, const Lock& lock) -> void
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -171,33 +185,52 @@ void Root::save(storage::Tree* tree, const Lock& lock)
     OT_ASSERT(saved);
 }
 
-auto Root::Save(const Driver& to) const -> bool
-{
-    Lock lock(write_lock_);
-
-    return save(lock, to);
-}
-
 auto Root::Sequence() const -> std::uint64_t { return sequence_.load(); }
 
 auto Root::serialize(const Lock&) const -> proto::StorageRoot
 {
     auto output = proto::StorageRoot{};
     output.set_version(version_);
-    output.set_items(tree_root_);
-    output.set_altlocation(current_bucket_);
+    write(tree_root_, *output.mutable_items());
+    output.set_altlocation(static_cast<bool>(current_bucket_.load()));
     output.set_sequence(sequence_);
-    gc_->Serialize(output);
+    output.set_lastgc(Clock::to_time_t(gc_params_.last_));
+    output.set_gc(gc_params_.running_);
+    write(gc_params_.root_, *output.mutable_gcroot());
 
     return output;
 }
 
-auto Root::tree() const -> storage::Tree*
+auto Root::StartGC() noexcept -> std::optional<GCParams>
+{
+    auto lock = Lock{write_lock_};
+    const auto original{gc_params_};
+
+    if (auto running = std::exchange(gc_params_.running_, true); running) {
+
+        return std::nullopt;
+    }
+
+    gc_params_.root_ = plugin_.LoadRoot();
+    gc_params_.from_ = current_bucket_.load();
+    current_bucket_.store(next(gc_params_.from_));
+
+    if (save(lock)) {
+
+        return gc_params_;
+    } else {
+        gc_params_ = original;
+
+        return std::nullopt;
+    }
+}
+
+auto Root::trunk() const -> tree::Trunk*
 {
     Lock lock(tree_lock_);
 
     if (!tree_) {
-        tree_.reset(new storage::Tree(crypto_, factory_, driver_, tree_root_));
+        tree_.reset(new tree::Trunk(crypto_, factory_, plugin_, tree_root_));
     }
 
     OT_ASSERT(tree_);
@@ -207,5 +240,29 @@ auto Root::tree() const -> storage::Tree*
     return tree_.get();
 }
 
-auto Root::Tree() const -> const storage::Tree& { return *tree(); }
-}  // namespace opentxs::storage
+auto Root::Trunk() const -> const tree::Trunk& { return *trunk(); }
+
+auto Root::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        case 3u:
+        default: {
+        }
+    }
+
+    if (is_valid(tree_root_)) {
+        if (auto* node = trunk(); node->Upgrade()) {
+            tree_root_ = node->root_;
+            changed = true;
+        }
+    }
+
+    return changed;
+}
+
+Root::~Root() = default;
+}  // namespace opentxs::storage::tree

@@ -22,11 +22,6 @@ namespace crypto
 class Seed;
 }  // namespace crypto
 
-namespace network
-{
-class Asio;
-}  // namespace network
-
 namespace session
 {
 class Crypto;
@@ -48,7 +43,6 @@ namespace zeromq
 class Context;
 }  // namespace zeromq
 }  // namespace network
-class Flag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -93,14 +87,12 @@ protected:
     auto start() noexcept -> void;
 
     Storage(
-        const Flag& running,
         Options&& args,
         const api::Session& session,
         const api::session::Endpoints& endpoints,
         const api::Crypto& crypto,
         const api::Settings& config,
         const api::Legacy& legacy,
-        const api::network::Asio& asio,
         const opentxs::network::zeromq::Context& zmq,
         const std::filesystem::path& dataFolder,
         std::unique_ptr<api::session::Factory> factory);

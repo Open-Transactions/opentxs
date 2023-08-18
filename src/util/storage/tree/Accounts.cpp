@@ -9,26 +9,28 @@
 #include <StorageAccounts.pb.h>
 #include <StorageEnums.pb.h>
 #include <StorageIDList.pb.h>
-#include <StorageItemHash.pb.h>
+#include <atomic>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageAccounts.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
 #define EXTRACT_SET_BY_VALUE(index, value)                                     \
@@ -73,7 +75,7 @@
     static_assert(0 < sizeof(char))  // NOTE silence -Wextra-semi-stmt
 
 #define DESERIALIZE_INDEX(field, index, position, factory)                     \
-    for (const auto& it : serialized->field()) {                               \
+    for (const auto& it : proto.field()) {                                     \
         const auto id = factory_.factory(it.id());                             \
                                                                                \
         auto& map = index[id];                                                 \
@@ -90,19 +92,21 @@
 #define ACCOUNT_VERSION 1
 #define INDEX_VERSION 1
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Accounts::Accounts(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), ACCOUNT_VERSION)
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(ACCOUNT_VERSION);
+        blank();
     }
 }
 
@@ -198,7 +202,7 @@ auto Accounts::add_set_index(
     return true;
 }
 
-auto Accounts::Alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Accounts::Alias(const identifier::Account& id) const -> UnallocatedCString
 {
     return get_alias(id);
 }
@@ -289,21 +293,20 @@ auto Accounts::check_update_account(
     return true;
 }
 
-auto Accounts::Delete(const UnallocatedCString& id) -> bool
+auto Accounts::Delete(const identifier::Account& id) -> bool
 {
     Lock lock(write_lock_);
-    const auto accountID = factory_.AccountIDFromBase58(id);
-    auto it = account_data_.find(accountID);
+    auto it = account_data_.find(id);
 
     if (account_data_.end() != it) {
         const auto& [owner, signer, issuer, server, contract, unit] =
             it->second;
-        erase(accountID, owner, owner_index_);
-        erase(accountID, signer, signer_index_);
-        erase(accountID, issuer, issuer_index_);
-        erase(accountID, server, server_index_);
-        erase(accountID, contract, contract_index_);
-        erase(accountID, unit, unit_index_);
+        erase(id, owner, owner_index_);
+        erase(id, signer, signer_index_);
+        erase(id, issuer, issuer_index_);
+        erase(id, server, server_index_);
+        erase(id, contract, contract_index_);
+        erase(id, unit, unit_index_);
         account_data_.erase(it);
     }
 
@@ -330,50 +333,51 @@ auto Accounts::get_account_data(
     return data->second;
 }
 
-void Accounts::init(const UnallocatedCString& hash)
+auto Accounts::init(const Hash& hash) noexcept(false) -> void
 {
-    Lock lock(write_lock_);
-    std::shared_ptr<proto::StorageAccounts> serialized{nullptr};
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageAccounts>{};
 
-    if (false == bool(serialized)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load account index file.")
-            .Flush();
-        OT_FAIL;
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(ACCOUNT_VERSION, *serialized);
+        switch (set_original_version(proto.version())) {
+            case 1u:
+            default: {
+                init_map(proto.account());
 
-    for (const auto& it : serialized->account()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
-    }
+                Lock lock(write_lock_);
+                DESERIALIZE_INDEX(owner, owner_index_, 0, NymIDFromBase58);
+                DESERIALIZE_INDEX(signer, signer_index_, 1, NymIDFromBase58);
+                DESERIALIZE_INDEX(issuer, issuer_index_, 2, NymIDFromBase58);
+                DESERIALIZE_INDEX(server, server_index_, 3, NotaryIDFromBase58);
+                DESERIALIZE_INDEX(unit, contract_index_, 4, UnitIDFromBase58);
 
-    DESERIALIZE_INDEX(owner, owner_index_, 0, NymIDFromBase58);
-    DESERIALIZE_INDEX(signer, signer_index_, 1, NymIDFromBase58);
-    DESERIALIZE_INDEX(issuer, issuer_index_, 2, NymIDFromBase58);
-    DESERIALIZE_INDEX(server, server_index_, 3, NotaryIDFromBase58);
-    DESERIALIZE_INDEX(unit, contract_index_, 4, UnitIDFromBase58);
+                for (const auto& it : proto.index()) {
+                    const auto unit = it.type();
+                    const auto type = ClaimToUnit(translate(unit));
+                    auto& map = unit_index_[type];
 
-    for (const auto& it : serialized->index()) {
-        const auto unit = it.type();
-        const auto type = ClaimToUnit(translate(unit));
-        auto& map = unit_index_[type];
+                    for (const auto& account : it.account()) {
+                        const auto accountID =
+                            factory_.AccountIDFromBase58(account);
 
-        for (const auto& account : it.account()) {
-            const auto accountID = factory_.AccountIDFromBase58(account);
-
-            map.emplace(accountID);
-            std::get<5>(get_account_data(lock, accountID)) = type;
+                        map.emplace(accountID);
+                        std::get<5>(get_account_data(lock, accountID)) = type;
+                    }
+                }
+            }
         }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
 auto Accounts::Load(
-    const UnallocatedCString& id,
+    const identifier::Account& id,
     UnallocatedCString& output,
     UnallocatedCString& alias,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     return load_raw(id, output, alias, checking);
 }
@@ -389,7 +393,7 @@ auto Accounts::save(const Lock& lock) const -> bool
 
     if (false == proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Accounts::serialize() const -> proto::StorageAccounts
@@ -399,12 +403,11 @@ auto Accounts::serialize() const -> proto::StorageAccounts
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
             serialize_index(
-                version_,
                 item.first,
                 item.second,
                 *serialized.add_account(),
@@ -437,14 +440,14 @@ auto Accounts::serialize() const -> proto::StorageAccounts
     return serialized;
 }
 
-auto Accounts::SetAlias(const UnallocatedCString& id, std::string_view alias)
+auto Accounts::SetAlias(const identifier::Account& id, std::string_view alias)
     -> bool
 {
     return set_alias(id, alias);
 }
 
 auto Accounts::Store(
-    const UnallocatedCString& id,
+    const identifier::Account& id,
     const UnallocatedCString& data,
     std::string_view alias,
     const identifier::Nym& owner,
@@ -455,17 +458,29 @@ auto Accounts::Store(
     const UnitType unit) -> bool
 {
     Lock lock(write_lock_);
-    const auto account = factory_.AccountIDFromBase58(id);
 
     if (!check_update_account(
-            lock, account, owner, signer, issuer, server, contract, unit)) {
+            lock, id, owner, signer, issuer, server, contract, unit)) {
 
         return false;
     }
 
     return store_raw(lock, data, id, alias);
 }
-}  // namespace opentxs::storage
+
+auto Accounts::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree
 
 #undef INDEX_VERSION
 #undef ACCOUNT_VERSION

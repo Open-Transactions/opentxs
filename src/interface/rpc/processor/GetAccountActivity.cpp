@@ -9,6 +9,7 @@
 #include <PaymentWorkflowEnums.pb.h>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/BalanceItem.hpp"
@@ -66,7 +67,7 @@ auto RPC::get_account_activity(const request::Base& base) const
 
                 if (nym.empty()) {
 
-                    return api.Storage().AccountOwner(accountID);
+                    return api.Storage().Internal().AccountOwner(accountID);
                 } else {
 
                     return nym;

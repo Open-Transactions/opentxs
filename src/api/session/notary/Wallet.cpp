@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "internal/api/session/Factory.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -28,7 +29,6 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -148,8 +148,8 @@ auto Wallet::load_legacy_account(
 
     OT_ASSERT(server_.ID() == serverID);
 
-    saved = api_.Storage().Store(
-        accountID.asBase58(api_.Crypto()),
+    saved = api_.Storage().Internal().Store(
+        accountID,
         serialized->Get(),
         "",
         ownerID,

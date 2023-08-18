@@ -312,5 +312,3 @@
 #include "opentxs/util/WorkType.hpp"                     // IWYU pragma: export
 #include "opentxs/util/WriteBuffer.hpp"                  // IWYU pragma: export
 #include "opentxs/util/Writer.hpp"                       // IWYU pragma: export
-#include "opentxs/util/storage/Driver.hpp"               // IWYU pragma: export
-#include "opentxs/util/storage/Plugin.hpp"               // IWYU pragma: export

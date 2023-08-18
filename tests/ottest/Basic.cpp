@@ -52,14 +52,15 @@ auto Home() noexcept -> const fs::path&
         const auto random = [&] {
             auto buf = ot::Space{};
             const auto rc = opentxs::crypto::sodium::Randomize(
-                ot::writer(buf).Reserve(16_uz));
+                ot::writer(buf).Reserve(32_uz));
 
             assert(rc);
 
             return ot::to_hex(buf.data(), buf.size());
         }();
-
-        const auto dir = fs::temp_directory_path() / "ottest" / random;
+        const auto time = ot::Clock::to_time_t(ot::Clock::now());
+        const auto dir = (fs::temp_directory_path() / "ottest" / random)
+                             .replace_extension(std::to_string(time));
 
         assert(fs::create_directories(dir));
 

@@ -3,11 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <string_view>
+// IWYU pragma: no_include <typeindex>
+
 #pragma once
 
 #include <cstddef>
 #include <functional>
-#include <string_view>
 #include <utility>
 
 #include "opentxs/Export.hpp"

@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
@@ -537,7 +538,7 @@ auto Base<CRTP, DataType>::save(Data& data, const PasswordPrompt& reason)
     if (false == update_signature(data, reason)) { return false; }
     if (false == validate(data)) { return false; }
 
-    return api_.Storage().Store(contract(data));
+    return api_.Storage().Internal().Store(contract(data));
 }
 
 template <typename CRTP, typename DataType>

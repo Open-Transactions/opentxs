@@ -6,47 +6,53 @@
 #include "util/storage/tree/Nyms.hpp"  // IWYU pragma: associated
 
 #include <Nym.pb.h>
-#include <StorageItemHash.pb.h>
 #include <StorageNymList.pb.h>
+#include <atomic>
 #include <functional>
+#include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
+#include <variant>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 #include "util/storage/tree/Nym.hpp"
 #include "util/storage/tree/Thread.hpp"
 #include "util/storage/tree/Threads.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Nyms::Nyms(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
     , nyms_()
     , local_nyms_()
     , default_local_nym_()
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(current_version_);
+        blank();
     }
 }
 
@@ -60,6 +66,23 @@ auto Nyms::Default() const -> identifier::Nym
     return default_local_nym_;
 }
 
+auto Nyms::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
+    const noexcept -> bool
+{
+    if (false == is_valid(root_)) { return true; }
+
+    if (false == Node::dump(lock, log, out)) { return false; }
+
+    for (const auto& index : item_map_) {
+        const auto& id = factory_.Internal().NymIDConvertSafe(index.first);
+        const auto& node = *nym(id);
+
+        if (false == node.dump(lock, log, out)) { return false; }
+    }
+
+    return true;
+}
+
 auto Nyms::Exists(const identifier::Nym& id) const -> bool
 {
     auto lock = Lock{write_lock_};
@@ -67,49 +90,36 @@ auto Nyms::Exists(const identifier::Nym& id) const -> bool
     return nyms_.find(id) != nyms_.end();
 }
 
-auto Nyms::init(const UnallocatedCString& hash) -> void
+auto Nyms::init(const Hash& hash) noexcept(false) -> void
 {
-    const auto& log = LogTrace();
-    auto serialized = std::shared_ptr<proto::StorageNymList>{};
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageNymList>{};
 
-    if (false == serialized.operator bool()) {
-        LogAbort()(OT_PRETTY_CLASS())("Failed to load nym list index file")
-            .Abort();
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    const auto& proto = *serialized;
-    init_version(current_version_, proto);
-    log(OT_PRETTY_CLASS())("found ")(proto.nym().size())(" nyms").Flush();
+        switch (set_original_version(proto.version())) {
+            case 5u:
+            case 4u:
+            case 3u:
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.nym());
 
-    for (const auto& it : proto.nym()) {
-        log(OT_PRETTY_CLASS())("loaded nym ")(it.itemid()).Flush();
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
-    }
+                for (const auto& nymID : proto.localnymid()) {
+                    local_nyms_.emplace(factory_.NymIDFromBase58(nymID));
+                }
 
-    log(OT_PRETTY_CLASS())("found ")(proto.localnymid().size())(" local nyms")
-        .Flush();
-
-    for (const auto& nymID : proto.localnymid()) {
-        log(OT_PRETTY_CLASS())("indexed local nym ")(nymID).Flush();
-        local_nyms_.emplace(factory_.NymIDFromBase58(nymID));
-    }
-
-    if (proto.has_defaultlocalnym()) {
-        auto nym = factory_.InternalSession().NymID(proto.defaultlocalnym());
-        log(OT_PRETTY_CLASS())("found default local nym ")(nym, crypto_)
-            .Flush();
-        default_local_nym_ = std::move(nym);
-    }
-
-    if (default_local_nym_.empty() && (1_uz == local_nyms_.size())) {
-        const auto& nymID = *local_nyms_.begin();
-        log(OT_PRETTY_CLASS())("setting default local nym to ")(nymID, crypto_)
-            .Flush();
-        auto lock = Lock{write_lock_};
-        set_default(lock, nymID);
-        save(lock);
+                if (proto.has_defaultlocalnym()) {
+                    auto nym = factory_.InternalSession().NymID(
+                        proto.defaultlocalnym());
+                    default_local_nym_ = std::move(nym);
+                }
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
@@ -120,70 +130,35 @@ auto Nyms::LocalNyms() const noexcept -> Set<identifier::Nym>
     return local_nyms_;
 }
 
-auto Nyms::Map(NymLambda lambda) const -> void
+auto Nyms::mutable_Nym(const identifier::Nym& id) -> Editor<tree::Nym>
 {
-    auto lock = Lock{write_lock_};
-    const auto copy = item_map_;
-    lock.unlock();
-
-    for (const auto& it : copy) {
-        const auto id = factory_.NymIDFromBase58(it.first);
-        const auto& node = *nym(id);
-        const auto& hash = node.credentials_;
-
-        std::shared_ptr<proto::Nym> serialized;
-
-        if (Node::BLANK_HASH == hash) { continue; }
-
-        if (driver_.LoadProto(hash, serialized, false)) { lambda(*serialized); }
-    }
-}
-
-auto Nyms::Migrate(const Driver& to) const -> bool
-{
-    bool output{true};
-
-    for (const auto& index : item_map_) {
-        const auto id = factory_.NymIDFromBase58(index.first);
-        const auto& node = *nym(id);
-        output &= node.Migrate(to);
-    }
-
-    output &= migrate(root_, to);
-
-    return output;
-}
-
-auto Nyms::mutable_Nym(const identifier::Nym& id) -> Editor<storage::Nym>
-{
-    std::function<void(storage::Nym*, Lock&)> callback =
-        [&](storage::Nym* in, Lock& lock) -> void { this->save(in, lock, id); };
+    std::function<void(tree::Nym*, Lock&)> callback =
+        [&](tree::Nym* in, Lock& lock) -> void { this->save(in, lock, id); };
 
     return {write_lock_, nym(id), callback};
 }
 
 auto Nyms::NeedUpgrade() const noexcept -> bool { return UpgradeLevel() < 3u; }
 
-auto Nyms::nym(const identifier::Nym& id) const -> storage::Nym*
+auto Nyms::nym(const identifier::Nym& id) const -> tree::Nym*
 {
     auto lock = Lock{write_lock_};
 
     return nym(lock, id);
 }
 
-auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const
-    -> storage::Nym*
+auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const -> tree::Nym*
 {
     OT_ASSERT(verify_write_lock(lock));
 
-    const auto& index = item_map_[id.asBase58(crypto_)];
+    const auto& index = item_map_[id];
     const auto hash = std::get<0>(index);
     const auto alias = std::get<1>(index);
     auto& nym = nyms_[id];
 
     if (false == nym.operator bool()) {
-        nym = std::make_unique<storage::Nym>(
-            crypto_, factory_, driver_, id.asBase58(crypto_), hash, alias);
+        nym = std::make_unique<tree::Nym>(
+            crypto_, factory_, plugin_, id, hash, alias);
 
         if (false == nym.operator bool()) {
             LogAbort()(OT_PRETTY_CLASS())("failed to instantiate storage nym ")(
@@ -195,20 +170,20 @@ auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const
     return nym.get();
 }
 
-auto Nyms::Nym(const identifier::Nym& id) const -> const storage::Nym&
+auto Nyms::Nym(const identifier::Nym& id) const -> const tree::Nym&
 {
     return *nym(id);
 }
 
 auto Nyms::RelabelThread(
-    const UnallocatedCString& threadID,
+    const identifier::Generic& threadID,
     const UnallocatedCString label) -> bool
 {
     auto lock = Lock{write_lock_};
     auto nyms = Set<identifier::Nym>{};
 
     for (const auto& it : item_map_) {
-        const auto nymID = factory_.NymIDFromBase58(it.first);
+        const auto nymID = factory_.Internal().NymIDConvertSafe(it.first);
         auto* nym = Nyms::nym(lock, nymID);
 
         OT_ASSERT(nym);
@@ -248,10 +223,10 @@ auto Nyms::save(const Lock& lock) const -> bool
 
     OT_ASSERT(current_version_ == serialized.version());
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
-auto Nyms::save(storage::Nym* nym, const Lock& lock, const identifier::Nym& id)
+auto Nyms::save(tree::Nym* nym, const Lock& lock, const identifier::Nym& id)
     -> void
 {
     if (!verify_write_lock(lock)) {
@@ -262,7 +237,7 @@ auto Nyms::save(storage::Nym* nym, const Lock& lock, const identifier::Nym& id)
         LogAbort()(OT_PRETTY_CLASS())("Null target").Abort();
     }
 
-    auto& index = item_map_[id.asBase58(crypto_)];
+    auto& index = item_map_[id];
     auto& hash = std::get<0>(index);
     auto& alias = std::get<1>(index);
     hash = nym->Root();
@@ -282,12 +257,11 @@ auto Nyms::serialize() const -> proto::StorageNymList
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
-            serialize_index(
-                version_, item.first, item.second, *output.add_nym());
+            serialize_index(item.first, item.second, *output.add_nym());
         }
     }
 
@@ -314,31 +288,49 @@ auto Nyms::set_default(const Lock&, const identifier::Nym& id) -> void
     default_local_nym_ = id;
 }
 
-auto Nyms::Upgrade() noexcept -> void
+auto Nyms::upgrade(const Lock& lock) noexcept -> bool
 {
-    auto lock = Lock{write_lock_};
+    auto changed = Node::upgrade(lock);
 
-    switch (UpgradeLevel()) {
-        case 1:
-        case 2: {
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u: {
             upgrade_create_local_nym_index(lock);
         } break;
+        case 3u:
+        case 4u:
+        case 5u:
         default: {
-            LogError()(OT_PRETTY_CLASS())("no upgrades needed").Flush();
+            if (default_local_nym_.empty() && (1_uz == local_nyms_.size())) {
+                const auto& nymID = *local_nyms_.begin();
+                set_default(lock, nymID);
+                changed = true;
+            }
         }
     }
 
-    save(lock);
+    for (auto& [id, meta] : item_map_) {
+        const auto nymID = factory_.Internal().NymIDConvertSafe(id);
+        auto& hash = std::get<0>(meta);
+
+        if (auto* node = nym(lock, nymID); node->Upgrade()) {
+            hash = node->root_;
+            changed = true;
+        }
+    }
+
+    return changed;
 }
 
 auto Nyms::upgrade_create_local_nym_index(const Lock& lock) noexcept -> void
 {
     for (const auto& index : item_map_) {
-        const auto id = factory_.NymIDFromBase58(index.first);
+        const auto id = factory_.Internal().NymIDConvertSafe(index.first);
         const auto& node = *nym(lock, id);
         auto credentials = std::make_shared<proto::Nym>();
         auto alias = UnallocatedCString{};
-        const auto loaded = node.Load(credentials, alias, false);
+        using enum ErrorReporting;
+        const auto loaded = node.Load(credentials, alias, verbose);
 
         if (false == loaded) { continue; }
 
@@ -354,4 +346,4 @@ auto Nyms::upgrade_create_local_nym_index(const Lock& lock) noexcept -> void
 }
 
 Nyms::~Nyms() = default;
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

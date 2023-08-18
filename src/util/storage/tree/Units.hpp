@@ -10,8 +10,10 @@
 #include <mutex>
 #include <string_view>
 
-#include "opentxs/api/session/Storage.hpp"
+#include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -39,13 +41,20 @@ class UnitDefinition;
 
 namespace storage
 {
-class Driver;
-class Tree;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
+class Trunk;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Units final : public Node
 {
@@ -56,8 +65,7 @@ public:
         const identifier::UnitDefinition& id,
         std::shared_ptr<proto::UnitDefinition>& output,
         UnallocatedCString& alias,
-        const bool checking) const -> bool;
-    void Map(UnitLambda lambda) const;
+        ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::UnitDefinition& id) -> bool;
     auto SetAlias(const identifier::UnitDefinition& id, std::string_view alias)
@@ -76,16 +84,17 @@ public:
     ~Units() final = default;
 
 private:
-    friend Tree;
+    friend Trunk;
 
-    void init(const UnallocatedCString& hash) final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
     auto serialize() const -> proto::StorageUnits;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Units(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& key);
+        const driver::Plugin& storage,
+        const Hash& key);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

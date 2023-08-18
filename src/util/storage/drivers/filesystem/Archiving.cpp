@@ -3,18 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::storage::Plugin
+// IWYU pragma: no_forward_declare opentxs::storage::Driver
 
 #include "util/storage/drivers/filesystem/Archiving.hpp"  // IWYU pragma: associated
 
 #include <Ciphertext.pb.h>
 #include <memory>
+#include <stdexcept>
 #include <system_error>
+#include <utility>
 
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -23,64 +25,67 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Writer.hpp"
-#include "opentxs/util/storage/Plugin.hpp"
+#include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory
 {
 auto StorageFSArchive(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
     const storage::Config& config,
-    const Flag& bucket,
-    const UnallocatedCString& folder,
-    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Plugin>
+    const std::filesystem::path& folder,
+    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Driver>
 {
     using ReturnType = storage::driver::filesystem::Archiving;
 
-    return std::make_unique<ReturnType>(
-        crypto, asio, parent, config, bucket, folder, key);
+    try {
+
+        return std::make_unique<ReturnType>(crypto, config, folder, key);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::storage::driver::filesystem
 {
+using namespace std::literals;
+
 Archiving::Archiving(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& storage,
     const storage::Config& config,
-    const Flag& bucket,
-    const UnallocatedCString& folder,
-    crypto::symmetric::Key& key)
-    : ot_super(crypto, asio, storage, config, folder, bucket)
+    const std::filesystem::path& folder,
+    crypto::symmetric::Key& key) noexcept(false)
+    : Common(crypto, config, folder)
     , encryption_key_(key)
     , encrypted_(bool(encryption_key_))
 {
-    Init_Archiving();
+    init();
 }
 
 auto Archiving::calculate_path(
+    const Data& data,
     std::string_view key,
-    bool bucket,
+    Bucket bucket,
     fs::path& directory) const noexcept -> fs::path
 {
-    directory = folder_;
-    const auto& level1 = folder_;
+    directory = data.folder_;
+    const auto& level1 = data.folder_;
     UnallocatedCString level2{};
 
-    if (4 < key.size()) {
+    if (4_uz < key.size()) {
         directory.append(key.substr(0, 4));
         level2 = directory.string();
     }
 
-    if (8 < key.size()) { directory.append(key.substr(4, 4)); }
+    if (8_uz < key.size()) { directory.append(key.substr(4, 4)); }
 
     auto ec = std::error_code{};
     fs::create_directories(directory, ec);
 
-    if (8 < key.size()) {
+    if (8_uz < key.size()) {
         if (false == sync(level2)) {
             LogError()(OT_PRETTY_CLASS())("Unable to sync directory ")(
                 level2)(".")
@@ -96,74 +101,68 @@ auto Archiving::calculate_path(
     return fs::path{directory} / key;
 }
 
-void Archiving::Cleanup()
+auto Archiving::Description() const noexcept -> std::string_view
 {
-    Cleanup_Archiving();
-    ot_super::Cleanup();
+    return "archiving flat file"sv;
 }
 
-void Archiving::Cleanup_Archiving()
+auto Archiving::do_write(
+    const fs::path& directory,
+    const fs::path& filename,
+    File& file,
+    ReadView data) const noexcept(false) -> void
 {
-    // future cleanup actions go here
+    if (encrypted_) {
+        auto ciphertext = proto::Ciphertext{};
+        auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
+            "Storage write");
+        const auto encrypt =
+            encryption_key_.Internal().Encrypt(data, ciphertext, reason, false);
+
+        if (false == encrypt) {
+            throw std::runtime_error{"encryption failure"};
+        }
+
+        finalize_write(directory, filename, file, proto::ToString(ciphertext));
+    } else {
+        finalize_write(directory, filename, file, data);
+    }
 }
 
-auto Archiving::EmptyBucket(const bool) const -> bool { return true; }
-
-void Archiving::Init_Archiving()
+auto Archiving::empty_bucket(const Data&, Bucket) const noexcept(false) -> bool
 {
-    OT_ASSERT(false == folder_.empty());
-
-    auto ec = std::error_code{};
-
-    if (fs::create_directory(folder_, ec)) { ready_->On(); }
+    return true;
 }
 
-auto Archiving::prepare_read(const UnallocatedCString& input) const
+auto Archiving::init(Data& data) noexcept(false) -> void
+{
+    Common::init(data);
+    fs::create_directory(data.folder_);
+}
+
+auto Archiving::finalize_read(UnallocatedCString&& input) const noexcept(false)
     -> UnallocatedCString
 {
-    if (false == encrypted_) { return input; }
+    if (false == encrypted_) { return std::move(input); }
 
     const auto ciphertext = proto::Factory<proto::Ciphertext>(input);
 
-    OT_ASSERT(encryption_key_);
-
-    UnallocatedCString output{};
+    auto output = ""s;
     auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
         "Storage read");
+    const auto decrypt =
+        encryption_key_.Internal().Decrypt(ciphertext, writer(output), reason);
 
-    if (false == encryption_key_.Internal().Decrypt(
-                     ciphertext, writer(output), reason)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decrypt value.").Flush();
-    }
+    if (false == decrypt) { throw std::runtime_error{"decryption failure"}; }
 
     return output;
 }
 
-auto Archiving::prepare_write(const UnallocatedCString& plaintext) const
-    -> UnallocatedCString
+auto Archiving::root_filename(const Data& data) const noexcept -> fs::path
 {
-    if (false == encrypted_) { return plaintext; }
-
-    OT_ASSERT(encryption_key_);
-
-    proto::Ciphertext ciphertext{};
-    auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
-        "Storage write");
-    const bool encrypted = encryption_key_.Internal().Encrypt(
-        plaintext, ciphertext, reason, false);
-
-    if (false == encrypted) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encrypt value.").Flush();
-    }
-
-    return proto::ToString(ciphertext);
-}
-
-auto Archiving::root_filename() const -> fs::path
-{
-    return (folder_ / config_.fs_root_file_)
+    return (data.folder_ / config_.fs_root_file_)
         .replace_extension(root_file_extension_);
 }
 
-Archiving::~Archiving() { Cleanup_Archiving(); }
+Archiving::~Archiving() = default;
 }  // namespace opentxs::storage::driver::filesystem

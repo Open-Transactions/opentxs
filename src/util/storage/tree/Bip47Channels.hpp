@@ -11,9 +11,11 @@
 #include <shared_mutex>
 
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -36,13 +38,20 @@ class Bip47Channel;
 
 namespace storage
 {
-class Driver;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
 class Nym;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Bip47Channels final : public Node
 {
@@ -54,9 +63,8 @@ public:
     auto Load(
         const identifier::Account& id,
         std::shared_ptr<proto::Bip47Channel>& output,
-        const bool checking) const -> bool;
+        ErrorReporting checking) const -> bool;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
     auto Store(
         const identifier::Account& channelID,
         const proto::Bip47Channel& data) -> bool;
@@ -81,6 +89,7 @@ private:
     mutable std::shared_mutex index_lock_;
     ChannelIndex channel_data_;
     ChainIndex chain_index_;
+    bool repair_indices_;
 
     template <typename I, typename V>
     auto extract_set(const I& id, const V& index) const ->
@@ -92,15 +101,16 @@ private:
         const eLock& lock,
         const identifier::Account& id,
         const proto::Bip47Channel& data) -> void;
-    auto init(const UnallocatedCString& hash) -> void final;
+    auto init(const Hash& hash) -> void final;
     auto repair_indices() noexcept -> void;
     auto save(const Lock& lock) const -> bool final;
     auto serialize() const -> proto::StorageBip47Contexts;
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Bip47Channels(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& hash);
+        const driver::Plugin& storage,
+        const Hash& hash);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

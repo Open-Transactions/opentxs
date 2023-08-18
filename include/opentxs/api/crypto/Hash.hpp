@@ -61,10 +61,6 @@ public:
         const opentxs::crypto::HashType hashType,
         const opentxs::network::zeromq::Frame& data,
         Writer&& destination) const noexcept -> bool = 0;
-    virtual auto Digest(
-        const std::uint32_t type,
-        const ReadView data,
-        Writer&& encodedDestination) const noexcept -> bool = 0;
     virtual auto HMAC(
         const opentxs::crypto::HashType hashType,
         const ReadView key,

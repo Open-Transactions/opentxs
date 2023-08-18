@@ -22,6 +22,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/crypto/Factory.hpp"
 #include "internal/crypto/Seed.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
@@ -509,7 +510,7 @@ auto Seed::get_seed(
 
     if (auto it{seeds_.find(seedID)}; it != seeds_.end()) { return it->second; }
 
-    if (false == storage_.Load(seedID, proto)) {
+    if (false == storage_.Internal().Load(seedID, proto)) {
 
         throw std::runtime_error{
             "Failed to load seed "s + seedID.asBase58(api_.Crypto())};
@@ -745,7 +746,7 @@ auto Seed::SeedDescription(const opentxs::crypto::SeedID& seedID) const noexcept
             auto proto = proto::Seed{};
             auto name = UnallocatedCString{};
 
-            if (false == storage_.Load(effective, proto, name)) {
+            if (false == storage_.Internal().Load(effective, proto, name)) {
                 throw std::runtime_error{
                     "Failed to load seed "s +
                     effective.asBase58(api_.Crypto())};
@@ -799,7 +800,7 @@ auto Seed::SetDefault(const opentxs::crypto::SeedID& id) const noexcept -> bool
         return false;
     }
 
-    const auto out = api_.Storage().SetDefaultSeed(id);
+    const auto out = api_.Storage().Internal().SetDefaultSeed(id);
 
     if (out) { publish(id); }
 
@@ -810,7 +811,7 @@ auto Seed::SetSeedComment(
     const opentxs::crypto::SeedID& id,
     const std::string_view alias) const noexcept -> bool
 {
-    if (api_.Storage().SetSeedAlias(id, alias)) {
+    if (api_.Storage().Internal().SetSeedAlias(id, alias)) {
         LogVerbose()(OT_PRETTY_CLASS())("Changed seed comment for ")(
             id, api_.Crypto())(" to ")(alias)
             .Flush();

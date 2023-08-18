@@ -15,6 +15,7 @@
 #include "internal/api/Legacy.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -2293,7 +2294,7 @@ auto OTTransaction::VerifyBalanceReceipt(
         // STILL not found??
         if (false == bool(pTransaction)) {
             const auto unittype =
-                api_.Storage().AccountUnit(GetRealAccountID());
+                api_.Storage().Internal().AccountUnit(GetRealAccountID());
             LogConsole()(OT_PRETTY_CLASS())("Expected ")(
                 pszLedgerType)(" transaction (")(
                 lTempTransactionNum)(") not found. (Amount ")(
@@ -2330,7 +2331,7 @@ auto OTTransaction::VerifyBalanceReceipt(
 
         if (pSubItem->GetAmount() != lTransactionAmount) {
             const auto unittype =
-                api_.Storage().AccountUnit(GetRealAccountID());
+                api_.Storage().Internal().AccountUnit(GetRealAccountID());
             LogConsole()(OT_PRETTY_CLASS())(pszLedgerType)(" transaction (")(
                 lTempTransactionNum)(") amounts don't match: Report says ")(
                 pSubItem->GetAmount(), unittype)(", but expected ")(
@@ -2641,7 +2642,7 @@ auto OTTransaction::VerifyBalanceReceipt(
             if (pSubItem->GetAmount() !=
                 (pTransaction->GetReceiptAmount(reason))) {
                 const auto unittype =
-                    api_.Storage().AccountUnit(GetRealAccountID());
+                    api_.Storage().Internal().AccountUnit(GetRealAccountID());
                 LogConsole()(OT_PRETTY_CLASS())("Inbox transaction (")(
                     pSubItem->GetTransactionNum())(") amounts don't match: ")(
                     pSubItem->GetAmount(), unittype)(", expected ")(
@@ -2919,7 +2920,8 @@ auto OTTransaction::VerifyBalanceReceipt(
     // supposed difference from adding up just the new receipts, (Which is
     // probably impossible anyway) then return false.
     if (lActualDifference != lInboxSupposedDifference) {
-        const auto unittype = api_.Storage().AccountUnit(GetRealAccountID());
+        const auto unittype =
+            api_.Storage().Internal().AccountUnit(GetRealAccountID());
         LogError()(OT_PRETTY_CLASS())("lActualDifference (")(
             lActualDifference,
             unittype)(") is not equal to lInboxSupposedDifference (")(
@@ -2950,7 +2952,8 @@ auto OTTransaction::VerifyBalanceReceipt(
          (account.get().GetBalance() + (lActualDifference * (-1))));
 
     if (wrongBalance) {
-        const auto unittype = api_.Storage().AccountUnit(GetRealAccountID());
+        const auto unittype =
+            api_.Storage().Internal().AccountUnit(GetRealAccountID());
         LogError()(OT_PRETTY_CLASS())("lActualDifference in receipts (")(
             lActualDifference, unittype)(") plus current acct balance (")(
             account.get().GetBalance(),

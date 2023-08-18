@@ -6,10 +6,11 @@
 #include "util/storage/tree/PeerRequests.hpp"  // IWYU pragma: associated
 
 #include <PeerRequest.pb.h>
-#include <StorageItemHash.pb.h>
 #include <StorageNymList.pb.h>
+#include <atomic>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 
@@ -18,50 +19,54 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
+#include "internal/util/DeferredConstruction.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 PeerRequests::PeerRequests(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 2)
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(2);
+        blank();
     }
 }
 
 auto PeerRequests::Delete(const identifier::Generic& id) -> bool
 {
-    return delete_item(id.asBase58(crypto_));
+    return delete_item(id);
 }
 
-void PeerRequests::init(const UnallocatedCString& hash)
+auto PeerRequests::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StorageNymList> serialized;
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageNymList>{};
 
-    if (!serialized) {
-        std::cerr << __func__ << ": Failed to load peer request index file."
-                  << std::endl;
-        abort();
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(2, *serialized);
-
-    for (const auto& it : serialized->nym()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
+        switch (set_original_version(proto.version())) {
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.nym());
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
@@ -69,10 +74,9 @@ auto PeerRequests::Load(
     const identifier::Generic& id,
     std::shared_ptr<proto::PeerRequest>& output,
     UnallocatedCString& alias,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::PeerRequest>(
-        id.asBase58(crypto_), output, alias, checking);
+    return load_proto<proto::PeerRequest>(id, output, alias, checking);
 }
 
 auto PeerRequests::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -86,7 +90,7 @@ auto PeerRequests::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto PeerRequests::serialize() const -> proto::StorageNymList
@@ -96,12 +100,11 @@ auto PeerRequests::serialize() const -> proto::StorageNymList
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
-            serialize_index(
-                version_, item.first, item.second, *serialized.add_nym());
+            serialize_index(item.first, item.second, *serialized.add_nym());
         }
     }
 
@@ -112,7 +115,7 @@ auto PeerRequests::SetAlias(
     const identifier::Generic& id,
     std::string_view alias) -> bool
 {
-    return set_alias(id.asBase58(crypto_), alias);
+    return set_alias(id, alias);
 }
 
 auto PeerRequests::Store(const proto::PeerRequest& data, std::string_view alias)
@@ -120,6 +123,20 @@ auto PeerRequests::Store(const proto::PeerRequest& data, std::string_view alias)
 {
     const auto id = factory_.Internal().Identifier(data.id());
 
-    return store_proto(data, id.asBase58(crypto_), alias);
+    return store_proto(data, id, alias);
 }
-}  // namespace opentxs::storage
+
+auto PeerRequests::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

@@ -17,6 +17,7 @@
 
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -973,15 +974,18 @@ TEST_F(Basic, send_cheque)
         SUCCESS,
         0,
         alice_counter_);
-    const auto workflowList =
-        client_1_.Storage().PaymentWorkflowList(alice_nym_id_).size();
+    const auto workflowList = client_1_.Storage()
+                                  .Internal()
+                                  .PaymentWorkflowList(alice_nym_id_)
+                                  .size();
 
     EXPECT_EQ(1, workflowList);
 
-    const auto workflows = client_1_.Storage().PaymentWorkflowsByState(
-        alice_nym_id_,
-        ot::otx::client::PaymentWorkflowType::OutgoingCheque,
-        ot::otx::client::PaymentWorkflowState::Conveyed);
+    const auto workflows =
+        client_1_.Storage().Internal().PaymentWorkflowsByState(
+            alice_nym_id_,
+            ot::otx::client::PaymentWorkflowType::OutgoingCheque,
+            ot::otx::client::PaymentWorkflowState::Conveyed);
 
     ASSERT_EQ(1, workflows.size());
 
@@ -1030,14 +1034,15 @@ TEST_F(Basic, getNymbox_receive_cheque)
         0,
         bob_counter_);
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_);
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_);
 
     EXPECT_EQ(1, workflowList.size());
 
-    const auto workflows = client_2_.Storage().PaymentWorkflowsByState(
-        bob_nym_id_,
-        ot::otx::client::PaymentWorkflowType::IncomingCheque,
-        ot::otx::client::PaymentWorkflowState::Conveyed);
+    const auto workflows =
+        client_2_.Storage().Internal().PaymentWorkflowsByState(
+            bob_nym_id_,
+            ot::otx::client::PaymentWorkflowType::IncomingCheque,
+            ot::otx::client::PaymentWorkflowState::Conveyed);
 
     EXPECT_EQ(1, workflows.size());
 
@@ -1090,8 +1095,7 @@ TEST_F(Basic, getNymbox_after_clearing_nymbox_2_Bob)
 TEST_F(Basic, depositCheque)
 {
     const auto accountID = find_user_account();
-    const auto workflowID =
-        client_2_.Factory().IdentifierFromBase58(incoming_cheque_workflow_id_);
+    const auto& workflowID = incoming_cheque_workflow_id_;
     auto [state, pCheque] =
         client_2_.Workflow().InstantiateCheque(bob_nym_id_, workflowID);
 
@@ -1149,12 +1153,13 @@ TEST_F(Basic, depositCheque)
     EXPECT_EQ(CHEQUE_AMOUNT, clientAccount.get().GetBalance());
 
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(1, workflowList);
 
-    const auto [wType, wState] = client_2_.Storage().PaymentWorkflowState(
-        bob_nym_id_, incoming_cheque_workflow_id_);
+    const auto [wType, wState] =
+        client_2_.Storage().Internal().PaymentWorkflowState(
+            bob_nym_id_, incoming_cheque_workflow_id_);
 
     EXPECT_EQ(ot::otx::client::PaymentWorkflowType::IncomingCheque, wType);
     EXPECT_EQ(ot::otx::client::PaymentWorkflowState::Completed, wState);
@@ -1220,13 +1225,16 @@ TEST_F(Basic, getAccountData_after_cheque_deposited)
         serverAccount,
         reason_c1_,
         reason_s1_);
-    const auto workflowList =
-        client_1_.Storage().PaymentWorkflowList(alice_nym_id_).size();
+    const auto workflowList = client_1_.Storage()
+                                  .Internal()
+                                  .PaymentWorkflowList(alice_nym_id_)
+                                  .size();
 
     EXPECT_EQ(1, workflowList);
 
-    const auto [wType, wState] = client_1_.Storage().PaymentWorkflowState(
-        alice_nym_id_, outgoing_cheque_workflow_id_);
+    const auto [wType, wState] =
+        client_1_.Storage().Internal().PaymentWorkflowState(
+            alice_nym_id_, outgoing_cheque_workflow_id_);
 
     EXPECT_EQ(wType, ot::otx::client::PaymentWorkflowType::OutgoingCheque);
     // TODO should be completed?
@@ -1347,15 +1355,18 @@ TEST_F(Basic, sendTransfer)
         (-1 * (CHEQUE_AMOUNT + TRANSFER_AMOUNT)),
         serverAccount.get().GetBalance());
 
-    const auto workflowList =
-        client_1_.Storage().PaymentWorkflowList(alice_nym_id_).size();
+    const auto workflowList = client_1_.Storage()
+                                  .Internal()
+                                  .PaymentWorkflowList(alice_nym_id_)
+                                  .size();
 
     EXPECT_EQ(2, workflowList);
 
-    const auto workflows = client_1_.Storage().PaymentWorkflowsByState(
-        alice_nym_id_,
-        ot::otx::client::PaymentWorkflowType::OutgoingTransfer,
-        ot::otx::client::PaymentWorkflowState::Acknowledged);
+    const auto workflows =
+        client_1_.Storage().Internal().PaymentWorkflowsByState(
+            alice_nym_id_,
+            ot::otx::client::PaymentWorkflowType::OutgoingTransfer,
+            ot::otx::client::PaymentWorkflowState::Acknowledged);
 
     ASSERT_EQ(1, workflows.size());
 
@@ -1365,10 +1376,7 @@ TEST_F(Basic, sendTransfer)
 
     auto partysize = int{-1};
     EXPECT_TRUE(client_1_.Workflow().WorkflowPartySize(
-        alice_nym_id_,
-        client_1_.Factory().IdentifierFromBase58(
-            outgoing_transfer_workflow_id_),
-        partysize));
+        alice_nym_id_, outgoing_transfer_workflow_id_, partysize));
     EXPECT_EQ(partysize, 0);
 }
 
@@ -1437,14 +1445,15 @@ TEST_F(Basic, getAccountData_after_incomingTransfer)
         (CHEQUE_AMOUNT + TRANSFER_AMOUNT), serverAccount.get().GetBalance());
 
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(2, workflowList);
 
-    const auto workflows = client_2_.Storage().PaymentWorkflowsByState(
-        bob_nym_id_,
-        ot::otx::client::PaymentWorkflowType::IncomingTransfer,
-        ot::otx::client::PaymentWorkflowState::Completed);
+    const auto workflows =
+        client_2_.Storage().Internal().PaymentWorkflowsByState(
+            bob_nym_id_,
+            ot::otx::client::PaymentWorkflowType::IncomingTransfer,
+            ot::otx::client::PaymentWorkflowState::Completed);
 
     ASSERT_EQ(1, workflows.size());
 
@@ -1454,33 +1463,22 @@ TEST_F(Basic, getAccountData_after_incomingTransfer)
 
     auto partysize = int{-1};
     EXPECT_TRUE(client_2_.Workflow().WorkflowPartySize(
-        bob_nym_id_,
-        client_2_.Factory().IdentifierFromBase58(
-            incoming_transfer_workflow_id_),
-        partysize));
+        bob_nym_id_, incoming_transfer_workflow_id_, partysize));
     EXPECT_EQ(1, partysize);
 
     EXPECT_STREQ(
         alice_nym_id_.asBase58(client_1_.Crypto()).c_str(),
         client_2_.Workflow()
-            .WorkflowParty(
-                bob_nym_id_,
-                client_2_.Factory().IdentifierFromBase58(
-                    incoming_transfer_workflow_id_),
-                0)
+            .WorkflowParty(bob_nym_id_, incoming_transfer_workflow_id_, 0)
             .c_str());
 
     EXPECT_EQ(
         client_2_.Workflow().WorkflowType(
-            bob_nym_id_,
-            client_2_.Factory().IdentifierFromBase58(
-                incoming_transfer_workflow_id_)),
+            bob_nym_id_, incoming_transfer_workflow_id_),
         ot::otx::client::PaymentWorkflowType::IncomingTransfer);
     EXPECT_EQ(
         client_2_.Workflow().WorkflowState(
-            bob_nym_id_,
-            client_2_.Factory().IdentifierFromBase58(
-                incoming_transfer_workflow_id_)),
+            bob_nym_id_, incoming_transfer_workflow_id_),
         ot::otx::client::PaymentWorkflowState::Completed);
 }
 
@@ -1550,12 +1548,13 @@ TEST_F(Basic, getAccountData_after_transfer_accepted)
         serverAccount.get().GetBalance());
 
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(2, workflowList);
 
-    const auto [type, state] = client_1_.Storage().PaymentWorkflowState(
-        alice_nym_id_, outgoing_transfer_workflow_id_);
+    const auto [type, state] =
+        client_1_.Storage().Internal().PaymentWorkflowState(
+            alice_nym_id_, outgoing_transfer_workflow_id_);
 
     EXPECT_EQ(type, ot::otx::client::PaymentWorkflowType::OutgoingTransfer);
     EXPECT_EQ(state, ot::otx::client::PaymentWorkflowState::Completed);
@@ -1693,20 +1692,20 @@ TEST_F(Basic, send_internal_transfer)
         serverAccount.get().GetBalance());
 
     std::size_t count{0}, tries{100};
-    ot::UnallocatedSet<ot::UnallocatedCString> workflows{};
+    ot::UnallocatedSet<ot::identifier::Generic> workflows{};
     while (0 == count) {
         // The state change from ACKNOWLEDGED to CONVEYED occurs
         // asynchronously due to server push notifications so the order in
         // which these states are observed by the sender is undefined.
         ot::Sleep(100ms);
-        workflows = client_2_.Storage().PaymentWorkflowsByState(
+        workflows = client_2_.Storage().Internal().PaymentWorkflowsByState(
             bob_nym_id_,
             ot::otx::client::PaymentWorkflowType::InternalTransfer,
             ot::otx::client::PaymentWorkflowState::Acknowledged);
         count = workflows.size();
 
         if (0 == count) {
-            workflows = client_2_.Storage().PaymentWorkflowsByState(
+            workflows = client_2_.Storage().Internal().PaymentWorkflowsByState(
                 bob_nym_id_,
                 ot::otx::client::PaymentWorkflowType::InternalTransfer,
                 ot::otx::client::PaymentWorkflowState::Conveyed);
@@ -1723,7 +1722,7 @@ TEST_F(Basic, send_internal_transfer)
     EXPECT_NE(internal_transfer_workflow_id_.size(), 0);
 
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(3, workflowList);
 }
@@ -1789,12 +1788,13 @@ TEST_F(Basic, getAccountData_after_incoming_internal_Transfer)
         reason_c2_,
         reason_s1_);
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(3, workflowList);
 
-    const auto [type, state] = client_2_.Storage().PaymentWorkflowState(
-        bob_nym_id_, internal_transfer_workflow_id_);
+    const auto [type, state] =
+        client_2_.Storage().Internal().PaymentWorkflowState(
+            bob_nym_id_, internal_transfer_workflow_id_);
 
     EXPECT_EQ(type, ot::otx::client::PaymentWorkflowType::InternalTransfer);
     EXPECT_EQ(state, ot::otx::client::PaymentWorkflowState::Conveyed);
@@ -1862,12 +1862,13 @@ TEST_F(Basic, getAccountData_after_internal_transfer_accepted)
         reason_c2_,
         reason_s1_);
     const auto workflowList =
-        client_2_.Storage().PaymentWorkflowList(bob_nym_id_).size();
+        client_2_.Storage().Internal().PaymentWorkflowList(bob_nym_id_).size();
 
     EXPECT_EQ(3, workflowList);
 
-    const auto [type, state] = client_2_.Storage().PaymentWorkflowState(
-        bob_nym_id_, internal_transfer_workflow_id_);
+    const auto [type, state] =
+        client_2_.Storage().Internal().PaymentWorkflowState(
+            bob_nym_id_, internal_transfer_workflow_id_);
 
     EXPECT_EQ(type, ot::otx::client::PaymentWorkflowType::InternalTransfer);
     EXPECT_EQ(state, ot::otx::client::PaymentWorkflowState::Completed);
@@ -2792,15 +2793,15 @@ TEST_F(Basic, receive_cash)
         0,
         alice_counter_);
     const auto& unitID = asset_contract_1_->ID();
-    const auto workflows = client_1_.Storage().PaymentWorkflowsByState(
-        alice_nym_id_,
-        ot::otx::client::PaymentWorkflowType::IncomingCash,
-        ot::otx::client::PaymentWorkflowState::Conveyed);
+    const auto workflows =
+        client_1_.Storage().Internal().PaymentWorkflowsByState(
+            alice_nym_id_,
+            ot::otx::client::PaymentWorkflowType::IncomingCash,
+            ot::otx::client::PaymentWorkflowState::Conveyed);
 
     ASSERT_EQ(1, workflows.size());
 
-    const auto& workflowID =
-        client_1_.Factory().IdentifierFromBase58(*workflows.begin());
+    const auto& workflowID = *workflows.begin();
     auto [state, incomingPurse] =
         client_1_.Workflow().InstantiatePurse(alice_nym_id_, workflowID);
 

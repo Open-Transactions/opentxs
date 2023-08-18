@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "interface/ui/base/Combined.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/client/Issuer.hpp"
@@ -133,9 +134,9 @@ void IssuerItem::process_account(const Message& message) noexcept
 
     OT_ASSERT(false == accountID.empty());
 
-    const auto rowID =
-        IssuerItemRowID{accountID, {api_.Storage().AccountUnit(accountID)}};
-    const auto issuerID = api_.Storage().AccountIssuer(accountID);
+    const auto rowID = IssuerItemRowID{
+        accountID, {api_.Storage().Internal().AccountUnit(accountID)}};
+    const auto issuerID = api_.Storage().Internal().AccountIssuer(accountID);
 
     if (issuerID == issuer_->IssuerID()) { process_account(accountID); }
 }

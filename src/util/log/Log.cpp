@@ -199,6 +199,13 @@ auto Log::operator()(
     return operator()(static_cast<const identifier::Generic&>(in), api);
 }
 
+auto Log::operator()(const storage::Hash& in) const noexcept -> const Log&
+{
+    imp_->Buffer(in);
+
+    return *this;
+}
+
 auto Log::operator()(const std::chrono::nanoseconds& in) const noexcept
     -> const Log&
 {

@@ -12,6 +12,7 @@
 
 #include "interface/ui/accountactivity/BalanceItem.hpp"
 #include "interface/ui/base/Widget.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -91,7 +92,8 @@ auto BlockchainBalanceItem::Contacts() const noexcept
 {
     auto output = UnallocatedVector<UnallocatedCString>{};
 
-    for (const auto& id : api_.Storage().BlockchainThreadMap(nym_id_, txid_)) {
+    for (const auto& id :
+         api_.Storage().Internal().BlockchainThreadMap(nym_id_, txid_)) {
         if (0 < id.size()) { output.emplace_back(id.asBase58(api_.Crypto())); }
     }
 

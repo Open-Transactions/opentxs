@@ -5,26 +5,20 @@
 
 #pragma once
 
-#include "internal/util/Lockable.hpp"
+#include <cs_shared_guarded.h>
+#include <array>
+#include <shared_mutex>
+#include <string_view>
+
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
+#include "opentxs/util/storage/Types.hpp"
+#include "util/storage/drivers/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
@@ -33,35 +27,27 @@ namespace storage
 class Config;
 }  // namespace storage
 
-class Flag;
+class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::driver
 {
-// In-memory implementation of opentxs::storage
-class MemDB final : public implementation::Plugin,
-                    virtual public storage::Driver,
-                    Lockable
+class MemDB final : public storage::implementation::Driver
 {
 public:
-    auto EmptyBucket(const bool bucket) const -> bool final;
-    auto LoadFromBucket(
-        const UnallocatedCString& key,
-        UnallocatedCString& value,
-        const bool bucket) const -> bool final;
-    auto LoadRoot() const -> UnallocatedCString final;
-    auto StoreRoot(const bool commit, const UnallocatedCString& hash) const
-        -> bool final;
+    auto Description() const noexcept -> std::string_view final;
+    auto Load(const Log& logger, const Hash& key, Search order, Writer& value)
+        const noexcept -> bool final;
+    auto LoadRoot() const noexcept -> Hash final;
 
-    void Cleanup() final {}
+    auto Commit(const Hash& root, Transaction data, Bucket bucket)
+        const noexcept -> bool final;
+    auto EmptyBucket(Bucket bucket) const noexcept -> bool final;
+    auto Store(Transaction data, Bucket bucket) const noexcept -> bool final;
 
-    MemDB(
-        const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
-        const storage::Config& config,
-        const Flag& bucket);
+    MemDB(const api::Crypto& crypto, const storage::Config& config) noexcept;
     MemDB() = delete;
     MemDB(const MemDB&) = delete;
     MemDB(MemDB&&) = delete;
@@ -71,16 +57,27 @@ public:
     ~MemDB() final = default;
 
 private:
-    using ot_super = Plugin;
+    struct Data {
+        using Map = UnallocatedMap<Hash, UnallocatedCString>;
 
-    mutable UnallocatedCString root_;
-    mutable UnallocatedMap<UnallocatedCString, UnallocatedCString> a_;
-    mutable UnallocatedMap<UnallocatedCString, UnallocatedCString> b_;
+        Hash root_{};
 
-    auto store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucket) const -> bool final;
+        auto get_bucket(Bucket bucket) const noexcept -> const Map&;
+        auto get_search(Search order) const noexcept
+            -> std::array<const Map*, 2>;
+
+        auto get_bucket(Bucket bucket) noexcept -> Map&;
+
+    private:
+        Map a_{};
+        Map b_{};
+    };
+
+    using GuardedData = libguarded::shared_guarded<Data, std::shared_mutex>;
+
+    mutable GuardedData data_;
+
+    auto store(Data& data, Transaction values, Bucket bucket) const noexcept
+        -> bool;
 };
 }  // namespace opentxs::storage::driver

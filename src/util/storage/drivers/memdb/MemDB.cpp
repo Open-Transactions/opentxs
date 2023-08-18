@@ -3,109 +3,152 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::storage::Plugin
+// IWYU pragma: no_forward_declare opentxs::storage::Driver
 
 #include "util/storage/drivers/memdb/MemDB.hpp"  // IWYU pragma: associated
 
+#include <array>
 #include <memory>
+#include <span>
+#include <utility>
 
-#include "internal/util/Mutex.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Plugin.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/storage/Driver.hpp"
 
 namespace opentxs::factory
 {
 auto StorageMemDB(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>
 {
     using ReturnType = storage::driver::MemDB;
 
-    return std::make_unique<ReturnType>(crypto, asio, parent, config, bucket);
+    return std::make_unique<ReturnType>(crypto, config);
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::storage::driver
 {
-MemDB::MemDB(
-    const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& storage,
-    const storage::Config& config,
-    const Flag& bucket)
-    : ot_super(crypto, asio, storage, config, bucket)
-    , root_("")
-    , a_()
-    , b_()
+auto MemDB::Data::get_bucket(Bucket bucket) noexcept -> Map&
 {
-}
+    using enum Bucket;
 
-auto MemDB::EmptyBucket(const bool bucket) const -> bool
-{
-    eLock lock(shared_lock_);
+    switch (bucket) {
+        case left: {
 
-    if (bucket) {
-        a_.clear();
-    } else {
-        b_.clear();
-    }
-
-    return true;
-}
-
-auto MemDB::LoadFromBucket(
-    const UnallocatedCString& key,
-    UnallocatedCString& value,
-    const bool bucket) const -> bool
-{
-    sLock lock(shared_lock_);
-
-    try {
-        if (bucket) {
-            value = a_.at(key);
-        } else {
-            value = b_.at(key);
+            return a_;
         }
-    } catch (...) {
+        case right: {
 
-        return false;
+            return b_;
+        }
+        default: {
+            LogAbort()(OT_PRETTY_CLASS())("invalid bucket").Abort();
+        }
     }
-
-    return (false == value.empty());
 }
 
-auto MemDB::LoadRoot() const -> UnallocatedCString
+auto MemDB::Data::get_bucket(Bucket bucket) const noexcept -> const Map&
 {
-    sLock lock(shared_lock_);
-
-    return root_;
+    return const_cast<Data*>(this)->get_bucket(bucket);
 }
 
-auto MemDB::store(
-    [[maybe_unused]] const bool isTransaction,
-    const UnallocatedCString& key,
-    const UnallocatedCString& value,
-    const bool bucket) const -> bool
+auto MemDB::Data::get_search(Search order) const noexcept
+    -> std::array<const Map*, 2>
 {
-    if (bucket) {
-        a_[key] = value;
+    using enum Search;
+
+    if (ltr == order) {
+
+        return {std::addressof(a_), std::addressof(b_)};
     } else {
-        b_[key] = value;
+
+        return {std::addressof(b_), std::addressof(a_)};
     }
+}
+}  // namespace opentxs::storage::driver
+
+namespace opentxs::storage::driver
+{
+using namespace std::literals;
+
+MemDB::MemDB(const api::Crypto& crypto, const storage::Config& config) noexcept
+    : Driver(crypto, config)
+    , data_()
+{
+}
+
+auto MemDB::Commit(const Hash& root, Transaction tx, Bucket bucket)
+    const noexcept -> bool
+{
+    auto handle = data_.lock();
+    auto& data = *handle;
+
+    if (false == store(data, tx, bucket)) { return false; }
+
+    data.root_ = root;
 
     return true;
 }
 
-auto MemDB::StoreRoot(
-    [[maybe_unused]] const bool commit,
-    const UnallocatedCString& hash) const -> bool
+auto MemDB::Description() const noexcept -> std::string_view
 {
-    eLock lock(shared_lock_);
-    root_ = hash;
+    return "memory database"sv;
+}
+
+auto MemDB::EmptyBucket(Bucket bucket) const noexcept -> bool
+{
+    data_.lock()->get_bucket(bucket).clear();
+
+    return true;
+}
+
+auto MemDB::Load(const Log&, const Hash& key, Search order, Writer& value)
+    const noexcept -> bool
+{
+    auto handle = data_.lock_shared();
+    const auto& data = *handle;
+    const auto search = data.get_search(order);
+
+    for (const auto* bucket : search) {
+        if (auto i = bucket->find(key); bucket->end() != i) {
+            copy(i->second, std::move(value));
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+auto MemDB::LoadRoot() const noexcept -> Hash
+{
+    return data_.lock_shared()->root_;
+}
+
+auto MemDB::Store(Transaction values, Bucket bucket) const noexcept -> bool
+{
+    return store(*data_.lock(), values, bucket);
+}
+
+auto MemDB::store(Data& data, Transaction values, Bucket bucket) const noexcept
+    -> bool
+{
+    if (values.first.empty()) { return true; }
+
+    auto& map = data.get_bucket(bucket);
+    const auto count = values.first.size();
+
+    for (auto n = 0_uz; n < count; ++n) {
+        const auto& key = values.first[n];
+        const auto& value = values.second[n];
+        map[key] = value;
+    }
 
     return true;
 }

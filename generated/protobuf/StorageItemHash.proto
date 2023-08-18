@@ -11,11 +11,13 @@ option java_outer_classname = "OTStorageItemHash";
 option optimize_for = LITE_RUNTIME;
 
 import public "StorageEnums.proto";
+import public "Identifier.proto";
 
 message StorageItemHash {
     optional uint32 version = 1;
-    optional string itemID = 2;
+    optional string item_id_base58 = 2;
     optional string hash = 3;
     optional string alias = 4;
     optional StorageHashType type = 5;
+    optional Identifier id = 6;
 }

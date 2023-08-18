@@ -150,7 +150,7 @@ public:
     virtual auto PaymentText(
         const identifier::Nym& nym,
         const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept
+        const identifier::Generic& workflow) const noexcept
         -> std::shared_ptr<const UnallocatedCString> = 0;
     /**   Asynchronously cache the most recent items in each of a nym's threads
      *

@@ -120,7 +120,10 @@ auto ActivitySummaryItem::find_text(
         }
         case otx::client::StorageBox::INCOMINGCHEQUE:
         case otx::client::StorageBox::OUTGOINGCHEQUE: {
-            auto text = api_.Activity().PaymentText(nym_id_, itemID, accountID);
+            auto text = api_.Activity().PaymentText(
+                nym_id_,
+                itemID,
+                api_.Factory().IdentifierFromBase58(accountID));
 
             if (text) {
 

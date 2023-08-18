@@ -12,13 +12,14 @@
 #include <memory>
 #include <mutex>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 #include "util/storage/tree/Thread.hpp"
 
@@ -45,15 +46,21 @@ class TransactionHash;
 
 namespace storage
 {
-class Driver;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
 class Mailbox;
 class Nym;
+}  // namespace tree
 }  // namespace storage
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Threads final : public Node
 {
@@ -64,28 +71,26 @@ public:
         const noexcept -> UnallocatedVector<identifier::Generic>;
     auto BlockchainTransactionList() const noexcept
         -> UnallocatedVector<ByteArray>;
-    auto Exists(const UnallocatedCString& id) const -> bool;
+    auto Exists(const identifier::Generic& id) const -> bool;
     using ot_super::List;
     auto List(const bool unreadOnly) const -> ObjectList;
-    auto Migrate(const Driver& to) const -> bool final;
-    auto Thread(const UnallocatedCString& id) const -> const storage::Thread&;
+    auto Thread(const identifier::Generic& id) const -> const tree::Thread&;
 
     auto AddIndex(
         const blockchain::block::TransactionHash& txid,
         const identifier::Generic& thread) noexcept -> bool;
     auto Create(
-        const UnallocatedCString& id,
-        const UnallocatedSet<UnallocatedCString>& participants)
-        -> UnallocatedCString;
-    auto FindAndDeleteItem(const UnallocatedCString& itemID) -> bool;
-    auto mutable_Thread(const UnallocatedCString& id)
-        -> Editor<storage::Thread>;
+        const identifier::Generic& id,
+        const UnallocatedSet<identifier::Generic>& participants)
+        -> identifier::Generic;
+    auto FindAndDeleteItem(const identifier::Generic& itemID) -> bool;
+    auto mutable_Thread(const identifier::Generic& id) -> Editor<tree::Thread>;
     auto RemoveIndex(
         const blockchain::block::TransactionHash& txid,
         const identifier::Generic& thread) noexcept -> void;
     auto Rename(
-        const UnallocatedCString& existingID,
-        const UnallocatedCString& newID) -> bool;
+        const identifier::Generic& existingID,
+        const identifier::Generic& newID) -> bool;
 
     Threads() = delete;
     Threads(const Threads&) = delete;
@@ -106,36 +111,40 @@ private:
         UnallocatedMap<Txid, UnallocatedSet<ThreadID>> map_{};
     };
 
-    mutable UnallocatedMap<UnallocatedCString, std::unique_ptr<storage::Thread>>
+    mutable UnallocatedMap<identifier::Generic, std::unique_ptr<tree::Thread>>
         threads_;
     Mailbox& mail_inbox_;
     Mailbox& mail_outbox_;
     BlockchainThreadIndex blockchain_;
 
+    auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
+        -> bool final;
+
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
     auto serialize() const -> proto::StorageNymList;
-    auto thread(const UnallocatedCString& id) const -> storage::Thread*;
+    auto thread(const identifier::Generic& id) const -> tree::Thread*;
     auto thread(
-        const UnallocatedCString& id,
-        const std::unique_lock<std::mutex>& lock) const -> storage::Thread*;
+        const identifier::Generic& id,
+        const std::unique_lock<std::mutex>& lock) const -> tree::Thread*;
 
     auto create(
         const Lock& lock,
-        const UnallocatedCString& id,
-        const UnallocatedSet<UnallocatedCString>& participants)
-        -> UnallocatedCString;
-    void init(const UnallocatedCString& hash) final;
+        const identifier::Generic& id,
+        const UnallocatedSet<identifier::Generic>& participants)
+        -> identifier::Generic;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     void save(
-        storage::Thread* thread,
+        tree::Thread* thread,
         const std::unique_lock<std::mutex>& lock,
-        const UnallocatedCString& id);
+        const identifier::Generic& id);
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Threads(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& hash,
+        const driver::Plugin& storage,
+        const Hash& hash,
         Mailbox& mailInbox,
         Mailbox& mailOutbox);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

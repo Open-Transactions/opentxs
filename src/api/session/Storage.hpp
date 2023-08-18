@@ -5,18 +5,20 @@
 
 #pragma once
 
+#include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string_view>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Storage.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Types.hpp"
@@ -33,6 +35,7 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/Config.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -40,17 +43,13 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
 namespace session
 {
 class Factory;
 }  // namespace session
 
 class Crypto;
+class Session;
 }  // namespace api
 
 namespace crypto
@@ -85,13 +84,14 @@ namespace storage
 {
 namespace driver
 {
-namespace internal
-{
-class Multiplex;
-}  // namespace internal
+class Plugin;
 }  // namespace driver
 
+namespace tree
+{
 class Root;
+struct GCParams;
+}  // namespace tree
 }  // namespace storage
 
 class ByteArray;
@@ -101,6 +101,8 @@ class Writer;
 
 namespace opentxs::api::session::imp
 {
+using opentxs::storage::ErrorReporting;
+
 // Content-aware storage module for opentxs
 //
 // Storage accepts serialized opentxs objects in protobuf form, writes them
@@ -129,43 +131,44 @@ class Storage final : public internal::Storage,
                       public std::enable_shared_from_this<Storage>
 {
 public:
-    auto AccountAlias(const identifier::Account& accountID) const
+    auto AccountAlias(const identifier::Account& accountID) const noexcept
         -> UnallocatedCString final;
-    auto AccountList() const -> ObjectList final;
-    auto AccountContract(const identifier::Account& accountID) const
+    auto AccountList() const noexcept -> ObjectList final;
+    auto AccountContract(const identifier::Account& accountID) const noexcept
         -> identifier::UnitDefinition final;
-    auto AccountIssuer(const identifier::Account& accountID) const
+    auto AccountIssuer(const identifier::Account& accountID) const noexcept
         -> identifier::Nym final;
-    auto AccountOwner(const identifier::Account& accountID) const
+    auto AccountOwner(const identifier::Account& accountID) const noexcept
         -> identifier::Nym final;
-    auto AccountServer(const identifier::Account& accountID) const
+    auto AccountServer(const identifier::Account& accountID) const noexcept
         -> identifier::Notary final;
-    auto AccountSigner(const identifier::Account& accountID) const
+    auto AccountSigner(const identifier::Account& accountID) const noexcept
         -> identifier::Nym final;
-    auto AccountUnit(const identifier::Account& accountID) const
+    auto AccountUnit(const identifier::Account& accountID) const noexcept
         -> UnitType final;
-    auto AccountsByContract(const identifier::UnitDefinition& contract) const
+    auto AccountsByContract(const identifier::UnitDefinition& contract)
+        const noexcept -> UnallocatedSet<identifier::Account> final;
+    auto AccountsByIssuer(const identifier::Nym& issuerNym) const noexcept
         -> UnallocatedSet<identifier::Account> final;
-    auto AccountsByIssuer(const identifier::Nym& issuerNym) const
+    auto AccountsByOwner(const identifier::Nym& ownerNym) const noexcept
         -> UnallocatedSet<identifier::Account> final;
-    auto AccountsByOwner(const identifier::Nym& ownerNym) const
+    auto AccountsByServer(const identifier::Notary& server) const noexcept
         -> UnallocatedSet<identifier::Account> final;
-    auto AccountsByServer(const identifier::Notary& server) const
-        -> UnallocatedSet<identifier::Account> final;
-    auto AccountsByUnit(const UnitType unit) const
+    auto AccountsByUnit(const UnitType unit) const noexcept
         -> UnallocatedSet<identifier::Account> final;
     auto Bip47Chain(
         const identifier::Nym& nymID,
-        const identifier::Account& channelID) const -> UnitType final;
+        const identifier::Account& channelID) const noexcept -> UnitType final;
     auto Bip47ChannelsByChain(
         const identifier::Nym& nymID,
-        const UnitType chain) const -> Bip47ChannelList final;
+        const UnitType chain) const noexcept -> Bip47ChannelList final;
     auto BlockchainAccountList(
         const identifier::Nym& nymID,
-        const UnitType type) const -> UnallocatedSet<identifier::Account> final;
+        const UnitType type) const noexcept
+        -> UnallocatedSet<identifier::Account> final;
     auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
-        const identifier::Account& id) const -> UnitType final;
+        const identifier::Account& id) const noexcept -> UnitType final;
     auto BlockchainThreadMap(
         const identifier::Nym& nym,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
@@ -176,189 +179,191 @@ public:
         const identifier::Notary& notary,
         const identifier::UnitDefinition& unit,
         const std::uint64_t series,
-        const UnallocatedCString& key) const -> bool final;
-    auto ContactAlias(const UnallocatedCString& id) const
+        const UnallocatedCString& key) const noexcept -> bool final;
+    auto ContactAlias(const identifier::Generic& id) const noexcept
         -> UnallocatedCString final;
-    auto ContactList() const -> ObjectList final;
-    auto ContextList(const identifier::Nym& nymID) const -> ObjectList final;
-    auto ContactOwnerNym(const identifier::Nym& nym) const
+    auto ContactList() const noexcept -> ObjectList final;
+    auto ContextList(const identifier::Nym& nymID) const noexcept
+        -> ObjectList final;
+    auto ContactOwnerNym(const identifier::Nym& nym) const noexcept
         -> identifier::Generic final;
-    void ContactSaveIndices() const final;
-    auto ContactUpgradeLevel() const -> VersionNumber final;
+    auto ContactSaveIndices() const noexcept -> void final;
+    auto ContactUpgradeLevel() const noexcept -> VersionNumber final;
     auto CreateThread(
         const identifier::Nym& nymID,
-        const UnallocatedCString& threadID,
-        const UnallocatedSet<UnallocatedCString>& participants) const
+        const identifier::Generic& threadID,
+        const UnallocatedSet<identifier::Generic>& participants) const noexcept
         -> bool final;
-    auto DeleteAccount(const UnallocatedCString& id) const -> bool final;
-    auto DefaultNym() const -> identifier::Nym final;
-    auto DefaultSeed() const -> opentxs::crypto::SeedID final;
-    auto DeleteContact(const UnallocatedCString& id) const -> bool final;
+    auto DeleteAccount(const identifier::Account& id) const noexcept
+        -> bool final;
+    auto DeleteContact(const identifier::Generic& id) const noexcept
+        -> bool final;
+    auto DefaultNym() const noexcept -> identifier::Nym final;
+    auto DefaultSeed() const noexcept -> opentxs::crypto::SeedID final;
     auto DeletePaymentWorkflow(
         const identifier::Nym& nymID,
-        const UnallocatedCString& workflowID) const -> bool final;
-    auto HashType() const -> std::uint32_t final;
-    auto IssuerList(const identifier::Nym& nymID) const -> ObjectList final;
+        const identifier::Generic& workflowID) const noexcept -> bool final;
+    auto GCStatus() const noexcept -> opentxs::storage::tree::GCParams;
+    auto IssuerList(const identifier::Nym& nymID) const noexcept
+        -> ObjectList final;
     auto Load(
-        const UnallocatedCString& accountID,
+        const identifier::Account& accountID,
         UnallocatedCString& output,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         proto::HDAccount& output,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
         proto::Bip47Channel& output,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         proto::Contact& contact,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         proto::Contact& contact,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& localNym,
         const identifier::Nym& remoteNym,
         proto::Context& context,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Generic& id,
         proto::Credential& cred,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& id,
         proto::Nym& nym,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& id,
         proto::Nym& nym,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
-    auto LoadNym(
+        ErrorReporting checking) const noexcept -> bool final;
+    auto Load(
+        const identifier::Nym& nymID,
         const identifier::Nym& id,
-        Writer&& destination,
-        const bool checking = false) const -> bool final;
-    auto Load(
-        const identifier::Nym& nymID,
-        const UnallocatedCString& id,
         proto::Issuer& issuer,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& workflowID,
+        const identifier::Generic& workflowID,
         proto::PaymentWorkflow& workflow,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const otx::client::StorageBox box,
         UnallocatedCString& output,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
         const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerReply& request,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymID,
         const identifier::Generic& id,
         const otx::client::StorageBox box,
         proto::PeerRequest& request,
         Time& time,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nym,
         const identifier::Notary& notary,
         const identifier::UnitDefinition& unit,
         proto::Purse& output,
-        const bool checking) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const opentxs::crypto::SeedID& id,
         proto::Seed& seed,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Notary& id,
         proto::ServerContract& contract,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Notary& id,
         proto::ServerContract& contract,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::Nym& nymId,
-        const UnallocatedCString& threadId,
-        proto::StorageThread& thread) const -> bool final;
-    auto Load(proto::Ciphertext& output, const bool checking = false) const
+        const identifier::Generic& threadId,
+        proto::StorageThread& thread) const noexcept -> bool final;
+    auto Load(proto::Ciphertext& output, ErrorReporting checking) const noexcept
         -> bool final;
     auto Load(
         const identifier::UnitDefinition& id,
         proto::UnitDefinition& contract,
-        const bool checking = false) const -> bool final;
+        ErrorReporting checking) const noexcept -> bool final;
     auto Load(
         const identifier::UnitDefinition& id,
         proto::UnitDefinition& contract,
         UnallocatedCString& alias,
-        const bool checking = false) const -> bool final;
-    auto LocalNyms() const -> Set<identifier::Nym> final;
-    void MapPublicNyms(NymLambda& lambda) const final;
-    void MapServers(ServerLambda& lambda) const final;
-    void MapUnitDefinitions(UnitLambda& lambda) const final;
+        ErrorReporting checking) const noexcept -> bool final;
+    auto LoadNym(
+        const identifier::Nym& id,
+        Writer&& destination,
+        ErrorReporting checking) const noexcept -> bool final;
+    auto LocalNyms() const noexcept -> Set<identifier::Nym> final;
     auto MarkTokenSpent(
         const identifier::Notary& notary,
         const identifier::UnitDefinition& unit,
         const std::uint64_t series,
-        const UnallocatedCString& key) const -> bool final;
+        const UnallocatedCString& key) const noexcept -> bool final;
     auto MoveThreadItem(
         const identifier::Nym& nymId,
-        const UnallocatedCString& fromThreadID,
-        const UnallocatedCString& toThreadID,
-        const UnallocatedCString& itemID) const -> bool final;
+        const identifier::Generic& fromThreadID,
+        const identifier::Generic& toThreadID,
+        const identifier::Generic& itemID) const noexcept -> bool final;
     auto NymBoxList(
         const identifier::Nym& nymID,
-        const otx::client::StorageBox box) const -> ObjectList final;
-    auto NymList() const -> ObjectList final;
-    auto PaymentWorkflowList(const identifier::Nym& nymID) const
+        const otx::client::StorageBox box) const noexcept -> ObjectList final;
+    auto NymList() const noexcept -> ObjectList final;
+    auto PaymentWorkflowList(const identifier::Nym& nymID) const noexcept
         -> ObjectList final;
     auto PaymentWorkflowLookup(
         const identifier::Nym& nymID,
-        const UnallocatedCString& sourceID) const -> UnallocatedCString final;
+        const identifier::Generic& sourceID) const noexcept
+        -> identifier::Generic final;
     auto PaymentWorkflowsByAccount(
         const identifier::Nym& nymID,
-        const UnallocatedCString& accountID) const
-        -> UnallocatedSet<UnallocatedCString> final;
+        const identifier::Account& accountID) const noexcept
+        -> UnallocatedSet<identifier::Generic> final;
     auto PaymentWorkflowsByState(
         const identifier::Nym& nymID,
         const otx::client::PaymentWorkflowType type,
-        const otx::client::PaymentWorkflowState state) const
-        -> UnallocatedSet<UnallocatedCString> final;
+        const otx::client::PaymentWorkflowState state) const noexcept
+        -> UnallocatedSet<identifier::Generic> final;
     auto PaymentWorkflowsByUnit(
         const identifier::Nym& nymID,
-        const UnallocatedCString& unitID) const
-        -> UnallocatedSet<UnallocatedCString> final;
+        const identifier::UnitDefinition& unitID) const noexcept
+        -> UnallocatedSet<identifier::Generic> final;
     auto PaymentWorkflowState(
         const identifier::Nym& nymID,
-        const UnallocatedCString& workflowID) const
+        const identifier::Generic& workflowID) const noexcept
         -> std::pair<
             otx::client::PaymentWorkflowType,
             otx::client::PaymentWorkflowState> final;
     auto RelabelThread(
-        const UnallocatedCString& threadID,
-        const UnallocatedCString& label) const -> bool final;
+        const identifier::Generic& threadID,
+        const UnallocatedCString& label) const noexcept -> bool final;
     auto RemoveBlockchainThreadItem(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
@@ -368,53 +373,54 @@ public:
     auto RemoveNymBoxItem(
         const identifier::Nym& nymID,
         const otx::client::StorageBox box,
-        const identifier::Generic& itemID) const -> bool final;
-    auto RemoveServer(const identifier::Notary& id) const -> bool final;
+        const identifier::Generic& itemID) const noexcept -> bool final;
+    auto RemoveServer(const identifier::Notary& id) const noexcept
+        -> bool final;
     auto RemoveThreadItem(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
-        const UnallocatedCString& id) const -> bool final;
-    auto RemoveUnitDefinition(const identifier::UnitDefinition& id) const
-        -> bool final;
+        const identifier::Generic& id) const noexcept -> bool final;
+    auto RemoveUnitDefinition(
+        const identifier::UnitDefinition& id) const noexcept -> bool final;
     auto RenameThread(
         const identifier::Nym& nymId,
-        const UnallocatedCString& threadId,
-        const UnallocatedCString& newID) const -> bool final;
-    void RunGC() const final;
-    auto SeedList() const -> ObjectList final;
-    auto ServerAlias(const identifier::Notary& id) const
+        const identifier::Generic& threadId,
+        const identifier::Generic& newID) const noexcept -> bool final;
+    auto SeedList() const noexcept -> ObjectList final;
+    auto ServerAlias(const identifier::Notary& id) const noexcept
         -> UnallocatedCString final;
-    auto ServerList() const -> ObjectList final;
-    auto SetAccountAlias(const UnallocatedCString& id, std::string_view alias)
-        const -> bool final;
-    auto SetContactAlias(const UnallocatedCString& id, std::string_view alias)
-        const -> bool final;
-    auto SetDefaultNym(const identifier::Nym& id) const -> bool final;
-    auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const -> bool final;
-    auto SetNymAlias(const identifier::Nym& id, std::string_view alias) const
+    auto ServerList() const noexcept -> ObjectList final;
+    auto SetAccountAlias(const identifier::Account& id, std::string_view alias)
+        const noexcept -> bool final;
+    auto SetContactAlias(const identifier::Generic& id, std::string_view alias)
+        const noexcept -> bool final;
+    auto SetDefaultNym(const identifier::Nym& id) const noexcept -> bool final;
+    auto SetDefaultSeed(const opentxs::crypto::SeedID& id) const noexcept
         -> bool final;
+    auto SetNymAlias(const identifier::Nym& id, std::string_view alias)
+        const noexcept -> bool final;
     auto SetPeerRequestTime(
         const identifier::Nym& nymID,
         const identifier::Generic& id,
-        const otx::client::StorageBox box) const -> bool final;
+        const otx::client::StorageBox box) const noexcept -> bool final;
     auto SetReadState(
         const identifier::Nym& nymId,
-        const UnallocatedCString& threadId,
-        const UnallocatedCString& itemId,
-        const bool unread) const -> bool final;
+        const identifier::Generic& threadId,
+        const identifier::Generic& itemId,
+        const bool unread) const noexcept -> bool final;
     auto SetSeedAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
-        const -> bool final;
+        const noexcept -> bool final;
     auto SetServerAlias(const identifier::Notary& id, std::string_view alias)
-        const -> bool final;
+        const noexcept -> bool final;
     auto SetThreadAlias(
         const identifier::Nym& nymId,
-        const UnallocatedCString& threadId,
-        std::string_view alias) const -> bool final;
+        const identifier::Generic& threadId,
+        std::string_view alias) const noexcept -> bool final;
     auto SetUnitDefinitionAlias(
         const identifier::UnitDefinition& id,
-        std::string_view alias) const -> bool final;
+        std::string_view alias) const noexcept -> bool final;
     auto Store(
-        const UnallocatedCString& accountID,
+        const identifier::Account& accountID,
         const UnallocatedCString& data,
         std::string_view alias,
         const identifier::Nym& ownerNym,
@@ -422,35 +428,35 @@ public:
         const identifier::Nym& issuerNym,
         const identifier::Notary& server,
         const identifier::UnitDefinition& contract,
-        const UnitType unit) const -> bool final;
+        const UnitType unit) const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nymID,
         const identity::wot::claim::ClaimType type,
-        const proto::HDAccount& data) const -> bool final;
+        const proto::HDAccount& data) const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
-        const proto::Bip47Channel& data) const -> bool final;
-    auto Store(const proto::Contact& data) const -> bool final;
-    auto Store(const proto::Context& data) const -> bool final;
-    auto Store(const proto::Credential& data) const -> bool final;
-    auto Store(const proto::Nym& data, std::string_view alias = {}) const
+        const proto::Bip47Channel& data) const noexcept -> bool final;
+    auto Store(const proto::Contact& data) const noexcept -> bool final;
+    auto Store(const proto::Context& data) const noexcept -> bool final;
+    auto Store(const proto::Credential& data) const noexcept -> bool final;
+    auto Store(const proto::Nym& data, std::string_view alias = {})
+        const noexcept -> bool final;
+    auto Store(const ReadView& data, std::string_view alias = {}) const noexcept
         -> bool final;
-    auto Store(const ReadView& data, std::string_view alias = {}) const
-        -> bool final;
-    auto Store(const identifier::Nym& nymID, const proto::Issuer& data) const
-        -> bool final;
+    auto Store(const identifier::Nym& nymID, const proto::Issuer& data)
+        const noexcept -> bool final;
     auto Store(const identifier::Nym& nymID, const proto::PaymentWorkflow& data)
-        const -> bool final;
+        const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nymid,
-        const UnallocatedCString& threadid,
-        const UnallocatedCString& itemid,
+        const identifier::Generic& threadid,
+        const identifier::Generic& itemid,
         const std::uint64_t time,
         std::string_view alias,
         const UnallocatedCString& data,
         const otx::client::StorageBox box,
-        const UnallocatedCString& account = {}) const -> bool final;
+        const identifier::Generic& workflow) const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nym,
         const identifier::Generic& thread,
@@ -460,42 +466,49 @@ public:
     auto Store(
         const proto::PeerReply& data,
         const identifier::Nym& nymid,
-        const otx::client::StorageBox box) const -> bool final;
+        const otx::client::StorageBox box) const noexcept -> bool final;
     auto Store(
         const proto::PeerRequest& data,
         const identifier::Nym& nymid,
-        const otx::client::StorageBox box) const -> bool final;
-    auto Store(const identifier::Nym& nym, const proto::Purse& purse) const
-        -> bool final;
-    auto Store(const opentxs::crypto::SeedID& id, const proto::Seed& data) const
-        -> bool final;
+        const otx::client::StorageBox box) const noexcept -> bool final;
+    auto Store(const identifier::Nym& nym, const proto::Purse& purse)
+        const noexcept -> bool final;
+    auto Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+        const noexcept -> bool final;
     auto Store(const proto::ServerContract& data, std::string_view alias = {})
-        const -> bool final;
-    auto Store(const proto::Ciphertext& serialized) const -> bool final;
+        const noexcept -> bool final;
+    auto Store(const proto::Ciphertext& serialized) const noexcept
+        -> bool final;
     auto Store(const proto::UnitDefinition& data, std::string_view alias = {})
-        const -> bool final;
-    auto ThreadList(const identifier::Nym& nymID, const bool unreadOnly) const
-        -> ObjectList final;
+        const noexcept -> bool final;
+    auto ThreadList(const identifier::Nym& nymID, const bool unreadOnly)
+        const noexcept -> ObjectList final;
     auto ThreadAlias(
         const identifier::Nym& nymID,
-        const UnallocatedCString& threadID) const -> UnallocatedCString final;
+        const identifier::Generic& threadID) const noexcept
+        -> UnallocatedCString final;
     auto UnaffiliatedBlockchainTransaction(
         const identifier::Nym& recipient,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
         -> bool final;
-    auto UnitDefinitionAlias(const identifier::UnitDefinition& id) const
-        -> UnallocatedCString final;
-    auto UnitDefinitionList() const -> ObjectList final;
+    auto UnitDefinitionAlias(const identifier::UnitDefinition& id)
+        const noexcept -> UnallocatedCString final;
+    auto UnitDefinitionList() const noexcept -> ObjectList final;
     auto UnreadCount(
         const identifier::Nym& nymId,
-        const UnallocatedCString& threadId) const -> std::size_t final;
+        const identifier::Generic& threadId) const noexcept
+        -> std::size_t final;
+
+    auto DoGC(const opentxs::storage::tree::GCParams& params) noexcept -> bool;
+    auto FinishGC(bool success) noexcept -> void;
+    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto StartGC() const noexcept
+        -> std::optional<opentxs::storage::tree::GCParams>;
     auto Upgrade() noexcept -> void final;
 
     Storage(
         const api::Crypto& crypto,
-        const network::Asio& asio,
         const session::Factory& factory,
-        const Flag& running,
         const opentxs::storage::Config& config);
     Storage(const Storage&) = delete;
     Storage(Storage&&) = delete;
@@ -505,39 +518,30 @@ public:
     ~Storage() final;
 
 private:
-    static const std::uint32_t HASH_TYPE;
-
     const api::Crypto& crypto_;
     const api::session::Factory& factory_;
-    const network::Asio& asio_;
-    const Flag& running_;
-    std::int64_t gc_interval_;
+    const std::chrono::seconds gc_interval_;
     mutable std::mutex write_lock_;
-    mutable std::unique_ptr<opentxs::storage::Root> root_;
-    mutable OTFlag primary_bucket_;
+    mutable std::unique_ptr<opentxs::storage::tree::Root> root_;
+    mutable std::atomic<opentxs::storage::Bucket> primary_bucket_;
     const opentxs::storage::Config config_;
-    std::unique_ptr<opentxs::storage::driver::internal::Multiplex> multiplex_p_;
-    opentxs::storage::driver::internal::Multiplex& multiplex_;
+    std::shared_ptr<opentxs::storage::driver::Plugin> plugin_p_;
+    opentxs::storage::driver::Plugin& plugin_;
 
-    auto root() const -> opentxs::storage::Root*;
-    auto Root() const -> const opentxs::storage::Root&;
-    auto verify_write_lock(const Lock& lock) const -> bool;
+    auto root() const noexcept -> opentxs::storage::tree::Root*;
+    auto Root() const noexcept -> const opentxs::storage::tree::Root&;
+    auto verify_write_lock(const Lock& lock) const noexcept -> bool;
 
     auto blockchain_thread_item_id(
         const opentxs::blockchain::Type chain,
         const opentxs::blockchain::block::TransactionHash& txid) const noexcept
-        -> UnallocatedCString;
-    void Cleanup();
-    void Cleanup_Storage();
-    void CollectGarbage() const;
+        -> identifier::Generic;
     void InitBackup() final;
     void InitEncryptedBackup(opentxs::crypto::symmetric::Key& key) final;
     void InitPlugins();
-    auto mutable_Root() const -> Editor<opentxs::storage::Root>;
-    void RunMapPublicNyms(NymLambda lambda) const;
-    void RunMapServers(ServerLambda lambda) const;
-    void RunMapUnits(UnitLambda lambda) const;
-    void save(opentxs::storage::Root* in, const Lock& lock) const;
+    auto mutable_Root() const noexcept -> Editor<opentxs::storage::tree::Root>;
+    void save(opentxs::storage::tree::Root* in, const Lock& lock)
+        const noexcept;
     void start() final;
 };
 #pragma GCC diagnostic pop
