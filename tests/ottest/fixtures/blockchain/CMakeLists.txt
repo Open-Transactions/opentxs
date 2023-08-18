@@ -17,6 +17,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Address.hpp"
       "BIP158.cpp"
       "BIP158.hpp"
+      "BIP44.cpp"
+      "BIP44.hpp"
       "Basic.cpp"
       "Basic.hpp"
       "BitcoinTransaction.cpp"
