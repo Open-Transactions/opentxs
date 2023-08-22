@@ -37,7 +37,23 @@ ContactActivityQtFilterable::ContactActivityQtFilterable(
     ContactActivityQt& parent) noexcept
     : imp_(std::make_unique<Imp>(parent).release())
 {
-    setSourceModel(std::addressof(parent));
+    auto* p = std::addressof(parent);
+    setSourceModel(p);
+    connect(
+        p,
+        &ContactActivityQt::canMessageUpdate,
+        this,
+        &ContactActivityQtFilterable::canMessageUpdate);
+    connect(
+        p,
+        &ContactActivityQt::displayNameUpdate,
+        this,
+        &ContactActivityQtFilterable::displayNameUpdate);
+    connect(
+        p,
+        &ContactActivityQt::draftUpdate,
+        this,
+        &ContactActivityQtFilterable::draftUpdate);
 }
 
 auto ContactActivityQtFilterable::blacklistType(int type) -> void
