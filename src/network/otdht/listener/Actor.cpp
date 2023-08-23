@@ -407,7 +407,7 @@ auto Listener::Actor::process_external(Message&& msg) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
     }
 }
 

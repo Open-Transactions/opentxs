@@ -999,12 +999,12 @@ auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
 {
     // TODO c++20 use contains
     if (0_uz < peers_.count(endpoint)) {
-        log_(OT_PRETTY_CLASS())(name_)("already connected to ")(endpoint)
+        log_(OT_PRETTY_CLASS())(name_)(": already connected to ")(endpoint)
             .Flush();
 
         return;
     } else {
-        log_(OT_PRETTY_CLASS())(name_)("connecting to ")(endpoint).Flush();
+        log_(OT_PRETTY_CLASS())(name_)(": connecting to ")(endpoint).Flush();
     }
 
     auto alloc = get_allocator();

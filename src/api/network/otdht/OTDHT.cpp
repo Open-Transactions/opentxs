@@ -274,6 +274,7 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
         static const auto defaultServers = Endpoints{
             "tcp://metier1.opentransactions.org:8814",
             "tcp://metier2.opentransactions.org:8814",
+            "tcp://ot01.matterfi.net:8814",
         };
         const auto existing = [&] {
             auto out = Set<CString>{};
