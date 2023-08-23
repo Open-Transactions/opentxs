@@ -40,6 +40,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Common.hpp"
       "FaucetListener.cpp"
       "FaucetListener.hpp"
+      "Filters.cpp"
+      "Filters.hpp"
       "HeaderOracle.cpp"
       "HeaderOracle.hpp"
       "MinedBlocks.cpp"
