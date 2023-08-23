@@ -5,41 +5,14 @@
 
 #include "api/session/base/Scheduler.hpp"  // IWYU pragma: associated
 
-#include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/Thread.hpp"
-#include "opentxs/util/Time.hpp"
-
 namespace opentxs::api::session
 {
 Scheduler::Scheduler(const api::Context& parent, Flag& running)
     : Lockable()
     , parent_(parent)
     , running_(running)
-    , periodic_()
 {
 }
 
-void Scheduler::Start(const api::session::Storage* const storage)
-{
-    OT_ASSERT(nullptr != storage);
-
-    periodic_ = std::thread(&Scheduler::thread, this);
-}
-
-void Scheduler::thread()
-{
-    SetThisThreadsName("Scheduler");
-
-    while (running_) {
-        // Storage has its own interval checking.
-        storage_gc_hook();
-        Sleep(100ms);
-    }
-}
-
-Scheduler::~Scheduler()
-{
-    if (periodic_.joinable()) { periodic_.join(); }
-}
+Scheduler::~Scheduler() = default;
 }  // namespace opentxs::api::session

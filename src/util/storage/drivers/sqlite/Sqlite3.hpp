@@ -9,32 +9,25 @@ extern "C" {
 #include <sqlite3.h>
 }
 
+#include <cs_shared_guarded.h>
 #include <cstddef>
-#include <filesystem>
 #include <iosfwd>
-#include <mutex>
-#include <utility>
+#include <optional>
+#include <shared_mutex>
+#include <span>
+#include <string_view>
 
-#include "internal/util/Flag.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
+#include "util/storage/drivers/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
@@ -42,34 +35,28 @@ namespace storage
 {
 class Config;
 }  // namespace storage
+
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::driver
 {
-// SQLite3 implementation of opentxs::storage
-class Sqlite3 final : public virtual implementation::Plugin,
-                      public virtual storage::Driver
+class Sqlite3 final : public virtual storage::implementation::Driver
 {
 public:
-    auto EmptyBucket(const bool bucket) const -> bool final;
-    auto LoadFromBucket(
-        const UnallocatedCString& key,
-        UnallocatedCString& value,
-        const bool bucket) const -> bool final;
-    auto LoadRoot() const -> UnallocatedCString final;
-    auto StoreRoot(const bool commit, const UnallocatedCString& hash) const
-        -> bool final;
+    auto Description() const noexcept -> std::string_view final;
+    auto Load(const Log& logger, const Hash& key, Search order, Writer& value)
+        const noexcept -> bool final;
+    auto LoadRoot() const noexcept -> Hash final;
 
-    void Cleanup() final;
-    void Cleanup_Sqlite3();
+    auto Commit(const Hash& root, Transaction data, Bucket bucket)
+        const noexcept -> bool final;
+    auto EmptyBucket(Bucket bucket) const noexcept -> bool final;
+    auto Store(Transaction data, Bucket bucket) const noexcept -> bool final;
 
-    Sqlite3(
-        const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
-        const storage::Config& config,
-        const Flag& bucket);
+    Sqlite3(const api::Crypto& crypto, const storage::Config& config) noexcept(
+        false);
     Sqlite3() = delete;
     Sqlite3(const Sqlite3&) = delete;
     Sqlite3(Sqlite3&&) = delete;
@@ -79,44 +66,78 @@ public:
     ~Sqlite3() final;
 
 private:
-    using ot_super = Plugin;
+    struct Data {
+        auto Load(
+            const Log& logger,
+            const Hash& key,
+            Search order,
+            Writer& value) const noexcept -> bool;
+        auto LoadRoot() const noexcept -> Hash;
 
-    const std::filesystem::path folder_;
-    mutable std::mutex transaction_lock_;
-    mutable OTFlag transaction_bucket_;
-    mutable UnallocatedVector<
-        std::pair<const UnallocatedCString, const UnallocatedCString>>
-        pending_;
-    sqlite3* db_{nullptr};
+        auto Commit(const Hash& root, Transaction data, Bucket bucket)
+            const noexcept -> bool;
+        auto EmptyBucket(Bucket bucket) noexcept -> bool;
+        auto Store(Transaction data, Bucket bucket) const noexcept -> bool;
 
-    auto bind_key(
-        const UnallocatedCString& source,
-        const UnallocatedCString& key,
-        const std::size_t start) const -> UnallocatedCString;
-    void commit(std::stringstream& sql) const;
-    auto commit_transaction(const UnallocatedCString& rootHash) const -> bool;
-    auto Create(const UnallocatedCString& tablename) const -> bool;
-    auto expand_sql(sqlite3_stmt* statement) const -> UnallocatedCString;
-    auto GetTableName(const bool bucket) const -> UnallocatedCString;
-    auto Select(
-        const UnallocatedCString& key,
-        const UnallocatedCString& tablename,
-        UnallocatedCString& value) const -> bool;
-    auto Purge(const UnallocatedCString& tablename) const -> bool;
-    void set_data(std::stringstream& sql) const;
-    void set_root(const UnallocatedCString& rootHash, std::stringstream& sql)
-        const;
-    void start_transaction(std::stringstream& sql) const;
-    auto store(
-        const bool isTransaction,
-        const UnallocatedCString& key,
-        const UnallocatedCString& value,
-        const bool bucke) const -> bool final;
-    auto Upsert(
-        const UnallocatedCString& key,
-        const UnallocatedCString& tablename,
-        const UnallocatedCString& value) const -> bool;
+        Data(const storage::Config& config) noexcept(false);
+        Data(const Data&) = delete;
+        Data(Data&&) = delete;
+        auto operator=(const Data&) -> Data& = delete;
+        auto operator=(Data&&) -> Data& = delete;
 
-    void Init_Sqlite3();
+        ~Data();
+
+    private:
+        struct Wrapper {
+            operator ::sqlite3*() noexcept { return db_; }
+
+            Wrapper(const storage::Config& config) noexcept(false);
+            Wrapper() = delete;
+            Wrapper(const Wrapper&) = delete;
+            Wrapper(Wrapper&&) = delete;
+            auto operator=(const Wrapper&) -> Wrapper& = delete;
+            auto operator=(Wrapper&&) -> Wrapper& = delete;
+
+            ~Wrapper();
+
+        private:
+            ::sqlite3* db_;
+        };
+
+        const storage::Config& config_;
+
+        static auto check(int rc, int expected = SQLITE_OK) noexcept(false)
+            -> void;
+        static auto commit(std::stringstream& sql) noexcept -> void;
+        static auto expand_sql(sqlite3_stmt* statement) noexcept
+            -> UnallocatedCString;
+        static auto start_transaction(std::stringstream& sql) noexcept -> void;
+
+        auto begin_transaction() const noexcept(false) -> ::sqlite3_stmt*;
+        auto bind_key(ReadView source, ReadView key, const std::size_t start)
+            const noexcept(false) -> UnallocatedCString;
+        auto commit_transaction() const noexcept(false) -> ::sqlite3_stmt*;
+        auto create_table(Bucket bucket, ::sqlite3* db = nullptr) const
+            noexcept(false) -> ::sqlite3_stmt*;
+        auto create_table(std::string_view table, ::sqlite3* db = nullptr) const
+            noexcept(false) -> ::sqlite3_stmt*;
+        auto db() const noexcept -> ::sqlite3*;
+        auto drop(Bucket bucket) const noexcept(false) -> ::sqlite3_stmt*;
+        auto execute(sqlite3_stmt* statement) const noexcept(false) -> void;
+        auto get_table_name(Bucket bucket) const noexcept -> std::string_view;
+        auto insert(
+            std::span<const UnallocatedCString> keys,
+            std::span<const ReadView> values,
+            Bucket bucket) const noexcept(false) -> ::sqlite3_stmt*;
+        auto root(const Hash& hash) const noexcept(false) -> ::sqlite3_stmt*;
+        auto select(ReadView key, ReadView tablename, Writer& value)
+            const noexcept -> bool;
+        auto store(Transaction data, Bucket bucket, std::optional<Hash> root)
+            const noexcept -> bool;
+    };
+
+    using GuardedData = libguarded::shared_guarded<Data, std::shared_mutex>;
+
+    mutable GuardedData data_;
 };
 }  // namespace opentxs::storage::driver

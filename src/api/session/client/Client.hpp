@@ -92,7 +92,6 @@ public:
 
     auto Init() -> void final;
     auto Start(std::shared_ptr<session::Client> api) noexcept -> void final;
-    auto StartActivity() -> void;
     auto StartBlockchain() noexcept -> void;
     auto StartContacts() -> void;
 

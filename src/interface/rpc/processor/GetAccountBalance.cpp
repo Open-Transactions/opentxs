@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -142,8 +143,10 @@ auto RPC::get_account_balance_custodial(
             accountID.asBase58(api.Crypto()),
             account.get().Alias(),
             unit.asBase58(api.Crypto()),
-            api.Storage().AccountOwner(accountID).asBase58(api.Crypto()),
-            api.Storage().AccountIssuer(accountID).asBase58(api.Crypto()),
+            api.Storage().Internal().AccountOwner(accountID).asBase58(
+                api.Crypto()),
+            api.Storage().Internal().AccountIssuer(accountID).asBase58(
+                api.Crypto()),
             formatted,
             formatted,
             balance,

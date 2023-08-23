@@ -20,11 +20,6 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
-namespace network
-{
-class Asio;
-}  // namespace network
-
 namespace session
 {
 class Activity;
@@ -117,9 +112,7 @@ auto SessionFactoryAPI(
     -> std::unique_ptr<api::session::Factory>;
 auto StorageAPI(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
     const api::session::Factory& factory,
-    const Flag& running,
     const opentxs::storage::Config& config) noexcept
     -> std::shared_ptr<api::session::Storage>;
 auto UI(

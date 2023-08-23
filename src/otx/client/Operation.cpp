@@ -1870,9 +1870,7 @@ void Operation::execute()
                         otx::client::StorageBox::MAILOUTBOX,
                         memo_->Get());
 
-                    if (set_id_) {
-                        set_id_(api_.Factory().IdentifierFromBase58(messageID));
-                    }
+                    if (set_id_) { set_id_(messageID); }
 
                     set_result(std::move(finished));
                 } else {

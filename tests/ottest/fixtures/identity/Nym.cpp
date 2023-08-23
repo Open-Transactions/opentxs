@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "2_Factory.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/identity/Nym.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -137,7 +138,8 @@ auto Test_Nym::test_storage(const ot::api::session::Client& api) -> bool
         EXPECT_TRUE(nym.SerializeCredentialIndex(
             ot::writer(bytes), ot::identity::internal::Nym::Mode::Abbreviated));
 
-        EXPECT_TRUE(api.Storage().Store(ot::reader(bytes), nym.Alias()));
+        EXPECT_TRUE(
+            api.Storage().Internal().Store(ot::reader(bytes), nym.Alias()));
     }
 
     {
@@ -156,7 +158,7 @@ auto Test_Nym::test_storage(const ot::api::session::Client& api) -> bool
     {
         auto bytes = ot::Space{};
 
-        EXPECT_TRUE(api.Storage().LoadNym(id, ot::writer(bytes)));
+        EXPECT_TRUE(api.Storage().Internal().LoadNym(id, ot::writer(bytes)));
         EXPECT_TRUE(ot::valid(ot::reader(bytes)));
 
         pNym.reset(ot::Factory::Nym(api, ot::reader(bytes), alias));

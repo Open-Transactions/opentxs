@@ -17,9 +17,11 @@
 #include "internal/api/Context.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/api/network/Network.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PasswordPrompt.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -100,14 +102,12 @@ Session::Session(
     : session::ZMQ(crypto, zmq, instance)
     , session::Scheduler(parent, running)
     , base::Storage(
-          running,
           std::move(args),
           *this,
           endpoints_,
           crypto,
           config,
           parent.Internal().Legacy(),
-          parent.Asio(),
           zmq,
           dataFolder,
           std::move(factory))
@@ -121,19 +121,17 @@ Session::Session(
     , encrypted_secret_()
     , master_key_lock_()
     , master_secret_()
-    , master_key_(make_master_key(
-          parent,
-          factory_,
-          encrypted_secret_,
-          master_secret_,
-          crypto_.Symmetric(),
-          *storage_))
+    , master_key_(std::nullopt)
     , password_duration_(-1)
     , last_activity_()
     , init_promise_()
     , init_(init_promise_.get_future())
     , shutdown_promise_()
 {
+    auto& caller = parent.Internal().GetPasswordCaller();
+    external_password_callback_ = &caller;
+
+    OT_ASSERT(nullptr != external_password_callback_);
     OT_ASSERT(network_);
 
     if (master_secret_) {
@@ -194,7 +192,8 @@ auto Session::GetSecret(
         factory_.SecretFromText(DefaultPassword());
     auto prompt = factory_.PasswordPrompt(reason.GetDisplayString());
     prompt.Internal().SetPassword(defaultPassword);
-    auto unlocked = master_key_.Unlock(prompt);
+    const auto& masterKey = MasterKey(lock);
+    auto unlocked = masterKey.Unlock(prompt);
     auto tries{0};
 
     if ((false == unlocked) && (tries < 3)) {
@@ -209,7 +208,7 @@ auto Session::GetSecret(
         }
 
         prompt.Internal().SetPassword(masterPassword);
-        unlocked = master_key_.Unlock(prompt);
+        unlocked = masterKey.Unlock(prompt);
 
         if (false == unlocked) { ++tries; }
     }
@@ -221,7 +220,7 @@ auto Session::GetSecret(
         return success;
     }
 
-    const auto decrypted = master_key_.Internal().Decrypt(
+    const auto decrypted = masterKey.Internal().Decrypt(
         encrypted_secret_,
         master_secret_.value().WriteInto(Secret::Mode::Mem),
         prompt);
@@ -254,11 +253,8 @@ auto Session::make_master_key(
     const api::session::Storage& storage) -> opentxs::crypto::symmetric::Key
 {
     auto& caller = parent.Internal().GetPasswordCaller();
-    external_password_callback_ = &caller;
-
-    OT_ASSERT(nullptr != external_password_callback_);
-
-    const auto have = storage.Load(encrypted, true);
+    using enum opentxs::storage::ErrorReporting;
+    const auto have = storage.Internal().Load(encrypted, silent);
 
     if (have) {
 
@@ -288,17 +284,33 @@ auto Session::make_master_key(
 
     OT_ASSERT(saved);
 
-    saved = storage.Store(encrypted);
+    saved = storage.Internal().Store(encrypted);
 
     OT_ASSERT(saved);
 
     return output;
 }
 
+auto Session::MasterKey(const opentxs::Lock& lock)
+    -> opentxs::crypto::symmetric::Key&
+{
+    if (false == master_key_.has_value()) {
+        master_key_.emplace(make_master_key(
+            parent_,
+            factory_,
+            encrypted_secret_,
+            master_secret_,
+            crypto_.Symmetric(),
+            *storage_));
+    }
+
+    return *master_key_;
+}
+
 auto Session::MasterKey(const opentxs::Lock& lock) const
     -> const opentxs::crypto::symmetric::Key&
 {
-    return master_key_;
+    return const_cast<Session*>(this)->MasterKey(lock);
 }
 
 void Session::SetMasterKeyTimeout(
@@ -323,6 +335,7 @@ auto Session::start(std::shared_ptr<const api::Session> me) noexcept -> void
     OT_ASSERT(me);
 
     init_promise_.set_value();
+    storage_->Internal().Start(me);
 }
 
 auto Session::Stop() noexcept -> std::future<void>
@@ -337,11 +350,6 @@ auto Session::Storage() const noexcept -> const api::session::Storage&
     OT_ASSERT(storage_);
 
     return *storage_;
-}
-
-void Session::storage_gc_hook()
-{
-    if (storage_) { storage_->RunGC(); }
 }
 
 // TODO

@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"  // IWYU pragma: keep
@@ -294,7 +295,8 @@ auto AccountTree::load_custodial(ChildMap& out) const noexcept -> void
 {
     const auto& storage = api_.Storage();
 
-    for (const auto& account : storage.AccountsByOwner(primary_id_)) {
+    for (const auto& account :
+         storage.Internal().AccountsByOwner(primary_id_)) {
         load_custodial_account(
             std::move(const_cast<identifier::Account&>(account)), out);
     }
@@ -357,7 +359,7 @@ auto AccountTree::load_custodial_account(
     }();
     auto& accountMap = std::get<3>(currencyData);
     const auto& api = api_;
-    auto notaryID = api.Storage().AccountServer(id);
+    auto notaryID = api.Storage().Internal().AccountServer(id);
     // TODO set sort index
     auto [it, added] = accountMap.try_emplace(
         std::move(id),
@@ -504,7 +506,7 @@ auto AccountTree::process_custodial(Message&& message) noexcept -> void
 
     const auto& api = api_;
     auto id = api.Factory().AccountIDFromZMQ(body[1]);
-    const auto owner = api.Storage().AccountOwner(id);
+    const auto owner = api.Storage().Internal().AccountOwner(id);
 
     if (owner != primary_id_) { return; }
 

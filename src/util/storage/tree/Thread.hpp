@@ -13,8 +13,10 @@
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -32,37 +34,43 @@ class Crypto;
 
 namespace storage
 {
-class Driver;
+namespace tree
+{
 class Mailbox;
 class Threads;
+}  // namespace tree
+
+namespace driver
+{
+class Plugin;
+}  // namespace driver
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class Thread final : public Node
 {
 public:
     auto Alias() const -> UnallocatedCString;
-    auto Check(const UnallocatedCString& id) const -> bool;
-    auto ID() const -> UnallocatedCString;
+    auto Check(const identifier::Generic& id) const -> bool;
+    auto ID() const -> identifier::Generic;
     auto Items() const -> proto::StorageThread;
-    auto Migrate(const Driver& to) const -> bool final;
     auto UnreadCount() const -> std::size_t;
 
     auto Add(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         const std::uint64_t time,
         const otx::client::StorageBox& box,
         std::string_view alias,
         const UnallocatedCString& contents,
         const std::uint64_t index = 0,
-        const UnallocatedCString& account = {},
+        const identifier::Generic& workflow = {},
         const std::uint32_t chain = {}) -> bool;
-    auto Read(const UnallocatedCString& id, const bool unread) -> bool;
-    auto Rename(const UnallocatedCString& newID) -> bool;
-    auto Remove(const UnallocatedCString& id) -> bool;
+    auto Read(const identifier::Generic& id, const bool unread) -> bool;
+    auto Rename(const identifier::Generic& newID) -> bool;
+    auto Remove(const identifier::Generic& id) -> bool;
     auto SetAlias(std::string_view alias) -> bool;
 
     Thread() = delete;
@@ -75,42 +83,42 @@ public:
 
 private:
     friend Threads;
-    using SortKey = std::tuple<std::size_t, std::int64_t, UnallocatedCString>;
+    using SortKey = std::tuple<std::size_t, std::int64_t, identifier::Generic>;
     using SortedItems =
         UnallocatedMap<SortKey, const proto::StorageThreadItem*>;
 
-    UnallocatedCString id_;
+    identifier::Generic id_;
     UnallocatedCString alias_;
     std::size_t index_;
     Mailbox& mail_inbox_;
     Mailbox& mail_outbox_;
-    UnallocatedMap<UnallocatedCString, proto::StorageThreadItem> items_;
+    UnallocatedMap<identifier::Generic, proto::StorageThreadItem> items_;
     // It's important to use a sorted container for this so the thread ID can be
     // calculated deterministically
-    UnallocatedSet<UnallocatedCString> participants_;
+    UnallocatedSet<identifier::Generic> participants_;
 
-    void init(const UnallocatedCString& hash) final;
+    auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const Lock& lock) const -> bool final;
     auto serialize(const Lock& lock) const -> proto::StorageThread;
     auto sort(const Lock& lock) const -> SortedItems;
-    void upgrade(const Lock& lock);
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Thread(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& id,
-        const UnallocatedCString& hash,
+        const driver::Plugin& storage,
+        const identifier::Generic& id,
+        const Hash& hash,
         std::string_view alias,
         Mailbox& mailInbox,
         Mailbox& mailOutbox);
     Thread(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& id,
-        const UnallocatedSet<UnallocatedCString>& participants,
+        const driver::Plugin& storage,
+        const identifier::Generic& id,
+        const UnallocatedSet<identifier::Generic>& participants,
         Mailbox& mailInbox,
         Mailbox& mailOutbox);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

@@ -5,17 +5,13 @@
 
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Plugin.hpp"
+#include "opentxs/util/storage/Driver.hpp"
 
 namespace opentxs::factory
 {
-auto StorageSqlite3(
-    const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>
+auto StorageSqlite3(const api::Crypto&, const storage::Config&) noexcept
+    -> std::unique_ptr<storage::Driver>
 {
-    return nullptr;
+    return {};
 }
 }  // namespace opentxs::factory

@@ -18,6 +18,7 @@
 #include "2_Factory.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -51,11 +52,11 @@ const ot::identifier::Nym Basic::bob_nym_id_{};
 ot::TransactionNumber Basic::cheque_transaction_number_{0};
 ot::UnallocatedCString Basic::bob_account_1_id_{""};
 ot::UnallocatedCString Basic::bob_account_2_id_{""};
-ot::UnallocatedCString Basic::outgoing_cheque_workflow_id_{};
-ot::UnallocatedCString Basic::incoming_cheque_workflow_id_{};
-ot::UnallocatedCString Basic::outgoing_transfer_workflow_id_{};
-ot::UnallocatedCString Basic::incoming_transfer_workflow_id_{};
-ot::UnallocatedCString Basic::internal_transfer_workflow_id_{};
+ot::identifier::Generic Basic::outgoing_cheque_workflow_id_{};
+ot::identifier::Generic Basic::incoming_cheque_workflow_id_{};
+ot::identifier::Generic Basic::outgoing_transfer_workflow_id_{};
+ot::identifier::Generic Basic::incoming_transfer_workflow_id_{};
+ot::identifier::Generic Basic::internal_transfer_workflow_id_{};
 const ot::UnallocatedCString Basic::unit_id_1_{};
 const ot::UnallocatedCString Basic::unit_id_2_{};
 std::unique_ptr<ot::otx::client::internal::Operation>
@@ -258,7 +259,8 @@ void Basic::create_unit_definition_2()
 
 auto Basic::find_issuer_account() -> ot::identifier::Account
 {
-    const auto accounts = client_1_.Storage().AccountsByOwner(alice_nym_id_);
+    const auto accounts =
+        client_1_.Storage().Internal().AccountsByOwner(alice_nym_id_);
 
     OT_ASSERT(1 == accounts.size());
 
@@ -271,7 +273,8 @@ auto Basic::find_unit_definition_id_1() -> ot::identifier::UnitDefinition
 
     OT_ASSERT(false == accountID.empty());
 
-    const auto output = client_1_.Storage().AccountContract(accountID);
+    const auto output =
+        client_1_.Storage().Internal().AccountContract(accountID);
 
     OT_ASSERT(false == output.empty());
 

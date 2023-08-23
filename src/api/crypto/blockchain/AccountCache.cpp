@@ -10,6 +10,7 @@
 #include <span>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -81,8 +82,8 @@ auto AccountCache::load_nym(
     const identifier::Nym& nym,
     NymAccountMap& output) const noexcept -> void
 {
-    const auto hd =
-        api_.Storage().BlockchainAccountList(nym, blockchain_to_unit(chain));
+    const auto hd = api_.Storage().Internal().BlockchainAccountList(
+        nym, blockchain_to_unit(chain));
     std::for_each(std::begin(hd), std::end(hd), [&](const auto& accountID) {
         auto& set = output[nym];
         account_index_.emplace(accountID, nym);
@@ -90,8 +91,8 @@ auto AccountCache::load_nym(
             accountID, opentxs::blockchain::crypto::SubaccountType::HD);
         set.emplace(std::move(accountID));
     });
-    const auto pc =
-        api_.Storage().Bip47ChannelsByChain(nym, blockchain_to_unit(chain));
+    const auto pc = api_.Storage().Internal().Bip47ChannelsByChain(
+        nym, blockchain_to_unit(chain));
     std::for_each(std::begin(pc), std::end(pc), [&](const auto& accountID) {
         auto& set = output[nym];
         account_index_.emplace(accountID, nym);

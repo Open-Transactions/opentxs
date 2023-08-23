@@ -168,16 +168,12 @@ auto PaymentItem::extract(
         case otx::client::StorageBox::INCOMINGCHEQUE:
         case otx::client::StorageBox::OUTGOINGCHEQUE: {
             auto message = api.Activity().PaymentText(
-                nym,
-                itemID.asBase58(api.Crypto()),
-                account.asBase58(api.Crypto()));
+                nym, itemID.asBase58(api.Crypto()), account);
 
             if (message) { text = *message; }
 
-            const auto [cheque, contract] = api.Activity().Internal().Cheque(
-                nym,
-                itemID.asBase58(api.Crypto()),
-                account.asBase58(api.Crypto()));
+            const auto [cheque, contract] =
+                api.Activity().Internal().Cheque(nym, account);
 
             if (cheque) {
                 memo = cheque->GetMemo().Get();

@@ -21,6 +21,7 @@ extern "C" {
 
 #include "crypto/library/openssl/BIO.hpp"
 #include "crypto/library/openssl/OpenSSL.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -509,7 +510,8 @@ auto Lucre::IsSpent(const PasswordPrompt& reason) const -> bool
         throw std::runtime_error("failed to calculate token ID");
     }
 
-    return api_.Storage().CheckTokenSpent(notary_, unit_, series_, id);
+    return api_.Storage().Internal().CheckTokenSpent(
+        notary_, unit_, series_, id);
 }
 
 auto Lucre::MarkSpent(const PasswordPrompt& reason) -> bool
@@ -526,7 +528,8 @@ auto Lucre::MarkSpent(const PasswordPrompt& reason) -> bool
     }
 
     try {
-        output = api_.Storage().MarkTokenSpent(notary_, unit_, series_, id);
+        output = api_.Storage().Internal().MarkTokenSpent(
+            notary_, unit_, series_, id);
     } catch (...) {
         LogError()(OT_PRETTY_CLASS())("Failed to load spendable token").Flush();
     }

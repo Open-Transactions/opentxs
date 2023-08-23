@@ -60,7 +60,7 @@ auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
 
 namespace opentxs::storage::driver::filesystem
 {
-auto Common::sync(DescriptorType::handle_type fd) const -> bool
+auto Common::sync(DescriptorType::handle_type fd) noexcept -> bool
 {
     return 0 == ::fsync(fd);
 }

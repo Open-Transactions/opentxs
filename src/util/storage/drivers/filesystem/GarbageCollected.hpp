@@ -8,7 +8,7 @@
 #include <filesystem>
 #include <string_view>
 
-#include "opentxs/util/storage/Driver.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/drivers/filesystem/Common.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -16,16 +16,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
@@ -33,30 +23,20 @@ namespace storage
 {
 class Config;
 }  // namespace storage
-
-class Flag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::storage::driver::filesystem
 {
 // Simple filesystem implementation of opentxs::storage
-class GarbageCollected final : public Common, public virtual storage::Driver
+class GarbageCollected final : public Common
 {
-private:
-    using ot_super = Common;
-
 public:
-    auto EmptyBucket(const bool bucket) const -> bool final;
-
-    void Cleanup() final;
+    auto Description() const noexcept -> std::string_view final;
 
     GarbageCollected(
         const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
-        const storage::Config& config,
-        const Flag& bucket);
+        const storage::Config& config) noexcept(false);
     GarbageCollected() = delete;
     GarbageCollected(const GarbageCollected&) = delete;
     GarbageCollected(GarbageCollected&&) = delete;
@@ -68,12 +48,17 @@ public:
 private:
     static auto purge(const fs::path& path) noexcept -> void;
 
-    auto bucket_name(const bool bucket) const noexcept -> fs::path;
-    auto calculate_path(std::string_view key, bool bucket, fs::path& directory)
-        const noexcept -> fs::path final;
-    auto root_filename() const -> fs::path final;
+    auto bucket_name(Bucket bucket) const noexcept -> fs::path;
+    auto calculate_path(
+        const Data& data,
+        std::string_view key,
+        Bucket bucket,
+        fs::path& directory) const noexcept -> fs::path final;
+    auto empty_bucket(const Data& data, Bucket bucket) const noexcept(false)
+        -> bool final;
+    auto root_filename(const Data& data) const noexcept -> fs::path final;
 
-    void Cleanup_GarbageCollected();
-    void Init_GarbageCollected();
+    using Common::init;
+    auto init(Data& data) noexcept(false) -> void final;
 };
 }  // namespace opentxs::storage::driver::filesystem

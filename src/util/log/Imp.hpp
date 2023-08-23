@@ -15,6 +15,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/log/Logger.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -81,6 +82,7 @@ public:
         -> void;
     auto Buffer(const PaymentCode& in) const noexcept -> void;
     auto Buffer(const Time in) const noexcept -> void;
+    auto Buffer(const storage::Hash& in) const noexcept -> void;
     auto Buffer(const blockchain::block::Outpoint& outpoint) const noexcept
         -> void;
     auto Buffer(const blockchain::block::Position& position) const noexcept

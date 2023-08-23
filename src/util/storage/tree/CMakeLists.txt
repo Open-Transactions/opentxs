@@ -6,8 +6,11 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/util/storage/tree/Types.hpp"
     "Accounts.cpp"
     "Accounts.hpp"
+    "Actor.cpp"
+    "Actor.hpp"
     "Bip47Channels.cpp"
     "Bip47Channels.hpp"
     "Contacts.cpp"
@@ -16,7 +19,6 @@ target_sources(
     "Contexts.hpp"
     "Credentials.cpp"
     "Credentials.hpp"
-    "GC.cpp"
     "Issuers.cpp"
     "Issuers.hpp"
     "Mailbox.cpp"
@@ -45,8 +47,8 @@ target_sources(
     "Thread.hpp"
     "Threads.cpp"
     "Threads.hpp"
-    "Tree.cpp"
-    "Tree.hpp"
+    "Trunk.cpp"
+    "Trunk.hpp"
     "Units.cpp"
     "Units.hpp"
 )

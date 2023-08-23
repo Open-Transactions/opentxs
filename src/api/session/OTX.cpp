@@ -26,6 +26,7 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -2106,7 +2107,7 @@ auto OTX::refresh_accounts() const -> bool
 {
     LogVerbose()(OT_PRETTY_CLASS())("Begin").Flush();
     const auto serverList = api_.Wallet().ServerList();
-    const auto accounts = api_.Storage().AccountList();
+    const auto accounts = api_.Storage().Internal().AccountList();
 
     for (const auto& server : serverList) {
         SHUTDOWN_OTX();
@@ -2152,8 +2153,9 @@ auto OTX::refresh_accounts() const -> bool
     for (const auto& it : accounts) {
         SHUTDOWN_OTX();
         const auto accountID = api_.Factory().AccountIDFromBase58(it.first);
-        const auto nymID = api_.Storage().AccountOwner(accountID);
-        const auto serverID = api_.Storage().AccountServer(accountID);
+        const auto nymID = api_.Storage().Internal().AccountOwner(accountID);
+        const auto serverID =
+            api_.Storage().Internal().AccountServer(accountID);
         LogDetail()(OT_PRETTY_CLASS())("Account ")(accountID, api_.Crypto())(
             ": ")("  * Owned by nym: ")(nymID, api_.Crypto())(
             "  * "
@@ -2723,11 +2725,13 @@ auto OTX::valid_account(
 {
     UnallocatedSet<identifier::Generic> matchingAccounts{};
 
-    for (const auto& it : api_.Storage().AccountList()) {
+    for (const auto& it : api_.Storage().Internal().AccountList()) {
         const auto accountID = api_.Factory().AccountIDFromBase58(it.first);
-        const auto nymID = api_.Storage().AccountOwner(accountID);
-        const auto serverID = api_.Storage().AccountServer(accountID);
-        const auto unitID = api_.Storage().AccountContract(accountID);
+        const auto nymID = api_.Storage().Internal().AccountOwner(accountID);
+        const auto serverID =
+            api_.Storage().Internal().AccountServer(accountID);
+        const auto unitID =
+            api_.Storage().Internal().AccountContract(accountID);
 
         if (nymID != recipient) { continue; }
 

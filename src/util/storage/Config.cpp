@@ -5,6 +5,7 @@
 
 #include "util/storage/Config.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
 #include <chrono>
 
 #include "internal/api/Legacy.hpp"
@@ -100,14 +101,15 @@ Config::Config(
     , gc_interval_([&] {
         auto output = std::int64_t{};
         auto notUsed{false};
+        constexpr auto defaultInterval = 3600;
         config.Internal().CheckSet_long(
             String::Factory(STORAGE_CONFIG_KEY),
             String::Factory("gc_interval"),
-            0,
+            3600,
             output,
             notUsed);
 
-        return output;
+        return std::max<decltype(gc_interval_)>(output, defaultInterval);
     }())
     , path_([&]() -> std::filesystem::path {
         auto output = std::filesystem::path{};

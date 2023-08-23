@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
@@ -149,7 +150,7 @@ auto RPC::send_payment_custodial(
         return reply(ResponseCode::contact_not_found);
     }
 
-    const auto sender = api.Storage().AccountOwner(source);
+    const auto sender = api.Storage().Internal().AccountOwner(source);
 
     if (sender.empty()) { return reply(ResponseCode::account_owner_not_found); }
 
@@ -197,7 +198,7 @@ auto RPC::send_payment_custodial(
         case PaymentType::transfer: {
             const auto destination =
                 api.Factory().AccountIDFromBase58(command.DestinationAccount());
-            const auto notary = api.Storage().AccountServer(source);
+            const auto notary = api.Storage().Internal().AccountServer(source);
             auto [taskID, future] = otx.SendTransfer(
                 sender,
                 notary,

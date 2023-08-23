@@ -11,15 +11,15 @@ endif()
 add_subdirectory(tree)
 
 libopentxs_add_public_header("util/storage" "Driver.hpp")
-libopentxs_add_public_header("util/storage" "Plugin.hpp")
+libopentxs_add_public_header("util/storage" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/util/storage/Types.hpp"
+    "Common.cpp"
     "Config.cpp"
     "Config.hpp"
-    "Plugin.cpp"
-    "Plugin.hpp"
 )
 
 if(LMDB_EXPORT)

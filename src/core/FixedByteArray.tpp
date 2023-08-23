@@ -12,11 +12,9 @@ extern "C" {
 }
 
 #include <boost/endian/buffers.hpp>
-#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <string_view>
 
@@ -33,12 +31,13 @@ template <std::size_t N>
 FixedByteArray<N>::FixedByteArray() noexcept
     : data_()
 {
+    clear();
     static_assert(0 < N);
 }
 
 template <std::size_t N>
 FixedByteArray<N>::FixedByteArray(const ReadView bytes) noexcept(false)
-    : data_()
+    : FixedByteArray()
 {
     if (false == Assign(bytes)) {
         const auto error = CString{"input size "}

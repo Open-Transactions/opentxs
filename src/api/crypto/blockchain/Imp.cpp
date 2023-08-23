@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -305,7 +306,8 @@ auto Blockchain::Imp::AssignContact(
     auto lock = Lock{nym_mutex(nymID)};
 
     const auto chain = unit_to_blockchain(
-        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
+        api_.Storage().Internal().BlockchainSubaccountAccountType(
+            nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
@@ -345,7 +347,8 @@ auto Blockchain::Imp::AssignLabel(
     auto lock = Lock{nym_mutex(nymID)};
 
     const auto chain = unit_to_blockchain(
-        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID));
+        api_.Storage().Internal().BlockchainSubaccountAccountType(
+            nymID, accountID));
 
     OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
@@ -1026,7 +1029,8 @@ auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     const auto& nymID = accounts_.Owner(accountID);
     const auto& wallet = [&]() -> auto& {
         const auto type =
-            api_.Storage().BlockchainSubaccountAccountType(nymID, accountID);
+            api_.Storage().Internal().BlockchainSubaccountAccountType(
+                nymID, accountID);
 
         if (UnitType::Error == type) {
             const auto error =
@@ -1069,8 +1073,8 @@ auto Blockchain::Imp::HDSubaccount(
     const identifier::Account& accountID) const noexcept(false)
     -> const opentxs::blockchain::crypto::HD&
 {
-    const auto type =
-        api_.Storage().BlockchainSubaccountAccountType(nymID, accountID);
+    const auto type = api_.Storage().Internal().BlockchainSubaccountAccountType(
+        nymID, accountID);
 
     if (UnitType::Error == type) {
         const auto error = UnallocatedCString{"HD account "} +
@@ -1469,7 +1473,7 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     const identifier::Account& accountID) const noexcept(false)
     -> const opentxs::blockchain::crypto::PaymentCode&
 {
-    const auto type = api_.Storage().Bip47Chain(nymID, accountID);
+    const auto type = api_.Storage().Internal().Bip47Chain(nymID, accountID);
 
     if (UnitType::Error == type) {
         const auto error = UnallocatedCString{"Payment code account "} +
@@ -1498,7 +1502,7 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     const auto accountID =
         opentxs::blockchain::crypto::internal::PaymentCode::GetID(
             api_, chain, local, remote);
-    const auto type = api_.Storage().Bip47Chain(nymID, accountID);
+    const auto type = api_.Storage().Internal().Bip47Chain(nymID, accountID);
 
     if (UnitType::Error == type) {
         const auto id =

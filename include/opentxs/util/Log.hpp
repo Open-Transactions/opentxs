@@ -14,6 +14,7 @@
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
@@ -126,6 +127,7 @@ public:
     auto operator()(
         const identifier::UnitDefinition& in,
         const api::Crypto& api) const noexcept -> const Log&;
+    auto operator()(const storage::Hash& in) const noexcept -> const Log&;
     auto operator()(const std::chrono::nanoseconds& in) const noexcept
         -> const Log&;
     auto operator()(const std::filesystem::path& in) const noexcept

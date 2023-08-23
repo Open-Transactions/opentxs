@@ -7,10 +7,12 @@
 
 #include <InstrumentRevision.pb.h>
 #include <PaymentWorkflow.pb.h>
-#include <StorageItemHash.pb.h>
 #include <StoragePaymentWorkflows.pb.h>
 #include <StorageWorkflowIndex.pb.h>
 #include <StorageWorkflowType.pb.h>
+#include <atomic>
+#include <stdexcept>
+#include <string_view>
 #include <tuple>
 
 #include "internal/api/session/Types.hpp"
@@ -18,23 +20,27 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/StoragePaymentWorkflows.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 PaymentWorkflows::PaymentWorkflows(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
     , archived_()
     , item_workflow_map_()
     , account_workflow_map_()
@@ -43,16 +49,16 @@ PaymentWorkflows::PaymentWorkflows(
     , type_workflow_map_()
     , state_workflow_map_()
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(current_version_);
+        blank();
     }
 }
 
 void PaymentWorkflows::add_state_index(
     const Lock& lock,
-    const UnallocatedCString& workflowID,
+    const identifier::Generic& workflowID,
     otx::client::PaymentWorkflowType type,
     otx::client::PaymentWorkflowState state)
 {
@@ -67,7 +73,7 @@ void PaymentWorkflows::add_state_index(
     state_workflow_map_[key].emplace(workflowID);
 }
 
-auto PaymentWorkflows::Delete(const UnallocatedCString& id) -> bool
+auto PaymentWorkflows::Delete(const identifier::Generic& id) -> bool
 {
     Lock lock(write_lock_);
     delete_by_value(id);
@@ -76,7 +82,7 @@ auto PaymentWorkflows::Delete(const UnallocatedCString& id) -> bool
     return delete_item(id);
 }
 
-void PaymentWorkflows::delete_by_value(const UnallocatedCString& value)
+void PaymentWorkflows::delete_by_value(const identifier::Generic& value)
 {
     auto it = item_workflow_map_.begin();
 
@@ -89,7 +95,7 @@ void PaymentWorkflows::delete_by_value(const UnallocatedCString& value)
     }
 }
 
-auto PaymentWorkflows::GetState(const UnallocatedCString& workflowID) const
+auto PaymentWorkflows::GetState(const identifier::Generic& workflowID) const
     -> PaymentWorkflows::State
 {
     State output{
@@ -110,49 +116,60 @@ auto PaymentWorkflows::GetState(const UnallocatedCString& workflowID) const
     return output;
 }
 
-void PaymentWorkflows::init(const UnallocatedCString& hash)
+auto PaymentWorkflows::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StoragePaymentWorkflows> serialized;
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StoragePaymentWorkflows>{};
 
-    if (!serialized) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load workflow index file.")
-            .Flush();
-        OT_FAIL;
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(current_version_, *serialized);
+        switch (set_original_version(proto.version())) {
+            case 3u:
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.workflow());
 
-    for (const auto& it : serialized->workflow()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
-    }
+                for (const auto& it : proto.items()) {
+                    item_workflow_map_.emplace(
+                        factory_.IdentifierFromBase58(it.item()),
+                        factory_.IdentifierFromBase58(it.workflow()));
+                }
 
-    for (const auto& it : serialized->items()) {
-        item_workflow_map_.emplace(it.item(), it.workflow());
-    }
+                for (const auto& it : proto.accounts()) {
+                    account_workflow_map_[factory_.AccountIDFromBase58(
+                                              it.item())]
+                        .emplace(factory_.IdentifierFromBase58(it.workflow()));
+                }
 
-    for (const auto& it : serialized->accounts()) {
-        account_workflow_map_[it.item()].emplace(it.workflow());
-    }
+                for (const auto& it : proto.units()) {
+                    unit_workflow_map_[factory_.UnitIDFromBase58(it.item())]
+                        .emplace(factory_.IdentifierFromBase58(it.workflow()));
+                }
 
-    for (const auto& it : serialized->units()) {
-        unit_workflow_map_[it.item()].emplace(it.workflow());
-    }
+                for (const auto& it : proto.archived()) {
+                    archived_.emplace(factory_.IdentifierFromBase58(it));
+                }
 
-    for (const auto& it : serialized->archived()) { archived_.emplace(it); }
+                Lock lock(write_lock_);
 
-    Lock lock(write_lock_);
-
-    for (const auto& it : serialized->types()) {
-        const auto& workflowID = it.workflow();
-        const auto& type = it.type();
-        const auto& state = it.state();
-        add_state_index(lock, workflowID, translate(type), translate(state));
+                for (const auto& it : proto.types()) {
+                    const auto workflowID =
+                        factory_.IdentifierFromBase58(it.workflow());
+                    const auto& type = it.type();
+                    const auto& state = it.state();
+                    add_state_index(
+                        lock, workflowID, translate(type), translate(state));
+                }
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
-auto PaymentWorkflows::ListByAccount(const UnallocatedCString& accountID) const
+auto PaymentWorkflows::ListByAccount(const identifier::Account& accountID) const
     -> PaymentWorkflows::Workflows
 {
     Lock lock(write_lock_);
@@ -163,8 +180,8 @@ auto PaymentWorkflows::ListByAccount(const UnallocatedCString& accountID) const
     return it->second;
 }
 
-auto PaymentWorkflows::ListByUnit(const UnallocatedCString& accountID) const
-    -> PaymentWorkflows::Workflows
+auto PaymentWorkflows::ListByUnit(const identifier::UnitDefinition& accountID)
+    const -> PaymentWorkflows::Workflows
 {
     Lock lock(write_lock_);
     const auto it = unit_workflow_map_.find(accountID);
@@ -188,17 +205,17 @@ auto PaymentWorkflows::ListByState(
 }
 
 auto PaymentWorkflows::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::shared_ptr<proto::PaymentWorkflow>& output,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     UnallocatedCString alias;
 
     return load_proto<proto::PaymentWorkflow>(id, output, alias, checking);
 }
 
-auto PaymentWorkflows::LookupBySource(const UnallocatedCString& sourceID) const
-    -> UnallocatedCString
+auto PaymentWorkflows::LookupBySource(const identifier::Generic& sourceID) const
+    -> identifier::Generic
 {
     Lock lock(write_lock_);
     const auto it = item_workflow_map_.find(sourceID);
@@ -210,7 +227,7 @@ auto PaymentWorkflows::LookupBySource(const UnallocatedCString& sourceID) const
 
 void PaymentWorkflows::reindex(
     const Lock& lock,
-    const UnallocatedCString& workflowID,
+    const identifier::Generic& workflowID,
     const otx::client::PaymentWorkflowType type,
     const otx::client::PaymentWorkflowState newState,
     otx::client::PaymentWorkflowState& state)
@@ -244,7 +261,7 @@ auto PaymentWorkflows::save(const Lock& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
@@ -254,23 +271,20 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
             serialize_index(
-                hash_version_,
-                item.first,
-                item.second,
-                *serialized.add_workflow());
+                item.first, item.second, *serialized.add_workflow());
         }
     }
 
     for (const auto& [item, workflow] : item_workflow_map_) {
         auto& newIndex = *serialized.add_items();
         newIndex.set_version(index_version_);
-        newIndex.set_workflow(workflow);
-        newIndex.set_item(item);
+        newIndex.set_workflow(workflow.asBase58(crypto_));
+        newIndex.set_item(item.asBase58(crypto_));
     }
 
     for (const auto& [account, workflowSet] : account_workflow_map_) {
@@ -281,8 +295,8 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
 
             auto& newAccount = *serialized.add_accounts();
             newAccount.set_version(index_version_);
-            newAccount.set_workflow(workflow);
-            newAccount.set_item(account);
+            newAccount.set_workflow(workflow.asBase58(crypto_));
+            newAccount.set_item(account.asBase58(crypto_));
         }
     }
 
@@ -294,8 +308,8 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
 
             auto& newUnit = *serialized.add_units();
             newUnit.set_version(index_version_);
-            newUnit.set_workflow(workflow);
-            newUnit.set_item(unit);
+            newUnit.set_workflow(workflow.asBase58(crypto_));
+            newUnit.set_item(unit.asBase58(crypto_));
         }
     }
 
@@ -309,7 +323,7 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
 
         auto& newIndex = *serialized.add_types();
         newIndex.set_version(type_version_);
-        newIndex.set_workflow(workflow);
+        newIndex.set_workflow(workflow.asBase58(crypto_));
         newIndex.set_type(translate(type));
         newIndex.set_state(translate(state));
     }
@@ -317,7 +331,7 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
     for (const auto& archived : archived_) {
         OT_ASSERT(false == archived.empty());
 
-        serialized.add_archived(archived);
+        serialized.add_archived(archived.asBase58(crypto_));
     }
 
     return serialized;
@@ -329,11 +343,12 @@ auto PaymentWorkflows::Store(
 {
     Lock lock(write_lock_);
     UnallocatedCString alias;
-    const auto& id = data.id();
+    const auto id = factory_.IdentifierFromBase58(data.id());
     delete_by_value(id);
 
     for (const auto& source : data.source()) {
-        item_workflow_map_.emplace(source.id(), id);
+        item_workflow_map_.emplace(
+            factory_.IdentifierFromBase58(source.id()), id);
     }
 
     const auto it = workflow_state_map_.find(id);
@@ -347,13 +362,29 @@ auto PaymentWorkflows::Store(
     }
 
     for (const auto& account : data.account()) {
-        account_workflow_map_[account].emplace(id);
+        account_workflow_map_[factory_.AccountIDFromBase58(account)].emplace(
+            id);
     }
 
     for (const auto& unit : data.unit()) {
-        unit_workflow_map_[unit].emplace(id);
+        unit_workflow_map_[factory_.UnitIDFromBase58(unit)].emplace(id);
     }
 
     return store_proto(lock, data, id, alias, plaintext);
 }
-}  // namespace opentxs::storage
+
+auto PaymentWorkflows::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        case 3u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

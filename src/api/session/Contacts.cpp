@@ -23,12 +23,13 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Factory.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Boost.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -83,15 +84,7 @@ Contacts::Contacts(const api::session::Client& api)
     , lock_()
     , blockchain_()
     , contact_map_()
-    , contact_name_map_([&] {
-        auto output = ContactNameMap{};
-
-        for (const auto& [id, alias] : api_.Storage().ContactList()) {
-            output.emplace(api_.Factory().IdentifierFromBase58(id), alias);
-        }
-
-        return output;
-    }())
+    , contact_name_map_()
     , publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
     , pipeline_(api_.Network().ZeroMQ().Internal().Pipeline(
           [this](auto&& in) { pipeline(std::move(in)); },
@@ -155,10 +148,11 @@ auto Contacts::check_nyms() noexcept -> void
     auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
     const auto contacts = [&] {
         auto out = Vector<identifier::Generic>{&alloc};
-        auto lock = rLock{lock_};
-        out.reserve(contact_name_map_.size());
+        auto handle = contact_name_map_.lock();
+        const auto& map = contact_name_map(*handle);
+        out.reserve(map.size());
 
-        for (auto& [key, value] : contact_name_map_) { out.emplace_back(key); }
+        for (const auto& [key, value] : map) { out.emplace_back(key); }
 
         return out;
     }();
@@ -226,14 +220,19 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
         return out;
     }();
 
-    if (false == api_.Storage().Store(proto)) {
+    if (false == api_.Storage().Internal().Store(proto)) {
         LogError()(OT_PRETTY_CLASS())("Unable to save contact.").Flush();
         contact_map_.erase(it);
 
         return {};
     }
 
-    contact_name_map_[contactID] = output->Label();
+    {
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
+        map[contactID] = output->Label();
+    }
+
     // Not parsing changed addresses because this is a new contact
 
     return output;
@@ -250,12 +249,12 @@ auto Contacts::Contact(const identifier::Generic& id) const
 auto Contacts::ContactID(const identifier::Nym& nymID) const
     -> identifier::Generic
 {
-    return api_.Storage().ContactOwnerNym(nymID);
+    return api_.Storage().Internal().ContactOwnerNym(nymID);
 }
 
 auto Contacts::ContactList() const -> ObjectList
 {
-    return api_.Storage().ContactList();
+    return api_.Storage().Internal().ContactList();
 }
 
 auto Contacts::ContactName(const identifier::Generic& id) const
@@ -268,11 +267,12 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
     const -> UnallocatedCString
 {
     auto alias = UnallocatedCString{};
-    const auto fallback = [&](const rLock&) {
+    const auto fallback = [&, this]() {
         if (false == alias.empty()) { return alias; }
 
-        auto [it, added] =
-            contact_name_map_.try_emplace(id, id.asBase58(api_.Crypto()));
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
+        auto [it, added] = map.try_emplace(id, id.asBase58(api_.Crypto()));
 
         OT_ASSERT(added);
 
@@ -281,12 +281,13 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
     auto lock = rLock{lock_};
 
     {
-        auto it = contact_name_map_.find(id);
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
 
-        if (contact_name_map_.end() != it) {
+        if (auto it = map.find(id); map.end() != it) {
             alias = it->second;
 
-            if (alias.empty()) { contact_name_map_.erase(it); }
+            if (alias.empty()) { map.erase(it); }
         }
     }
 
@@ -304,10 +305,12 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
 
     auto contact = this->contact(lock, id);
 
-    if (!contact) { return fallback(lock); }
+    if (!contact) { return fallback(); }
 
     if (const auto& label = contact->Label(); false == label.empty()) {
-        auto& output = contact_name_map_[id];
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
+        auto& output = map[id];
         output = std::move(label);
 
         return output;
@@ -318,7 +321,9 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
     OT_ASSERT(data);
 
     if (auto name = data->Name(); false == name.empty()) {
-        auto& output = contact_name_map_[id];
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
+        auto& output = map[id];
         output = std::move(name);
 
         return output;
@@ -358,7 +363,26 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
         }
     }
 
-    return fallback(lock);
+    return fallback();
+}
+
+auto Contacts::contact_name_map(OptionalContactNameMap& value) const noexcept
+    -> ContactNameMap&
+{
+    if (false == value.has_value()) {
+        value.emplace([&] {
+            auto output = ContactNameMap{};
+
+            for (const auto& [id, alias] :
+                 api_.Storage().Internal().ContactList()) {
+                output.emplace(api_.Factory().IdentifierFromBase58(id), alias);
+            }
+
+            return output;
+        }());
+    }
+
+    return *value;
 }
 
 auto Contacts::import_contacts(const rLock& lock) -> void
@@ -374,7 +398,7 @@ auto Contacts::import_contacts(const rLock& lock) -> void
             return out;
         }();
 
-        api_.Storage().ContactOwnerNym(nymID);
+        api_.Storage().Internal().ContactOwnerNym(nymID);
 
         if (contactID.empty()) {
             const auto nym = api_.Wallet().Nym(nymID);
@@ -834,7 +858,7 @@ void Contacts::init_nym_map(const rLock& lock)
 {
     LogDetail()(OT_PRETTY_CLASS())("Upgrading indices.").Flush();
 
-    for (const auto& it : api_.Storage().ContactList()) {
+    for (const auto& it : api_.Storage().Internal().ContactList()) {
         const auto& contactID = api_.Factory().IdentifierFromBase58(it.first);
         auto loaded = load_contact(lock, contactID);
 
@@ -855,7 +879,7 @@ void Contacts::init_nym_map(const rLock& lock)
         if (identity::wot::claim::ClaimType::Error == type) {
             LogError()(OT_PRETTY_CLASS())("Invalid contact ")(it.first)(".")
                 .Flush();
-            api_.Storage().DeleteContact(it.first);
+            api_.Storage().Internal().DeleteContact(contactID);
         }
 
         const auto nyms = contact->Nyms();
@@ -863,7 +887,7 @@ void Contacts::init_nym_map(const rLock& lock)
         for (const auto& nym : nyms) { update_nym_map(lock, nym, *contact); }
     }
 
-    api_.Storage().ContactSaveIndices();
+    api_.Storage().Internal().ContactSaveIndices();
 }
 
 auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
@@ -874,8 +898,8 @@ auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
     }
 
     auto serialized = proto::Contact{};
-    const auto loaded =
-        api_.Storage().Load(id.asBase58(api_.Crypto()), serialized, SILENT);
+    using enum opentxs::storage::ErrorReporting;
+    const auto loaded = api_.Storage().Internal().Load(id, serialized, silent);
 
     if (false == loaded) {
         LogDetail()(OT_PRETTY_CLASS())("Unable to load contact ")(
@@ -961,14 +985,14 @@ auto Contacts::Merge(
         return out;
     }();
 
-    if (false == api_.Storage().Store(rProto)) {
+    if (false == api_.Storage().Internal().Store(rProto)) {
         LogError()(OT_PRETTY_CLASS())(": Unable to create save child contact.")
             .Flush();
 
         OT_FAIL;
     }
 
-    if (false == api_.Storage().Store(lProto)) {
+    if (false == api_.Storage().Internal().Store(lProto)) {
         LogError()(OT_PRETTY_CLASS())(": Unable to create save parent contact.")
             .Flush();
 
@@ -1038,7 +1062,8 @@ auto Contacts::new_contact(
     check_identifiers(nymID, code, haveNymID, havePaymentCode, inputNymID);
 
     if (haveNymID) {
-        const auto contactID = api_.Storage().ContactOwnerNym(inputNymID);
+        const auto contactID =
+            api_.Storage().Internal().ContactOwnerNym(inputNymID);
 
         if (false == contactID.empty()) {
 
@@ -1148,7 +1173,7 @@ auto Contacts::NewContactFromAddress(
         return out;
     }();
 
-    if (false == api_.Storage().Store(proto)) {
+    if (false == api_.Storage().Internal().Store(proto)) {
         LogError()(OT_PRETTY_CLASS())("Unable to save contact.").Flush();
 
         OT_FAIL;
@@ -1324,7 +1349,11 @@ auto Contacts::refresh_indices(const rLock& lock, opentxs::Contact& contact)
     }
 
     const auto& id = contact.ID();
-    contact_name_map_[id] = contact.Label();
+    {
+        auto handle = contact_name_map_.lock();
+        auto& map = contact_name_map(*handle);
+        map[id] = contact.Label();
+    }
     publisher_->Send([&] {
         auto work = opentxs::network::zeromq::tagged_message(
             WorkType::ContactUpdated, true);
@@ -1363,7 +1392,7 @@ void Contacts::save(opentxs::Contact* contact) const
         return out;
     }();
 
-    if (false == api_.Storage().Store(proto)) {
+    if (false == api_.Storage().Internal().Store(proto)) {
         LogError()(OT_PRETTY_CLASS())(": Unable to create or save contact.")
             .Flush();
 
@@ -1372,8 +1401,8 @@ void Contacts::save(opentxs::Contact* contact) const
 
     const auto& id = contact->ID();
 
-    if (false == api_.Storage().SetContactAlias(
-                     id.asBase58(api_.Crypto()), contact->Label())) {
+    if (false ==
+        api_.Storage().Internal().SetContactAlias(id, contact->Label())) {
         LogError()(OT_PRETTY_CLASS())(": Unable to create or save contact.")
             .Flush();
 
@@ -1395,7 +1424,7 @@ void Contacts::save(opentxs::Contact* contact) const
 
 void Contacts::start()
 {
-    const auto level = api_.Storage().ContactUpgradeLevel();
+    const auto level = api_.Storage().Internal().ContactUpgradeLevel();
 
     switch (level) {
         case 0:
@@ -1852,7 +1881,7 @@ auto Contacts::update(const identity::Nym& nym) const
 
     const auto& nymID = nym.ID();
     auto lock = rLock{lock_};
-    const auto contactID = api_.Storage().ContactOwnerNym(nymID);
+    const auto contactID = api_.Storage().Internal().ContactOwnerNym(nymID);
     const auto label = Contact::ExtractLabel(nym);
 
     if (contactID.empty()) {
@@ -1891,8 +1920,7 @@ auto Contacts::update(const identity::Nym& nym) const
 
     OT_ASSERT(output);
 
-    api_.Storage().RelabelThread(
-        output->ID().asBase58(api_.Crypto()), output->Label());
+    api_.Storage().Internal().RelabelThread(output->ID(), output->Label());
 
     return output;
 }
@@ -1940,7 +1968,7 @@ void Contacts::update_nym_map(
         throw std::runtime_error("lock error");
     }
 
-    const auto contactID = api_.Storage().ContactOwnerNym(nymID);
+    const auto contactID = api_.Storage().Internal().ContactOwnerNym(nymID);
     const bool exists = (false == contactID.empty());
     const auto& incomingID = contact.ID();
     const bool same = (incomingID == contactID);
@@ -1967,7 +1995,7 @@ void Contacts::update_nym_map(
                 return out;
             }();
 
-            if (false == api_.Storage().Store(proto)) {
+            if (false == api_.Storage().Internal().Store(proto)) {
                 LogError()(OT_PRETTY_CLASS())(
                     ": Unable to create or save contact.")
                     .Flush();
@@ -1983,7 +2011,7 @@ void Contacts::update_nym_map(
                 return out;
             }();
 
-            if (false == api_.Storage().Store(proto)) {
+            if (false == api_.Storage().Internal().Store(proto)) {
                 LogError()(OT_PRETTY_CLASS())(
                     ": Unable to create or save contact.")
                     .Flush();

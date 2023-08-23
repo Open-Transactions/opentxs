@@ -5,6 +5,7 @@
 
 #include "identity/wot/claim/claim/ClaimPrivate.hpp"  // IWYU pragma: associated
 
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"

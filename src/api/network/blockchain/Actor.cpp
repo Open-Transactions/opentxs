@@ -159,7 +159,7 @@ Actor::Actor(
 {
 }
 
-auto Actor::do_shutdown() noexcept -> void {}
+auto Actor::do_shutdown() noexcept -> void { api_p_.reset(); }
 
 auto Actor::do_startup(allocator_type) noexcept -> bool
 {

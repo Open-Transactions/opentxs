@@ -15,6 +15,7 @@
 #include <memory>
 #include <span>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
@@ -375,8 +376,8 @@ auto CustodialAccountActivity::Name() const noexcept -> UnallocatedCString
 
     return account_name_custodial(
         api,
-        api.Storage().AccountServer(account_id_),
-        api.Storage().AccountContract(account_id_),
+        api.Storage().Internal().AccountServer(account_id_),
+        api.Storage().Internal().AccountContract(account_id_),
         [this] {
             auto lock = sLock{shared_lock_};
 
@@ -519,7 +520,7 @@ auto CustodialAccountActivity::process_notary(const Message& message) noexcept
         {
             eLock lock{shared_lock_};
             notary_ = api_.Wallet().Internal().Server(
-                api_.Storage().AccountServer(account_id_));
+                api_.Storage().Internal().AccountServer(account_id_));
         }
 
         return NotaryName();
@@ -577,7 +578,7 @@ auto CustodialAccountActivity::process_unit(const Message& message) noexcept
     // since we don't use it
     eLock lock{shared_lock_};
     contract_ = api_.Wallet().Internal().UnitDefinition(
-        api_.Storage().AccountContract(account_id_));
+        api_.Storage().Internal().AccountContract(account_id_));
 }
 
 auto CustodialAccountActivity::startup() noexcept -> void

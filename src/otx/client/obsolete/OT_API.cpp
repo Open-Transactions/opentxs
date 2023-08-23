@@ -21,6 +21,7 @@
 #include "internal/api/Settings.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -54,6 +55,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -2363,8 +2365,11 @@ auto OT_API::IsBasketCurrency(const identifier::UnitDefinition& id) const
     -> bool  // returns true or false.
 {
     auto contract = proto::UnitDefinition{};
+    using enum opentxs::storage::ErrorReporting;
 
-    if (false == api_.Storage().Load(id, contract, true)) { return false; }
+    if (false == api_.Storage().Internal().Load(id, contract, silent)) {
+        return false;
+    }
 
     return (contract::UnitType::Basket == translate(contract.type()));
 }
@@ -2378,8 +2383,11 @@ auto OT_API::GetBasketMemberCount(const identifier::UnitDefinition& id) const
     -> std::int32_t
 {
     auto serialized = proto::UnitDefinition{};
+    using enum opentxs::storage::ErrorReporting;
 
-    if (false == api_.Storage().Load(id, serialized, true)) { return 0; }
+    if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
+        return 0;
+    }
 
     if (contract::UnitType::Basket != translate(serialized.type())) {
         return 0;
@@ -2400,8 +2408,11 @@ auto OT_API::GetBasketMemberType(
     identifier::UnitDefinition& theOutputMemberType) const -> bool
 {
     auto serialized = proto::UnitDefinition{};
+    using enum opentxs::storage::ErrorReporting;
 
-    if (false == api_.Storage().Load(id, serialized, true)) { return false; }
+    if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
+        return false;
+    }
 
     if (contract::UnitType::Basket != translate(serialized.type())) {
         return false;
@@ -2432,8 +2443,11 @@ auto OT_API::GetBasketMemberMinimumTransferAmount(
     std::int32_t nIndex) const -> std::int64_t
 {
     auto serialized = proto::UnitDefinition{};
+    using enum opentxs::storage::ErrorReporting;
 
-    if (false == api_.Storage().Load(id, serialized, true)) { return 0; }
+    if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
+        return 0;
+    }
 
     if (contract::UnitType::Basket != translate(serialized.type())) {
         return 0;
@@ -2457,8 +2471,11 @@ auto OT_API::GetBasketMinimumTransferAmount(
     const identifier::UnitDefinition& id) const -> Amount
 {
     auto serialized = proto::UnitDefinition{};
+    using enum opentxs::storage::ErrorReporting;
 
-    if (false == api_.Storage().Load(id, serialized, true)) { return 0; }
+    if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
+        return 0;
+    }
 
     if (contract::UnitType::Basket != translate(serialized.type())) {
         return 0;

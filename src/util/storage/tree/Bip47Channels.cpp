@@ -10,9 +10,10 @@
 #include <BlockchainDeterministicAccountData.pb.h>
 #include <StorageBip47ChannelList.pb.h>
 #include <StorageBip47Contexts.pb.h>
-#include <StorageItemHash.pb.h>
+#include <atomic>
 #include <mutex>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -21,38 +22,42 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Bip47Channel.hpp"
 #include "internal/serialization/protobuf/verify/StorageBip47Contexts.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
 #define CHANNEL_VERSION 1
 #define CHANNEL_INDEX_VERSION 1
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Bip47Channels::Bip47Channels(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), CHANNEL_VERSION)
     , index_lock_()
     , channel_data_()
     , chain_index_()
+    , repair_indices_(false)
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(CHANNEL_VERSION);
+        blank();
     }
 }
 
@@ -68,11 +73,6 @@ auto Bip47Channels::ChannelsByChain(const UnitType chain) const
     -> Bip47Channels::ChannelList
 {
     return extract_set(chain, chain_index_);
-}
-
-auto Bip47Channels::Delete(const UnallocatedCString& id) -> bool
-{
-    return delete_item(id);
 }
 
 template <typename I, typename V>
@@ -116,46 +116,45 @@ auto Bip47Channels::index(
     chain_index_[chain].emplace(id);
 }
 
-auto Bip47Channels::init(const UnallocatedCString& hash) -> void
+auto Bip47Channels::init(const Hash& hash) noexcept(false) -> void
 {
-    auto proto = std::shared_ptr<proto::StorageBip47Contexts>{};
-    driver_.LoadProto(hash, proto);
+    auto p = std::shared_ptr<proto::StorageBip47Contexts>{};
 
-    if (!proto) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to load bip47 channel index file.")
-            .Flush();
-        OT_FAIL;
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(CHANNEL_VERSION, *proto);
+        switch (set_original_version(proto.version())) {
+            case 1u:
+            default: {
+                init_map(proto.context());
 
-    for (const auto& it : proto->context()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
-    }
-
-    if (proto->context().size() != proto->index().size()) {
-        repair_indices();
-    } else {
-        for (const auto& index : proto->index()) {
-            auto id = factory_.AccountIDFromBase58(index.channelid());
-            auto& chain = channel_data_[id];
-            chain = ClaimToUnit(translate(index.chain()));
-            chain_index_[chain].emplace(std::move(id));
+                if (proto.context().size() != proto.index().size()) {
+                    repair_indices_ = true;
+                } else {
+                    for (const auto& index : proto.index()) {
+                        auto id =
+                            factory_.AccountIDFromBase58(index.channelid());
+                        auto& chain = channel_data_[id];
+                        chain = ClaimToUnit(translate(index.chain()));
+                        chain_index_[chain].emplace(std::move(id));
+                    }
+                }
+            }
         }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
 auto Bip47Channels::Load(
     const identifier::Account& id,
     std::shared_ptr<proto::Bip47Channel>& output,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     UnallocatedCString alias{""};
 
-    return load_proto<proto::Bip47Channel>(
-        id.asBase58(crypto_), output, alias, checking);
+    return load_proto<proto::Bip47Channel>(id, output, alias, checking);
 }
 
 auto Bip47Channels::repair_indices() noexcept -> void
@@ -166,7 +165,8 @@ auto Bip47Channels::repair_indices() noexcept -> void
         for (const auto& [strid, alias] : List()) {
             const auto id = factory_.AccountIDFromBase58(strid);
             auto data = std::shared_ptr<proto::Bip47Channel>{};
-            const auto loaded = Load(id, data, false);
+            using enum ErrorReporting;
+            const auto loaded = Load(id, data, verbose);
 
             OT_ASSERT(loaded);
             OT_ASSERT(data);
@@ -174,11 +174,6 @@ auto Bip47Channels::repair_indices() noexcept -> void
             index(lock, id, *data);
         }
     }
-
-    auto lock = Lock{write_lock_};
-    const auto saved = save(lock);
-
-    OT_ASSERT(saved);
 }
 
 auto Bip47Channels::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -192,7 +187,7 @@ auto Bip47Channels::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Bip47Channels::serialize() const -> proto::StorageBip47Contexts
@@ -202,12 +197,11 @@ auto Bip47Channels::serialize() const -> proto::StorageBip47Contexts
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
-            serialize_index(
-                version_, item.first, item.second, *serialized.add_context());
+            serialize_index(item.first, item.second, *serialized.add_context());
         }
     }
 
@@ -233,6 +227,23 @@ auto Bip47Channels::Store(
         index(lock, id, data);
     }
 
-    return store_proto(data, id.asBase58(crypto_), "");
+    return store_proto(data, id, "");
 }
-}  // namespace opentxs::storage
+
+auto Bip47Channels::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        default: {
+            if (repair_indices_) {
+                repair_indices();
+                changed = true;
+            }
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

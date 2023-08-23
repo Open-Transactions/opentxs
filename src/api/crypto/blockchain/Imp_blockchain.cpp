@@ -19,6 +19,7 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/api/crypto/blockchain/BalanceOracle.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -120,8 +121,7 @@ auto BlockchainImp::ActivityDescription(
 {
     auto data = proto::StorageThread{};
 
-    if (false ==
-        api_.Storage().Load(nym, thread.asBase58(api_.Crypto()), data)) {
+    if (false == api_.Storage().Internal().Load(nym, thread, data)) {
         LogError()(OT_PRETTY_CLASS())("thread ")(thread, api_.Crypto())(
             " does not exist for nym ")(nym, api_.Crypto())
             .Flush();

@@ -8,6 +8,7 @@
 #include <span>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
@@ -108,8 +109,10 @@ auto Wallets::populate(const Lock& lock) const noexcept -> void
         const auto unit = blockchain_to_unit(chain);
 
         for (const auto& nymID : nyms) {
-            const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);
-            const auto pc = api_.Storage().Bip47ChannelsByChain(nymID, unit);
+            const auto hd =
+                api_.Storage().Internal().BlockchainAccountList(nymID, unit);
+            const auto pc =
+                api_.Storage().Internal().Bip47ChannelsByChain(nymID, unit);
 
             if ((false == hd.empty()) || (false == pc.empty())) {
                 exists.emplace(chain);

@@ -105,6 +105,22 @@ auto StorageIssuerAllowedStorageItemHash() noexcept -> const VersionMap&
 
     return output;
 }
+auto StorageItemHashAllowedIdentifier() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+        {2, {1, 1}},
+        {3, {1, 1}},
+        {4, {1, 1}},
+        {5, {1, 1}},
+        {6, {1, 1}},
+        {7, {1, 1}},
+        {8, {1, 1}},
+        {9, {1, 1}},
+    };
+
+    return output;
+}
 auto StorageItemsAllowedSymmetricKey() noexcept -> const VersionMap&
 {
     static const auto output = VersionMap{

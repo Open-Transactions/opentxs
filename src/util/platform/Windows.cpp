@@ -208,9 +208,15 @@ class OPENTXS_EXPORT Hash;
 
 namespace opentxs::storage::driver::filesystem
 {
-auto Common::sync(DescriptorType::handle_type fd) const -> bool
+auto Common::sync(DescriptorType::handle_type fd) noexcept -> bool
 {
-    return FlushFileBuffers(fd);
+    try {
+
+        return FlushFileBuffers(fd);
+    } catch (...) {
+
+        return false;
+    }
 }
 
 Common::FileDescriptor::FileDescriptor(const fs::path& path) noexcept

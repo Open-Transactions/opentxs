@@ -11,11 +11,11 @@ namespace opentxs::proto
 {
 auto BlindedSeriesListAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageAccountsAllowedStorageAccountIndex() noexcept -> const VersionMap&;
-auto StorageAccountsAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageAccountsAllowedStorageIDList() noexcept -> const VersionMap&;
-auto StorageBip47ContextsAllowedStorageItemHash() noexcept -> const VersionMap&;
+auto StorageAccountsAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageBip47ContextsAllowedStorageBip47ChannelList() noexcept
     -> const VersionMap&;
+auto StorageBip47ContextsAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageContactsAllowedAddress() noexcept -> const VersionMap&;
 auto StorageContactsAllowedList() noexcept -> const VersionMap&;
 auto StorageContactsAllowedStorageContactNymIndex() noexcept
@@ -23,6 +23,7 @@ auto StorageContactsAllowedStorageContactNymIndex() noexcept
 auto StorageContactsAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageCredentialAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageIssuerAllowedStorageItemHash() noexcept -> const VersionMap&;
+auto StorageItemHashAllowedIdentifier() noexcept -> const VersionMap&;
 auto StorageItemsAllowedSymmetricKey() noexcept -> const VersionMap&;
 auto StorageNotaryAllowedBlindedSeriesList() noexcept -> const VersionMap&;
 auto StorageNymAllowedBlockchainAccountList() noexcept -> const VersionMap&;
@@ -30,9 +31,9 @@ auto StorageNymAllowedHDAccount() noexcept -> const VersionMap&;
 auto StorageNymAllowedStorageBip47AddressIndex() noexcept -> const VersionMap&;
 auto StorageNymAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StorageNymAllowedStoragePurse() noexcept -> const VersionMap&;
+auto StorageNymListAllowedIdentifier() noexcept -> const VersionMap&;
 auto StorageNymListAllowedStorageBip47NymAddressIndex() noexcept
     -> const VersionMap&;
-auto StorageNymListAllowedIdentifier() noexcept -> const VersionMap&;
 auto StorageNymListAllowedStorageItemHash() noexcept -> const VersionMap&;
 auto StoragePaymentWorkflowsAllowedStorageItemHash() noexcept
     -> const VersionMap&;

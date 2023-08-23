@@ -23,6 +23,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -738,7 +739,8 @@ auto Workflow::add_cheque_event(
 
     if (false == account.empty()) {
         workflow.set_notary(
-            api_.Storage().AccountServer(account).asBase58(api_.Crypto()));
+            api_.Storage().Internal().AccountServer(account).asBase58(
+                api_.Crypto()));
     }
 
     return save_workflow(nymID, account, workflow);
@@ -1236,6 +1238,7 @@ auto Workflow::ClearCheque(
     }
 
     auto lock = get_workflow_lock(global, workflow->id());
+    const auto workflowID = api_.Factory().IdentifierFromBase58(workflow->id());
 
     if (false == can_accept_cheque(*workflow)) { return false; }
 
@@ -1260,7 +1263,7 @@ auto Workflow::ClearCheque(
             cheque->GetSenderNymID(),
             recipientNymID,
             api_.Factory().Internal().Identifier(*cheque),
-            api_.Factory().IdentifierFromBase58(workflow->id()),
+            workflowID,
             otx::client::StorageBox::OUTGOINGCHEQUE,
             extract_conveyed_time(*workflow));
     }
@@ -1270,7 +1273,7 @@ auto Workflow::ClearCheque(
         cheque->GetRecipientNymID(),
         cheque->SourceAccountID().asBase58(api_.Crypto()),
         proto::ACCOUNTEVENT_OUTGOINGCHEQUE,
-        workflow->id(),
+        workflowID,
         -1 * cheque->GetAmount(),
         0,
         time,
@@ -1337,6 +1340,7 @@ auto Workflow::ClearTransfer(
     }
 
     auto lock = get_workflow_lock(global, workflow->id());
+    const auto workflowID = api_.Factory().IdentifierFromBase58(workflow->id());
 
     if (false == can_clear_transfer(*workflow)) { return false; }
 
@@ -1363,7 +1367,7 @@ auto Workflow::ClearTransfer(
             nymID,
             depositorNymID,
             api_.Factory().Internal().Identifier(*transfer),
-            api_.Factory().IdentifierFromBase58(workflow->id()),
+            workflowID,
             otx::client::StorageBox::OUTGOINGTRANSFER,
             time);
         update_rpc(
@@ -1371,7 +1375,7 @@ auto Workflow::ClearTransfer(
             depositorNymID,
             accountID.asBase58(api_.Crypto()),
             proto::ACCOUNTEVENT_OUTGOINGTRANSFER,
-            workflow->id(),
+            workflowID,
             transfer->GetAmount(),
             0,
             time,
@@ -1510,7 +1514,7 @@ auto Workflow::convey_incoming_transfer(
             senderNymID,
             accountID.asBase58(api_.Crypto()),
             proto::ACCOUNTEVENT_INCOMINGTRANSFER,
-            workflowID.asBase58(api_.Crypto()),
+            workflowID,
             transfer.GetAmount(),
             0,
             time,
@@ -1677,7 +1681,8 @@ auto Workflow::create_cheque(
 
     if ((false == account.empty()) && (workflow.notary().empty())) {
         workflow.set_notary(
-            api_.Storage().AccountServer(account).asBase58(api_.Crypto()));
+            api_.Storage().Internal().AccountServer(account).asBase58(
+                api_.Crypto()));
     }
 
     if (workflow.notary().empty() && (nullptr != message)) {
@@ -1763,7 +1768,8 @@ auto Workflow::create_transfer(
 
     event.set_success(true);
     workflow.add_unit(
-        api_.Storage().AccountContract(account).asBase58(api_.Crypto()));
+        api_.Storage().Internal().AccountContract(account).asBase58(
+            api_.Crypto()));
 
     // add account if it is not already present
     if (0 == workflow.account_size()) {
@@ -1839,7 +1845,7 @@ auto Workflow::CreateTransfer(const Item& transfer, const Message& request)
             {},
             accountID.asBase58(api_.Crypto()),
             proto::ACCOUNTEVENT_OUTGOINGTRANSFER,
-            workflowID.asBase58(api_.Crypto()),
+            workflowID,
             transfer.GetAmount(),
             0,
             time,
@@ -1892,7 +1898,7 @@ auto Workflow::DepositCheque(
             cheque.GetSenderNymID(),
             accountID.asBase58(api_.Crypto()),
             proto::ACCOUNTEVENT_INCOMINGCHEQUE,
-            workflow->id(),
+            api_.Factory().IdentifierFromBase58(workflow->id()),
             cheque.GetAmount(),
             0,
             convert_stime(reply->time_),
@@ -2176,25 +2182,24 @@ auto Workflow::get_workflow(
 {
     OT_ASSERT(verify_lock(global));
 
-    const auto itemID =
-        api_.Factory().Internal().Identifier(source).asBase58(api_.Crypto());
-    LogVerbose()(OT_PRETTY_CLASS())("Item ID: ")(itemID).Flush();
+    const auto itemID = api_.Factory().Internal().Identifier(source);
+    LogVerbose()(OT_PRETTY_CLASS())("Item ID: ")(itemID, api_.Crypto()).Flush();
 
     return get_workflow_by_source(types, nymID, itemID);
 }
 
 auto Workflow::get_workflow_by_id(
     const identifier::Nym& nymID,
-    const UnallocatedCString& workflowID) const
+    const identifier::Generic& workflowID) const
     -> std::shared_ptr<proto::PaymentWorkflow>
 {
     auto output = std::make_shared<proto::PaymentWorkflow>();
 
     OT_ASSERT(output);
 
-    if (false == api_.Storage().Load(nymID, workflowID, *output)) {
-        LogDetail()(OT_PRETTY_CLASS())("Workflow ")(workflowID)(" for nym ")(
-            nymID, api_.Crypto())(" can not be loaded")
+    if (false == api_.Storage().Internal().Load(nymID, workflowID, *output)) {
+        LogDetail()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
+            " for nym ")(nymID, api_.Crypto())(" can not be loaded")
             .Flush();
 
         return {};
@@ -2206,14 +2211,15 @@ auto Workflow::get_workflow_by_id(
 auto Workflow::get_workflow_by_id(
     const UnallocatedSet<PaymentWorkflowType>& types,
     const identifier::Nym& nymID,
-    const UnallocatedCString& workflowID) const
+    const identifier::Generic& workflowID) const
     -> std::shared_ptr<proto::PaymentWorkflow>
 {
     auto output = get_workflow_by_id(nymID, workflowID);
 
     if (0 == types.count(translate(output->type()))) {
         LogError()(OT_PRETTY_CLASS())("Incorrect type (")(output->type())(
-            ") on workflow ")(workflowID)(" for nym ")(nymID, api_.Crypto())
+            ") on workflow ")(workflowID, api_.Crypto())(" for nym ")(
+            nymID, api_.Crypto())
             .Flush();
 
         return {nullptr};
@@ -2225,11 +2231,11 @@ auto Workflow::get_workflow_by_id(
 auto Workflow::get_workflow_by_source(
     const UnallocatedSet<PaymentWorkflowType>& types,
     const identifier::Nym& nymID,
-    const UnallocatedCString& sourceID) const
+    const identifier::Generic& sourceID) const
     -> std::shared_ptr<proto::PaymentWorkflow>
 {
     const auto workflowID =
-        api_.Storage().PaymentWorkflowLookup(nymID, sourceID);
+        api_.Storage().Internal().PaymentWorkflowLookup(nymID, sourceID);
 
     if (workflowID.empty()) { return {}; }
 
@@ -2300,7 +2306,7 @@ auto Workflow::ImportCheque(
             cheque.GetSenderNymID(),
             {},
             proto::ACCOUNTEVENT_INCOMINGCHEQUE,
-            workflowID.asBase58(api_.Crypto()),
+            workflowID,
             0,
             cheque.GetAmount(),
             time,
@@ -2400,11 +2406,13 @@ auto Workflow::isInternalTransfer(
     const identifier::Account& sourceAccount,
     const identifier::Account& destinationAccount) const -> bool
 {
-    const auto ownerNymID = api_.Storage().AccountOwner(sourceAccount);
+    const auto ownerNymID =
+        api_.Storage().Internal().AccountOwner(sourceAccount);
 
     OT_ASSERT(false == ownerNymID.empty());
 
-    const auto recipientNymID = api_.Storage().AccountOwner(destinationAccount);
+    const auto recipientNymID =
+        api_.Storage().Internal().AccountOwner(destinationAccount);
 
     if (recipientNymID.empty()) { return false; }
 
@@ -2422,18 +2430,8 @@ auto Workflow::List(
     const PaymentWorkflowState state) const
     -> UnallocatedSet<identifier::Generic>
 {
-    const auto input =
-        api_.Storage().PaymentWorkflowsByState(nymID, type, state);
-    UnallocatedSet<identifier::Generic> output{};
-    std::transform(
-        input.begin(),
-        input.end(),
-        std::inserter(output, output.end()),
-        [this](const auto& id) {
-            return api_.Factory().IdentifierFromBase58(id);
-        });
-
-    return output;
+    return api_.Storage().Internal().PaymentWorkflowsByState(
+        nymID, type, state);
 }
 
 auto Workflow::LoadCheque(
@@ -2444,7 +2442,7 @@ auto Workflow::LoadCheque(
         {PaymentWorkflowType::OutgoingCheque,
          PaymentWorkflowType::IncomingCheque},
         nymID,
-        chequeID.asBase58(api_.Crypto()));
+        chequeID);
 
     if (false == bool(workflow)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -2465,7 +2463,7 @@ auto Workflow::LoadChequeByWorkflow(
         {PaymentWorkflowType::OutgoingCheque,
          PaymentWorkflowType::IncomingCheque},
         nymID,
-        workflowID.asBase58(api_.Crypto()));
+        workflowID);
 
     if (false == bool(workflow)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -2487,7 +2485,7 @@ auto Workflow::LoadTransfer(
          PaymentWorkflowType::IncomingTransfer,
          PaymentWorkflowType::InternalTransfer},
         nymID,
-        transferID.asBase58(api_.Crypto()));
+        transferID);
 
     if (false == bool(workflow)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -2509,7 +2507,7 @@ auto Workflow::LoadTransferByWorkflow(
          PaymentWorkflowType::IncomingTransfer,
          PaymentWorkflowType::InternalTransfer},
         nymID,
-        workflowID.asBase58(api_.Crypto()));
+        workflowID);
 
     if (false == bool(workflow)) {
         LogError()(OT_PRETTY_CLASS())(
@@ -2527,8 +2525,7 @@ auto Workflow::LoadWorkflow(
     const identifier::Generic& workflowID,
     proto::PaymentWorkflow& out) const -> bool
 {
-    auto pWorkflow =
-        get_workflow_by_id(nymID, workflowID.asBase58(api_.Crypto()));
+    auto pWorkflow = get_workflow_by_id(nymID, workflowID);
 
     if (pWorkflow) {
         out = *pWorkflow;
@@ -2643,7 +2640,7 @@ auto Workflow::ReceiveCheque(
             cheque.GetSenderNymID(),
             {},
             proto::ACCOUNTEVENT_INCOMINGCHEQUE,
-            workflowID.asBase58(api_.Crypto()),
+            workflowID,
             0,
             cheque.GetAmount(),
             time,
@@ -2671,7 +2668,7 @@ auto Workflow::save_workflow(
 
     OT_ASSERT(valid);
 
-    const auto saved = api_.Storage().Store(nymID, workflow);
+    const auto saved = api_.Storage().Internal().Store(nymID, workflow);
 
     OT_ASSERT(saved);
 
@@ -2719,8 +2716,7 @@ auto Workflow::SendCash(
     const Message* reply) const -> bool
 {
     Lock global(lock_);
-    const auto pWorkflow =
-        get_workflow_by_id(sender, workflowID.asBase58(api_.Crypto()));
+    const auto pWorkflow = get_workflow_by_id(sender, workflowID);
 
     if (false == bool(pWorkflow)) {
         LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
@@ -2809,8 +2805,7 @@ auto Workflow::WorkflowParty(
     const identifier::Generic& workflowID,
     const int index) const -> const UnallocatedCString
 {
-    auto workflow =
-        get_workflow_by_id(nymID, workflowID.asBase58(api_.Crypto()));
+    auto workflow = get_workflow_by_id(nymID, workflowID);
 
     if (false == bool{workflow}) { return {}; }
 
@@ -2822,8 +2817,7 @@ auto Workflow::WorkflowPartySize(
     const identifier::Generic& workflowID,
     int& partysize) const -> bool
 {
-    auto workflow =
-        get_workflow_by_id(nymID, workflowID.asBase58(api_.Crypto()));
+    auto workflow = get_workflow_by_id(nymID, workflowID);
 
     if (false == bool{workflow}) { return false; }
 
@@ -2836,8 +2830,7 @@ auto Workflow::WorkflowState(
     const identifier::Nym& nymID,
     const identifier::Generic& workflowID) const -> PaymentWorkflowState
 {
-    auto workflow =
-        get_workflow_by_id(nymID, workflowID.asBase58(api_.Crypto()));
+    auto workflow = get_workflow_by_id(nymID, workflowID);
 
     if (false == bool{workflow}) { return PaymentWorkflowState::Error; }
 
@@ -2848,8 +2841,7 @@ auto Workflow::WorkflowType(
     const identifier::Nym& nymID,
     const identifier::Generic& workflowID) const -> PaymentWorkflowType
 {
-    auto workflow =
-        get_workflow_by_id(nymID, workflowID.asBase58(api_.Crypto()));
+    auto workflow = get_workflow_by_id(nymID, workflowID);
 
     if (false == bool{workflow}) { return PaymentWorkflowType::Error; }
 
@@ -2898,7 +2890,7 @@ void Workflow::update_rpc(
     const identifier::Nym& remoteNymID,
     const UnallocatedCString& accountID,
     const proto::AccountEventType type,
-    const UnallocatedCString& workflowID,
+    const identifier::Generic& workflowID,
     const Amount amount,
     const Amount pending,
     const Time time,
@@ -2918,7 +2910,7 @@ void Workflow::update_rpc(
             contact_.NymToContact(remoteNymID).asBase58(api_.Crypto()));
     }
 
-    event.set_workflow(workflowID);
+    event.set_workflow(workflowID.asBase58(api_.Crypto()));
     amount.Serialize(writer(event.mutable_amount()));
     pending.Serialize(writer(event.mutable_pendingamount()));
     event.set_timestamp(Clock::to_time_t(time));
@@ -2949,15 +2941,10 @@ auto Workflow::WorkflowsByAccount(
     -> UnallocatedVector<identifier::Generic>
 {
     UnallocatedVector<identifier::Generic> output{};
-    const auto workflows = api_.Storage().PaymentWorkflowsByAccount(
-        nymID, accountID.asBase58(api_.Crypto()));
-    std::transform(
-        workflows.begin(),
-        workflows.end(),
-        std::inserter(output, output.end()),
-        [this](const UnallocatedCString& id) {
-            return api_.Factory().IdentifierFromBase58(id);
-        });
+    const auto workflows =
+        api_.Storage().Internal().PaymentWorkflowsByAccount(nymID, accountID);
+    output.reserve(workflows.size());
+    std::copy(workflows.begin(), workflows.end(), std::back_inserter(output));
 
     return output;
 }
@@ -3033,7 +3020,7 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const
             cheque.GetRecipientNymID(),
             cheque.SourceAccountID().asBase58(api_.Crypto()),
             proto::ACCOUNTEVENT_OUTGOINGCHEQUE,
-            workflowID.asBase58(api_.Crypto()),
+            workflowID,
             0,
             -1 * cheque.GetAmount(),
             time,

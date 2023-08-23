@@ -15,6 +15,7 @@
 
 #include "blockchain/crypto/Account.tpp"  // IWYU pragma: keep
 #include "blockchain/crypto/AccountIndex.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -328,7 +329,8 @@ auto Account::init_hd(const Accounts& accounts) noexcept -> void
     for (const auto& accountID : accounts) {
         init_notification();
         auto account = proto::HDAccount{};
-        const auto loaded = api_.Storage().Load(nym_id_, accountID, account);
+        const auto loaded =
+            api_.Storage().Internal().Load(nym_id_, accountID, account);
 
         if (false == loaded) { continue; }
 
@@ -353,7 +355,8 @@ auto Account::init_payment_code(const Accounts& accounts) noexcept -> void
 {
     for (const auto& id : accounts) {
         auto account = proto::Bip47Channel{};
-        const auto loaded = api_.Storage().Load(nym_id_, id, account);
+        const auto loaded =
+            api_.Storage().Internal().Load(nym_id_, id, account);
 
         if (false == loaded) { continue; }
 

@@ -12,11 +12,13 @@
 #include <cstdlib>
 #include <sstream>
 #include <utility>
+#include <variant>
 
 #include "internal/core/Amount.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/util/Log.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -144,6 +146,13 @@ auto Log::Imp::Buffer(const Time in) const noexcept -> void
     if (false == active()) { return; }
 
     buffer(formatTimestamp(in));
+}
+
+auto Log::Imp::Buffer(const storage::Hash& in) const noexcept -> void
+{
+    if (false == active()) { return; }
+
+    buffer(std::visit(storage::EncodedView{}, in));
 }
 
 auto Log::Imp::Buffer(const blockchain::block::Outpoint& in) const noexcept

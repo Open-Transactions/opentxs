@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "api/session/Session.hpp"
-#include "api/session/base/Scheduler.hpp"
 #include "api/session/base/Storage.hpp"
 #include "api/session/notary/Actor.hpp"
 #include "api/session/notary/Shared.hpp"
@@ -441,7 +440,6 @@ auto Notary::ID() const -> const identifier::Notary&
 
 void Notary::Init(std::shared_ptr<session::Notary> me)
 {
-    Scheduler::Start(storage_.get());
     Storage::init(crypto_, factory_, crypto_.Seed());
     start(me);
 }

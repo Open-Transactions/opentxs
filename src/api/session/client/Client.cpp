@@ -14,7 +14,6 @@
 
 #include "2_Factory.hpp"
 #include "api/session/Session.hpp"
-#include "api/session/base/Scheduler.hpp"
 #include "api/session/base/Storage.hpp"
 #include "internal/api/Context.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
@@ -228,7 +227,6 @@ auto Client::Init() -> void
     crypto_.InternalSession().Init(blockchain_);
     Storage::init(crypto_, factory_, crypto_.Seed());
     StartContacts();
-    StartActivity();
     pair_->init();
     blockchain_->Internal().Init();
     ui_->Internal().Init();
@@ -303,8 +301,6 @@ auto Client::Start(std::shared_ptr<session::Client> api) noexcept -> void
     blockchain_->Internal().Start(std::move(me));
     StartBlockchain();
 }
-
-auto Client::StartActivity() -> void { Scheduler::Start(storage_.get()); }
 
 auto Client::StartBlockchain() noexcept -> void
 {

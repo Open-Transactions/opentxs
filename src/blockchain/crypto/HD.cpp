@@ -24,6 +24,7 @@
 #include "blockchain/crypto/Element.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Seed.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -207,7 +208,7 @@ HD::HD(
 
 auto HD::account_already_exists(const rLock&) const noexcept -> bool
 {
-    const auto existing = api_.Storage().BlockchainAccountList(
+    const auto existing = api_.Storage().Internal().BlockchainAccountList(
         parent_.NymID(), blockchain_to_unit(chain_));
 
     return existing.contains(id_);
@@ -298,8 +299,8 @@ auto HD::save(const rLock& lock) const noexcept -> bool
         hd.set_standard(static_cast<std::uint16_t>(standard_));
     }
 
-    const bool saved =
-        api_.Storage().Store(parent_.NymID(), UnitToClaim(type), serialized);
+    const bool saved = api_.Storage().Internal().Store(
+        parent_.NymID(), UnitToClaim(type), serialized);
 
     if (false == saved) {
         LogError()(OT_PRETTY_CLASS())("Failed to save HD account.").Flush();

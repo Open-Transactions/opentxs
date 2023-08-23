@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -313,7 +314,7 @@ auto Item::VerifyBalanceStatement(
     const auto balance = THE_ACCOUNT.GetBalance() + lActualAdjustment;
     if (balance != GetAmount()) {
         const auto unittype =
-            api_.Storage().AccountUnit(GetDestinationAcctID());
+            api_.Storage().Internal().AccountUnit(GetDestinationAcctID());
 
         LogConsole()(OT_PRETTY_CLASS())(
             "This balance statement has a value of ")(GetAmount())(
@@ -456,7 +457,7 @@ auto Item::VerifyBalanceStatement(
         // the appropriate ledger (inbox or outbox).
         if (false == bool(pTransaction)) {
             const auto unittype =
-                api_.Storage().AccountUnit(GetDestinationAcctID());
+                api_.Storage().Internal().AccountUnit(GetDestinationAcctID());
 
             LogConsole()(OT_PRETTY_CLASS())("Expected ")(
                 pszLedgerType)(" transaction (server ")(outboxNum)(", client ")(
@@ -496,7 +497,7 @@ auto Item::VerifyBalanceStatement(
 
         if (pSubItem->GetAmount() != lTransactionAmount) {
             const auto unittype =
-                api_.Storage().AccountUnit(GetDestinationAcctID());
+                api_.Storage().Internal().AccountUnit(GetDestinationAcctID());
 
             LogConsole()(OT_PRETTY_CLASS())("Transaction (")(
                 pSubItem->GetTransactionNum())(

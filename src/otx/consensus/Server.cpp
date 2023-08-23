@@ -30,6 +30,7 @@
 #include "internal/api/session/Activity.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
@@ -561,8 +562,10 @@ auto Server::accept_issued_number(
 auto Server::Accounts() const -> UnallocatedVector<identifier::Generic>
 {
     UnallocatedVector<identifier::Generic> output{};
-    const auto serverSet = api_.Storage().AccountsByServer(server_id_);
-    const auto nymSet = api_.Storage().AccountsByOwner(Signer()->ID());
+    const auto serverSet =
+        api_.Storage().Internal().AccountsByServer(server_id_);
+    const auto nymSet =
+        api_.Storage().Internal().AccountsByOwner(Signer()->ID());
     std::set_intersection(
         serverSet.begin(),
         serverSet.end(),
@@ -1659,7 +1662,8 @@ auto Server::harvest_unused(Data& data, const api::session::Client& client)
     bool output{true};
     const auto& nymID = Signer()->ID();
     auto available = data.issued_transaction_numbers_;
-    const auto workflows = client.Storage().PaymentWorkflowList(nymID);
+    const auto workflows =
+        client.Storage().Internal().PaymentWorkflowList(nymID);
     UnallocatedSet<client::PaymentWorkflowState> keepStates{};
 
     // Loop through workflows to determine which issued numbers should not be
@@ -2049,8 +2053,8 @@ auto Server::is_internal_transfer(const Item& item) const -> bool
         throw std::runtime_error("Missing destination account id");
     }
 
-    auto sourceOwner = api_.Storage().AccountOwner(source);
-    auto destinationOwner = api_.Storage().AccountOwner(destination);
+    auto sourceOwner = api_.Storage().Internal().AccountOwner(source);
+    auto destinationOwner = api_.Storage().Internal().AccountOwner(destination);
 
     return sourceOwner == destinationOwner;
 }

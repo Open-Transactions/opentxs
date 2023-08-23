@@ -22,9 +22,7 @@
 #include "internal/crypto/library/Scrypt.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Hasher.hpp"
@@ -38,7 +36,6 @@
 namespace opentxs::factory
 {
 auto Hash(
-    const api::crypto::Encode& encode,
     const crypto::HashingProvider& sha,
     const crypto::HashingProvider& blake,
     const crypto::Pbkdf2& pbkdf2,
@@ -47,8 +44,7 @@ auto Hash(
 {
     using ReturnType = api::crypto::imp::Hash;
 
-    return std::make_unique<ReturnType>(
-        encode, sha, blake, pbkdf2, ripe, scrypt);
+    return std::make_unique<ReturnType>(sha, blake, pbkdf2, ripe, scrypt);
 }
 }  // namespace opentxs::factory
 
@@ -57,14 +53,12 @@ namespace opentxs::api::crypto::imp
 using Provider = opentxs::crypto::HashingProvider;
 
 Hash::Hash(
-    const api::crypto::Encode& encode,
     const Provider& sha,
     const Provider& blake,
     const opentxs::crypto::Pbkdf2& pbkdf2,
     const opentxs::crypto::Ripemd160& ripe,
     const opentxs::crypto::Scrypt& scrypt) noexcept
-    : encode_(encode)
-    , sha_(sha)
+    : sha_(sha)
     , blake_(blake)
     , pbkdf2_(pbkdf2)
     , ripe_(ripe)
@@ -155,28 +149,6 @@ auto Hash::Digest(
     Writer&& destination) const noexcept -> bool
 {
     return Digest(type, data.Bytes(), std::move(destination));
-}
-
-auto Hash::Digest(
-    const std::uint32_t hash,
-    const ReadView data,
-    Writer&& destination) const noexcept -> bool
-{
-    const auto type = static_cast<opentxs::crypto::HashType>(hash);
-    auto temp = ByteArray{};
-
-    try {
-        if (false == Digest(type, data, temp.WriteInto())) {
-
-            throw std::runtime_error{"failed to calculate hash"};
-        }
-
-        return encode_.Base58CheckEncode(temp.Bytes(), std::move(destination));
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return false;
-    }
 }
 
 auto Hash::HMAC(

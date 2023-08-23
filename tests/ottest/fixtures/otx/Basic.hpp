@@ -80,11 +80,11 @@ public:
     static ot::TransactionNumber cheque_transaction_number_;
     static ot::UnallocatedCString bob_account_1_id_;
     static ot::UnallocatedCString bob_account_2_id_;
-    static ot::UnallocatedCString outgoing_cheque_workflow_id_;
-    static ot::UnallocatedCString incoming_cheque_workflow_id_;
-    static ot::UnallocatedCString outgoing_transfer_workflow_id_;
-    static ot::UnallocatedCString incoming_transfer_workflow_id_;
-    static ot::UnallocatedCString internal_transfer_workflow_id_;
+    static ot::identifier::Generic outgoing_cheque_workflow_id_;
+    static ot::identifier::Generic incoming_cheque_workflow_id_;
+    static ot::identifier::Generic outgoing_transfer_workflow_id_;
+    static ot::identifier::Generic incoming_transfer_workflow_id_;
+    static ot::identifier::Generic internal_transfer_workflow_id_;
     static const ot::UnallocatedCString unit_id_1_;
     static const ot::UnallocatedCString unit_id_2_;
     static std::unique_ptr<ot::otx::client::internal::Operation>

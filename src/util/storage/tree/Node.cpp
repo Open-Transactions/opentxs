@@ -8,55 +8,71 @@
 #include <Contact.pb.h>
 #include <Nym.pb.h>
 #include <Seed.pb.h>
-#include <StorageEnums.pb.h>
 #include <StorageItemHash.pb.h>
+#include <algorithm>
+#include <iterator>
+#include <string_view>
 
+#include "internal/api/FactoryAPI.hpp"
+#include "internal/core/identifier/Identifier.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
-const UnallocatedCString Node::BLANK_HASH = "blankblankblankblankblank";
+using namespace std::literals;
 
 Node::Node(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& key)
+    const driver::Plugin& storage,
+    const Hash& key,
+    UnallocatedCString name,
+    VersionNumber desired)
     : crypto_(crypto)
     , factory_(factory)
-    , driver_(storage)
-    , version_(0)
-    , original_version_(0)
+    , plugin_(storage)
+    , name_(std::move(name))
+    , desired_version_(desired)
+    , original_version_()
+    , version_()
     , root_(key)
     , write_lock_()
     , item_map_()
 {
 }
 
-void Node::blank(const VersionNumber version)
+auto Node::blank() noexcept -> void
 {
-    version_ = version;
-    original_version_ = version_;
-    root_ = BLANK_HASH;
+    set_original_version(desired_version_);
+    root_ = NullHash{};
 }
 
-auto Node::check_hash(const UnallocatedCString& hash) const -> bool
+auto Node::copy(const Log& log, const Index& in, Vector<Hash>& out)
+    const noexcept -> void
 {
-    const bool empty = hash.empty();
-    const bool blank = (Node::BLANK_HASH == hash);
+    out.reserve(out.size() + in.size());
+    const auto get_hash = [&, this](const auto& i) {
+        const auto& hash = std::get<0>(i.second);
+        log(OT_PRETTY_CLASS())(name_)("adding item hash ")(hash).Flush();
 
-    return !(empty || blank);
+        return hash;
+    };
+    std::transform(in.begin(), in.end(), std::back_inserter(out), get_hash);
 }
 
-auto Node::delete_item(const UnallocatedCString& id) -> bool
+auto Node::delete_item(const identifier::Generic& id) -> bool
 {
     auto lock = Lock{write_lock_};
 
     return delete_item(lock, id);
 }
 
-auto Node::delete_item(const Lock& lock, const UnallocatedCString& id) -> bool
+auto Node::delete_item(const Lock& lock, const identifier::Generic& id) -> bool
 {
     OT_ASSERT(verify_write_lock(lock));
 
@@ -65,6 +81,31 @@ auto Node::delete_item(const Lock& lock, const UnallocatedCString& id) -> bool
     if (0 == items) { return false; }
 
     return save(lock);
+}
+
+auto Node::Dump(Vector<Hash>& out) const noexcept -> bool
+{
+    const auto& log = LogTrace();
+    auto lock = Lock{write_lock_};
+
+    return dump(lock, log, out);
+}
+
+auto Node::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
+    const noexcept -> bool
+{
+    if (is_valid(root_)) {
+        log(name_)("copying root hash ")(root_).Flush();
+        out.emplace_back(root_);
+    } else {
+        log(name_)("skipping object due to blank root hash").Flush();
+
+        return true;
+    }
+
+    copy(log, item_map_, out);
+
+    return true;
 }
 
 auto Node::extract_revision(const proto::Contact& input) const -> std::uint64_t
@@ -82,7 +123,7 @@ auto Node::extract_revision(const proto::Seed& input) const -> std::uint64_t
     return input.index();
 }
 
-auto Node::get_alias(const UnallocatedCString& id) const -> UnallocatedCString
+auto Node::get_alias(const identifier::Generic& id) const -> UnallocatedCString
 {
     UnallocatedCString output;
     std::lock_guard<std::mutex> lock(write_lock_);
@@ -93,13 +134,64 @@ auto Node::get_alias(const UnallocatedCString& id) const -> UnallocatedCString
     return output;
 }
 
+auto Node::init_map(
+    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+        items) noexcept -> void
+{
+    auto lock = Lock{write_lock_};
+    init_map(lock, items);
+}
+
+auto Node::init_map(
+    const Lock& lock,
+    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+        items) noexcept -> void
+{
+    const auto load_metadata = [this, &lock](const auto& proto) {
+        init_map(lock, proto);
+    };
+    std::for_each(items.begin(), items.end(), load_metadata);
+}
+
+auto Node::init_map(
+    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>& in,
+    Index& out) noexcept -> void
+{
+    const auto load_metadata = [this, &out](const auto& proto) {
+        init_map(proto, out);
+    };
+    std::for_each(in.begin(), in.end(), load_metadata);
+}
+
+auto Node::init_map(const Lock&, const proto::StorageItemHash& item) noexcept
+    -> void
+{
+    init_map(item, item_map_);
+}
+
+auto Node::init_map(const proto::StorageItemHash& in, Index& out) const noexcept
+    -> void
+{
+    out.emplace(
+        [&] {
+            if (in.has_id()) {
+
+                return factory_.Internal().Identifier(in.id());
+            } else {
+
+                return factory_.IdentifierFromBase58(in.item_id_base58());
+            }
+        }(),
+        Metadata{read(in.hash()), in.alias(), 0, false});
+}
+
 auto Node::List() const -> ObjectList
 {
     ObjectList output;
     auto lock = Lock{write_lock_};
 
     for (const auto& it : item_map_) {
-        output.emplace_back(it.first, std::get<1>(it.second));
+        output.emplace_back(it.first.asBase58(crypto_), std::get<1>(it.second));
     }
 
     lock.unlock();
@@ -108,19 +200,21 @@ auto Node::List() const -> ObjectList
 }
 
 auto Node::load_raw(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     UnallocatedCString& output,
     UnallocatedCString& alias,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     std::lock_guard<std::mutex> lock(write_lock_);
     const auto& it = item_map_.find(id);
     const bool exists = (item_map_.end() != it);
 
-    if (!exists) {
-        if (!checking) {
-            LogError()(OT_PRETTY_CLASS())("Error: item with id ")(
-                id)(" does not exist.")
+    if (false == exists) {
+        using enum ErrorReporting;
+
+        if (verbose == checking) {
+            LogError()(OT_PRETTY_CLASS())("Error: item with id ")(id, crypto_)(
+                " does not exist.")
                 .Flush();
         }
 
@@ -129,82 +223,38 @@ auto Node::load_raw(
 
     alias = std::get<1>(it->second);
 
-    return driver_.Load(std::get<0>(it->second), checking, output);
+    return plugin_.Load(std::get<0>(it->second), checking, writer(output));
 }
 
-auto Node::migrate(const UnallocatedCString& hash, const Driver& to) const
-    -> bool
-{
-    if (false == check_hash(hash)) { return true; }
-
-    return driver_.Migrate(hash, to);
-}
-
-auto Node::Migrate(const Driver& to) const -> bool
-{
-    if (UnallocatedCString(BLANK_HASH) == root_) {
-        if (0 < item_map_.size()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Items present in object with blank root hash.")
-                .Flush();
-
-            OT_FAIL;
-        }
-
-        return true;
-    }
-
-    bool output{true};
-    output &= migrate(root_, to);
-
-    for (const auto& item : item_map_) {
-        const auto& hash = std::get<0>(item.second);
-        output &= migrate(hash, to);
-    }
-
-    return output;
-}
-
-auto Node::normalize_hash(const UnallocatedCString& hash) -> UnallocatedCString
-{
-    if (hash.empty()) { return BLANK_HASH; }
-
-    if (20 > hash.size()) {
-        LogError()(OT_PRETTY_STATIC(Node))("Blanked out short hash ")(hash)(".")
-            .Flush();
-
-        return BLANK_HASH;
-    }
-
-    if (116 < hash.size()) {
-        LogError()(OT_PRETTY_STATIC(Node))("Blanked out long hash ")(hash)(".")
-            .Flush();
-
-        return BLANK_HASH;
-    }
-
-    return hash;
-}
-
-auto Node::Root() const -> UnallocatedCString
+auto Node::Root() const -> Hash
 {
     Lock lock_(write_lock_);
 
     return root_;
 }
 
-void Node::serialize_index(
-    const VersionNumber version,
-    const UnallocatedCString& id,
-    const Metadata& metadata,
+auto Node::serialize_index(
+    const identifier::Generic& id,
+    const Hash& hash,
+    ReadView alias,
     proto::StorageItemHash& output,
-    const proto::StorageHashType type) const
+    const proto::StorageHashType type) const noexcept -> void
 {
-    set_hash(version, id, std::get<0>(metadata), output, type);
-    output.set_alias(std::get<1>(metadata));
+    set_hash(id, hash, output, type);
+    output.set_alias(alias.data(), alias.size());
 }
 
-auto Node::set_alias(const UnallocatedCString& id, std::string_view value)
+auto Node::serialize_index(
+    const identifier::Generic& id,
+    const Metadata& metadata,
+    proto::StorageItemHash& output,
+    const proto::StorageHashType type) const -> void
+{
+    serialize_index(
+        id, std::get<0>(metadata), std::get<1>(metadata), output, type);
+}
+
+auto Node::set_alias(const identifier::Generic& id, std::string_view value)
     -> bool
 {
     auto lock = Lock{write_lock_};
@@ -224,42 +274,41 @@ auto Node::set_alias(const UnallocatedCString& id, std::string_view value)
         return true;
     }
 
-    LogError()(OT_PRETTY_CLASS())("item ")(id)(" does not exist").Flush();
+    LogError()(OT_PRETTY_CLASS())("item ")(id, crypto_)(" does not exist")
+        .Flush();
 
     return false;
 }
 
-void Node::set_hash(
-    const VersionNumber version,
-    const UnallocatedCString& id,
-    const UnallocatedCString& hash,
+auto Node::set_hash(
+    const identifier::Generic& id,
+    const Hash& hash,
     proto::StorageItemHash& output,
-    const proto::StorageHashType type) const
+    const proto::StorageHashType type) const noexcept -> void
 {
-    if (2 > version) {
-        if (proto::STORAGEHASH_ERROR != type) {
-            output.set_version(2);
-        } else {
-            output.set_version(version);
-        }
-    } else {
-        output.set_version(version);
-    }
+    output.set_version(storage_item_hash_version_);
+    id.Internal().Serialize(*output.mutable_id());
 
-    output.set_itemid(id);
-
-    if (hash.empty()) {
-        output.set_hash(Node::BLANK_HASH);
+    if (false == is_valid(hash)) {
+        write(NullHash{}, *output.mutable_hash());
     } else {
-        output.set_hash(hash);
+        write(hash, *output.mutable_hash());
     }
 
     output.set_type(type);
 }
 
+auto Node::set_original_version(VersionNumber version) noexcept -> VersionNumber
+{
+    original_version_.set_value(version);
+    version_.store(version);
+
+    return version;
+}
+
 auto Node::store_raw(
     const UnallocatedCString& data,
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::string_view alias) -> bool
 {
     auto lock = Lock{write_lock_};
@@ -270,7 +319,7 @@ auto Node::store_raw(
 auto Node::store_raw(
     const Lock& lock,
     const UnallocatedCString& data,
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     std::string_view alias) -> bool
 {
     OT_ASSERT(verify_write_lock(lock));
@@ -278,11 +327,30 @@ auto Node::store_raw(
     auto& metadata = item_map_[id];
     auto& hash = std::get<0>(metadata);
 
-    if (!driver_.Store(true, data, hash)) { return false; }
+    if (!plugin_.Store(data, hash)) { return false; }
 
     if (!alias.empty()) { std::get<1>(metadata) = alias; }
 
     return save(lock);
+}
+
+auto Node::Upgrade() noexcept -> bool
+{
+    auto lock = Lock{write_lock_};
+    const auto changed = upgrade(lock);
+
+    if (changed && (false == save(lock))) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)("save failure").Abort();
+    }
+
+    return changed;
+}
+
+auto Node::upgrade(const Lock&) noexcept -> bool
+{
+    version_.store(desired_version_);
+
+    return original_version_.get() != desired_version_;
 }
 
 auto Node::UpgradeLevel() const -> VersionNumber { return original_version_; }
@@ -303,4 +371,4 @@ auto Node::verify_write_lock(const Lock& lock) const -> bool
 
     return true;
 }
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

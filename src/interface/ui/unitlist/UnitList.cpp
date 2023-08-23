@@ -12,6 +12,7 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
@@ -100,7 +101,7 @@ auto UnitList::process_account(const Message& message) noexcept -> void
 
 auto UnitList::process_account(const identifier::Account& id) noexcept -> void
 {
-    process_unit(api_.Storage().AccountUnit(id));
+    process_unit(api_.Storage().Internal().AccountUnit(id));
 }
 
 auto UnitList::process_blockchain_balance(const Message& message) noexcept
@@ -145,7 +146,8 @@ auto UnitList::setup_listeners(
 
 auto UnitList::startup() noexcept -> void
 {
-    const auto accounts = api_.Storage().AccountsByOwner(primary_id_);
+    const auto accounts =
+        api_.Storage().Internal().AccountsByOwner(primary_id_);
     LogDetail()(OT_PRETTY_CLASS())("Loading ")(accounts.size())(" accounts.")
         .Flush();
 

@@ -5,20 +5,17 @@
 
 #pragma once
 
+#include <filesystem>
 #include <memory>
 
 #include "opentxs/util/Container.hpp"  // IWYU pragma: keep
+#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
 namespace session
 {
 class Factory;
@@ -40,17 +37,13 @@ namespace storage
 {
 namespace driver
 {
-namespace internal
-{
-class Multiplex;
-}  // namespace internal
+class Plugin;
 }  // namespace driver
 
 class Config;
-class Plugin;
+class Driver;
 }  // namespace storage
 
-class Flag;
 class String;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -59,42 +52,25 @@ namespace opentxs::factory
 {
 auto StorageFSArchive(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
     const storage::Config& config,
-    const Flag& bucket,
-    const UnallocatedCString& folder,
-    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Plugin>;
+    const std::filesystem::path& folder,
+    crypto::symmetric::Key& key) noexcept -> std::unique_ptr<storage::Driver>;
 auto StorageFSGC(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>;
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>;
 auto StorageMemDB(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>;
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>;
 auto StorageLMDB(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>;
-auto StorageMultiplex(
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>;
+auto StoragePlugin(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
     const api::session::Factory& factory,
-    const api::session::Storage& parent,
-    const Flag& primaryBucket,
+    const std::atomic<storage::Bucket>& primaryBucket,
     const storage::Config& config) noexcept
-    -> std::unique_ptr<storage::driver::internal::Multiplex>;
+    -> std::shared_ptr<storage::driver::Plugin>;
 auto StorageSqlite3(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>;
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>;
 }  // namespace opentxs::factory

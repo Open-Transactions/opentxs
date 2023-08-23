@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"
@@ -168,7 +169,8 @@ auto AccountList::load_custodial() noexcept -> void
 {
     const auto& storage = api_.Storage();
 
-    for (const auto& account : storage.AccountsByOwner(primary_id_)) {
+    for (const auto& account :
+         storage.Internal().AccountsByOwner(primary_id_)) {
         load_custodial_account(
             std::move(const_cast<identifier::Account&>(account)));
     }
@@ -216,7 +218,7 @@ auto AccountList::load_custodial_account(
         id, api_.Crypto())
         .Flush();
     const auto& api = api_;
-    auto notaryID = api.Storage().AccountServer(id);
+    auto notaryID = api.Storage().Internal().AccountServer(id);
     const auto index = AccountListSortKey{
         type, account_name_custodial(api, notaryID, contract, std::move(name))};
     auto custom = [&] {
@@ -352,7 +354,7 @@ auto AccountList::process_custodial(Message&& message) noexcept -> void
 
     const auto& api = api_;
     auto id = api.Factory().AccountIDFromZMQ(body[1]);
-    const auto owner = api.Storage().AccountOwner(id);
+    const auto owner = api.Storage().Internal().AccountOwner(id);
 
     if (owner != primary_id_) { return; }
 

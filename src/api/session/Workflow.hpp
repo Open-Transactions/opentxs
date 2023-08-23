@@ -359,16 +359,16 @@ private:
     auto get_workflow_by_id(
         const UnallocatedSet<otx::client::PaymentWorkflowType>& types,
         const identifier::Nym& nymID,
-        const UnallocatedCString& workflowID) const
+        const identifier::Generic& workflowID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;
     auto get_workflow_by_id(
         const identifier::Nym& nymID,
-        const UnallocatedCString& workflowID) const
+        const identifier::Generic& workflowID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;
     auto get_workflow_by_source(
         const UnallocatedSet<otx::client::PaymentWorkflowType>& types,
         const identifier::Nym& nymID,
-        const UnallocatedCString& sourceID) const
+        const identifier::Generic& sourceID) const
         -> std::shared_ptr<proto::PaymentWorkflow>;
     // Unlocks global after successfully locking the workflow-specific mutex
     auto get_workflow_lock(Lock& global, const UnallocatedCString& id) const
@@ -406,7 +406,7 @@ private:
         const identifier::Nym& remoteNymID,
         const UnallocatedCString& accountID,
         const proto::AccountEventType type,
-        const UnallocatedCString& workflowID,
+        const identifier::Generic& workflowID,
         const Amount amount,
         const Amount pending,
         const Time time,

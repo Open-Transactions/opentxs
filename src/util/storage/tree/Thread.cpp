@@ -7,34 +7,40 @@
 
 #include <StorageThread.pb.h>
 #include <StorageThreadItem.pb.h>
+#include <atomic>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageThread.hpp"
 #include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
+#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Mailbox.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Thread::Thread(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& id,
-    const UnallocatedCString& hash,
+    const driver::Plugin& storage,
+    const identifier::Generic& id,
+    const Hash& hash,
     std::string_view alias,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
-    : Node(crypto, factory, storage, hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 1)
     , id_(id)
     , alias_(alias)
     , index_(0)
@@ -43,22 +49,22 @@ Thread::Thread(
     , items_()
     , participants_()
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(1);
+        blank();
     }
 }
 
 Thread::Thread(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& id,
-    const UnallocatedSet<UnallocatedCString>& participants,
+    const driver::Plugin& storage,
+    const identifier::Generic& id,
+    const UnallocatedSet<identifier::Generic>& participants,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
-    : Node(crypto, factory, storage, Node::BLANK_HASH)
+    : Node(crypto, factory, storage, NullHash{}, OT_PRETTY_CLASS(), 1)
     , id_(id)
     , alias_()
     , index_(0)
@@ -67,17 +73,17 @@ Thread::Thread(
     , items_()
     , participants_(participants)
 {
-    blank(1);
+    blank();
 }
 
 auto Thread::Add(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     const std::uint64_t time,
     const otx::client::StorageBox& box,
     std::string_view alias,
     const UnallocatedCString& contents,
     const std::uint64_t index,
-    const UnallocatedCString& account,
+    const identifier::Generic& workflow,
     const std::uint32_t chain) -> bool
 {
     Lock lock(write_lock_);
@@ -115,7 +121,7 @@ auto Thread::Add(
 
     auto& item = items_[id];
     item.set_version(version_);
-    item.set_id(id);
+    item.set_id(id.asBase58(crypto_));
 
     if (0 == index) {
         item.set_index(index_++);
@@ -125,7 +131,7 @@ auto Thread::Add(
 
     item.set_time(time);
     item.set_box(static_cast<std::uint32_t>(box));
-    item.set_account(account);
+    item.set_account(workflow.asBase58(crypto_));
     item.set_unread(unread);
 
     if (otx::client::StorageBox::BLOCKCHAIN == box) {
@@ -151,42 +157,43 @@ auto Thread::Alias() const -> UnallocatedCString
     return alias_;
 }
 
-void Thread::init(const UnallocatedCString& hash)
+auto Thread::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StorageThread> serialized;
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageThread>{};
 
-    if (false == bool(serialized)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load thread index file.")
-            .Flush();
-        OT_FAIL;
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
+
+        switch (set_original_version(proto.version())) {
+            case 1u:
+            default: {
+                for (const auto& participant : proto.participant()) {
+                    participants_.emplace(
+                        factory_.IdentifierFromBase58(participant));
+                }
+
+                for (const auto& it : proto.item()) {
+                    const auto index = convert_to_size(it.index());
+                    items_.emplace(factory_.IdentifierFromBase58(it.id()), it);
+
+                    if (index >= index_) { index_ = index + 1; }
+                }
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
-
-    init_version(1, *serialized);
-
-    for (const auto& participant : serialized->participant()) {
-        participants_.emplace(participant);
-    }
-
-    for (const auto& it : serialized->item()) {
-        const auto index = convert_to_size(it.index());
-        items_.emplace(it.id(), it);
-
-        if (index >= index_) { index_ = index + 1; }
-    }
-
-    Lock lock(write_lock_);
-    upgrade(lock);
 }
 
-auto Thread::Check(const UnallocatedCString& id) const -> bool
+auto Thread::Check(const identifier::Generic& id) const -> bool
 {
     Lock lock(write_lock_);
 
     return items_.end() != items_.find(id);
 }
 
-auto Thread::ID() const -> UnallocatedCString { return id_; }
+auto Thread::ID() const -> identifier::Generic { return id_; }
 
 auto Thread::Items() const -> proto::StorageThread
 {
@@ -195,12 +202,7 @@ auto Thread::Items() const -> proto::StorageThread
     return serialize(lock);
 }
 
-auto Thread::Migrate(const Driver& to) const -> bool
-{
-    return Node::migrate(root_, to);
-}
-
-auto Thread::Read(const UnallocatedCString& id, const bool unread) -> bool
+auto Thread::Read(const identifier::Generic& id, const bool unread) -> bool
 {
     Lock lock(write_lock_);
 
@@ -219,7 +221,7 @@ auto Thread::Read(const UnallocatedCString& id, const bool unread) -> bool
     return save(lock);
 }
 
-auto Thread::Remove(const UnallocatedCString& id) -> bool
+auto Thread::Remove(const identifier::Generic& id) -> bool
 {
     Lock lock(write_lock_);
 
@@ -248,7 +250,7 @@ auto Thread::Remove(const UnallocatedCString& id) -> bool
     return save(lock);
 }
 
-auto Thread::Rename(const UnallocatedCString& newID) -> bool
+auto Thread::Rename(const identifier::Generic& newID) -> bool
 {
     Lock lock(write_lock_);
     const auto oldID = id_;
@@ -270,7 +272,7 @@ auto Thread::save(const Lock& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
@@ -279,10 +281,12 @@ auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
 
     proto::StorageThread serialized;
     serialized.set_version(version_);
-    serialized.set_id(id_);
+    serialized.set_id(id_.asBase58(crypto_));
 
     for (const auto& nym : participants_) {
-        if (!nym.empty()) { *serialized.add_participant() = nym; }
+        if (!nym.empty()) {
+            *serialized.add_participant() = nym.asBase58(crypto_);
+        }
     }
 
     auto sorted = sort(lock);
@@ -339,28 +343,32 @@ auto Thread::UnreadCount() const -> std::size_t
     return output;
 }
 
-void Thread::upgrade(const Lock& lock)
+auto Thread::upgrade(const Lock& lock) noexcept -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    auto changed = Node::upgrade(lock);
 
-    bool changed{false};
+    switch (original_version_.get()) {
+        case 1u:
+        default: {
+            for (auto& it : items_) {
+                auto& item = it.second;
+                const auto box =
+                    static_cast<otx::client::StorageBox>(item.box());
 
-    for (auto& it : items_) {
-        auto& item = it.second;
-        const auto box = static_cast<otx::client::StorageBox>(item.box());
-
-        switch (box) {
-            case otx::client::StorageBox::MAILOUTBOX: {
-                if (item.unread()) {
-                    item.set_unread(false);
-                    changed = true;
+                switch (box) {
+                    case otx::client::StorageBox::MAILOUTBOX: {
+                        if (item.unread()) {
+                            item.set_unread(false);
+                            changed = true;
+                        }
+                    } break;
+                    default: {
+                    }
                 }
-            } break;
-            default: {
             }
         }
     }
 
-    if (changed) { save(lock); }
+    return changed;
 }
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

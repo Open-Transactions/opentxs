@@ -539,7 +539,9 @@ auto Server::LoadServerNym(const identifier::Nym& nymID) -> bool
     auto nym = api_.Wallet().Nym(nymID);
 
     if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Server nym does not exist.").Flush();
+        LogError()(OT_PRETTY_CLASS())("Server nym ")(nymID, api_.Crypto())(
+            " does not exist.")
+            .Flush();
 
         return false;
     }

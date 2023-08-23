@@ -10,6 +10,7 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -63,7 +64,7 @@ auto AccountSummaryItem::DisplayBalance() const noexcept -> UnallocatedCString
 
         try {
             contract_ = api_.Wallet().Internal().UnitDefinition(
-                api_.Storage().AccountContract(account_id_));
+                api_.Storage().Internal().AccountContract(account_id_));
         } catch (...) {
         }
     }
@@ -89,7 +90,7 @@ auto AccountSummaryItem::load_unit(
 {
     try {
         return api.Wallet().Internal().UnitDefinition(
-            api.Storage().AccountContract(id));
+            api.Storage().Internal().AccountContract(id));
     } catch (...) {
 
         return api.Factory().InternalSession().UnitDefinition();

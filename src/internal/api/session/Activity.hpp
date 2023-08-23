@@ -41,8 +41,7 @@ public:
 
     virtual auto Cheque(
         const identifier::Nym& nym,
-        const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept -> ChequeData = 0;
+        const identifier::Generic& workflow) const noexcept -> ChequeData = 0;
     auto Internal() const noexcept -> const Activity& final { return *this; }
     using session::Activity::Mail;
     /**   Load a mail object
@@ -70,17 +69,17 @@ public:
         const identifier::Nym& nym,
         const Message& mail,
         const otx::client::StorageBox box,
-        const PeerObject& text) const noexcept -> UnallocatedCString = 0;
+        const PeerObject& text) const noexcept -> identifier::Generic = 0;
     virtual auto Mail(
         const identifier::Nym& nym,
         const Message& mail,
         const otx::client::StorageBox box,
         const UnallocatedCString& text) const noexcept
-        -> UnallocatedCString = 0;
+        -> identifier::Generic = 0;
     virtual auto Transfer(
         const identifier::Nym& nym,
         const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept -> TransferData = 0;
+        const identifier::Generic& workflow) const noexcept -> TransferData = 0;
 
     auto Internal() noexcept -> Activity& final { return *this; }
 

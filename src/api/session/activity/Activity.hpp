@@ -38,7 +38,6 @@ namespace session
 class Client;
 class Contacts;
 }  // namespace session
-
 }  // namespace api
 
 namespace blockchain
@@ -77,6 +76,8 @@ public:
         const identifier::Generic& itemID,
         const identifier::Generic& workflowID,
         Time time) const noexcept -> bool final;
+    auto Cheque(const identifier::Nym& nym, const identifier::Generic& workflow)
+        const noexcept -> ChequeData final;
     auto Mail(
         const identifier::Nym& nym,
         const identifier::Generic& id,
@@ -89,13 +90,13 @@ public:
         const identifier::Nym& nym,
         const Message& mail,
         const otx::client::StorageBox box,
-        const PeerObject& text) const noexcept -> UnallocatedCString final;
+        const PeerObject& text) const noexcept -> identifier::Generic final;
     auto Mail(
         const identifier::Nym& nym,
         const Message& mail,
         const otx::client::StorageBox box,
         const UnallocatedCString& text) const noexcept
-        -> UnallocatedCString final;
+        -> identifier::Generic final;
     auto Mail(const identifier::Nym& nym, const otx::client::StorageBox box)
         const noexcept -> ObjectList final;
     auto MailRemove(
@@ -119,19 +120,15 @@ public:
         const identifier::Nym& nymId,
         const identifier::Generic& threadId,
         const identifier::Generic& itemId) const noexcept -> bool final;
-    auto Cheque(
-        const identifier::Nym& nym,
-        const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept -> ChequeData final;
     auto Transfer(
         const identifier::Nym& nym,
         const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept
+        const identifier::Generic& workflow) const noexcept
         -> TransferData final;
     auto PaymentText(
         const identifier::Nym& nym,
         const UnallocatedCString& id,
-        const UnallocatedCString& workflow) const noexcept
+        const identifier::Generic& workflow) const noexcept
         -> std::shared_ptr<const UnallocatedCString> final;
     auto PreloadActivity(
         const identifier::Nym& nymID,
@@ -187,7 +184,7 @@ private:
     auto thread_preload_thread(
         PasswordPrompt reason,
         const identifier::Nym nymID,
-        const UnallocatedCString threadID,
+        const identifier::Generic threadID,
         const std::size_t start,
         const std::size_t count) const noexcept -> void;
 
@@ -213,6 +210,6 @@ private:
         -> OTZMQPublishSocket;
     auto verify_thread_exists(
         const identifier::Nym& nym,
-        const UnallocatedCString& thread) const noexcept -> bool;
+        const identifier::Generic& thread) const noexcept -> bool;
 };
 }  // namespace opentxs::api::session::imp

@@ -22,6 +22,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
@@ -618,7 +619,8 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
     const auto balance = account.get().GetBalance();
 
     if (balance != 0) {
-        const auto unittype = server_.API().Storage().AccountUnit(accountID);
+        const auto unittype =
+            server_.API().Storage().Internal().AccountUnit(accountID);
         LogError()(OT_PRETTY_CLASS())("Unable to delete account ")(
             accountID,
             api_.Crypto())(" with non-zero balance ")(balance, unittype)(".")

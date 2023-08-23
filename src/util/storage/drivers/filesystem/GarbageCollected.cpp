@@ -3,87 +3,103 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::storage::Plugin
+// IWYU pragma: no_forward_declare opentxs::storage::Driver
 
 #include "util/storage/drivers/filesystem/GarbageCollected.hpp"  // IWYU pragma: associated
 
 #include <cstdio>
+#include <exception>
 #include <memory>
 
 #include "internal/api/crypto/Encode.hpp"
-#include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
-#include "opentxs/util/storage/Plugin.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/storage/Driver.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory
 {
 auto StorageFSGC(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& parent,
-    const storage::Config& config,
-    const Flag& bucket) noexcept -> std::unique_ptr<storage::Plugin>
+    const storage::Config& config) noexcept -> std::unique_ptr<storage::Driver>
 {
     using ReturnType = storage::driver::filesystem::GarbageCollected;
 
-    return std::make_unique<ReturnType>(crypto, asio, parent, config, bucket);
+    try {
+
+        return std::make_unique<ReturnType>(crypto, config);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 }  // namespace opentxs::factory
 
 namespace opentxs::storage::driver::filesystem
 {
+using namespace std::literals;
+
 GarbageCollected::GarbageCollected(
     const api::Crypto& crypto,
-    const api::network::Asio& asio,
-    const api::session::Storage& storage,
-    const storage::Config& config,
-    const Flag& bucket)
-    : ot_super(crypto, asio, storage, config, config.path_.string(), bucket)
+    const storage::Config& config) noexcept(false)
+    : Common(crypto, config, config.path_)
 {
-    Init_GarbageCollected();
+    init();
 }
 
-auto GarbageCollected::bucket_name(const bool bucket) const noexcept -> fs::path
+auto GarbageCollected::bucket_name(Bucket bucket) const noexcept -> fs::path
 {
-    return bucket ? config_.fs_secondary_bucket_ : config_.fs_primary_bucket_;
+    using enum Bucket;
+
+    switch (bucket) {
+        case left: {
+
+            return config_.fs_primary_bucket_;
+        }
+        case right: {
+
+            return config_.fs_secondary_bucket_;
+        }
+        default: {
+
+            OT_FAIL;
+        }
+    }
 }
 
 auto GarbageCollected::calculate_path(
+    const Data& data,
     std::string_view key,
-    bool bucket,
+    Bucket bucket,
     fs::path& directory) const noexcept -> fs::path
 {
-    directory = folder_ / bucket_name(bucket);
+    directory = data.folder_ / bucket_name(bucket);
 
     return directory / key;
 }
 
-void GarbageCollected::Cleanup()
+auto GarbageCollected::Description() const noexcept -> std::string_view
 {
-    Cleanup_GarbageCollected();
-    ot_super::Cleanup();
+    return "flat file"sv;
 }
 
-void GarbageCollected::Cleanup_GarbageCollected()
-{
-    // future cleanup actions go here
-}
-
-auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
+auto GarbageCollected::empty_bucket(const Data& data, Bucket bucket) const
+    noexcept(false) -> bool
 {
     const auto oldDirectory = [&] {
         auto out = fs::path{};
-        calculate_path("", bucket, out);
+        calculate_path(data, "", bucket, out);
 
         return out;
     }();
     const auto random = crypto_.Encode().InternalEncode().RandomFilename();
-    const auto newName = folder_ / random;
+    const auto newName = data.folder_ / random;
 
     if (0 !=
         std::rename(oldDirectory.string().c_str(), newName.string().c_str())) {
@@ -95,11 +111,11 @@ auto GarbageCollected::EmptyBucket(const bool bucket) const -> bool
     return fs::create_directory(oldDirectory);
 }
 
-void GarbageCollected::Init_GarbageCollected()
+auto GarbageCollected::init(Data& data) noexcept(false) -> void
 {
-    fs::create_directory(folder_ / config_.fs_primary_bucket_);
-    fs::create_directory(folder_ / config_.fs_secondary_bucket_);
-    ready_->On();
+    Common::init(data);
+    fs::create_directory(data.folder_ / config_.fs_primary_bucket_);
+    fs::create_directory(data.folder_ / config_.fs_secondary_bucket_);
 }
 
 auto GarbageCollected::purge(const fs::path& path) noexcept -> void
@@ -109,13 +125,11 @@ auto GarbageCollected::purge(const fs::path& path) noexcept -> void
     fs::remove_all(path);
 }
 
-auto GarbageCollected::root_filename() const -> fs::path
+auto GarbageCollected::root_filename(const Data& data) const noexcept
+    -> fs::path
 {
-    OT_ASSERT(false == folder_.empty());
-    OT_ASSERT(false == config_.fs_root_file_.empty());
-
-    return folder_ / config_.fs_root_file_;
+    return data.folder_ / config_.fs_root_file_;
 }
 
-GarbageCollected::~GarbageCollected() { Cleanup_GarbageCollected(); }
+GarbageCollected::~GarbageCollected() = default;
 }  // namespace opentxs::storage::driver::filesystem

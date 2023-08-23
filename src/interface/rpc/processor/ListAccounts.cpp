@@ -9,6 +9,7 @@
 #include <iterator>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/core/Core.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -58,7 +59,8 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto all = haveNym && haveServer && haveUnit;
         const auto byNymOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto accountids = session.Storage().AccountsByOwner(nym);
+            const auto accountids =
+                session.Storage().Internal().AccountsByOwner(nym);
             std::transform(
                 accountids.begin(),
                 accountids.end(),
@@ -92,7 +94,8 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         };
         const auto byServerOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
-            const auto accountids = session.Storage().AccountsByServer(notary);
+            const auto accountids =
+                session.Storage().Internal().AccountsByServer(notary);
             std::transform(
                 accountids.begin(),
                 accountids.end(),
@@ -128,7 +131,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byUnitOTX = [&] {
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto accountids =
-                session.Storage().AccountsByContract(unitID);
+                session.Storage().Internal().AccountsByContract(unitID);
             std::transform(
                 accountids.begin(),
                 accountids.end(),
@@ -216,7 +219,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             auto data = byUnit();
             std::move(data.begin(), data.end(), std::back_inserter(ids));
         } else {
-            const auto otx = session.Storage().AccountList();
+            const auto otx = session.Storage().Internal().AccountList();
             const auto bc = blockchain.AccountList();
             std::transform(
                 otx.begin(),

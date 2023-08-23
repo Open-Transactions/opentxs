@@ -5,6 +5,7 @@
 
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"  // IWYU pragma: associated
 
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
 namespace opentxs::identity::wot

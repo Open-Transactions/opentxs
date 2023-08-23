@@ -6,67 +6,73 @@
 #include "util/storage/tree/Mailbox.hpp"  // IWYU pragma: associated
 
 #include <StorageEnums.pb.h>
-#include <StorageItemHash.pb.h>
 #include <StorageNymList.pb.h>
+#include <atomic>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
+#include "internal/util/DeferredConstruction.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Mailbox::Mailbox(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 2)
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(2);
+        blank();
     }
 }
 
-auto Mailbox::Delete(const UnallocatedCString& id) -> bool
+auto Mailbox::Delete(const identifier::Generic& id) -> bool
 {
     return delete_item(id);
 }
 
-void Mailbox::init(const UnallocatedCString& hash)
+auto Mailbox::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StorageNymList> serialized;
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageNymList>{};
 
-    if (!serialized) {
-        std::cerr << __func__ << ": Failed to load mailbox index file."
-                  << std::endl;
-        abort();
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(2, *serialized);
-
-    for (const auto& it : serialized->nym()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
+        switch (set_original_version(proto.version())) {
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.nym());
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
 auto Mailbox::Load(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     UnallocatedCString& output,
     UnallocatedCString& alias,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
     return load_raw(id, output, alias, checking);
 }
@@ -82,7 +88,7 @@ auto Mailbox::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Mailbox::serialize() const -> proto::StorageNymList
@@ -92,12 +98,11 @@ auto Mailbox::serialize() const -> proto::StorageNymList
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
             serialize_index(
-                version_,
                 item.first,
                 item.second,
                 *serialized.add_nym(),
@@ -109,10 +114,24 @@ auto Mailbox::serialize() const -> proto::StorageNymList
 }
 
 auto Mailbox::Store(
-    const UnallocatedCString& id,
+    const identifier::Generic& id,
     const UnallocatedCString& data,
     std::string_view alias) -> bool
 {
     return store_raw(data, id, alias);
 }
-}  // namespace opentxs::storage
+
+auto Mailbox::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

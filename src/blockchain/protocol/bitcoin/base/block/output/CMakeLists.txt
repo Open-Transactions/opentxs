@@ -22,7 +22,6 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common
     PRIVATE
       "Data.cpp"
-      "Data.hpp"
       "Factory.cpp"
       "Imp.cpp"
       "Imp.hpp"

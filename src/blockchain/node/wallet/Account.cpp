@@ -14,6 +14,7 @@
 
 #include "blockchain/node/wallet/subchain/NotificationStateData.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -472,7 +473,7 @@ auto Account::Imp::scan_subchains() noexcept -> void
 
 auto Account::Imp::scan_contacts(allocator_type monotonic) noexcept -> void
 {
-    const auto contacts = api_.Storage().ContactList();
+    const auto contacts = api_.Storage().Internal().ContactList();
     const auto scan = [this, monotonic](const auto& item) {
         const auto id =
             api_.Factory().IdentifierFromBase58(item.first, monotonic);

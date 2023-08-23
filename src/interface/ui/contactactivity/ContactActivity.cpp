@@ -18,6 +18,7 @@
 #include <tuple>
 
 #include "interface/ui/base/Widget.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -293,7 +294,8 @@ auto ContactActivity::Pay(
     const UnallocatedCString& memo,
     const otx::client::PaymentType type) const noexcept -> bool
 {
-    const auto& unitID = api_.Storage().AccountContract(sourceAccount);
+    const auto& unitID =
+        api_.Storage().Internal().AccountContract(sourceAccount);
 
     if (unitID.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid account: (")(
@@ -341,7 +343,7 @@ auto ContactActivity::Pay(
 
     if (0 >= amount) {
         const auto contract = api_.Wallet().Internal().UnitDefinition(
-            api_.Storage().AccountContract(sourceAccount));
+            api_.Storage().Internal().AccountContract(sourceAccount));
         LogError()(OT_PRETTY_CLASS())("Invalid amount: (")(
             amount, contract->UnitOfAccount())(")")
             .Flush();
@@ -723,7 +725,7 @@ auto ContactActivity::send_cheque(
 
     try {
         const auto contract = api_.Wallet().Internal().UnitDefinition(
-            api_.Storage().AccountContract(sourceAccount));
+            api_.Storage().Internal().AccountContract(sourceAccount));
         const auto& definition =
             display::GetDefinition(contract->UnitOfAccount());
         displayAmount = definition.Format(amount);
@@ -1022,7 +1024,7 @@ auto ContactActivity::update_payment_codes() noexcept -> bool
 auto ContactActivity::validate_account(
     const identifier::Account& sourceAccount) const noexcept -> bool
 {
-    const auto owner = api_.Storage().AccountOwner(sourceAccount);
+    const auto owner = api_.Storage().Internal().AccountOwner(sourceAccount);
 
     if (owner.empty()) {
         LogError()(OT_PRETTY_CLASS())("Invalid account id: (")(

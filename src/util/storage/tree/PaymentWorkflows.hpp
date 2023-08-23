@@ -11,9 +11,14 @@
 #include <utility>
 
 #include "internal/util/Mutex.hpp"
+#include "internal/util/storage/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -36,13 +41,20 @@ class PaymentWorkflow;
 
 namespace storage
 {
-class Driver;
+namespace driver
+{
+class Plugin;
+}  // namespace driver
+
+namespace tree
+{
 class Nym;
+}  // namespace tree
 }  // namespace storage
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
 class PaymentWorkflows final : public Node
 {
@@ -50,22 +62,23 @@ public:
     using State = std::pair<
         otx::client::PaymentWorkflowType,
         otx::client::PaymentWorkflowState>;
-    using Workflows = UnallocatedSet<UnallocatedCString>;
+    using Workflows = UnallocatedSet<identifier::Generic>;
 
-    auto GetState(const UnallocatedCString& workflowID) const -> State;
-    auto ListByAccount(const UnallocatedCString& accountID) const -> Workflows;
+    auto GetState(const identifier::Generic& workflowID) const -> State;
+    auto ListByAccount(const identifier::Account& accountID) const -> Workflows;
     auto ListByState(
         otx::client::PaymentWorkflowType type,
         otx::client::PaymentWorkflowState state) const -> Workflows;
-    auto ListByUnit(const UnallocatedCString& unitID) const -> Workflows;
+    auto ListByUnit(const identifier::UnitDefinition& unitID) const
+        -> Workflows;
     auto Load(
-        const UnallocatedCString& id,
+        const identifier::Generic& id,
         std::shared_ptr<proto::PaymentWorkflow>& output,
-        const bool checking) const -> bool;
-    auto LookupBySource(const UnallocatedCString& sourceID) const
-        -> UnallocatedCString;
+        ErrorReporting checking) const -> bool;
+    auto LookupBySource(const identifier::Generic& sourceID) const
+        -> identifier::Generic;
 
-    auto Delete(const UnallocatedCString& id) -> bool;
+    auto Delete(const identifier::Generic& id) -> bool;
     auto Store(
         const proto::PaymentWorkflow& data,
         UnallocatedCString& plaintext) -> bool;
@@ -84,13 +97,12 @@ private:
     static constexpr auto current_version_ = VersionNumber{3};
     static constexpr auto type_version_ = VersionNumber{3};
     static constexpr auto index_version_ = VersionNumber{1};
-    static constexpr auto hash_version_ = VersionNumber{2};
 
     Workflows archived_;
-    UnallocatedMap<UnallocatedCString, UnallocatedCString> item_workflow_map_;
-    UnallocatedMap<UnallocatedCString, Workflows> account_workflow_map_;
-    UnallocatedMap<UnallocatedCString, Workflows> unit_workflow_map_;
-    UnallocatedMap<UnallocatedCString, State> workflow_state_map_;
+    UnallocatedMap<identifier::Generic, identifier::Generic> item_workflow_map_;
+    UnallocatedMap<identifier::Account, Workflows> account_workflow_map_;
+    UnallocatedMap<identifier::UnitDefinition, Workflows> unit_workflow_map_;
+    UnallocatedMap<identifier::Generic, State> workflow_state_map_;
     UnallocatedMap<otx::client::PaymentWorkflowType, Workflows>
         type_workflow_map_;
     UnallocatedMap<State, Workflows> state_workflow_map_;
@@ -100,22 +112,23 @@ private:
 
     void add_state_index(
         const Lock& lock,
-        const UnallocatedCString& workflowID,
+        const identifier::Generic& workflowID,
         otx::client::PaymentWorkflowType type,
         otx::client::PaymentWorkflowState state);
-    void delete_by_value(const UnallocatedCString& value);
-    void init(const UnallocatedCString& hash) final;
+    void delete_by_value(const identifier::Generic& value);
+    auto init(const Hash& hash) noexcept(false) -> void final;
     void reindex(
         const Lock& lock,
-        const UnallocatedCString& workflowID,
+        const identifier::Generic& workflowID,
         const otx::client::PaymentWorkflowType type,
         const otx::client::PaymentWorkflowState newState,
         otx::client::PaymentWorkflowState& state);
+    auto upgrade(const Lock& lock) noexcept -> bool final;
 
     PaymentWorkflows(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const Driver& storage,
-        const UnallocatedCString& key);
+        const driver::Plugin& storage,
+        const Hash& key);
 };
-}  // namespace opentxs::storage
+}  // namespace opentxs::storage::tree

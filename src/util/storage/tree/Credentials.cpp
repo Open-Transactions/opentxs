@@ -8,9 +8,10 @@
 #include <Credential.pb.h>
 #include <Enums.pb.h>
 #include <StorageCredentials.pb.h>
-#include <StorageItemHash.pb.h>
+#include <atomic>
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 
@@ -20,35 +21,38 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
+#include "internal/util/DeferredConstruction.hpp"
+#include "internal/util/LogMacros.hpp"
+#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
-#include "util/storage/Plugin.hpp"
 #include "util/storage/tree/Node.hpp"
 
-namespace opentxs::storage
+namespace opentxs::storage::tree
 {
+using namespace std::literals;
+
 Credentials::Credentials(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const Driver& storage,
-    const UnallocatedCString& hash)
-    : Node(crypto, factory, storage, hash)
+    const driver::Plugin& storage,
+    const Hash& hash)
+    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 2)
 {
-    if (check_hash(hash)) {
+    if (is_valid(hash)) {
         init(hash);
     } else {
-        blank(2);
+        blank();
     }
 }
 
 auto Credentials::Alias(const identifier::Generic& id) const
     -> UnallocatedCString
 {
-    return get_alias(id.asBase58(crypto_));
+    return get_alias(id);
 }
 
 auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
@@ -72,8 +76,9 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
     // ...so we have to load the credential just to be sure
     if (!isPrivate) {
         std::shared_ptr<proto::Credential> existing;
+        using enum ErrorReporting;
 
-        if (!driver_.LoadProto(hash, existing, false)) {
+        if (!LoadProto(hash, existing, verbose)) {
             std::cerr << __func__ << ": Failed to load object" << std::endl;
             abort();
         }
@@ -87,50 +92,53 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
 
 auto Credentials::Delete(const identifier::Generic& id) -> bool
 {
-    return delete_item(id.asBase58(crypto_));
+    return delete_item(id);
 }
 
-void Credentials::init(const UnallocatedCString& hash)
+auto Credentials::init(const Hash& hash) noexcept(false) -> void
 {
-    std::shared_ptr<proto::StorageCredentials> serialized;
-    driver_.LoadProto(hash, serialized);
+    auto p = std::shared_ptr<proto::StorageCredentials>{};
 
-    if (!serialized) {
-        std::cerr << __func__ << ": Failed to load credentials index file."
-                  << std::endl;
-        abort();
-    }
+    if (LoadProto(hash, p, verbose) && p) {
+        const auto& proto = *p;
 
-    init_version(2, *serialized);
-
-    for (const auto& it : serialized->cred()) {
-        item_map_.emplace(
-            it.itemid(), Metadata{it.hash(), it.alias(), 0, false});
+        switch (set_original_version(proto.version())) {
+            case 2u:
+            case 1u:
+            default: {
+                init_map(proto.cred());
+            }
+        }
+    } else {
+        throw std::runtime_error{
+            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
     }
 }
 
 auto Credentials::Load(
     const identifier::Generic& id,
     std::shared_ptr<proto::Credential>& cred,
-    const bool checking) const -> bool
+    ErrorReporting checking) const -> bool
 {
-    const auto base58 = id.asBase58(crypto_);
     std::lock_guard<std::mutex> lock(write_lock_);
-    const bool exists = (item_map_.end() != item_map_.find(base58));
+    const bool exists = (item_map_.end() != item_map_.find(id));
 
-    if (!exists) {
-        if (!checking) {
-            std::cerr << __func__ << ": Error: credential with id " << base58
-                      << " does not exist." << std::endl;
+    if (false == exists) {
+        using enum ErrorReporting;
+
+        if (verbose == checking) {
+            std::cerr << __func__ << ": Error: credential with id "
+                      << id.asBase58(crypto_) << " does not exist."
+                      << std::endl;
         }
 
         return false;
     }
 
-    auto& metadata = item_map_[base58];
+    auto& metadata = item_map_[id];
     const auto& hash = std::get<0>(metadata);
     auto& isPrivate = std::get<3>(metadata);
-    const bool loaded = driver_.LoadProto(hash, cred, checking);
+    const bool loaded = LoadProto(hash, cred, checking);
 
     if (!loaded) { return false; }
 
@@ -150,7 +158,7 @@ auto Credentials::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    return driver_.StoreProto(serialized, root_);
+    return StoreProto(serialized, root_);
 }
 
 auto Credentials::serialize() const -> proto::StorageCredentials
@@ -160,12 +168,11 @@ auto Credentials::serialize() const -> proto::StorageCredentials
 
     for (const auto& item : item_map_) {
         const bool goodID = !item.first.empty();
-        const bool goodHash = check_hash(std::get<0>(item.second));
+        const bool goodHash = is_valid(std::get<0>(item.second));
         const bool good = goodID && goodHash;
 
         if (good) {
-            serialize_index(
-                version_, item.first, item.second, *serialized.add_cred());
+            serialize_index(item.first, item.second, *serialized.add_cred());
         }
     }
 
@@ -176,7 +183,7 @@ auto Credentials::SetAlias(
     const identifier::Generic& id,
     std::string_view alias) -> bool
 {
-    return set_alias(id.asBase58(crypto_), alias);
+    return set_alias(id, alias);
 }
 
 auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
@@ -184,12 +191,11 @@ auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
 {
     std::unique_lock<std::mutex> lock(write_lock_);
     const auto id = factory_.Internal().Identifier(cred.id());
-    const auto base58 = id.asBase58(crypto_);
-    const bool existingKey = (item_map_.end() != item_map_.find(base58));
+    const bool existingKey = (item_map_.end() != item_map_.find(id));
     const bool incomingPrivate = (proto::KEYMODE_PRIVATE == cred.mode());
     const bool incomingPublic = (proto::KEYMODE_PUBLIC == cred.mode());
 
-    auto& metadata = item_map_[base58];
+    auto& metadata = item_map_[id];
     auto& hash = std::get<0>(metadata);
 
     if (existingKey && incomingPublic) {
@@ -202,10 +208,24 @@ auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
         }
     }
 
-    if (!driver_.StoreProto(cred, hash)) { return false; }
+    if (!StoreProto(cred, hash)) { return false; }
 
     if (!alias.empty()) { std::get<1>(metadata) = alias; }
 
     return save(lock);
 }
-}  // namespace opentxs::storage
+
+auto Credentials::upgrade(const Lock& lock) noexcept -> bool
+{
+    auto changed = Node::upgrade(lock);
+
+    switch (original_version_.get()) {
+        case 1u:
+        case 2u:
+        default: {
+        }
+    }
+
+    return changed;
+}
+}  // namespace opentxs::storage::tree

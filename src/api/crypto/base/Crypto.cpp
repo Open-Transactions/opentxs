@@ -60,7 +60,7 @@ Crypto::Crypto(const api::Settings& settings) noexcept
     , bip32_(factory::Bip32(*this))
     , bip39_(*bip39_p_)
     , encode_(factory::Encode(*this))
-    , hash_(factory::Hash(*encode_, *ssl_, *sodium_, *ssl_, *ssl_, *sodium_))
+    , hash_(factory::Hash(*ssl_, *sodium_, *ssl_, *ssl_, *sodium_))
     , asymmetric_map_([this] {
         auto out = AMap{};
         out.emplace(AType::ED25519, sodium_.get());

@@ -7,6 +7,7 @@
 
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Crypto.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -143,8 +144,10 @@ void Wallet::init() noexcept
 
     for (const auto& nymID : nyms) {
         const auto unit = blockchain_to_unit(chain_);
-        const auto hd = api_.Storage().BlockchainAccountList(nymID, unit);
-        const auto pc = api_.Storage().Bip47ChannelsByChain(nymID, unit);
+        const auto hd =
+            api_.Storage().Internal().BlockchainAccountList(nymID, unit);
+        const auto pc =
+            api_.Storage().Internal().Bip47ChannelsByChain(nymID, unit);
         add(lock, nymID, factory(nymID, hd, pc));
     }
 }

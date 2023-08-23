@@ -131,6 +131,9 @@ public:
     auto Storage() const noexcept -> const api::session::Storage& final;
     auto Wallet() const noexcept -> const session::Wallet& final;
 
+    auto MasterKey(const opentxs::Lock& lock)
+        -> opentxs::crypto::symmetric::Key&;
+
     Session() = delete;
     Session(const Session&) = delete;
     Session(Session&&) = delete;
@@ -184,7 +187,7 @@ protected:
 private:
     mutable std::mutex master_key_lock_;
     mutable std::optional<Secret> master_secret_;
-    mutable opentxs::crypto::symmetric::Key master_key_;
+    mutable std::optional<opentxs::crypto::symmetric::Key> master_key_;
     mutable std::chrono::seconds password_duration_;
     mutable Time last_activity_;
     std::promise<void> init_promise_;
@@ -193,7 +196,5 @@ private:
 
     void bump_password_timer(const opentxs::Lock& lock) const;
     // TODO void password_timeout() const;
-
-    void storage_gc_hook() final;
 };
 }  // namespace opentxs::api::session::imp

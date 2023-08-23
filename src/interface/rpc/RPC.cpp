@@ -44,6 +44,7 @@
 #include "interface/rpc/response/Invalid.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
@@ -262,7 +263,8 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
             acceptpendingpayment.destinationaccount());
         const auto workflowID = client.Factory().IdentifierFromBase58(
             acceptpendingpayment.workflow());
-        const auto nymID = client.Storage().AccountOwner(destinationaccountID);
+        const auto nymID =
+            client.Storage().Internal().AccountOwner(destinationaccountID);
 
         try {
             const auto paymentWorkflow = [&] {
@@ -967,8 +969,10 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
         return output;
     }
 
-    const auto owneraccounts = client.Storage().AccountsByOwner(ownerID);
-    const auto unitaccounts = client.Storage().AccountsByContract(unitID);
+    const auto owneraccounts =
+        client.Storage().Internal().AccountsByOwner(ownerID);
+    const auto unitaccounts =
+        client.Storage().Internal().AccountsByContract(unitID);
     UnallocatedVector<identifier::Generic> compatible{};
     std::set_intersection(
         owneraccounts.begin(),
@@ -1571,7 +1575,7 @@ auto RPC::lookup_account_id(const proto::RPCCommand& command) const
 
     const auto& label = command.param();
 
-    for (const auto& [id, alias] : session.Storage().AccountList()) {
+    for (const auto& [id, alias] : session.Storage().Internal().AccountList()) {
         if (alias == label) { output.add_identifier(id); }
     }
 
@@ -1592,13 +1596,14 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
     const auto& movefunds = command.movefunds();
     const auto sourceaccount =
         ot_.Factory().AccountIDFromBase58(movefunds.sourceaccount());
-    auto sender = client.Storage().AccountOwner(sourceaccount);
+    auto sender = client.Storage().Internal().AccountOwner(sourceaccount);
 
     switch (movefunds.type()) {
         case proto::RPCPAYMENTTYPE_TRANSFER: {
             const auto targetaccount = ot_.Factory().AccountIDFromBase58(
                 movefunds.destinationaccount());
-            const auto notary = client.Storage().AccountServer(sourceaccount);
+            const auto notary =
+                client.Storage().Internal().AccountServer(sourceaccount);
 
             INIT_OTX(
                 SendTransfer,

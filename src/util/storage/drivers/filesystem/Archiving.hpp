@@ -10,7 +10,8 @@
 #include <string_view>
 
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Driver.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/drivers/filesystem/Common.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -18,16 +19,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class Asio;
-}  // namespace network
-
-namespace session
-{
-class Storage;
-}  // namespace session
-
 class Crypto;
 }  // namespace api
 
@@ -43,8 +34,6 @@ namespace storage
 {
 class Config;
 }  // namespace storage
-
-class Flag;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -52,25 +41,16 @@ namespace opentxs::storage::driver::filesystem
 {
 using namespace std::literals;
 
-class Archiving final : public Common, public virtual storage::Driver
+class Archiving final : public Common
 {
-
-private:
-    using ot_super = Common;
-
 public:
-    auto EmptyBucket(const bool bucket) const -> bool final;
-
-    void Cleanup() final;
+    auto Description() const noexcept -> std::string_view final;
 
     Archiving(
         const api::Crypto& crypto,
-        const api::network::Asio& asio,
-        const api::session::Storage& storage,
         const storage::Config& config,
-        const Flag& bucket,
-        const UnallocatedCString& folder,
-        crypto::symmetric::Key& key);
+        const std::filesystem::path& folder,
+        crypto::symmetric::Key& key) noexcept(false);
     Archiving() = delete;
     Archiving(const Archiving&) = delete;
     Archiving(Archiving&&) = delete;
@@ -85,15 +65,23 @@ private:
     crypto::symmetric::Key& encryption_key_;
     const bool encrypted_;
 
-    auto calculate_path(std::string_view key, bool bucket, fs::path& directory)
-        const noexcept -> fs::path final;
-    auto prepare_read(const UnallocatedCString& ciphertext) const
+    auto calculate_path(
+        const Data& data,
+        std::string_view key,
+        Bucket bucket,
+        fs::path& directory) const noexcept -> fs::path final;
+    auto do_write(
+        const fs::path& directory,
+        const fs::path& filename,
+        File& file,
+        ReadView data) const noexcept(false) -> void final;
+    auto empty_bucket(const Data& data, Bucket bucket) const noexcept(false)
+        -> bool final;
+    auto finalize_read(UnallocatedCString&& ciphertext) const noexcept(false)
         -> UnallocatedCString final;
-    auto prepare_write(const UnallocatedCString& plaintext) const
-        -> UnallocatedCString final;
-    auto root_filename() const -> fs::path final;
+    auto root_filename(const Data& data) const noexcept -> fs::path final;
 
-    void Init_Archiving();
-    void Cleanup_Archiving();
+    using Common::init;
+    auto init(Data& data) noexcept(false) -> void final;
 };
 }  // namespace opentxs::storage::driver::filesystem

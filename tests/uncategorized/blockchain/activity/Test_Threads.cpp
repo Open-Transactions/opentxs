@@ -8,6 +8,7 @@
 #include <memory>
 #include <optional>
 
+#include "internal/api/session/Storage.hpp"
 #include "ottest/fixtures/blockchain/Activity.hpp"
 
 namespace ottest
@@ -99,7 +100,8 @@ TEST_F(Test_BlockchainActivity, inputs)
 
     txid_ = incoming.ID().asHex();
 
-    auto list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming.ID());
+    auto list = api_.Storage().Internal().BlockchainThreadMap(
+        nym_1_id(), incoming.ID());
 
     EXPECT_EQ(list.size(), 0);
     // ASSERT_TRUE(api_.Crypto().Blockchain().Internal().ProcessTransaction(
@@ -120,7 +122,8 @@ TEST_F(Test_BlockchainActivity, inputs)
     EXPECT_FALSE(thread3);
     EXPECT_FALSE(thread4);
 
-    list = api_.Storage().BlockchainThreadMap(nym_1_id(), incoming.ID());
+    list = api_.Storage().Internal().BlockchainThreadMap(
+        nym_1_id(), incoming.ID());
 
     EXPECT_EQ(list.size(), 2);
 }

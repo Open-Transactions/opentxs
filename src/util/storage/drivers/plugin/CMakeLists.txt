@@ -3,7 +3,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(opentxs-common PRIVATE "Multiplex.cpp" "Multiplex.hpp")
+target_sources(
+  opentxs-common
+  PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/util/storage/drivers/Plugin.hpp"
+    "PendingWrite.cpp"
+    "PendingWrite.hpp"
+    "Plugin.cpp"
+    "Plugin.hpp"
+)
 libopentxs_parallel_algorithms()
 
 if(FS_EXPORT)

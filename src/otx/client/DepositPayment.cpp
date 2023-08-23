@@ -9,6 +9,7 @@
 #include <memory>
 #include <utility>
 
+#include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Message.hpp"
@@ -134,7 +135,8 @@ auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     -> identifier::Account
 {
     Lock lock(payment_tasks_.GetAccountLock(unit));
-    const auto accounts = parent_.api().Storage().AccountsByContract(unit);
+    const auto accounts =
+        parent_.api().Storage().Internal().AccountsByContract(unit);
 
     if (1 < accounts.size()) {
         LogError()(OT_PRETTY_CLASS())(
