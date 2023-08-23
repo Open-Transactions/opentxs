@@ -536,16 +536,21 @@ auto Actor::add_peer(
     ConnectionID connection,
     std::optional<Message> msg) noexcept -> PeerID
 {
+    const auto& log = log_;
+
     OT_ASSERT(endpoint.IsValid());
 
     endpoint.Internal().SetIncoming(incoming);
 
     if (is_active(endpoint)) {
-        log_(OT_PRETTY_CLASS())(name_)(": address ")(endpoint.Display())(
+        log(OT_PRETTY_CLASS())(name_)(": address ")(endpoint.Display())(
             " is already active")
             .Flush();
 
         return invalid_peer_;
+    } else {
+        log(OT_PRETTY_CLASS())(name_)(": adding peer ")(endpoint.Display())
+            .Flush();
     }
 
     const auto inproc = network::zeromq::MakeArbitraryInproc();
@@ -684,15 +689,28 @@ auto Actor::check_dns() noexcept -> void
 
 auto Actor::check_peers(allocator_type monotonic) noexcept -> void
 {
+    const auto& log = log_;
+
     if (false == have_target_zmq_peers()) {
+        log(OT_PRETTY_CLASS())(name_)(": attempting to add a zmq peer").Flush();
+
         if (auto peer = get_peer(true, monotonic); peer.IsValid()) {
             add_peer(std::move(peer), false);
+        } else {
+            log(OT_PRETTY_CLASS())(name_)(": no valid zmq peer not found")
+                .Flush();
         }
     }
 
     if (false == have_target_peers()) {
+        log(OT_PRETTY_CLASS())(name_)(
+            ": attempting to add a peer on any network")
+            .Flush();
+
         if (auto peer = get_peer(false, monotonic); peer.IsValid()) {
             add_peer(std::move(peer), false);
+        } else {
+            log(OT_PRETTY_CLASS())(name_)(": no valid peer not found").Flush();
         }
     }
 }
@@ -908,6 +926,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
 auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
     -> network::blockchain::Address
 {
+    const auto& log = log_;
     auto peer = opentxs::network::blockchain::Address{};
     using enum opentxs::network::blockchain::Transport;
     const auto& count = transports_[zmq];
@@ -924,17 +943,19 @@ auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
 
         if (peer.IsValid()) {
             if (peer.Key() == selfKey) {
+                log(OT_PRETTY_CLASS())(name_)(": avoiding connection to self")
+                    .Flush();
                 exclude.emplace(peer.ID());
             } else if (
                 (zmq == peer.Type()) &&
                 (false == transports.contains(peer.Subtype()))) {
-                log_(OT_PRETTY_CLASS())(name_)(
+                log(OT_PRETTY_CLASS())(name_)(
                     ": ignoring zmq peer due to unsupported transport ")(
                     print(peer.Subtype()))
                     .Flush();
                 exclude.emplace(peer.ID());
             } else {
-                log_(OT_PRETTY_CLASS())(name_)(
+                log(OT_PRETTY_CLASS())(name_)(
                     ": attempting to connect to zmq peer ")(peer.Display())
                     .Flush();
 
@@ -947,7 +968,7 @@ auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
     }
 
     if (0_uz == count) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log(OT_PRETTY_CLASS())(name_)(
             ": did not find a suitable zmq peer in database")
             .Flush();
     }

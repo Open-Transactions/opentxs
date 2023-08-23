@@ -73,7 +73,15 @@ Message::Message(
                   using enum blockchain::Transport;
 
                   if (invalid != bip155.GetNetwork()) {
-                      out.emplace_back(bip155.ToAddress(api, chain, version));
+                      const auto& address = out.emplace_back(
+                          bip155.ToAddress(api, chain, version));
+
+                      if (false == address.IsValid()) {
+                          LogError()(OT_PRETTY_CLASS())(
+                              "error decoding address")
+                              .Flush();
+                          out.pop_back();
+                      }
                   } else {
                       LogError()(OT_PRETTY_CLASS())("ignoring invalid addr")
                           .Flush();

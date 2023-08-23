@@ -392,6 +392,8 @@ auto Bip155::ToAddress(
                 {});
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(": ")(e.what()).Flush();
+
+            return {};
         }
     }
 
