@@ -44,6 +44,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "HeaderOracle.hpp"
       "MinedBlocks.cpp"
       "MinedBlocks.hpp"
+      "NumericHash.cpp"
+      "NumericHash.hpp"
       "PeerListener.cpp"
       "PeerListener.hpp"
       "ScanListener.cpp"

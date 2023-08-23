@@ -8,27 +8,16 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/blockchain/NumericHash.hpp"
 
 namespace be = boost::endian;
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_NumericHash : public ::testing::Test
-{
-public:
-    const ot::api::session::Client& api_;
+TEST_F(NumericHash, init_opentxs) {}
 
-    Test_NumericHash()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-    {
-    }
-};
-
-TEST_F(Test_NumericHash, init_opentxs) {}
-
-TEST_F(Test_NumericHash, number_low_1)
+TEST_F(NumericHash, number_low_1)
 {
     // Little endian
     const auto raw = ot::ByteArray{ot::IsHex, "0x01"};
@@ -42,7 +31,7 @@ TEST_F(Test_NumericHash, number_low_1)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, number_low_32)
+TEST_F(NumericHash, number_low_32)
 {
     // Little endian
     const auto raw = ot::ByteArray{
@@ -58,7 +47,7 @@ TEST_F(Test_NumericHash, number_low_32)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, number_high)
+TEST_F(NumericHash, number_high)
 {
     // Little endian
     const auto raw = ot::ByteArray{
@@ -76,7 +65,7 @@ TEST_F(Test_NumericHash, number_high)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, nBits_1)
+TEST_F(NumericHash, nBits_1)
 {
     const std::int32_t nBits{83923508};  // 0x05009234
     const ot::UnallocatedCString decimal{"2452881408"};
@@ -88,7 +77,7 @@ TEST_F(Test_NumericHash, nBits_1)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, nBits_2)
+TEST_F(NumericHash, nBits_2)
 {
     const std::int32_t nBits{68301910};  // 0x04123456
     const ot::UnallocatedCString decimal{"305419776"};
@@ -100,7 +89,7 @@ TEST_F(Test_NumericHash, nBits_2)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, nBits_3)
+TEST_F(NumericHash, nBits_3)
 {
     const std::int32_t nBits{404472624};  // 0x81bc330
     const ot::UnallocatedCString decimal{
@@ -113,7 +102,7 @@ TEST_F(Test_NumericHash, nBits_3)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, nBits_4)
+TEST_F(NumericHash, nBits_4)
 {
     const std::int32_t nBits{453248203};  // 0x1b0404cb
     const ot::UnallocatedCString decimal{
@@ -126,7 +115,7 @@ TEST_F(Test_NumericHash, nBits_4)
     EXPECT_EQ(hex, number.asHex());
 }
 
-TEST_F(Test_NumericHash, nBits_5)
+TEST_F(NumericHash, nBits_5)
 {
     const std::int32_t nBits{486604799};  // 0x1d00ffff
     const ot::UnallocatedCString decimal{
