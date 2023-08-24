@@ -42,6 +42,10 @@ inline auto shorten(std::time_t in) noexcept(false) -> std::uint32_t
 {
     return convert_to_size<std::time_t, std::uint32_t>(in);
 }
+inline auto size_to_int(std::size_t in) noexcept(false) -> int
+{
+    return convert_to_size<std::size_t, int>(in);
+}
 extern template auto convert_to_size<std::uint64_t, std::size_t>(
     std::uint64_t) noexcept(false) -> std::size_t;
 extern template auto convert_to_size<std::size_t, std::uint32_t>(

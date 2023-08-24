@@ -7,6 +7,7 @@
 
 #include <QString>
 
+#include "internal/util/Size.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Types.hpp"
 
@@ -36,7 +37,7 @@ auto DisplayScaleQt::data(const QModelIndex& index, int role) const -> QVariant
         using Index = display::ScaleIndex;
         const auto name = data_.ScaleName(static_cast<Index>(index.row()));
 
-        return QString::fromUtf8(name.data(), name.size());
+        return QString::fromUtf8(name.data(), size_to_int(name.size()));
     } catch (...) {
 
         return {};
