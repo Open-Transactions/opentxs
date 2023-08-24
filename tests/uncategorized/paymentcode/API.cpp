@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -8,28 +8,15 @@
 #include <memory>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
-
-namespace ot = opentxs;
+#include "ottest/fixtures/paymentcode/PaymentCodeAPI.hpp"
 
 namespace ottest
 {
-class Test_PaymentCodeAPI : public ::testing::Test
-{
-public:
-    const ot::api::session::Client& alice_;
-    const ot::api::session::Client& bob_;
+namespace ot = opentxs;
 
-    Test_PaymentCodeAPI()
-        : alice_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , bob_(OTTestEnvironment::GetOT().StartClientSession(1))
-    {
-    }
-};
+TEST_F(PaymentCodeAPI, init) {}
 
-TEST_F(Test_PaymentCodeAPI, init) {}
-
-TEST_F(Test_PaymentCodeAPI, alice)
+TEST_F(PaymentCodeAPI, alice)
 {
     const auto& vector = GetPaymentCodeVector3().alice_;
     const auto& remote = GetPaymentCodeVector3().bob_;
@@ -129,7 +116,7 @@ TEST_F(Test_PaymentCodeAPI, alice)
     }
 }
 
-TEST_F(Test_PaymentCodeAPI, bob)
+TEST_F(PaymentCodeAPI, bob)
 {
     const auto& vector = GetPaymentCodeVector3().bob_;
     const auto& remote = GetPaymentCodeVector3().alice_;
