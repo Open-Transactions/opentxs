@@ -84,7 +84,7 @@ auto operator<=>(const Data& lhs, const Data& rhs) noexcept
 auto to_hex(const std::byte* in, std::size_t size) noexcept
     -> UnallocatedCString
 {
-    if (nullptr == in) { return {}; }
+    if ((nullptr == in) || (0_uz == size)) { return {}; }
 
     auto out = std::stringstream{};
 
@@ -101,7 +101,7 @@ auto to_hex(
     std::size_t size,
     alloc::Default alloc) noexcept -> CString
 {
-    if (nullptr == in) { return CString{alloc}; }
+    if ((nullptr == in) || (0_uz == size)) { return CString{alloc}; }
 
     auto out = std::stringstream{};  // TODO c++20 use allocator
 

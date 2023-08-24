@@ -11,9 +11,11 @@
 #include <openssl/err.h>
 #include <openssl/ssl3.h>
 #include <chrono>
+#include <compare>
 #include <exception>
 #include <future>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <utility>
 
@@ -21,9 +23,12 @@
 #include "internal/util/LogMacros.hpp"
 #include "network/asio/WebRequest.tpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::asio
 {
+using namespace std::literals;
+
 HTTPS::HTTPS(
     const std::string_view hostname,
     const std::string_view file,
@@ -31,22 +36,46 @@ HTTPS::HTTPS(
     Finish&& cb,
     allocator_type alloc) noexcept
     : WebRequest(hostname, file, asio, std::move(cb), std::move(alloc))
-    , ssl_([] {
-        auto out = ssl::context{ssl::context::tlsv13_client};
-        // clang-format off
-        out.set_options(
-            ssl::context::default_workarounds |
-            ssl::context::no_compression |
-            ssl::context::no_sslv2 |
-            ssl::context::no_sslv3 |
-            ssl::context::no_tlsv1 |
-            ssl::context::no_tlsv1_1 |
-            ssl::context::no_tlsv1_2);
-        // clang-format on
-        out.set_default_verify_paths();
-        out.set_verify_mode(ssl::verify_peer);
+    , ssl_([this] {
+        // NOTE Initializing an ssl::context works 100% of the time with
+        // versions of OpenSSL < 3, but randomly fails with versions of OpenSSL
+        // >= 3 apparently due to some race condition in the SSL library
+        // initialization ("context: library has no ciphers (SSL routines)")
+        // which their documentation implies can't be a problem because the
+        // library initialization happens automagically now.
+        //
+        // Alternately it might be an Asio / Beast incompatibility with
+        // OpenSSL 3 instead of an OpenSSL bug.
+        static constexpr auto max = 16s;
+        auto retry = 1s;
 
-        return out;
+        while (retry <= max) {
+            try {
+                auto out = ssl::context{ssl::context::tlsv13_client};
+                // clang-format off
+                out.set_options(
+                    ssl::context::default_workarounds |
+                    ssl::context::no_compression |
+                    ssl::context::no_sslv2 |
+                    ssl::context::no_sslv3 |
+                    ssl::context::no_tlsv1 |
+                    ssl::context::no_tlsv1_1 |
+                    ssl::context::no_tlsv1_2);
+                // clang-format on
+                out.set_default_verify_paths();
+                out.set_verify_mode(ssl::verify_peer);
+
+                return out;
+            } catch (const std::exception& e) {
+                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            }
+
+            Sleep(retry);
+            retry *= 2;
+        }
+
+        LogAbort()(OT_PRETTY_CLASS())("failed to initialize ssl context")
+            .Abort();
     }())
     , stream_(std::nullopt)
 {
