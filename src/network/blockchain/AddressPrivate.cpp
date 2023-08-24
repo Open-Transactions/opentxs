@@ -409,7 +409,9 @@ private:
         output.set_protocol(static_cast<std::uint8_t>(protocol));
         output.set_network(static_cast<std::uint8_t>(network));
         output.set_chain(static_cast<std::uint32_t>(chain));
-        output.set_address(bytes.data(), bytes.size());
+
+        if (valid(bytes)) { output.set_address(bytes.data(), bytes.size()); }
+
         output.set_port(port);
         output.set_time(Clock::to_time_t(lastConnected));
 
@@ -418,7 +420,8 @@ private:
         }
 
         output.set_subtype(static_cast<std::uint8_t>(subtype));
-        output.set_key(key.data(), key.size());
+
+        if (valid(key)) { output.set_key(key.data(), key.size()); }
 
         return output;
     }

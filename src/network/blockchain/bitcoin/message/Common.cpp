@@ -371,6 +371,7 @@ auto Bip155::ToAddress(
         try {
             auto addr = addr_.Bytes();
             auto key = std::array<char, 32_uz>{};
+            const auto keyView = ReadView{key.data(), key.size()};
             auto subtype = std::uint8_t{};
             deserialize(
                 addr, preallocated(key.size(), key.data()), key.size(), "key");
@@ -381,7 +382,7 @@ auto Bip155::ToAddress(
                 bitcoin,
                 type,
                 GetNetwork(subtype, addr.size()),
-                ReadView{key.data(), key.size()},
+                keyView,
                 addr,
                 port_.value(),
                 chain,

@@ -41,9 +41,9 @@ Root::Root(
     std::atomic<Bucket>& bucket)
     : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
     , current_bucket_(bucket)
-    , sequence_()
+    , sequence_(0)
     , gc_params_()
-    , tree_root_()
+    , tree_root_(NullHash{})
     , tree_lock_()
     , tree_()
 {
@@ -58,8 +58,8 @@ auto Root::blank() noexcept -> void
 {
     Node::blank();
     current_bucket_.store(Bucket::left);
-    sequence_.store(0);
-    tree_root_ = NullHash{};
+    gc_params_.last_ = Clock::now();
+    gc_params_.from_ = next(current_bucket_.load());
 }
 
 auto Root::CheckSequence(
