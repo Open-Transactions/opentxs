@@ -59,5 +59,13 @@ auto PendingWrite::Reset() noexcept -> void
     view_.clear();
 }
 
+auto PendingWrite::swap(PendingWrite& rhs) noexcept -> void
+{
+    using std::swap;
+    swap(key_, rhs.key_);
+    swap(data_, rhs.data_);
+    swap(view_, rhs.view_);
+}
+
 auto PendingWrite::size() const noexcept -> std::size_t { return key_.size(); }
 }  // namespace opentxs::storage::driver

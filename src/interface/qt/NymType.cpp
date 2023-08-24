@@ -11,6 +11,7 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/util/Size.hpp"
 #include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 
@@ -62,7 +63,7 @@ auto NymType::data(const QModelIndex& index, int role) const noexcept
         }
         case Qt::DisplayRole:
         case NymTypeName: {
-            return QString::fromUtf8(name.data(), name.size());
+            return QString::fromUtf8(name.data(), size_to_int(name.size()));
         }
         default: {
 

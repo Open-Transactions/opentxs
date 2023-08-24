@@ -29,15 +29,14 @@ public:
     auto size() const noexcept -> std::size_t;
 
     auto Add(const Hash& key, ReadView data) noexcept -> void;
-    // WARNING this function invalidates the output of Data(). Call
-    // RecalculateViews() before using it.
     auto Add(const Hash& key) noexcept -> Writer;
     auto RecalculateViews() noexcept -> void;
     auto Reset() noexcept -> void;
+    auto swap(PendingWrite& rhs) noexcept -> void;
 
     PendingWrite() noexcept;
     PendingWrite(const PendingWrite&) = delete;
-    PendingWrite(PendingWrite&&) = delete;
+    PendingWrite(PendingWrite&& rhs) noexcept = default;
     auto operator=(const PendingWrite&) -> PendingWrite& = delete;
     auto operator=(PendingWrite&&) -> PendingWrite& = delete;
 

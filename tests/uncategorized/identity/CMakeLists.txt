@@ -4,5 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_opentx_test(ottest-identity-nym Test_Nym.cpp)
-add_opentx_test(ottest-identity-source Test_Source.cpp)
-add_opentx_test(ottest-identity-authority Test_Authority.cpp)
+# NOTE tests files must not access un-exported symbols, such as any class
+# defined in a .pb.h header or internal/ header
+# add_opentx_test(ottest-identity-source Test_Source.cpp)
+# add_opentx_test(ottest-identity-authority Test_Authority.cpp)

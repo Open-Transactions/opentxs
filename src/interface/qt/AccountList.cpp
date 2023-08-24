@@ -12,6 +12,7 @@
 
 #include "interface/ui/accountlist/AccountListItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "internal/util/Size.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
@@ -126,7 +127,7 @@ auto AccountListItem::qt_data(const int column, const int role, QVariant& out)
         } break;
         case Parent::UnitDescriptionRole: {
             const auto text = print(Unit());
-            out = QString::fromUtf8(text.data(), text.size());
+            out = QString::fromUtf8(text.data(), size_to_int(text.size()));
         } break;
         default: {
         }

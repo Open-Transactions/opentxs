@@ -4,7 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 if(OT_ENABLE_RPC)
-  # Prevent building tests that still include protobuf generated header files.
+  # NOTE tests files must not access un-exported symbols, such as any class
+  # defined in a .pb.h header or internal/ header
   #
   # add_opentx_test(ottest-rpc-async Test_Rpc_Async.cpp)
   # set_tests_properties(ottest-rpc-async PROPERTIES DISABLED TRUE)
@@ -21,7 +22,8 @@ if(OT_ENABLE_RPC)
     )
   endif()
 
-  # Prevent building tests that still include protobuf generated header files.
+  # NOTE tests files must not access un-exported symbols, such as any class
+  # defined in a .pb.h header or internal/ header
   #
   # add_opentx_test(ottest-rpc-sync Test_Rpc.cpp)
   # set_tests_properties(ottest-rpc-sync PROPERTIES DISABLED TRUE)
