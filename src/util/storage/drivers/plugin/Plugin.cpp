@@ -509,11 +509,18 @@ auto Plugin::StoreRoot(const Hash& hash) const noexcept -> bool
         "committing queue and updating root hash to ")(hash)
         .Flush();
     auto handle = write_.lock();
-    auto& write = *handle;
+    auto& data = *handle;
+    const auto write = [&] {
+        auto out = PendingWrite{};
+        out.Reset();
+        data.swap(out);
+        out.RecalculateViews();
+
+        return out;
+    }();
     const auto tx = Transaction{write.Keys(), write.Data()};
     const auto bucket = primary_bucket_.load();
     const auto result = evaluate(evaluate(commit(hash, tx, bucket)));
-    write.Reset();
     *root_.lock() = hash;
 
     return result;
