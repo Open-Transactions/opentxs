@@ -52,7 +52,7 @@ auto Home() noexcept -> const fs::path&
         const auto random = [&] {
             auto buf = ot::Space{};
             const auto rc = opentxs::crypto::sodium::Randomize(
-                ot::writer(buf).Reserve(32_uz));
+                ot::writer(buf).Reserve(16_uz));
 
             assert(rc);
 
