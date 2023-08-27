@@ -593,7 +593,6 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Property:
                 case identity::wot::claim::ClaimType::Unknown:
                 case identity::wot::claim::ClaimType::Ethereum_olympic:
-                case identity::wot::claim::ClaimType::Ethereum_classic:
                 case identity::wot::claim::ClaimType::Ethereum_expanse:
                 case identity::wot::claim::ClaimType::Ethereum_morden:
                 case identity::wot::claim::ClaimType::Ethereum_ropsten:
@@ -659,7 +658,7 @@ auto Contacts::import_contacts(const rLock& lock) -> void
                 case identity::wot::claim::ClaimType::Chz:
                 case identity::wot::claim::ClaimType::Ar:
                 case identity::wot::claim::ClaimType::Stx:
-                case identity::wot::claim::ClaimType::trc20_tron_btt:
+                case identity::wot::claim::ClaimType::trc20_trx_btt:
                 case identity::wot::claim::ClaimType::erc20_eth_hot:
                 case identity::wot::claim::ClaimType::erc20_eth_sand:
                 case identity::wot::claim::ClaimType::erc20_eth_omg:
@@ -1630,7 +1629,6 @@ auto Contacts::update(const identity::Nym& nym) const
         case Property:
         case Unknown:
         case Ethereum_olympic:
-        case Ethereum_classic:
         case Ethereum_expanse:
         case Ethereum_morden:
         case Ethereum_ropsten:
@@ -1696,7 +1694,7 @@ auto Contacts::update(const identity::Nym& nym) const
         case Chz:
         case Ar:
         case Stx:
-        case trc20_tron_btt:
+        case trc20_trx_btt:
         case erc20_eth_hot:
         case erc20_eth_sand:
         case erc20_eth_omg:

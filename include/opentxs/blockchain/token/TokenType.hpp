@@ -27,6 +27,9 @@ enum class Type : std::underlying_type<Type>::type {
     tzip7 = 11,
     tzip12 = 12,
     trc20 = 13,
+    trc10 = 14,
+    bep2 = 15,
+    bsc20 = 16,
     unknown = std::numeric_limits<std::underlying_type<Type>::type>::max(),
 };
 }  // namespace opentxs::blockchain::token
