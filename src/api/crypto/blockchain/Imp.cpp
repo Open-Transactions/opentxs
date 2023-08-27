@@ -394,62 +394,273 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
 
             return BITCOIN;
         }
-        case Ltc: {
+        case Bch: {
 
-            return LITECOIN;
-        }
-        case Doge: {
-
-            return DOGECOIN;
-        }
-        case Dash: {
-
-            return DASH;
-        }
-        case Ethereum_expanse: {
-
-            return EXP;
+            return BITCOINCASH;
         }
         case Eth: {
 
             return ETHER;
         }
-        case Ethereum_classic: {
+        case Xrp: {
 
-            return ETC;
+            return XRP;
         }
-        case Bch: {
+        case Ltc: {
 
-            return BITCOINCASH;
+            return LITECOIN;
         }
-        case Ethereum_core: {
+        case Xem: {
 
-            return POA;
+            return XEM;
         }
-        case Bsv: {
+        case Dash: {
 
-            return BITCOINSV;
+            return DASH;
+        }
+        case Maid: {
+
+            return MAID;
+        }
+        case Doge: {
+
+            return DOGECOIN;
+        }
+        case Xmr: {
+
+            return XMR;
+        }
+        case Waves: {
+
+            return WAVES;
+        }
+        case Nxt: {
+
+            return NXT;
         }
         case Pkt: {
 
             return PKT;
         }
-        case Cspr: {
+        case Ethereum_expanse: {
 
-            return CASPER;
+            return EXP;
+        }
+        case Ethereum_core: {
+
+            return POA;
+        }
+        case Bnb: {
+
+            return BNB;
+        }
+        case Sol: {
+
+            return SOL;
+        }
+        case Ada: {
+
+            return ADA;
+        }
+        case Dot: {
+
+            return DOT;
+        }
+        case Luna: {
+
+            return LUNA;
+        }
+        case Avax: {
+
+            return AVAX;
+        }
+        case MatiC: {
+
+            return MATIC;
+        }
+        case Algo: {
+
+            return ALGO;
+        }
+        case Vet: {
+
+            return VET;
+        }
+        case Icp: {
+
+            return ICP;
+        }
+        case Atom: {
+
+            return ATOM;
+        }
+        case Theta: {
+
+            return THETA;
+        }
+        case Fil: {
+
+            return FIL;
+        }
+        case Trx: {
+
+            return TRON;
+        }
+        case Etc: {
+
+            return ETC;
+        }
+        case Ftm: {
+
+            return FTM;
+        }
+        case Egld: {
+
+            return EGLD;
+        }
+        case Hbar: {
+
+            return HBAR;
+        }
+        case Xtz: {
+
+            return XTZ;
+        }
+        case Near: {
+
+            return NearProtocol;
+        }
+        case Eos: {
+
+            return EOS;
+        }
+        case Flow: {
+
+            return FLOW;
+        }
+        case Klay: {
+
+            return KLAY;
+        }
+        case Ksm: {
+
+            return KSM;
         }
         case Xec: {
 
             return ECASH;
         }
-        case Tnbch:
+        case Miota: {
+
+            return MIOTA;
+        }
+        case Hnt: {
+
+            return HNT;
+        }
+        case Rune: {
+
+            return RUNE;
+        }
+        case Bsv: {
+
+            return BITCOINSV;
+        }
+        case Neo: {
+
+            return NEO;
+        }
+        case One: {
+
+            return ONE;
+        }
+        case Qnt: {
+
+            return QNT;
+        }
+        case Chz: {
+
+            return CHZ;
+        }
+        case Ar: {
+
+            return AR;
+        }
+        case Stx: {
+
+            return STX;
+        }
+        case Celo: {
+
+            return CELO;
+        }
+        case Zec: {
+
+            return ZEC;
+        }
+        case Tfuel: {
+
+            return TFUEL;
+        }
+        case Kda: {
+
+            return KDA;
+        }
+        case Qtum: {
+
+            return QTUM;
+        }
+        case Ht: {
+
+            return HT;
+        }
+        case Dcr: {
+
+            return DCR;
+        }
+        case Icx: {
+
+            return ICX;
+        }
+        case Rvn: {
+
+            return RVN;
+        }
+        case Scrt: {
+
+            return SCRT;
+        }
+        case Zil: {
+
+            return ZIL;
+        }
+        case Mina: {
+
+            return MINA;
+        }
+        case Xdc: {
+
+            return XDC;
+        }
+        case Btg: {
+
+            return BTG;
+        }
+        case Cspr: {
+
+            return CASPER;
+        }
+        case Bsc: {
+
+            return BSC;
+        }
         case Tnbtc:
+        case Tnbch:
         case Tnxrp:
         case Tnltc:
         case Tnxem:
         case Tndash:
         case Tnmaid:
-        case reserved1:
         case Tndoge:
         case Tnxmr:
         case Tnwaves:
@@ -475,21 +686,27 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
             return TESTNET;
         }
         case Error:
-        case Xrp:
         case erc20_eth_dao:
-        case Xem:
-        case Maid:
         case erc20_eth_lsk:
         case erc20_eth_dgd:
-        case Xmr:
-        case Waves:
-        case Nxt:
         case Sc:
-        case Steem:
+        case Steem: {
+
+            return STEEM;
+        }
         case erc20_eth_amp:
-        case Xlm:
-        case Fct:
-        case Bts:
+        case Xlm: {
+
+            return XLM;
+        }
+        case Fct: {
+
+            return FCT;
+        }
+        case Bts: {
+
+            return BTS;
+        }
         case Usd:
         case Eur:
         case Gbp:
@@ -510,92 +727,46 @@ auto Blockchain::Imp::bip44_type(const UnitType type) const noexcept
         case Zar:
         case Php:
         case Sek:
-        case Bnb:
-        case Sol:
+        case reserved1:
         case erc20_eth_usdt:
-        case Ada:
-        case Dot:
         case erc20_eth_usdc:
         case erc20_eth_shib:
-        case Luna:
-        case Avax:
         case erc20_eth_uni:
         case erc20_eth_link:
         case erc20_eth_wbtc:
         case erc20_eth_busd:
-        case MatiC:
-        case Algo:
-        case Vet:
         case erc20_eth_axs:
-        case Icp:
         case erc20_eth_cro:
-        case Atom:
-        case Theta:
-        case Fil:
-        case Trx:
         case erc20_eth_ftt:
-        case Etc:
-        case Ftm:
         case erc20_eth_dai:
         case bep2_bnb_btcb:
-        case Egld:
-        case Hbar:
-        case Xtz:
         case erc20_eth_mana:
-        case Near:
         case erc20_eth_grt:
         case bsc20_bsc_cake:
-        case Eos:
-        case Flow:
         case erc20_eth_aave:
-        case Klay:
-        case Ksm:
-        case Miota:
-        case Hnt:
-        case Rune:
         case erc20_eth_leo:
-        case Neo:
-        case One:
-        case Qnt:
         case erc20_eth_ust:
         case erc20_eth_mkr:
         case erc20_eth_enj:
-        case Chz:
-        case Ar:
-        case Stx:
-        case trc20_tron_btt:
+        case trc20_trx_btt:
         case erc20_eth_hot:
         case erc20_eth_sand:
         case erc20_eth_omg:
-        case Celo:
-        case Zec:
         case erc20_eth_comp:
-        case Tfuel:
-        case Kda:
         case erc20_eth_lrc:
-        case Qtum:
         case erc20_eth_crv:
-        case Ht:
         case erc20_eth_nexo:
         case erc20_eth_sushi:
         case erc20_eth_kcs:
         case erc20_eth_bat:
         case Okb:
-        case Dcr:
-        case Icx:
-        case Rvn:
-        case Scrt:
         case erc20_eth_rev:
         case erc20_eth_audio:
-        case Zil:
         case erc20_eth_tusd:
         case erc20_eth_yfi:
-        case Mina:
         case erc20_eth_perp:
-        case Xdc:
         case erc20_eth_tel:
         case erc20_eth_snx:
-        case Btg:
         case Afn:
         case All:
         case Amd:

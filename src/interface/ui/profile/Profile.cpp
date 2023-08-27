@@ -296,7 +296,6 @@ auto Profile::AddClaim(
                 case identity::wot::claim::ClaimType::Property:
                 case identity::wot::claim::ClaimType::Unknown:
                 case identity::wot::claim::ClaimType::Ethereum_olympic:
-                case identity::wot::claim::ClaimType::Ethereum_classic:
                 case identity::wot::claim::ClaimType::Ethereum_expanse:
                 case identity::wot::claim::ClaimType::Ethereum_morden:
                 case identity::wot::claim::ClaimType::Ethereum_ropsten:
@@ -362,7 +361,7 @@ auto Profile::AddClaim(
                 case identity::wot::claim::ClaimType::Chz:
                 case identity::wot::claim::ClaimType::Ar:
                 case identity::wot::claim::ClaimType::Stx:
-                case identity::wot::claim::ClaimType::trc20_tron_btt:
+                case identity::wot::claim::ClaimType::trc20_trx_btt:
                 case identity::wot::claim::ClaimType::erc20_eth_hot:
                 case identity::wot::claim::ClaimType::erc20_eth_sand:
                 case identity::wot::claim::ClaimType::erc20_eth_omg:
