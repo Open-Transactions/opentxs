@@ -23,6 +23,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto check_account_activity(
     const User& user,
@@ -158,7 +159,7 @@ auto init_account_activity(
     user.api_->UI().Internal().AccountActivity(
         user.nym_id_, account, make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"account_activity_"_sv;
+            out << u8"account_activity_"sv;
             out << user.name_lower_;
 
             return out.str();

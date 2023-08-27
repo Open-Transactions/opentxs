@@ -58,6 +58,7 @@ Regtest_fixture_base::SyncListen Regtest_fixture_base::wallet_listener_{};
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT

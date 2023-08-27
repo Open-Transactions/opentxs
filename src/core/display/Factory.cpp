@@ -8,8 +8,8 @@
 #include <memory>
 #include <utility>
 
-#include "core/display/Definition.hpp"
-#include "core/display/Scale.hpp"
+#include "core/display/DefinitionPrivate.hpp"
+#include "core/display/ScalePrivate.hpp"
 
 namespace opentxs::factory
 {

@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTStorageBlockchainTransactions";
 option optimize_for = LITE_RUNTIME;
 
-message StorageBlockchainTransactions {
+message StorageBlockchainTransactions
+{
     optional uint32 version = 1;
     optional string txid = 2;
     repeated string thread = 3;

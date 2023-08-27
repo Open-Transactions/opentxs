@@ -1,0 +1,656 @@
+static constexpr auto scale_1_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_1_0_},
+    ScaleRef{scale_1_1_},
+    ScaleRef{scale_1_2_},
+    ScaleRef{scale_1_3_},
+    ScaleRef{scale_1_4_},
+};
+static constexpr auto scale_2_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_2_0_},
+    ScaleRef{scale_2_1_},
+    ScaleRef{scale_2_2_},
+    ScaleRef{scale_2_3_},
+    ScaleRef{scale_2_4_},
+};
+static constexpr auto scale_3_ = std::array<ScaleRef, 10>{
+    ScaleRef{scale_3_0_},
+    ScaleRef{scale_3_1_},
+    ScaleRef{scale_3_2_},
+    ScaleRef{scale_3_3_},
+    ScaleRef{scale_3_4_},
+    ScaleRef{scale_3_5_},
+    ScaleRef{scale_3_6_},
+    ScaleRef{scale_3_7_},
+    ScaleRef{scale_3_8_},
+    ScaleRef{scale_3_9_},
+};
+static constexpr auto scale_4_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_4_0_},
+    ScaleRef{scale_4_1_},
+};
+static constexpr auto scale_5_ = std::array<ScaleRef, 4>{
+    ScaleRef{scale_5_0_},
+    ScaleRef{scale_5_1_},
+    ScaleRef{scale_5_2_},
+    ScaleRef{scale_5_3_},
+};
+static constexpr auto scale_6_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_6_0_},
+    ScaleRef{scale_6_1_},
+};
+static constexpr auto scale_7_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_7_0_},
+    ScaleRef{scale_7_1_},
+};
+static constexpr auto scale_8_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_8_0_},
+    ScaleRef{scale_8_1_},
+    ScaleRef{scale_8_2_},
+    ScaleRef{scale_8_3_},
+    ScaleRef{scale_8_4_},
+};
+static constexpr auto scale_9_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_9_0_},
+    ScaleRef{scale_9_1_},
+};
+static constexpr auto scale_10_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_10_0_},
+    ScaleRef{scale_10_1_},
+};
+static constexpr auto scale_11_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_11_0_},
+    ScaleRef{scale_11_1_},
+};
+static constexpr auto scale_12_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_12_0_},
+    ScaleRef{scale_12_1_},
+};
+static constexpr auto scale_13_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_13_0_},
+    ScaleRef{scale_13_1_},
+};
+static constexpr auto scale_14_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_14_0_},
+    ScaleRef{scale_14_1_},
+};
+static constexpr auto scale_15_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_15_0_},
+    ScaleRef{scale_15_1_},
+};
+static constexpr auto scale_16_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_16_0_},
+    ScaleRef{scale_16_1_},
+};
+static constexpr auto scale_17_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_17_0_},
+    ScaleRef{scale_17_1_},
+};
+static constexpr auto scale_18_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_18_0_},
+    ScaleRef{scale_18_1_},
+};
+static constexpr auto scale_19_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_19_0_},
+    ScaleRef{scale_19_1_},
+};
+static constexpr auto scale_20_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_20_0_},
+    ScaleRef{scale_20_1_},
+};
+static constexpr auto scale_21_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_21_0_},
+    ScaleRef{scale_21_1_},
+};
+static constexpr auto scale_22_ = std::array<ScaleRef, 4>{
+    ScaleRef{scale_22_0_},
+    ScaleRef{scale_22_1_},
+    ScaleRef{scale_22_2_},
+    ScaleRef{scale_22_3_},
+};
+static constexpr auto scale_42_ = std::array<ScaleRef, 6>{
+    ScaleRef{scale_42_0_},
+    ScaleRef{scale_42_1_},
+    ScaleRef{scale_42_2_},
+    ScaleRef{scale_42_3_},
+    ScaleRef{scale_42_4_},
+    ScaleRef{scale_42_5_},
+};
+static constexpr auto scale_43_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_43_0_},
+    ScaleRef{scale_43_1_},
+    ScaleRef{scale_43_2_},
+    ScaleRef{scale_43_3_},
+    ScaleRef{scale_43_4_},
+};
+static constexpr auto scale_44_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_44_0_},
+    ScaleRef{scale_44_1_},
+    ScaleRef{scale_44_2_},
+    ScaleRef{scale_44_3_},
+    ScaleRef{scale_44_4_},
+};
+static constexpr auto scale_45_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_45_0_},
+    ScaleRef{scale_45_1_},
+};
+static constexpr auto scale_46_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_46_0_},
+    ScaleRef{scale_46_1_},
+    ScaleRef{scale_46_2_},
+    ScaleRef{scale_46_3_},
+    ScaleRef{scale_46_4_},
+};
+static constexpr auto scale_47_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_47_0_},
+    ScaleRef{scale_47_1_},
+};
+static constexpr auto scale_48_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_48_0_},
+    ScaleRef{scale_48_1_},
+    ScaleRef{scale_48_2_},
+    ScaleRef{scale_48_3_},
+    ScaleRef{scale_48_4_},
+};
+static constexpr auto scale_49_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_49_0_},
+    ScaleRef{scale_49_1_},
+};
+static constexpr auto scale_51_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_51_0_},
+    ScaleRef{scale_51_1_},
+};
+static constexpr auto scale_52_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_52_0_},
+    ScaleRef{scale_52_1_},
+};
+static constexpr auto scale_53_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_53_0_},
+    ScaleRef{scale_53_1_},
+};
+static constexpr auto scale_54_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_54_0_},
+    ScaleRef{scale_54_1_},
+};
+static constexpr auto scale_55_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_55_0_},
+    ScaleRef{scale_55_1_},
+};
+static constexpr auto scale_56_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_56_0_},
+    ScaleRef{scale_56_1_},
+};
+static constexpr auto scale_57_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_57_0_},
+    ScaleRef{scale_57_1_},
+    ScaleRef{scale_57_2_},
+    ScaleRef{scale_57_3_},
+    ScaleRef{scale_57_4_},
+};
+static constexpr auto scale_58_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_58_0_},
+    ScaleRef{scale_58_1_},
+};
+static constexpr auto scale_60_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_60_0_},
+    ScaleRef{scale_60_1_},
+};
+static constexpr auto scale_61_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_61_0_},
+    ScaleRef{scale_61_1_},
+};
+static constexpr auto scale_62_ = std::array<ScaleRef, 10>{
+    ScaleRef{scale_62_0_},
+    ScaleRef{scale_62_1_},
+    ScaleRef{scale_62_2_},
+    ScaleRef{scale_62_3_},
+    ScaleRef{scale_62_4_},
+    ScaleRef{scale_62_5_},
+    ScaleRef{scale_62_6_},
+    ScaleRef{scale_62_7_},
+    ScaleRef{scale_62_8_},
+    ScaleRef{scale_62_9_},
+};
+static constexpr auto scale_63_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_63_0_},
+    ScaleRef{scale_63_1_},
+};
+static constexpr auto scale_64_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_64_0_},
+    ScaleRef{scale_64_1_},
+};
+static constexpr auto scale_65_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_65_0_},
+    ScaleRef{scale_65_1_},
+};
+static constexpr auto scale_66_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_66_0_},
+    ScaleRef{scale_66_1_},
+};
+static constexpr auto scale_67_ = std::array<ScaleRef, 1>{
+    ScaleRef{scale_67_0_},
+};
+static constexpr auto scale_68_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_68_0_},
+    ScaleRef{scale_68_1_},
+};
+static constexpr auto scale_69_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_69_0_},
+    ScaleRef{scale_69_1_},
+};
+static constexpr auto scale_70_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_70_0_},
+    ScaleRef{scale_70_1_},
+};
+static constexpr auto scale_71_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_71_0_},
+    ScaleRef{scale_71_1_},
+};
+static constexpr auto scale_72_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_72_0_},
+    ScaleRef{scale_72_1_},
+};
+static constexpr auto scale_73_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_73_0_},
+    ScaleRef{scale_73_1_},
+};
+static constexpr auto scale_74_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_74_0_},
+    ScaleRef{scale_74_1_},
+};
+static constexpr auto scale_75_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_75_0_},
+    ScaleRef{scale_75_1_},
+};
+static constexpr auto scale_76_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_76_0_},
+    ScaleRef{scale_76_1_},
+};
+static constexpr auto scale_77_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_77_0_},
+    ScaleRef{scale_77_1_},
+};
+static constexpr auto scale_78_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_78_0_},
+    ScaleRef{scale_78_1_},
+};
+static constexpr auto scale_79_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_79_0_},
+    ScaleRef{scale_79_1_},
+};
+static constexpr auto scale_80_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_80_0_},
+    ScaleRef{scale_80_1_},
+};
+static constexpr auto scale_81_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_81_0_},
+    ScaleRef{scale_81_1_},
+};
+static constexpr auto scale_82_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_82_0_},
+    ScaleRef{scale_82_1_},
+};
+static constexpr auto scale_83_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_83_0_},
+    ScaleRef{scale_83_1_},
+};
+static constexpr auto scale_84_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_84_0_},
+    ScaleRef{scale_84_1_},
+};
+static constexpr auto scale_85_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_85_0_},
+    ScaleRef{scale_85_1_},
+};
+static constexpr auto scale_86_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_86_0_},
+    ScaleRef{scale_86_1_},
+};
+static constexpr auto scale_87_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_87_0_},
+    ScaleRef{scale_87_1_},
+};
+static constexpr auto scale_88_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_88_0_},
+    ScaleRef{scale_88_1_},
+};
+static constexpr auto scale_89_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_89_0_},
+    ScaleRef{scale_89_1_},
+};
+static constexpr auto scale_90_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_90_0_},
+    ScaleRef{scale_90_1_},
+};
+static constexpr auto scale_91_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_91_0_},
+    ScaleRef{scale_91_1_},
+};
+static constexpr auto scale_92_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_92_0_},
+    ScaleRef{scale_92_1_},
+};
+static constexpr auto scale_93_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_93_0_},
+    ScaleRef{scale_93_1_},
+};
+static constexpr auto scale_94_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_94_0_},
+    ScaleRef{scale_94_1_},
+};
+static constexpr auto scale_95_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_95_0_},
+    ScaleRef{scale_95_1_},
+};
+static constexpr auto scale_96_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_96_0_},
+    ScaleRef{scale_96_1_},
+};
+static constexpr auto scale_97_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_97_0_},
+    ScaleRef{scale_97_1_},
+};
+static constexpr auto scale_98_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_98_0_},
+    ScaleRef{scale_98_1_},
+};
+static constexpr auto scale_99_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_99_0_},
+    ScaleRef{scale_99_1_},
+};
+static constexpr auto scale_100_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_100_0_},
+    ScaleRef{scale_100_1_},
+};
+static constexpr auto scale_101_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_101_0_},
+    ScaleRef{scale_101_1_},
+};
+static constexpr auto scale_102_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_102_0_},
+    ScaleRef{scale_102_1_},
+};
+static constexpr auto scale_103_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_103_0_},
+    ScaleRef{scale_103_1_},
+};
+static constexpr auto scale_104_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_104_0_},
+    ScaleRef{scale_104_1_},
+};
+static constexpr auto scale_105_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_105_0_},
+    ScaleRef{scale_105_1_},
+};
+static constexpr auto scale_106_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_106_0_},
+    ScaleRef{scale_106_1_},
+};
+static constexpr auto scale_107_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_107_0_},
+    ScaleRef{scale_107_1_},
+};
+static constexpr auto scale_108_ = std::array<ScaleRef, 4>{
+    ScaleRef{scale_108_0_},
+    ScaleRef{scale_108_1_},
+    ScaleRef{scale_108_2_},
+    ScaleRef{scale_108_3_},
+};
+static constexpr auto scale_109_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_109_0_},
+    ScaleRef{scale_109_1_},
+};
+static constexpr auto scale_110_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_110_0_},
+    ScaleRef{scale_110_1_},
+};
+static constexpr auto scale_111_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_111_0_},
+    ScaleRef{scale_111_1_},
+};
+static constexpr auto scale_112_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_112_0_},
+    ScaleRef{scale_112_1_},
+    ScaleRef{scale_112_2_},
+    ScaleRef{scale_112_3_},
+    ScaleRef{scale_112_4_},
+};
+static constexpr auto scale_113_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_113_0_},
+    ScaleRef{scale_113_1_},
+};
+static constexpr auto scale_114_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_114_0_},
+    ScaleRef{scale_114_1_},
+};
+static constexpr auto scale_115_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_115_0_},
+    ScaleRef{scale_115_1_},
+};
+static constexpr auto scale_116_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_116_0_},
+    ScaleRef{scale_116_1_},
+};
+static constexpr auto scale_117_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_117_0_},
+    ScaleRef{scale_117_1_},
+};
+static constexpr auto scale_118_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_118_0_},
+    ScaleRef{scale_118_1_},
+};
+static constexpr auto scale_119_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_119_0_},
+    ScaleRef{scale_119_1_},
+};
+static constexpr auto scale_120_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_120_0_},
+    ScaleRef{scale_120_1_},
+};
+static constexpr auto scale_121_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_121_0_},
+    ScaleRef{scale_121_1_},
+};
+static constexpr auto scale_122_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_122_0_},
+    ScaleRef{scale_122_1_},
+};
+static constexpr auto scale_123_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_123_0_},
+    ScaleRef{scale_123_1_},
+};
+static constexpr auto scale_124_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_124_0_},
+    ScaleRef{scale_124_1_},
+};
+static constexpr auto scale_125_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_125_0_},
+    ScaleRef{scale_125_1_},
+};
+static constexpr auto scale_126_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_126_0_},
+    ScaleRef{scale_126_1_},
+};
+static constexpr auto scale_127_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_127_0_},
+    ScaleRef{scale_127_1_},
+};
+static constexpr auto scale_128_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_128_0_},
+    ScaleRef{scale_128_1_},
+};
+static constexpr auto scale_129_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_129_0_},
+    ScaleRef{scale_129_1_},
+};
+static constexpr auto scale_130_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_130_0_},
+    ScaleRef{scale_130_1_},
+};
+static constexpr auto scale_131_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_131_0_},
+    ScaleRef{scale_131_1_},
+};
+static constexpr auto scale_132_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_132_0_},
+    ScaleRef{scale_132_1_},
+};
+static constexpr auto scale_133_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_133_0_},
+    ScaleRef{scale_133_1_},
+};
+static constexpr auto scale_134_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_134_0_},
+    ScaleRef{scale_134_1_},
+};
+static constexpr auto scale_135_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_135_0_},
+    ScaleRef{scale_135_1_},
+};
+static constexpr auto scale_136_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_136_0_},
+    ScaleRef{scale_136_1_},
+};
+static constexpr auto scale_137_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_137_0_},
+    ScaleRef{scale_137_1_},
+};
+static constexpr auto scale_138_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_138_0_},
+    ScaleRef{scale_138_1_},
+};
+static constexpr auto scale_139_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_139_0_},
+    ScaleRef{scale_139_1_},
+};
+static constexpr auto scale_140_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_140_0_},
+    ScaleRef{scale_140_1_},
+};
+static constexpr auto scale_141_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_141_0_},
+    ScaleRef{scale_141_1_},
+};
+static constexpr auto scale_142_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_142_0_},
+    ScaleRef{scale_142_1_},
+};
+static constexpr auto scale_143_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_143_0_},
+    ScaleRef{scale_143_1_},
+};
+static constexpr auto scale_144_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_144_0_},
+    ScaleRef{scale_144_1_},
+};
+static constexpr auto scale_145_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_145_0_},
+    ScaleRef{scale_145_1_},
+};
+static constexpr auto scale_146_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_146_0_},
+    ScaleRef{scale_146_1_},
+};
+static constexpr auto scale_147_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_147_0_},
+    ScaleRef{scale_147_1_},
+};
+static constexpr auto scale_148_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_148_0_},
+    ScaleRef{scale_148_1_},
+};
+static constexpr auto scale_149_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_149_0_},
+    ScaleRef{scale_149_1_},
+};
+static constexpr auto scale_150_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_150_0_},
+    ScaleRef{scale_150_1_},
+};
+static constexpr auto scale_151_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_151_0_},
+    ScaleRef{scale_151_1_},
+};
+static constexpr auto scale_152_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_152_0_},
+    ScaleRef{scale_152_1_},
+};
+static constexpr auto scale_153_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_153_0_},
+    ScaleRef{scale_153_1_},
+};
+static constexpr auto scale_154_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_154_0_},
+    ScaleRef{scale_154_1_},
+};
+static constexpr auto scale_155_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_155_0_},
+    ScaleRef{scale_155_1_},
+};
+static constexpr auto scale_299_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_299_0_},
+    ScaleRef{scale_299_1_},
+    ScaleRef{scale_299_2_},
+    ScaleRef{scale_299_3_},
+    ScaleRef{scale_299_4_},
+};
+static constexpr auto scale_300_ = std::array<ScaleRef, 4>{
+    ScaleRef{scale_300_0_},
+    ScaleRef{scale_300_1_},
+    ScaleRef{scale_300_2_},
+    ScaleRef{scale_300_3_},
+};
+static constexpr auto scale_301_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_301_0_},
+    ScaleRef{scale_301_1_},
+};
+static constexpr auto scale_302_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_302_0_},
+    ScaleRef{scale_302_1_},
+};
+static constexpr auto scale_303_ = std::array<ScaleRef, 5>{
+    ScaleRef{scale_303_0_},
+    ScaleRef{scale_303_1_},
+    ScaleRef{scale_303_2_},
+    ScaleRef{scale_303_3_},
+    ScaleRef{scale_303_4_},
+};
+static constexpr auto scale_304_ = std::array<ScaleRef, 10>{
+    ScaleRef{scale_304_0_},
+    ScaleRef{scale_304_1_},
+    ScaleRef{scale_304_2_},
+    ScaleRef{scale_304_3_},
+    ScaleRef{scale_304_4_},
+    ScaleRef{scale_304_5_},
+    ScaleRef{scale_304_6_},
+    ScaleRef{scale_304_7_},
+    ScaleRef{scale_304_8_},
+    ScaleRef{scale_304_9_},
+};
+static constexpr auto scale_305_ = std::array<ScaleRef, 10>{
+    ScaleRef{scale_305_0_},
+    ScaleRef{scale_305_1_},
+    ScaleRef{scale_305_2_},
+    ScaleRef{scale_305_3_},
+    ScaleRef{scale_305_4_},
+    ScaleRef{scale_305_5_},
+    ScaleRef{scale_305_6_},
+    ScaleRef{scale_305_7_},
+    ScaleRef{scale_305_8_},
+    ScaleRef{scale_305_9_},
+};
+static constexpr auto scale_306_ = std::array<ScaleRef, 10>{
+    ScaleRef{scale_306_0_},
+    ScaleRef{scale_306_1_},
+    ScaleRef{scale_306_2_},
+    ScaleRef{scale_306_3_},
+    ScaleRef{scale_306_4_},
+    ScaleRef{scale_306_5_},
+    ScaleRef{scale_306_6_},
+    ScaleRef{scale_306_7_},
+    ScaleRef{scale_306_8_},
+    ScaleRef{scale_306_9_},
+};
+static constexpr auto scale_307_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_307_0_},
+    ScaleRef{scale_307_1_},
+};

@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Verification.proto";
 
-message VerificationReply {
+message VerificationReply
+{
     optional uint32 version = 1;
     optional Verification response = 2;
 }

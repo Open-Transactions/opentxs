@@ -29,10 +29,7 @@ TransactionHash::TransactionHash(const HexType&, const ReadView bytes) noexcept(
     if (false == DecodeHex(bytes)) { throw std::runtime_error{"invalid hash"}; }
 }
 
-TransactionHash::TransactionHash(const TransactionHash& rhs) noexcept
-    : FixedByteArray(rhs)
-{
-}
+TransactionHash::TransactionHash(const TransactionHash& rhs) noexcept = default;
 
 auto TransactionHash::operator=(const TransactionHash& rhs) noexcept
     -> TransactionHash& = default;

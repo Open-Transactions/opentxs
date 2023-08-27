@@ -26,6 +26,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 const auto params_ = ot::blockchain::internal::GetFilterParams(
     ot::blockchain::cfilter::Type::Basic_BIP158);

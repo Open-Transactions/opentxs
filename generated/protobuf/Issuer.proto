@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "PeerRequestHistory.proto";
 import public "UnitAccountMap.proto";
 
-message Issuer {
+message Issuer
+{
     optional uint32 version = 1;
     optional string id = 2;
     optional bool paired = 3;

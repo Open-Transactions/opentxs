@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Identifier.proto";
 
-message Bailment {
+message Bailment
+{
     optional uint32 version = 1;
     optional Identifier unitID = 2;
     optional Identifier serverID = 3;

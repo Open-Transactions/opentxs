@@ -86,7 +86,7 @@ public:
     auto operator=(const Data& rhs) -> Data& = delete;
     auto operator=(Data&& rhs) -> Data& = delete;
 
-    virtual ~Data() = default;
+    constexpr virtual ~Data() = default;
 
 protected:
     Data() = default;

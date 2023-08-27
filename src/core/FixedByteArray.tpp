@@ -28,14 +28,6 @@ extern "C" {
 namespace opentxs
 {
 template <std::size_t N>
-FixedByteArray<N>::FixedByteArray() noexcept
-    : data_()
-{
-    clear();
-    static_assert(0 < N);
-}
-
-template <std::size_t N>
 FixedByteArray<N>::FixedByteArray(const ReadView bytes) noexcept(false)
     : FixedByteArray()
 {
@@ -49,21 +41,6 @@ FixedByteArray<N>::FixedByteArray(const ReadView bytes) noexcept(false)
 
         throw std::out_of_range{error.c_str()};
     }
-}
-
-template <std::size_t N>
-FixedByteArray<N>::FixedByteArray(const FixedByteArray& rhs) noexcept
-    : data_(rhs.data_)
-{
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::operator=(const FixedByteArray& rhs) noexcept
-    -> FixedByteArray&
-{
-    data_ = rhs.data_;
-
-    return *this;
 }
 
 template <std::size_t N>
@@ -229,18 +206,6 @@ auto FixedByteArray<N>::Extract(std::uint64_t& output, const std::size_t pos)
 }
 
 template <std::size_t N>
-auto FixedByteArray<N>::get() const noexcept -> std::span<const std::byte>
-{
-    return data_;
-}
-
-template <std::size_t N>
-auto FixedByteArray<N>::get() noexcept -> std::span<std::byte>
-{
-    return data_;
-}
-
-template <std::size_t N>
 auto FixedByteArray<N>::IsNull() const noexcept -> bool
 {
     if (data_.empty()) { return true; }
@@ -275,7 +240,4 @@ auto FixedByteArray<N>::WriteInto() noexcept -> Writer
 {
     return preallocated(data_.size(), data_.data());
 }
-
-template <std::size_t N>
-FixedByteArray<N>::~FixedByteArray() = default;
 }  // namespace opentxs

@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <functional>
 #include <optional>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -22,6 +23,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 bool Regtest_fixture_hd::init_hd_{false};
 const User Regtest_fixture_hd::alex_{
     GetPaymentCodeVector3().alice_.words_,
@@ -36,9 +38,9 @@ Regtest_fixture_hd::Regtest_fixture_hd()
     : Regtest_fixture_normal(ot_, 1)
     , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
     , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
-    , expected_display_unit_(u8"UNITTEST"_sv)
-    , expected_account_name_(u8"On chain UNITTEST (this device)"_sv)
-    , expected_notary_name_(u8"Unit Test Simulation"_sv)
+    , expected_display_unit_(u8"UNITTEST"sv)
+    , expected_account_name_(u8"On chain UNITTEST (this device)"sv)
+    , expected_notary_name_(u8"Unit Test Simulation"sv)
     , memo_outgoing_("memo for outgoing transaction")
     , expected_account_type_(ot::AccountType::Blockchain)
     , expected_unit_type_(ot::UnitType::Regtest)

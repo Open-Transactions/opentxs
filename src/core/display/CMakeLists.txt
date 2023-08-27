@@ -12,10 +12,19 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/core/display/Factory.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/display/Types.hpp"
-    "Common.cpp"
     "Definition.cpp"
-    "Definition.hpp"
+    "DefinitionPrivate.cpp"
+    "DefinitionPrivate.hpp"
     "Factory.cpp"
     "Scale.cpp"
-    "Scale.hpp"
+    "ScalePrivate.cpp"
+    "ScalePrivate.hpp"
 )
+
+add_library(opentxs-core-display OBJECT "Common.cpp")
+target_link_libraries(opentxs-core-display PRIVATE Boost::headers)
+target_include_directories(
+  opentxs-core-display SYSTEM
+  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+)
+libopentxs_configure_constexpr_target(opentxs-core-display)

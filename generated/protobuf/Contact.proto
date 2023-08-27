@@ -15,9 +15,9 @@ import public "ContactData.proto";
 message Contact
 {
     optional uint32 version = 1;
-    optional string id = 2;					// contact id
-    optional uint64 revision = 3;			// contact revision
-    optional string label = 4;				// contact name
+    optional string id = 2;        // contact id
+    optional uint64 revision = 3;  // contact revision
+    optional string label = 4;     // contact name
     optional ContactData contactData = 5;
     optional string mergedto = 6;
     repeated string merged = 7;

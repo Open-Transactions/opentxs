@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <span>
+#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/Hashes.hpp"
@@ -16,6 +17,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 TEST_F(Test_Hash, MurmurHash3)
 {

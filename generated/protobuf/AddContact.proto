@@ -12,9 +12,10 @@ option optimize_for = LITE_RUNTIME;
 
 import public "RPCEnums.proto";
 
-message AddContact {
+message AddContact
+{
     optional uint32 version = 1;
-    optional string label = 2;			// contact label
-    optional string paymentcode = 3;	// paymentcode (base 58)
-    optional string nymid = 4;			// nym id
+    optional string label = 2;        // contact label
+    optional string paymentcode = 3;  // paymentcode (base 58)
+    optional string nymid = 4;        // nym id
 }

@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ContactItemType.proto";
 
-message UnitAccountMap {
+message UnitAccountMap
+{
     optional uint32 version = 1;
     optional ContactItemType type = 2;
     optional string unitdefinitionid = 3;

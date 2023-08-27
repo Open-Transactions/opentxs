@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTConnectionInfoReply";
 option optimize_for = LITE_RUNTIME;
 
-message ConnectionInfoReply {
+message ConnectionInfoReply
+{
     optional uint32 version = 1;
     optional bool success = 2;
     optional string url = 3;

@@ -11,4 +11,3 @@ option java_outer_classname = "OTSymmetricKey";
 option optimize_for = LITE_RUNTIME;
 
 import public "Ciphertext.proto";
-

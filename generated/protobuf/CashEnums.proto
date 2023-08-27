@@ -30,4 +30,3 @@ enum PurseType {
     PURSETYPE_ISSUE = 2;
     PURSETYPE_NORMAL = 3;
 }
-

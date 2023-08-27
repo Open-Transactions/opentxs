@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTStorageWorkflowIndex";
 option optimize_for = LITE_RUNTIME;
 
-message StorageWorkflowIndex {
+message StorageWorkflowIndex
+{
     optional uint32 version = 1;
     optional string workflow = 2;
     optional string item = 3;

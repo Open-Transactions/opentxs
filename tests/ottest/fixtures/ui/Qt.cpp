@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <iterator>
 #include <optional>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/P0330.hpp"
@@ -37,6 +38,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 constexpr auto account_activity_columns_{6};
 constexpr auto account_list_columns_{4};

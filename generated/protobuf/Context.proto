@@ -16,7 +16,8 @@ import public "Identifier.proto";
 import public "ServerContext.proto";
 import public "Signature.proto";
 
-message Context {
+message Context
+{
     optional uint32 version = 1;
     optional ConsensusType type = 2;
     optional Identifier localnym = 3;
@@ -27,7 +28,8 @@ message Context {
     repeated uint64 acknowledgedrequestnumber = 8;
     repeated uint64 availabletransactionnumber = 9;
     repeated uint64 issuedtransactionnumber = 10;
-    oneof typedata {
+    oneof typedata
+    {
         ServerContext servercontext = 11;
         ClientContext clientcontext = 12;
     }

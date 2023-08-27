@@ -14,7 +14,8 @@ import public "BlockchainTransactionInput.proto";
 import public "BlockchainTransactionOutput.proto";
 import public "ContactItemType.proto";
 
-message BlockchainTransaction {
+message BlockchainTransaction
+{
     optional uint32 version = 1;
     repeated ContactItemType chain = 2;
     optional string txid = 3;

@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "HDPath.proto";
 import public "PaymentCode.proto";
 
-message BlockchainTransactionProposedNotification {
+message BlockchainTransactionProposedNotification
+{
     optional uint32 version = 1;
     optional PaymentCode sender = 2;
     optional HDPath path = 3;

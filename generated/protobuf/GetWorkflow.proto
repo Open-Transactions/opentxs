@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "RPCEnums.proto";
 
-message GetWorkflow {
+message GetWorkflow
+{
     optional uint32 version = 1;
     optional string nymid = 2;       // nym id
     optional string workflowid = 3;  // workflow id

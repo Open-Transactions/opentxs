@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <span>
+#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -172,6 +173,7 @@ TEST_F(RouterRouterF, test)
     auto frames = msg.get();
     const auto parts = frames.size();
     using namespace opentxs::literals;
+    using namespace std::literals;
     auto counter = 0_uz;
 
     for (auto& frame : frames) {

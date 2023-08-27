@@ -57,6 +57,7 @@ static auto print(SyncListenerJob state) noexcept -> std::string_view
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 using enum opentxs::network::zeromq::socket::Direction;
 
 using SyncListenerActor = opentxs::Actor<SyncListener::Imp, SyncListenerJob>;

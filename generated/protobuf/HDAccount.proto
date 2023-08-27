@@ -14,7 +14,8 @@ import public "BlockchainAddress.proto";
 import public "BlockchainDeterministicAccountData.proto";
 import public "BlockchainHDAccountData.proto";
 
-message HDAccount {
+message HDAccount
+{
     optional uint32 version = 1;
     optional BlockchainDeterministicAccountData deterministic = 2;
     repeated BlockchainAddress internaladdress = 3;

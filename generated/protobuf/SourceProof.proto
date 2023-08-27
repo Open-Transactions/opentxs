@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "Enums.proto";
 import public "Signature.proto";
 
-message SourceProof {
+message SourceProof
+{
     optional uint32 version = 1;
     optional SourceProofType type = 2;
 }

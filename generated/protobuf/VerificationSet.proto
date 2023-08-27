@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "VerificationGroup.proto";
 
-message VerificationSet {
+message VerificationSet
+{
     optional uint32 version = 1;
     optional VerificationGroup internal = 2;
     optional VerificationGroup external = 3;

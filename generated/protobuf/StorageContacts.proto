@@ -15,7 +15,8 @@ import public "StorageContactNymIndex.proto";
 import public "StorageIDList.proto";
 import public "StorageItemHash.proto";
 
-message StorageContacts {
+message StorageContacts
+{
     optional uint32 version = 1;
     repeated StorageIDList merge = 2;
     repeated StorageItemHash contact = 3;

@@ -15,6 +15,7 @@
 namespace opentxs
 {
 enum class UnitType : std::uint32_t {
+    Unknown = std::numeric_limits<std::uint32_t>::max(),
     Error = 0,
     Btc = 1,
     Bch = 2,
@@ -328,6 +329,5 @@ enum class UnitType : std::uint32_t {
     Ethereum_sepolia = 305,
     Ethereum_holesovice = 306,
     Bsc = 307,
-    Unknown = std::numeric_limits<std::uint32_t>::max(),
 };
 }  // namespace opentxs

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <memory>
 #include <ratio>
+#include <string_view>
 #include <tuple>
 
 #include "internal/api/session/UI.hpp"
@@ -30,6 +31,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 constexpr auto blocks_ = std::uint64_t{200u};
 constexpr auto tx_per_block_ = std::uint64_t{500u};
@@ -196,9 +198,9 @@ protected:
         , expected_account_bob_(bob_account_.Parent().AccountID())
         , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
         , expected_unit_(client_1_.UI().BlockchainUnitID(test_chain_))
-        , expected_display_unit_(u8"UNITTEST"_sv)
-        , expected_account_name_(u8"On chain UNITTEST (this device)"_sv)
-        , expected_notary_name_(u8"Unit Test Simulation"_sv)
+        , expected_display_unit_(u8"UNITTEST"sv)
+        , expected_account_name_(u8"On chain UNITTEST (this device)"sv)
+        , expected_notary_name_(u8"Unit Test Simulation"sv)
         , memo_outgoing_("memo for outgoing transaction")
         , expected_account_type_(ot::AccountType::Blockchain)
         , expected_unit_type_(ot::UnitType::Regtest)
@@ -504,7 +506,7 @@ TEST_F(Regtest_stress, bob_after_receive)
     const auto& widget = client_2_.UI().Internal().AccountActivity(
         bob_.ID(),
         expected_account_bob_,
-        make_cb(account_activity_, u8"account_activity_"_sv));
+        make_cb(account_activity_, u8"account_activity_"sv));
     constexpr auto expectedTotal = amount_ * transaction_count_;
     wait_for_counter(account_activity_, false);
 

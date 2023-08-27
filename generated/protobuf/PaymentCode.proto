@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Enums.proto";
 
-message PaymentCode {
+message PaymentCode
+{
     optional uint32 version = 1;
     optional bytes key = 2;
     optional bytes chaincode = 3;

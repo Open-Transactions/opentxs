@@ -12,7 +12,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTP2PBlockchainHello";
 option optimize_for = LITE_RUNTIME;
 
-message P2PBlockchainHello {
+message P2PBlockchainHello
+{
     optional uint32 version = 1;
     repeated P2PBlockchainChainState state = 2;
 }

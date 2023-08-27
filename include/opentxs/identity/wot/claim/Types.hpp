@@ -5,15 +5,11 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-#include <tuple>
 
-#include "opentxs/Export.hpp"
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::identity::wot::claim
 {

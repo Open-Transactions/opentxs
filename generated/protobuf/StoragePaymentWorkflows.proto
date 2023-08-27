@@ -14,7 +14,8 @@ import public "StorageItemHash.proto";
 import public "StorageWorkflowIndex.proto";
 import public "StorageWorkflowType.proto";
 
-message StoragePaymentWorkflows {
+message StoragePaymentWorkflows
+{
     optional uint32 version = 1;
     repeated StorageItemHash workflow = 2;
     repeated StorageWorkflowIndex items = 3;

@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTCashtoken";
 option optimize_for = LITE_RUNTIME;
 
-message Cashtoken {
+message Cashtoken
+{
     optional uint32 version = 1;
     optional bytes category = 2;
     optional bool nft = 3;

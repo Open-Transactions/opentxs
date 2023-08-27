@@ -27,16 +27,17 @@ import public "ServerContract.proto";
 import public "VerificationItem.proto";
 import public "VerifyClaim.proto";
 
-message RPCCommand {
+message RPCCommand
+{
     optional uint32 version = 1;
-    optional string cookie = 2;			// unique value between 20 and 116 bytes
-    optional RPCCommandType type = 3;	// see RPCEnums.proto
-    optional int32 session = 4;			// session instance value
-    repeated string associatenym = 5;	// nym ids for push notifications
-    optional string owner = 6;			// nym id
-    optional string notary = 7;			// notary id
-    optional string unit = 8;			// unitdefinition id
-    repeated string identifier = 9;		// ids (defined by RPCCommandType)
+    optional string cookie = 2;        // unique value between 20 and 116 bytes
+    optional RPCCommandType type = 3;  // see RPCEnums.proto
+    optional int32 session = 4;        // session instance value
+    repeated string associatenym = 5;  // nym ids for push notifications
+    optional string owner = 6;         // nym id
+    optional string notary = 7;        // notary id
+    optional string unit = 8;          // unitdefinition id
+    repeated string identifier = 9;    // ids (defined by RPCCommandType)
     repeated APIArgument arg = 10;
     optional HDSeed hdseed = 11;
     optional CreateNym createnym = 12;

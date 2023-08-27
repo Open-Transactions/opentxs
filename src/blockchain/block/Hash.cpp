@@ -28,10 +28,7 @@ Hash::Hash(const HexType&, const ReadView bytes) noexcept(false)
     if (false == DecodeHex(bytes)) { throw std::runtime_error{"invalid hash"}; }
 }
 
-Hash::Hash(const Hash& rhs) noexcept
-    : FixedByteArray(rhs)
-{
-}
+Hash::Hash(const Hash& rhs) noexcept = default;
 
 auto Hash::operator=(const Hash& rhs) noexcept -> Hash& = default;
 

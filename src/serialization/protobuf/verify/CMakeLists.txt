@@ -180,7 +180,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerifyWorkflows.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/verify/VerifyZMQ.hpp"
     "Check.cpp"
-    "Contact.cpp"
     "VerifyBlockchain.cpp"
     "VerifyCash.cpp"
     "VerifyConsensus.cpp"

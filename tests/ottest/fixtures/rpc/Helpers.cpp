@@ -12,6 +12,7 @@
 #include <future>
 #include <iterator>
 #include <mutex>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/session/UI.hpp"
@@ -32,6 +33,7 @@ namespace ottest
 {
 using namespace std::literals::chrono_literals;
 using namespace opentxs::literals;
+using namespace std::literals;
 
 RPC_fixture::SeedMap RPC_fixture::seed_map_{};
 RPC_fixture::LocalNymMap RPC_fixture::local_nym_map_{};
@@ -272,7 +274,7 @@ auto RPC_fixture::InitAccountActivityCounter(
         api.Factory().AccountIDFromBase58(account),
         make_cb(
             counter,
-            ot::UnallocatedCString{u8"account activity "_sv} + account));
+            ot::UnallocatedCString{u8"account activity "sv} + account));
 }
 
 auto RPC_fixture::InitAccountTreeCounter(const User& nym, Counter& counter)
@@ -290,7 +292,7 @@ auto RPC_fixture::InitAccountTreeCounter(
         nym,
         make_cb(
             counter,
-            ot::UnallocatedCString{u8"account tree for "_sv} +
+            ot::UnallocatedCString{u8"account tree for "sv} +
                 nym.asBase58(ot_.Crypto())));
 }
 

@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "StorageItemHash.proto";
 
-message StorageSeeds {
+message StorageSeeds
+{
     optional uint32 version = 1;
     optional string defaultSeed = 2;
     repeated StorageItemHash seed = 3;

@@ -14,6 +14,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 // NOTE AppleClang is why we can't have nice things
 auto BlockHeaderTestSequence::operator<=>(

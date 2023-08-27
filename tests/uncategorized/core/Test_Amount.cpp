@@ -10,6 +10,7 @@
 #include <memory>
 #include <span>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "internal/core/Amount.hpp"
@@ -21,6 +22,7 @@ namespace bmp = boost::multiprecision;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 constexpr auto int_max = std::numeric_limits<int>::max();
 constexpr auto int_min = std::numeric_limits<int>::min();
@@ -41,7 +43,7 @@ TEST(Amount, limits)
 {
     try {
         const auto max_backend =
-            u8"115792089237316195423570985008687907853269984665640564039457584007913129639935"_sv;
+            u8"115792089237316195423570985008687907853269984665640564039457584007913129639935"sv;
         const auto backend_amount = ot::factory::Amount(max_backend, true);
         EXPECT_TRUE(true);
     } catch (std::overflow_error&) {
@@ -52,7 +54,7 @@ TEST(Amount, limits)
 
     try {
         const auto max_backend_plus_one =
-            u8"115792089237316195423570985008687907853269984665640564039457584007913129639936"_sv;
+            u8"115792089237316195423570985008687907853269984665640564039457584007913129639936"sv;
         const auto backend_amount =
             ot::factory::Amount(max_backend_plus_one, true);
         EXPECT_TRUE(false);

@@ -30,10 +30,7 @@ Header::Header(const HexType&, const ReadView bytes) noexcept(false)
     }
 }
 
-Header::Header(const Header& rhs) noexcept
-    : FixedByteArray(rhs)
-{
-}
+Header::Header(const Header& rhs) noexcept = default;
 
 auto Header::operator=(const Header& rhs) noexcept -> Header& = default;
 

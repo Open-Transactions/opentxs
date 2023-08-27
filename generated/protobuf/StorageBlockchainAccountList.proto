@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ContactItemType.proto";
 
-message StorageBlockchainAccountList {
+message StorageBlockchainAccountList
+{
     optional uint32 version = 1;
     optional ContactItemType id = 2;
     repeated string list = 3;

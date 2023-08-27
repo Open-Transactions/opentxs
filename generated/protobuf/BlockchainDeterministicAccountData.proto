@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "BlockchainAccountData.proto";
 import public "HDPath.proto";
 
-message BlockchainDeterministicAccountData {
+message BlockchainDeterministicAccountData
+{
     optional uint32 version = 1;
     optional BlockchainAccountData common = 2;
     optional HDPath path = 5;

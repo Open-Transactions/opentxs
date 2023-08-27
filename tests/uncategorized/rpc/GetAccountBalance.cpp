@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <atomic>
 #include <iterator>
+#include <string_view>
 #include <utility>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
@@ -22,6 +23,7 @@ namespace rpc = opentxs::rpc;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 constexpr auto issuer_{
     "ot2xuVPJDdweZvKLQD42UMCzhCmT3okn3W1PktLgCbmQLRnaKy848sX"};

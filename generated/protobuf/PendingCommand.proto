@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTPendingCommand";
 option optimize_for = LITE_RUNTIME;
 
-message PendingCommand {
+message PendingCommand
+{
     optional uint32 version = 1;
     optional string serialized = 2;
     optional string accountlabel = 3;

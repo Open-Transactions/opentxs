@@ -13,11 +13,12 @@ option optimize_for = LITE_RUNTIME;
 import public "AddClaim.proto";
 import public "ContactItemType.proto";
 
-message CreateNym {
+message CreateNym
+{
     optional uint32 version = 1;
     optional ContactItemType type = 2;
-    optional string name = 3;			// nym alias
-    optional string seedid = 4;			// seed id
-    optional int32 index = 5;			// derivation path (-1 for next index)
+    optional string name = 3;    // nym alias
+    optional string seedid = 4;  // seed id
+    optional int32 index = 5;    // derivation path (-1 for next index)
     repeated AddClaim claims = 6;
 }

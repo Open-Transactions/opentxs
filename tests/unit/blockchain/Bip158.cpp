@@ -10,6 +10,7 @@
 #include <functional>
 #include <optional>
 #include <span>
+#include <string_view>
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/util/P0330.hpp"
@@ -169,6 +170,7 @@ TEST_F(BIP158, bip158)
 
         const auto encodedFilter = vector.Filter(api_);
         using namespace opentxs::literals;
+        using namespace std::literals;
         auto encodedElements = 0_uz;
 
         {

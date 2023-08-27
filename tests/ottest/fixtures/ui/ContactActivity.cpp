@@ -23,6 +23,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto contact_activity_request_faucet(
     const User& user,
@@ -164,7 +165,7 @@ auto init_contact_activity(
     user.api_->UI().Internal().ContactActivity(
         user.nym_id_, user.Contact(remote.name_), make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"contact_activity_"_sv;
+            out << u8"contact_activity_"sv;
             out << user.name_lower_;
             out << '_';
             out << remote.name_lower_;

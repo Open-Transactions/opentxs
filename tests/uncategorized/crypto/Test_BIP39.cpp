@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "crypto/Bip39.hpp"
 #include "internal/util/P0330.hpp"
@@ -93,6 +94,7 @@ public:
 
         auto word = false;
         using namespace opentxs::literals;
+        using namespace std::literals;
         auto count = 0_uz;
 
         for (const auto c : in) {

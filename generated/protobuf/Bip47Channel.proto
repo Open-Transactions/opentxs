@@ -14,7 +14,8 @@ import public "Bip47Direction.proto";
 import public "BlockchainDeterministicAccountData.proto";
 import public "PaymentCode.proto";
 
-message Bip47Channel {
+message Bip47Channel
+{
     optional uint32 version = 1;
     optional BlockchainDeterministicAccountData deterministic = 2;
     optional PaymentCode local = 3;

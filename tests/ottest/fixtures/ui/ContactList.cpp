@@ -24,6 +24,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto check_contact_list(
     const User& user,
@@ -194,7 +195,7 @@ auto init_contact_list(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().Internal().ContactList(user.nym_id_, make_cb(counter, [&] {
                                                auto out = std::stringstream{};
-                                               out << u8"contact_list_"_sv;
+                                               out << u8"contact_list_"sv;
                                                out << user.name_lower_;
 
                                                return out.str();
@@ -207,7 +208,7 @@ auto init_messagable_list(const User& user, Counter& counter) noexcept -> void
     user.api_->UI().Internal().MessagableList(
         user.nym_id_, make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"messagable_list_"_sv;
+            out << u8"messagable_list_"sv;
             out << user.name_lower_;
 
             return out.str();

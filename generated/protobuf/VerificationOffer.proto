@@ -14,7 +14,8 @@ import public "Claim.proto";
 import public "VerificationItem.proto";
 import public "Identifier.proto";
 
-message VerificationOffer {
+message VerificationOffer
+{
     optional uint32 version = 1;
     optional Identifier offeringnym = 2;
     optional Identifier recipientnym = 3;

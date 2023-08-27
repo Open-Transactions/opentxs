@@ -26,6 +26,7 @@ using Position = b::script::Position;
 using Pattern = b::script::Pattern;
 using enum b::script::OP;
 using namespace opentxs::literals;
+using namespace std::literals;
 
 const ot::UnallocatedVector<std::byte> expected_1_{
     std::byte{0},   std::byte{79},  std::byte{80},  std::byte{81},

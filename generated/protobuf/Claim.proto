@@ -14,7 +14,8 @@ import public "ContactItem.proto";
 import public "ContactSectionName.proto";
 import public "Identifier.proto";
 
-message Claim {
+message Claim
+{
     optional uint32 version = 1;
     optional Identifier nym = 2;
     optional ContactSectionName section = 3;

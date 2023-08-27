@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ContractEnums.proto";
 
-message ListenAddress {
+message ListenAddress
+{
     optional uint32 version = 1;
     optional AddressType type = 2;
     optional ProtocolVersion protocol = 3;

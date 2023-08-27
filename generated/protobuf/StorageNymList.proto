@@ -14,7 +14,8 @@ import public "Identifier.proto";
 import public "StorageBip47NymAddressIndex.proto";
 import public "StorageItemHash.proto";
 
-message StorageNymList {
+message StorageNymList
+{
     optional uint32 version = 1;
     repeated StorageItemHash nym = 2;
     repeated string localnymid = 3;

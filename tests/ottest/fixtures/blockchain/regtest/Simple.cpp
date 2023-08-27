@@ -15,6 +15,7 @@
 #include <ostream>
 #include <ratio>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 
 #include "internal/api/session/FactoryAPI.hpp"
@@ -33,6 +34,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 RegtestListener::RegtestListener(const ot::api::session::Client& client)
     : block_listener_(std::make_unique<BlockHeaderListener>(client, "client"))

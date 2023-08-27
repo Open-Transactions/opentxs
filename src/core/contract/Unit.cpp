@@ -517,7 +517,7 @@ auto Unit::IDVersion() const -> SerializedType
         const auto count = display_definition_->ScaleCount();
 
         for (auto i = 0u; i < count; ++i) {
-            const auto& scale = display_definition_->Scale(i);
+            const auto scale = display_definition_->Scale(i);
             const auto prefix = scale.Prefix();
             const auto suffix = scale.Suffix();
             auto& serialized = *currency.add_scales();

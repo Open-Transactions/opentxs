@@ -14,7 +14,8 @@ import public "ConsensusEnums.proto";
 import public "PendingCommand.proto";
 import public "Identifier.proto";
 
-message ServerContext {
+message ServerContext
+{
     optional uint32 version = 1;
     optional Identifier serverid = 2;
     optional uint64 highesttransactionnumber = 3;

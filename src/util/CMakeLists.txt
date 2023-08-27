@@ -39,6 +39,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/Exclusive.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Flag.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Future.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/Literals.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Lockable.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Mutex.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/P0330.hpp"

@@ -22,6 +22,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto check_account_list(
     const User& user,
@@ -87,7 +88,7 @@ auto init_account_list(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().Internal().AccountList(user.nym_id_, make_cb(counter, [&] {
                                                auto out = std::stringstream{};
-                                               out << u8"account_list_"_sv;
+                                               out << u8"account_list_"sv;
                                                out << user.name_lower_;
 
                                                return out.str();
