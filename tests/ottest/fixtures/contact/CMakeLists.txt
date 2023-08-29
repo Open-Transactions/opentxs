@@ -10,4 +10,6 @@ target_sources(
     "ContactData.hpp"
     "ContactGroup.cpp"
     "ContactGroup.hpp"
+    "ContactItem.cpp"
+    "ContactItem.hpp"
 )

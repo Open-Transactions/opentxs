@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,39 +7,13 @@
 #include <opentxs/opentxs.hpp>
 
 #include "internal/identity/wot/claim/Types.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/contact/ContactItem.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_ContactItem : public ::testing::Test
-{
-public:
-    Test_ContactItem()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , contact_item_(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("testNym"),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              ot::UnallocatedCString("testValue"),
-              {ot::identity::wot::claim::Attribute::Active},
-              {},
-              {},
-              "")
-        , nym_id_(api_.Factory().NymIDFromRandom())
-    {
-    }
-
-    const ot::api::session::Client& api_;
-    const ot::identity::wot::claim::Item contact_item_;
-    const ot::identifier::Nym nym_id_;
-};
-
-TEST_F(Test_ContactItem, first_constructor)
+TEST_F(ContactItem, first_constructor)
 {
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -81,7 +55,7 @@ TEST_F(Test_ContactItem, first_constructor)
     EXPECT_FALSE(contactItem1.isPrimary());
 }
 
-TEST_F(Test_ContactItem, first_constructor_different_versions)
+TEST_F(ContactItem, first_constructor_different_versions)
 {
     const ot::identity::wot::claim::Item contactItem1(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -98,7 +72,7 @@ TEST_F(Test_ContactItem, first_constructor_different_versions)
     EXPECT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactItem1.Version());
 }
 
-TEST_F(Test_ContactItem, second_constructor)
+TEST_F(ContactItem, second_constructor)
 {
     static constexpr auto attrib = {
         ot::identity::wot::claim::Attribute::Active};
@@ -143,7 +117,7 @@ TEST_F(Test_ContactItem, second_constructor)
     EXPECT_FALSE(contactItem1.isPrimary());
 }
 
-TEST_F(Test_ContactItem, copy_constructor)
+TEST_F(ContactItem, copy_constructor)
 {
     ot::identity::wot::claim::Item copiedContactItem(contact_item_);
 
@@ -160,12 +134,12 @@ TEST_F(Test_ContactItem, copy_constructor)
     EXPECT_EQ(contact_item_.isPrimary(), copiedContactItem.isPrimary());
 }
 
-TEST_F(Test_ContactItem, operator_equal_true)
+TEST_F(ContactItem, operator_equal_true)
 {
     EXPECT_EQ(contact_item_, contact_item_);
 }
 
-TEST_F(Test_ContactItem, operator_equal_false)
+TEST_F(ContactItem, operator_equal_false)
 {
     ot::identity::wot::claim::Item contactItem2(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -185,7 +159,7 @@ TEST_F(Test_ContactItem, operator_equal_false)
     EXPECT_FALSE(contact_item_ == contactItem2);
 }
 
-TEST_F(Test_ContactItem, public_accessors)
+TEST_F(ContactItem, public_accessors)
 {
     const ot::identifier::Generic identifier(
         api_.Factory().IdentifierFromBase58(
@@ -214,7 +188,7 @@ TEST_F(Test_ContactItem, public_accessors)
     EXPECT_FALSE(contact_item_.isPrimary());
 }
 
-TEST_F(Test_ContactItem, public_setters)
+TEST_F(ContactItem, public_setters)
 {
     const auto now = ot::Clock::now();
 
@@ -260,7 +234,7 @@ TEST_F(Test_ContactItem, public_setters)
     EXPECT_TRUE(primaryItem.isActive());
 }
 
-TEST_F(Test_ContactItem, Serialize)
+TEST_F(ContactItem, Serialize)
 {
     // Test without id.
     auto bytes = ot::Space{};
