@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,56 +10,13 @@
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/contact/ContactGroup.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_ContactGroup : public ::testing::Test
-{
-public:
-    Test_ContactGroup()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , contact_group_(
-              ot::UnallocatedCString("testContactGroupNym1"),
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              {})
-        , primary_(new ot::identity::wot::claim::Item(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("primaryContactItem"),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              ot::UnallocatedCString("primaryContactItemValue"),
-              {ot::identity::wot::claim::Attribute::Primary},
-              {},
-              {},
-              ""))
-        , active_(new ot::identity::wot::claim::Item(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("activeContactItem"),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              ot::UnallocatedCString("activeContactItemValue"),
-              {ot::identity::wot::claim::Attribute::Active},
-              {},
-              {},
-              ""))
-    {
-    }
-
-    const ot::api::session::Client& api_;
-    const ot::identity::wot::claim::Group contact_group_;
-    const std::shared_ptr<ot::identity::wot::claim::Item> primary_;
-    const std::shared_ptr<ot::identity::wot::claim::Item> active_;
-};
-
-TEST_F(Test_ContactGroup, first_constructor)
+TEST_F(ContactGroup, first_constructor)
 {
     // Test constructing a group with a map containing two primary items.
     const std::shared_ptr<ot::identity::wot::claim::Item> primary2(
@@ -98,7 +55,7 @@ TEST_F(Test_ContactGroup, first_constructor)
     }
 }
 
-TEST_F(Test_ContactGroup, first_constructor_no_items)
+TEST_F(ContactGroup, first_constructor_no_items)
 {
     // Test constructing a group with a map containing no items.
     const ot::identity::wot::claim::Group group1(
@@ -111,7 +68,7 @@ TEST_F(Test_ContactGroup, first_constructor_no_items)
     ASSERT_EQ(ot::identity::wot::claim::ClaimType::Employee, group1.Type());
 }
 
-TEST_F(Test_ContactGroup, second_constructor)
+TEST_F(ContactGroup, second_constructor)
 {
     const ot::identity::wot::claim::Group group1(
         ot::UnallocatedCString("testContactGroupNym1"),
@@ -124,7 +81,7 @@ TEST_F(Test_ContactGroup, second_constructor)
     ASSERT_EQ(active_->ID(), group1.begin()->second->ID());
 }
 
-TEST_F(Test_ContactGroup, copy_constructor)
+TEST_F(ContactGroup, copy_constructor)
 {
     const ot::identity::wot::claim::Group group1(
         ot::UnallocatedCString("testContactGroupNym1"),
@@ -139,7 +96,7 @@ TEST_F(Test_ContactGroup, copy_constructor)
     ASSERT_EQ(active_->ID(), copiedContactGroup.begin()->second->ID());
 }
 
-TEST_F(Test_ContactGroup, move_constructor)
+TEST_F(ContactGroup, move_constructor)
 {
     ot::identity::wot::claim::Group movedContactGroup(
         contact_group_.AddItem(active_));
@@ -150,7 +107,7 @@ TEST_F(Test_ContactGroup, move_constructor)
     ASSERT_EQ(active_->ID(), movedContactGroup.begin()->second->ID());
 }
 
-TEST_F(Test_ContactGroup, operator_plus)
+TEST_F(ContactGroup, operator_plus)
 {
     // Test adding a group with a primary (rhs) to a group without a primary.
     const auto& group1 = contact_group_.AddItem(active_);
@@ -193,7 +150,7 @@ TEST_F(Test_ContactGroup, operator_plus)
     }
 }
 
-TEST_F(Test_ContactGroup, AddItem)
+TEST_F(ContactGroup, AddItem)
 {
     const auto& group1 = contact_group_.AddItem(active_);
     ASSERT_EQ(1, group1.Size());
@@ -211,7 +168,7 @@ TEST_F(Test_ContactGroup, AddItem)
     ASSERT_TRUE(group3.begin()->second->isPrimary());
 }
 
-TEST_F(Test_ContactGroup, AddPrimary)
+TEST_F(ContactGroup, AddPrimary)
 {
     // Test that AddPrimary ignores a null pointer.
     const auto& group1 = contact_group_.AddPrimary(nullptr);
@@ -242,7 +199,7 @@ TEST_F(Test_ContactGroup, AddPrimary)
     }
 }
 
-TEST_F(Test_ContactGroup, begin)
+TEST_F(ContactGroup, begin)
 {
     auto it = contact_group_.begin();
     ASSERT_EQ(contact_group_.end(), it);
@@ -258,9 +215,9 @@ TEST_F(Test_ContactGroup, begin)
     ASSERT_EQ(std::distance(it, group1.end()), 0);
 }
 
-TEST_F(Test_ContactGroup, Best_none) { ASSERT_FALSE(contact_group_.Best()); }
+TEST_F(ContactGroup, Best_none) { ASSERT_FALSE(contact_group_.Best()); }
 
-TEST_F(Test_ContactGroup, Best_primary)
+TEST_F(ContactGroup, Best_primary)
 {
     const auto& group1 = contact_group_.AddItem(primary_);
 
@@ -269,7 +226,7 @@ TEST_F(Test_ContactGroup, Best_primary)
     ASSERT_EQ(primary_->ID(), best->ID());
 }
 
-TEST_F(Test_ContactGroup, Best_active_and_local)
+TEST_F(ContactGroup, Best_active_and_local)
 {
     const std::shared_ptr<ot::identity::wot::claim::Item> local(
         new ot::identity::wot::claim::Item(
@@ -302,7 +259,7 @@ TEST_F(Test_ContactGroup, Best_active_and_local)
     ASSERT_TRUE(best2->isLocal());
 }
 
-TEST_F(Test_ContactGroup, Claim_found)
+TEST_F(ContactGroup, Claim_found)
 {
     const auto& group1 = contact_group_.AddItem(active_);
 
@@ -312,14 +269,14 @@ TEST_F(Test_ContactGroup, Claim_found)
     ASSERT_EQ(active_->ID(), claim->ID());
 }
 
-TEST_F(Test_ContactGroup, Claim_notfound)
+TEST_F(ContactGroup, Claim_notfound)
 {
     const std::shared_ptr<ot::identity::wot::claim::Item>& claim =
         contact_group_.Claim(active_->ID());
     ASSERT_FALSE(claim);
 }
 
-TEST_F(Test_ContactGroup, end)
+TEST_F(ContactGroup, end)
 {
     auto it = contact_group_.end();
     ASSERT_EQ(contact_group_.begin(), it);
@@ -335,19 +292,19 @@ TEST_F(Test_ContactGroup, end)
     ASSERT_EQ(std::distance(group1.begin(), it), 0);
 }
 
-TEST_F(Test_ContactGroup, HaveClaim_true)
+TEST_F(ContactGroup, HaveClaim_true)
 {
     const auto& group1 = contact_group_.AddItem(active_);
 
     ASSERT_TRUE(group1.HaveClaim(active_->ID()));
 }
 
-TEST_F(Test_ContactGroup, HaveClaim_false)
+TEST_F(ContactGroup, HaveClaim_false)
 {
     ASSERT_FALSE(contact_group_.HaveClaim(active_->ID()));
 }
 
-TEST_F(Test_ContactGroup, Delete)
+TEST_F(ContactGroup, Delete)
 {
     const auto& group1 = contact_group_.AddItem(active_);
     ASSERT_TRUE(group1.HaveClaim(active_->ID()));
@@ -366,19 +323,19 @@ TEST_F(Test_ContactGroup, Delete)
     ASSERT_EQ(1, group4.Size());
 }
 
-TEST_F(Test_ContactGroup, Primary_group_has_primary)
+TEST_F(ContactGroup, Primary_group_has_primary)
 {
     const auto& group1 = contact_group_.AddItem(primary_);
     ASSERT_FALSE(group1.Primary().empty());
     ASSERT_EQ(primary_->ID(), group1.Primary());
 }
 
-TEST_F(Test_ContactGroup, Primary_no_primary)
+TEST_F(ContactGroup, Primary_no_primary)
 {
     ASSERT_TRUE(contact_group_.Primary().empty());
 }
 
-TEST_F(Test_ContactGroup, PrimaryClaim_found)
+TEST_F(ContactGroup, PrimaryClaim_found)
 {
     const auto& group1 = contact_group_.AddItem(primary_);
 
@@ -388,14 +345,14 @@ TEST_F(Test_ContactGroup, PrimaryClaim_found)
     ASSERT_EQ(primary_->ID(), primaryClaim->ID());
 }
 
-TEST_F(Test_ContactGroup, PrimaryClaim_notfound)
+TEST_F(ContactGroup, PrimaryClaim_notfound)
 {
     const std::shared_ptr<ot::identity::wot::claim::Item>& primaryClaim =
         contact_group_.PrimaryClaim();
     ASSERT_FALSE(primaryClaim);
 }
 
-TEST_F(Test_ContactGroup, Size)
+TEST_F(ContactGroup, Size)
 {
     ASSERT_EQ(contact_group_.Size(), 0);
     const auto& group1 = contact_group_.AddItem(primary_);
@@ -406,7 +363,7 @@ TEST_F(Test_ContactGroup, Size)
     ASSERT_EQ(1, group3.Size());
 }
 
-TEST_F(Test_ContactGroup, Type)
+TEST_F(ContactGroup, Type)
 {
     ASSERT_EQ(
         ot::identity::wot::claim::ClaimType::Employee, contact_group_.Type());
