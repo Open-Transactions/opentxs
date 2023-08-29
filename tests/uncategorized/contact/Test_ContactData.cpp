@@ -1,11 +1,10 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <cstdint>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -13,77 +12,13 @@
 #include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/contact/ContactData.hpp"
 
 namespace ottest
 {
 namespace ot = opentxs;
 namespace claim = ot::identity::wot::claim;
 using namespace std::literals;
-
-class Test_ContactData : public ::testing::Test
-{
-public:
-    Test_ContactData()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , nym_id_1_(api_.Factory().NymIDFromRandom())
-        , nym_id_2_(api_.Factory().NymIDFromRandom())
-        , nym_id_3_(api_.Factory().NymIDFromRandom())
-        , nym_id_4_(api_.Factory().NymIDFromRandom())
-        , contact_data_(
-              api_,
-              nym_id_1_.asBase58(api_.Crypto()),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              {})
-        , active_contact_item_(std::make_shared<claim::Item>(
-              api_,
-              "activeContactItem"s,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              claim::SectionType::Identifier,
-              claim::ClaimType::Employee,
-              "activeContactItemValue"s,
-              ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-              ot::Time{},
-              ot::Time{},
-              ""))
-    {
-    }
-
-    const ot::api::session::Client& api_;
-    const ot::identifier::Nym nym_id_1_;
-    const ot::identifier::Nym nym_id_2_;
-    const ot::identifier::Nym nym_id_3_;
-    const ot::identifier::Nym nym_id_4_;
-    const claim::Data contact_data_;
-    const std::shared_ptr<claim::Item> active_contact_item_;
-
-    using CallbackType1 = claim::Data (*)(
-        const claim::Data&,
-        const ot::UnallocatedCString&,
-        const ot::UnitType,
-        const bool,
-        const bool);
-    using CallbackType2 = claim::Data (*)(
-        const claim::Data&,
-        const ot::UnallocatedCString&,
-        const bool,
-        const bool);
-
-    void testAddItemMethod(
-        const CallbackType1 contactDataMethod,
-        claim::SectionType sectionName,
-        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
-        std::uint32_t targetVersion = 0);
-
-    void testAddItemMethod2(
-        const CallbackType2 contactDataMethod,
-        claim::SectionType sectionName,
-        claim::ClaimType itemType,
-        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
-        std::uint32_t targetVersion = 0);
-};
 
 auto add_contract(
     const claim::Data& data,
@@ -145,266 +80,6 @@ auto add_phone_number(
     return data.AddPhoneNumber(id, active, primary);
 }
 
-void Test_ContactData::testAddItemMethod(
-    const CallbackType1 contactDataMethod,
-    claim::SectionType sectionName,
-    std::uint32_t version,
-    std::uint32_t targetVersion)
-{
-    // Add a contact to a group with no primary.
-    using Group = claim::Group;
-    using Section = claim::Section;
-    const auto group1 = std::make_shared<Group>(
-        "contactGroup1", sectionName, claim::ClaimType::Bch, Group::ItemMap{});
-    const auto section1 = std::make_shared<Section>(
-        api_,
-        "contactSectionNym1",
-        version,
-        version,
-        sectionName,
-        Section::GroupMap{{claim::ClaimType::Bch, group1}});
-    const auto data1 = claim::Data{
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
-        version,
-        version,
-        claim::Data::SectionMap{{sectionName, section1}}};
-
-    const auto data2 = contactDataMethod(
-        data1, "instrumentDefinitionID1", ot::UnitType::Bch, false, false);
-
-    if (targetVersion) {
-        ASSERT_EQ(targetVersion, data2.Version());
-        return;
-    }
-
-    // Verify that the item was made primary.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                claim::ClaimType::Bch,
-                {},
-                {},
-                "instrumentDefinitionID1",
-                "")));
-    const auto contactItem1 = data2.Claim(identifier1);
-    ASSERT_NE(nullptr, contactItem1);
-    ASSERT_TRUE(contactItem1->isPrimary());
-
-    // Add a contact to a group with a primary.
-    const auto data3 = contactDataMethod(
-        data2, "instrumentDefinitionID2", ot::UnitType::Bch, false, false);
-
-    // Verify that the item wasn't made primary.
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                claim::ClaimType::Bch,
-                {},
-                {},
-                "instrumentDefinitionID2",
-                "")));
-    const auto contactItem2 = data3.Claim(identifier2);
-    ASSERT_NE(nullptr, contactItem2);
-    ASSERT_FALSE(contactItem2->isPrimary());
-
-    // Add a contact for a type with no group.
-    const auto data4 = contactDataMethod(
-        data3, "instrumentDefinitionID3", ot::UnitType::Eur, false, false);
-
-    // Verify the group was created.
-    ASSERT_NE(nullptr, data4.Group(sectionName, claim::ClaimType::Eur));
-    // Verify that the item was made primary.
-    const ot::identifier::Generic identifier3(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                claim::ClaimType::Eur,
-                {},
-                {},
-                "instrumentDefinitionID3",
-                "")));
-    const auto contactItem3 = data4.Claim(identifier3);
-    ASSERT_NE(nullptr, contactItem3);
-    ASSERT_TRUE(contactItem3->isPrimary());
-
-    // Add an active contact.
-    const auto data5 = contactDataMethod(
-        data4, "instrumentDefinitionID4", ot::UnitType::Usd, false, true);
-
-    // Verify the group was created.
-    ASSERT_NE(nullptr, data5.Group(sectionName, claim::ClaimType::Usd));
-    // Verify that the item was made active.
-    const ot::identifier::Generic identifier4(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                claim::ClaimType::Usd,
-                {},
-                {},
-                "instrumentDefinitionID4",
-                "")));
-    const auto contactItem4 = data5.Claim(identifier4);
-    ASSERT_NE(nullptr, contactItem4);
-    ASSERT_TRUE(contactItem4->isActive());
-
-    // Add a primary contact.
-    const auto data6 = contactDataMethod(
-        data5, "instrumentDefinitionID5", ot::UnitType::Usd, true, false);
-
-    // Verify that the item was made primary.
-    const ot::identifier::Generic identifier5(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                claim::ClaimType::Usd,
-                {},
-                {},
-                "instrumentDefinitionID5",
-                "")));
-    const auto contactItem5 = data6.Claim(identifier5);
-    ASSERT_NE(nullptr, contactItem5);
-    ASSERT_TRUE(contactItem5->isPrimary());
-}
-
-void Test_ContactData::testAddItemMethod2(
-    const CallbackType2 contactDataMethod,
-    claim::SectionType sectionName,
-    claim::ClaimType itemType,
-    std::uint32_t version,
-    std::uint32_t targetVersion)
-{
-    // Add a contact to a group with no primary.
-    using Group = claim::Group;
-    using Section = claim::Section;
-    const auto group1 = std::make_shared<Group>(
-        "contactGroup1", sectionName, itemType, Group::ItemMap{});
-    const auto section1 = std::make_shared<Section>(
-        api_,
-        "contactSectionNym1",
-        version,
-        version,
-        sectionName,
-        Section::GroupMap{{itemType, group1}});
-
-    const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
-        version,
-        version,
-        claim::Data::SectionMap{{sectionName, section1}});
-
-    const auto data2 = contactDataMethod(data1, "contactValue1", false, false);
-
-    if (targetVersion) {
-        ASSERT_EQ(targetVersion, data2.Version());
-        return;
-    }
-
-    // Verify that the item was made primary.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                itemType,
-                {},
-                {},
-                "contactValue1",
-                "")));
-    const auto contactItem1 = data2.Claim(identifier1);
-    ASSERT_NE(nullptr, contactItem1);
-    ASSERT_TRUE(contactItem1->isPrimary());
-
-    // Add a contact to a group with a primary.
-    const auto data3 = contactDataMethod(data2, "contactValue2", false, false);
-
-    // Verify that the item wasn't made primary.
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                sectionName,
-                itemType,
-                {},
-                {},
-                "contactValue2",
-                "")));
-    const auto contactItem2 = data3.Claim(identifier2);
-    ASSERT_NE(nullptr, contactItem2);
-    ASSERT_FALSE(contactItem2->isPrimary());
-
-    // Add a contact for a type with no group.
-    const auto section2 = std::make_shared<claim::Section>(
-
-        api_,
-        "contactSectionNym2",
-        version,
-        version,
-        sectionName,
-        claim::Section::GroupMap{});
-
-    const claim::Data data4(
-        api_,
-        nym_id_4_.asBase58(api_.Crypto()),
-        version,
-        version,
-        claim::Data::SectionMap{{sectionName, section2}});
-
-    const auto data5 = contactDataMethod(data4, "contactValue3", false, false);
-
-    // Verify the group was created.
-    ASSERT_NE(nullptr, data5.Group(sectionName, itemType));
-    // Verify that the item was made primary.
-    const ot::identifier::Generic identifier3(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_4_.asBase58(api_.Crypto()),
-                sectionName,
-                itemType,
-                {},
-                {},
-                "contactValue3",
-                "")));
-    const auto contactItem3 = data5.Claim(identifier3);
-    ASSERT_NE(nullptr, contactItem3);
-    ASSERT_TRUE(contactItem3->isPrimary());
-
-    // Add an active contact.
-    const auto data6 = contactDataMethod(data5, "contactValue4", false, true);
-
-    // Verify that the item was made active.
-    const ot::identifier::Generic identifier4(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_4_.asBase58(api_.Crypto()),
-                sectionName,
-                itemType,
-                {},
-                {},
-                "contactValue4",
-                "")));
-    const auto contactItem4 = data6.Claim(identifier4);
-    ASSERT_NE(nullptr, contactItem4);
-    ASSERT_TRUE(contactItem4->isActive());
-}
-
 static const ot::UnallocatedCString expectedStringOutput =
     ot::UnallocatedCString{"Version "} +
     std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
@@ -417,7 +92,7 @@ static const ot::UnallocatedCString expectedStringOutput =
     std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
     ot::UnallocatedCString{"\n--- Attributes: Active \n"};
 
-TEST_F(Test_ContactData, first_constructor)
+TEST_F(ContactData, first_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
         api_,
@@ -447,7 +122,7 @@ TEST_F(Test_ContactData, first_constructor)
         active_contact_item_->Value()));
 }
 
-TEST_F(Test_ContactData, first_constructor_no_sections)
+TEST_F(ContactData, first_constructor_no_sections)
 {
     const claim::Data contactData(
         api_,
@@ -458,7 +133,7 @@ TEST_F(Test_ContactData, first_constructor_no_sections)
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
 }
 
-TEST_F(Test_ContactData, first_constructor_different_versions)
+TEST_F(ContactData, first_constructor_different_versions)
 {
     const claim::Data contactData(
         api_,
@@ -469,7 +144,7 @@ TEST_F(Test_ContactData, first_constructor_different_versions)
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
 }
 
-TEST_F(Test_ContactData, copy_constructor)
+TEST_F(ContactData, copy_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
         api_,
@@ -504,7 +179,7 @@ TEST_F(Test_ContactData, copy_constructor)
         active_contact_item_->Value()));
 }
 
-TEST_F(Test_ContactData, operator_plus)
+TEST_F(ContactData, operator_plus)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     // Add a ContactData object with a section of the same type.
@@ -612,7 +287,7 @@ TEST_F(Test_ContactData, operator_plus)
             ->Size());
 }
 
-TEST_F(Test_ContactData, operator_plus_different_version)
+TEST_F(ContactData, operator_plus_different_version)
 {
     // rhs version less than lhs
     const claim::Data contactData2(
@@ -632,14 +307,14 @@ TEST_F(Test_ContactData, operator_plus_different_version)
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData4.Version());
 }
 
-TEST_F(Test_ContactData, operator_string)
+TEST_F(ContactData, operator_string)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     const ot::UnallocatedCString dataString = data1;
     ASSERT_EQ(expectedStringOutput, dataString);
 }
 
-TEST_F(Test_ContactData, Serialize)
+TEST_F(ContactData, Serialize)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
 
@@ -695,12 +370,12 @@ TEST_F(Test_ContactData, Serialize)
     ASSERT_EQ(active_contact_item_->End(), contact_item->End());
 }
 
-TEST_F(Test_ContactData, AddContract)
+TEST_F(ContactData, AddContract)
 {
     testAddItemMethod(add_contract, claim::SectionType::Contract);
 }
 
-TEST_F(Test_ContactData, AddContract_different_versions)
+TEST_F(ContactData, AddContract_different_versions)
 {
     testAddItemMethod(
         add_contract,
@@ -710,7 +385,7 @@ TEST_F(Test_ContactData, AddContract_different_versions)
         4);
 }
 
-TEST_F(Test_ContactData, AddEmail)
+TEST_F(ContactData, AddEmail)
 {
     testAddItemMethod2(
         add_email, claim::SectionType::Communication, claim::ClaimType::Email);
@@ -720,7 +395,7 @@ TEST_F(Test_ContactData, AddEmail)
 // because all current contact item types have been available for all
 // versions of CONTACTSECTION_COMMUNICATION section.
 
-// TEST_F(Test_ContactData, AddEmail_different_versions)
+// TEST_F(ContactData, AddEmail_different_versions)
 //{
 //    testAddItemMethod2(
 //        std::mem_fn<claim::ContactData(
@@ -734,7 +409,7 @@ TEST_F(Test_ContactData, AddEmail)
 //             // item type.
 //}
 
-TEST_F(Test_ContactData, AddItem_claim)
+TEST_F(ContactData, AddItem_claim)
 {
     static constexpr auto attrib = {claim::Attribute::Active};
     const auto claim = api_.Factory().Claim(
@@ -757,7 +432,7 @@ TEST_F(Test_ContactData, AddItem_claim)
         "contactItemValue"));
 }
 
-TEST_F(Test_ContactData, AddItem_claim_different_versions)
+TEST_F(ContactData, AddItem_claim_different_versions)
 {
     const auto group1 = std::make_shared<claim::Group>(
         "contactGroup1",
@@ -796,7 +471,7 @@ TEST_F(Test_ContactData, AddItem_claim_different_versions)
     ASSERT_EQ(4, data2.Version());
 }
 
-TEST_F(Test_ContactData, AddItem_item)
+TEST_F(ContactData, AddItem_item)
 {
     // Add an item to a ContactData with no section.
     const auto data1 = contact_data_.AddItem(active_contact_item_);
@@ -837,7 +512,7 @@ TEST_F(Test_ContactData, AddItem_item)
             ->Size());
 }
 
-TEST_F(Test_ContactData, AddItem_item_different_versions)
+TEST_F(ContactData, AddItem_item_different_versions)
 {
     const auto group1 = std::make_shared<claim::Group>(
         "contactGroup1",
@@ -880,12 +555,12 @@ TEST_F(Test_ContactData, AddItem_item_different_versions)
     ASSERT_EQ(4, data2.Version());
 }
 
-TEST_F(Test_ContactData, AddPaymentCode)
+TEST_F(ContactData, AddPaymentCode)
 {
     testAddItemMethod(add_payment_code, claim::SectionType::Procedure);
 }
 
-TEST_F(Test_ContactData, AddPaymentCode_different_versions)
+TEST_F(ContactData, AddPaymentCode_different_versions)
 {
     testAddItemMethod(
         add_contract,
@@ -895,7 +570,7 @@ TEST_F(Test_ContactData, AddPaymentCode_different_versions)
         4);
 }
 
-TEST_F(Test_ContactData, AddPhoneNumber)
+TEST_F(ContactData, AddPhoneNumber)
 {
     testAddItemMethod2(
         add_phone_number,
@@ -907,7 +582,7 @@ TEST_F(Test_ContactData, AddPhoneNumber)
 // because all current contact item types have been available for all
 // versions of CONTACTSECTION_COMMUNICATION section.
 
-// TEST_F(Test_ContactData, AddPhoneNumber_different_versions)
+// TEST_F(ContactData, AddPhoneNumber_different_versions)
 //{
 //    testAddItemMethod2(
 //        std::mem_fn<claim::ContactData(
@@ -921,7 +596,7 @@ TEST_F(Test_ContactData, AddPhoneNumber)
 //             // item type.
 //}
 
-TEST_F(Test_ContactData, AddPreferredOTServer)
+TEST_F(ContactData, AddPreferredOTServer)
 {
     // Add a server to a group with no primary.
     const auto group1 = std::make_shared<claim::Group>(
@@ -1079,11 +754,11 @@ TEST_F(Test_ContactData, AddPreferredOTServer)
 // because CMITEMTYPE_OPENTXS has been available for all versions of
 // CONTACTSECTION_COMMUNICATION section.
 
-// TEST_F(Test_ContactData, AddPreferredOTServer_different_versions)
+// TEST_F(ContactData, AddPreferredOTServer_different_versions)
 //{
 //}
 
-TEST_F(Test_ContactData, AddSocialMediaProfile)
+TEST_F(ContactData, AddSocialMediaProfile)
 {
     // Add a profile that only resides in the profile section.
 
@@ -1263,7 +938,7 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
 // all versions of CONTACTSECTION_COMMUNICATION, CONTACTSECTION_IDENTIFIER,
 // and CONTACTSECTION_PROFILE sections.
 
-// TEST_F(Test_ContactData, AddSocialMediaProfile_different_versions)
+// TEST_F(ContactData, AddSocialMediaProfile_different_versions)
 //{
 //    // Add a profile to the CONTACTSECTION_PROFILE section.
 //    testAddItemMethod3(
@@ -1282,7 +957,7 @@ TEST_F(Test_ContactData, AddSocialMediaProfile)
 //             // item type.
 //}
 
-TEST_F(Test_ContactData, BestEmail)
+TEST_F(ContactData, BestEmail)
 {
     // Add a non-active, non-primary email.
     const auto data1 = contact_data_.AddEmail("emailValue", false, false);
@@ -1305,7 +980,7 @@ TEST_F(Test_ContactData, BestEmail)
     ASSERT_STREQ("primaryEmailValue", data4.BestEmail().c_str());
 }
 
-TEST_F(Test_ContactData, BestPhoneNumber)
+TEST_F(ContactData, BestPhoneNumber)
 {
     // Add a non-active, non-primary phone number.
     const auto data1 =
@@ -1333,7 +1008,7 @@ TEST_F(Test_ContactData, BestPhoneNumber)
     ASSERT_STREQ("primaryPhoneNumberValue", data4.BestPhoneNumber().c_str());
 }
 
-TEST_F(Test_ContactData, BestSocialMediaProfile)
+TEST_F(ContactData, BestSocialMediaProfile)
 {
     // Add a non-active, non-primary profile.
     const auto data1 = contact_data_.AddSocialMediaProfile(
@@ -1368,18 +1043,18 @@ TEST_F(Test_ContactData, BestSocialMediaProfile)
         data4.BestSocialMediaProfile(claim::ClaimType::Facebook).c_str());
 }
 
-TEST_F(Test_ContactData, Claim_found)
+TEST_F(ContactData, Claim_found)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     ASSERT_NE(nullptr, data1.Claim(active_contact_item_->ID()));
 }
 
-TEST_F(Test_ContactData, Claim_not_found)
+TEST_F(ContactData, Claim_not_found)
 {
     ASSERT_FALSE(contact_data_.Claim(active_contact_item_->ID()));
 }
 
-TEST_F(Test_ContactData, Contracts)
+TEST_F(ContactData, Contracts)
 {
     const auto data1 = contact_data_.AddContract(
         "instrumentDefinitionID1", ot::UnitType::Usd, false, false);
@@ -1387,7 +1062,7 @@ TEST_F(Test_ContactData, Contracts)
     ASSERT_EQ(1, contracts.size());
 }
 
-TEST_F(Test_ContactData, Contracts_onlyactive)
+TEST_F(ContactData, Contracts_onlyactive)
 {
     const auto data1 = contact_data_.AddContract(
         "instrumentDefinitionID1", ot::UnitType::Usd, false, true);
@@ -1397,7 +1072,7 @@ TEST_F(Test_ContactData, Contracts_onlyactive)
     ASSERT_EQ(1, contracts.size());
 }
 
-TEST_F(Test_ContactData, Delete)
+TEST_F(ContactData, Delete)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     const auto contactItem2 = std::make_shared<claim::Item>(
@@ -1428,7 +1103,7 @@ TEST_F(Test_ContactData, Delete)
     ASSERT_FALSE(data5.Section(claim::SectionType::Identifier));
 }
 
-TEST_F(Test_ContactData, EmailAddresses)
+TEST_F(ContactData, EmailAddresses)
 {
     const auto data2 = contact_data_.AddEmail("email1", true, false);
     const auto data3 = data2.AddEmail("email2", false, true);
@@ -1447,7 +1122,7 @@ TEST_F(Test_ContactData, EmailAddresses)
     ASSERT_TRUE(emails.find("email3") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_ContactData, Group_found)
+TEST_F(ContactData, Group_found)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     ASSERT_NE(
@@ -1456,13 +1131,13 @@ TEST_F(Test_ContactData, Group_found)
             claim::SectionType::Identifier, claim::ClaimType::Employee));
 }
 
-TEST_F(Test_ContactData, Group_notfound)
+TEST_F(ContactData, Group_notfound)
 {
     ASSERT_FALSE(contact_data_.Group(
         claim::SectionType::Identifier, claim::ClaimType::Employee));
 }
 
-TEST_F(Test_ContactData, HaveClaim_1)
+TEST_F(ContactData, HaveClaim_1)
 {
     ASSERT_FALSE(contact_data_.HaveClaim(active_contact_item_->ID()));
 
@@ -1470,7 +1145,7 @@ TEST_F(Test_ContactData, HaveClaim_1)
     ASSERT_TRUE(data1.HaveClaim(active_contact_item_->ID()));
 }
 
-TEST_F(Test_ContactData, HaveClaim_2)
+TEST_F(ContactData, HaveClaim_2)
 {
     // Test for an item in group that doesn't exist.
     ASSERT_FALSE(contact_data_.HaveClaim(
@@ -1492,7 +1167,7 @@ TEST_F(Test_ContactData, HaveClaim_2)
         "dummyContactItemValue"));
 }
 
-TEST_F(Test_ContactData, Name)
+TEST_F(ContactData, Name)
 {
     // Verify that Name returns an empty string if there is no scope group.
     ASSERT_STREQ("", contact_data_.Name().c_str());
@@ -1527,7 +1202,7 @@ TEST_F(Test_ContactData, Name)
     ASSERT_STREQ("activeContactItemValue", data2.Name().c_str());
 }
 
-TEST_F(Test_ContactData, PhoneNumbers)
+TEST_F(ContactData, PhoneNumbers)
 {
     const auto data2 =
         contact_data_.AddPhoneNumber("phonenumber1", true, false);
@@ -1548,7 +1223,7 @@ TEST_F(Test_ContactData, PhoneNumbers)
         phonenumbers.find("phonenumber3") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_ContactData, PreferredOTServer)
+TEST_F(ContactData, PreferredOTServer)
 {
     // Test getting the preferred server with no group.
     const auto identifier = contact_data_.PreferredOTServer();
@@ -1598,7 +1273,7 @@ TEST_F(Test_ContactData, PreferredOTServer)
     ASSERT_EQ(serverIdentifier2, preferredServer);
 }
 
-TEST_F(Test_ContactData, Section)
+TEST_F(ContactData, Section)
 {
     ASSERT_FALSE(contact_data_.Section(claim::SectionType::Identifier));
 
@@ -1606,7 +1281,7 @@ TEST_F(Test_ContactData, Section)
     ASSERT_NE(nullptr, data1.Section(claim::SectionType::Identifier));
 }
 
-TEST_F(Test_ContactData, SetCommonName)
+TEST_F(ContactData, SetCommonName)
 {
     const auto data1 = contact_data_.SetCommonName("commonName");
     const ot::identifier::Generic identifier(
@@ -1626,7 +1301,7 @@ TEST_F(Test_ContactData, SetCommonName)
     ASSERT_TRUE(commonNameItem->isActive());
 }
 
-TEST_F(Test_ContactData, SetName)
+TEST_F(ContactData, SetName)
 {
     const auto data1 =
         contact_data_.SetScope(claim::ClaimType::Individual, "firstName");
@@ -1670,7 +1345,7 @@ TEST_F(Test_ContactData, SetName)
     ASSERT_TRUE(contactItem2->isActive());
 }
 
-TEST_F(Test_ContactData, SetScope)
+TEST_F(ContactData, SetScope)
 {
     const auto data1 = contact_data_.SetScope(
         claim::ClaimType::Organization, "organizationScope");
@@ -1714,7 +1389,7 @@ TEST_F(Test_ContactData, SetScope)
     ASSERT_TRUE(scopeItem2->isActive());
 }
 
-TEST_F(Test_ContactData, SetScope_different_versions)
+TEST_F(ContactData, SetScope_different_versions)
 {
     const claim::Data data1(
         api_,
@@ -1729,7 +1404,7 @@ TEST_F(Test_ContactData, SetScope_different_versions)
     ASSERT_EQ(4, data2.Version());
 }
 
-TEST_F(Test_ContactData, SocialMediaProfiles)
+TEST_F(ContactData, SocialMediaProfiles)
 {
     const auto data2 = contact_data_.AddSocialMediaProfile(
         "facebook1", claim::ClaimType::Facebook, true, false);
@@ -1753,7 +1428,7 @@ TEST_F(Test_ContactData, SocialMediaProfiles)
     ASSERT_TRUE(profiles.find("linkedin1") == ot::UnallocatedCString::npos);
 }
 
-TEST_F(Test_ContactData, Type)
+TEST_F(ContactData, Type)
 {
     ASSERT_EQ(claim::ClaimType::Unknown, contact_data_.Type());
 
@@ -1762,7 +1437,7 @@ TEST_F(Test_ContactData, Type)
     ASSERT_EQ(claim::ClaimType::Individual, data1.Type());
 }
 
-TEST_F(Test_ContactData, Version)
+TEST_F(ContactData, Version)
 {
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contact_data_.Version());
 }
