@@ -19,7 +19,7 @@ jobs:
             preset: macos
             static_deps: 'ON'
             triplet: 'x64-osx-13'
-            runner: 'macos-13-xl'
+            runner: 'macos-13'
           - platform: windows-2022
             vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
@@ -32,7 +32,20 @@ jobs:
       VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-overlay/triplets'
       VCPKG_DEFAULT_TRIPLET: '${{ matrix.triplet }}'
     steps:
-    - name: Checkout opentxs
+    - name: Get more disk space
+      if: runner.os == 'macOS'
+      run:  |
+        rm -rvf '${GOROOT_1_17_X64}'
+        rm -rvf '${GOROOT_1_18_X64}'
+        rm -rvf '${GOROOT_1_19_X64}'
+        rm -rvf '${JAVA_HOME_11_X64}'
+        rm -rvf '${JAVA_HOME_13_X64}'
+        rm -rvf '${JAVA_HOME_17_X64}'
+        rm -rvf '${JAVA_HOME_8_X64}'
+        rm -rvf '/Users/runner/Library/Android'
+        rm -rvf /usr/bin/link'
+      shell: bash
+      continue-on-error: true    - name: Checkout opentxs
       uses: actions/checkout@v3
       with:
         fetch-depth: '0'
