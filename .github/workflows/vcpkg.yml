@@ -7,7 +7,7 @@ on:
 jobs:
   job:
     name: ${{ matrix.platform }}-${{ github.workflow }}
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
@@ -19,45 +19,19 @@ jobs:
             preset: macos
             static_deps: 'ON'
             triplet: 'x64-osx-13'
+            runner: 'macos-13-xl'
           - platform: windows-2022
             vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
             preset: msvc
             static_deps: 'OFF'
             triplet: 'x64-windows'
+            runner: 'windows-2022-xl8'
     env:
       VCPKG_INSTALLED_DIR: '${{ matrix.vcpkg_installed_root }}/${{ matrix.platform }}'
       VCPKG_OVERLAY_TRIPLETS: '${{ github.workspace }}/deps/vcpkg-overlay/triplets'
       VCPKG_DEFAULT_TRIPLET: '${{ matrix.triplet }}'
     steps:
-    - name: Get more disk space
-      run:  |
-        rm -rvf '${GOROOT_1_17_X64}'
-        rm -rvf '${GOROOT_1_18_X64}'
-        rm -rvf '${GOROOT_1_19_X64}'
-        rm -rvf '${JAVA_HOME_11_X64}'
-        rm -rvf '${JAVA_HOME_13_X64}'
-        rm -rvf '${JAVA_HOME_17_X64}'
-        rm -rvf '${JAVA_HOME_8_X64}'
-        rm -rvf '/Users/runner/Library/Android'
-        rm -rvf 'C:\Android'
-        rm -rvf 'C:\Microsoft\AndroidSDK'
-        rm -rvf 'C:\Microsoft\AndroidNDK64'
-        rm -rvf 'C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools'
-        rm -rvf 'C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools'
-        rm -rvf 'C:\Program Files\Google\Chrome'
-        rm -rvf 'C:\Program Files\MongoDB'
-        rm -rvf 'C:\Program Files\Mozilla Firefox'
-        rm -rvf 'C:\Program Files\dotnet'
-        rm -rvf 'C:\ProgramData\docker'
-        rm -rvf 'C:\SeleniumWebDrivers'
-        rm -rvf 'C:\selenium'
-        rm -rvf 'C:\tools\Apache24'
-        rm -rvf 'C:\tools\nginx-1.23.1'
-        rm -rvf 'C:\vcpkg'
-        rm -rvf /usr/bin/link'
-      shell: bash
-      continue-on-error: true
     - name: Checkout opentxs
       uses: actions/checkout@v3
       with:

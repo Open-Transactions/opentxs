@@ -81,7 +81,7 @@ constexpr auto unit_to_token_map_ = [] {
     using enum opentxs::blockchain::token::Type;
     using T = opentxs::UnitType;
     using U = Descriptor;
-    constexpr auto N = 42_uz;
+    constexpr auto N = 1753_uz;
 
     return frozen::unordered_map<T, U, N>{std::array<std::pair<T, U>, N>{
 #include "blockchain/token/unit_to_token"  // IWYU pragma: keep
