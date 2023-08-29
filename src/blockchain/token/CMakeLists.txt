@@ -7,4 +7,14 @@ libopentxs_add_public_header("blockchain/token" "Descriptor.hpp")
 libopentxs_add_public_header("blockchain/token" "TokenType.hpp")
 libopentxs_add_public_header("blockchain/token" "Types.hpp")
 
-target_sources(opentxs-common PRIVATE "Common.cpp" "Descriptor.cpp")
+target_sources(opentxs-common PRIVATE "Descriptor.cpp")
+
+add_library(opentxs-blockchain-token OBJECT "Common.cpp")
+target_include_directories(
+  opentxs-blockchain-token SYSTEM
+  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+)
+target_link_libraries(
+  opentxs-blockchain-token PRIVATE opentxs-common opentxs-protobuf
+)
+libopentxs_configure_constexpr_target(opentxs-blockchain-token)

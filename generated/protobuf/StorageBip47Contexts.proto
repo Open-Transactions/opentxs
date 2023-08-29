@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "StorageBip47ChannelList.proto";
 import public "StorageItemHash.proto";
 
-message StorageBip47Contexts {
+message StorageBip47Contexts
+{
     optional uint32 version = 1;
     repeated StorageItemHash context = 2;
     repeated StorageBip47ChannelList index = 3;

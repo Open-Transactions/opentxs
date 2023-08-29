@@ -15,10 +15,11 @@ import public "ContactEvent.proto";
 import public "RPCEnums.proto";
 import public "TaskComplete.proto";
 
-message RPCPush {
+message RPCPush
+{
     optional uint32 version = 1;
-    optional RPCPushType type = 2;			// see RPCEnums.proto
-    optional string id = 3;					// nym id
+    optional RPCPushType type = 2;  // see RPCEnums.proto
+    optional string id = 3;         // nym id
     optional AccountEvent accountevent = 4;
     optional ContactEvent contactevent = 5;
     optional TaskComplete taskcomplete = 6;

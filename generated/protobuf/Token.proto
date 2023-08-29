@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "CashEnums.proto";
 import public "LucreTokenData.proto";
 
-message Token {
+message Token
+{
     optional uint32 version = 1;
     optional CashType type = 2;
     optional TokenState state = 3;
@@ -23,7 +24,5 @@ message Token {
     optional bytes denomination = 7;
     optional int64 validfrom = 8;
     optional int64 validto = 9;
-    oneof algorithm {
-        LucreTokenData lucre = 10;
-    }
+    oneof algorithm { LucreTokenData lucre = 10; }
 }

@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ContactSection.proto";
 
-message ContactData {
+message ContactData
+{
     optional uint32 version = 1;
     repeated ContactSection section = 2;
 }

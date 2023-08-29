@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "ContactItemType.proto";
 
-message StorageContactAddressIndex {
+message StorageContactAddressIndex
+{
     optional uint32 version = 1;
     optional string contact = 2;
     optional ContactItemType chain = 3;

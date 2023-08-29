@@ -48,7 +48,7 @@ public:
         DecimalPlaces maxDecimals = std::nullopt) const noexcept -> CString;
     auto Import(std::string_view formatted, SpecifiedScale scale = std::nullopt)
         const noexcept -> std::optional<Amount>;
-    auto Scale(ScaleIndex scale) const noexcept -> const display::Scale&;
+    auto Scale(ScaleIndex scale) const noexcept -> display::Scale;
     auto ScaleCount() const noexcept -> ScaleIndex;
     auto ScaleName(ScaleIndex scale) const noexcept -> std::string_view;
     auto ShortName() const noexcept -> std::string_view;

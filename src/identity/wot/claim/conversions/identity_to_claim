@@ -1,0 +1,7 @@
+{invalid, Error},
+{individual, Individual},
+{organization, Organization},
+{business, Business},
+{government, Government},
+{server, Server},
+{bot, Bot},

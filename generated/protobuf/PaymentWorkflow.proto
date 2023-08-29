@@ -14,7 +14,8 @@ import public "InstrumentRevision.proto";
 import public "PaymentEvent.proto";
 import public "PaymentWorkflowEnums.proto";
 
-message PaymentWorkflow {
+message PaymentWorkflow
+{
     optional uint32 version = 1;
     optional string id = 2;
     optional PaymentWorkflowType type = 3;

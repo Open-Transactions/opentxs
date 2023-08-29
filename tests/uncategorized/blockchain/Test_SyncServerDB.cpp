@@ -20,6 +20,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 class SyncServerDB : public ::testing::Test
 {

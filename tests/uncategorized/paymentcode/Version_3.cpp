@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
+#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
@@ -14,6 +15,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 class Test_PaymentCode_v3 : public PC_Fixture_Base
 {

@@ -17,6 +17,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 class BlockHeaderListener::Imp
 {

@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "VerificationItem.proto";
 import public "Identifier.proto";
 
-message VerificationIdentity {
+message VerificationIdentity
+{
     optional uint32 version = 1;
     optional Identifier nym = 2;
     repeated VerificationItem verification = 3;

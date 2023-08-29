@@ -23,7 +23,11 @@
 namespace opentxs
 {
 template <std::size_t N>
-class FixedByteArray : virtual public Data
+class
+#ifndef _WIN32
+    OPENTXS_IMPORT
+#endif
+        FixedByteArray : public Data
 {
 public:
     static constexpr auto payload_size_ = std::size_t{N};
@@ -45,9 +49,12 @@ public:
         const noexcept -> bool final;
     [[nodiscard]] auto Extract(std::uint64_t& output, const std::size_t pos = 0)
         const noexcept -> bool final;
-    auto get() const noexcept -> std::span<const std::byte> final;
+    constexpr auto get() const noexcept -> std::span<const std::byte> final
+    {
+        return data_;
+    }
     auto IsNull() const noexcept -> bool final;
-    auto size() const noexcept -> std::size_t final { return N; }
+    constexpr auto size() const noexcept -> std::size_t final { return N; }
 
     [[nodiscard]] auto Assign(const Data& source) noexcept -> bool final;
     [[nodiscard]] auto Assign(const ReadView source) noexcept -> bool final;
@@ -65,7 +72,10 @@ public:
     }
     auto data() noexcept -> void* final;
     [[nodiscard]] auto DecodeHex(const ReadView hex) noexcept -> bool final;
-    auto get() noexcept -> std::span<std::byte> final;
+    constexpr auto get() noexcept -> std::span<std::byte> final
+    {
+        return data_;
+    }
     [[nodiscard]] auto Randomize(const std::size_t size) noexcept -> bool final;
     [[nodiscard]] auto resize(const std::size_t) noexcept -> bool final
     {
@@ -73,16 +83,25 @@ public:
     }
     auto WriteInto() noexcept -> Writer final;
 
-    FixedByteArray() noexcept;
+    constexpr FixedByteArray() noexcept = default;
     /// Throws std::out_of_range if input size is incorrect
     FixedByteArray(const ReadView bytes) noexcept(false);
-    FixedByteArray(const FixedByteArray& rhs) noexcept;
-    auto operator=(const FixedByteArray& rhs) noexcept -> FixedByteArray&;
+    constexpr FixedByteArray(const FixedByteArray& rhs) noexcept
+        : data_(rhs.data_)
+    {
+    }
+    constexpr auto operator=(const FixedByteArray& rhs) noexcept
+        -> FixedByteArray&
+    {
+        data_ = rhs.data_;
 
-    ~FixedByteArray() override;
+        return *this;
+    }
+
+    constexpr ~FixedByteArray() override = default;
 
 private:
-    std::array<std::byte, N> data_;
+    std::array<std::byte, N> data_{};
 };
 
 extern template class OPENTXS_IMPORT FixedByteArray<16>;

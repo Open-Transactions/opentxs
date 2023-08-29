@@ -15,7 +15,8 @@ import public "BlockchainTransactionProposedOutput.proto";
 import public "BlockchainTransactionProposedNotification.proto";
 import public "BlockchainTransactionProposedSweep.proto";
 
-message BlockchainTransactionProposal {
+message BlockchainTransactionProposal
+{
     optional uint32 version = 1;
     optional bytes id = 2;
     optional bytes initiator = 3;

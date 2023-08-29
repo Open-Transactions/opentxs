@@ -9,6 +9,7 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <iterator>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
@@ -20,6 +21,7 @@ namespace rpc = opentxs::rpc;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 TEST_F(RPC_fixture, preconditions)
 {

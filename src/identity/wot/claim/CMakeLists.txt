@@ -21,7 +21,16 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/identity/wot/claim/Types.hpp"
     "Data.cpp"
     "Group.cpp"
-    "Internal.cpp"
     "Item.cpp"
     "Section.cpp"
 )
+
+add_library(opentxs-identity-wot-claim OBJECT "Internal.cpp")
+target_include_directories(
+  opentxs-identity-wot-claim SYSTEM
+  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+)
+target_link_libraries(
+  opentxs-identity-wot-claim PRIVATE opentxs-common opentxs-protobuf
+)
+libopentxs_configure_constexpr_target(opentxs-identity-wot-claim)

@@ -20,10 +20,7 @@ Hash::Hash(const ReadView bytes) noexcept(false)
 {
 }
 
-Hash::Hash(const Hash& rhs) noexcept
-    : FixedByteArray(rhs)
-{
-}
+Hash::Hash(const Hash& rhs) noexcept = default;
 
 auto Hash::operator=(const Hash& rhs) noexcept -> Hash& = default;
 

@@ -112,3 +112,32 @@ function(libopentxs_configure_cxx_target target_name)
     )
   endif()
 endfunction()
+
+function(libopentxs_configure_constexpr_target target_name)
+  libopentxs_configure_cxx_target(${target_name})
+  set_target_properties(${target_name} PROPERTIES UNITY_BUILD OFF)
+  target_link_libraries(${target_name} PRIVATE opentxs-common)
+  target_compile_definitions(${target_name} PRIVATE "${OT_EXPORT_MACRO}")
+  libopentxs_add_sources($<TARGET_OBJECTS:${target_name}>)
+
+  if(MSVC)
+    target_compile_options(${target_name} PRIVATE "/constexpr:steps268435456")
+  elseif(
+    CMAKE_CXX_COMPILER_ID
+    MATCHES
+    GNU
+  )
+    target_compile_options(
+      ${target_name} PRIVATE "-fconstexpr-ops-limit=268435456"
+    )
+  elseif(
+    CMAKE_CXX_COMPILER_ID
+    MATCHES
+    Clang
+    OR CMAKE_CXX_COMPILER_ID
+       MATCHES
+       AppleClang
+  )
+    target_compile_options(${target_name} PRIVATE "-fconstexpr-steps=268435456")
+  endif()
+endfunction()

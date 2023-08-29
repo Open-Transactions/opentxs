@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
+#include <string_view>
 
 #include "ottest/fixtures/blockchain/regtest/Single.hpp"
 
@@ -13,6 +14,7 @@ namespace ottest
 {
 using namespace std::literals::chrono_literals;
 using namespace opentxs::literals;
+using namespace std::literals;
 
 TEST_F(Regtest_fixture_single, init_opentxs) {}
 

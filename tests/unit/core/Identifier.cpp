@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/core/Identifier.hpp"
@@ -12,6 +13,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 using enum opentxs::identifier::Type;
 using enum opentxs::identifier::AccountSubtype;
 using enum opentxs::AccountType;

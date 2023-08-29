@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Claim.proto";
 
-message VerificationRequest {
+message VerificationRequest
+{
     optional uint32 version = 1;
     optional Claim claim = 2;
 }

@@ -19,7 +19,8 @@ message ContactItem
     optional uint32 version = 1;
     optional Identifier id = 2;         // contact item id
     optional ContactItemType type = 3;  // see ContactEnums.proto
-    oneof data {
+    oneof data
+    {
         bytes value = 4;
         Identifier commitment = 10;
     }

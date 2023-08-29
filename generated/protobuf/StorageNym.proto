@@ -15,7 +15,8 @@ import public "StorageBlockchainAccountList.proto";
 import public "StoragePurse.proto";
 import public "StorageItemHash.proto";
 
-message StorageNym {
+message StorageNym
+{
     optional uint32 version = 1;
     optional string nymid = 2;
     optional StorageItemHash credList = 3;

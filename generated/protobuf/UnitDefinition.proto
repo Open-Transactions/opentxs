@@ -18,7 +18,8 @@ import public "Identifier.proto";
 import public "Nym.proto";
 import public "Signature.proto";
 
-message UnitDefinition {
+message UnitDefinition
+{
     optional uint32 version = 1;
     optional Identifier id = 2;
     optional Identifier issuer = 3;

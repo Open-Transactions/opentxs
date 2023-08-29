@@ -12,8 +12,9 @@ option optimize_for = LITE_RUNTIME;
 
 import public "RPCEnums.proto";
 
-message AcceptPendingPayment {
+message AcceptPendingPayment
+{
     optional uint32 version = 1;
-    optional string destinationaccount = 2;	// destination account id
-    optional string workflow = 3;			// workflow id
+    optional string destinationaccount = 2;  // destination account id
+    optional string workflow = 3;            // workflow id
 }

@@ -27,14 +27,15 @@ import public "SessionData.proto";
 import public "TransactionData.proto";
 import public "UnitDefinition.proto";
 
-message RPCResponse {
+message RPCResponse
+{
     optional uint32 version = 1;
-    optional string cookie = 2;			// value from RPCCommand
-    optional RPCCommandType type = 3;	// see RPCEnums.proto
+    optional string cookie = 2;        // value from RPCCommand
+    optional RPCCommandType type = 3;  // see RPCEnums.proto
     repeated RPCStatus status = 4;
-    optional uint32 session = 5;		// session instance value
+    optional uint32 session = 5;  // session instance value
     repeated SessionData sessions = 6;
-    repeated string identifier = 7;		// ids (defined by RPCCommandType)
+    repeated string identifier = 7;  // ids (defined by RPCCommandType)
     repeated HDSeed seed = 8;
     repeated Nym nym = 9;
     repeated AccountData balance = 10;

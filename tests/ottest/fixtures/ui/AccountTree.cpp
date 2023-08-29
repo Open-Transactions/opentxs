@@ -23,6 +23,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto check_account_tree_items(
     const ot::ui::AccountCurrency& widget,
@@ -138,7 +139,7 @@ auto init_account_tree(const User& user, Counter& counter) noexcept -> void
 {
     user.api_->UI().Internal().AccountTree(user.nym_id_, make_cb(counter, [&] {
                                                auto out = std::stringstream{};
-                                               out << u8"account_tree_"_sv;
+                                               out << u8"account_tree_"sv;
                                                out << user.name_lower_;
 
                                                return out.str();

@@ -14,7 +14,8 @@ import public "Ciphertext.proto";
 import public "Enums.proto";
 import public "HDPath.proto";
 
-message AsymmetricKey {
+message AsymmetricKey
+{
     optional uint32 version = 1;
     optional AsymmetricKeyType type = 2;
     optional KeyMode mode = 3;

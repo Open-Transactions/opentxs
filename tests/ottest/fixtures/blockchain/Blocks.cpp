@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <optional>
 #include <span>
+#include <string_view>
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Parser.hpp"
@@ -75,6 +76,7 @@ auto BlockchainBlocks::CheckTxids(
     using opentxs::blockchain::block::Parser;
     using opentxs::blockchain::protocol::bitcoin::base::EncodedTransaction;
     using namespace opentxs::literals;
+    using namespace std::literals;
     const auto& crypto = ot_.Crypto();
     auto block = opentxs::blockchain::block::Block{};
     const auto construct = Parser::Construct(crypto, chain, bytes, block, {});

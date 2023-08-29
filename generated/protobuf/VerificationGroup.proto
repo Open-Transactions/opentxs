@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "VerificationIdentity.proto";
 
-message VerificationGroup {
+message VerificationGroup
+{
     optional uint32 version = 1;
     repeated VerificationIdentity identity = 2;
 }

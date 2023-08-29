@@ -20,7 +20,8 @@ import public "PeerEnums.proto";
 import public "Signature.proto";
 import public "VerificationReply.proto";
 
-message PeerReply {
+message PeerReply
+{
     optional uint32 version = 1;
     optional Identifier id = 2;
     optional Identifier initiator = 3;
@@ -29,7 +30,8 @@ message PeerReply {
     optional Identifier cookie = 6;
     optional Signature signature = 7;
     optional Identifier server = 8;
-    oneof reply {
+    oneof reply
+    {
         BailmentReply bailment = 9;
         OutBailmentReply outbailment = 10;
         NoticeAcknowledgement notice = 11;

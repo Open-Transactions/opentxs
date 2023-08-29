@@ -13,7 +13,8 @@ option optimize_for = LITE_RUNTIME;
 import public "Enums.proto";
 import public "Identifier.proto";
 
-message Signature {
+message Signature
+{
     optional uint32 version = 1;
     optional Identifier credentialID = 2;
     optional SignatureRole role = 3;

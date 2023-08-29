@@ -14,7 +14,8 @@ import "AsymmetricKey.proto";
 import "Ciphertext.proto";
 import "TaggedKey.proto";
 
-message Envelope {
+message Envelope
+{
     optional uint32 version = 1;
     repeated AsymmetricKey dhkey = 2;
     repeated TaggedKey sessionkey = 3;

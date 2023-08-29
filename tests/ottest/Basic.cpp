@@ -15,6 +15,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto Args(bool lowlevel, int argc, char** argv) noexcept -> const ot::Options&
 {

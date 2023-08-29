@@ -9,11 +9,15 @@
 
 #include <array>  // IWYU pragma: keep
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
+#include <exception>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
+#include "internal/util/P0330.hpp"
 #include "opentxs/util/Bytes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -125,5 +129,140 @@ template <std::size_t N>
 auto writer(std::array<std::byte, N>& in) noexcept -> Writer
 {
     return preallocated(N, in.data());
+}
+}  // namespace opentxs
+
+namespace opentxs
+{
+constexpr auto subtract(std::byte lhs, std::byte rhs) noexcept -> std::byte
+{
+    constexpr auto zero = std::byte{0};
+
+    while (rhs != zero) {
+        const auto borrow = (~lhs) & rhs;
+        lhs ^= rhs;
+        rhs = borrow << 1;
+    }
+
+    return lhs;
+}
+
+constexpr auto hex_nibble(std::byte in) noexcept -> std::byte
+{
+    static_assert(sizeof(std::byte) == sizeof(std::uint8_t));
+    constexpr auto digitMin = std::byte{48};
+    constexpr auto digitMax = std::byte{57};
+    constexpr auto upperMin = std::byte{65};
+    constexpr auto upperMax = std::byte{70};
+    constexpr auto lowerMin = std::byte{97};
+    constexpr auto lowerMax = std::byte{102};
+    constexpr auto offset = std::byte{10};
+    constexpr auto upperOffset = subtract(upperMin, offset);
+    constexpr auto lowerOffset = subtract(lowerMin, offset);
+
+    if ((digitMin <= in) && (digitMax >= in)) {
+
+        return subtract(in, digitMin);
+    } else if ((upperMin <= in) && (upperMax >= in)) {
+
+        return subtract(in, upperOffset);
+    } else if ((lowerMin <= in) && (lowerMax >= in)) {
+
+        return subtract(in, lowerOffset);
+    } else {
+        std::terminate();
+    }
+}
+
+constexpr auto hex_nibble(char in) noexcept -> std::byte
+{
+    return hex_nibble(static_cast<std::byte>(in));
+}
+
+constexpr auto decode_hex(std::byte lhs, std::byte rhs) noexcept -> std::byte
+{
+    return (hex_nibble(lhs) << 4) | hex_nibble(rhs);
+}
+
+constexpr auto decode_hex(char lhs, char rhs) noexcept -> std::byte
+{
+    return decode_hex(static_cast<std::byte>(lhs), static_cast<std::byte>(rhs));
+}
+
+constexpr auto decode_hex(
+    std::string_view hex,
+    std::span<std::byte> out) noexcept -> bool
+{
+    using namespace std::literals;
+
+    if (hex.starts_with("0x"sv) || hex.starts_with("0X"sv)) {
+        hex.remove_prefix(2);
+    }
+
+    if (hex.empty()) { return true; }
+
+    const auto count = hex.size();
+    const auto reserved = out.size();
+
+    if (count > (reserved * 2_uz)) { return false; }
+
+    const auto offset = count % 2_uz;
+    const auto start = reserved - ((count + offset) / 2_uz);
+
+    for (auto i = 0_uz, o = start; i < count; ++o) {
+        const auto& first = hex[i];
+        auto& value = out[o];
+
+        if ((1_uz == offset) && (0_uz == i)) {
+            constexpr auto zero = std::byte{48};
+            value = decode_hex(zero, static_cast<std::byte>(first));
+            i += 1_uz;
+        } else {
+            const auto& second = hex[i + 1_uz];
+            value = decode_hex(first, second);
+            i += 2_uz;
+        }
+    }
+
+    return true;
+}
+
+constexpr auto test_decode_hex() noexcept -> bool
+{
+    constexpr auto F = std::byte{0x46};
+    constexpr auto f = std::byte{0x66};
+    constexpr auto ff = std::byte{0xff};
+    constexpr auto zero = std::byte{0x00};
+    constexpr auto of = std::byte{0x0f};
+
+    static_assert(decode_hex(f, f) == ff);
+    static_assert(decode_hex(F, f) == ff);
+    static_assert(decode_hex(f, F) == ff);
+    static_assert(decode_hex(F, F) == ff);
+
+    {
+        constexpr auto lhs = std::byte{255};
+        constexpr auto rhs = std::byte{127};
+        static_assert(subtract(lhs, rhs) == std::byte{128});
+    }
+    {
+        constexpr auto empty = std::array<std::byte, 4_uz>{};
+        constexpr auto full = std::array<std::byte, 4_uz>{ff, ff, ff, ff};
+        constexpr auto shorter = std::array<std::byte, 4_uz>{zero, ff, ff, ff};
+        constexpr auto partial = std::array<std::byte, 4_uz>{of, ff, ff, ff};
+        constexpr auto decode = [](const auto hex) {
+            auto buf = std::array<std::byte, 4_uz>{};
+            decode_hex(hex, buf);
+
+            return buf;
+        };
+        static_assert(decode("") == empty);
+        static_assert(decode("0x") == empty);
+        static_assert(decode("0xffffffff") == full);
+        static_assert(decode("0xffffff") == shorter);
+        static_assert(decode("0xfffffff") == partial);
+    }
+
+    return true;
 }
 }  // namespace opentxs

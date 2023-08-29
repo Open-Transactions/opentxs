@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "PaymentWorkflowEnums.proto";
 
-message StorageWorkflowType {
+message StorageWorkflowType
+{
     optional uint32 version = 1;
     optional string workflow = 2;
     optional PaymentWorkflowType type = 3;

@@ -12,9 +12,11 @@
 #include <locale>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 
 #include "internal/interface/ui/AccountActivity.hpp"
+#include "internal/util/Literals.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
@@ -24,11 +26,12 @@
 #include "opentxs/interface/qt/AmountValidator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui
 {
+using namespace std::literals;
+
 struct AmountValidator::Imp {
     using Parent = ui::AccountActivity;
 
@@ -78,7 +81,7 @@ struct AmountValidator::Imp {
         old = scale_.exchange(scale);
         const auto& definition = display::GetDefinition(unittype());
         const auto index = effective_scale(definition, scale);
-        const auto& scaledef = definition.Scale(index);
+        const auto scaledef = definition.Scale(index);
         const auto& minDecimals = scaledef.DefaultMinDecimals();
 
         if (minDecimals.has_value()) { setMinDecimals(minDecimals.value()); }
@@ -95,7 +98,7 @@ struct AmountValidator::Imp {
         try {
             const auto& definition = display::GetDefinition(unittype());
             const auto index = effective_scale(definition);
-            const auto& scale = definition.Scale(index);
+            const auto scale = definition.Scale(index);
             auto [whole, fractional, isNegative] = strip(input, pos);
             add_leading_zero(input, pos, whole);
             add_seperators(whole, fractional, isNegative, input, pos);
@@ -156,7 +159,7 @@ private:
         const noexcept -> void
     {
         const auto decimalSymbol = locale_.decimal_point();
-        static const auto space = u8"\u202F"_sv;
+        const auto& space = narrow_non_breaking_space_;
         auto distance{0};
         auto counter{-1};
         auto buf = input.toStdString();

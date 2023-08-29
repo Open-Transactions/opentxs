@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "BlockchainTransaction.proto";
 
-message FaucetReply {
+message FaucetReply
+{
     optional uint32 version = 1;
     optional string txid = 2;
     optional BlockchainTransaction transaction = 3;

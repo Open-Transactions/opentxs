@@ -3,15 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "core/display/Definition.hpp"  // IWYU pragma: associated
+#include "opentxs/core/display/Definition.hpp"  // IWYU pragma: associated
 
 #include <memory>
 #include <optional>
 #include <utility>
 
+#include "core/display/DefinitionPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -58,12 +58,12 @@ auto Definition::operator=(Definition&& rhs) noexcept -> Definition&
 
 auto Definition::AtomicScale() const noexcept -> ScaleIndex
 {
-    return imp_->atomic_;
+    return imp_->AtomicScale();
 }
 
 auto Definition::DefaultScale() const noexcept -> ScaleIndex
 {
-    return imp_->default_;
+    return imp_->DefaultScale();
 }
 
 auto Definition::Format(
@@ -72,7 +72,7 @@ auto Definition::Format(
     const DecimalPlaces minDecimals,
     const DecimalPlaces maxDecimals) const noexcept -> UnallocatedCString
 {
-    return Scale(scale.value_or(imp_->default_))
+    return Scale(scale.value_or(imp_->DefaultScale()))
         .Format(amount, minDecimals, maxDecimals);
 }
 
@@ -83,7 +83,7 @@ auto Definition::Format(
     const DecimalPlaces minDecimals,
     const DecimalPlaces maxDecimals) const noexcept -> CString
 {
-    return Scale(scale.value_or(imp_->default_))
+    return Scale(scale.value_or(imp_->DefaultScale()))
         .Format(amount, alloc, minDecimals, maxDecimals);
 }
 
@@ -91,44 +91,27 @@ auto Definition::Import(
     const std::string_view formatted,
     const SpecifiedScale scale) const noexcept -> std::optional<Amount>
 {
-    return imp_->Import(formatted, scale.value_or(imp_->default_));
+    return imp_->Import(formatted, scale.value_or(imp_->DefaultScale()));
 }
 
-auto Definition::Scale(ScaleIndex scale) const noexcept -> const display::Scale&
+auto Definition::Scale(ScaleIndex scale) const noexcept -> display::Scale
 {
-    const auto& scales = imp_->scales_;
-
-    if (scale < scales.size()) {
-
-        return scales[scale].second;
-    } else {
-        static const auto blank = display::Scale{};
-
-        return blank;
-    }
+    return imp_->Scale(scale);
 }
 
 auto Definition::ScaleCount() const noexcept -> ScaleIndex
 {
-    return static_cast<ScaleIndex>(imp_->scales_.size());
+    return imp_->ScaleCount();
 }
 
 auto Definition::ScaleName(ScaleIndex scale) const noexcept -> std::string_view
 {
-    const auto& scales = imp_->scales_;
-
-    if (scale < scales.size()) {
-
-        return scales[scale].first;
-    } else {
-
-        return {};
-    }
+    return imp_->ScaleName(scale);
 }
 
 auto Definition::ShortName() const noexcept -> std::string_view
 {
-    return imp_->short_name_;
+    return imp_->ShortName();
 }
 
 auto Definition::swap(Definition& rhs) noexcept -> void
@@ -138,7 +121,7 @@ auto Definition::swap(Definition& rhs) noexcept -> void
 
 Definition::~Definition()
 {
-    if (nullptr != imp_) {
+    if ((nullptr != imp_) && imp_->RuntimeAllocated()) {
         delete imp_;
         imp_ = nullptr;
     }

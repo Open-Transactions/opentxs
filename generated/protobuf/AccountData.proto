@@ -15,14 +15,13 @@ import public "RPCEnums.proto";
 message AccountData
 {
     optional uint32 version = 1;
-    optional string id = 2;      // account id
-    optional string label = 3;   // account name
-    optional string unit = 4;    // unit definition id
-    optional string owner = 5;   // account owner nym id
-    optional string issuer = 6;  // issuer nym id
-    optional bytes balance = 7;  // current balance
-    optional bytes pendingbalance =
-        8;  // balance after pending transactions are processed
+    optional string id = 2;             // account id
+    optional string label = 3;          // account name
+    optional string unit = 4;           // unit definition id
+    optional string owner = 5;          // account owner nym id
+    optional string issuer = 6;         // issuer nym id
+    optional bytes balance = 7;         // current balance
+    optional bytes pendingbalance = 8;  // balance after pending transactions are processed
     optional AccountType type = 9;
     optional string balanceformatted = 10;
     optional string pendingbalanceformatted = 11;

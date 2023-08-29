@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "Enums.proto";
 
-message Ciphertext {
+message Ciphertext
+{
     optional uint32 version = 1;
     optional SymmetricMode mode = 2;
     optional bool is_payload = 3;
@@ -22,7 +23,8 @@ message Ciphertext {
     optional bytes data = 7;
 }
 
-message SymmetricKey {
+message SymmetricKey
+{
     optional uint32 version = 1;
     optional SymmetricKeyType type = 2;
     optional uint32 size = 3;

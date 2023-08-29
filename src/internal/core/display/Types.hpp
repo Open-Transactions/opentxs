@@ -7,9 +7,14 @@
 
 #pragma once
 
+#include <initializer_list>
+#include <span>
 #include <string_view>
 #include <tuple>
+#include <variant>
 
+#include "internal/util/P0330.hpp"
+#include "opentxs/core/display/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -27,4 +32,16 @@ namespace opentxs::display
 using Name = CString;
 using ScaleData = std::pair<Name, display::Scale>;
 using Scales = Vector<ScaleData>;
+using ScaleInit = std::tuple<
+    std::string_view,
+    std::string_view,
+    std::span<const Ratio>,
+    DecimalPlaces,
+    DecimalPlaces>;
+using ScaleDef = std::pair<std::string_view, ScaleInit>;
+using ScaleRef = std::span<const ScaleDef, 1_uz>;
+using ScalesInit = std::span<const ScaleRef>;
+using DefInit =
+    std::tuple<std::string_view, ScaleIndex, ScaleIndex, ScalesInit>;
+using DefRef = std::span<const DefInit, 1_uz>;
 }  // namespace opentxs::display

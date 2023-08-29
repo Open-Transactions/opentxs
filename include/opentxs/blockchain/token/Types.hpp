@@ -9,10 +9,28 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/core/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace token
+{
+struct Descriptor;
+}  // namespace token
+}  // namespace blockchain
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::token
 {
 enum class Type : std::uint32_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
+OPENTXS_EXPORT auto token_to_unit(const Descriptor&) noexcept
+    -> opentxs::UnitType;
+OPENTXS_EXPORT auto unit_to_token(opentxs::UnitType) noexcept
+    -> const Descriptor&;
 }  // namespace opentxs::blockchain::token

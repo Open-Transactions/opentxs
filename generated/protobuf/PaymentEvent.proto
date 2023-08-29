@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "PaymentWorkflowEnums.proto";
 
-message PaymentEvent {
+message PaymentEvent
+{
     optional uint32 version = 1;
     optional PaymentEventType type = 2;
     repeated string item = 3;

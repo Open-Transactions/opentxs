@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
+#include <string_view>
 #include <utility>
 
 #include "internal/util/P0330.hpp"
@@ -167,6 +168,7 @@ auto verify_response_codes(
     const ot::rpc::ResponseCode required) noexcept -> bool
 {
     using namespace opentxs::literals;
+    using namespace std::literals;
     auto output{true};
     output &= (codes.size() == count);
 

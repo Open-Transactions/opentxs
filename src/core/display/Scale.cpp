@@ -8,7 +8,7 @@
 #include <memory>
 #include <utility>
 
-#include "core/display/Scale.hpp"
+#include "core/display/ScalePrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
@@ -39,12 +39,12 @@ Scale::Scale(Scale&& rhs) noexcept
 
 auto Scale::DefaultMinDecimals() const noexcept -> DecimalPlaces
 {
-    return imp_->default_min_;
+    return imp_->DefaultMinDecimals();
 }
 
 auto Scale::DefaultMaxDecimals() const noexcept -> DecimalPlaces
 {
-    return imp_->default_max_;
+    return imp_->DefaultMaxDecimals();
 }
 
 auto Scale::Format(
@@ -52,7 +52,7 @@ auto Scale::Format(
     const DecimalPlaces minDecimals,
     const DecimalPlaces maxDecimals) const noexcept -> UnallocatedCString
 {
-    return imp_->format(amount, minDecimals, maxDecimals, {}).str();
+    return imp_->Format(amount, minDecimals, maxDecimals, {}).str();
 }
 
 auto Scale::Format(
@@ -62,7 +62,7 @@ auto Scale::Format(
     const DecimalPlaces maxDecimals) const noexcept -> CString
 {
     return CString{
-        imp_->format(amount, minDecimals, maxDecimals, alloc).str(),
+        imp_->Format(amount, minDecimals, maxDecimals, alloc).str(),
         alloc.result_};
 }
 
@@ -79,24 +79,24 @@ auto Scale::MaximumDecimals() const noexcept -> DecimalCount
 
 auto Scale::Prefix() const noexcept -> std::string_view
 {
-    return imp_->prefix_;
+    return imp_->Prefix();
 }
 
 auto Scale::Ratios() const noexcept -> std::span<const Ratio>
 {
-    return imp_->ratios_;
+    return imp_->Ratios();
 }
 
 auto Scale::Suffix() const noexcept -> std::string_view
 {
-    return imp_->suffix_;
+    return imp_->Suffix();
 }
 
 auto Scale::swap(Scale& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
 
 Scale::~Scale()
 {
-    if (nullptr != imp_) {
+    if ((nullptr != imp_) && (imp_->RuntimeAllocated())) {
         delete imp_;
         imp_ = nullptr;
     }

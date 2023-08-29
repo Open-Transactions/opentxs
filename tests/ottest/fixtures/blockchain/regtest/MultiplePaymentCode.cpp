@@ -6,6 +6,7 @@
 #include "ottest/fixtures/blockchain/regtest/MultiplePaymentCode.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
+#include <string_view>
 
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
@@ -17,6 +18,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 bool Regtest_multiple_payment_code::init_multiple_{false};
 const User Regtest_multiple_payment_code::chris_{
     GetPaymentCodeVector3().bob_.words_,

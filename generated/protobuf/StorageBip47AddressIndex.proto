@@ -10,7 +10,8 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTStorageBip47AddressIndex";
 option optimize_for = LITE_RUNTIME;
 
-message StorageBip47AddressIndex {
+message StorageBip47AddressIndex
+{
     optional uint32 version = 1;
     optional string address = 2;
     optional string channelid = 3;

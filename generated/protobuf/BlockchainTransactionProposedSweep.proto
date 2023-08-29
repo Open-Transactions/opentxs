@@ -13,9 +13,11 @@ option optimize_for = LITE_RUNTIME;
 import public "BlockchainWalletKey.proto";
 import public "Identifier.proto";
 
-message BlockchainTransactionProposedSweep {
+message BlockchainTransactionProposedSweep
+{
     optional uint32 version = 1;
-    oneof type {
+    oneof type
+    {
         Identifier subaccount = 2;
         BlockchainWalletKey key = 3;
     }

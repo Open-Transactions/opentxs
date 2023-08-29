@@ -12,8 +12,9 @@ option optimize_for = LITE_RUNTIME;
 
 import public "RPCEnums.proto";
 
-message RPCStatus {
+message RPCStatus
+{
     optional uint32 version = 1;
-    optional uint32 index = 2;			// index in status field of RPCResponse
-    optional RPCResponseCode code = 3;	// see RPCEnums.proto
+    optional uint32 index = 2;          // index in status field of RPCResponse
+    optional RPCResponseCode code = 3;  // see RPCEnums.proto
 }

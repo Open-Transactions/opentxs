@@ -18,6 +18,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 ot::DeferredConstruction<ot::Nym_p> nym_{};
 ot::DeferredConstruction<ot::crypto::SeedID> seed_id_{};

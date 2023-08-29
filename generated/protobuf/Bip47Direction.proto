@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "BlockchainAddress.proto";
 
-message Bip47Direction {
+message Bip47Direction
+{
     optional uint32 version = 1;
     repeated string notification = 2;
     repeated BlockchainAddress address = 3;

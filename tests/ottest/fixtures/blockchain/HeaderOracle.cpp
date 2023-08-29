@@ -23,6 +23,7 @@ namespace ottest
 {
 using namespace std::literals;
 using namespace opentxs::literals;
+using namespace std::literals;
 
 HeaderOracle_base::HeaderOracle_base(const b::Type type)
     : api_(OTTestEnvironment::GetOT().StartClientSession(

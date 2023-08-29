@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -24,6 +25,7 @@ namespace ot = opentxs;
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 class Test_Envelope : public ::testing::Test
 {

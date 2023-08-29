@@ -55,5 +55,31 @@ struct OPENTXS_EXPORT Descriptor {
     blockchain::Type host_{};
     token::Type type_{};
     FixedByteArray<32> id_{};
+
+    // NOLINTBEGIN(modernize-use-equals-default)
+    constexpr Descriptor(
+        blockchain::Type chain = {},
+        token::Type type = {},
+        FixedByteArray<32> id = {}) noexcept
+        : host_(chain)
+        , type_(type)
+        , id_(id)
+    {
+    }
+    constexpr Descriptor(const Descriptor& rhs) noexcept
+        : host_(rhs.host_)
+        , type_(rhs.type_)
+        , id_(rhs.id_)
+    {
+    }
+    constexpr auto operator=(const Descriptor& rhs) noexcept -> Descriptor&
+    {
+        host_ = rhs.host_;
+        type_ = rhs.type_;
+        id_ = rhs.id_;
+
+        return *this;
+    }
+    // NOLINTEND(modernize-use-equals-default)
 };
 }  // namespace opentxs::blockchain::token

@@ -14,7 +14,8 @@ import public "Ciphertext.proto";
 import public "Enums.proto";
 import public "Identifier.proto";
 
-message Seed {
+message Seed
+{
     optional uint32 version = 1;
     optional Ciphertext words = 2;
     optional Ciphertext passphrase = 3;

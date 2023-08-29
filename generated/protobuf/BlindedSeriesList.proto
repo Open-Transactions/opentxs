@@ -12,7 +12,8 @@ option optimize_for = LITE_RUNTIME;
 
 import public "StorageItemHash.proto";
 
-message BlindedSeriesList {
+message BlindedSeriesList
+{
     optional uint32 version = 1;
     optional string notary = 2;
     optional string unit = 3;

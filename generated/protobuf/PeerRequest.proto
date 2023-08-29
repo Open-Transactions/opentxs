@@ -22,7 +22,8 @@ import public "VerificationOffer.proto";
 import public "VerificationRequest.proto";
 import public "Identifier.proto";
 
-message PeerRequest {
+message PeerRequest
+{
     optional uint32 version = 1;
     optional Identifier id = 2;
     optional Identifier initiator = 3;
@@ -30,7 +31,8 @@ message PeerRequest {
     optional PeerRequestType type = 5;
     optional Identifier cookie = 6;
     optional Signature signature = 7;
-    oneof request {
+    oneof request
+    {
         Bailment bailment = 8;
         OutBailment outbailment = 9;
         PendingBailment pendingbailment = 10;

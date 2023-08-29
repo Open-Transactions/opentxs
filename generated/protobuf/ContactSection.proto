@@ -13,8 +13,9 @@ option optimize_for = LITE_RUNTIME;
 import public "ContactSectionName.proto";
 import public "ContactItem.proto";
 
-message ContactSection {
+message ContactSection
+{
     optional uint32 version = 1;
-    optional ContactSectionName name = 2;	// see ContactEnums.proto
+    optional ContactSectionName name = 2;  // see ContactEnums.proto
     repeated ContactItem item = 3;
 }

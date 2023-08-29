@@ -24,6 +24,7 @@
 namespace ottest
 {
 using namespace opentxs::literals;
+using namespace std::literals;
 
 auto check_blockchain_subaccounts(
     const ot::api::Session& api,
@@ -186,7 +187,7 @@ auto init_blockchain_account_status(
     user.api_->UI().Internal().BlockchainAccountStatus(
         user.nym_id_, chain, make_cb(counter, [&] {
             auto out = std::stringstream{};
-            out << u8"blockchain_account_status_"_sv;
+            out << u8"blockchain_account_status_"sv;
             out << user.name_lower_;
 
             return out.str();
