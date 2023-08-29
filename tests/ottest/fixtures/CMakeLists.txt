@@ -3,14 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-if(OT_BLOCKCHAIN_EXPORT)
-  add_subdirectory(blockchain)
-endif()
-
 add_subdirectory(api)
 add_subdirectory(blind)
+add_subdirectory(blockchain)
 add_subdirectory(client)
 add_subdirectory(common)
+add_subdirectory(contact)
 add_subdirectory(core)
 add_subdirectory(crypto)
 add_subdirectory(identity)

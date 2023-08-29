@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,46 +10,14 @@
 
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
-#include "ottest/fixtures/paymentcode/Helpers.hpp"
+#include "ottest/fixtures/paymentcode/PaymentCode_v3.hpp"
 
 namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
 
-class Test_PaymentCode_v3 : public PC_Fixture_Base
-{
-public:
-    static constexpr auto version_ = std::uint8_t{3};
-
-    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_secret_;
-    const ot::crypto::asymmetric::key::EllipticCurve& alice_blind_public_;
-    const ot::crypto::asymmetric::key::EllipticCurve& bob_blind_secret_;
-    const ot::crypto::asymmetric::key::EllipticCurve& bob_blind_public_;
-
-    Test_PaymentCode_v3()
-        : PC_Fixture_Base(
-              version_,
-              version_,
-              GetPaymentCodeVector3().alice_.words_,
-              GetPaymentCodeVector3().bob_.words_,
-              GetPaymentCodeVector3().alice_.payment_code_,
-              GetPaymentCodeVector3().bob_.payment_code_)
-        , alice_blind_secret_(user_1_.blinding_key_secret(
-              api_,
-              GetPaymentCodeVector3().bob_.receive_chain_,
-              reason_))
-        , alice_blind_public_(user_1_.blinding_key_public())
-        , bob_blind_secret_(user_2_.blinding_key_secret(
-              api_,
-              GetPaymentCodeVector3().alice_.receive_chain_,
-              reason_))
-        , bob_blind_public_(user_2_.blinding_key_public())
-    {
-    }
-};
-
-TEST_F(Test_PaymentCode_v3, generate)
+TEST_F(PaymentCode_v3, generate)
 {
     EXPECT_EQ(alice_pc_secret_.Version(), version_);
     EXPECT_EQ(alice_pc_public_.Version(), version_);
@@ -72,7 +40,7 @@ TEST_F(Test_PaymentCode_v3, generate)
         bob_pc_secret_.asBase58(), GetPaymentCodeVector3().bob_.payment_code_);
 }
 
-TEST_F(Test_PaymentCode_v3, locators)
+TEST_F(PaymentCode_v3, locators)
 {
     for (auto i = std::uint8_t{1}; i < 4u; ++i) {
         auto pub = api_.Factory().Data();
@@ -111,7 +79,7 @@ TEST_F(Test_PaymentCode_v3, locators)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, outgoing_btc)
+TEST_F(PaymentCode_v3, outgoing_btc)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Outgoing(
@@ -133,7 +101,7 @@ TEST_F(Test_PaymentCode_v3, outgoing_btc)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, incoming_btc)
+TEST_F(PaymentCode_v3, incoming_btc)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
         const auto key = alice_pc_secret_.Incoming(
@@ -155,7 +123,7 @@ TEST_F(Test_PaymentCode_v3, incoming_btc)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, outgoing_testnet)
+TEST_F(PaymentCode_v3, outgoing_testnet)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
         const auto key = alice_pc_secret_.Outgoing(
@@ -177,7 +145,7 @@ TEST_F(Test_PaymentCode_v3, outgoing_testnet)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, incoming_testnet)
+TEST_F(PaymentCode_v3, incoming_testnet)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Incoming(
@@ -199,7 +167,7 @@ TEST_F(Test_PaymentCode_v3, incoming_testnet)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, avoid_cross_chain_address_reuse)
+TEST_F(PaymentCode_v3, avoid_cross_chain_address_reuse)
 {
     for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Outgoing(
@@ -218,7 +186,7 @@ TEST_F(Test_PaymentCode_v3, avoid_cross_chain_address_reuse)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, blind_alice)
+TEST_F(PaymentCode_v3, blind_alice)
 {
     const auto sec = api_.Factory().DataFromHex(
         GetPaymentCodeVector3().alice_.change_key_secret_);
@@ -320,7 +288,7 @@ TEST_F(Test_PaymentCode_v3, blind_alice)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, blind_bob)
+TEST_F(PaymentCode_v3, blind_bob)
 {
     const auto sec = api_.Factory().DataFromHex(
         GetPaymentCodeVector3().bob_.change_key_secret_);
@@ -420,5 +388,5 @@ TEST_F(Test_PaymentCode_v3, blind_bob)
     }
 }
 
-TEST_F(Test_PaymentCode_v3, shutdown) { Shutdown(); }
+TEST_F(PaymentCode_v3, shutdown) { Shutdown(); }
 }  // namespace ottest

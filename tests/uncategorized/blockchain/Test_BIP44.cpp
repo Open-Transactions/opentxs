@@ -6,92 +6,24 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <iostream>
-#include <memory>
 #include <string_view>
 
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
-#include "ottest/data/crypto/PaymentCodeV3.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/blockchain/BIP44.hpp"
+
+namespace ot = opentxs;
 
 namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
 
-ot::DeferredConstruction<ot::Nym_p> nym_{};
-ot::DeferredConstruction<ot::crypto::SeedID> seed_id_{};
 using Pubkey = ot::Space;
 using ExpectedKeys = ot::UnallocatedVector<Pubkey>;
 const ExpectedKeys external_{};
 const ExpectedKeys internal_{};
 
-class Test_BIP44 : public ::testing::Test
-{
-protected:
-    static constexpr auto count_ = 1000_uz;
-    static constexpr auto account_id_base58_{
-        "otfQgxcu7MtAFbWHnhsnqjL26gG8TBdg1BatHoZxPopW3gRL8KfvK2gL9"};
-
-    const ot::api::session::Client& api_;
-    const ot::PasswordPrompt reason_;
-    const ot::identifier::Nym& nym_id_;
-    const ot::blockchain::crypto::HD& account_;
-    const ot::identifier::Generic account_id_;
-
-    static bool init_;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
-    Test_BIP44()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , reason_(api_.Factory().PasswordPrompt(__func__))
-        , nym_id_([&]() -> const ot::identifier::Nym& {
-            if (false == init_) {
-                const auto words = api_.Factory().SecretFromText(
-                    GetPaymentCodeVector3().alice_.words_);
-                const auto phrase = api_.Factory().Secret(0);
-                seed_id_.set_value(api_.Crypto().Seed().ImportSeed(
-                    words,
-                    phrase,
-                    ot::crypto::SeedStyle::BIP39,
-                    ot::crypto::Language::en,
-                    reason_));
-                const auto& seed = seed_id_.get();
-
-                OT_ASSERT(false == seed.empty());
-
-                nym_.set_value(api_.Wallet().Nym(
-                    {api_.Factory(), seed, 0}, reason_, "Alice"));
-                const auto& nym = nym_.get();
-
-                OT_ASSERT(nym);
-
-                api_.Crypto().Blockchain().NewHDSubaccount(
-                    nym->ID(),
-                    ot::blockchain::crypto::HDProtocol::BIP_44,
-                    ot::blockchain::Type::UnitTest,
-                    reason_);
-                init_ = true;
-            }
-
-            return nym_.get()->ID();
-        }())
-        , account_(api_.Crypto()
-                       .Blockchain()
-                       .Account(nym_id_, ot::blockchain::Type::UnitTest)
-                       .GetHD()
-                       .at(0))
-        , account_id_(api_.Factory().IdentifierFromBase58(account_id_base58_))
-    {
-    }
-#pragma GCC diagnostic pop
-};
-
-bool Test_BIP44::init_{false};
-
-TEST_F(Test_BIP44, init)
+TEST_F(BIP44, init)
 {
     EXPECT_FALSE(seed_id_.get().empty());
     EXPECT_FALSE(nym_id_.empty());
@@ -99,7 +31,7 @@ TEST_F(Test_BIP44, init)
     EXPECT_EQ(account_.Standard(), ot::blockchain::crypto::HDProtocol::BIP_44);
 }
 
-TEST_F(Test_BIP44, generate_expected_keys)
+TEST_F(BIP44, generate_expected_keys)
 {
     auto& internal = const_cast<ExpectedKeys&>(internal_);
     auto& external = const_cast<ExpectedKeys&>(external_);
@@ -150,7 +82,7 @@ TEST_F(Test_BIP44, generate_expected_keys)
     }
 }
 
-TEST_F(Test_BIP44, balance_elements)
+TEST_F(BIP44, balance_elements)
 {
     const auto test = [&](auto subchain, auto i, const auto& vector) {
         auto output{true};

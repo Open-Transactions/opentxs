@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,51 +10,13 @@
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/contact/ContactSection.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_ContactSection : public ::testing::Test
-{
-public:
-    Test_ContactSection()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , contact_section_(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("testContactSectionNym1"),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::Section::GroupMap{})
-        , contact_group_(new ot::identity::wot::claim::Group(
-              ot::UnallocatedCString("testContactGroupNym1"),
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              {}))
-        , active_contact_item_(new ot::identity::wot::claim::Item(
-              dynamic_cast<const ot::api::session::Client&>(api_),
-              ot::UnallocatedCString("activeContactItem"),
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              opentxs::CONTACT_CONTACT_DATA_VERSION,
-              ot::identity::wot::claim::SectionType::Identifier,
-              ot::identity::wot::claim::ClaimType::Employee,
-              ot::UnallocatedCString("activeContactItemValue"),
-              {ot::identity::wot::claim::Attribute::Active},
-              {},
-              {},
-              ""))
-    {
-    }
-
-    const ot::api::session::Client& api_;
-    const ot::identity::wot::claim::Section contact_section_;
-    const std::shared_ptr<ot::identity::wot::claim::Group> contact_group_;
-    const std::shared_ptr<ot::identity::wot::claim::Item> active_contact_item_;
-};
-
-TEST_F(Test_ContactSection, first_constructor)
+TEST_F(ContactSection, first_constructor)
 {
     const auto& group1 = std::make_shared<ot::identity::wot::claim::Group>(
         contact_group_->AddItem(active_contact_item_));
@@ -78,7 +40,7 @@ TEST_F(Test_ContactSection, first_constructor)
     ASSERT_NE(section1.end(), section1.begin());
 }
 
-TEST_F(Test_ContactSection, first_constructor_different_versions)
+TEST_F(ContactSection, first_constructor_different_versions)
 {
     // Test private static method check_version.
     const ot::identity::wot::claim::Section section2(
@@ -91,7 +53,7 @@ TEST_F(Test_ContactSection, first_constructor_different_versions)
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, section2.Version());
 }
 
-TEST_F(Test_ContactSection, second_constructor)
+TEST_F(ContactSection, second_constructor)
 {
     const ot::identity::wot::claim::Section section1(
         dynamic_cast<const ot::api::session::Client&>(api_),
@@ -112,7 +74,7 @@ TEST_F(Test_ContactSection, second_constructor)
     ASSERT_NE(section1.end(), section1.begin());
 }
 
-TEST_F(Test_ContactSection, copy_constructor)
+TEST_F(ContactSection, copy_constructor)
 {
     const auto& section1(contact_section_.AddItem(active_contact_item_));
 
@@ -132,7 +94,7 @@ TEST_F(Test_ContactSection, copy_constructor)
     ASSERT_NE(copiedContactSection.end(), copiedContactSection.begin());
 }
 
-TEST_F(Test_ContactSection, operator_plus)
+TEST_F(ContactSection, operator_plus)
 {
     // Combine two sections with one item each of the same type.
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
@@ -215,7 +177,7 @@ TEST_F(Test_ContactSection, operator_plus)
         section6.Group(ot::identity::wot::claim::ClaimType::Ssl)->Size(), 1);
 }
 
-TEST_F(Test_ContactSection, operator_plus_different_versions)
+TEST_F(ContactSection, operator_plus_different_versions)
 {
     // rhs version less than lhs
     const ot::identity::wot::claim::Section section2(
@@ -236,7 +198,7 @@ TEST_F(Test_ContactSection, operator_plus_different_versions)
     ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, section4.Version());
 }
 
-TEST_F(Test_ContactSection, AddItem)
+TEST_F(ContactSection, AddItem)
 {
     // Add an item to a SCOPE section.
     const std::shared_ptr<ot::identity::wot::claim::Item> scopeContactItem(
@@ -316,7 +278,7 @@ TEST_F(Test_ContactSection, AddItem)
         section6.Group(ot::identity::wot::claim::ClaimType::Ssl)->Size(), 1);
 }
 
-TEST_F(Test_ContactSection, AddItem_different_versions)
+TEST_F(ContactSection, AddItem_different_versions)
 {
     // Add an item with a newer version to a SCOPE section.
     const std::shared_ptr<ot::identity::wot::claim::Item> scopeContactItem(
@@ -381,7 +343,7 @@ TEST_F(Test_ContactSection, AddItem_different_versions)
     ASSERT_EQ(4, section4.Version());
 }
 
-TEST_F(Test_ContactSection, begin)
+TEST_F(ContactSection, begin)
 {
     auto it = contact_section_.begin();
     ASSERT_EQ(contact_section_.end(), it);
@@ -397,7 +359,7 @@ TEST_F(Test_ContactSection, begin)
     ASSERT_EQ(std::distance(it, section1.end()), 0);
 }
 
-TEST_F(Test_ContactSection, Claim_found)
+TEST_F(ContactSection, Claim_found)
 {
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
 
@@ -427,14 +389,14 @@ TEST_F(Test_ContactSection, Claim_found)
     ASSERT_EQ(contactItem2->ID(), claim2->ID());
 }
 
-TEST_F(Test_ContactSection, Claim_notfound)
+TEST_F(ContactSection, Claim_notfound)
 {
     const std::shared_ptr<ot::identity::wot::claim::Item>& claim =
         contact_section_.Claim(active_contact_item_->ID());
     ASSERT_FALSE(claim);
 }
 
-TEST_F(Test_ContactSection, end)
+TEST_F(ContactSection, end)
 {
     auto it = contact_section_.end();
     ASSERT_EQ(contact_section_.begin(), it);
@@ -450,20 +412,20 @@ TEST_F(Test_ContactSection, end)
     ASSERT_EQ(std::distance(section1.begin(), it), 0);
 }
 
-TEST_F(Test_ContactSection, Group_found)
+TEST_F(ContactSection, Group_found)
 {
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
     ASSERT_NE(
         nullptr, section1.Group(ot::identity::wot::claim::ClaimType::Employee));
 }
 
-TEST_F(Test_ContactSection, Group_notfound)
+TEST_F(ContactSection, Group_notfound)
 {
     ASSERT_FALSE(
         contact_section_.Group(ot::identity::wot::claim::ClaimType::Employee));
 }
 
-TEST_F(Test_ContactSection, HaveClaim_true)
+TEST_F(ContactSection, HaveClaim_true)
 {
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
 
@@ -487,12 +449,12 @@ TEST_F(Test_ContactSection, HaveClaim_true)
     ASSERT_TRUE(section2.HaveClaim(contactItem2->ID()));
 }
 
-TEST_F(Test_ContactSection, HaveClaim_false)
+TEST_F(ContactSection, HaveClaim_false)
 {
     ASSERT_FALSE(contact_section_.HaveClaim(active_contact_item_->ID()));
 }
 
-TEST_F(Test_ContactSection, Delete)
+TEST_F(ContactSection, Delete)
 {
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
     ASSERT_TRUE(section1.HaveClaim(active_contact_item_->ID()));
@@ -557,7 +519,7 @@ TEST_F(Test_ContactSection, Delete)
     ASSERT_FALSE(section6.Group(ot::identity::wot::claim::ClaimType::Ssl));
 }
 
-TEST_F(Test_ContactSection, SerializeTo)
+TEST_F(ContactSection, SerializeTo)
 {
     // Serialize without ids.
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
@@ -610,7 +572,7 @@ TEST_F(Test_ContactSection, SerializeTo)
     ASSERT_EQ(active_contact_item_->End(), contact_item->End());
 }
 
-TEST_F(Test_ContactSection, Size)
+TEST_F(ContactSection, Size)
 {
     ASSERT_EQ(contact_section_.Size(), 0);
     const auto& section1 = contact_section_.AddItem(active_contact_item_);
@@ -663,14 +625,14 @@ TEST_F(Test_ContactSection, Size)
     ASSERT_EQ(section5.Size(), 1);
 }
 
-TEST_F(Test_ContactSection, Type)
+TEST_F(ContactSection, Type)
 {
     ASSERT_EQ(
         ot::identity::wot::claim::SectionType::Identifier,
         contact_section_.Type());
 }
 
-TEST_F(Test_ContactSection, Version)
+TEST_F(ContactSection, Version)
 {
     ASSERT_EQ(
         opentxs::CONTACT_CONTACT_DATA_VERSION, contact_section_.Version());
