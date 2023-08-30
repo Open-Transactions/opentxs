@@ -9,3 +9,7 @@ add_subdirectory(bitcoincash)
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(pkt)
 endif()
+
+libopentxs_add_public_header("blockchain/protocol/bitcoin/" "Types.hpp")
+
+target_sources(opentxs-common PRIVATE "Common.cpp")
