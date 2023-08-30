@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -15,6 +16,7 @@
 
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
+#include "ottest/data/core/Amount.hpp"
 
 namespace ot = opentxs;
 namespace bmp = boost::multiprecision;
@@ -793,5 +795,25 @@ TEST(Amount, double)
     const auto fromFloat2 = ot::Amount{0.5};
 
     EXPECT_EQ(fromInt2, fromFloat2);
+}
+
+TEST(Amount, ethereum)
+{
+    using opentxs::blockchain::protocol::ethereum::amount_to_native;
+    using opentxs::blockchain::protocol::ethereum::native_to_amount;
+
+    for (const auto& [value, expected] : EthereumTestAmounts()) {
+        const auto amount = ot::Amount{value};
+        const auto native = amount_to_native(amount);
+        const auto recovered = native_to_amount(native);
+
+        EXPECT_EQ(native, expected) << "test value: " << std::to_string(value);
+
+        ASSERT_TRUE(recovered.has_value())
+            << "test value: " << std::to_string(value);
+
+        EXPECT_EQ(*recovered, amount)
+            << "test value: " << std::to_string(value);
+    }
 }
 }  // namespace ottest

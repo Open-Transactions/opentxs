@@ -7,8 +7,10 @@
 
 #include <boost/endian/buffers.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <string_view>
@@ -17,6 +19,7 @@
 #include "internal/core/Amount.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -28,6 +31,8 @@ namespace be = boost::endian;
 
 namespace opentxs
 {
+using namespace std::literals;
+
 class Amount::Imp final : virtual public internal::Amount
 {
 public:
@@ -202,6 +207,26 @@ public:
         copy(view, std::move(dest));
 
         return true;
+    }
+    // NOTE https://ethereum.org/pt/developers/docs/apis/json-rpc/#hex-encoding
+    auto SerializeEthereum(Writer&& dest) const noexcept -> bool final
+    {
+        const auto backend = shift_right();
+
+        if (backend < 0) { return false; }
+
+        auto bytes = Vector<char>{};
+        using boost::multiprecision::cpp_int;
+        export_bits(backend, std::back_inserter(bytes), 8, true);
+        auto hex = to_hex(
+            reinterpret_cast<const std::byte*>(bytes.data()), bytes.size());
+        hex.erase(0, hex.find_first_not_of("0"));
+
+        if (hex.empty()) { hex.push_back('0'); }
+
+        hex = "0x"s.append(hex);
+
+        return copy(hex, std::move(dest));
     }
 
     auto ToFloat() const noexcept -> amount::Float final

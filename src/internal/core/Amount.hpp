@@ -29,7 +29,9 @@ static constexpr auto fractional_bits_{
     std::numeric_limits<std::uint64_t>::digits};
 static constexpr auto minimum_integer_bits_{
     std::numeric_limits<std::uint64_t>::digits + fractional_bits_};
-static constexpr auto maximum_integer_bits_{256u + fractional_bits_};
+static constexpr auto nominal_integer_bits_ = 256u;
+static constexpr auto maximum_integer_bits_{
+    nominal_integer_bits_ + fractional_bits_};
 
 using Integer = bmp::number<bmp::cpp_int_backend<
     minimum_integer_bits_,
@@ -57,6 +59,7 @@ public:
     virtual auto ExtractInt64() const noexcept(false) -> std::int64_t = 0;
     virtual auto ExtractUInt64() const noexcept(false) -> std::uint64_t = 0;
     virtual auto SerializeBitcoin(Writer&& dest) const noexcept -> bool = 0;
+    virtual auto SerializeEthereum(Writer&& dest) const noexcept -> bool = 0;
     virtual auto ToFloat() const noexcept -> amount::Float = 0;
 
     Amount() noexcept

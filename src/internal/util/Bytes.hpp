@@ -134,6 +134,8 @@ auto writer(std::array<std::byte, N>& in) noexcept -> Writer
 
 namespace opentxs
 {
+using namespace std::literals;
+
 constexpr auto subtract(std::byte lhs, std::byte rhs) noexcept -> std::byte
 {
     constexpr auto zero = std::byte{0};
@@ -189,15 +191,20 @@ constexpr auto decode_hex(char lhs, char rhs) noexcept -> std::byte
     return decode_hex(static_cast<std::byte>(lhs), static_cast<std::byte>(rhs));
 }
 
+constexpr auto remove_hex_prefix(std::string_view& hex)
+{
+    if (hex.starts_with("0x"sv) || hex.starts_with("0X"sv)) {
+        hex.remove_prefix(2);
+    }
+}
+
 constexpr auto decode_hex(
     std::string_view hex,
     std::span<std::byte> out) noexcept -> bool
 {
     using namespace std::literals;
 
-    if (hex.starts_with("0x"sv) || hex.starts_with("0X"sv)) {
-        hex.remove_prefix(2);
-    }
+    remove_hex_prefix(hex);
 
     if (hex.empty()) { return true; }
 
@@ -213,7 +220,7 @@ constexpr auto decode_hex(
         const auto& first = hex[i];
         auto& value = out[o];
 
-        if ((1_uz == offset) && (0_uz == i)) {
+        if ((0_uz == i) && (1_uz == offset)) {
             constexpr auto zero = std::byte{48};
             value = decode_hex(zero, static_cast<std::byte>(first));
             i += 1_uz;

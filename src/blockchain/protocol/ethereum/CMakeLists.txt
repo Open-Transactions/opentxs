@@ -4,3 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(base)
+
+libopentxs_add_public_header("blockchain/protocol/ethereum/" "Types.hpp")
+
+target_sources(opentxs-common PRIVATE "Common.cpp")
