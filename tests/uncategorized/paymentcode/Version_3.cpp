@@ -388,5 +388,25 @@ TEST_F(PaymentCode_v3, blind_bob)
     }
 }
 
+TEST_F(PaymentCode_v3, loopback_notification)
+{
+    {
+        const auto elements = alice_pc_secret_.GenerateNotificationElements(
+            alice_pc_public_, alice_blind_secret_, reason_);
+        const auto recovered = alice_pc_secret_.DecodeNotificationElements(
+            alice_pc_public_.Version(), elements, reason_);
+
+        EXPECT_EQ(alice_pc_public_, recovered);
+    }
+    {
+        const auto elements = bob_pc_secret_.GenerateNotificationElements(
+            bob_pc_public_, bob_blind_secret_, reason_);
+        const auto recovered = bob_pc_secret_.DecodeNotificationElements(
+            bob_pc_public_.Version(), elements, reason_);
+
+        EXPECT_EQ(bob_pc_public_, recovered);
+    }
+}
+
 TEST_F(PaymentCode_v3, shutdown) { Shutdown(); }
 }  // namespace ottest
