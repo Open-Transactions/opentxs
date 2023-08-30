@@ -11,7 +11,8 @@
 #include <optional>
 #include <utility>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"

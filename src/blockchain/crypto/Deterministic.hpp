@@ -16,7 +16,8 @@
 #include <utility>
 
 #include "blockchain/crypto/Subaccount.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Deterministic.hpp"
+#include "internal/blockchain/crypto/Element.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"

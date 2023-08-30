@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <cstddef>
+#include <tuple>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 
@@ -13,11 +16,6 @@ namespace opentxs
 {
 namespace blockchain
 {
-namespace block
-{
-class TransactionHash;
-}  // namespace block
-
 namespace crypto
 {
 namespace internal
@@ -33,19 +31,17 @@ class PaymentCode;
 
 namespace opentxs::blockchain::crypto
 {
-using blockchain::block::TransactionHash;
-
 class OPENTXS_EXPORT PaymentCode : virtual public Deterministic
 {
 public:
-    virtual auto AddNotification(const TransactionHash& tx) const noexcept
-        -> bool = 0;
+    virtual auto IncomingNotificationCount() const noexcept -> std::size_t = 0;
     OPENTXS_NO_EXPORT virtual auto InternalPaymentCode() const noexcept
         -> internal::PaymentCode& = 0;
-    virtual auto IsNotified() const noexcept -> bool = 0;
     virtual auto Local() const noexcept -> const opentxs::PaymentCode& = 0;
-    virtual auto ReorgNotification(const TransactionHash& tx) const noexcept
-        -> bool = 0;
+    /// returns incoming count, outgoing count
+    virtual auto NotificationCount() const noexcept
+        -> std::pair<std::size_t, std::size_t> = 0;
+    virtual auto OutgoingNotificationCount() const noexcept -> std::size_t = 0;
     virtual auto Remote() const noexcept -> const opentxs::PaymentCode& = 0;
 
     PaymentCode(const PaymentCode&) = delete;

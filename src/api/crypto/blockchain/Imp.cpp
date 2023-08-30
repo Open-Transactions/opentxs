@@ -18,7 +18,9 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"

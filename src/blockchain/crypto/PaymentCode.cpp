@@ -23,6 +23,8 @@
 #include "blockchain/crypto/Element.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
+#include "internal/blockchain/crypto/Element.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -108,7 +110,7 @@ namespace opentxs::blockchain::crypto::internal
 {
 auto PaymentCode::GetID(
     const api::Session& api,
-    const Chain chain,
+    const blockchain::Type chain,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote) noexcept -> identifier::Account
 {
@@ -272,12 +274,27 @@ auto PaymentCode::account_already_exists(const rLock&) const noexcept -> bool
     return 0 < existing.count(id_);
 }
 
+auto PaymentCode::AddIncomingNotification(
+    const block::TransactionHash& tx) const noexcept -> bool
+{
+    auto lock = rLock{lock_};
+
+    if (incoming_notifications_.contains(tx)) { return true; }
+
+    incoming_notifications_.emplace(tx);
+    const auto out = save(lock);
+
+    if (false == out) { incoming_notifications_.erase(tx); }
+
+    return out;
+}
+
 auto PaymentCode::AddNotification(
     const block::TransactionHash& tx) const noexcept -> bool
 {
     auto lock = rLock{lock_};
 
-    if (0 < outgoing_notifications_.count(tx)) { return true; }
+    if (outgoing_notifications_.contains(tx)) { return true; }
 
     outgoing_notifications_.emplace(tx);
     const auto out = save(lock);
@@ -304,11 +321,27 @@ auto PaymentCode::has_private(const PasswordPrompt& reason) const noexcept
         seed_id_, *path_.child().rbegin(), reason);
 }
 
-auto PaymentCode::IsNotified() const noexcept -> bool
+auto PaymentCode::IncomingNotificationCount() const noexcept -> std::size_t
 {
     auto lock = rLock{lock_};
 
-    return 0 < outgoing_notifications_.size();
+    return incoming_notifications_.size();
+}
+
+auto PaymentCode::NotificationCount() const noexcept
+    -> std::pair<std::size_t, std::size_t>
+{
+    auto lock = rLock{lock_};
+
+    return std::make_pair(
+        incoming_notifications_.size(), outgoing_notifications_.size());
+}
+
+auto PaymentCode::OutgoingNotificationCount() const noexcept -> std::size_t
+{
+    auto lock = rLock{lock_};
+
+    return outgoing_notifications_.size();
 }
 
 auto PaymentCode::PrivateKey(

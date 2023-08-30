@@ -20,7 +20,8 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Session.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Notification.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -138,12 +139,12 @@ auto NotificationStateData::handle_confirmed_matches(
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
         const auto& [version, subchainID] = elementID;
-        log(OT_PRETTY_CLASS())(print(chain_))(" transaction ")
+        LogConsole()(OT_PRETTY_CLASS())(print(chain_))(" transaction ")
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_)
             .Flush();
         const auto tx = block.FindByID(txid);
-        process(match, tx, reason);
+        process(match, tx, true, reason);
     }
 }
 
@@ -167,7 +168,7 @@ auto NotificationStateData::handle_mempool_matches(
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_)
             .Flush();
-        process(match, tx, reason);
+        process(match, tx, false, reason);
     }
 }
 
@@ -208,7 +209,8 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
                 return out;
             }();
             const auto reason = api_.Factory().PasswordPrompt(prompt.str());
-            process(remote, reason);
+            static const auto blank = block::TransactionHash{};
+            process(blank, remote, false, reason);
         }
     }
 }
@@ -233,6 +235,7 @@ auto NotificationStateData::init_keys(
 auto NotificationStateData::process(
     const block::Match match,
     const block::Transaction& tx,
+    bool confirmed,
     const PasswordPrompt& reason) const noexcept -> void
 {
     const auto& log = log_;
@@ -275,13 +278,15 @@ auto NotificationStateData::process(
             log(OT_PRETTY_CLASS())("decoded incoming notification from ")(
                 sender)(" on ")(print(chain_))(" for ")(pc_)
                 .Flush();
-            process(sender, reason);
+            process(tx.ID(), sender, confirmed, reason);
         }
     }
 }
 
 auto NotificationStateData::process(
+    const block::TransactionHash& tx,
     const opentxs::PaymentCode& remote,
+    bool confirmed,
     const PasswordPrompt& reason) const noexcept -> void
 {
     const auto& log = log_;
@@ -291,6 +296,11 @@ auto NotificationStateData::process(
     const auto& account =
         api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
             owner_, pc_, remote, path_, chain_, reason);
+
+    if (confirmed) {
+        account.InternalPaymentCode().AddIncomingNotification(tx);
+    }
+
     log(OT_PRETTY_CLASS())("Created or verified account ")(
         account.ID(), api_.Crypto())(" for ")(remote)
         .Flush();

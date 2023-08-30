@@ -15,6 +15,8 @@
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
+#include "internal/blockchain/crypto/Element.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"

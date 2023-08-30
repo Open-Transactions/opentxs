@@ -10,7 +10,7 @@
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/HD.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"

@@ -35,7 +35,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
@@ -1642,7 +1642,7 @@ private:
                 const auto& account =
                     api_.Crypto().Blockchain().PaymentCodeSubaccount(
                         nymID, accountID);
-                account.AddNotification(transaction.ID());
+                account.InternalPaymentCode().AddNotification(transaction.ID());
             }
 
             return Success;

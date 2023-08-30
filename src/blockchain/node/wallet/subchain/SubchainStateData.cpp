@@ -28,7 +28,7 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"

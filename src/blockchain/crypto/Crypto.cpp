@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/blockchain/crypto/Crypto.hpp"  // IWYU pragma: associated
+#include "internal/blockchain/crypto/Types.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
@@ -24,10 +24,12 @@
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::crypto

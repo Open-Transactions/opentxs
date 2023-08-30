@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "internal/api/session/Session.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"

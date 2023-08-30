@@ -15,7 +15,8 @@
 #include <mutex>
 #include <string_view>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"

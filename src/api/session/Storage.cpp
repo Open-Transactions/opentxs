@@ -34,7 +34,7 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Factory.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
