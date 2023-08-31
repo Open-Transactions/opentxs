@@ -45,7 +45,8 @@ jobs:
         rm -rvf '/Users/runner/Library/Android'
         rm -rvf /usr/bin/link'
       shell: bash
-      continue-on-error: true    - name: Checkout opentxs
+      continue-on-error: true
+    - name: Checkout opentxs
       uses: actions/checkout@v3
       with:
         fetch-depth: '0'

@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -1009,7 +1010,7 @@ TEST_F(Regtest_payment_code, alex_account_activity_first_spend_confirmed)
 
     EXPECT_EQ(
         account.Type(), ot::blockchain::crypto::SubaccountType::PaymentCode);
-    EXPECT_TRUE(account.IsNotified());
+    EXPECT_EQ(account.OutgoingNotificationCount(), 1_uz);
 
     {
         constexpr auto subchain{Subchain::Incoming};

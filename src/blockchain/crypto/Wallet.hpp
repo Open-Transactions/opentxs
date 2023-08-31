@@ -9,7 +9,7 @@
 #include <memory>
 #include <mutex>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Wallet.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"

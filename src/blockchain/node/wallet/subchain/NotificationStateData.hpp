@@ -18,6 +18,7 @@
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -120,9 +121,12 @@ private:
     auto process(
         const block::Match match,
         const block::Transaction& tx,
+        bool confirmed,
         const PasswordPrompt& reason) const noexcept -> void;
     auto process(
+        const block::TransactionHash& tx,
         const opentxs::PaymentCode& remote,
+        bool confirmed,
         const PasswordPrompt& reason) const noexcept -> void;
 
     auto init_contacts(allocator_type monotonic) noexcept -> void;

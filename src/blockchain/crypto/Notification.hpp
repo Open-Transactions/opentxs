@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 #include "blockchain/crypto/Subaccount.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Notification.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"

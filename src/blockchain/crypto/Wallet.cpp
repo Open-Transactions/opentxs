@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Session.hpp"

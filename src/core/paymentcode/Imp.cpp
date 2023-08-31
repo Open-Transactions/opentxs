@@ -18,6 +18,7 @@
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "core/paymentcode/Preimage.hpp"
@@ -268,9 +269,9 @@ auto PaymentCode::Blind(
             throw std::runtime_error{"remote payment code key is invalid"};
         }
 
-        if (id_ == recipient.ID()) {
-            throw std::runtime_error{"remote payment code must be different "
-                                     "than local payment code"};
+        if (privateKey.PublicKey() == Key().PublicKey()) {
+            throw std::runtime_error{
+                "A payment code may not be used as its own blinding key"};
         }
 
         if (2 < recipient.Version()) {
@@ -314,9 +315,9 @@ auto PaymentCode::BlindV3(
             throw std::runtime_error{"remote payment code key is invalid"};
         }
 
-        if (id_ == recipient.ID()) {
-            throw std::runtime_error{"remote payment code must be different "
-                                     "than local payment code"};
+        if (privateKey.PublicKey() == Key().PublicKey()) {
+            throw std::runtime_error{
+                "A payment code may not be used as its own blinding key"};
         }
 
         if (3 > recipient.Version()) {
@@ -572,11 +573,6 @@ auto PaymentCode::GenerateNotificationElements(
             throw std::runtime_error{"remote payment code key is invalid"};
         }
 
-        if (id_ == recipient.ID()) {
-            throw std::runtime_error{"remote payment code must be different "
-                                     "than local payment code"};
-        }
-
         if (3 > recipient.Version()) {
             throw std::runtime_error{"Recipient payment code version too low"};
         }
@@ -689,6 +685,19 @@ auto PaymentCode::Incoming(
     -> crypto::asymmetric::key::EllipticCurve
 {
     try {
+        if (false == sender.Key().IsValid()) {
+            throw std::runtime_error{"remote payment code key is invalid"};
+        }
+
+        if (id_ == sender.ID()) {
+            throw std::runtime_error{"remote payment code must be different "
+                                     "than local payment code"};
+        }
+
+        if (false == key_.HasPrivate()) {
+            throw std::runtime_error{"Private key missing"};
+        }
+
         const auto effective = effective_version(version);
         const auto [localPrivate, remotePublic] =
             derive_keys(sender, index, 0, reason);

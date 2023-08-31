@@ -5,13 +5,14 @@
 
 #pragma once
 
+#include <BlockchainAddress.pb.h>
 #include <boost/container/flat_set.hpp>
 #include <functional>
 #include <mutex>
 #include <optional>
 #include <string_view>
 
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Element.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"

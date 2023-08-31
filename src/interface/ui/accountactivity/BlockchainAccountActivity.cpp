@@ -23,7 +23,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"

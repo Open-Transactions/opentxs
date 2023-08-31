@@ -12,10 +12,11 @@
 #include <cstddef>
 #include <functional>
 #include <string_view>
+#include <utility>
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
-#include "internal/blockchain/crypto/Crypto.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -35,7 +36,6 @@ namespace opentxs
 {
 namespace api
 {
-
 namespace session
 {
 class Contacts;
@@ -74,17 +74,22 @@ public:
     using Element = implementation::Element;
     using SerializedType = proto::Bip47Channel;
 
+    auto AddIncomingNotification(
+        const block::TransactionHash& tx) const noexcept -> bool final;
     auto AddNotification(const block::TransactionHash& tx) const noexcept
         -> bool final;
+    auto IncomingNotificationCount() const noexcept -> std::size_t final;
     auto InternalPaymentCode() const noexcept -> internal::PaymentCode& final
     {
         return const_cast<PaymentCode&>(*this);
     }
-    auto IsNotified() const noexcept -> bool final;
     auto Local() const noexcept -> const opentxs::PaymentCode& final
     {
         return local_;
     }
+    auto NotificationCount() const noexcept
+        -> std::pair<std::size_t, std::size_t> final;
+    auto OutgoingNotificationCount() const noexcept -> std::size_t final;
     auto ReorgNotification(const block::TransactionHash& tx) const noexcept
         -> bool final;
     auto Remote() const noexcept -> const opentxs::PaymentCode& final

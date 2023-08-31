@@ -236,7 +236,9 @@ auto Actor::create_or_load_subaccount(
             shared_.Chain(),
             reason);
 
-    if (false == account.IsNotified()) { notify.emplace(recipient); }
+    if (0_uz == account.OutgoingNotificationCount()) {
+        notify.emplace(recipient);
+    }
 
     return account;
 }

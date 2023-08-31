@@ -22,8 +22,16 @@ libopentxs_add_public_header("blockchain/crypto" "Wallet.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Crypto.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Account.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Deterministic.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Element.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Factory.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/HD.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Imported.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Notification.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/PaymentCode.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Subaccount.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Wallet.hpp"
     "Account.cpp"
     "Account.hpp"
     "Account.tpp"

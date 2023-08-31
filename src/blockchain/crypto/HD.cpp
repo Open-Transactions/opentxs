@@ -25,6 +25,7 @@
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
+#include "internal/blockchain/crypto/Element.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
