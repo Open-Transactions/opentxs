@@ -22,6 +22,7 @@ auto license_frozen(LicenseMap& out) noexcept -> void;
 auto license_irrxml(LicenseMap& out) noexcept -> void;
 auto license_libguarded(LicenseMap& out) noexcept -> void;
 auto license_lucre(LicenseMap& out) noexcept -> void;
+auto license_matterfi(LicenseMap& out) noexcept -> void;
 auto license_opentxs(LicenseMap& out) noexcept -> void;
 auto license_packetcrypt(LicenseMap& out) noexcept -> void;
 auto license_protobuf(LicenseMap& out) noexcept -> void;

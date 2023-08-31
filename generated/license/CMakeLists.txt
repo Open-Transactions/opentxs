@@ -68,6 +68,11 @@ file(
   "${opentxs_SOURCE_DIR}/deps/simpleini/LICENCE.txt"
   SIMPLEINI_LICENSE_TEXT
 )
+file(
+  READ
+  "${opentxs_SOURCE_DIR}/src/matterfi/LICENSE.txt"
+  MATTERFI_LICENSE_TEXT
+)
 
 include(otcommon-file-to-hex)
 otcommon_file_to_hex(
@@ -182,6 +187,21 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/util/license/lgpl21.cpp"
   @ONLY
 )
+
+if(OT_ENABLE_MATTERFI)
+  configure_file(
+    "matterfi.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/matterfi.cpp"
+    @ONLY
+  )
+else()
+  configure_file(
+    "no-matterfi.cpp.in"
+    "${opentxs_BINARY_DIR}/src/util/license/matterfi.cpp"
+    @ONLY
+  )
+endif()
+
 configure_file(
   "mpl.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/mpl.cpp"
