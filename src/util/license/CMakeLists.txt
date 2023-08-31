@@ -19,6 +19,7 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/lgpl21.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/libguarded.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/lucre.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/matterfi.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/mpl.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/opentxs.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/packetcrypt.cpp"

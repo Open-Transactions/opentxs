@@ -1,0 +1,42 @@
+MatterFi Semi-Open License:
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to exploit the Software, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, create
+derivative works from, and sublicense copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following restrictions and conditions:
+
+    (1) exploitation of the Software must be for non-commercial use,
+where “non-commercial” means the exploitation is not associated
+with the income or value of an entity such that MatterFi, Inc. would
+have or develop an interest in profiting or deriving some portion of
+its own income from that entity’s exploitation;
+
+    (2) the exploitation of the Software does not involve competitive
+analysis, benchmarking, or competition with MatterFi, Inc.;
+
+    (3) all non-internal exploitation of the Software or distribution
+to third parties includes a copyright notice crediting MatterFi, Inc.
+as the copyright holder of the Software and including the text of this
+license;
+
+MatterFi, Inc. is and shall remain the owner of any and all
+intellectual property rights in the Software, including, without
+limitation, any copyright, patents, and moral rights, whether or not
+registered or registrable. For clarity, and without limiting the
+ability of the licensee to exploit the Software as this license
+intends, this license does not include the right to offer for sale,
+sell, or import any patent or proprietary invention of MatterFi, Inc.,
+and a separate license to any patent or proprietary invention may be
+required.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL MATTERFI, INC., ITS SUCCESSORS, HEIRS, DIRECTORS,
+EMPLOYEES, AGENTS, OR ASSOCIATES, BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF,
+EXPLOITATION OF, OR OTHER DEALINGS INVOLVING THE SOFTWARE.

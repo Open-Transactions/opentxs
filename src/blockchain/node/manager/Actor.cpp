@@ -58,6 +58,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "matterfi/PaymentCode.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -634,6 +635,7 @@ auto Actor::process_send_to_payment_code(
                     txout.set_contact(UnallocatedCString{contact.Bytes()});
                 }
 
+                matterfi::paymentcode_extra_notifications(account, notify);
                 // TODO add preemptive notifications
                 const auto serialize = [&](const auto& r) {
                     serialize_notification(fuckllvm.first, r, p, out);

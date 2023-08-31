@@ -142,6 +142,16 @@
             }
         },
         {
+            "name": "matterfi",
+            "displayName": "matterfi",
+            "description": "Full build with MatterFi features enabled",
+            "inherits": "full",
+            "cacheVariables": {
+                "OT_ENABLE_NONFREE": "ON",
+                "OT_ENABLE_MATTERFI": "ON"
+            }
+        },
+        {
             "name": "test01",
             "displayName": "Build option test #1",
             "description":
@@ -526,6 +536,10 @@
         {
             "name": "tidy",
             "configurePreset": "tidy"
+        },
+        {
+            "name": "matterfi",
+            "configurePreset": "matterfi"
         },
         {
             "name": "test01",

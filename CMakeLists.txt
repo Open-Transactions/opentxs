@@ -383,6 +383,25 @@ option(
   ${OT_ENABLE_RPC_DEFAULT}
 )
 
+option(
+  OT_ENABLE_NONFREE
+  "Enable optional features whose use may be subject to additional terms and conditions by third parties"
+  OFF
+)
+
+option(
+  OT_ENABLE_MATTERFI
+  "Enable optional features contributed by MatterFi, Inc."
+  OFF
+)
+
+if(OT_ENABLE_MATTERFI AND NOT OT_ENABLE_NONFREE)
+  message(
+    FATAL_ERROR
+      "You must enable OT_ENABLE_NONFREE in order to enable OT_ENABLE_MATTERFI"
+  )
+endif()
+
 if(OT_IWYU)
   otcommon_make_iwyu_target()
 endif()

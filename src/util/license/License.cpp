@@ -24,6 +24,7 @@ auto LicenseData() noexcept -> const LicenseMap&
         license_irrxml(out);
         license_libguarded(out);
         license_lucre(out);
+        license_matterfi(out);
         license_opentxs(out);
         license_packetcrypt(out);
         license_protobuf(out);

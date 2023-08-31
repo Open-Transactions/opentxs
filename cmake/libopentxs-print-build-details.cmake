@@ -45,6 +45,9 @@ macro(libopentxs_print_build_details)
   message(STATUS "QML:                      ${OT_WITH_QML}")
   message(STATUS "RPC:                      ${OT_ENABLE_RPC}")
 
+  message(STATUS "Proprietary Features-------------------------")
+  message(STATUS "MatterFi:                 ${OT_ENABLE_MATTERFI}")
+
   message(STATUS "Packaging------------------------------------")
   message(STATUS "Install headers:          ${OT_INSTALL_HEADERS}")
   message(STATUS "Install cmake package:    ${OT_INSTALL_CMAKE}")
