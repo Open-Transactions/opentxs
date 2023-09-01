@@ -5,18 +5,14 @@
 
 #pragma once
 
-#include <cstddef>
-#include <memory>
 #include <mutex>
 #include <optional>
 #include <utility>
 
+#include "blockchain/crypto/account/NodeGroup.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
@@ -26,13 +22,11 @@
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -43,13 +37,14 @@ namespace session
 {
 class Contacts;
 }  // namespace session
+
+class Session;
 }  // namespace api
 
 namespace blockchain
 {
 namespace crypto
 {
-class Account;
 class AccountIndex;
 class Element;
 }  // namespace crypto
@@ -99,6 +94,7 @@ public:
         const PasswordPrompt& reason,
         const UnallocatedCString& memo) const noexcept
         -> UnallocatedCString final;
+    auto Get(Notifications& out) const noexcept -> void final;
     auto GetHD() const noexcept -> const HDAccounts& final { return hd_; }
     auto GetImported() const noexcept -> const ImportedAccounts& final
     {
@@ -179,138 +175,6 @@ public:
     ~Account() final = default;
 
 private:
-    template <typename InterfaceType, typename PayloadType>
-    class NodeGroup final : virtual public InterfaceType
-    {
-    public:
-        using const_iterator = typename InterfaceType::const_iterator;
-        using value_type = typename InterfaceType::value_type;
-
-        auto all() const noexcept -> UnallocatedSet<identifier::Account> final
-        {
-            auto out = UnallocatedSet<identifier::Account>{};
-            auto lock = Lock{lock_};
-
-            for (const auto& [id, count] : index_) { out.emplace(id); }
-
-            return out;
-        }
-        auto at(const std::size_t position) const -> const value_type& final
-        {
-            auto lock = Lock{lock_};
-
-            return *nodes_.at(position);
-        }
-        auto at(const identifier::Account& id) const -> const PayloadType& final
-        {
-            auto lock = Lock{lock_};
-
-            return *nodes_.at(index_.at(id));
-        }
-        auto begin() const noexcept -> const_iterator final
-        {
-            return const_iterator(this, 0);
-        }
-        auto cbegin() const noexcept -> const_iterator final
-        {
-            return const_iterator(this, 0);
-        }
-        auto cend() const noexcept -> const_iterator final
-        {
-            return const_iterator(this, nodes_.size());
-        }
-        auto end() const noexcept -> const_iterator final
-        {
-            return const_iterator(this, nodes_.size());
-        }
-        auto size() const noexcept -> std::size_t final
-        {
-            return nodes_.size();
-        }
-        auto Type() const noexcept -> SubaccountType final { return type_; }
-
-        auto at(const std::size_t position) -> value_type&
-        {
-            auto lock = Lock{lock_};
-
-            return *nodes_.at(position);
-        }
-        auto at(const identifier::Account& id) -> PayloadType&
-        {
-            auto lock = Lock{lock_};
-
-            return *nodes_.at(index_.at(id));
-        }
-        template <typename... Args>
-        auto Construct(identifier::Account& out, const Args&... args) noexcept
-            -> bool
-        {
-            auto lock = Lock{lock_};
-
-            return construct(lock, out, args...);
-        }
-
-        NodeGroup(
-            const api::Session& api,
-            const SubaccountType type,
-            Account& parent) noexcept
-            : api_(api)
-            , type_(type)
-            , parent_(parent)
-            , lock_()
-            , nodes_()
-            , index_()
-        {
-        }
-
-    private:
-        const api::Session& api_;
-        const SubaccountType type_;
-        Account& parent_;
-        mutable std::mutex lock_;
-        UnallocatedVector<std::unique_ptr<PayloadType>> nodes_;
-        UnallocatedMap<identifier::Account, std::size_t> index_;
-
-        auto add(
-            const Lock& lock,
-            const identifier::Account& id,
-            std::unique_ptr<PayloadType> node) noexcept -> bool;
-        template <typename... Args>
-        auto construct(
-            const Lock& lock,
-            identifier::Account& id,
-            const Args&... args) noexcept -> bool
-        {
-            auto node{
-                Factory<PayloadType, Args...>::get(api_, parent_, id, args...)};
-
-            if (false == bool(node)) { return false; }
-
-            if (0 < index_.count(id)) {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
-                    " already exists")
-                    .Flush();
-
-                return false;
-            } else {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
-                    " created")
-                    .Flush();
-            }
-
-            return add(lock, id, std::move(node));
-        }
-    };
-
-    template <typename ReturnType, typename... Args>
-    struct Factory {
-        static auto get(
-            const api::Session& api,
-            const crypto::Account& parent,
-            identifier::Account& id,
-            const Args&... args) noexcept -> std::unique_ptr<ReturnType>;
-    };
-
     struct NodeIndex {
         auto Find(const identifier::Account& id) const noexcept
             -> crypto::Subaccount*;
@@ -330,12 +194,13 @@ private:
         UnallocatedMap<identifier::Account, crypto::Subaccount*> index_;
     };
 
-    using HDNodes = NodeGroup<HDAccounts, crypto::HD>;
-    using ImportedNodes = NodeGroup<ImportedAccounts, crypto::Imported>;
+    using HDNodes = account::NodeGroup<HDAccounts, crypto::HD>;
+    using ImportedNodes =
+        account::NodeGroup<ImportedAccounts, crypto::Imported>;
     using NotificationNodes =
-        NodeGroup<NotificationAccounts, crypto::Notification>;
+        account::NodeGroup<NotificationAccounts, crypto::Notification>;
     using PaymentCodeNodes =
-        NodeGroup<PaymentCodeAccounts, crypto::PaymentCode>;
+        account::NodeGroup<PaymentCodeAccounts, crypto::PaymentCode>;
 
     const api::Session& api_;
     const api::session::Contacts& contacts_;
@@ -350,8 +215,8 @@ private:
     PaymentCodeNodes payment_code_;
     mutable NodeIndex node_index_;
     mutable std::mutex lock_;
-    mutable internal::ActivityMap unspent_;
-    mutable internal::ActivityMap spent_;
+    mutable ActivityMap unspent_;
+    mutable ActivityMap spent_;
     OTZMQPushSocket find_nym_;
 
     auto init_hd(const Accounts& HDAccounts) noexcept -> void;

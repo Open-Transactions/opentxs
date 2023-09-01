@@ -177,7 +177,7 @@ public:
     virtual auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        node::internal::SpendPolicy& policy) noexcept
+        const node::internal::SpendPolicy& policy) noexcept
         -> std::optional<UTXO> = 0;
     virtual auto ReserveUTXO(
         const identifier::Nym& spender,

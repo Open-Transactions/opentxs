@@ -146,8 +146,8 @@ protected:
     const CString description_;
     mutable std::recursive_mutex lock_;
     mutable std::atomic<Revision> revision_;
-    mutable internal::ActivityMap unspent_;
-    mutable internal::ActivityMap spent_;
+    mutable ActivityMap unspent_;
+    mutable ActivityMap spent_;
 
     using SerializedActivity =
         google::protobuf::RepeatedPtrField<proto::BlockchainActivity>;
@@ -162,7 +162,7 @@ protected:
         const api::Session& api,
         const SerializedActivity& in) noexcept -> UnallocatedVector<Activity>;
     static auto convert(const UnallocatedVector<Activity>& in) noexcept
-        -> internal::ActivityMap;
+        -> ActivityMap;
     static auto describe(
         const api::Session& api,
         const opentxs::blockchain::Type chain,

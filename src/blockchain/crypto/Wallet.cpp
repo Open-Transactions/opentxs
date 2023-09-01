@@ -5,12 +5,14 @@
 
 #include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -47,9 +49,7 @@ Wallet::Wallet(
     , api_(api)
     , contacts_(contacts)
     , chain_(chain)
-    , lock_()
-    , trees_()
-    , index_()
+    , data_()
 {
     init();
 }
@@ -57,23 +57,21 @@ Wallet::Wallet(
 auto Wallet::Account(const identifier::Nym& id) const noexcept
     -> crypto::Account&
 {
-    Lock lock(lock_);
-
-    return const_cast<Wallet&>(*this).get_or_create(lock, id);
+    return get_or_create(*data_.lock(), id);
 }
 
 auto Wallet::add(
-    const Lock& lock,
+    Data& data,
     const identifier::Nym& id,
-    std::unique_ptr<crypto::Account> tree) noexcept -> bool
+    std::unique_ptr<crypto::Account> tree) const noexcept -> bool
 {
     if (false == bool(tree)) { return false; }
 
-    if (0 < index_.count(id)) { return false; }
+    if (0 < data.index_.count(id)) { return false; }
 
-    trees_.emplace_back(std::move(tree));
-    const std::size_t position = trees_.size() - 1;
-    index_.emplace(id, position);
+    data.trees_.emplace_back(std::move(tree));
+    const auto position = data.trees_.size() - 1_uz;
+    data.index_.emplace(id, position);
 
     return true;
 }
@@ -85,30 +83,37 @@ auto Wallet::AddHDNode(
     const PasswordPrompt& reason,
     identifier::Account& id) noexcept -> bool
 {
-    Lock lock(lock_);
-
-    return get_or_create(lock, nym).Internal().AddHDNode(
-        path, standard, reason, id);
+    return get_or_create(*data_.lock(), nym)
+        .Internal()
+        .AddHDNode(path, standard, reason, id);
 }
 
 auto Wallet::at(const std::size_t position) const noexcept(false)
     -> Wallet::const_iterator::value_type&
 {
-    Lock lock(lock_);
-
-    return at(lock, position);
+    return at(*data_.lock_shared(), position);
 }
 
-auto Wallet::at(const Lock& lock, const std::size_t index) const noexcept(false)
+auto Wallet::at(const Data& data, const std::size_t index) const noexcept(false)
     -> const_iterator::value_type&
 {
-    return *trees_.at(index);
+    return *data.trees_.at(index);
 }
 
-auto Wallet::at(const Lock& lock, const std::size_t index) noexcept(false)
+auto Wallet::at(Data& data, const std::size_t index) const noexcept(false)
     -> crypto::Account&
 {
-    return *trees_.at(index);
+    return *data.trees_.at(index);
+}
+
+auto Wallet::cend() const noexcept -> const_iterator
+{
+    return {this, data_.lock_shared()->trees_.size()};
+}
+
+auto Wallet::end() const noexcept -> const_iterator
+{
+    return {this, data_.lock_shared()->trees_.size()};
 }
 
 auto Wallet::factory(
@@ -121,25 +126,52 @@ auto Wallet::factory(
         api_, contacts_, *this, account_index_, nym, hd, {}, paymentCode);
 }
 
-auto Wallet::get_or_create(const Lock& lock, const identifier::Nym& id) noexcept
+auto Wallet::GetNotificationStatus(alloc::Strategy alloc) const noexcept
+    -> NotificationStatus
+{
+    auto status = NotificationStatus{alloc.result_};
+    status.clear();
+    auto job = [&] {
+        auto values = Vector<std::pair<const crypto::Account*, Notifications*>>{
+            alloc.work_};
+        auto handle = data_.lock_shared();
+        const auto& data = handle->trees_;
+        const auto count = data.size();
+        values.reserve(count);
+        values.clear();
+        const auto prepare = [&](const auto& account) {
+            const auto* p = account.get();
+            values.emplace_back(p, std::addressof(status[p->Chain()]));
+        };
+        std::for_each(data.begin(), data.end(), prepare);
+
+        return values;
+    }();
+    get(job);
+
+    return status;
+}
+
+auto Wallet::get_or_create(Data& data, const identifier::Nym& id) const noexcept
     -> crypto::Account&
 {
-    if (0 == index_.count(id)) {
+    if (false == data.index_.contains(id)) {
         auto pTree = factory(id, {}, {});
 
         OT_ASSERT(pTree);
 
-        const auto added = add(lock, id, std::move(pTree));
+        const auto added = add(data, id, std::move(pTree));
 
         OT_ASSERT(added);
     }
 
-    return at(lock, index_.at(id));
+    return at(data, data.index_.at(id));
 }
 
-void Wallet::init() noexcept
+auto Wallet::init() noexcept -> void
 {
-    Lock lock(lock_);
+    auto handle = data_.lock();
+    auto& data = *handle;
     const auto nyms = api_.Storage().LocalNyms();
 
     for (const auto& nymID : nyms) {
@@ -148,7 +180,12 @@ void Wallet::init() noexcept
             api_.Storage().Internal().BlockchainAccountList(nymID, unit);
         const auto pc =
             api_.Storage().Internal().Bip47ChannelsByChain(nymID, unit);
-        add(lock, nymID, factory(nymID, hd, pc));
+        add(data, nymID, factory(nymID, hd, pc));
     }
+}
+
+auto Wallet::size() const noexcept -> std::size_t
+{
+    return data_.lock_shared()->trees_.size();
 }
 }  // namespace opentxs::blockchain::crypto::implementation

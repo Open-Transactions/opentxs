@@ -73,6 +73,7 @@ struct Data {
     ServiceMap services_{};
     Bip158 bip158_{};
     GenesisBip158 genesis_bip158_{};
+    std::size_t max_notifications_{};
 };
 using ChainMap = boost::container::flat_map<blockchain::Type, Data>;
 

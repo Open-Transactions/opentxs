@@ -3,7 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-libopentxs_add_public_header("blockchain/crypto" "Account.hpp")
+add_subdirectory(account)
+
 libopentxs_add_public_header("blockchain/crypto" "AddressStyle.hpp")
 libopentxs_add_public_header("blockchain/crypto" "Deterministic.hpp")
 libopentxs_add_public_header("blockchain/crypto" "Element.hpp")
@@ -22,7 +23,6 @@ libopentxs_add_public_header("blockchain/crypto" "Wallet.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Account.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Deterministic.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Element.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Factory.hpp"
@@ -32,9 +32,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/PaymentCode.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Subaccount.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Wallet.hpp"
-    "Account.cpp"
-    "Account.hpp"
-    "Account.tpp"
     "AccountIndex.cpp"
     "AccountIndex.hpp"
     "Crypto.cpp"
@@ -53,3 +50,4 @@ target_sources(
     "Wallet.cpp"
     "Wallet.hpp"
 )
+libopentxs_parallel_algorithms()

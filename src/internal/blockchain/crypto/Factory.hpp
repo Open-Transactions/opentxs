@@ -28,6 +28,11 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
 namespace crypto
 {
 class Account;

@@ -20,6 +20,11 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
+
+namespace crypto
+{
+struct Notifications;
+}  // namespace crypto
 }  // namespace blockchain
 
 namespace proto
@@ -41,6 +46,7 @@ struct Account : virtual public crypto::Account {
         const identifier::Account& id,
         crypto::Subaccount* node) const noexcept -> void = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
+    virtual auto Get(Notifications& out) const noexcept -> void = 0;
     virtual auto LookupUTXO(const Coin& coin) const noexcept
         -> std::optional<std::pair<Key, Amount>> = 0;
 

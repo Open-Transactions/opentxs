@@ -100,6 +100,7 @@ public:
     const Data::Bip158 bip158_;
     const Data::Bip158Reverse bip158_reverse_;
     const std::pair<Bip44Type, network::blockchain::Subchain> zmq_;
+    const std::size_t max_notifications_;
     mutable GuardedCheckpoints cfheaders_;
 
     auto GenesisBlock(const api::Crypto& crypto) const noexcept

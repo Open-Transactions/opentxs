@@ -258,6 +258,11 @@ auto ChainData::MaturationInterval() const noexcept -> block::Height
     return imp_->maturation_interval_;
 }
 
+auto ChainData::MaxNotifications() const noexcept -> std::size_t
+{
+    return imp_->max_notifications_;
+}
+
 auto ChainData::P2PDefaultPort() const noexcept -> std::uint16_t
 {
     return imp_->default_port_;

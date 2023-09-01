@@ -799,7 +799,8 @@ public:
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& id,
-        node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>
+        const node::internal::SpendPolicy& policy) noexcept
+        -> std::optional<UTXO>
     {
         auto output = std::optional<UTXO>{std::nullopt};
         auto handle = lock();
@@ -2130,7 +2131,7 @@ auto Output::PublishBalance() const noexcept -> void { imp_->PublishBalance(); }
 auto Output::ReserveUTXO(
     const identifier::Nym& spender,
     const identifier::Generic& proposal,
-    node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>
+    const node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>
 {
     return imp_->ReserveUTXO(spender, proposal, policy);
 }

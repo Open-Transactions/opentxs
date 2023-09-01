@@ -118,6 +118,7 @@ ChainDataPrivate::ChainDataPrivate(
                       Data::Bip158Reverse,
                       Data::Bip158>(bip158_))
     , zmq_(std::make_pair(data.parent_bip44_, data.subchain_))
+    , max_notifications_(data.max_notifications_)
     , cfheaders_([&] {
         auto out = CfheaderCheckpoints{};
 

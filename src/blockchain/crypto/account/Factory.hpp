@@ -1,21 +1,34 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Account.hpp"  // IWYU pragma: associated
+#pragma once
 
 #include "internal/blockchain/crypto/Factory.hpp"
+
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace blockchain
+{
+namespace crypto
+{
+class Account;
+}  // namespace crypto
+}  // namespace blockchain
+
 namespace identifier
 {
 class Account;
@@ -32,10 +45,19 @@ class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto::account
 {
+template <typename ReturnType, typename... Args>
+struct Factory {
+    static auto get(
+        const api::Session& api,
+        const crypto::Account& parent,
+        identifier::Account& id,
+        const Args&... args) noexcept -> std::unique_ptr<ReturnType>;
+};
+
 template <>
-struct Account::Factory<crypto::HD, proto::HDPath, HDProtocol, PasswordPrompt> {
+struct Factory<crypto::HD, proto::HDPath, HDProtocol, PasswordPrompt> {
     static auto get(
         const api::Session& api,
         const crypto::Account& parent,
@@ -48,8 +70,9 @@ struct Account::Factory<crypto::HD, proto::HDPath, HDProtocol, PasswordPrompt> {
             api, parent, data, standard, reason, id);
     }
 };
+
 template <>
-struct Account::Factory<crypto::HD, proto::HDAccount> {
+struct Factory<crypto::HD, proto::HDAccount> {
     static auto get(
         const api::Session& api,
         const crypto::Account& parent,
@@ -61,8 +84,7 @@ struct Account::Factory<crypto::HD, proto::HDAccount> {
 };
 
 template <>
-struct Account::
-    Factory<crypto::Notification, opentxs::PaymentCode, identity::Nym> {
+struct Factory<crypto::Notification, opentxs::PaymentCode, identity::Nym> {
     static auto get(
         const api::Session& api,
         const crypto::Account& parent,
@@ -77,7 +99,7 @@ struct Account::
 };
 
 template <>
-struct Account::Factory<
+struct Factory<
     crypto::PaymentCode,
     api::session::Contacts,
     opentxs::PaymentCode,
@@ -101,8 +123,9 @@ struct Account::Factory<
             api, contacts, parent, local, remote, path, blank, reason, id);
     }
 };
+
 template <>
-struct Account::Factory<
+struct Factory<
     crypto::PaymentCode,
     api::session::Contacts,
     opentxs::PaymentCode,
@@ -126,9 +149,12 @@ struct Account::Factory<
             api, contacts, parent, local, remote, path, txid, reason, id);
     }
 };
+
 template <>
-struct Account::
-    Factory<crypto::PaymentCode, api::session::Contacts, proto::Bip47Channel> {
+struct Factory<
+    crypto::PaymentCode,
+    api::session::Contacts,
+    proto::Bip47Channel> {
     static auto get(
         const api::Session& api,
         const crypto::Account& parent,
@@ -140,29 +166,4 @@ struct Account::
         return factory::BlockchainPCSubaccount(api, contacts, parent, data, id);
     }
 };
-
-template <typename InterfaceType, typename PayloadType>
-auto Account::NodeGroup<InterfaceType, PayloadType>::add(
-    const Lock& lock,
-    const identifier::Account& id,
-    std::unique_ptr<PayloadType> node) noexcept -> bool
-{
-    if (false == bool(node)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid node").Flush();
-
-        return false;
-    }
-
-    if (0 < index_.count(id)) {
-        LogError()(OT_PRETTY_CLASS())("Index already exists").Flush();
-
-        return false;
-    }
-
-    nodes_.emplace_back(std::move(node));
-    const auto position = nodes_.size() - 1_uz;
-    index_.emplace(id, position);
-
-    return true;
-}
-}  // namespace opentxs::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto::account
