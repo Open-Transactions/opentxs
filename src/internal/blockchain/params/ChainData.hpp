@@ -108,6 +108,7 @@ public:
     auto IsTestnet() const noexcept -> bool;
     auto KnownCfilterTypes() const noexcept -> Set<cfilter::Type>;
     auto MaturationInterval() const noexcept -> block::Height;
+    auto MaxNotifications() const noexcept -> std::size_t;
     auto P2PDefaultPort() const noexcept -> std::uint16_t;
     auto P2PDefaultProtocol() const noexcept -> network::blockchain::Protocol;
     auto P2PMagicBits() const noexcept -> std::uint32_t;

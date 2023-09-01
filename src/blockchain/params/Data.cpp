@@ -5,6 +5,7 @@
 
 #include "blockchain/params/Data.hpp"  // IWYU pragma: associated
 
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
@@ -105,6 +106,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"0354578634dd178058ad5f3addf0d97c45911f483c99a1022ce51502e142e99f"sv,
                            "049dc75e0d584a300293ef3d3980"sv}},
                      },
+                     2_uz,
                  }},
                 {blockchain::Type::Bitcoin_testnet3,
                  {
@@ -175,6 +177,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"a1310188d76ce653283a3086aa6f1ba30b6934990a093e1789a78a43b9261315"sv,
                            "04e2f587e146bf6c662d35278a40"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::BitcoinCash,
                  {
@@ -252,6 +255,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"0354578634dd178058ad5f3addf0d97c45911f483c99a1022ce51502e142e99f"sv,
                            "049dc75e0d584a300293ef3d3980"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::BitcoinCash_testnet3,
                  {
@@ -327,6 +331,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"a1310188d76ce653283a3086aa6f1ba30b6934990a093e1789a78a43b9261315"sv,
                            "04e2f587e146bf6c662d35278a40"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::BitcoinCash_testnet4,
                  {
@@ -402,6 +407,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"95ead3821cbfd071e3c2eba402038bc02cee3f5647ee1c9f02dc283590d3ff53"sv,
                            "04a01a958ade0a4933acf0bef8b0"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::Ethereum,
                  {
@@ -435,6 +441,7 @@ auto Chains() noexcept -> const ChainMap&
                          {P2TR, false},
                      },
                      P2PKH,
+                     {},
                      {},
                      {},
                      {},
@@ -478,6 +485,7 @@ auto Chains() noexcept -> const ChainMap&
                      {},
                      {},
                      {},
+                     {},
                  }},
                 {blockchain::Type::Ethereum_goerli,
                  {
@@ -511,6 +519,7 @@ auto Chains() noexcept -> const ChainMap&
                          {P2TR, false},
                      },
                      P2PKH,
+                     {},
                      {},
                      {},
                      {},
@@ -554,6 +563,7 @@ auto Chains() noexcept -> const ChainMap&
                      {},
                      {},
                      {},
+                     {},
                  }},
                 {blockchain::Type::Ethereum_holesovice,
                  {
@@ -587,6 +597,7 @@ auto Chains() noexcept -> const ChainMap&
                          {P2TR, false},
                      },
                      P2PKH,
+                     {},
                      {},
                      {},
                      {},
@@ -662,6 +673,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"5a71cc36ad0b35d4c99b335ff69c3ed89e667b9772dbbf40396a1b4f2b2c3080"sv,
                            "049de8963322099e81f3bf7c4600"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::Litecoin_testnet4,
                  {
@@ -730,6 +742,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"042bce138093a271d8d7f730f7f9f9ab8c7240f297b47aea4440dceec623aca3"sv,
                            "048b3d6095a4b01eb30ce44017c0"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::PKT,
                  {
@@ -798,6 +811,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"d8a96cd0b19de626e7d84c964cf1da0e09b90c589bd3e23bcf1c931779a47512"sv,
                            "02649a429ba06300"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::PKT_testnet,
                  {
@@ -866,6 +880,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"d8a96cd0b19de626e7d84c964cf1da0e09b90c589bd3e23bcf1c931779a47512"sv,
                            "02649a429ba06300"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::BitcoinSV,
                  {
@@ -940,6 +955,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"0354578634dd178058ad5f3addf0d97c45911f483c99a1022ce51502e142e99f"sv,
                            "049dc75e0d584a300293ef3d3980"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::BitcoinSV_testnet3,
                  {
@@ -1014,6 +1030,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"a1310188d76ce653283a3086aa6f1ba30b6934990a093e1789a78a43b9261315"sv,
                            "04e2f587e146bf6c662d35278a40"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::eCash,
                  {
@@ -1092,6 +1109,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"0354578634dd178058ad5f3addf0d97c45911f483c99a1022ce51502e142e99f"sv,
                            "049dc75e0d584a300293ef3d3980"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::eCash_testnet3,
                  {
@@ -1169,6 +1187,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"a1310188d76ce653283a3086aa6f1ba30b6934990a093e1789a78a43b9261315"sv,
                            "04e2f587e146bf6c662d35278a40"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::Casper,
                  {
@@ -1207,6 +1226,7 @@ auto Chains() noexcept -> const ChainMap&
                      {},
                      {},
                      {},
+                     {},
                  }},
                 {blockchain::Type::Casper_testnet,
                  {
@@ -1240,6 +1260,7 @@ auto Chains() noexcept -> const ChainMap&
                          {P2TR, false},
                      },
                      P2PKH,
+                     {},
                      {},
                      {},
                      {},
@@ -1311,6 +1332,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"569b62f1c34b6f0eb93e8f0cca7d8750a34a2342682910f1d2e2576738b00b3e"sv,
                            "047f3e1e9be1085bde55aa378ac0"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::Dash_testnet3,
                  {
@@ -1377,6 +1399,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"12dc6e4a4282eb1578d59a101f58f4861be41057e3524f1e13de8d72ffa19ba4"sv,
                            "042a1bbff5a1733041f84275fef0"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::UnitTest,
                  {
@@ -1444,6 +1467,7 @@ auto Chains() noexcept -> const ChainMap&
                           {"18e0f10a66d223e36d0333dfe3e2546135f632f53e1e44ba016022f0a404628a"sv,
                            "042547f6de198130360443dfcdc0"sv}},
                      },
+                     8_uz,
                  }},
                 {blockchain::Type::Tron,
                  {
