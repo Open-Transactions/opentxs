@@ -142,7 +142,8 @@ public:
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        node::internal::SpendPolicy& policy) noexcept -> std::optional<UTXO>;
+        const node::internal::SpendPolicy& policy) noexcept
+        -> std::optional<UTXO>;
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,

@@ -280,7 +280,8 @@ auto Wallet::ReorgTo(
 auto Wallet::ReserveUTXO(
     const identifier::Nym& spender,
     const identifier::Generic& id,
-    node::internal::SpendPolicy& policy) const noexcept -> std::optional<UTXO>
+    const node::internal::SpendPolicy& policy) const noexcept
+    -> std::optional<UTXO>
 {
     if (false == proposals_.Exists(id)) {
         LogError()(OT_PRETTY_CLASS())("Proposal ")(id, api_.Crypto())(

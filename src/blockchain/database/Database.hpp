@@ -455,7 +455,7 @@ public:
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        node::internal::SpendPolicy& policy) noexcept
+        const node::internal::SpendPolicy& policy) noexcept
         -> std::optional<UTXO> final
     {
         return wallet_.ReserveUTXO(spender, proposal, policy);

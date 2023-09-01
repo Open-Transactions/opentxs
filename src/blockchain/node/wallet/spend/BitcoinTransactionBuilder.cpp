@@ -77,7 +77,7 @@
 #include "opentxs/blockchain/node/TxoState.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/node/TxoTag.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/node/Wallet.hpp"
+#include "opentxs/blockchain/node/Wallet.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
@@ -169,15 +169,21 @@ struct BitcoinTransactionBuilder::Imp {
         }
 
         while (false == is_funded()) {
-            auto policy = node::internal::SpendPolicy{};
-            auto utxo = db_.ReserveUTXO(spender(), id_, policy);
+            using node::internal::SpendPolicy;
+            static constexpr auto conservative = SpendPolicy{false, true};
+            static constexpr auto relaxed = SpendPolicy{true, true};
+            auto utxo = db_.ReserveUTXO(spender(), id_, conservative);
 
             if (false == utxo.has_value()) {
-                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
-                output = PermanentFailure;
-                rc = InsufficientFunds;
+                utxo = db_.ReserveUTXO(spender(), id_, relaxed);
 
-                return output;
+                if (false == utxo.has_value()) {
+                    LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                    output = PermanentFailure;
+                    rc = InsufficientFunds;
+
+                    return output;
+                }
             }
 
             if (false == add_input(utxo.value())) {
@@ -1368,26 +1374,38 @@ private:
     auto add_sweep_inputs(BuildResult& output, SendResult& rc) noexcept -> bool
     {
         try {
-            const auto utxos = [&] {
-                constexpr auto state = TxoState::ConfirmedNew;
-                const auto& sweep = proposal_.sweep();
+            const auto utxos = [&, this] {
+                const auto get = [&, this](auto state) {
+                    const auto& sweep = proposal_.sweep();
 
-                if (sweep.has_key()) {
-                    const auto& sKey = sweep.key();
-                    const auto key = crypto::Key{
-                        api_.Factory().AccountIDFromBase58(sKey.subaccount()),
-                        static_cast<crypto::Subchain>(sKey.subchain()),
-                        static_cast<Bip32Index>(sKey.index())};
+                    if (sweep.has_key()) {
+                        const auto& sKey = sweep.key();
+                        const auto key = crypto::Key{
+                            api_.Factory().AccountIDFromBase58(
+                                sKey.subaccount()),
+                            static_cast<crypto::Subchain>(sKey.subchain()),
+                            static_cast<Bip32Index>(sKey.index())};
 
-                    return node_.Wallet().GetOutputs(key, state);
-                } else if (sweep.has_subaccount()) {
-                    const auto id =
-                        api_.Factory().Internal().AccountID(sweep.subaccount());
+                        return node_.Wallet().GetOutputs(key, state);
+                    } else if (sweep.has_subaccount()) {
+                        const auto id = api_.Factory().Internal().AccountID(
+                            sweep.subaccount());
 
-                    return node_.Wallet().GetOutputs(spender(), id, state);
+                        return node_.Wallet().GetOutputs(spender(), id, state);
+                    } else {
+
+                        return node_.Wallet().GetOutputs(spender(), state);
+                    }
+                };
+                constexpr auto confirmed = TxoState::ConfirmedNew;
+                constexpr auto unconfirmed = TxoState::UnconfirmedNew;
+
+                if (auto out = get(confirmed); false == out.empty()) {
+
+                    return out;
                 } else {
 
-                    return node_.Wallet().GetOutputs(spender(), state);
+                    return get(unconfirmed);
                 }
             }();
 

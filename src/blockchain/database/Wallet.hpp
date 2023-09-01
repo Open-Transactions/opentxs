@@ -35,7 +35,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace block
 {
 class Position;
@@ -177,7 +176,7 @@ public:
     auto ReserveUTXO(
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        node::internal::SpendPolicy& policy) const noexcept
+        const node::internal::SpendPolicy& policy) const noexcept
         -> std::optional<UTXO>;
     auto ReserveUTXO(
         const identifier::Nym& spender,
