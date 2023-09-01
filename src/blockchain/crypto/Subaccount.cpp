@@ -222,9 +222,9 @@ auto Subaccount::convert(
 }
 
 auto Subaccount::convert(const UnallocatedVector<Activity>& in) noexcept
-    -> internal::ActivityMap
+    -> ActivityMap
 {
-    auto output = internal::ActivityMap{};
+    auto output = ActivityMap{};
 
     for (const auto& [coin, key, value] : in) {
         output.emplace(

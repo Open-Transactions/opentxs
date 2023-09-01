@@ -9,6 +9,7 @@
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -43,7 +44,15 @@ auto blockchain_thread_item_id(
     -> identifier::Generic;
 }  // namespace opentxs
 
-namespace opentxs::blockchain::crypto::internal
+namespace opentxs::blockchain::crypto
 {
 using ActivityMap = UnallocatedMap<Coin, std::pair<Key, Amount>>;
-}  // namespace opentxs::blockchain::crypto::internal
+
+struct Notifications {
+    Set<opentxs::PaymentCode> incoming_{};
+    Set<opentxs::PaymentCode> outgoing_{};
+    Set<opentxs::PaymentCode> neither_{};
+};
+
+using NotificationStatus = Map<blockchain::Type, Notifications>;
+}  // namespace opentxs::blockchain::crypto

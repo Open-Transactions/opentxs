@@ -5,12 +5,15 @@
 
 #pragma once
 
+#include <cs_shared_guarded.h>
 #include <cstddef>
 #include <memory>
-#include <mutex>
+#include <shared_mutex>
+#include <span>
+#include <utility>
 
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/crypto/Wallet.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -18,6 +21,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -61,18 +65,14 @@ public:
         -> const_iterator::value_type& final;
     auto begin() const noexcept -> const_iterator final { return {this, 0}; }
     auto cbegin() const noexcept -> const_iterator final { return {this, 0}; }
-    auto cend() const noexcept -> const_iterator final
-    {
-        return {this, trees_.size()};
-    }
+    auto cend() const noexcept -> const_iterator final;
     auto Chain() const noexcept -> opentxs::blockchain::Type final
     {
         return chain_;
     }
-    auto end() const noexcept -> const_iterator final
-    {
-        return {this, trees_.size()};
-    }
+    auto end() const noexcept -> const_iterator final;
+    auto GetNotificationStatus(alloc::Strategy alloc) const noexcept
+        -> NotificationStatus final;
     auto Internal() const noexcept -> internal::Wallet& final
     {
         return const_cast<Wallet&>(*this);
@@ -81,7 +81,7 @@ public:
     {
         return parent_;
     }
-    auto size() const noexcept -> std::size_t final { return trees_.size(); }
+    auto size() const noexcept -> std::size_t final;
 
     auto AddHDNode(
         const identifier::Nym& nym,
@@ -106,34 +106,40 @@ public:
 private:
     using Accounts = UnallocatedSet<identifier::Account>;
 
+    struct Data {
+        Vector<std::unique_ptr<crypto::Account>> trees_{};
+        Map<identifier::Nym, std::size_t> index_{};
+    };
+    using Guarded = libguarded::shared_guarded<Data, std::shared_mutex>;
+
     const api::crypto::Blockchain& parent_;
     const AccountIndex& account_index_;
     const api::Session& api_;
     const api::session::Contacts& contacts_;
     const opentxs::blockchain::Type chain_;
-    mutable std::mutex lock_;
-    UnallocatedVector<std::unique_ptr<crypto::Account>> trees_;
-    UnallocatedMap<identifier::Nym, std::size_t> index_;
+    mutable Guarded data_;
 
+    auto add(
+        Data& data,
+        const identifier::Nym& id,
+        std::unique_ptr<crypto::Account> tree) const noexcept -> bool;
     using crypto::Wallet::at;
-    auto at(const Lock& lock, const std::size_t index) const noexcept(false)
+    auto at(const Data& data, const std::size_t index) const noexcept(false)
         -> const crypto::Account&;
+    auto at(Data& data, const std::size_t index) const noexcept(false)
+        -> crypto::Account&;
     auto factory(
         const identifier::Nym& nym,
         const Accounts& hd,
         const Accounts& paymentCode) const noexcept
         -> std::unique_ptr<crypto::Account>;
+    auto get(std::span<std::pair<const crypto::Account*, Notifications*>>)
+        const noexcept -> void;
+    auto get_or_create(Data& data, const identifier::Nym& id) const noexcept
+        -> crypto::Account&;
     using crypto::Wallet::size;
-    auto size(const Lock& lock) const noexcept -> std::size_t;
+    auto size(const Data& data) const noexcept -> std::size_t;
 
-    auto add(
-        const Lock& lock,
-        const identifier::Nym& id,
-        std::unique_ptr<crypto::Account> tree) noexcept -> bool;
-    auto at(const Lock& lock, const std::size_t index) noexcept(false)
-        -> crypto::Account&;
-    auto get_or_create(const Lock& lock, const identifier::Nym& id) noexcept
-        -> crypto::Account&;
-    void init() noexcept;
+    auto init() noexcept -> void;
 };
 }  // namespace opentxs::blockchain::crypto::implementation

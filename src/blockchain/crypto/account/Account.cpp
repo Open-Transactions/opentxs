@@ -3,23 +3,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Account.hpp"  // IWYU pragma: associated
+// IWYU pragma: no_forward_declare opentxs::blockchain::crypto::Account
+
+#include "blockchain/crypto/account/Account.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
 #include <HDAccount.pb.h>
+#include <cstddef>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "blockchain/crypto/Account.tpp"  // IWYU pragma: keep
 #include "blockchain/crypto/AccountIndex.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
+#include "internal/util/Mutex.hpp"
+#include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -28,6 +33,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"      // IWYU pragma: keep
@@ -36,6 +42,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -48,6 +55,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
@@ -284,6 +292,27 @@ auto Account::FindNym(const identifier::Nym& id) const noexcept -> void
 
         return work;
     }());
+}
+
+auto Account::Get(Notifications& out) const noexcept -> void
+{
+    payment_code_.for_each([&](const crypto::PaymentCode& pc) {
+        const auto [incoming, outgoing] = pc.NotificationCount();
+        const auto& remote = pc.Remote();
+        auto atLeastOne{false};
+
+        if (0_uz < incoming) {
+            out.incoming_.emplace(remote);
+            atLeastOne = true;
+        }
+
+        if (0_uz < outgoing) {
+            out.outgoing_.emplace(remote);
+            atLeastOne = true;
+        }
+
+        if (false == atLeastOne) { out.neither_.emplace(remote); }
+    });
 }
 
 auto Account::GetNextChangeKey(const PasswordPrompt& reason) const
