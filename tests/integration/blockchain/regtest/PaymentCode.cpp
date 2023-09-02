@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -52,15 +51,7 @@ TEST_F(Regtest_payment_code, init_opentxs) {}
 
 TEST_F(Regtest_payment_code, start_chains) { EXPECT_TRUE(Start()); }
 
-TEST_F(Regtest_payment_code, connect_peers)
-{
-    // TODO find out why inproc peers sometimes time out
-    const auto connected = Connect();
-
-    EXPECT_TRUE(connected);
-
-    OT_ASSERT(connected);
-}
+TEST_F(Regtest_payment_code, connect_peers) { EXPECT_TRUE(Connect()); }
 
 TEST_F(Regtest_payment_code, init_ui_models)
 {
@@ -558,6 +549,23 @@ TEST_F(Regtest_payment_code, first_outgoing_transaction)
         EXPECT_EQ(tags.count(Tag::Notification), 1);
         EXPECT_EQ(tags.count(Tag::Change), 1);
     }
+}
+
+TEST_F(Regtest_payment_code, check_notification_transactions_sender)
+{
+    const auto& account =
+        client_1_.Crypto().Blockchain().Account(alex_.nym_id_, test_chain_);
+    const auto& pc = account.GetPaymentCode();
+
+    ASSERT_TRUE(0_uz < pc.size());
+
+    const auto& subaccount = pc.at(0_uz);
+    const auto [incoming, outgoing] = subaccount.NotificationCount();
+
+    EXPECT_EQ(subaccount.IncomingNotificationCount(), 0_uz);
+    EXPECT_EQ(subaccount.OutgoingNotificationCount(), 1_uz);
+    EXPECT_EQ(incoming, 0_uz);
+    EXPECT_EQ(outgoing, 1_uz);
 }
 
 TEST_F(Regtest_payment_code, alex_contact_list_first_spend_unconfirmed)
@@ -1368,6 +1376,23 @@ TEST_F(Regtest_payment_code, bob_first_incoming_transaction)
 TEST_F(Regtest_payment_code, bob_txodb_first_spend_confirmed)
 {
     EXPECT_TRUE(CheckTXODBBob());
+}
+
+TEST_F(Regtest_payment_code, check_notification_transactions_recipient)
+{
+    const auto& account =
+        client_2_.Crypto().Blockchain().Account(bob_.nym_id_, test_chain_);
+    const auto& pc = account.GetPaymentCode();
+
+    ASSERT_TRUE(0_uz < pc.size());
+
+    const auto& subaccount = pc.at(0_uz);
+    const auto [incoming, outgoing] = subaccount.NotificationCount();
+
+    EXPECT_EQ(subaccount.IncomingNotificationCount(), 1_uz);
+    EXPECT_EQ(subaccount.OutgoingNotificationCount(), 0_uz);
+    EXPECT_EQ(incoming, 1_uz);
+    EXPECT_EQ(outgoing, 0_uz);
 }
 
 TEST_F(Regtest_payment_code, send_to_bob_again)

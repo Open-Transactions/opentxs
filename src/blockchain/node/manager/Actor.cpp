@@ -614,36 +614,37 @@ auto Actor::process_send_to_payment_code(
             return out;
         }();
         // TODO c++20
-        const auto proposal =
-            [&](const auto& i, const auto& p, const auto& pk) {
-                const auto id = api_.Factory().IdentifierFromRandom();
-                auto out = proto::BlockchainTransactionProposal{};
-                out.set_version(proposal_version_);
-                out.set_id(id.asBase58(api_.Crypto()));
-                out.set_initiator(nymID.data(), nymID.size());
-                out.set_expires(Clock::to_time_t(Clock::now() + 1h));
-                out.set_memo(UnallocatedCString{memo});
+        const auto proposal = [&](const auto& i,
+                                  const auto& p,
+                                  const auto& pk) {
+            const auto id = api_.Factory().IdentifierFromRandom();
+            auto out = proto::BlockchainTransactionProposal{};
+            out.set_version(proposal_version_);
+            out.set_id(id.asBase58(api_.Crypto()));
+            out.set_initiator(nymID.data(), nymID.size());
+            out.set_expires(Clock::to_time_t(Clock::now() + 1h));
+            out.set_memo(UnallocatedCString{memo});
 
-                {
-                    auto& txout = *out.add_output();
-                    txout.set_version(output_version_);
-                    amount.Serialize(writer(txout.mutable_amount()));
-                    txout.set_index(i);
-                    txout.set_paymentcodechannel(
-                        account.ID().asBase58(api_.Crypto()));
-                    txout.set_pubkey(UnallocatedCString{pk.Bytes()});
-                    txout.set_contact(UnallocatedCString{contact.Bytes()});
-                }
+            {
+                auto& txout = *out.add_output();
+                txout.set_version(output_version_);
+                amount.Serialize(writer(txout.mutable_amount()));
+                txout.set_index(i);
+                txout.set_paymentcodechannel(
+                    account.ID().asBase58(api_.Crypto()));
+                txout.set_pubkey(UnallocatedCString{pk.Bytes()});
+                txout.set_contact(UnallocatedCString{contact.Bytes()});
+            }
 
-                matterfi::paymentcode_extra_notifications(account, notify);
-                // TODO add preemptive notifications
-                const auto serialize = [&](const auto& r) {
-                    serialize_notification(fuckllvm.first, r, p, out);
-                };
-                std::for_each(notify.begin(), notify.end(), serialize);
+            matterfi::paymentcode_extra_notifications(log_, account, notify);
+            // TODO add preemptive notifications
+            const auto serialize = [&](const auto& r) {
+                serialize_notification(fuckllvm.first, r, p, out);
+            };
+            std::for_each(notify.begin(), notify.end(), serialize);
 
-                return out;
-            }(index, path, pubkey);
+            return out;
+        }(index, path, pubkey);
         shared_.Wallet().Internal().ConstructTransaction(
             proposal, shared_.Finish(promise));
     } catch (const std::exception& e) {

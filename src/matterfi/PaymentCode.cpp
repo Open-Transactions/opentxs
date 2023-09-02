@@ -7,6 +7,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/util/Log.hpp"
 
 // This functions in this file implement operations covered by one or more
 // claims of US Provisional Patent Application 63/507,085 and 63/512,052
@@ -16,11 +17,15 @@ namespace matterfi
 using namespace opentxs::literals;
 
 auto paymentcode_extra_notifications(
+    const opentxs::Log& log,
     const opentxs::blockchain::crypto::PaymentCode& account,
     opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void
 {
     if (0_uz == account.IncomingNotificationCount()) {
+        log(__func__)(": adding extra notification to self").Flush();
         out.emplace(account.Local());
+    } else {
+        log(__func__)(": contact has already sent notification").Flush();
     }
 }
 }  // namespace matterfi

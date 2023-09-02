@@ -17,6 +17,7 @@ class PaymentCode;
 }  // namespace crypto
 }  // namespace blockchain
 
+class Log;
 class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -24,6 +25,7 @@ class PaymentCode;
 namespace matterfi
 {
 auto paymentcode_extra_notifications(
+    const opentxs::Log& log,
     const opentxs::blockchain::crypto::PaymentCode& account,
     opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void;
 }  // namespace matterfi
