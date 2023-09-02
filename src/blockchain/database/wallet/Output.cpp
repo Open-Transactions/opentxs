@@ -59,7 +59,6 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -1553,124 +1552,19 @@ private:
 
         const auto& proposalID = oProposalID.value();
 
-        if (0u < processed.count(proposalID)) { return true; }
+        if (processed.contains(proposalID)) { return true; }
 
-        const auto created = [&] {
-            auto out = UnallocatedVector<block::Outpoint>{};
-            lmdb_.Load(
-                proposal_created_,
-                proposalID.Bytes(),
-                [&](const auto bytes) { out.emplace_back(bytes); },
-                Mode::Multiple);
+        if (proposals_.Exists(proposalID)) {
 
-            return out;
-        }();
-        const auto spent = [&] {
-            auto out = UnallocatedVector<block::Outpoint>{};
-            lmdb_.Load(
-                proposal_spent_,
-                proposalID.Bytes(),
-                [&](const auto bytes) { out.emplace_back(bytes); },
-                Mode::Multiple);
+            return finish_proposal(
+                proposalID, txid, outpoint, block, cache, processed, tx);
+        } else {
+            LogError()(OT_PRETTY_CLASS())("proposal ")(
+                proposalID, api_.Crypto())(" already processed")
+                .Flush();
 
-            return out;
-        }();
-
-        for (const auto& newOutpoint : created) {
-            const auto rhs = api_.Factory().DataFromBytes(newOutpoint.Txid());
-
-            if (txid != rhs) {
-                static constexpr auto state = node::TxoState::OrphanedNew;
-                const auto changed =
-                    change_state(cache, tx, outpoint, state, block);
-
-                if (changed) {
-                    LogTrace()(OT_PRETTY_CLASS())("Updated ")(
-                        outpoint)(" to state ")(print(state))
-                        .Flush();
-                } else {
-                    LogError()(OT_PRETTY_CLASS())("Failed to update ")(
-                        outpoint)(" to state ")(print(state))
-                        .Flush();
-
-                    return false;
-                }
-            }
-
-            auto rc = lmdb_.Delete(
-                proposal_created_, proposalID.Bytes(), newOutpoint.Bytes(), tx);
-
-            if (rc) {
-                LogTrace()(OT_PRETTY_CLASS())("Deleted index for proposal ")(
-                    proposalID,
-                    api_.Crypto())(" to created output ")(newOutpoint)
-                    .Flush();
-            } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to delete index for proposal ")(
-                    proposalID,
-                    api_.Crypto())(" to created output ")(newOutpoint)
-                    .Flush();
-
-                return false;
-            }
-
-            rc = lmdb_.Delete(output_proposal_, newOutpoint.Bytes(), tx);
-
-            if (rc) {
-                LogTrace()(OT_PRETTY_CLASS())(
-                    "Deleted index for created outpoint ")(
-                    newOutpoint)(" to proposal ")(proposalID, api_.Crypto())
-                    .Flush();
-            } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to delete index for created outpoint ")(
-                    newOutpoint)(" to proposal ")(proposalID, api_.Crypto())
-                    .Flush();
-
-                return false;
-            }
+            return lmdb_.Delete(output_proposal_, outpoint.Bytes(), tx);
         }
-
-        for (const auto& spentOutpoint : spent) {
-            auto rc = lmdb_.Delete(
-                proposal_spent_, proposalID.Bytes(), spentOutpoint.Bytes(), tx);
-
-            if (rc) {
-                LogTrace()(OT_PRETTY_CLASS())("Delete index for proposal ")(
-                    proposalID,
-                    api_.Crypto())(" to consumed output ")(spentOutpoint)
-                    .Flush();
-            } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to delete index for proposal ")(
-                    proposalID,
-                    api_.Crypto())(" to consumed output ")(spentOutpoint)
-                    .Flush();
-
-                return false;
-            }
-
-            rc = lmdb_.Delete(output_proposal_, spentOutpoint.Bytes(), tx);
-
-            if (rc) {
-                LogTrace()(OT_PRETTY_CLASS())(
-                    "Deleted index for consumed outpoint ")(
-                    spentOutpoint)(" to proposal ")(proposalID, api_.Crypto())
-                    .Flush();
-            } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to delete index for consumed outpoint ")(
-                    spentOutpoint)(" to proposal ")(proposalID, api_.Crypto())
-                    .Flush();
-
-                return false;
-            }
-        }
-
-        processed.emplace(proposalID);
-
-        return proposals_.FinishProposal(tx, proposalID);
     }
     [[nodiscard]] auto choose(
         const identifier::Nym& spender,
@@ -1815,6 +1709,137 @@ private:
             }
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+            return false;
+        }
+
+        return true;
+    }
+    [[nodiscard]] auto finish_proposal(
+        const identifier::Generic& proposalID,
+        const block::TransactionHash& txid,
+        const block::Outpoint& outpoint,
+        const block::Position& block,
+        OutputCache& cache,
+        UnallocatedSet<identifier::Generic>& processed,
+        storage::lmdb::Transaction& tx
+
+        ) noexcept -> bool
+    {
+        const auto& log = LogTrace();
+        const auto& crypto = api_.Crypto();
+        const auto created = [&] {
+            auto out = UnallocatedVector<block::Outpoint>{};
+            lmdb_.Load(
+                proposal_created_,
+                proposalID.Bytes(),
+                [&](const auto bytes) { out.emplace_back(bytes); },
+                Mode::Multiple);
+
+            return out;
+        }();
+        const auto spent = [&] {
+            auto out = UnallocatedVector<block::Outpoint>{};
+            lmdb_.Load(
+                proposal_spent_,
+                proposalID.Bytes(),
+                [&](const auto bytes) { out.emplace_back(bytes); },
+                Mode::Multiple);
+
+            return out;
+        }();
+        const auto print_id = [&](const auto& id) { log(" * ")(id).Flush(); };
+        log("Proposal ")(proposalID, crypto)(" consumed ")(spent.size())(
+            " outputs:")
+            .Flush();
+        std::for_each(spent.begin(), spent.end(), print_id);
+        log("Proposal ")(proposalID, crypto)(" created ")(created.size())(
+            " outputs:")
+            .Flush();
+        std::for_each(created.begin(), created.end(), print_id);
+
+        for (const auto& newOutpoint : created) {
+            if (txid.Bytes() != newOutpoint.Txid()) {
+                static constexpr auto state = node::TxoState::OrphanedNew;
+                const auto changed =
+                    change_state(cache, tx, outpoint, state, block);
+
+                if (changed) {
+                    log(OT_PRETTY_CLASS())("Updated ")(outpoint)(" to state ")(
+                        print(state))
+                        .Flush();
+                } else {
+                    LogError()(OT_PRETTY_CLASS())("Failed to update ")(
+                        outpoint)(" to state ")(print(state))
+                        .Flush();
+
+                    return false;
+                }
+            }
+
+            auto rc = lmdb_.Delete(
+                proposal_created_, proposalID.Bytes(), newOutpoint.Bytes(), tx);
+
+            if (rc) {
+                log(OT_PRETTY_CLASS())("Deleted index for proposal ")(
+                    proposalID, crypto)(" to created output ")(newOutpoint)
+                    .Flush();
+            } else {
+                LogError()(OT_PRETTY_CLASS())(
+                    "Failed to delete index for proposal ")(proposalID, crypto)(
+                    " to created output ")(newOutpoint)
+                    .Flush();
+            }
+
+            rc = lmdb_.Delete(output_proposal_, newOutpoint.Bytes(), tx);
+
+            if (rc) {
+                log(OT_PRETTY_CLASS())("Deleted index for created outpoint ")(
+                    newOutpoint)(" to proposal ")(proposalID, crypto)
+                    .Flush();
+            } else {
+                LogError()(OT_PRETTY_CLASS())(
+                    "Failed to delete index for created outpoint ")(
+                    newOutpoint)(" to proposal ")(proposalID, crypto)
+                    .Flush();
+            }
+        }
+
+        for (const auto& spentOutpoint : spent) {
+            auto rc = lmdb_.Delete(
+                proposal_spent_, proposalID.Bytes(), spentOutpoint.Bytes(), tx);
+
+            if (rc) {
+                log(OT_PRETTY_CLASS())("Delete index for proposal ")(
+                    proposalID, crypto)(" to consumed output ")(spentOutpoint)
+                    .Flush();
+            } else {
+                LogError()(OT_PRETTY_CLASS())(
+                    "Failed to delete index for proposal ")(proposalID, crypto)(
+                    " to consumed output ")(spentOutpoint)
+                    .Flush();
+            }
+
+            rc = lmdb_.Delete(output_proposal_, spentOutpoint.Bytes(), tx);
+
+            if (rc) {
+                log(OT_PRETTY_CLASS())("Deleted index for consumed outpoint ")(
+                    spentOutpoint)(" to proposal ")(proposalID, crypto)
+                    .Flush();
+            } else {
+                LogError()(OT_PRETTY_CLASS())(
+                    "Failed to delete index for consumed outpoint ")(
+                    spentOutpoint)(" to proposal ")(proposalID, crypto)
+                    .Flush();
+            }
+        }
+
+        if (proposals_.FinishProposal(tx, proposalID)) {
+            processed.emplace(proposalID);
+        } else {
+            LogError()(OT_PRETTY_CLASS())("Failed to finish proposal ")(
+                proposalID, crypto)
+                .Flush();
 
             return false;
         }
