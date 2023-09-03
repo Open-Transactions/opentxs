@@ -12,11 +12,13 @@
 #include <optional>
 #include <span>
 #include <string_view>
+#include <utility>
 
 #include "api/crypto/blockchain/AccountCache.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "api/crypto/blockchain/Wallets.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -155,6 +157,10 @@ struct Blockchain::Imp {
         const Style style,
         const opentxs::blockchain::Type chain,
         const Data& data) const noexcept -> UnallocatedCString;
+    auto GetNotificationStatus(
+        const identifier::Nym& nym,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::blockchain::crypto::NotificationStatus;
     auto GetKey(const Key& id) const noexcept(false)
         -> const opentxs::blockchain::crypto::Element&;
     auto HDSubaccount(
@@ -313,6 +319,10 @@ protected:
     auto validate_nym(const identifier::Nym& nymID) const noexcept -> bool;
 
 private:
+    auto get(std::span<std::pair<
+                 const opentxs::blockchain::crypto::Account*,
+                 opentxs::blockchain::crypto::Notifications*>>) const noexcept
+        -> void;
     virtual auto notify_new_account(
         const identifier::Account& id,
         const identifier::Nym& owner,

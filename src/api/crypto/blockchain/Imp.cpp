@@ -647,6 +647,32 @@ auto Blockchain::Imp::EncodeAddress(
     }
 }
 
+auto Blockchain::Imp::GetNotificationStatus(
+    const identifier::Nym& nym,
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::blockchain::crypto::NotificationStatus
+{
+    auto out = opentxs::blockchain::crypto::NotificationStatus{alloc.result_};
+    out.clear();
+    auto job = [&] {
+        auto values = Vector<std::pair<
+            const opentxs::blockchain::crypto::Account*,
+            opentxs::blockchain::crypto::Notifications*>>{alloc.work_};
+
+        for (const auto& id : wallets_.AccountList(nym)) {
+            const auto [chain, _] = LookupAccount(id);
+            const auto& account = Account(nym, chain);
+            values.emplace_back(
+                std::addressof(account), std::addressof(out[chain]));
+        }
+
+        return values;
+    }();
+    get(job);
+
+    return out;
+}
+
 auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     -> const opentxs::blockchain::crypto::Element&
 {

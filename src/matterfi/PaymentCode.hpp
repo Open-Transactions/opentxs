@@ -4,11 +4,18 @@
 
 #pragma once
 
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
 namespace crypto
@@ -16,6 +23,11 @@ namespace crypto
 class PaymentCode;
 }  // namespace crypto
 }  // namespace blockchain
+
+namespace identifier
+{
+class Nym;
+}  // namespace identifier
 
 class Log;
 class PaymentCode;
@@ -28,4 +40,11 @@ auto paymentcode_extra_notifications(
     const opentxs::Log& log,
     const opentxs::blockchain::crypto::PaymentCode& account,
     opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void;
+auto paymentcode_preemptive_notifications(
+    const opentxs::Log& log,
+    const opentxs::api::Session& api,
+    const opentxs::identifier::Nym& sender,
+    opentxs::blockchain::Type chain,
+    opentxs::Set<opentxs::PaymentCode>& out,
+    opentxs::alloc::Strategy alloc) noexcept -> void;
 }  // namespace matterfi

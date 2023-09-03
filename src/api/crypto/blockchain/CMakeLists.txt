@@ -20,6 +20,7 @@ target_sources(
     "Wallets.cpp"
     "Wallets.hpp"
 )
+libopentxs_parallel_algorithms()
 libopentxs_link_internal(opentxs-bech32)
 
 if(OT_BLOCKCHAIN_EXPORT)

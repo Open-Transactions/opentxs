@@ -3,16 +3,18 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
+#include "api/crypto/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include "TBB.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/util/P0330.hpp"
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::api::crypto::imp
 {
-auto Wallet::get(std::span<std::pair<const crypto::Account*, Notifications*>>
-                     in) const noexcept -> void
+auto Blockchain::Imp::get(
+    std::span<std::pair<
+        const opentxs::blockchain::crypto::Account*,
+        opentxs::blockchain::crypto::Notifications*>> in) const noexcept -> void
 {
     tbb::parallel_for(
         tbb::blocked_range<std::size_t>{0_uz, in.size()}, [&](const auto& r) {
@@ -22,4 +24,4 @@ auto Wallet::get(std::span<std::pair<const crypto::Account*, Notifications*>>
             }
         });
 }
-}  // namespace opentxs::blockchain::crypto::implementation
+}  // namespace opentxs::api::crypto::imp

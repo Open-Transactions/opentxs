@@ -510,7 +510,7 @@ auto Actor::process_send_to_address(
                 // TODO c++20
                 const auto stuff = get_sender(nymID, rc);
                 const auto [sender, path] = stuff;
-                const auto notify = extract_notifications(
+                auto notify = extract_notifications(
                     body.subspan(6),
                     nymID,
                     sender,
@@ -518,7 +518,13 @@ auto Actor::process_send_to_address(
                     reason,
                     rc,
                     {monotonic, monotonic});
-                // TODO add preemptive notifications
+                matterfi::paymentcode_preemptive_notifications(
+                    log_,
+                    api_,
+                    nymID,
+                    shared_.Chain(),
+                    notify,
+                    {monotonic, monotonic});
                 const auto serialize = [&](const auto& r) {
                     serialize_notification(stuff.first, r, stuff.second, out);
                 };
@@ -637,7 +643,13 @@ auto Actor::process_send_to_payment_code(
             }
 
             matterfi::paymentcode_extra_notifications(log_, account, notify);
-            // TODO add preemptive notifications
+            matterfi::paymentcode_preemptive_notifications(
+                log_,
+                api_,
+                nymID,
+                shared_.Chain(),
+                notify,
+                {monotonic, monotonic});
             const auto serialize = [&](const auto& r) {
                 serialize_notification(fuckllvm.first, r, p, out);
             };
@@ -785,7 +797,7 @@ auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
                 // TODO c++20
                 const auto stuff = get_sender(nymID, rc);
                 const auto [sender, path] = stuff;
-                const auto notify = extract_notifications(
+                auto notify = extract_notifications(
                     body.subspan(6),
                     nymID,
                     sender,
@@ -793,7 +805,13 @@ auto Actor::process_sweep(Message&& in, allocator_type monotonic) noexcept
                     reason,
                     rc,
                     {monotonic, monotonic});
-                // TODO add preemptive notifications
+                matterfi::paymentcode_preemptive_notifications(
+                    log_,
+                    api_,
+                    nymID,
+                    shared_.Chain(),
+                    notify,
+                    {monotonic, monotonic});
                 const auto serialize = [&](const auto& r) {
                     serialize_notification(stuff.first, r, stuff.second, out);
                 };

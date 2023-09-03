@@ -7,17 +7,11 @@
 
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 
-#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace alloc
-{
-struct Strategy;
-}  // namespace alloc
-
 namespace identifier
 {
 class Account;
@@ -35,9 +29,6 @@ class PasswordPrompt;
 namespace opentxs::blockchain::crypto::internal
 {
 struct Wallet : virtual public crypto::Wallet {
-    virtual auto GetNotificationStatus(alloc::Strategy alloc) const noexcept
-        -> NotificationStatus = 0;
-
     virtual auto AddHDNode(
         const identifier::Nym& nym,
         const proto::HDPath& path,
