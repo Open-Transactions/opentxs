@@ -152,7 +152,7 @@ PaymentCode::PaymentCode(
         auto out =
             UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
-        if (false == txid.empty()) { out.emplace(txid); }
+        if (false == txid.IsNull()) { out.emplace(txid); }
 
         return out;
     }())
@@ -237,7 +237,9 @@ PaymentCode::PaymentCode(
             UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
         for (const auto& notif : serialized.outgoing().notification()) {
-            out.emplace(notif);
+            if (const auto [i, _] = out.emplace(notif); i->IsNull()) {
+                out.erase(i);
+            }
         }
 
         return out;
@@ -247,7 +249,9 @@ PaymentCode::PaymentCode(
             UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
 
         for (const auto& notif : serialized.incoming().notification()) {
-            out.emplace(notif);
+            if (const auto [i, _] = out.emplace(notif); i->IsNull()) {
+                out.erase(i);
+            }
         }
 
         return out;

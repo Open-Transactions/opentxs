@@ -10,16 +10,19 @@ add_opentx_test(
 add_opentx_test(ottest-integration-blockchain-connection Connection.cpp)
 add_opentx_test(ottest-integration-blockchain-connection-tcp ConnectionTCP.cpp)
 add_opentx_test(ottest-integration-blockchain-connection-zmq ConnectionZMQ.cpp)
+add_opentx_test(ottest-integration-blockchain-faucet Faucet.cpp)
 add_opentx_test(ottest-integration-blockchain-generate-block Mine.cpp)
 add_opentx_test(
   ottest-integration-blockchain-notification-extra ExtraNotification.cpp
 )
-add_opentx_test(ottest-integration-blockchain-faucet Faucet.cpp)
 add_opentx_test(
   ottest-integration-blockchain-notification-multiple MultipleNotification.cpp
 )
 add_opentx_test(ottest-integration-blockchain-payment-code PaymentCode.cpp)
 add_opentx_test(ottest-integration-blockchain-reorg Reorg.cpp)
+add_opentx_test(
+  ottest-integration-blockchain-spend-unconfirmed UnconfirmedSpend.cpp
+)
 add_opentx_test(ottest-integration-blockchain-stress Stress.cpp)
 add_opentx_test(ottest-integration-blockchain-sweep Sweep.cpp)
 add_opentx_test(ottest-integration-blockchain-sync-client SyncClient.cpp)

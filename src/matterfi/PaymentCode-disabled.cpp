@@ -7,6 +7,7 @@
 namespace matterfi
 {
 auto paymentcode_extra_notifications(
+    const opentxs::Log&,
     const opentxs::blockchain::crypto::PaymentCode& account,
     opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void
 {
