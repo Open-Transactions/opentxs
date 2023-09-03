@@ -206,6 +206,14 @@ auto Blockchain::EncodeAddress(
     return imp_->EncodeAddress(style, chain, data);
 }
 
+auto Blockchain::GetNotificationStatus(
+    const identifier::Nym& nym,
+    alloc::Strategy alloc) const noexcept
+    -> opentxs::blockchain::crypto::NotificationStatus
+{
+    return imp_->GetNotificationStatus(nym, alloc);
+}
+
 auto Blockchain::GetKey(const Key& id) const noexcept(false)
     -> const opentxs::blockchain::crypto::Element&
 {

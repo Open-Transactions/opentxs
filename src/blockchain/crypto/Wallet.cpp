@@ -5,7 +5,6 @@
 
 #include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
@@ -124,32 +123,6 @@ auto Wallet::factory(
 {
     return factory::BlockchainAccountKeys(
         api_, contacts_, *this, account_index_, nym, hd, {}, paymentCode);
-}
-
-auto Wallet::GetNotificationStatus(alloc::Strategy alloc) const noexcept
-    -> NotificationStatus
-{
-    auto status = NotificationStatus{alloc.result_};
-    status.clear();
-    auto job = [&] {
-        auto values = Vector<std::pair<const crypto::Account*, Notifications*>>{
-            alloc.work_};
-        auto handle = data_.lock_shared();
-        const auto& data = handle->trees_;
-        const auto count = data.size();
-        values.reserve(count);
-        values.clear();
-        const auto prepare = [&](const auto& account) {
-            const auto* p = account.get();
-            values.emplace_back(p, std::addressof(status[p->Chain()]));
-        };
-        std::for_each(data.begin(), data.end(), prepare);
-
-        return values;
-    }();
-    get(job);
-
-    return status;
 }
 
 auto Wallet::get_or_create(Data& data, const identifier::Nym& id) const noexcept

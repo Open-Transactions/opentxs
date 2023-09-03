@@ -50,4 +50,3 @@ target_sources(
     "Wallet.cpp"
     "Wallet.hpp"
 )
-libopentxs_parallel_algorithms()

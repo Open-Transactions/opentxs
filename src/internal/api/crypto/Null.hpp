@@ -12,6 +12,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -137,6 +138,11 @@ public:
         -> const opentxs::blockchain::crypto::Element& final
     {
         throw std::out_of_range{""};
+    }
+    auto GetNotificationStatus(const identifier::Nym&, alloc::Strategy alloc)
+        const noexcept -> opentxs::blockchain::crypto::NotificationStatus final
+    {
+        return opentxs::blockchain::crypto::NotificationStatus{alloc.result_};
     }
     auto HDSubaccount(const identifier::Nym&, const identifier::Account&) const
         noexcept(false) -> const opentxs::blockchain::crypto::HD& final

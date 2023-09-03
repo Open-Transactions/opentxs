@@ -19,6 +19,7 @@
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -31,6 +32,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -130,6 +132,10 @@ public:
         -> DecodedAddress final;
     auto EncodeAddress(const Style style, const Chain chain, const Data& data)
         const noexcept -> UnallocatedCString final;
+    auto GetNotificationStatus(
+        const identifier::Nym& nym,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::blockchain::crypto::NotificationStatus final;
     auto GetKey(const Key& id) const noexcept(false)
         -> const opentxs::blockchain::crypto::Element& final;
     auto HDSubaccount(

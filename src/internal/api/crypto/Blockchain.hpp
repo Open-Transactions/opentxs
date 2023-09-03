@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -54,6 +55,10 @@ public:
     virtual auto API() const noexcept -> const api::Crypto& = 0;
     virtual auto BalanceOracleEndpoint() const noexcept -> std::string_view = 0;
     virtual auto Contacts() const noexcept -> const api::session::Contacts& = 0;
+    virtual auto GetNotificationStatus(
+        const identifier::Nym& nym,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::blockchain::crypto::NotificationStatus = 0;
     virtual auto KeyEndpoint() const noexcept -> std::string_view = 0;
     virtual auto KeyGenerated(
         const Chain chain,

@@ -9,10 +9,7 @@
 #include <cstddef>
 #include <memory>
 #include <shared_mutex>
-#include <span>
-#include <utility>
 
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/crypto/Wallet.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -21,7 +18,6 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -71,8 +67,6 @@ public:
         return chain_;
     }
     auto end() const noexcept -> const_iterator final;
-    auto GetNotificationStatus(alloc::Strategy alloc) const noexcept
-        -> NotificationStatus final;
     auto Internal() const noexcept -> internal::Wallet& final
     {
         return const_cast<Wallet&>(*this);
@@ -133,8 +127,6 @@ private:
         const Accounts& hd,
         const Accounts& paymentCode) const noexcept
         -> std::unique_ptr<crypto::Account>;
-    auto get(std::span<std::pair<const crypto::Account*, Notifications*>>)
-        const noexcept -> void;
     auto get_or_create(Data& data, const identifier::Nym& id) const noexcept
         -> crypto::Account&;
     using crypto::Wallet::size;
