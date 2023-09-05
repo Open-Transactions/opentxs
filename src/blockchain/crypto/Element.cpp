@@ -12,6 +12,7 @@
 #include <chrono>
 #include <compare>
 #include <iterator>
+#include <memory>
 #include <ratio>
 #include <stdexcept>
 #include <utility>
@@ -58,30 +59,35 @@ Element::Element(
     , blockchain_(blockchain)
     , parent_(parent)
     , chain_(chain)
-    , lock_()
     , version_(version)
     , subchain_(subchain)
     , index_(index)
-    , label_(label)
-    , contact_(std::move(contact))
     , key_(key)
-    , timestamp_(time)
-    , unconfirmed_(std::move(unconfirmed))
-    , confirmed_(std::move(confirmed))
-    , cached_(std::nullopt)
-{
-    if (false == key_.IsValid()) {
-        throw std::runtime_error("No key provided");
-    }
+    , data_([&] {
+        if (false == key.IsValid()) {
+            throw std::runtime_error("No key provided");
+        }
 
+        const auto pc = (Subchain::Incoming == subchain_) ||
+                        (Subchain::Outgoing == subchain_);
+
+        if (pc && contact.empty()) {
+            throw std::runtime_error("Missing contact");
+        }
+
+        return ElementPrivate{
+            label,
+            std::move(contact),
+            time,
+            std::move(unconfirmed),
+            std::move(confirmed),
+            std::nullopt,
+            std::nullopt};
+    }())
+{
     if (Subchain::Error == subchain_) {
         throw std::runtime_error("Invalid subchain");
     }
-
-    const auto pc =
-        (Subchain::Incoming == subchain_) || (Subchain::Outgoing == subchain_);
-
-    if (pc && contact_.empty()) { throw std::runtime_error("Missing contact"); }
 }
 
 Element::Element(
@@ -149,7 +155,7 @@ Element::Element(
               return out;
           }())
 {
-    cached_ = address;
+    data_.lock()->cached_ = address;
 }
 
 Element::Element(
@@ -173,17 +179,19 @@ Element::Element(
 auto Element::Address(const blockchain::crypto::AddressStyle format)
     const noexcept -> UnallocatedCString
 {
-    auto lock = rLock{lock_};
-
     return blockchain_.CalculateAddress(
         chain_, format, api_.Factory().DataFromBytes(key_.PublicKey()));
 }
 
 auto Element::Confirmed() const noexcept -> Txids
 {
-    auto lock = rLock{lock_};
     auto output = Txids{};
-    std::copy(confirmed_.begin(), confirmed_.end(), std::back_inserter(output));
+    auto handle = data_.lock_shared();
+    const auto& data = *handle;
+    std::copy(
+        data.confirmed_.begin(),
+        data.confirmed_.end(),
+        std::back_inserter(output));
 
     return output;
 }
@@ -196,30 +204,22 @@ auto Element::Confirm(const block::TransactionHash& tx) noexcept -> bool
         return false;
     }
 
-    auto lock = rLock{lock_};
-    unconfirmed_.erase(tx);
-    confirmed_.emplace(tx);
-    timestamp_ = Clock::now();
-    cached_ = std::nullopt;
+    auto handle = data_.lock();
+    auto& data = *handle;
+    data.unconfirmed_.erase(tx);
+    data.confirmed_.emplace(tx);
+    data.timestamp_ = Clock::now();
+    data.cached_ = std::nullopt;
 
     return true;
 }
 
 auto Element::Contact() const noexcept -> identifier::Generic
 {
-    auto lock = rLock{lock_};
-
-    return contact_;
+    return data_.lock_shared()->contact_;
 }
 
 auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
-{
-    auto lock = rLock{lock_};
-
-    return elements(lock);
-}
-
-auto Element::elements(const rLock&) const noexcept -> UnallocatedSet<ByteArray>
 {
     auto output = UnallocatedSet<ByteArray>{};
     auto pubkey = api_.Factory().DataFromBytes(key_.PublicKey());
@@ -258,16 +258,19 @@ auto Element::IsAvailable(
     const identifier::Generic& contact,
     const std::string_view memo) const noexcept -> Availability
 {
-    if (0 < confirmed_.size()) { return Availability::Used; }
+    auto handle = data_.lock_shared();
+    const auto& data = *handle;
+
+    if (0 < data.confirmed_.size()) { return Availability::Used; }
 
     const auto age = std::chrono::duration_cast<std::chrono::hours>(
-        Clock::now() - timestamp_);
+        Clock::now() - data.timestamp_);
     constexpr auto unconfirmedLimit = std::chrono::hours{24 * 7};
     constexpr auto reservedLimit = std::chrono::hours{24 * 2};
     const auto haveMetadata =
-        ((false == contact_.empty()) || (false == label_.empty()));
+        ((false == data.contact_.empty()) || (false == data.label_.empty()));
     const auto match =
-        haveMetadata && (contact_ == contact) && (label_ == memo);
+        haveMetadata && (data.contact_ == contact) && (data.label_ == memo);
 
     if (age > unconfirmedLimit) {
         if (match) {
@@ -276,7 +279,7 @@ auto Element::IsAvailable(
         } else if (haveMetadata) {
 
             return Availability::MetadataConflict;
-        } else if (0 < unconfirmed_.size()) {
+        } else if (0 < data.unconfirmed_.size()) {
 
             return Availability::StaleUnconfirmed;
         } else {
@@ -284,7 +287,7 @@ auto Element::IsAvailable(
             return Availability::NeverUsed;
         }
     } else if (age > reservedLimit) {
-        if (0 < unconfirmed_.size()) {
+        if (0 < data.unconfirmed_.size()) {
 
             return Availability::Reserved;
         } else if (match) {
@@ -306,69 +309,56 @@ auto Element::IsAvailable(
 auto Element::Key() const noexcept
     -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
-    auto lock = rLock{lock_};
-
     return key_;
 }
 
 auto Element::Label() const noexcept -> UnallocatedCString
 {
-    auto lock = rLock{lock_};
-
-    return label_;
+    return data_.lock_shared()->label_;
 }
 
 auto Element::LastActivity() const noexcept -> Time
 {
-    auto lock = rLock{lock_};
-
-    return timestamp_;
+    return data_.lock_shared()->timestamp_;
 }
 
 auto Element::PrivateKey(const PasswordPrompt& reason) const noexcept
     -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
-    auto lock = rLock{lock_};
+    if (key_.HasPrivate()) { return key_; }
 
-    if (false == key_.HasPrivate()) {
-        auto key = parent_.Internal().PrivateKey(subchain_, index_, reason);
+    {
+        auto handle = data_.lock_shared();
+        const auto& data = *handle;
 
-        if (false == key.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("error deriving private key").Flush();
-
-            return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
-        }
-
-        key_ = std::move(key);
+        if (data.private_key_.has_value()) { return *data.private_key_; }
     }
 
-    OT_ASSERT(key_.HasPrivate());
-
-    return key_;
+    return parent_.Internal().PrivateKey(*this, subchain_, index_, reason);
 }
 
 auto Element::PubkeyHash() const noexcept -> ByteArray
 {
-    auto lock = rLock{lock_};
-    const auto key = api_.Factory().DataFromBytes(key_.PublicKey());
-
-    return blockchain_.Internal().PubkeyHash(chain_, key);
+    return blockchain_.Internal().PubkeyHash(
+        chain_, ByteArray{key_.PublicKey()});
 }
 
 auto Element::Reserve(const Time time) noexcept -> bool
 {
-    auto lock = rLock{lock_};
-    timestamp_ = time;
-    cached_ = std::nullopt;
+    auto handle = data_.lock();
+    auto& data = *handle;
+    data.timestamp_ = time;
+    data.cached_ = std::nullopt;
 
     return true;
 }
 
 auto Element::Serialize() const noexcept -> Element::SerializedType
 {
-    auto lock = rLock{lock_};
+    auto handle = data_.lock();
+    auto& data = *handle;
 
-    if (false == cached_.has_value()) {
+    if (false == data.cached_.has_value()) {
         const auto key = [&] {
             auto serialized = proto::AsymmetricKey{};
 
@@ -381,62 +371,74 @@ auto Element::Serialize() const noexcept -> Element::SerializedType
             return serialized;
         }();
 
-        auto& output = cached_.emplace();
+        auto& output = data.cached_.emplace();
         output.set_version(
             (DefaultVersion > version_) ? DefaultVersion : version_);
         output.set_index(index_);
-        output.set_label(label_);
-        output.set_contact(contact_.asBase58(api_.Crypto()));
+        output.set_label(data.label_);
+        output.set_contact(data.contact_.asBase58(api_.Crypto()));
         *output.mutable_key() = key;
-        output.set_modified(Clock::to_time_t(timestamp_));
+        output.set_modified(Clock::to_time_t(data.timestamp_));
 
-        for (const auto& txid : unconfirmed_) {
+        for (const auto& txid : data.unconfirmed_) {
             output.add_unconfirmed(UnallocatedCString{txid.Bytes()});
         }
 
-        for (const auto& txid : confirmed_) {
+        for (const auto& txid : data.confirmed_) {
             output.add_confirmed(UnallocatedCString{txid.Bytes()});
         }
     }
 
-    return cached_.value();
+    return data.cached_.value();
 }
 
-void Element::SetContact(const identifier::Generic& contact) noexcept
+auto Element::SetContact(const identifier::Generic& contact) noexcept -> void
 {
     const auto pc =
         (Subchain::Incoming == subchain_) || (Subchain::Outgoing == subchain_);
 
     if (pc) { return; }
 
-    auto lock = rLock{lock_};
-    contact_ = contact;
-    cached_ = std::nullopt;
-    update_element(lock);
+    {
+        auto handle = data_.lock();
+        auto& data = *handle;
+        data.contact_ = contact;
+        data.cached_ = std::nullopt;
+    }
+
+    update_element();
 }
 
-void Element::SetLabel(const std::string_view label) noexcept
+auto Element::SetLabel(const std::string_view label) noexcept -> void
 {
-    auto lock = rLock{lock_};
-    label_ = label;
-    cached_ = std::nullopt;
-    update_element(lock);
+    {
+        auto handle = data_.lock();
+        auto& data = *handle;
+        data.label_ = label;
+        data.cached_ = std::nullopt;
+    }
+
+    update_element();
 }
 
-void Element::SetMetadata(
+auto Element::SetMetadata(
     const identifier::Generic& contact,
-    const std::string_view label) noexcept
+    const std::string_view label) noexcept -> void
 {
     const auto pc =
         (Subchain::Incoming == subchain_) || (Subchain::Outgoing == subchain_);
 
-    auto lock = rLock{lock_};
+    {
+        auto handle = data_.lock();
+        auto& data = *handle;
 
-    if (false == pc) { contact_ = contact; }
+        if (false == pc) { data.contact_ = contact; }
 
-    label_ = label;
-    cached_ = std::nullopt;
-    update_element(lock);
+        data.label_ = label;
+        data.cached_ = std::nullopt;
+    }
+
+    update_element();
 }
 
 auto Element::Unconfirm(
@@ -445,30 +447,35 @@ auto Element::Unconfirm(
 {
     if (tx.empty()) { return false; }
 
-    auto lock = rLock{lock_};
-    confirmed_.erase(tx);
-    unconfirmed_.emplace(tx);
-    timestamp_ = time;
-    cached_ = std::nullopt;
+    auto handle = data_.lock();
+    auto& data = *handle;
+    data.confirmed_.erase(tx);
+    data.unconfirmed_.emplace(tx);
+    data.timestamp_ = time;
+    data.cached_ = std::nullopt;
 
     return true;
 }
 
 auto Element::Unconfirmed() const noexcept -> Txids
 {
-    auto lock = rLock{lock_};
+    auto handle = data_.lock_shared();
+    const auto& data = *handle;
     auto output = Txids{};
     std::copy(
-        unconfirmed_.begin(), unconfirmed_.end(), std::back_inserter(output));
+        data.unconfirmed_.begin(),
+        data.unconfirmed_.end(),
+        std::back_inserter(output));
 
     return output;
 }
 
 auto Element::Unreserve() noexcept -> bool
 {
-    auto lock = rLock{lock_};
+    auto handle = data_.lock();
+    auto& data = *handle;
 
-    if ((0u < confirmed_.size()) || (0u < confirmed_.size())) {
+    if ((0u < data.confirmed_.size()) || (0u < data.confirmed_.size())) {
         LogVerbose()(OT_PRETTY_CLASS())(
             "element is already associated with transactions")
             .Flush();
@@ -476,24 +483,23 @@ auto Element::Unreserve() noexcept -> bool
         return false;
     }
 
-    timestamp_ = {};
-    label_ = {};
-    contact_ = identifier::Generic{};
-    cached_ = std::nullopt;
+    data.timestamp_ = {};
+    data.label_ = {};
+    data.contact_ = identifier::Generic{};
+    data.cached_ = std::nullopt;
 
     return true;
 }
 
-auto Element::update_element(rLock& lock) const noexcept -> void
+auto Element::update_element() const noexcept -> void
 {
-    const auto elements = this->elements(lock);
+    const auto elements = Elements();
     auto hashes = UnallocatedVector<ReadView>{};
     std::transform(
         std::begin(elements),
         std::end(elements),
         std::back_inserter(hashes),
         [](const auto& in) -> auto { return in.Bytes(); });
-    lock.unlock();
     parent_.Internal().UpdateElement(hashes);
 }
 }  // namespace opentxs::blockchain::crypto::implementation

@@ -47,7 +47,16 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
+
+namespace crypto
+{
+namespace implementation
+{
+class Element;
+}  // namespace implementation
+}  // namespace crypto
 }  // namespace blockchain
+
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -78,10 +87,11 @@ public:
         return parent_;
     }
     auto PrivateKey(
+        const implementation::Element& element,
         const Subchain type,
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
-        -> opentxs::crypto::asymmetric::key::EllipticCurve override;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& override;
     auto ScanProgress(Subchain type) const noexcept -> block::Position override;
 
     auto Confirm(
@@ -121,7 +131,7 @@ public:
     ~Subaccount() override;
 
 protected:
-    using AddressMap = Map<Bip32Index, std::unique_ptr<Element>>;
+    using AddressMap = Map<Bip32Index, std::unique_ptr<crypto::Element>>;
     using Revision = std::uint64_t;
 
     struct AddressData {
@@ -190,7 +200,7 @@ protected:
     virtual auto mutable_element(
         const rLock& lock,
         const Subchain type,
-        const Bip32Index index) noexcept(false) -> Element& = 0;
+        const Bip32Index index) noexcept(false) -> crypto::Element& = 0;
 
     Subaccount(
         const api::Session& api,

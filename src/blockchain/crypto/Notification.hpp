@@ -116,7 +116,7 @@ private:
     auto mutable_element(
         const rLock&,
         const Subchain,
-        const Bip32Index) noexcept(false) -> Element& final
+        const Bip32Index) noexcept(false) -> crypto::Element& final
     {
         throw std::out_of_range{
             "no balance elements present in notification subaccounts"};

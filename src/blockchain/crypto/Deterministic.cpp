@@ -659,6 +659,38 @@ auto Deterministic::PathRoot() const noexcept -> const opentxs::crypto::SeedID&
     return seed_id_;
 }
 
+auto Deterministic::PrivateKey(
+    const implementation::Element& element,
+    const Subchain type,
+    const Bip32Index index,
+    const PasswordPrompt& reason) const noexcept
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
+{
+    auto key = PrivateKey(type, index, reason);
+
+    if (false == key.IsValid()) {
+        LogError()(OT_PRETTY_CLASS())("error deriving private key").Flush();
+
+        return Subaccount::PrivateKey(element, type, index, reason);
+    }
+
+    if (false == key.HasPrivate()) {
+        LogError()(OT_PRETTY_CLASS())("deriving private key is not valid")
+            .Flush();
+
+        return Subaccount::PrivateKey(element, type, index, reason);
+    }
+
+    auto handle = element.data_.lock();
+    auto& data = *handle;
+
+    if (false == data.private_key_.has_value()) {
+        data.private_key_.emplace(std::move(key));
+    }
+
+    return *data.private_key_;
+}
+
 auto Deterministic::Reserve(
     const Subchain type,
     const PasswordPrompt& reason,

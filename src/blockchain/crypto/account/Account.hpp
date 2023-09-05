@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/Data.hpp"
+
 #pragma once
 
 #include <mutex>
@@ -15,6 +17,7 @@
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Imported.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
@@ -46,7 +49,6 @@ namespace blockchain
 namespace crypto
 {
 class AccountIndex;
-class Element;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -105,9 +107,9 @@ public:
         return notification_;
     }
     auto GetNextChangeKey(const PasswordPrompt& reason) const noexcept(false)
-        -> const Element& final;
+        -> const crypto::Element& final;
     auto GetNextDepositKey(const PasswordPrompt& reason) const noexcept(false)
-        -> const Element& final;
+        -> const crypto::Element& final;
     auto GetPaymentCode() const noexcept -> const PaymentCodeAccounts& final
     {
         return payment_code_;
@@ -227,6 +229,7 @@ private:
         Subchain subchain,
         const identifier::Generic& contact,
         const UnallocatedCString& label,
-        const PasswordPrompt& reason) const noexcept(false) -> const Element&;
+        const PasswordPrompt& reason) const noexcept(false)
+        -> const crypto::Element&;
 };
 }  // namespace opentxs::blockchain::crypto::implementation

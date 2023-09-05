@@ -7,13 +7,13 @@
 
 #include <BlockchainAddress.pb.h>
 #include <boost/container/flat_set.hpp>
+#include <cs_shared_guarded.h>
 #include <functional>
-#include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <string_view>
 
 #include "internal/blockchain/crypto/Element.hpp"
-#include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -43,6 +43,17 @@ class Blockchain;
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace crypto
+{
+namespace implementation
+{
+class Deterministic;
+}  // namespace implementation
+}  // namespace crypto
+}  // namespace blockchain
+
 namespace proto
 {
 class AsymmetricKey;
@@ -51,6 +62,23 @@ class AsymmetricKey;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
+
+namespace opentxs::blockchain::crypto
+{
+using Txid = opentxs::blockchain::block::TransactionHash;
+using Transactions = boost::container::flat_set<Txid>;
+
+struct ElementPrivate {
+    UnallocatedCString label_{};
+    identifier::Generic contact_{};
+    Time timestamp_{};
+    Transactions unconfirmed_{};
+    Transactions confirmed_{};
+    std::optional<internal::Element::SerializedType> cached_{};
+    std::optional<opentxs::crypto::asymmetric::key::EllipticCurve>
+        private_key_{};
+};
+}  // namespace opentxs::blockchain::crypto
 
 namespace opentxs::blockchain::crypto::implementation
 {
@@ -62,8 +90,6 @@ public:
     auto Confirmed() const noexcept -> Txids final;
     auto Contact() const noexcept -> identifier::Generic final;
     auto Elements() const noexcept -> UnallocatedSet<ByteArray> final;
-    auto elements(const rLock& lock) const noexcept
-        -> UnallocatedSet<ByteArray>;
     auto ID() const noexcept -> const identifier::Account& final
     {
         return parent_.ID();
@@ -144,8 +170,9 @@ public:
     ~Element() final = default;
 
 private:
-    using Txid = opentxs::blockchain::block::TransactionHash;
-    using Transactions = boost::container::flat_set<Txid>;
+    friend implementation::Deterministic;
+
+    using Data = libguarded::shared_guarded<ElementPrivate, std::shared_mutex>;
 
     static const VersionNumber DefaultVersion{1};
 
@@ -153,24 +180,18 @@ private:
     const api::crypto::Blockchain& blockchain_;
     const crypto::Subaccount& parent_;
     const opentxs::blockchain::Type chain_;
-    mutable std::recursive_mutex lock_;
     const VersionNumber version_;
     const crypto::Subchain subchain_;
     const Bip32Index index_;
-    UnallocatedCString label_;
-    identifier::Generic contact_;
-    mutable opentxs::crypto::asymmetric::key::EllipticCurve key_;
-    Time timestamp_;
-    Transactions unconfirmed_;
-    Transactions confirmed_;
-    mutable std::optional<SerializedType> cached_;
+    const opentxs::crypto::asymmetric::key::EllipticCurve key_;
+    mutable Data data_;
 
     static auto instantiate(
         const api::Session& api,
         const proto::AsymmetricKey& serialized) noexcept(false)
         -> opentxs::crypto::asymmetric::key::EllipticCurve;
 
-    auto update_element(rLock& lock) const noexcept -> void;
+    auto update_element() const noexcept -> void;
 
     Element(
         const api::Session& api,
