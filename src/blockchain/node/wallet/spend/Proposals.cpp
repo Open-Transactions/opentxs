@@ -160,6 +160,9 @@ private:
         {
             auto lock = Lock{lock_};
             auto post = ScopeGuard{[&] { data_.pop_front(); }};
+            auto& job = data_.front();
+            const auto& [id, promise] = job;
+            ids_.erase(id);
 
             return std::move(data_.front());
         }

@@ -252,7 +252,8 @@ auto Account::find_next_element(
     Subchain subchain,
     const identifier::Generic& contact,
     const UnallocatedCString& label,
-    const PasswordPrompt& reason) const noexcept(false) -> const Element&
+    const PasswordPrompt& reason) const noexcept(false)
+    -> const crypto::Element&
 {
     // TODO Add a mechanism for setting a default subaccount in case more than
     // one is present. Also handle cases where only an imported subaccount
@@ -316,7 +317,7 @@ auto Account::Get(Notifications& out) const noexcept -> void
 }
 
 auto Account::GetNextChangeKey(const PasswordPrompt& reason) const
-    noexcept(false) -> const Element&
+    noexcept(false) -> const crypto::Element&
 {
     static const auto blank = identifier::Generic{};
 
@@ -324,7 +325,7 @@ auto Account::GetNextChangeKey(const PasswordPrompt& reason) const
 }
 
 auto Account::GetNextDepositKey(const PasswordPrompt& reason) const
-    noexcept(false) -> const Element&
+    noexcept(false) -> const crypto::Element&
 {
     static const auto blank = identifier::Generic{};
 

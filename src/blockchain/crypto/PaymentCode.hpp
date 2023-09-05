@@ -16,6 +16,7 @@
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
+#include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -96,11 +97,12 @@ public:
     {
         return remote_;
     }
+    using Subaccount::PrivateKey;
     auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
-        -> opentxs::crypto::asymmetric::key::EllipticCurve final;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve final;
     using Deterministic::Reserve;
     auto Reserve(
         const Subchain type,

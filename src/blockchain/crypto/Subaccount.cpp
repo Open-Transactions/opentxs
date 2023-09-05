@@ -279,12 +279,15 @@ void Subaccount::init() noexcept
 }
 
 auto Subaccount::PrivateKey(
+    const implementation::Element& element,
     const Subchain type,
     const Bip32Index index,
     const PasswordPrompt& reason) const noexcept
-    -> opentxs::crypto::asymmetric::key::EllipticCurve
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
-    return {};
+    static const auto blank = opentxs::crypto::asymmetric::key::EllipticCurve{};
+
+    return blank;
 }
 
 // Due to asynchronous blockchain scanning, spends may be discovered out of

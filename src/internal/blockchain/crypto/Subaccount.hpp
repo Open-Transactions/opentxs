@@ -18,6 +18,14 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
+
+namespace crypto
+{
+namespace implementation
+{
+class Element;
+}  // namespace implementation
+}  // namespace crypto
 }  // namespace blockchain
 
 namespace crypto
@@ -46,10 +54,11 @@ struct Subaccount : virtual public crypto::Subaccount {
     virtual auto IncomingTransactions(const Key& key) const noexcept
         -> UnallocatedSet<UnallocatedCString> = 0;
     virtual auto PrivateKey(
+        const implementation::Element& element,
         const Subchain type,
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
-        -> opentxs::crypto::asymmetric::key::EllipticCurve = 0;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
 
     virtual auto Confirm(
         const Subchain type,

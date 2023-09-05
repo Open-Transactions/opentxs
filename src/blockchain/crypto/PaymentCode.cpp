@@ -352,7 +352,7 @@ auto PaymentCode::PrivateKey(
     const Subchain type,
     const Bip32Index index,
     const PasswordPrompt& reason) const noexcept
-    -> opentxs::crypto::asymmetric::key::EllipticCurve
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve
 {
     if (false == has_private(reason)) {
         LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();

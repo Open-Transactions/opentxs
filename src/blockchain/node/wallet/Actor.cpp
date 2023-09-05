@@ -121,9 +121,7 @@ auto Wallet::Actor::pipeline(
         case Work::init:
         case Work::statemachine:
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled type").Flush();
-
-            OT_FAIL;
+            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled type").Abort();
         }
     }
 }

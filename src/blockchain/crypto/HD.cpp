@@ -236,7 +236,7 @@ auto HD::PrivateKey(
     const Subchain type,
     const Bip32Index index,
     const PasswordPrompt& reason) const noexcept
-    -> opentxs::crypto::asymmetric::key::EllipticCurve
+    -> const opentxs::crypto::asymmetric::key::EllipticCurve
 {
     switch (type) {
         case internal_type_:

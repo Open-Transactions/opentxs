@@ -10,6 +10,7 @@
 
 #include "blockchain/crypto/Deterministic.hpp"
 #include "blockchain/crypto/Element.hpp"
+#include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/HD.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
@@ -63,11 +64,12 @@ public:
         return const_cast<HD&>(*this);
     }
     auto Name() const noexcept -> UnallocatedCString final;
+    using Subaccount::PrivateKey;
     auto PrivateKey(
         const Subchain type,
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
-        -> opentxs::crypto::asymmetric::key::EllipticCurve final;
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve final;
     auto Standard() const noexcept -> HDProtocol final { return standard_; }
 
     HD(const api::Session& api,

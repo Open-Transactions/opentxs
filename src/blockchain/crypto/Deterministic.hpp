@@ -43,6 +43,11 @@ namespace blockchain
 {
 namespace crypto
 {
+namespace implementation
+{
+class Element;
+}  // namespace implementation
+
 class Account;
 }  // namespace crypto
 }  // namespace blockchain
@@ -78,6 +83,18 @@ public:
     auto LastGenerated(const Subchain type) const noexcept
         -> std::optional<Bip32Index> final;
     auto Lookahead() const noexcept -> std::size_t final { return window_; }
+    using Subaccount::PrivateKey;
+    auto PrivateKey(
+        const implementation::Element& element,
+        const Subchain type,
+        const Bip32Index index,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
+    virtual auto PrivateKey(
+        const Subchain type,
+        const Bip32Index index,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve = 0;
     auto Path() const noexcept -> proto::HDPath final { return path_; }
     auto PathRoot() const noexcept -> const opentxs::crypto::SeedID& final;
     auto Reserve(
@@ -281,7 +298,7 @@ private:
     auto mutable_element(
         const rLock& lock,
         const Subchain type,
-        const Bip32Index index) noexcept(false) -> Element& final;
+        const Bip32Index index) noexcept(false) -> crypto::Element& final;
     virtual auto set_deterministic_contact(
         UnallocatedSet<identifier::Generic>&) const noexcept -> void
     {

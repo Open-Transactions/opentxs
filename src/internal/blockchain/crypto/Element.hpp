@@ -16,6 +16,11 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
+
+namespace crypto
+{
+struct ElementPrivate;
+}  // namespace crypto
 }  // namespace blockchain
 
 namespace identifier
