@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,47 +7,15 @@
 #include <opentxs/opentxs.hpp>
 
 #include "ottest/data/crypto/Bip32.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/crypto/BIP32.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_BIP32 : public ::testing::Test
-{
-protected:
-    using Path = ot::UnallocatedVector<ot::Bip32Index>;
+TEST_F(BIP32, init) {}
 
-    const ot::api::session::Client& api_;
-    const ot::PasswordPrompt reason_;
-
-    auto make_path(const Child::Path& path) const noexcept -> Path
-    {
-        auto output = Path{};
-        static constexpr auto hard =
-            static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED);
-
-        for (const auto& item : path) {
-            if (item.hardened_) {
-                output.emplace_back(item.index_ | hard);
-            } else {
-                output.emplace_back(item.index_);
-            }
-        }
-
-        return output;
-    }
-
-    Test_BIP32()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , reason_(api_.Factory().PasswordPrompt(__func__))
-    {
-    }
-};
-
-TEST_F(Test_BIP32, init) {}
-
-TEST_F(Test_BIP32, cases)
+TEST_F(BIP32, cases)
 {
     for (const auto& item : Bip32TestCases()) {
         const auto seedID = [&] {
@@ -80,7 +48,7 @@ TEST_F(Test_BIP32, cases)
     }
 }
 
-TEST_F(Test_BIP32, stress)
+TEST_F(BIP32, stress)
 {
     const auto& item = Bip32TestCases().at(0u);
     const auto& child = item.children_.at(3u);

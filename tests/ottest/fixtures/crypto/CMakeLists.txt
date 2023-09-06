@@ -12,4 +12,6 @@ target_sources(
     "Symmetric.hpp"
     "AsymmetricProvider.cpp"
     "AsymmetricProvider.hpp"
+    "BIP32.cpp"
+    "BIP32.hpp"
 )
