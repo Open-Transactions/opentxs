@@ -1641,13 +1641,17 @@ private:
 
             for (const auto& notif : proposal_.notification()) {
                 using PC = crypto::internal::PaymentCode;
-                const auto accountID = PC::GetID(
-                    api_,
-                    chain_,
+                const auto sender =
                     api_.Factory().InternalSession().PaymentCode(
-                        notif.sender()),
+                        notif.sender());
+                const auto recipient =
                     api_.Factory().InternalSession().PaymentCode(
-                        notif.recipient()));
+                        notif.recipient());
+
+                if (sender == recipient) { continue; }
+
+                const auto accountID =
+                    PC::GetID(api_, chain_, sender, recipient);
                 const auto nymID = [&] {
                     auto out = identifier::Nym{};
                     const auto& bytes = proposal_.initiator();
@@ -1667,7 +1671,7 @@ private:
         } catch (const std::exception& e) {
             LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
-            return TemporaryFailure;
+            return PermanentFailure;
         }
     }
     auto finalize_outputs() noexcept -> void
