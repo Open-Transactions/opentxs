@@ -1789,6 +1789,8 @@ private:
                     "Failed to delete index for proposal ")(proposalID, crypto)(
                     " to created output ")(newOutpoint)
                     .Flush();
+
+                return false;
             }
 
             rc = lmdb_.Delete(output_proposal_, newOutpoint.Bytes(), tx);
@@ -1802,6 +1804,8 @@ private:
                     "Failed to delete index for created outpoint ")(
                     newOutpoint)(" to proposal ")(proposalID, crypto)
                     .Flush();
+
+                return false;
             }
         }
 
@@ -1818,6 +1822,8 @@ private:
                     "Failed to delete index for proposal ")(proposalID, crypto)(
                     " to consumed output ")(spentOutpoint)
                     .Flush();
+
+                return false;
             }
 
             rc = lmdb_.Delete(output_proposal_, spentOutpoint.Bytes(), tx);
@@ -1831,6 +1837,8 @@ private:
                     "Failed to delete index for consumed outpoint ")(
                     spentOutpoint)(" to proposal ")(proposalID, crypto)
                     .Flush();
+
+                return false;
             }
         }
 
