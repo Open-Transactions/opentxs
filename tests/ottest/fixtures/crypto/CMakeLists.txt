@@ -10,4 +10,6 @@ target_sources(
     "Hash.hpp"
     "Symmetric.cpp"
     "Symmetric.hpp"
+    "AsymmetricProvider.cpp"
+    "AsymmetricProvider.hpp"
 )

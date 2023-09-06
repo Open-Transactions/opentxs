@@ -1,18 +1,14 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <cstdint>
 #include <string_view>
 
 #include "internal/api/Crypto.hpp"
-#include "internal/crypto/library/AsymmetricProvider.hpp"
-#include "internal/util/LogMacros.hpp"  // IWYU pragma: keep
-#include "ottest/env/OTTestEnvironment.hpp"
-#include "util/HDIndex.hpp"  // IWYU pragma: keep
+#include "ottest/fixtures/crypto/AsymmetricProvider.hpp"
 
 namespace ot = opentxs;
 
@@ -20,276 +16,7 @@ namespace ottest
 {
 using namespace std::literals;
 
-class Test_Signatures : public ::testing::Test
-{
-public:
-    using Role = ot::crypto::asymmetric::Role;
-    using Type = ot::crypto::asymmetric::Algorithm;
-
-    static const bool have_hd_;
-    static const bool have_rsa_;
-    static const bool have_secp256k1_;
-    static const bool have_ed25519_;
-
-    const ot::api::session::Client& api_;
-    const ot::crypto::SeedID seed_id_;
-    const ot::crypto::HashType sha256_{ot::crypto::HashType::Sha256};
-    const ot::crypto::HashType sha512_{ot::crypto::HashType::Sha512};
-    const ot::crypto::HashType blake160_{ot::crypto::HashType::Blake2b160};
-    const ot::crypto::HashType blake256_{ot::crypto::HashType::Blake2b256};
-    const ot::crypto::HashType blake512_{ot::crypto::HashType::Blake2b512};
-    const ot::crypto::HashType ripemd160_{ot::crypto::HashType::Ripemd160};
-    const ot::UnallocatedCString plaintext_string_1_{"Test string"};
-    const ot::UnallocatedCString plaintext_string_2_{"Another string"};
-    const ot::ByteArray plaintext_1_{
-        plaintext_string_1_.data(),
-        plaintext_string_1_.size()};
-    const ot::ByteArray plaintext_2_{
-        plaintext_string_2_.data(),
-        plaintext_string_2_.size()};
-    ot::crypto::asymmetric::Key ed_;
-    ot::crypto::asymmetric::Key ed_hd_;
-    ot::crypto::asymmetric::Key ed_2_;
-    ot::crypto::asymmetric::Key secp_;
-    ot::crypto::asymmetric::Key secp_hd_;
-    ot::crypto::asymmetric::Key secp_2_;
-    ot::crypto::asymmetric::Key rsa_sign_1_;
-    ot::crypto::asymmetric::Key rsa_sign_2_;
-
-    [[maybe_unused]] Test_Signatures()
-        : api_(dynamic_cast<const ot::api::session::Client&>(
-              OTTestEnvironment::GetOT().StartClientSession(0)))
-        , seed_id_(api_.Crypto().Seed().ImportSeed(
-              api_.Factory().SecretFromText(
-                  "response seminar brave tip suit recall often sound stick owner lottery motion"sv),
-              api_.Factory().SecretFromText(""sv),
-              opentxs::crypto::SeedStyle::BIP39,
-              opentxs::crypto::Language::en,
-              api_.Factory().PasswordPrompt("Importing a BIP-39 seed")))
-        , ed_(get_key(api_, ot::crypto::EcdsaCurve::ed25519, Role::Sign))
-        , ed_hd_([&] {
-            if (have_hd_) {
-
-                return get_hd_key(
-                    api_, seed_id_, ot::crypto::EcdsaCurve::ed25519);
-            } else {
-
-                return get_key(
-                    api_, ot::crypto::EcdsaCurve::ed25519, Role::Sign);
-            }
-        }())
-        , ed_2_([&] {
-            if (have_hd_) {
-
-                return get_hd_key(
-                    api_, seed_id_, ot::crypto::EcdsaCurve::ed25519, 1);
-            } else {
-
-                return get_key(
-                    api_, ot::crypto::EcdsaCurve::ed25519, Role::Sign);
-            }
-        }())
-        , secp_(get_key(api_, ot::crypto::EcdsaCurve::secp256k1, Role::Sign))
-        , secp_hd_([&] {
-            if (have_hd_) {
-
-                return get_hd_key(
-                    api_, seed_id_, ot::crypto::EcdsaCurve::secp256k1);
-            } else {
-
-                return get_key(
-                    api_, ot::crypto::EcdsaCurve::secp256k1, Role::Sign);
-            }
-        }())
-        , secp_2_([&] {
-            if (have_hd_) {
-
-                return get_hd_key(
-                    api_, seed_id_, ot::crypto::EcdsaCurve::secp256k1, 1);
-            } else {
-
-                return get_key(
-                    api_, ot::crypto::EcdsaCurve::secp256k1, Role::Sign);
-            }
-        }())
-        , rsa_sign_1_(
-              get_key(api_, ot::crypto::EcdsaCurve::invalid, Role::Sign))
-        , rsa_sign_2_(
-              get_key(api_, ot::crypto::EcdsaCurve::invalid, Role::Sign))
-    {
-        OT_ASSERT(plaintext_1_ != plaintext_2_);
-    }
-
-    static auto get_hd_key(
-        const ot::api::session::Client& api,
-        const ot::crypto::SeedID& seedID,
-        const ot::crypto::EcdsaCurve& curve,
-        const std::uint32_t index = 0) -> ot::crypto::asymmetric::Key
-    {
-        auto reason = api.Factory().PasswordPrompt(__func__);
-
-        return api.Crypto().Seed().GetHDKey(
-            seedID,
-            curve,
-            {ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
-             ot::HDIndex{0, ot::Bip32Child::HARDENED},
-             ot::HDIndex{0, ot::Bip32Child::HARDENED},
-             ot::HDIndex{index, ot::Bip32Child::HARDENED},
-             ot::HDIndex{ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}},
-            reason);
-    }
-    [[maybe_unused]] static auto get_key(
-        const ot::api::session::Client& api,
-        const ot::crypto::EcdsaCurve curve,
-        const Role role) -> ot::crypto::asymmetric::Key
-    {
-        const auto reason = api.Factory().PasswordPrompt(__func__);
-        const auto params = [&] {
-            if (ot::crypto::EcdsaCurve::secp256k1 == curve) {
-
-                return ot::crypto::Parameters{
-                    api.Factory(), ot::crypto::ParameterType::secp256k1};
-            } else if (ot::crypto::EcdsaCurve::ed25519 == curve) {
-
-                return ot::crypto::Parameters{
-                    api.Factory(), ot::crypto::ParameterType::ed25519};
-            } else {
-
-                return ot::crypto::Parameters{api.Factory(), 1024};
-            }
-        }();
-
-        return api.Factory().AsymmetricKey(role, params, reason);
-    }
-
-    [[maybe_unused]] auto test_dh(
-        const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::asymmetric::Key& keyOne,
-        const ot::crypto::asymmetric::Key& keyTwo,
-        const ot::Data& expected) -> bool
-    {
-        constexpr auto style = ot::crypto::SecretStyle::Default;
-        auto reason = api_.Factory().PasswordPrompt(__func__);
-        auto secret1 = api_.Factory().Secret(0);
-        auto secret2 = api_.Factory().Secret(0);
-        auto output = lib.SharedSecret(
-            keyOne.PublicKey(), keyTwo.PrivateKey(reason), style, secret1);
-
-        if (false == output) { return output; }
-
-        output = lib.SharedSecret(
-            keyTwo.PublicKey(), keyOne.PrivateKey(reason), style, secret2);
-
-        EXPECT_TRUE(output);
-
-        if (false == output) { return output; }
-
-        EXPECT_EQ(secret1, secret2);
-
-        if (0 < expected.size()) {
-            EXPECT_EQ(secret1.Bytes(), expected.Bytes());
-
-            output &= (secret1.Bytes() == expected.Bytes());
-        }
-
-        return output;
-    }
-
-    [[maybe_unused]] auto test_signature(
-        const ot::Data& plaintext,
-        const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::asymmetric::Key& key,
-        const ot::crypto::HashType hash) -> bool
-    {
-        auto reason = api_.Factory().PasswordPrompt(__func__);
-        auto sig = ot::Space{};
-        const auto pubkey = key.PublicKey();
-        const auto seckey = key.PrivateKey(reason);
-
-        EXPECT_TRUE(key.HasPrivate());
-        EXPECT_NE(pubkey.size(), 0);
-        EXPECT_NE(seckey.size(), 0);
-
-        if (false == key.HasPrivate()) { return false; }
-        if ((0 == pubkey.size()) || (0 == seckey.size())) { return false; }
-
-        const auto haveSig =
-            lib.Sign(plaintext.Bytes(), seckey, hash, ot::writer(sig));
-        const auto verified =
-            lib.Verify(plaintext.Bytes(), pubkey, ot::reader(sig), hash);
-
-        return haveSig && verified;
-    }
-
-    [[maybe_unused]] auto bad_signature(
-        const ot::crypto::AsymmetricProvider& lib,
-        const ot::crypto::asymmetric::Key& key,
-        const ot::crypto::HashType hash) -> bool
-    {
-        auto reason = api_.Factory().PasswordPrompt(__func__);
-        auto sig1 = ot::ByteArray{};
-        auto sig2 = ot::ByteArray{};
-        const auto pubkey = key.PublicKey();
-        const auto seckey = key.PrivateKey(reason);
-
-        EXPECT_TRUE(key.HasPrivate());
-        EXPECT_NE(pubkey.size(), 0);
-        EXPECT_NE(seckey.size(), 0);
-
-        if (false == key.HasPrivate()) { return false; }
-        if ((0 == pubkey.size()) || (0 == seckey.size())) { return false; }
-
-        const auto haveSig1 = lib.Sign(
-            plaintext_1_.Bytes(),
-            key.PrivateKey(reason),
-            hash,
-            sig1.WriteInto());
-
-        EXPECT_TRUE(haveSig1);
-
-        if (false == haveSig1) { return false; }
-
-        const auto haveSig2 = lib.Sign(
-            plaintext_2_.Bytes(),
-            key.PrivateKey(reason),
-            hash,
-            sig2.WriteInto());
-
-        EXPECT_TRUE(haveSig2);
-
-        if (false == haveSig2) { return false; }
-
-        EXPECT_NE(sig1, sig2);
-
-        if (sig1 == sig2) { return false; }
-
-        const auto check1 = lib.Verify(
-            plaintext_2_.Bytes(), key.PublicKey(), sig1.Bytes(), hash);
-
-        EXPECT_FALSE(check1);
-
-        if (check1) { return false; }
-
-        const auto check2 = lib.Verify(
-            plaintext_1_.Bytes(), key.PublicKey(), sig2.Bytes(), hash);
-
-        EXPECT_FALSE(check2);
-
-        if (check2) { return false; }
-
-        return true;
-    }
-};
-
-const bool Test_Signatures::have_hd_{ot::api::crypto::HaveHDKeys()};
-const bool Test_Signatures::have_rsa_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
-const bool Test_Signatures::have_secp256k1_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)};
-const bool Test_Signatures::have_ed25519_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::ED25519)};
-
-TEST_F(Test_Signatures, RSA_unsupported_hash)
+TEST_F(Signatures, RSA_unsupported_hash)
 {
     if (have_rsa_) {
         const auto& provider =
@@ -306,7 +33,7 @@ TEST_F(Test_Signatures, RSA_unsupported_hash)
     }
 }
 
-TEST_F(Test_Signatures, RSA_detect_invalid_signature)
+TEST_F(Signatures, RSA_detect_invalid_signature)
 {
     if (have_rsa_) {
         const auto& provider =
@@ -320,7 +47,7 @@ TEST_F(Test_Signatures, RSA_detect_invalid_signature)
     }
 }
 
-TEST_F(Test_Signatures, RSA_supported_hashes)
+TEST_F(Signatures, RSA_supported_hashes)
 {
     if (have_rsa_) {
         const auto& provider =
@@ -337,7 +64,7 @@ TEST_F(Test_Signatures, RSA_supported_hashes)
     }
 }
 
-TEST_F(Test_Signatures, RSA_DH)
+TEST_F(Signatures, RSA_DH)
 {
     if (have_rsa_) {
         const auto& provider =
@@ -352,7 +79,7 @@ TEST_F(Test_Signatures, RSA_DH)
     }
 }
 
-TEST_F(Test_Signatures, Ed25519_unsupported_hash)
+TEST_F(Signatures, Ed25519_unsupported_hash)
 {
     if (have_ed25519_) {
         const auto& provider =
@@ -383,7 +110,7 @@ TEST_F(Test_Signatures, Ed25519_unsupported_hash)
     }
 }
 
-TEST_F(Test_Signatures, Ed25519_detect_invalid_signature)
+TEST_F(Signatures, Ed25519_detect_invalid_signature)
 {
     if (have_ed25519_) {
         const auto& provider =
@@ -401,7 +128,7 @@ TEST_F(Test_Signatures, Ed25519_detect_invalid_signature)
     }
 }
 
-TEST_F(Test_Signatures, Ed25519_supported_hashes)
+TEST_F(Signatures, Ed25519_supported_hashes)
 {
     if (have_ed25519_) {
         const auto& provider =
@@ -420,7 +147,7 @@ TEST_F(Test_Signatures, Ed25519_supported_hashes)
     }
 }
 
-TEST_F(Test_Signatures, Ed25519_ECDH)
+TEST_F(Signatures, Ed25519_ECDH)
 {
     if (have_ed25519_) {
         const auto& provider =
@@ -433,7 +160,7 @@ TEST_F(Test_Signatures, Ed25519_ECDH)
     }
 }
 
-TEST_F(Test_Signatures, Secp256k1_detect_invalid_signature)
+TEST_F(Signatures, Secp256k1_detect_invalid_signature)
 {
     if (have_secp256k1_) {
         const auto& provider =
@@ -461,7 +188,7 @@ TEST_F(Test_Signatures, Secp256k1_detect_invalid_signature)
     }
 }
 
-TEST_F(Test_Signatures, Secp256k1_supported_hashes)
+TEST_F(Signatures, Secp256k1_supported_hashes)
 {
     if (have_secp256k1_) {
         const auto& provider =
@@ -495,7 +222,7 @@ TEST_F(Test_Signatures, Secp256k1_supported_hashes)
     }
 }
 
-TEST_F(Test_Signatures, Secp256k1_ECDH)
+TEST_F(Signatures, Secp256k1_ECDH)
 {
     if (have_secp256k1_) {
         const auto& provider =
