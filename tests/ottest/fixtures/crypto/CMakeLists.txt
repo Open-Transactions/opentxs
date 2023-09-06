@@ -14,4 +14,6 @@ target_sources(
     "AsymmetricProvider.hpp"
     "BIP32.cpp"
     "BIP32.hpp"
+    "BIP39.cpp"
+    "BIP39.hpp"
 )
