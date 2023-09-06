@@ -12,7 +12,9 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #pragma GCC diagnostic pop
+#include <cs_plain_guarded.h>
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <cstdint>
 #include <exception>
@@ -29,6 +31,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Literals.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -82,10 +85,10 @@ public:
     // TODO constexpr
     ScalePrivate(ScaleRef data) noexcept;
     // TODO constexpr
-    ScalePrivate(const ScalePrivate& rhs) noexcept = default;
+    ScalePrivate(const ScalePrivate& rhs) noexcept;
 
     // TODO constexpr
-    ~ScalePrivate() = default;
+    ~ScalePrivate();
 
 private:
     struct Locale : std::numpunct<char> {
@@ -108,7 +111,13 @@ private:
             std::span<const Ratio> ratios) noexcept -> amount::Float;
     };
 
+    using CalculatedMap = Map<std::uintptr_t, Calculated>;
+    using Guarded = libguarded::plain_guarded<CalculatedMap>;
+
     const std::variant<Runtime, ScaleRef> data_;
+    mutable std::atomic<const Calculated*> calculated_;
+
+    static auto map() noexcept -> Guarded&;
 
     auto calculated() const noexcept -> const Calculated&;
     auto effective_limits(const DecimalPlaces min, const DecimalPlaces max)

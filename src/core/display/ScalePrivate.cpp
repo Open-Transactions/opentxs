@@ -86,6 +86,7 @@ namespace opentxs::display
 {
 ScalePrivate::ScalePrivate() noexcept
     : data_(Runtime{})
+    , calculated_(nullptr)
 {
 }
 
@@ -102,20 +103,33 @@ ScalePrivate::ScalePrivate(
           std::move(ratios),
           defaultMinDecimals,
           defaultMaxDecimals)
+    , calculated_(nullptr)
 {
 }
 
 ScalePrivate::ScalePrivate(ScaleRef data) noexcept
     : data_(data)
+    , calculated_(nullptr)
+{
+}
+
+ScalePrivate::ScalePrivate(const ScalePrivate& rhs) noexcept
+    : data_(rhs.data_)
+    , calculated_(nullptr)
 {
 }
 
 auto ScalePrivate::calculated() const noexcept -> const Calculated&
 {
-    static thread_local auto map = Map<std::uintptr_t, Calculated>{};
-    const auto key = reinterpret_cast<std::uintptr_t>(this);
+    const auto* p = calculated_.load();
 
-    return map.try_emplace(key, Ratios()).first->second;
+    if (nullptr != p) { return *p; }
+
+    const auto key = reinterpret_cast<std::uintptr_t>(this);
+    const auto i = map().lock()->try_emplace(key, Ratios()).first;
+    calculated_.store(std::addressof(i->second));
+
+    return i->second;
 }
 
 auto ScalePrivate::DefaultMinDecimals() const noexcept -> DecimalPlaces
@@ -269,6 +283,13 @@ auto ScalePrivate::Import(const std::string_view formatted) const noexcept
     }
 }
 
+auto ScalePrivate::map() noexcept -> Guarded&
+{
+    static auto map = Guarded{};
+
+    return map;
+}
+
 auto ScalePrivate::MaximumDecimals() const noexcept -> DecimalCount
 {
     return static_cast<DecimalCount>(calculated().absolute_max_);
@@ -337,5 +358,12 @@ auto ScalePrivate::strip(const std::string_view in) const noexcept
     }
 
     return output;
+}
+
+ScalePrivate::~ScalePrivate()
+{
+    if (nullptr != calculated_.load()) {
+        map().lock()->erase(reinterpret_cast<std::uintptr_t>(this));
+    }
 }
 }  // namespace opentxs::display
