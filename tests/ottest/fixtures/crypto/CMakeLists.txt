@@ -18,4 +18,6 @@ target_sources(
     "BIP39.hpp"
     "BitcoinProviders.cpp"
     "BitcoinProviders.hpp"
+    "Envelope.cpp"
+    "Envelope.hpp"
 )
