@@ -61,8 +61,6 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT Manager
 {
 public:
-    using PendingOutgoing = std::future<SendOutcome>;
-
     virtual auto AddBlock(const block::Block& block) const noexcept -> bool = 0;
     virtual auto AddPeer(
         const network::blockchain::Address& address) const noexcept -> bool = 0;
@@ -78,43 +76,6 @@ public:
     virtual auto Listen(
         const network::blockchain::Address& address) const noexcept -> bool = 0;
     virtual auto Profile() const noexcept -> BlockchainProfile = 0;
-    virtual auto SendToAddress(
-        const identifier::Nym& sender,
-        std::string_view address,
-        const Amount amount,
-        std::string_view memo = {},
-        std::span<const std::string_view> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
-    virtual auto SendToPaymentCode(
-        const identifier::Nym& sender,
-        std::string_view recipient,
-        const Amount amount,
-        std::string_view memo = {},
-        std::span<const std::string_view> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
-    virtual auto SendToPaymentCode(
-        const identifier::Nym& sender,
-        const PaymentCode& recipient,
-        const Amount amount,
-        std::string_view memo = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
-    virtual auto Sweep(
-        const identifier::Nym& account,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
-    virtual auto Sweep(
-        const identifier::Nym& account,
-        const identifier::Account& subaccount,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
-    virtual auto Sweep(
-        const crypto::Key& key,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing = 0;
     virtual auto Wallet() const noexcept -> const node::Wallet& = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept

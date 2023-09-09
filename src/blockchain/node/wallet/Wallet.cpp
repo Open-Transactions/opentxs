@@ -6,7 +6,6 @@
 #include "internal/blockchain/node/Wallet.hpp"  // IWYU pragma: associated
 
 #include <boost/smart_ptr/make_shared.hpp>
-#include <future>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -24,6 +23,7 @@
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -60,15 +60,15 @@ Wallet::Wallet() noexcept
 {
 }
 
-auto Wallet::ConstructTransaction(
-    const proto::BlockchainTransactionProposal& tx,
-    std::promise<SendOutcome>&& promise) const noexcept -> void
+auto Wallet::CreateSpend(const identifier::Nym& spender) const noexcept
+    -> node::Spend
 {
-    auto shared{shared_};
+    return shared_->CreateSpend(spender);
+}
 
-    OT_ASSERT(shared);
-
-    shared->ConstructTransaction(tx, std::move(promise));
+auto Wallet::Execute(node::Spend& spend) const noexcept -> PendingOutgoing
+{
+    return shared_->Execute(spend);
 }
 
 auto Wallet::FeeEstimate() const noexcept -> std::optional<Amount>

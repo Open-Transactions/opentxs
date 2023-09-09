@@ -103,7 +103,7 @@ enum class BuildResult : std::int8_t {
     PermanentFailure = -1,
     Success = 0,
     TemporaryFailure = 1,
-};
+};  // IWYU pragma: export
 
 auto print(WalletJobs) noexcept -> std::string_view;
 auto print(AccountsJobs) noexcept -> std::string_view;

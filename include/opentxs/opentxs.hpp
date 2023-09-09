@@ -76,9 +76,11 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"           // IWYU pragma: export
 #include "opentxs/blockchain/node/BlockOracle.hpp"        // IWYU pragma: export
 #include "opentxs/blockchain/node/FilterOracle.hpp"       // IWYU pragma: export
+#include "opentxs/blockchain/node/Funding.hpp"            // IWYU pragma: export
 #include "opentxs/blockchain/node/HeaderOracle.hpp"       // IWYU pragma: export
 #include "opentxs/blockchain/node/Manager.hpp"            // IWYU pragma: export
 #include "opentxs/blockchain/node/SendResult.hpp"         // IWYU pragma: export
+#include "opentxs/blockchain/node/Spend.hpp"              // IWYU pragma: export
 #include "opentxs/blockchain/node/Stats.hpp"              // IWYU pragma: export
 #include "opentxs/blockchain/node/TxoState.hpp"           // IWYU pragma: export
 #include "opentxs/blockchain/node/TxoTag.hpp"             // IWYU pragma: export

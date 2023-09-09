@@ -8,6 +8,12 @@ target_sources(
   PRIVATE
     "BitcoinTransactionBuilder.cpp"
     "BitcoinTransactionBuilder.hpp"
+    "BitcoinTransactionBuilderPrivate.cpp"
+    "BitcoinTransactionBuilderPrivate.hpp"
+    "Pending.cpp"
+    "Pending.hpp"
     "Proposals.cpp"
     "Proposals.hpp"
+    "ProposalsPrivate.cpp"
+    "ProposalsPrivate.hpp"
 )

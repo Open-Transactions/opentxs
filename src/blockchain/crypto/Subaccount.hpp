@@ -196,7 +196,7 @@ protected:
         -> void;
 
     // NOTE call only from final constructor bodies
-    virtual auto init() noexcept -> void;
+    virtual auto init() noexcept(false) -> void;
     virtual auto mutable_element(
         const rLock& lock,
         const Subchain type,

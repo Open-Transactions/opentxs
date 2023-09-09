@@ -8,13 +8,11 @@
 #include <BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <optional>
-#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
 
 #include "blockchain/node/Mempool.hpp"
-#include "blockchain/node/manager/SendPromises.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/api/session/Client.hpp"
 #include "internal/blockchain/Blockchain.hpp"
@@ -34,7 +32,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -45,13 +42,8 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/cfilter/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/PushTransaction.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -287,11 +279,6 @@ auto Shared::FilterOracle() const noexcept -> const node::FilterOracle&
 
 auto Shared::FilterOracle() noexcept -> node::FilterOracle& { return *filter_; }
 
-auto Shared::Finish(int index) noexcept -> std::promise<SendOutcome>
-{
-    return data_.lock()->send_promises_.finish(index);
-}
-
 auto Shared::GetBalance() const noexcept -> Balance
 {
     return database_->GetBalance();
@@ -387,116 +374,6 @@ auto Shared::Profile() const noexcept -> BlockchainProfile
     return config_.profile_;
 }
 
-auto Shared::SendToAddress(
-    const opentxs::identifier::Nym& sender,
-    std::string_view address,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const std::string_view> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    auto handle = data_.lock();
-    auto& data = *handle;
-    auto [index, future] = data.send_promises_.get();
-    // TODO c++20
-    data.to_actor_.SendDeferred(
-        [&](const auto& i) {
-            auto work = MakeWork(ManagerJobs::send_to_address);
-            work.AddFrame(sender);
-            work.AddFrame(address.data(), address.size());
-            amount.Serialize(work.AppendBytes());
-            work.AddFrame(memo.data(), memo.size());
-            work.AddFrame(i);
-            serialize_notifications(notify, work);
-
-            return work;
-        }(index),
-        __FILE__,
-        __LINE__);
-
-    return std::move(future);
-}
-
-auto Shared::SendToPaymentCode(
-    const opentxs::identifier::Nym& nymID,
-    std::string_view recipient,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const std::string_view> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    auto handle = data_.lock();
-    auto& data = *handle;
-    auto [index, future] = data.send_promises_.get();
-    // TODO c++20
-    data.to_actor_.SendDeferred(
-        [&](const auto& i) {
-            auto work = MakeWork(ManagerJobs::send_to_paymentcode);
-            work.AddFrame(nymID);
-            work.AddFrame(recipient.data(), recipient.size());
-            amount.Serialize(work.AppendBytes());
-            work.AddFrame(memo.data(), memo.size());
-            work.AddFrame(i);
-            serialize_notifications(notify, work);
-
-            return work;
-        }(index),
-        __FILE__,
-        __LINE__);
-
-    return std::move(future);
-}
-
-auto Shared::SendToPaymentCode(
-    const opentxs::identifier::Nym& nymID,
-    const PaymentCode& recipient,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const PaymentCode> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    auto handle = data_.lock();
-    auto& data = *handle;
-    auto [index, future] = data.send_promises_.get();
-    // TODO c++20
-    data.to_actor_.SendDeferred(
-        [&](const auto& i) {
-            auto work = MakeWork(ManagerJobs::send_to_paymentcode);
-            work.AddFrame(nymID);
-            work.AddFrame(recipient.asBase58());
-            amount.Serialize(work.AppendBytes());
-            work.AddFrame(memo.data(), memo.size());
-            work.AddFrame(i);
-            serialize_notifications(notify, work);
-
-            return work;
-        }(index),
-        __FILE__,
-        __LINE__);
-
-    return std::move(future);
-}
-
-auto Shared::serialize_notifications(
-    std::span<const std::string_view> in,
-    network::zeromq::Message& out) noexcept -> void
-{
-    auto append_to_message = [&out](const auto& i) {
-        out.AddFrame(i.data(), i.size());
-    };
-    std::for_each(in.begin(), in.end(), append_to_message);
-}
-
-auto Shared::serialize_notifications(
-    std::span<const PaymentCode> in,
-    network::zeromq::Message& out) noexcept -> void
-{
-    auto append_to_message = [&out](const auto& i) {
-        out.AddFrame(i.asBase58());
-    };
-    std::for_each(in.begin(), in.end(), append_to_message);
-}
-
 auto Shared::Shutdown() noexcept -> void
 {
     auto shutdown = [this] {
@@ -518,80 +395,6 @@ auto Shared::StartWallet() noexcept -> void
         data_.lock()->to_actor_.SendDeferred(
             MakeWork(ManagerJobs::start_wallet), __FILE__, __LINE__);
     }
-}
-
-auto Shared::Sweep(
-    const identifier::Nym& account,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    static const auto blankSubaccount = identifier::Account{};
-
-    return sweep(account, blankSubaccount, std::nullopt, toAddress, notify);
-}
-
-auto Shared::Sweep(
-    const identifier::Nym& account,
-    const identifier::Account& subaccount,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    return sweep(account, subaccount, std::nullopt, toAddress, notify);
-}
-
-auto Shared::Sweep(
-    const crypto::Key& key,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    const auto& [subaccount, subchain, index] = key;
-    const auto [_, nym] = api_.Crypto().Blockchain().LookupAccount(subaccount);
-
-    return sweep(nym, subaccount, key, toAddress, notify);
-}
-
-auto Shared::sweep(
-    const identifier::Nym& account,
-    const identifier::Account& subaccount,
-    std::optional<crypto::Key> key,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept
-    -> Manager::PendingOutgoing
-{
-    auto handle = data_.lock();
-    auto& data = *handle;
-    auto [index, future] = data.send_promises_.get();
-    // TODO c++20
-    data.to_actor_.SendDeferred(
-        [&](const auto& i) {
-            auto work = MakeWork(ManagerJobs::sweep);
-            account.Serialize(work);
-
-            if (subaccount.empty()) {
-                work.AddFrame();
-            } else {
-                subaccount.Serialize(work);
-            }
-
-            if (key.has_value()) {
-                work.AddFrame(serialize(*key));
-            } else {
-                work.AddFrame();
-            }
-
-            work.AddFrame(toAddress.data(), toAddress.size());
-            work.AddFrame(i);
-            serialize_notifications(notify, work);
-
-            return work;
-        }(index),
-        __FILE__,
-        __LINE__);
-
-    return std::move(future);
 }
 
 auto Shared::Wallet() const noexcept -> const node::Wallet& { return wallet_; }

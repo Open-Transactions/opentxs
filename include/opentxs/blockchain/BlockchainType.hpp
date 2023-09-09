@@ -116,6 +116,6 @@ enum class Type : TypeEnum {
     XDC = 97,
     Zcash = 98,
     Zilliqa = 99,
-    UnitTest = std::numeric_limits<TypeEnum>::max(),
+    UnitTest = std::numeric_limits<int>::max(),
 };
 }  // namespace opentxs::blockchain

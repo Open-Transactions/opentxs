@@ -6,7 +6,6 @@
 #include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"  // IWYU pragma: associated
 
 #include <BlockchainBlockHeader.pb.h>
-#include <cstdint>
 #include <limits>
 
 #include "internal/serialization/protobuf/verify/BitcoinBlockHeaderFields.hpp"  // IWYU pragma: keep
@@ -39,11 +38,19 @@ auto CheckProto_1(const BlockchainBlockHeader& input, const bool silent) -> bool
         case 17:
         case 18:
         case 19:
-        case std::numeric_limits<std::uint32_t>::max(): {
+        case std::numeric_limits<int>::max(): {
             bitcoin = true;
         } break;
         case 5:
-        case 6: {
+        case 6:
+        case 20:
+        case 21:
+        case 22:
+        case 39:
+        case 40:
+        case 41:
+        case 42:
+        case 43: {
             ethereum = true;
         } break;
         default: {

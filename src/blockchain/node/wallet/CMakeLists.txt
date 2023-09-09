@@ -8,8 +8,8 @@ libopentxs_add_public_header("blockchain/node" "Wallet.hpp")
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(feeoracle)
   add_subdirectory(feesource)
+  add_subdirectory(proposals)
   add_subdirectory(subchain)
-  add_subdirectory(spend)
 
   target_sources(
     opentxs-common
@@ -30,6 +30,9 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Accounts.hpp"
       "Actor.cpp"
       "Actor.hpp"
+      "Data.cpp"
+      "Data.hpp"
+      "Internal.cpp"
       "ReorgMaster.cpp"
       "ReorgMaster.hpp"
       "ReorgSlave.cpp"

@@ -85,7 +85,8 @@ auto DeterministicStateData::CheckCache(
         const auto flush = (0u == outstanding) || (interval > maxTime);
 
         if (flush) {
-            flush_cache(blockMap, cb);
+            if (false == flush_cache(blockMap, cb)) { TriggerRescan(); }
+
             time = Clock::now();
         }
     });
@@ -93,9 +94,8 @@ auto DeterministicStateData::CheckCache(
 
 auto DeterministicStateData::flush_cache(
     database::BatchedMatches& matches,
-    FinishedCallback cb) const noexcept -> void
+    FinishedCallback cb) const noexcept -> bool
 {
-    const auto start = Clock::now();
     const auto& log = log_;
 
     if (false == matches.empty()) {
@@ -108,10 +108,17 @@ auto DeterministicStateData::flush_cache(
             matches.end(),
             std::back_inserter(positions),
             [](const auto& data) { return data.first; });
-        auto updated = db_.AddConfirmedTransactions(
+        const auto updated = db_.AddConfirmedTransactions(
             id_, db_key_, std::move(matches), txoCreated, txoConsumed);
 
-        OT_ASSERT(updated);  // TODO handle database errors
+        if (false == updated) {
+            LogError()(OT_PRETTY_CLASS())(
+                name_)(": initiating rescan due to database error")
+                .Flush();
+            matches.clear();
+
+            return false;
+        }
 
         element_cache_.lock()->Add(
             std::move(txoCreated), std::move(txoConsumed));
@@ -121,10 +128,7 @@ auto DeterministicStateData::flush_cache(
         log(OT_PRETTY_CLASS())(name_)(" no cached transactions").Flush();
     }
 
-    log(OT_PRETTY_CLASS())(name_)(" finished flushing cache in ")(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(
-            Clock::now() - start))
-        .Flush();
+    return true;
 }
 
 auto DeterministicStateData::get_index(
@@ -140,7 +144,6 @@ auto DeterministicStateData::handle_confirmed_matches(
     const Log& log,
     allocator_type monotonic) const noexcept -> void
 {
-    const auto start = sClock::now();
     const auto& [utxo, general] = confirmed;
     auto transactions = database::BlockMatches{get_allocator()};
 
@@ -155,15 +158,12 @@ auto DeterministicStateData::handle_confirmed_matches(
         process(match, block.FindByID(txid), arg, monotonic);
     }
 
-    const auto processMatches = sClock::now();
-
     for (const auto& [txid, outpoint, element] : utxo) {
         auto& tx = transactions[txid].second;
 
         if (false == tx.IsValid()) { tx = block.FindByID(txid); }
     }
 
-    const auto buildTransactionMap = sClock::now();
     log(OT_PRETTY_CLASS())(name_)(" adding ")(transactions.size())(
         " confirmed transaction(s) to cache")
         .Flush();
@@ -204,16 +204,6 @@ auto DeterministicStateData::handle_confirmed_matches(
             }
         }
     });
-    const auto updateCache = sClock::now();
-    log(OT_PRETTY_CLASS())(name_)(" time to process matches: ")(
-        std::chrono::nanoseconds{processMatches - start})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(" time to build transaction map: ")(
-        std::chrono::nanoseconds{buildTransactionMap - processMatches})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(" time to update cache: ")(
-        std::chrono::nanoseconds{updateCache - buildTransactionMap})
-        .Flush();
 }
 
 auto DeterministicStateData::handle_mempool_matches(

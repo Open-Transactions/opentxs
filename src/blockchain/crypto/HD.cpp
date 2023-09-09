@@ -67,10 +67,11 @@ auto BlockchainHDSubaccount(
     using ReturnType = blockchain::crypto::implementation::HD;
 
     try {
+
         return std::make_unique<ReturnType>(
             api, parent, path, standard, reason, id);
     } catch (const std::exception& e) {
-        LogVerbose()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
+        LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -85,9 +86,10 @@ auto BlockchainHDSubaccount(
     using ReturnType = blockchain::crypto::implementation::HD;
 
     try {
+
         return std::make_unique<ReturnType>(api, parent, serialized, id);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return nullptr;
     }

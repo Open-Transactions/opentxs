@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace blockchain
 {
 namespace block
@@ -27,6 +32,12 @@ struct Notifications;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace identifier
+{
+class Account;
+class Nym;
+}  // namespace identifier
+
 namespace proto
 {
 class HDPath;
@@ -37,14 +48,19 @@ class HDPath;
 namespace opentxs::blockchain::crypto::internal
 {
 struct Account : virtual public crypto::Account {
+    static auto GetID(
+        const api::Session& api,
+        const identifier::Nym& owner,
+        blockchain::Type chain) noexcept -> identifier::Account;
+
     virtual auto AssociateTransaction(
         const UnallocatedVector<Activity>& unspent,
         const UnallocatedVector<Activity>& spent,
         UnallocatedSet<identifier::Generic>& contacts,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
-    virtual auto ClaimAccountID(
+    [[nodiscard]] virtual auto ClaimAccountID(
         const identifier::Account& id,
-        crypto::Subaccount* node) const noexcept -> void = 0;
+        crypto::Subaccount* node) const noexcept -> bool = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
     virtual auto LookupUTXO(const Coin& coin) const noexcept

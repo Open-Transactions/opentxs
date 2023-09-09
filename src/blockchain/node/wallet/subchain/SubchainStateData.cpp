@@ -86,6 +86,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -258,6 +259,7 @@ SubchainStateData::SubchainStateData(
       })
     , watchdog_(api_.Network().Asio().Internal().GetTimer())
     , reorg_(reorg.GetSlave(pipeline_, name_, alloc))
+    , rescan_pending_(false)
 {
     OT_ASSERT(false == owner_.empty());
     OT_ASSERT(false == id_.empty());
@@ -583,7 +585,7 @@ auto SubchainStateData::process_prepare_reorg(Message&& in) noexcept -> void
 
 auto SubchainStateData::process_rescan(Message&& in) noexcept -> void
 {
-    to_scan_.Send(MakeWork(Work::do_rescan), __FILE__, __LINE__);
+    start_rescan();
 }
 
 auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
@@ -600,17 +602,14 @@ auto SubchainStateData::ProcessBlock(
     const block::Block& block,
     allocator_type monotonic) const noexcept -> bool
 {
-    const auto start = Clock::now();
     const auto& name = name_;
     const auto& type = filter_type_;
     const auto& node = node_;
     const auto& filters = node.FilterOracle();
     const auto& blockHash = position.hash_;
-    auto haveTargets = Time{};
-    auto haveFilter = Time{};
     auto keyMatches = 0_uz;
     auto txoMatches = 0_uz;
-    const auto& log = LogTrace();
+    const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
     const auto confirmed = [&] {
         const auto handle = element_cache_.lock_shared();
         const auto matches = match_cache_.lock_shared()->GetMatches(position);
@@ -629,20 +628,17 @@ auto SubchainStateData::ProcessBlock(
             select_all(position, elements, patterns);
         }
 
-        haveTargets = Clock::now();
         const auto cfilter =
             filters.LoadFilter(type, blockHash, {get_allocator(), monotonic});
 
         OT_ASSERT(cfilter.IsValid());
 
-        haveFilter = Clock::now();
         keyMatches = key.size();
         txoMatches = outpoint.size();
 
         return block.Internal().FindMatches(
             api_, type, outpoint, key, log, monotonic, monotonic);
     }();
-    const auto haveMatches = Clock::now();
     const auto& [utxo, general] = confirmed;
     const auto& oracle = node.HeaderOracle();
     const auto header = oracle.LoadHeader(blockHash);
@@ -650,32 +646,13 @@ auto SubchainStateData::ProcessBlock(
     OT_ASSERT(header.IsValid());
     OT_ASSERT(position == header.Position());
 
-    const auto haveHeader = Clock::now();
     handle_confirmed_matches(block, position, confirmed, log, monotonic);
-    const auto handledMatches = Clock::now();
-    LogConsole()(name)(" processed block ")(position)(" in ")(
-        std::chrono::nanoseconds{Clock::now() - start})
-        .Flush();
+    LogConsole()(name)(" processed block ")(position).Flush();
     log(OT_PRETTY_CLASS())(name)(" ")(general.size())(" of ")(
         keyMatches)(" potential key matches confirmed.")
         .Flush();
     log(OT_PRETTY_CLASS())(name)(" ")(utxo.size())(" of ")(
         txoMatches)(" potential utxo matches confirmed.")
-        .Flush();
-    log(OT_PRETTY_CLASS())(name)(" time to load match targets: ")(
-        std::chrono::nanoseconds{haveTargets - start})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name)(" time to load filter: ")(
-        std::chrono::nanoseconds{haveFilter - haveTargets})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name)(" time to find matches: ")(
-        std::chrono::nanoseconds{haveMatches - haveFilter})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name)(" time to load block header: ")(
-        std::chrono::nanoseconds{haveHeader - haveMatches})
-        .Flush();
-    log(OT_PRETTY_CLASS())(name)(" time to handle matches: ")(
-        std::chrono::nanoseconds{handledMatches - haveHeader})
         .Flush();
 
     return true;
@@ -702,6 +679,11 @@ auto SubchainStateData::ProcessTransaction(
         " matches ")(utxo.size())(" utxos and ")(general.size())(" keys")
         .Flush();
     handle_mempool_matches(matches, tx, monotonic);
+}
+
+auto SubchainStateData::RescanFinished() const noexcept -> void
+{
+    rescan_pending_.store(false);
 }
 
 auto SubchainStateData::ReportScan(const block::Position& pos) const noexcept
@@ -1258,6 +1240,11 @@ auto SubchainStateData::set_key_data(
     tx.Internal().asBitcoin().SetKeyData(data);
 }
 
+auto SubchainStateData::start_rescan() const noexcept -> void
+{
+    to_scan_.Send(MakeWork(Work::do_rescan), __FILE__, __LINE__);
+}
+
 auto SubchainStateData::state_normal(const Work work, Message&& msg) noexcept
     -> void
 {
@@ -1419,6 +1406,13 @@ auto SubchainStateData::to_patterns(const Elements& in, allocator_type alloc)
     cb(in.elements_65_);
 
     return out;
+}
+
+auto SubchainStateData::TriggerRescan() const noexcept -> void
+{
+    if (auto rescan = rescan_pending_.exchange(true); false == rescan) {
+        start_rescan();
+    }
 }
 
 auto SubchainStateData::transition_state_normal() noexcept -> void

@@ -76,7 +76,7 @@ public:
         const crypto::Account& parent,
         const opentxs::PaymentCode& code,
         proto::HDPath&& path,
-        identifier::Account& out) noexcept;
+        identifier::Account& out) noexcept(false);
     Notification(const Notification&) = delete;
     Notification(Notification&&) = delete;
     auto operator=(const Notification&) -> Notification& = delete;
@@ -110,7 +110,7 @@ private:
     {
         return false;
     }
-    auto init() noexcept -> void final;
+    auto init() noexcept(false) -> void final;
     auto save(const rLock&) const noexcept -> bool final { return false; }
 
     auto mutable_element(

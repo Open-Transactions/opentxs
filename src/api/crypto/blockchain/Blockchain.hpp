@@ -22,6 +22,7 @@
 #include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -218,6 +219,12 @@ public:
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto RecipientContact(const Key& key) const noexcept
         -> identifier::Generic final;
+    [[nodiscard]] auto RegisterSubaccount(
+        const opentxs::blockchain::crypto::SubaccountType type,
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account,
+        const identifier::Account& subaccount) const noexcept -> bool final;
     auto Release(const Key key) const noexcept -> bool final;
     auto ReportScan(
         const Chain chain,

@@ -11,7 +11,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 
@@ -45,7 +44,6 @@ Data::Data(const api::Session& api, const node::Endpoints& endpoints) noexcept
 
         return out;
     }())
-    , send_promises_()
     , self_()
 {
 }

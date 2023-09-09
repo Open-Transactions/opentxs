@@ -69,6 +69,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 #include "util/Work.hpp"
 
@@ -521,6 +522,9 @@ public:
     }
     auto AdvanceTo(const block::Position& pos) noexcept -> bool
     {
+
+        const auto& log =
+            api_.GetOptions().TestMode() ? LogConsole() : LogTrace();
         auto output{true};
         auto changed{0};
         auto handle = lock();
@@ -529,17 +533,24 @@ public:
         try {
             const auto current = cache.GetPosition().Decode(api_);
             const auto start = current.height_;
-            LogTrace()(OT_PRETTY_CLASS())("incoming position: ")(pos).Flush();
-            LogTrace()(OT_PRETTY_CLASS())(" current position: ")(current)
-                .Flush();
 
             if (pos == current) { return true; }
             if (pos.height_ < current.height_) { return true; }
 
             OT_ASSERT(pos.height_ > start);
 
-            const auto stop = std::max<block::Height>(
-                0, start - params::get(chain_).MaturationInterval() - 1);
+            const auto firstMatureHeight = start - maturation_target_;
+            const auto lastMatureHeight = pos.height_ - maturation_target_;
+
+            if (0 > lastMatureHeight) {
+                log(OT_PRETTY_CLASS())("chain height of ")(pos.height_)(
+                    " is too low to mature outputs ")
+                    .Flush();
+
+                return true;
+            }
+
+            const auto stop = std::max<block::Height>(0, firstMatureHeight);
             const auto matured = [&] {
                 auto m = UnallocatedSet<block::Outpoint>{};
                 lmdb_.Read(
@@ -555,27 +566,40 @@ public:
                             return out;
                         }();
 
-                        if (is_mature(height, pos)) {
+                        if (height <= lastMatureHeight) {
                             m.emplace(block::Outpoint{value});
                         }
 
-                        return (height > stop);
+                        return (height >= stop);
                     },
                     Dir::Backward);
 
                 return m;
             }();
+            log(OT_PRETTY_CLASS())("found ")(matured.size())(
+                " generation outputs between block ")(stop)(" and block ")(
+                lastMatureHeight)
+                .Flush();
             auto tx = lmdb_.TransactionRW();
 
             for (const auto& outpoint : matured) {
                 static constexpr auto state = node::TxoState::ConfirmedNew;
                 const auto& out = cache.GetOutput(outpoint);
 
-                if (out.Internal().State() == state) { continue; }
+                if (out.Internal().State() == state) {
+                    log(OT_PRETTY_CLASS())("output ")(
+                        outpoint)(" already in state ")(print(state))
+                        .Flush();
+                    continue;
+                }
 
                 if (false == change_state(cache, tx, outpoint, state, pos)) {
                     throw std::runtime_error{"failed to mature output"};
                 } else {
+                    log(OT_PRETTY_CLASS())("matured output ")(
+                        outpoint)(" due to best chain reaching block height ")(
+                        pos.height_)
+                        .Flush();
                     ++changed;
                 }
             }
@@ -1215,17 +1239,23 @@ private:
     // NOTE: a mature output is available to be spent in the next block
     [[nodiscard]] auto is_mature(
         const OutputCache& cache,
-        const block::Height height) const noexcept -> bool
+        const block::Height minedAt) const noexcept -> bool
     {
-        const auto position = cache.GetPosition().Decode(api_);
+        const auto bestChain = cache.GetPosition().Decode(api_);
 
-        return is_mature(height, position);
+        return is_mature(minedAt, bestChain);
     }
     [[nodiscard]] auto is_mature(
-        const block::Height height,
-        const block::Position& pos) const noexcept -> bool
+        const block::Height minedAt,
+        const block::Position& bestChain) const noexcept -> bool
     {
-        return (pos.height_ - height) >= maturation_target_;
+        return is_mature(minedAt, bestChain.height_);
+    }
+    [[nodiscard]] auto is_mature(
+        const block::Height minedAt,
+        const block::Height bestChain) const noexcept -> bool
+    {
+        return (bestChain - minedAt) >= maturation_target_;
     }
     [[nodiscard]] auto match(
         const OutputCache& cache,
@@ -1266,23 +1296,25 @@ private:
     }
     auto publish_balance(const OutputCache& cache) const noexcept -> void
     {
-        to_balance_oracle_.lock()->SendDeferred(
+        const auto total = get_balance(cache);
+        const auto byNym = get_balances(cache);
+        auto handle = to_balance_oracle_.lock();
+        auto& socket = *handle;
+        socket.SendDeferred(
             [&] {
-                const auto balance = get_balance(cache);
                 auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
                 out.AddFrame(chain_);
-                out.AddFrame(balance.first);
-                out.AddFrame(balance.second);
+                out.AddFrame(total.first);
+                out.AddFrame(total.second);
 
                 return out;
             }(),
             __FILE__,
             __LINE__);
 
-        for (const auto& data : get_balances(cache)) {
-            to_balance_oracle_.lock()->SendDeferred(
-                [&] {
-                    const auto& [nym, balance] = data;  // TODO c++20
+        for (const auto& data : byNym) {
+            socket.SendDeferred(
+                [&](const auto& nym, const auto& balance) {
                     auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
                     out.AddFrame(chain_);
                     out.AddFrame(balance.first);
@@ -1290,7 +1322,7 @@ private:
                     out.AddFrame(nym);
 
                     return out;
-                }(),
+                }(data.first, data.second),
                 __FILE__,
                 __LINE__);
         }
@@ -1789,8 +1821,6 @@ private:
                     "Failed to delete index for proposal ")(proposalID, crypto)(
                     " to created output ")(newOutpoint)
                     .Flush();
-
-                return false;
             }
 
             rc = lmdb_.Delete(output_proposal_, newOutpoint.Bytes(), tx);
@@ -1804,8 +1834,6 @@ private:
                     "Failed to delete index for created outpoint ")(
                     newOutpoint)(" to proposal ")(proposalID, crypto)
                     .Flush();
-
-                return false;
             }
         }
 
@@ -1822,8 +1850,6 @@ private:
                     "Failed to delete index for proposal ")(proposalID, crypto)(
                     " to consumed output ")(spentOutpoint)
                     .Flush();
-
-                return false;
             }
 
             rc = lmdb_.Delete(output_proposal_, spentOutpoint.Bytes(), tx);
@@ -1837,8 +1863,6 @@ private:
                     "Failed to delete index for consumed outpoint ")(
                     spentOutpoint)(" to proposal ")(proposalID, crypto)
                     .Flush();
-
-                return false;
             }
         }
 

@@ -294,6 +294,15 @@ public:
     {
         return {id_};
     }
+    [[nodiscard]] auto RegisterSubaccount(
+        const opentxs::blockchain::crypto::SubaccountType,
+        const opentxs::blockchain::Type,
+        const identifier::Nym&,
+        const identifier::Account&,
+        const identifier::Account&) const noexcept -> bool final
+    {
+        return {};
+    }
     auto Release(const Key) const noexcept -> bool final { return {}; }
     auto SenderContact(const Key&) const noexcept -> identifier::Generic final
     {

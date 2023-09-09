@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <algorithm>
 #include <chrono>
+#include <exception>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -260,7 +261,11 @@ auto Account::Imp::check_notification(
 
 auto Account::Imp::check_pc(const identifier::Account& id) noexcept -> void
 {
-    check_pc(account_.GetPaymentCode().at(id));
+    try {
+        check_pc(account_.GetPaymentCode().at(id));
+    } catch (const std::exception& e) {
+        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+    }
 }
 
 auto Account::Imp::check_pc(const crypto::PaymentCode& subaccount) noexcept

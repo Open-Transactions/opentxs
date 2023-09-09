@@ -52,6 +52,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/Work.hpp"
 
@@ -339,6 +340,7 @@ auto Process::Imp::process_mempool(
     Message&& in,
     allocator_type monotonic) noexcept -> void
 {
+    const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
     const auto body = in.Payload();
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -350,7 +352,7 @@ auto Process::Imp::process_mempool(
     // as mempool transactions even if they are erroneously received from peers
     // on a subsequent run of the application
     if (txid_cache_.contains(txid)) {
-        log_(OT_PRETTY_CLASS())(name_)(" transaction ")
+        log(OT_PRETTY_CLASS())(name_)(" transaction ")
             .asHex(txid)(" already process as confirmed")
             .Flush();
 
@@ -358,7 +360,7 @@ auto Process::Imp::process_mempool(
     }
 
     if (auto t = parent_.mempool_oracle_.Query(txid, monotonic); t.IsValid()) {
-        parent_.ProcessTransaction(t, log_, monotonic);
+        parent_.ProcessTransaction(t, log, monotonic);
     }
 }
 

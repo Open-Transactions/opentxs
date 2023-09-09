@@ -41,6 +41,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -86,7 +87,7 @@ Index::Imp::Imp(
 
 auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
 {
-    const auto& log = log_;
+    const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
     const auto& oracle = parent_.mempool_oracle_;
     log(OT_PRETTY_CLASS())(name_)(": checking mempool for transactions")
         .Flush();

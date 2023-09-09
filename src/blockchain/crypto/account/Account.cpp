@@ -9,15 +9,18 @@
 
 #include <Bip47Channel.pb.h>
 #include <HDAccount.pb.h>
+#include <boost/endian/conversion.hpp>
 #include <cstddef>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <stdexcept>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
 #include "blockchain/crypto/AccountIndex.hpp"
+#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
@@ -26,6 +29,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -42,7 +46,6 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -78,6 +81,29 @@ auto BlockchainAccountKeys(
 }
 }  // namespace opentxs::factory
 
+namespace opentxs::blockchain::crypto::internal
+{
+auto Account::GetID(
+    const api::Session& api,
+    const identifier::Nym& owner,
+    blockchain::Type chain) noexcept -> identifier::Account
+{
+    const auto preimage = [&] {
+        auto out = api.Factory().DataFromBytes(owner.Bytes());
+        auto type =
+            static_cast<std::underlying_type<blockchain::Type>::type>(chain);
+        boost::endian::native_to_little_inplace(type);
+        out.Concatenate(&type, sizeof(type));
+
+        return out;
+    }();
+    using enum identifier::AccountSubtype;
+
+    return api.Factory().AccountIDFromPreimage(
+        preimage.Bytes(), blockchain_account);
+}
+}  // namespace opentxs::blockchain::crypto::internal
+
 namespace opentxs::blockchain::crypto::implementation
 {
 Account::Account(
@@ -95,19 +121,7 @@ Account::Account(
     , account_index_(index)
     , chain_(parent.Chain())
     , nym_id_(nym)
-    , account_id_([&] {
-        const auto preimage = [&] {
-            auto out = api_.Factory().DataFromBytes(nym_id_.Bytes());
-            const auto chain = parent.Chain();
-            out.Concatenate(&chain, sizeof(chain));
-
-            return out;
-        }();
-        using enum identifier::AccountSubtype;
-
-        return api_.Factory().AccountIDFromPreimage(
-            preimage.Bytes(), blockchain_account);
-    }())
+    , account_id_(GetID(api_, nym_id_, parent.Chain()))
     , hd_(api_, SubaccountType::HD, *this)
     , imported_(api_, SubaccountType::Imported, *this)
     , notification_(api_, SubaccountType::Notification, *this)
@@ -129,30 +143,6 @@ Account::Account(
     account_index_.Register(account_id_, nym_id_, chain_);
     init_hd(hd);
     init_payment_code(paymentCode);
-}
-
-auto Account::NodeIndex::Add(
-    const identifier::Account& id,
-    crypto::Subaccount* node) noexcept -> void
-{
-    OT_ASSERT(nullptr != node);
-
-    Lock lock(lock_);
-    index_[id] = node;
-}
-
-auto Account::NodeIndex::Find(const identifier::Account& id) const noexcept
-    -> crypto::Subaccount*
-{
-    Lock lock(lock_);
-
-    try {
-
-        return index_.at(id);
-    } catch (...) {
-
-        return nullptr;
-    }
 }
 
 auto Account::AddHDNode(
@@ -243,9 +233,18 @@ auto Account::AssociateTransaction(
 
 auto Account::ClaimAccountID(
     const identifier::Account& id,
-    crypto::Subaccount* node) const noexcept -> void
+    crypto::Subaccount* node) const noexcept -> bool
 {
-    node_index_.Add(id, node);
+    if (node_index_.Add(id, node)) {
+        [[maybe_unused]] const auto registered =
+            parent_.Parent().Internal().RegisterSubaccount(
+                node->Type(), chain_, nym_id_, account_id_, id);
+
+        return true;
+    } else {
+
+        return false;
+    }
 }
 
 auto Account::find_next_element(

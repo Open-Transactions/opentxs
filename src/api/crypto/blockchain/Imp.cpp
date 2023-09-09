@@ -678,16 +678,18 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
 {
     const auto& [account, subchain, index] = id;
     using Type = opentxs::blockchain::crypto::SubaccountType;
+    const auto handle = accounts_.lock_shared();
+    const auto& accounts = *handle;
 
-    switch (accounts_.Type(account)) {
+    switch (accounts.Type(account)) {
         case Type::HD: {
-            const auto& hd = HDSubaccount(accounts_.Owner(account), account);
+            const auto& hd = HDSubaccount(accounts.Owner(account), account);
 
             return hd.BalanceElement(subchain, index);
         }
         case Type::PaymentCode: {
             const auto& pc =
-                PaymentCodeSubaccount(accounts_.Owner(account), account);
+                PaymentCodeSubaccount(accounts.Owner(account), account);
 
             return pc.BalanceElement(subchain, index);
         }
@@ -703,7 +705,9 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
 auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
-    const auto& nymID = accounts_.Owner(accountID);
+    const auto handle = accounts_.lock_shared();
+    const auto& accounts = *handle;
+    const auto& nymID = accounts.Owner(accountID);
     const auto& wallet = [&]() -> auto& {
         const auto type =
             api_.Storage().Internal().BlockchainSubaccountAccountType(
@@ -724,7 +728,7 @@ auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     const auto& account = wallet.Account(nymID);
     const auto& subaccount =
         [&]() -> const opentxs::blockchain::crypto::Subaccount& {
-        switch (accounts_.Type(accountID)) {
+        switch (accounts.Type(accountID)) {
             case opentxs::blockchain::crypto::SubaccountType::HD: {
 
                 return account.GetHD().at(accountID);
@@ -773,7 +777,7 @@ auto Blockchain::Imp::IndexItem(const ReadView bytes) const noexcept
     return {};
 }
 
-auto Blockchain::Imp::Init() noexcept -> void { accounts_.Populate(); }
+auto Blockchain::Imp::Init() noexcept -> void { accounts_.lock()->Populate(); }
 
 auto Blockchain::Imp::init_path(
     const opentxs::crypto::SeedID& seed,
@@ -928,16 +932,6 @@ auto Blockchain::Imp::NewHDSubaccount(
             tree.AccountID(), api_.Crypto())(" owned by ")(nymID.asBase58(
             api_.Crypto()))(" using path ")(opentxs::crypto::Print(accountPath))
             .Flush();
-        accounts_.New(
-            opentxs::blockchain::crypto::SubaccountType::HD,
-            targetChain,
-            accountID,
-            nymID);
-        notify_new_account(
-            accountID,
-            nymID,
-            targetChain,
-            opentxs::blockchain::crypto::SubaccountType::HD);
 
         return accountID;
     } catch (...) {
@@ -978,64 +972,55 @@ auto Blockchain::Imp::new_payment_code(
 {
     static const auto blank = identifier::Account{};
 
-    if (false == validate_nym(nymID)) { return blank; }
-
-    if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
-        LogError()(OT_PRETTY_CLASS())("Invalid chain").Flush();
-
-        return blank;
-    }
-
-    auto nym = api_.Wallet().Nym(nymID);
-
-    if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym does not exist.").Flush();
-
-        return blank;
-    }
-
-    if (false == path.has_seed()) {
-        LogError()(OT_PRETTY_CLASS())("Missing seed.").Flush();
-
-        return blank;
-    }
-
-    if (3 > path.child().size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid path: ")(
-            opentxs::crypto::Print(path))
-            .Flush();
-
-        return blank;
-    }
-
     try {
+        if (false == validate_nym(nymID)) {
+            throw std::runtime_error{
+                "invalid nym: "s.append(nymID.asBase58(api_.Crypto()))};
+        }
+
+        if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
+            throw std::runtime_error{"invalid chain: "s.append(print(chain))};
+        }
+
+        auto nym = api_.Wallet().Nym(nymID);
+
+        if (false == bool(nym)) {
+            throw std::runtime_error{
+                "failed to load nym: "s.append(nymID.asBase58(api_.Crypto()))};
+        }
+
+        if (false == path.has_seed()) {
+            throw std::runtime_error{
+                "nym "s.append(nymID.asBase58(api_.Crypto()))
+                    .append(" does not contain an HD seed")};
+        }
+
+        if (3 > path.child().size()) {
+            throw std::runtime_error{
+                "nym "s.append(nymID.asBase58(api_.Crypto()))
+                    .append(" does not contain a valid HD path")};
+        }
+
         auto accountID{blank};
-        auto& tree = wallets_.Get(chain).Account(nymID);
-        tree.Internal().AddUpdatePaymentCode(
+        auto& account = wallets_.Get(chain).Account(nymID);
+        const auto got = account.Internal().AddUpdatePaymentCode(
             local, remote, path, reason, accountID);
 
-        OT_ASSERT(false == accountID.empty());
+        if ((false == got) || accountID.empty()) {
+            throw std::runtime_error{"failed to create or load subaccount"};
+        }
 
-        LogVerbose()(OT_PRETTY_CLASS())("Created new payment code subaccount ")(
-            accountID, api_.Crypto())(" for  ")(print(chain))(" account ")(
-            tree.AccountID(),
+        LogVerbose()(OT_PRETTY_CLASS())(
+            "Loaded or created new payment code subaccount ")(
+            accountID, api_.Crypto())(" for ")(print(chain))(" account ")(
+            account.AccountID(),
             api_.Crypto())(" owned by ")(nymID, api_.Crypto())(
             " in reference to remote payment code ")(remote)
             .Flush();
-        accounts_.New(
-            opentxs::blockchain::crypto::SubaccountType::PaymentCode,
-            chain,
-            accountID,
-            nymID);
-        notify_new_account(
-            accountID,
-            nymID,
-            chain,
-            opentxs::blockchain::crypto::SubaccountType::PaymentCode);
 
         return accountID;
-    } catch (...) {
-        LogVerbose()(OT_PRETTY_CLASS())("Failed to create account").Flush();
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return blank;
     }
@@ -1047,6 +1032,12 @@ auto Blockchain::Imp::nym_mutex(const identifier::Nym& nym) const noexcept
     auto lock = Lock{lock_};
 
     return nym_lock_[nym];
+}
+
+auto Blockchain::Imp::Owner(const identifier::Account& accountID) const noexcept
+    -> const identifier::Nym&
+{
+    return accounts_.lock_shared()->Owner(accountID);
 }
 
 auto Blockchain::Imp::Owner(const Key& key) const noexcept
@@ -1282,6 +1273,17 @@ auto Blockchain::Imp::RecipientContact(const Key& key) const noexcept
     }
 }
 
+auto Blockchain::Imp::RegisterSubaccount(
+    const opentxs::blockchain::crypto::SubaccountType type,
+    const opentxs::blockchain::Type chain,
+    const identifier::Nym& owner,
+    const identifier::Account& account,
+    const identifier::Account& subaccount) const noexcept -> bool
+{
+    return accounts_.lock()->RegisterSubaccount(
+        type, chain, owner, account, subaccount);
+}
+
 auto Blockchain::Imp::Release(const Key key) const noexcept -> bool
 {
     try {
@@ -1351,6 +1353,14 @@ auto Blockchain::Imp::Start(std::shared_ptr<const api::Session> api) noexcept
     for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain);
     }
+}
+
+auto Blockchain::Imp::SubaccountList(
+    const identifier::Nym& nymID,
+    const opentxs::blockchain::Type chain) const noexcept
+    -> UnallocatedSet<identifier::Account>
+{
+    return accounts_.lock_shared()->List(nymID, chain);
 }
 
 auto Blockchain::Imp::Unconfirm(

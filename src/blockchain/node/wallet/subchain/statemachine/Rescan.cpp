@@ -346,7 +346,15 @@ auto Rescan::Imp::process_filter(
 
 auto Rescan::Imp::prune() noexcept -> void
 {
-    OT_ASSERT(last_scanned_.has_value());
+    if (false == last_scanned_.has_value()) {
+        LogError()(OT_PRETTY_CLASS())(
+            name_)(": contract violated, possibly due to in-process subchain "
+                   "rescan operation")
+            .Flush();
+        parent_.TriggerRescan();
+
+        return;
+    }
 
     const auto& target = last_scanned_.value();
 
@@ -366,7 +374,15 @@ auto Rescan::Imp::prune() noexcept -> void
 
 auto Rescan::Imp::rescan_finished() const noexcept -> bool
 {
-    OT_ASSERT(last_scanned_.has_value());
+    if (false == last_scanned_.has_value()) {
+        LogError()(OT_PRETTY_CLASS())(
+            name_)(": contract violated, possibly due to in-process subchain "
+                   "rescan operation")
+            .Flush();
+        parent_.TriggerRescan();
+
+        return true;
+    }
 
     if (caught_up()) { return true; }
 
@@ -498,7 +514,15 @@ auto Rescan::Imp::work(allocator_type monotonic) noexcept -> bool
         // interrupted for a state change
     }
 
-    OT_ASSERT(last_scanned_.has_value());
+    if (false == last_scanned_.has_value()) {
+        LogError()(OT_PRETTY_CLASS())(
+            name_)(": contract violated, possibly due to in-process subchain "
+                   "rescan operation")
+            .Flush();
+        parent_.TriggerRescan();
+
+        return false;
+    }
 
     if (auto count = dirty.size(); 0u < count) {
         log_(OT_PRETTY_CLASS())(name_)(" re-processing ")(count)(" items:")

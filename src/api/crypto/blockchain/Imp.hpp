@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include <cs_shared_guarded.h>
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <shared_mutex>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -207,10 +209,7 @@ struct Blockchain::Imp {
         const opentxs::blockchain::Type chain,
         const PasswordPrompt& reason) const noexcept -> identifier::Account;
     auto Owner(const identifier::Account& accountID) const noexcept
-        -> const identifier::Nym&
-    {
-        return accounts_.Owner(accountID);
-    }
+        -> const identifier::Nym&;
     auto Owner(const Key& key) const noexcept -> const identifier::Nym&;
     auto PaymentCodeSubaccount(
         const identifier::Nym& nymID,
@@ -239,6 +238,12 @@ struct Blockchain::Imp {
     auto PubkeyHash(const opentxs::blockchain::Type chain, const Data& pubkey)
         const noexcept(false) -> ByteArray;
     auto RecipientContact(const Key& key) const noexcept -> identifier::Generic;
+    [[nodiscard]] auto RegisterSubaccount(
+        const opentxs::blockchain::crypto::SubaccountType type,
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account,
+        const identifier::Account& subaccount) const noexcept -> bool;
     auto Release(const Key key) const noexcept -> bool;
     virtual auto ReportScan(
         const opentxs::blockchain::Type chain,
@@ -254,10 +259,7 @@ struct Blockchain::Imp {
     auto SubaccountList(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept
-        -> UnallocatedSet<identifier::Account>
-    {
-        return accounts_.List(nymID, chain);
-    }
+        -> UnallocatedSet<identifier::Account>;
     virtual auto Unconfirm(
         const Key key,
         const opentxs::blockchain::block::TransactionHash& tx,
@@ -278,6 +280,9 @@ struct Blockchain::Imp {
     virtual ~Imp() = default;
 
 protected:
+    using AccountCache =
+        libguarded::shared_guarded<blockchain::AccountCache, std::shared_mutex>;
+
     const api::Session& api_;
     const api::session::Contacts& contacts_;
     const DecodedAddress blank_;
@@ -285,7 +290,7 @@ protected:
     const api::crypto::Blockchain& parent_;
     mutable std::mutex lock_;
     mutable IDLock nym_lock_;
-    mutable blockchain::AccountCache accounts_;
+    mutable AccountCache accounts_;
     mutable blockchain::Wallets wallets_;
 
     auto bip44_type(const UnitType type) const noexcept -> Bip44Type;
@@ -323,12 +328,5 @@ private:
                  const opentxs::blockchain::crypto::Account*,
                  opentxs::blockchain::crypto::Notifications*>>) const noexcept
         -> void;
-    virtual auto notify_new_account(
-        const identifier::Account& id,
-        const identifier::Nym& owner,
-        opentxs::blockchain::Type chain,
-        opentxs::blockchain::crypto::SubaccountType type) const noexcept -> void
-    {
-    }
 };
 }  // namespace opentxs::api::crypto::imp

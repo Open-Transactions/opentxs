@@ -193,6 +193,7 @@ public:
         Vector<ScanStatus>& out,
         allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
+    auto RescanFinished() const noexcept -> void;
     auto Scan(
         const block::Position best,
         const block::Height stop,
@@ -200,6 +201,7 @@ public:
         Vector<ScanStatus>& out,
         allocator_type monotonic) const noexcept
         -> std::optional<block::Position>;
+    auto TriggerRescan() const noexcept -> void;
 
     auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
 
@@ -274,6 +276,7 @@ private:
     Map<JobType, Time> child_activity_;
     Timer watchdog_;
     mutable ReorgSlave reorg_;
+    mutable std::atomic<bool> rescan_pending_;
 
     static auto describe(
         const crypto::Subaccount& account,
@@ -349,6 +352,7 @@ private:
         const block::Position& block,
         const Elements& in,
         BlockTargets& targets) const noexcept -> void;
+    auto start_rescan() const noexcept -> void;
     auto to_patterns(const Elements& in, allocator_type alloc) const noexcept
         -> Patterns;
     auto translate(const TXOs& utxos, allocator_type alloc) const noexcept

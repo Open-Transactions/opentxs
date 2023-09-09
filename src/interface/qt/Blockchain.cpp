@@ -6,9 +6,7 @@
 #include "interface/ui/accountactivity/BlockchainAccountActivity.hpp"  // IWYU pragma: associated
 #include "interface/ui/accountlist/BlockchainAccountListItem.hpp"  // IWYU pragma: associated
 
-#include <algorithm>
 #include <chrono>
-#include <iterator>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +17,10 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Funding.hpp"           // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
+#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/util/Container.hpp"
@@ -40,10 +41,18 @@ auto BlockchainAccountActivity::Notify(
             throw std::runtime_error{"invalid chain"};
         }
 
-        const auto& network = handle.get();
+        const auto& wallet = handle.get().Wallet();
+        auto spend = wallet.CreateSpend(primary_id_);
 
-        return SendMonitor().watch(
-            network.Sweep(primary_id_, ""sv, contacts), std::move(cb));
+        if (false == spend.SetSweepFromAccount(true)) {
+            throw std::runtime_error{"failed to set funding policy"};
+        }
+
+        if (false == spend.Notify(contacts)) {
+            throw std::runtime_error{"failed to set notifications"};
+        }
+
+        return SendMonitor().watch(wallet.Execute(spend), std::move(cb));
     } catch (...) {
 
         return -1;
@@ -64,7 +73,7 @@ auto BlockchainAccountActivity::Send(
             throw std::runtime_error{"invalid chain"};
         }
 
-        const auto& network = handle.get();
+        const auto& wallet = handle.get().Wallet();
         const auto recipient = api_.Factory().PaymentCodeFromBase58(address);
         const auto& definition =
             display::GetDefinition(blockchain_to_unit(chain_));
@@ -74,34 +83,29 @@ auto BlockchainAccountActivity::Send(
             throw std::runtime_error{"invalid amount"};
         }
 
-        if (0 < recipient.Version()) {
+        auto spend = wallet.CreateSpend(primary_id_);
 
-            return SendMonitor().watch(
-                network.SendToPaymentCode(
-                    primary_id_, recipient, *amount, memo, notify),
-                std::move(cb));
-        } else {
-            const auto text = [&] {
-                constexpr auto as_base58 = [](const auto& p) {
-                    return p.asBase58();
-                };
-                auto out = Vector<std::string_view>{};
-                out.reserve(notify.size());
-                out.clear();
-                std::transform(
-                    notify.begin(),
-                    notify.end(),
-                    std::back_inserter(out),
-                    as_base58);
+        if (false == spend.SetMemo(memo)) {
 
-                return out;
-            }();
-
-            return SendMonitor().watch(
-                network.SendToAddress(
-                    primary_id_, address, *amount, memo, text),
-                std::move(cb));
+            throw std::runtime_error{"failed set memo"};
         }
+
+        if (false == spend.Notify(notify)) {
+            throw std::runtime_error{"failed to set notifications"};
+        }
+
+        if (0 < recipient.Version()) {
+            if (false == spend.SendToPaymentCode(recipient, *amount)) {
+                throw std::runtime_error{
+                    "failed to set recipient payment code"};
+            }
+        } else {
+            if (false == spend.SendToAddress(address, *amount)) {
+                throw std::runtime_error{"failed to set recipient address"};
+            }
+        }
+
+        return SendMonitor().watch(wallet.Execute(spend), std::move(cb));
     } catch (const std::exception& e) {
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 

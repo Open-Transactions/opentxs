@@ -432,16 +432,21 @@ TEST_F(Regtest_payment_code, send_to_bob)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
-    auto future = network.SendToPaymentCode(
-        alex_.nym_id_,
-        client_1_.Factory().PaymentCodeFromBase58(
-            GetPaymentCodeVector3().bob_.payment_code_),
-        1000000000,
-        memo_outgoing_);
+    const auto& wallet = handle.get().Wallet();
+    const auto bob = client_1_.Factory().PaymentCodeFromBase58(
+        GetPaymentCodeVector3().bob_.payment_code_);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToPaymentCode(bob, 1000000000)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    ASSERT_FALSE(txid.empty());
+    ASSERT_FALSE(txid.IsNull());
 
     {
         const auto tx = client_1_.Crypto().Blockchain().LoadTransaction(txid);
@@ -1409,16 +1414,21 @@ TEST_F(Regtest_payment_code, send_to_bob_again)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
-    auto future = network.SendToPaymentCode(
-        alex_.nym_id_,
-        client_1_.Factory().PaymentCodeFromBase58(
-            GetPaymentCodeVector3().bob_.payment_code_),
-        1500000000,
-        memo_outgoing_);
+    const auto& wallet = handle.get().Wallet();
+    const auto bob = client_1_.Factory().PaymentCodeFromBase58(
+        GetPaymentCodeVector3().bob_.payment_code_);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToPaymentCode(bob, 1500000000)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    ASSERT_FALSE(txid.empty());
+    ASSERT_FALSE(txid.IsNull());
 
     {
         const auto tx =

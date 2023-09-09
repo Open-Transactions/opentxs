@@ -34,7 +34,7 @@ using namespace opentxs::literals;
 auto paymentcode_extra_notifications(
     const opentxs::Log& log,
     const opentxs::blockchain::crypto::PaymentCode& account,
-    opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void
+    boost::container::flat_set<opentxs::PaymentCode>& out) noexcept -> void
 {
     if (0_uz == account.IncomingNotificationCount()) {
         log(__func__)(": adding extra notification to self").Flush();
@@ -49,7 +49,7 @@ auto paymentcode_preemptive_notifications(
     const opentxs::api::Session& api,
     const opentxs::identifier::Nym& sender,
     opentxs::blockchain::Type chain,
-    opentxs::Set<opentxs::PaymentCode>& out,
+    boost::container::flat_set<opentxs::PaymentCode>& out,
     opentxs::alloc::Strategy alloc) noexcept -> void
 {
     const auto notif =

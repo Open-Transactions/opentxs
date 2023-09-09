@@ -73,7 +73,7 @@ auto BlockchainPCSubaccount(
         return std::make_unique<ReturnType>(
             api, contacts, parent, local, remote, path, txid, reason, id);
     } catch (const std::exception& e) {
-        LogVerbose()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
+        LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -99,7 +99,7 @@ auto BlockchainPCSubaccount(
         return std::make_unique<ReturnType>(
             api, contacts, parent, serialized, id, std::move(contact));
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
         return nullptr;
     }

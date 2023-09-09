@@ -10,12 +10,34 @@
 #include <frozen/unordered_map.h>
 
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Funding.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"     // IWYU pragma: keep
 #include "opentxs/blockchain/node/TxoState.hpp"       // IWYU pragma: keep
 #include "opentxs/blockchain/node/TxoTag.hpp"         // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {
+auto print(Funding in) noexcept -> std::string_view
+{
+    using namespace std::literals;
+    using enum Funding;
+    static constexpr auto map =
+        frozen::make_unordered_map<Funding, std::string_view>({
+            {Default, "default"sv},
+            {SweepAccount, "sweep account"sv},
+            {SweepSubaccount, "sweep subaccount"sv},
+            {SweepKey, "sweep key"sv},
+        });
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return "unknown Funding"sv;
+    }
+}
+
 auto print(SendResult code) noexcept -> std::string_view
 {
     using namespace std::literals;
@@ -23,14 +45,10 @@ auto print(SendResult code) noexcept -> std::string_view
     static constexpr auto map =
         frozen::make_unordered_map<SendResult, std::string_view>({
             {InvalidSenderNym, "invalid sender nym"sv},
-            {AddressNotValidforChain,
-             "provided address is not valid for specified blockchain"sv},
-            {UnsupportedAddressFormat, "address format is not supported"sv},
-            {SenderMissingPaymentCode,
-             "sender nym does not contain a valid payment code"sv},
-            {UnsupportedRecipientPaymentCode,
-             "recipient payment code version is not supported"sv},
-            {HDDerivationFailure, "key derivation error"sv},
+            {MissingRecipients, "no recipients specified in spend"sv},
+            {SerializationError, "internal serialization error"sv},
+            {InsufficientConfirmedFunds,
+             "try again after pending transactions are confirmed"sv},
             {DatabaseError, "database error"sv},
             {DuplicateProposal, "duplicate spend proposal"sv},
             {OutputCreationError, "failed to create transaction outputs"sv},
@@ -43,12 +61,12 @@ auto print(SendResult code) noexcept -> std::string_view
             {Sent, "successfully broadcast transaction"sv},
         });
 
-    try {
+    if (const auto* i = map.find(code); map.end() != i) {
 
-        return map.at(code);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return "unspecified error"sv;
+        return "unknown SendResult"sv;
     }
 }
 
@@ -70,12 +88,12 @@ auto print(TxoState in) noexcept -> std::string_view
             {Immature, "newly generated"sv},
         });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return {};
+        return "unknown TxoState"sv;
     }
 }
 
@@ -89,12 +107,12 @@ auto print(TxoTag in) noexcept -> std::string_view
             {Generation, "generated"sv},
         });
 
-    try {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return map.at(in);
-    } catch (...) {
+        return i->second;
+    } else {
 
-        return {};
+        return "unknown TxoTag"sv;
     }
 }
 }  // namespace opentxs::blockchain::node

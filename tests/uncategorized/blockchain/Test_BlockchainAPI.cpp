@@ -106,13 +106,11 @@ TEST_F(ApiCryptoBlockchain, TestSeedRoot)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(alex_, btc_chain_);
 
-    EXPECT_EQ(list.size(), 1);
-    EXPECT_EQ(list.count(account_1_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_1_id_.get()));
 
     list = api_.Crypto().Blockchain().SubaccountList(daniel_, btc_chain_);
 
-    EXPECT_EQ(list.size(), 1);
-    EXPECT_EQ(list.count(account_2_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_2_id_.get()));
 
     // Test difference in index on BIP32 implies a different account
     EXPECT_NE(account_1_id_.get(), account_2_id_.get());
@@ -186,9 +184,8 @@ TEST_F(ApiCryptoBlockchain, TestNym_AccountIdempotence)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(chris_, btc_chain_);
 
-    EXPECT_EQ(list.size(), 2);
-    EXPECT_EQ(list.count(account_3_id_.get()), 1);
-    EXPECT_EQ(list.count(account_4_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_3_id_.get()));
+    EXPECT_TRUE(list.contains(account_4_id_.get()));
 }
 
 // Test that the same nym creates different accounts for two chains
@@ -204,8 +201,7 @@ TEST_F(ApiCryptoBlockchain, TestChainDiff)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(chris_, bch_chain_);
 
-    EXPECT_EQ(list.size(), 1);
-    EXPECT_EQ(list.count(account_5_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_5_id_.get()));
 }
 
 TEST_F(ApiCryptoBlockchain, TestBip32_standard_1)
@@ -317,8 +313,7 @@ TEST_F(ApiCryptoBlockchain, testBip32_SeedB)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(bob_, btc_chain_);
 
-    EXPECT_EQ(list.size(), 1);
-    EXPECT_EQ(list.count(account_6_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_6_id_.get()));
     EXPECT_TRUE(check_hd_account(
         bob_,
         btc_chain_,
@@ -362,8 +357,7 @@ TEST_F(ApiCryptoBlockchain, testBip44_ltc)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(chris_, ltc_chain_);
 
-    EXPECT_EQ(list.size(), 1);
-    EXPECT_EQ(list.count(account_7_id_.get()), 1);
+    EXPECT_TRUE(list.contains(account_7_id_.get()));
     EXPECT_TRUE(check_hd_account(
         chris_,
         ltc_chain_,
@@ -413,7 +407,7 @@ TEST_F(ApiCryptoBlockchain, reserve_addresses)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(nym, chain);
 
-    EXPECT_EQ(list.count(accountID), 1);
+    EXPECT_TRUE(list.contains(accountID));
 
     const auto& account =
         api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
@@ -843,7 +837,7 @@ TEST_F(ApiCryptoBlockchain, batch)
 
     auto list = api_.Crypto().Blockchain().SubaccountList(nym, chain);
 
-    EXPECT_EQ(list.count(accountID), 1);
+    EXPECT_TRUE(list.contains(accountID));
 
     const auto& account =
         api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);

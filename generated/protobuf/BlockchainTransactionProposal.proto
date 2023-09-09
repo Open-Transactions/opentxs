@@ -26,4 +26,7 @@ message BlockchainTransactionProposal
     repeated BlockchainTransactionProposedNotification notification = 7;
     optional BlockchainTransaction finished = 8;
     optional BlockchainTransactionProposedSweep sweep = 9;
+    optional string password_prompt = 10;
+    optional bool spend_unconfirmed_change = 11;
+    optional bool spend_unconfirmed_incoming = 12;
 }

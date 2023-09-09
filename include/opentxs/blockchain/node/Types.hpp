@@ -48,17 +48,18 @@ namespace opentxs::blockchain::node
 {
 using TypeEnum = std::uint32_t;
 
-// IWYU pragma: begin_exports
-enum class SendResult : TypeEnum;     // IWYU pragma: keep
-enum class TxoState : std::uint16_t;  // IWYU pragma: keep
-enum class TxoTag : std::uint16_t;    // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class Funding : TypeEnum;        // IWYU pragma: export
+enum class SendResult : TypeEnum;     // IWYU pragma: export
+enum class TxoState : std::uint16_t;  // IWYU pragma: export
+enum class TxoTag : std::uint16_t;    // IWYU pragma: export
 
 using BlockResult = std::shared_future<block::Block>;
 using BlockResults = Vector<BlockResult>;
 using SendOutcome = std::pair<SendResult, block::TransactionHash>;
+using PendingOutgoing = std::future<SendOutcome>;
 using UTXO = std::pair<block::Outpoint, protocol::bitcoin::base::block::Output>;
 
+OPENTXS_EXPORT auto print(Funding) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SendResult) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(TxoState) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(TxoTag) noexcept -> std::string_view;

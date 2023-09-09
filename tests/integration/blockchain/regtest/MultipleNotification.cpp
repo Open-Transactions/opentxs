@@ -934,12 +934,23 @@ TEST_F(Regtest_multiple_payment_code, send_to_bob)
         chris_.PaymentCode(),
         daniel_.PaymentCode(),
     };
-    const auto& network = handle.get();
-    auto future = network.SendToPaymentCode(
-        alex_.nym_id_, bob_.PaymentCode(), 1000000000, memo_outgoing_, notify);
+    const auto& wallet = handle.get().Wallet();
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    if (false == spend.Notify(notify)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToPaymentCode(bob_.PaymentCode(), 1000000000)) {
+        ADD_FAILURE();
+    }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    ASSERT_FALSE(txid.empty());
+    ASSERT_FALSE(txid.IsNull());
 }
 
 TEST_F(Regtest_multiple_payment_code, first_outgoing_transaction)

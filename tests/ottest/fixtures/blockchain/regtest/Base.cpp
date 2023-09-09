@@ -606,13 +606,17 @@ auto Regtest_fixture_base::Mine(
     auto previousHeader =
         headerOracle.LoadHeader(headerOracle.BestHash(ancestor)).asBitcoin();
 
+    EXPECT_GE(previousHeader.Height(), 0);
+
+    auto mineHeight = previousHeader.Height() + 1;
+
     for (auto i = 0_uz; i < count; ++i) {
         auto promise = mined_blocks_.allocate();
 
         OT_ASSERT(gen);
+        OT_ASSERT(mineHeight > 0);
 
-        const auto height = previousHeader.Height() + 1;
-        auto tx = gen(height);
+        auto tx = gen(mineHeight);
         const auto block = miner_.Factory().InternalSession().BitcoinBlock(
             previousHeader,
             tx,
@@ -631,7 +635,8 @@ auto Regtest_fixture_base::Mine(
 
         previousHeader = block.Header().asBitcoin();
         using BlockPosition = ot::blockchain::block::Position;
-        log("Generated block ")(BlockPosition{height, hash}).Flush();
+        log("Generated block ")(BlockPosition{mineHeight, hash}).Flush();
+        ++mineHeight;
     }
 
     auto output = true;

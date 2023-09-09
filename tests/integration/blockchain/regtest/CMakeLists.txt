@@ -28,6 +28,12 @@ add_opentx_test(ottest-integration-blockchain-sweep Sweep.cpp)
 add_opentx_test(ottest-integration-blockchain-sync-client SyncClient.cpp)
 add_opentx_test(ottest-integration-blockchain-sync-server SyncServer.cpp)
 
+if(OT_ENABLE_MATTERFI)
+  add_opentx_test(
+    ottest-integration-blockchain-matterfi-notification Matterfi.cpp
+  )
+endif()
+
 set_tests_properties(
   ottest-integration-blockchain-stress PROPERTIES DISABLED TRUE
 )

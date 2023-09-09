@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "blockchain/crypto/account/NodeGroup.hpp"
+#include "blockchain/crypto/account/NodeIndex.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
@@ -82,8 +83,9 @@ public:
     {
         return chain_;
     }
-    auto ClaimAccountID(const identifier::Account& id, crypto::Subaccount* node)
-        const noexcept -> void final;
+    [[nodiscard]] auto ClaimAccountID(
+        const identifier::Account& id,
+        crypto::Subaccount* node) const noexcept -> bool final;
     auto FindNym(const identifier::Nym& id) const noexcept -> void final;
     auto GetDepositAddress(
         const blockchain::crypto::AddressStyle style,
@@ -177,25 +179,6 @@ public:
     ~Account() final = default;
 
 private:
-    struct NodeIndex {
-        auto Find(const identifier::Account& id) const noexcept
-            -> crypto::Subaccount*;
-
-        void Add(
-            const identifier::Account& id,
-            crypto::Subaccount* node) noexcept;
-
-        NodeIndex() noexcept
-            : lock_()
-            , index_()
-        {
-        }
-
-    private:
-        mutable std::mutex lock_;
-        UnallocatedMap<identifier::Account, crypto::Subaccount*> index_;
-    };
-
     using HDNodes = account::NodeGroup<HDAccounts, crypto::HD>;
     using ImportedNodes =
         account::NodeGroup<ImportedAccounts, crypto::Imported>;
@@ -215,7 +198,7 @@ private:
     ImportedNodes imported_;
     NotificationNodes notification_;
     PaymentCodeNodes payment_code_;
-    mutable NodeIndex node_index_;
+    mutable account::NodeIndex node_index_;
     mutable std::mutex lock_;
     mutable ActivityMap unspent_;
     mutable ActivityMap spent_;

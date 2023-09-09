@@ -7,7 +7,6 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <span>
 #include <string_view>
 #include <utility>
 
@@ -21,7 +20,6 @@
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
@@ -158,36 +156,6 @@ auto Base::Profile() const noexcept -> BlockchainProfile
     return shared_->Profile();
 }
 
-auto Base::SendToAddress(
-    const opentxs::identifier::Nym& sender,
-    std::string_view address,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->SendToAddress(sender, address, amount, memo, notify);
-}
-
-auto Base::SendToPaymentCode(
-    const opentxs::identifier::Nym& nymID,
-    std::string_view recipient,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const std::string_view> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->SendToPaymentCode(nymID, recipient, amount, memo, notify);
-}
-
-auto Base::SendToPaymentCode(
-    const opentxs::identifier::Nym& nymID,
-    const PaymentCode& recipient,
-    const Amount amount,
-    std::string_view memo,
-    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->SendToPaymentCode(nymID, recipient, amount, memo, notify);
-}
-
 auto Base::Shutdown() noexcept -> void { shared_->Shutdown(); }
 
 auto Base::ShuttingDown() const noexcept -> bool
@@ -219,31 +187,6 @@ auto Base::Start(
 }
 
 auto Base::StartWallet() noexcept -> void { shared_->StartWallet(); }
-
-auto Base::Sweep(
-    const identifier::Nym& account,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->Sweep(account, toAddress, notify);
-}
-
-auto Base::Sweep(
-    const identifier::Nym& account,
-    const identifier::Account& subaccount,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->Sweep(account, subaccount, toAddress, notify);
-}
-
-auto Base::Sweep(
-    const crypto::Key& key,
-    std::string_view toAddress,
-    std::span<const PaymentCode> notify) const noexcept -> PendingOutgoing
-{
-    return shared_->Sweep(key, toAddress, notify);
-}
 
 auto Base::Wallet() const noexcept -> const node::Wallet&
 {

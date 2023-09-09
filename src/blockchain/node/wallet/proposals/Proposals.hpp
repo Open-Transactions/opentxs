@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <BlockchainTransactionProposal.pb.h>
 #include <future>
 #include <memory>
 
@@ -17,7 +16,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -29,7 +31,13 @@ class Wallet;
 
 namespace node
 {
+namespace wallet
+{
+class ProposalsPrivate;
+}  // namespace wallet
+
 class Manager;
+class Spend;
 }  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
@@ -40,23 +48,19 @@ namespace opentxs::blockchain::node::wallet
 class Proposals
 {
 public:
-    using Proposal = proto::BlockchainTransactionProposal;
-
-    auto Add(const Proposal& tx, std::promise<SendOutcome>&& promise)
-        const noexcept -> void;
+    auto Add(const node::Spend& spend, std::promise<SendOutcome>&& promise)
+        const noexcept -> bool;
 
     auto Run() noexcept -> bool;
 
     Proposals(
-        const api::Session& api,
+        const api::session::Client& api,
         const node::Manager& node,
         database::Wallet& db,
         const Type chain) noexcept;
     ~Proposals();
 
 private:
-    struct Imp;
-
-    std::unique_ptr<Imp> imp_;
+    std::unique_ptr<ProposalsPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::node::wallet

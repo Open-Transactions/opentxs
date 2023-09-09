@@ -8,7 +8,7 @@
 #include <future>
 #include <memory>
 
-#include "internal/blockchain/node/wallet/Types.hpp"  // IWYU pragma: keep
+#include "internal/blockchain/node/wallet/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -30,14 +30,15 @@ class Wallet;
 
 namespace node
 {
+namespace wallet
+{
+class BitcoinTransactionBuilderPrivate;
+}  // namespace wallet
+
 class Manager;
+class Spend;
 }  // namespace node
 }  // namespace blockchain
-
-namespace proto
-{
-class BlockchainTransactionProposal;
-}  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,15 +55,13 @@ public:
         const identifier::Generic& id,
         const Type chain,
         database::Wallet& db,
-        proto::BlockchainTransactionProposal& proposal,
+        node::Spend& proposal,
         std::promise<SendOutcome>& promise) noexcept;
     BitcoinTransactionBuilder() = delete;
 
     ~BitcoinTransactionBuilder();
 
 private:
-    struct Imp;
-
-    std::unique_ptr<Imp> imp_;
+    std::unique_ptr<BitcoinTransactionBuilderPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::node::wallet
