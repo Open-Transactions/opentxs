@@ -9,7 +9,7 @@ namespace matterfi
 auto paymentcode_extra_notifications(
     const opentxs::Log&,
     const opentxs::blockchain::crypto::PaymentCode&,
-    opentxs::Set<opentxs::PaymentCode>&) noexcept -> void
+    boost::container::flat_set<opentxs::PaymentCode>&) noexcept -> void
 {
 }
 
@@ -18,7 +18,7 @@ auto paymentcode_preemptive_notifications(
     const opentxs::api::Session&,
     const opentxs::identifier::Nym&,
     opentxs::blockchain::Type,
-    opentxs::Set<opentxs::PaymentCode>&,
+    boost::container::flat_set<opentxs::PaymentCode>&,
     opentxs::alloc::Strategy) noexcept -> void
 {
 }

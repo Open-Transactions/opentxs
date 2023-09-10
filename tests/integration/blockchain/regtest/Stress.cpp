@@ -403,7 +403,7 @@ TEST_F(Regtest_stress, generate_transactions)
 
     ASSERT_TRUE(handle);
 
-    const auto& alex = handle.get();
+    const auto& alex = handle.get().Wallet();
     const auto previous{1u};
     const auto stop = previous + blocks_;
     auto future1 =
@@ -411,7 +411,7 @@ TEST_F(Regtest_stress, generate_transactions)
     auto transactions =
         ot::UnallocatedVector<ot::blockchain::block::TransactionHash>{
             tx_per_block_, ot::blockchain::block::TransactionHash{}};
-    using Future = ot::blockchain::node::Manager::PendingOutgoing;
+    using Future = ot::blockchain::node::PendingOutgoing;
     auto futures = std::array<Future, tx_per_block_>{};
 
     ASSERT_EQ(transactions.size(), tx_per_block_);
@@ -427,8 +427,17 @@ TEST_F(Regtest_stress, generate_transactions)
             << " sec to calculate receiving addresses\n";
 
         for (auto t{0u}; t < tx_per_block_; ++t) {
-            futures.at(t) =
-                alex.SendToAddress(alex_.ID(), destinations.at(t), amount_);
+            auto spend = alex.CreateSpend(alex_.ID());
+
+            if (false == spend.SetUseEnhancedNotifications(false)) {
+                ADD_FAILURE();
+            }
+
+            if (false == spend.SendToAddress(destinations.at(t), amount_)) {
+                ADD_FAILURE();
+            }
+
+            futures.at(t) = alex.Execute(spend);
         }
 
         const auto init = ot::Clock::now();

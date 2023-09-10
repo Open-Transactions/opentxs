@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <atomic>
-#include <initializer_list>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -431,21 +430,26 @@ TEST_F(Regtest_payment_code, send_to_unrelated_notify_bob)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
-    const auto bob =
-        client_1_.Factory()
-            .PaymentCodeFromBase58(GetPaymentCodeVector3().bob_.payment_code_)
-            .asBase58();
-    const auto notify = std::initializer_list<std::string_view>{bob};
-    auto future = network.SendToAddress(
-        alex_.nym_id_,
-        "mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn",
-        1000000000,
-        memo_outgoing_,
-        notify);
+    const auto& wallet = handle.get().Wallet();
+    const auto bob = client_1_.Factory().PaymentCodeFromBase58(
+        GetPaymentCodeVector3().bob_.payment_code_);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false ==
+        spend.SendToAddress("mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn", 1000000000)) {
+        ADD_FAILURE();
+    }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    if (false == spend.Notify(bob)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    ASSERT_FALSE(txid.empty());
+    ASSERT_FALSE(txid.IsNull());
 
     {
         const auto tx = client_1_.Crypto().Blockchain().LoadTransaction(txid);

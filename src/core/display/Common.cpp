@@ -5,8 +5,7 @@
 
 #include "opentxs/core/display/Definition.hpp"  // IWYU pragma: associated
 
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
+#include <ankerl/unordered_dense.h>
 #include <array>  // IWYU pragma: keep
 #include <memory>
 #include <optional>
@@ -49,11 +48,12 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
     // MSVC have trouble with that, let alone XCode 14 and NDK-25.
     //
     // Revisit this after XCode 15 and NDK-26 are officially released.
-    static const auto map = frozen::make_unordered_map<UnitType, Definition>({
+    // const auto map = frozen::make_unordered_map<UnitType, Definition>({
+    static const auto map = ankerl::unordered_dense::map<UnitType, Definition>{
 #include "core/display/data/defs"  // IWYU pragma: keep
-    });
+    };
 
-    if (const auto* i = map.find(in); map.end() != i) {
+    if (const auto i = map.find(in); map.end() != i) {
 
         return i->second;
     } else {

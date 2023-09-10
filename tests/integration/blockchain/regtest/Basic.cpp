@@ -644,10 +644,17 @@ TEST_F(Regtest_fixture_hd, failed_spend)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
+    const auto& wallet = handle.get().Wallet();
     constexpr auto address{"mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn"};
-    auto future = network.SendToAddress(
-        alex_.nym_id_, address, 140000000000, memo_outgoing_);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToAddress(address, 140000000000)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto txid = future.get().second;
 
     EXPECT_TRUE(txid.IsNull());
@@ -733,7 +740,7 @@ TEST_F(Regtest_fixture_hd, spend)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
+    const auto& wallet = handle.get().Wallet();
     const auto& widget = client_1_.UI().Internal().AccountActivity(
         alex_.nym_id_, SendHD().Parent().AccountID());
     constexpr auto sendAmount{"14 units"};
@@ -742,8 +749,15 @@ TEST_F(Regtest_fixture_hd, spend)
     ASSERT_FALSE(widget.ValidateAmount(sendAmount).empty());
     ASSERT_TRUE(widget.ValidateAddress(address));
 
-    auto future = network.SendToAddress(
-        alex_.nym_id_, address, 1400000000, memo_outgoing_);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToAddress(address, 1400000000)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
     EXPECT_FALSE(txid.IsNull());

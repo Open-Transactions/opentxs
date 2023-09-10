@@ -508,7 +508,7 @@ auto Deterministic::get_contact() const noexcept -> identifier::Generic
     return blank;
 }
 
-auto Deterministic::init() noexcept -> void
+auto Deterministic::init() noexcept(false) -> void
 {
     const auto& log = LogTrace();
     const auto cb = [&](const auto& data) {

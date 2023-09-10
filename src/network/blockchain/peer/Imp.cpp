@@ -71,6 +71,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Work.hpp"
@@ -486,7 +487,7 @@ auto Peer::Imp::disconnect(
     std::string_view why,
     allocator_type monotonic) noexcept -> void
 {
-    const auto& log = log_;
+    const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
     log(OT_PRETTY_CLASS())("disconnecting ")(name_);
 
     if (valid(why)) { log(": ")(why); }

@@ -6,14 +6,13 @@
 #include "blockchain/database/wallet/Proposal.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionProposal.pb.h>
-#include <mutex>
+#include <cs_plain_guarded.h>
 #include <stdexcept>
 
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/core/Data.hpp"
@@ -32,9 +31,7 @@ struct Proposal::Imp {
     auto CompletedProposals() const noexcept
         -> UnallocatedSet<identifier::Generic>
     {
-        auto lock = Lock{lock_};
-
-        return finished_proposals_;
+        return data_.lock()->finished_;
     }
     auto Exists(const identifier::Generic& id) const noexcept -> bool
     {
@@ -97,36 +94,26 @@ struct Proposal::Imp {
         storage::lmdb::Transaction& tx,
         const identifier::Generic& id) noexcept -> bool
     {
-        if (lmdb_.Delete(table_, id.Bytes(), tx)) {
-            LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
-                " cancelled ")
-                .Flush();
-
-            return true;
-        } else {
-            LogError()(OT_PRETTY_CLASS())("failed to cancel proposal ")(
-                id, crypto_)
-                .Flush();
-
-            return false;
-        }
+        return cancel(*data_.lock(), tx, id);
     }
     auto FinishProposal(
         storage::lmdb::Transaction& tx,
         const identifier::Generic& id) noexcept -> bool
     {
-        const auto out = CancelProposal(tx, id);
-        auto lock = Lock{lock_};
-        finished_proposals_.emplace(id);
+        auto handle = data_.lock();
+        auto& data = *handle;
+        const auto out = cancel(data, tx, id);
+        data.finished_.emplace(id);
 
         return out;
     }
     auto ForgetProposals(
         const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool
     {
-        auto lock = Lock{lock_};
+        auto handle = data_.lock();
+        auto& data = *handle;
 
-        for (const auto& id : ids) { finished_proposals_.erase(id); }
+        for (const auto& id : ids) { data.finished_.erase(id); }
 
         return true;
     }
@@ -134,8 +121,7 @@ struct Proposal::Imp {
     Imp(const api::Crypto& crypto, const storage::lmdb::Database& lmdb) noexcept
         : crypto_(crypto)
         , lmdb_(lmdb)
-        , lock_()
-        , finished_proposals_()
+        , data_()
     {
     }
     Imp() = delete;
@@ -144,13 +130,49 @@ struct Proposal::Imp {
     auto operator=(Imp&&) -> Imp& = delete;
 
 private:
-    using FinishedProposals = UnallocatedSet<identifier::Generic>;
+    using Proposals = UnallocatedSet<identifier::Generic>;
+
+    struct Data {
+        Proposals finished_{};
+        Proposals cancelled_{};
+    };
+
+    using Guarded = libguarded::plain_guarded<Data>;
 
     const api::Crypto& crypto_;
     const storage::lmdb::Database& lmdb_;
-    mutable std::mutex lock_;
-    mutable FinishedProposals finished_proposals_;
+    mutable Guarded data_;
 
+    auto cancel(
+        Data& data,
+        storage::lmdb::Transaction& tx,
+        const identifier::Generic& id) noexcept -> bool
+    {
+        if (data.cancelled_.contains(id)) {
+
+            return true;
+        } else if (lmdb_.Delete(table_, id.Bytes(), tx)) {
+            LogError()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
+                " cancelled")
+                .Flush();
+            data.cancelled_.emplace(id);
+
+            return true;
+        } else if (lmdb_.Exists(table_, id.Bytes())) {
+            LogError()(OT_PRETTY_CLASS())("failed to cancel proposal ")(
+                id, crypto_)
+                .Flush();
+
+            return false;
+        } else {
+            LogError()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
+                " already cancelled ")
+                .Flush();
+            data.cancelled_.emplace(id);
+
+            return true;
+        }
+    }
     auto load_proposal(const identifier::Generic& id) const noexcept
         -> std::optional<proto::BlockchainTransactionProposal>
     {

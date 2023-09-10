@@ -100,15 +100,6 @@ BlockchainImp::BlockchainImp(
 
         return out;
     }())
-    , new_blockchain_accounts_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
-        const auto listen =
-            out->Start(api_.Endpoints().BlockchainAccountCreated().data());
-
-        OT_ASSERT(listen);
-
-        return out;
-    }())
 {
 }
 
@@ -398,24 +389,6 @@ auto BlockchainImp::LookupContacts(const Data& pubkeyHash) const noexcept
 {
     return api_.Network().Blockchain().Internal().Database().LookupContact(
         pubkeyHash);
-}
-
-auto BlockchainImp::notify_new_account(
-    const identifier::Account& id,
-    const identifier::Nym& owner,
-    opentxs::blockchain::Type chain,
-    opentxs::blockchain::crypto::SubaccountType type) const noexcept -> void
-{
-    new_blockchain_accounts_->Send([&] {
-        auto work = opentxs::network::zeromq::tagged_message(
-            WorkType::BlockchainAccountCreated, true);
-        work.AddFrame(chain);
-        work.AddFrame(owner);
-        work.AddFrame(type);
-        id.Serialize(work);
-
-        return work;
-    }());
 }
 
 auto BlockchainImp::ProcessContact(

@@ -30,6 +30,6 @@ enum class Type : std::underlying_type<Type>::type {
     trc10 = 14,
     bep2 = 15,
     bsc20 = 16,
-    unknown = std::numeric_limits<std::underlying_type<Type>::type>::max(),
+    unknown = std::numeric_limits<int>::max(),
 };
 }  // namespace opentxs::blockchain::token

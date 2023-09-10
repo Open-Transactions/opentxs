@@ -5,150 +5,104 @@
 
 #include "blockchain/node/wallet/Shared.hpp"  // IWYU pragma: associated
 
+#include <exception>
 #include <future>
 #include <memory>
+#include <string_view>
 #include <utility>
 
+#include "blockchain/node/spend/Imp.hpp"
+#include "blockchain/node/wallet/proposals/Proposals.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
-#include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
+#include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Log.hpp"
+#include "opentxs/util/Options.hpp"
+#include "opentxs/util/PasswordPrompt.hpp"
 #include "util/Work.hpp"
-
-namespace opentxs::blockchain::node::internal
-{
-auto Wallet::Shared::ConstructTransaction(
-    const proto::BlockchainTransactionProposal&,
-    std::promise<SendOutcome>&&) const noexcept -> void
-{
-}
-
-auto Wallet::Shared::FeeEstimate() const noexcept -> std::optional<Amount>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetBalance() const noexcept -> Balance { return {}; }
-
-auto Wallet::Shared::GetBalance(const identifier::Nym&) const noexcept
-    -> Balance
-{
-    return {};
-}
-
-auto Wallet::Shared::GetBalance(
-    const identifier::Nym&,
-    const identifier::Account&) const noexcept -> Balance
-{
-    return {};
-}
-
-auto Wallet::Shared::GetBalance(const crypto::Key&) const noexcept -> Balance
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(alloc::Default) const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(TxoState, alloc::Default) const noexcept
-    -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(const identifier::Nym&, alloc::Default)
-    const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(
-    const identifier::Nym&,
-    TxoState,
-    alloc::Default) const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(
-    const identifier::Nym&,
-    const identifier::Account&,
-    alloc::Default) const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(
-    const identifier::Nym&,
-    const identifier::Account&,
-    TxoState,
-    alloc::Default) const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetOutputs(const crypto::Key&, TxoState, alloc::Default)
-    const noexcept -> Vector<UTXO>
-{
-    return {};
-}
-
-auto Wallet::Shared::GetTags(const block::Outpoint&) const noexcept
-    -> UnallocatedSet<TxoTag>
-{
-    return {};
-}
-
-auto Wallet::Shared::Height() const noexcept -> block::Height { return {}; }
-
-auto Wallet::Shared::Run() noexcept -> bool { return {}; }
-}  // namespace opentxs::blockchain::node::internal
 
 namespace opentxs::blockchain::node::wallet
 {
+using namespace std::literals;
+
 Shared::Shared(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept
-    : db_(node->Internal().DB())
+    : api_(*api)
+    , chain_(node->Internal().Chain())
+    , db_(node->Internal().DB())
     , fee_oracle_(api, node)
-    , proposals_(*api, *node, db_, node->Internal().Chain())
-    , to_actor_([&] {
-        using Type = network::zeromq::socket::Type;
-        auto out = api->Network().ZeroMQ().Internal().RawSocket(Type::Push);
-        const auto rc =
-            out.Connect(node->Internal().Endpoints().wallet_pull_.c_str());
-
-        OT_ASSERT(rc);
-
-        return out;
-    }())
+    , data_(api, node, db_)
 {
 }
 
 auto Shared::ConstructTransaction(
-    const proto::BlockchainTransactionProposal& tx,
+    const node::Spend& spend,
     std::promise<SendOutcome>&& promise) const noexcept -> void
 {
-    proposals_.lock()->Add(tx, std::move(promise));
-    to_actor_.lock()->SendDeferred(
-        MakeWork(wallet::WalletJobs::statemachine), __FILE__, __LINE__, true);
+    auto handle = data_.lock();
+    auto& data = *handle;
+
+    if (data.proposals_.Add(spend, std::move(promise))) {
+        data.to_actor_.SendDeferred(
+            MakeWork(wallet::WalletJobs::statemachine),
+            __FILE__,
+            __LINE__,
+            true);
+    }
+}
+
+auto Shared::CreateSpend(const identifier::Nym& spender) const noexcept
+    -> node::Spend
+{
+    return std::make_unique<wallet::SpendPrivate>(
+               api_,
+               chain_,
+               spender,
+               api_.Factory().PasswordPrompt("Spend "s.append(print(chain_))))
+        .release();
+}
+
+auto Shared::Execute(node::Spend& spend) const noexcept -> PendingOutgoing
+{
+    static const auto blank = block::TransactionHash{};
+
+    using enum SendResult;
+    auto promise = std::promise<SendOutcome>{};
+    auto future = promise.get_future();
+    auto& internal = spend.Internal();
+
+    try {
+        internal.Finalize(
+            api_.GetOptions().TestMode() ? LogConsole() : LogTrace(), {});
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        promise.set_value(std::make_pair(UnspecifiedError, blank));
+
+        return future;
+    }
+
+    if (auto error = internal.Check(); error) {
+        promise.set_value(std::make_pair(*error, blank));
+    } else {
+        ConstructTransaction(spend, std::move(promise));
+    }
+
+    return future;
 }
 
 auto Shared::FeeEstimate() const noexcept -> std::optional<Amount>
@@ -236,11 +190,11 @@ auto Shared::Height() const noexcept -> block::Height
     return db_.GetWalletHeight();
 }
 
-auto Shared::Run() noexcept -> bool { return proposals_.lock()->Run(); }
+auto Shared::Run() noexcept -> bool { return data_.lock()->proposals_.Run(); }
 
 auto Shared::StartRescan() const noexcept -> bool
 {
-    return to_actor_.lock()->SendDeferred(
+    return data_.lock()->to_actor_.SendDeferred(
         MakeWork(wallet::WalletJobs::rescan), __FILE__, __LINE__, true);
 }
 

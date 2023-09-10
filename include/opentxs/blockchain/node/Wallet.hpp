@@ -40,6 +40,8 @@ namespace internal
 {
 class Wallet;
 }  // namespace internal
+
+class Spend;
 }  // namespace node
 }  // namespace blockchain
 
@@ -57,6 +59,9 @@ namespace opentxs::blockchain::node
 class OPENTXS_EXPORT Wallet
 {
 public:
+    virtual auto CreateSpend(const identifier::Nym& spender) const noexcept
+        -> node::Spend = 0;
+    virtual auto Execute(node::Spend&) const noexcept -> PendingOutgoing = 0;
     virtual auto GetBalance() const noexcept -> Balance = 0;
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
         -> Balance = 0;

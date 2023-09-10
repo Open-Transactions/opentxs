@@ -8,7 +8,6 @@
 #pragma once
 
 #include <memory>
-#include <span>
 #include <string_view>
 
 #include "internal/blockchain/node/Config.hpp"
@@ -17,13 +16,11 @@
 #include "internal/blockchain/node/Mempool.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -74,7 +71,6 @@ namespace blockchain
 class Address;
 }  // namespace blockchain
 }  // namespace network
-class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -111,44 +107,7 @@ public:
         -> bool final;
     auto Mempool() const noexcept -> const internal::Mempool& final;
     auto Profile() const noexcept -> BlockchainProfile final;
-    auto SendToAddress(
-        const opentxs::identifier::Nym& sender,
-        std::string_view address,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const std::string_view> notify) const noexcept
-        -> PendingOutgoing final;
-    auto SendToPaymentCode(
-        const opentxs::identifier::Nym& sender,
-        std::string_view recipient,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const std::string_view> notify) const noexcept
-        -> PendingOutgoing final;
-    auto SendToPaymentCode(
-        const opentxs::identifier::Nym& sender,
-        const PaymentCode& recipient,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const PaymentCode> notify) const noexcept
-        -> PendingOutgoing final;
     auto ShuttingDown() const noexcept -> bool final;
-    auto Sweep(
-        const identifier::Nym& account,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing final;
-    auto Sweep(
-        const identifier::Nym& account,
-        const identifier::Account& subaccount,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing final;
-    auto Sweep(
-        const crypto::Key& key,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> PendingOutgoing final;
 
     auto Internal() noexcept -> Manager& final { return *this; }
     auto Shutdown() noexcept -> void final;

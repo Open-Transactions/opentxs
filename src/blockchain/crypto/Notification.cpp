@@ -42,19 +42,25 @@ auto BlockchainNotificationSubaccount(
     identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::Notification>
 {
-    using ReturnType = blockchain::crypto::implementation::Notification;
+    try {
+        using ReturnType = blockchain::crypto::implementation::Notification;
 
-    return std::make_unique<ReturnType>(
-        api,
-        parent,
-        code,
-        [&] {
-            auto out = proto::HDPath{};
-            nym.Internal().PaymentCodePath(out);
+        return std::make_unique<ReturnType>(
+            api,
+            parent,
+            code,
+            [&] {
+                auto out = proto::HDPath{};
+                nym.Internal().PaymentCodePath(out);
 
-            return out;
-        }(),
-        id);
+                return out;
+            }(),
+            id);
+    } catch (const std::exception& e) {
+        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+
+        return {};
+    }
 }
 }  // namespace opentxs::factory
 
@@ -65,7 +71,7 @@ Notification::Notification(
     const crypto::Account& parent,
     const opentxs::PaymentCode& code,
     proto::HDPath&& path,
-    identifier::Account& out) noexcept
+    identifier::Account& out) noexcept(false)
     : Subaccount(
           api,
           parent,
@@ -99,7 +105,7 @@ auto Notification::calculate_id(
         preimage.Bytes(), identifier::AccountSubtype::blockchain_subaccount);
 }
 
-auto Notification::init() noexcept -> void
+auto Notification::init() noexcept(false) -> void
 {
     Subaccount::init();
     auto handle = progress_.lock();

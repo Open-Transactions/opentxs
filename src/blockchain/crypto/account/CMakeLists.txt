@@ -13,5 +13,6 @@ target_sources(
     "Account.hpp"
     "Factory.hpp"
     "NodeGroup.hpp"
+    "NodeIndex.cpp"
     "NodeIndex.hpp"
 )

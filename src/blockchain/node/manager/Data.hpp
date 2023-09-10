@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "blockchain/node/manager/SendPromises.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,7 +36,6 @@ public:
     network::zeromq::socket::Raw to_actor_;
     network::zeromq::socket::Raw to_peer_manager_;
     network::zeromq::socket::Raw to_dht_;
-    SendPromises send_promises_;
     std::weak_ptr<node::Manager> self_;
 
     Data(const api::Session& api, const node::Endpoints& endpoints) noexcept;

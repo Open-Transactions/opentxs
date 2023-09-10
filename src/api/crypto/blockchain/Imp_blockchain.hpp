@@ -160,7 +160,6 @@ private:
     OTZMQPublishSocket transaction_updates_;
     OTZMQPublishSocket key_updates_;
     OTZMQPublishSocket scan_updates_;
-    OTZMQPublishSocket new_blockchain_accounts_;
 
     auto broadcast_update_signal(const Txid& txid, alloc::Default monotonic)
         const noexcept -> void;
@@ -197,12 +196,6 @@ private:
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept
         -> opentxs::blockchain::block::Transaction;
-    auto notify_new_account(
-        const identifier::Account& id,
-        const identifier::Nym& owner,
-        opentxs::blockchain::Type chain,
-        opentxs::blockchain::crypto::SubaccountType type) const noexcept
-        -> void final;
     auto reconcile_contact_activities(
         const Lock& lock,
         const Txid& txid,

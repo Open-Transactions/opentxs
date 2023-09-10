@@ -5,6 +5,7 @@
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(opentxs-common PRIVATE "PaymentCode.hpp")
+  libopentxs_link_internal(Boost::headers)
 
   if(OT_ENABLE_MATTERFI)
     target_sources(opentxs-common PRIVATE "PaymentCode.cpp")

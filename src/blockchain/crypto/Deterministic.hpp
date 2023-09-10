@@ -205,7 +205,7 @@ protected:
         const rLock& lock,
         const Subchain type,
         const Bip32Index index) noexcept(false) -> crypto::Element&;
-    auto init() noexcept -> void final;
+    auto init() noexcept(false) -> void final;
     auto init(const PasswordPrompt& reason) noexcept(false) -> void;
 
     Deterministic(

@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include <boost/container/flat_set.hpp>
+
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -39,12 +40,12 @@ namespace matterfi
 auto paymentcode_extra_notifications(
     const opentxs::Log& log,
     const opentxs::blockchain::crypto::PaymentCode& account,
-    opentxs::Set<opentxs::PaymentCode>& out) noexcept -> void;
+    boost::container::flat_set<opentxs::PaymentCode>& out) noexcept -> void;
 auto paymentcode_preemptive_notifications(
     const opentxs::Log& log,
     const opentxs::api::Session& api,
     const opentxs::identifier::Nym& sender,
     opentxs::blockchain::Type chain,
-    opentxs::Set<opentxs::PaymentCode>& out,
+    boost::container::flat_set<opentxs::PaymentCode>& out,
     opentxs::alloc::Strategy alloc) noexcept -> void;
 }  // namespace matterfi

@@ -9,11 +9,9 @@
 #include <PaymentEvent.pb.h>
 #include <PaymentWorkflow.pb.h>
 #include <PaymentWorkflowEnums.pb.h>
-#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <future>
-#include <iterator>
 #include <limits>
 #include <memory>
 #include <span>
@@ -46,8 +44,11 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/node/Funding.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
+#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
@@ -208,8 +209,18 @@ auto BlockchainAccountActivity::Notify(
             throw std::runtime_error{"invalid chain"};
         }
 
-        const auto& network = handle.get();
-        network.Sweep(primary_id_, ""sv, contacts);
+        const auto& wallet = handle.get().Wallet();
+        auto spend = wallet.CreateSpend(primary_id_);
+
+        if (false == spend.SetSweepFromAccount(true)) {
+            throw std::runtime_error{"failed to enable sweep"};
+        }
+
+        if (false == spend.Notify(contacts)) {
+            throw std::runtime_error{"failed to set notifications"};
+        }
+
+        wallet.Execute(spend);
 
         return true;
     } catch (...) {
@@ -547,30 +558,30 @@ auto BlockchainAccountActivity::Send(
             throw std::runtime_error{"invalid chain"};
         }
 
-        const auto& network = handle.get();
+        const auto& wallet = handle.get().Wallet();
         const auto recipient = api_.Factory().PaymentCodeFromBase58(address);
+        auto spend = wallet.CreateSpend(primary_id_);
+
+        if (false == spend.SetMemo(memo)) {
+            throw std::runtime_error{"failed to set memo"};
+        }
+
+        if (false == spend.Notify(notify)) {
+            throw std::runtime_error{"failed to set notifications"};
+        }
 
         if (0 < recipient.Version()) {
-            network.SendToPaymentCode(
-                primary_id_, recipient, amount, memo, notify);
+            if (false == spend.SendToPaymentCode(recipient, amount)) {
+                throw std::runtime_error{
+                    "failed to set recipient payment code"};
+            }
         } else {
-            const auto text = [&] {
-                constexpr auto as_base58 = [](const auto& p) {
-                    return p.asBase58();
-                };
-                auto out = Vector<std::string_view>{};
-                out.reserve(notify.size());
-                out.clear();
-                std::transform(
-                    notify.begin(),
-                    notify.end(),
-                    std::back_inserter(out),
-                    as_base58);
-
-                return out;
-            }();
-            network.SendToAddress(primary_id_, address, amount, memo, text);
+            if (false == spend.SendToAddress(address, amount)) {
+                throw std::runtime_error{"failed to set recipient address"};
+            }
         }
+
+        wallet.Execute(spend);
 
         return true;
     } catch (...) {

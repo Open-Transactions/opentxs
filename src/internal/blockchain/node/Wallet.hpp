@@ -6,13 +6,13 @@
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include <future>
 #include <memory>
 #include <optional>
 
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -48,11 +48,6 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
-{
-class BlockchainTransactionProposal;
-}  // namespace proto
-
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -65,9 +60,9 @@ public:
     class Actor;
     class Shared;
 
-    auto ConstructTransaction(
-        const proto::BlockchainTransactionProposal& tx,
-        std::promise<SendOutcome>&& promise) const noexcept -> void;
+    auto CreateSpend(const identifier::Nym& spender) const noexcept
+        -> node::Spend final;
+    auto Execute(node::Spend&) const noexcept -> PendingOutgoing final;
     auto FeeEstimate() const noexcept -> std::optional<Amount>;
     auto GetBalance() const noexcept -> Balance final;
     auto GetBalance(const crypto::Key& key) const noexcept -> Balance final;

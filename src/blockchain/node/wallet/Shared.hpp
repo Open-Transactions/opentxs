@@ -10,13 +10,13 @@
 #include <memory>
 #include <optional>
 
-#include "blockchain/node/wallet/spend/Proposals.hpp"
+#include "blockchain/node/wallet/Data.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/wallet/FeeOracle.hpp"
-#include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -27,7 +27,10 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+namespace session
+{
+class Client;
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -53,11 +56,6 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
-{
-class BlockchainTransactionProposal;
-}  // namespace proto
-
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -68,8 +66,11 @@ class Wallet::Shared
 {
 public:
     virtual auto ConstructTransaction(
-        const proto::BlockchainTransactionProposal& tx,
+        const node::Spend& spend,
         std::promise<SendOutcome>&& promise) const noexcept -> void;
+    virtual auto CreateSpend(const identifier::Nym& spender) const noexcept
+        -> node::Spend;
+    virtual auto Execute(node::Spend& spend) const noexcept -> PendingOutgoing;
     virtual auto FeeEstimate() const noexcept -> std::optional<Amount>;
     virtual auto GetBalance() const noexcept -> Balance;
     virtual auto GetBalance(const identifier::Nym& owner) const noexcept
@@ -118,8 +119,11 @@ class Shared final : public internal::Wallet::Shared
 {
 public:
     auto ConstructTransaction(
-        const proto::BlockchainTransactionProposal& tx,
+        const node::Spend& spend,
         std::promise<SendOutcome>&& promise) const noexcept -> void final;
+    auto CreateSpend(const identifier::Nym& spender) const noexcept
+        -> node::Spend final;
+    auto Execute(node::Spend&) const noexcept -> PendingOutgoing final;
     auto FeeEstimate() const noexcept -> std::optional<Amount> final;
     auto GetBalance() const noexcept -> Balance final;
     auto GetBalance(const identifier::Nym& owner) const noexcept
@@ -156,18 +160,18 @@ public:
     auto Run() noexcept -> bool final;
 
     Shared(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node) noexcept;
 
     ~Shared() final;
 
 private:
-    using Proposals = libguarded::plain_guarded<wallet::Proposals>;
-    using Socket = libguarded::plain_guarded<network::zeromq::socket::Raw>;
+    using GuardedData = libguarded::plain_guarded<wallet::Data>;
 
+    const api::session::Client& api_;
+    const blockchain::Type chain_;
     database::Wallet& db_;
     wallet::FeeOracle fee_oracle_;
-    mutable Proposals proposals_;
-    mutable Socket to_actor_;
+    mutable GuardedData data_;
 };
 }  // namespace opentxs::blockchain::node::wallet

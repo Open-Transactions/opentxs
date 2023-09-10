@@ -438,14 +438,22 @@ TEST_F(Regtest_payment_code, sweep)
 
     ASSERT_TRUE(handle);
 
-    const auto& network = handle.get();
+    const auto& wallet = handle.get().Wallet();
     const auto bob = client_1_.Factory().PaymentCodeFromBase58(
         GetPaymentCodeVector3().bob_.payment_code_);
     const auto notify = std::initializer_list<opentxs::PaymentCode>{bob};
-    auto future = network.Sweep(alex_.nym_id_, "", notify);
+    auto spend = wallet.CreateSpend(alex_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SetSweepFromAccount(true)) { ADD_FAILURE(); }
+
+    if (false == spend.Notify(notify)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
     const auto& txid = transactions_.emplace_back(future.get().second);
 
-    ASSERT_FALSE(txid.empty());
+    ASSERT_FALSE(txid.IsNull());
 }
 
 TEST_F(Regtest_payment_code, first_outgoing_transaction)

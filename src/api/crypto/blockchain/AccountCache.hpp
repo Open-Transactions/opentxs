@@ -6,10 +6,8 @@
 #pragma once
 
 #include <functional>
-#include <mutex>
-#include <optional>
 
-#include "internal/util/Mutex.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -35,46 +33,58 @@ public:
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept
         -> UnallocatedSet<identifier::Account>;
-    auto New(
-        const opentxs::blockchain::crypto::SubaccountType type,
-        const opentxs::blockchain::Type chain,
-        const identifier::Account& account,
-        const identifier::Nym& owner) const noexcept -> void;
     auto Owner(const identifier::Account& accountID) const noexcept
         -> const identifier::Nym&;
     auto Type(const identifier::Account& accountID) const noexcept
         -> opentxs::blockchain::crypto::SubaccountType;
 
     auto Populate() noexcept -> void;
+    [[nodiscard]] auto RegisterSubaccount(
+        const opentxs::blockchain::crypto::SubaccountType type,
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account,
+        const identifier::Account& subaccount) noexcept -> bool;
 
     AccountCache(const api::Session& api) noexcept;
 
 private:
-    using Accounts = UnallocatedSet<identifier::Account>;
-    using NymAccountMap = UnallocatedMap<identifier::Nym, Accounts>;
-    using ChainAccountMap =
-        UnallocatedMap<opentxs::blockchain::Type, std::optional<NymAccountMap>>;
-    using AccountNymIndex =
-        UnallocatedMap<identifier::Account, identifier::Nym>;
-    using AccountTypeIndex = UnallocatedMap<
-        identifier::Account,
-        opentxs::blockchain::crypto::SubaccountType>;
+    struct SubaccountParams {
+        opentxs::blockchain::crypto::SubaccountType type_{};
+        opentxs::blockchain::Type chain_{};
+        identifier::Nym owner_{};
+        identifier::Account parent_account_{};
+
+        SubaccountParams(
+            const opentxs::blockchain::crypto::SubaccountType type,
+            const opentxs::blockchain::Type chain,
+            const identifier::Nym& owner,
+            const identifier::Account& account) noexcept
+            : type_(type)
+            , chain_(chain)
+            , owner_(owner)
+            , parent_account_(account)
+        {
+        }
+    };
+
+    using Subaccounts = UnallocatedSet<identifier::Account>;
+    using NymIndex = Map<identifier::Nym, Subaccounts>;
+    using ChainIndex = Map<opentxs::blockchain::Type, NymIndex>;
+    using Params = UnallocatedMap<identifier::Account, SubaccountParams>;
 
     const api::Session& api_;
-    mutable std::mutex lock_;
-    mutable ChainAccountMap account_map_;
-    mutable AccountNymIndex account_index_;
-    mutable AccountTypeIndex account_type_;
+    bool populated_;
+    ChainIndex index_;
+    Params params_;
+    opentxs::network::zeromq::socket::Raw socket_;
 
     auto build_account_map(
-        const Lock&,
         const opentxs::blockchain::Type chain,
-        std::optional<NymAccountMap>& map) const noexcept -> void;
-    auto get_account_map(const Lock&, const opentxs::blockchain::Type chain)
-        const noexcept -> NymAccountMap&;
+        NymIndex& map) noexcept -> void;
     auto load_nym(
         const opentxs::blockchain::Type chain,
         const identifier::Nym& nym,
-        NymAccountMap& output) const noexcept -> void;
+        NymIndex& output) noexcept -> void;
 };
 }  // namespace opentxs::api::crypto::blockchain

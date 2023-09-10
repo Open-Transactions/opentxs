@@ -126,7 +126,9 @@ auto Progress::Imp::process_do_rescan(Message&& in) noexcept -> void
     parent_.progress_position_.lock()->reset();
     const auto& best = parent_.null_position_;
     parent_.db_.SubchainSetLastScanned(parent_.db_key_, best);
+    parent_.RescanFinished();
     notify(best);
+    to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
 }
 }  // namespace opentxs::blockchain::node::wallet
 

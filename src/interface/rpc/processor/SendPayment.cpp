@@ -5,6 +5,7 @@
 
 #include "interface/rpc/RPC.hpp"  // IWYU pragma: associated
 
+#include <stdexcept>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
@@ -22,6 +23,8 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Spend.hpp"
+#include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
@@ -104,16 +107,27 @@ auto RPC::send_payment_blockchain(
             const auto& address = in.DestinationAccount();
             const auto& memo = in.Memo();
             const auto handle = api.Network().Blockchain().GetChain(chaintype);
-            const auto& network = handle.get();
             const auto recipient = api.Factory().PaymentCodeFromBase58(address);
+            const auto& wallet = handle.get().Wallet();
+            auto spend = wallet.CreateSpend(accountowner);
+
+            if (false == spend.SetMemo(memo)) {
+                throw std::runtime_error{"failed to set memo"};
+            }
 
             if (0 < recipient.Version()) {
-                return network.SendToPaymentCode(
-                    accountowner, recipient, amount, memo);
+                if (false == spend.SendToPaymentCode(recipient, amount)) {
+                    throw std::runtime_error{
+                        "failed to set recipient payment code"};
+                }
             } else {
-                return network.SendToAddress(
-                    accountowner, address, amount, memo);
+                if (false == spend.SendToAddress(address, amount)) {
+                    throw std::runtime_error{
+                        "failed to set recipient payment code"};
+                }
             }
+
+            return wallet.Execute(spend);
         }();
         const auto [code, txid] = future.get();
 

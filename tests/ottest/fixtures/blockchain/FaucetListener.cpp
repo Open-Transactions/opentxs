@@ -79,8 +79,26 @@ public:
                 const auto handle = api_.Network().Blockchain().GetChain(
                     opentxs::blockchain::Type::UnitTest);
                 const auto& network = handle.get();
-                tx_ = network.SendToPaymentCode(
-                    local_nym_, pc, 1000000000, "faucet payment");
+                const auto& wallet = network.Wallet();
+                auto spend = wallet.CreateSpend(local_nym_);
+
+                if (false == spend.SetUseEnhancedNotifications(false)) {
+
+                    throw std::runtime_error{
+                        "failed disable enhanced notifications"};
+                }
+
+                if (false == spend.SendToPaymentCode(pc, 1000000000)) {
+
+                    throw std::runtime_error{"failed set recipient"};
+                }
+
+                if (false == spend.SetMemo("faucet payment")) {
+
+                    throw std::runtime_error{"failed set memo"};
+                }
+
+                tx_ = wallet.Execute(spend);
 
                 return true;
             } catch (const std::exception& e) {
@@ -178,7 +196,7 @@ private:
     std::shared_future<ot::blockchain::block::TransactionHash> future_;
     opentxs::Nym_p remote_nym_;
     std::optional<opentxs::contract::peer::Request> request_;
-    std::optional<opentxs::blockchain::node::Manager::PendingOutgoing> tx_;
+    std::optional<opentxs::blockchain::node::PendingOutgoing> tx_;
     std::optional<ot::blockchain::block::TransactionHash> txid_;
     std::optional<opentxs::api::session::OTX::BackgroundTask> otx_;
     bool finished_;

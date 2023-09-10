@@ -6,11 +6,8 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
-#include <future>
 #include <memory>
 #include <mutex>
-#include <optional>
-#include <span>
 #include <string_view>
 
 #include "blockchain/node/manager/Data.hpp"
@@ -20,10 +17,6 @@
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "util/Shutdown.hpp"
@@ -64,6 +57,7 @@ struct Config;
 class BlockOracle;
 class FilterOracle;
 class HeaderOracle;
+class Manager;
 class Mempool;
 class Wallet;
 }  // namespace node
@@ -80,15 +74,9 @@ namespace blockchain
 {
 class Address;
 }  // namespace blockchain
-
-namespace zeromq
-{
-class Message;
-}  // namespace zeromq
 }  // namespace network
 
 class Amount;
-class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -108,7 +96,6 @@ public:
     auto Endpoints() const noexcept -> const node::Endpoints&;
     auto FeeRate() const noexcept -> Amount;
     auto FilterOracle() const noexcept -> const node::FilterOracle&;
-    auto Finish(int index) noexcept -> std::promise<SendOutcome>;
     auto GetBalance() const noexcept -> Balance;
     auto GetBalance(const identifier::Nym& owner) const noexcept -> Balance;
     auto GetConfig() const noexcept -> const internal::Config&;
@@ -122,44 +109,7 @@ public:
         -> bool;
     auto Mempool() const noexcept -> const internal::Mempool&;
     auto Profile() const noexcept -> BlockchainProfile;
-    auto SendToAddress(
-        const opentxs::identifier::Nym& sender,
-        std::string_view address,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const std::string_view> notify) const noexcept
-        -> Manager::PendingOutgoing;
-    auto SendToPaymentCode(
-        const opentxs::identifier::Nym& sender,
-        std::string_view recipient,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const std::string_view> notify) const noexcept
-        -> Manager::PendingOutgoing;
-    auto SendToPaymentCode(
-        const opentxs::identifier::Nym& sender,
-        const PaymentCode& recipient,
-        const Amount amount,
-        std::string_view memo,
-        std::span<const PaymentCode> notify) const noexcept
-        -> Manager::PendingOutgoing;
     auto ShuttingDown() const noexcept -> bool;
-    auto Sweep(
-        const identifier::Nym& account,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> Manager::PendingOutgoing;
-    auto Sweep(
-        const identifier::Nym& account,
-        const identifier::Account& subaccount,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> Manager::PendingOutgoing;
-    auto Sweep(
-        const crypto::Key& key,
-        std::string_view toAddress = {},
-        std::span<const PaymentCode> notify = {}) const noexcept
-        -> Manager::PendingOutgoing;
 
     auto FilterOracle() noexcept -> node::FilterOracle&;
     auto HeaderOracle() noexcept -> node::HeaderOracle&;
@@ -196,20 +146,5 @@ private:
     node::internal::Wallet wallet_;
     std::once_flag shutdown_;
     mutable GuardedData data_;
-
-    static auto serialize_notifications(
-        std::span<const std::string_view> in,
-        network::zeromq::Message& out) noexcept -> void;
-    static auto serialize_notifications(
-        std::span<const PaymentCode> in,
-        network::zeromq::Message& out) noexcept -> void;
-
-    auto sweep(
-        const identifier::Nym& account,
-        const identifier::Account& subaccount,
-        std::optional<crypto::Key> key,
-        std::string_view toAddress,
-        std::span<const PaymentCode> notify) const noexcept
-        -> Manager::PendingOutgoing;
 };
 }  // namespace opentxs::blockchain::node::manager

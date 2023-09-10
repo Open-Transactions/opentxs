@@ -16,8 +16,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Data.hpp"
       "Manager.cpp"
       "Manager.hpp"
-      "SendPromises.cpp"
-      "SendPromises.hpp"
       "Shared.cpp"
       "Shared.hpp"
   )

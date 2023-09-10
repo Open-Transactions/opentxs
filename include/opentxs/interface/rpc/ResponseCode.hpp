@@ -44,7 +44,7 @@ enum class ResponseCode : TypeEnum {
     send_payment_failed = 28,
     transaction_failed = 29,
     txid = 30,
-    unimplemented = std::numeric_limits<TypeEnum>::max() - 1u,
-    error = std::numeric_limits<TypeEnum>::max(),
+    unimplemented = std::numeric_limits<int>::max() - 1u,
+    error = std::numeric_limits<int>::max(),
 };
 }  // namespace opentxs::rpc

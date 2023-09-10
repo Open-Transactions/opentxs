@@ -102,7 +102,7 @@ private:
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
         const noexcept -> void final;
     auto flush_cache(database::BatchedMatches& matches, FinishedCallback cb)
-        const noexcept -> void;
+        const noexcept -> bool;
 
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
