@@ -60,6 +60,7 @@ struct Account : virtual public crypto::Account {
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto ClaimAccountID(
         const identifier::Account& id,
+        bool existing,
         crypto::Subaccount* node) const noexcept -> bool = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
@@ -85,6 +86,9 @@ struct Account : virtual public crypto::Account {
         const PasswordPrompt& reason,
         identifier::Account& id) noexcept -> bool = 0;
     virtual auto Startup() noexcept -> void = 0;
+    using crypto::Account::Subaccount;
+    virtual auto Subaccount(const identifier::Account& id) noexcept(false)
+        -> crypto::Subaccount& = 0;
 
     ~Account() override = default;
 };

@@ -409,6 +409,14 @@ auto Blockchain::RecipientContact(const Key& key) const noexcept
     return imp_->RecipientContact(key);
 }
 
+auto Blockchain::RegisterAccount(
+    const opentxs::blockchain::Type chain,
+    const identifier::Nym& owner,
+    const identifier::Account& account) const noexcept -> bool
+{
+    return imp_->RegisterAccount(chain, owner, account);
+}
+
 auto Blockchain::RegisterSubaccount(
     const opentxs::blockchain::crypto::SubaccountType type,
     const opentxs::blockchain::Type chain,

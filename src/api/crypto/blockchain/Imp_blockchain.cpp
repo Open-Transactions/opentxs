@@ -74,6 +74,7 @@ BlockchainImp::BlockchainImp(
     , client_(api)
     , activity_(activity)
     , key_generated_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
+    , lock_()
     , transaction_updates_([&] {
         auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen =

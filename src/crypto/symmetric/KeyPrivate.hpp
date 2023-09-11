@@ -17,13 +17,13 @@
 
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -47,8 +47,7 @@ class Writer;
 
 namespace opentxs::crypto::symmetric
 {
-class KeyPrivate : virtual public internal::Key,
-                   public opentxs::implementation::Allocated
+class KeyPrivate : virtual public internal::Key, public opentxs::pmr::Allocated
 {
 public:
     static auto operator delete(

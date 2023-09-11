@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/util/PMR.hpp"
-#include "util/Allocated.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,7 +34,7 @@ class Output;
 namespace opentxs::blockchain::protocol::bitcoin::base::block
 {
 class OutputPrivate : virtual public internal::Output,
-                      public opentxs::implementation::Allocated
+                      public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

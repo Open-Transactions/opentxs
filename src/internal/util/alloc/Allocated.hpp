@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/util/Container.hpp"
+
 #pragma once
 
 #include "opentxs/util/Allocated.hpp"
 
-#include "opentxs/util/Container.hpp"
-
-namespace opentxs::implementation
+namespace opentxs::pmr
 {
 class Allocated : virtual public opentxs::Allocated
 {
@@ -18,6 +18,10 @@ public:
     {
         return allocator_;
     }
+
+    // NOTE: it's tempting to define an get_deleter here so you don't need to
+    // implement it in every child class. Don't do it. get_deleter must always
+    // be defined in the most derived class or else you get undefined behavior.
 
     Allocated(const Allocated&) = delete;
     Allocated(Allocated&&) = delete;
@@ -32,4 +36,4 @@ protected:
     {
     }
 };
-}  // namespace opentxs::implementation
+}  // namespace opentxs::pmr

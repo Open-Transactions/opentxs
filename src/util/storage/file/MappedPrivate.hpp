@@ -13,10 +13,10 @@
 
 #include "BoostIostreams.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "internal/util/storage/file/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -39,7 +39,7 @@ class Transaction;
 
 namespace opentxs::storage::file
 {
-class MappedPrivate final : public opentxs::implementation::Allocated
+class MappedPrivate final : public opentxs::pmr::Allocated
 {
 public:
     auto Read(const std::span<const Index> indices, allocator_type alloc)

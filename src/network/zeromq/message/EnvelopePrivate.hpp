@@ -8,9 +8,9 @@
 #include <span>
 
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,7 +27,7 @@ class Message;
 
 namespace opentxs::network::zeromq
 {
-class EnvelopePrivate final : public opentxs::implementation::Allocated
+class EnvelopePrivate final : public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept

@@ -25,13 +25,12 @@ auto BlockchainWalletKeys(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const api::crypto::Blockchain& parent,
-    const blockchain::crypto::AccountIndex& index,
     const blockchain::Type chain) noexcept
     -> std::unique_ptr<blockchain::crypto::Wallet>
 {
     using ReturnType = blockchain::crypto::implementation::Wallet;
 
-    return std::make_unique<ReturnType>(api, contacts, parent, index, chain);
+    return std::make_unique<ReturnType>(api, contacts, parent, chain);
 }
 }  // namespace opentxs::factory
 
@@ -41,10 +40,8 @@ Wallet::Wallet(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const api::crypto::Blockchain& parent,
-    const AccountIndex& index,
     const opentxs::blockchain::Type chain) noexcept
     : parent_(parent)
-    , account_index_(index)
     , api_(api)
     , contacts_(contacts)
     , chain_(chain)
@@ -122,7 +119,7 @@ auto Wallet::factory(
     -> std::unique_ptr<crypto::Account>
 {
     return factory::BlockchainAccountKeys(
-        api_, contacts_, *this, account_index_, nym, hd, {}, paymentCode);
+        api_, contacts_, *this, nym, hd, {}, paymentCode);
 }
 
 auto Wallet::get_or_create(Data& data, const identifier::Nym& id) const noexcept

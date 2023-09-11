@@ -82,7 +82,7 @@ Notification::Notification(
     , path_(std::move(path))
     , progress_()
 {
-    init();
+    init(false);
 }
 
 auto Notification::AllowedSubchains() const noexcept -> UnallocatedSet<Subchain>
@@ -105,9 +105,9 @@ auto Notification::calculate_id(
         preimage.Bytes(), identifier::AccountSubtype::blockchain_subaccount);
 }
 
-auto Notification::init() noexcept(false) -> void
+auto Notification::init(bool existing) noexcept(false) -> void
 {
-    Subaccount::init();
+    Subaccount::init(existing);
     auto handle = progress_.lock();
     const auto& hash = params::get(chain_).GenesisHash();
 

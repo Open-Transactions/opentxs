@@ -18,7 +18,7 @@
 #include <optional>
 
 #include "internal/util/PMR.hpp"
-#include "util/Allocated.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,7 +29,7 @@ class WriteBuffer;
 
 namespace opentxs
 {
-class WriterPrivate final : public implementation::Allocated
+class WriterPrivate final : public pmr::Allocated
 {
 public:
     auto clone(allocator_type alloc) const noexcept -> WriterPrivate*

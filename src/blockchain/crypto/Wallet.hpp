@@ -33,14 +33,6 @@ class Contacts;
 class Session;
 }  // namespace api
 
-namespace blockchain
-{
-namespace crypto
-{
-class AccountIndex;
-}  // namespace crypto
-}  // namespace blockchain
-
 namespace proto
 {
 class HDPath;
@@ -88,7 +80,6 @@ public:
         const api::Session& api,
         const api::session::Contacts& contacts,
         const api::crypto::Blockchain& parent,
-        const AccountIndex& index,
         const opentxs::blockchain::Type chain) noexcept;
     Wallet(const Wallet&) = delete;
     Wallet(Wallet&&) = delete;
@@ -107,7 +98,6 @@ private:
     using Guarded = libguarded::shared_guarded<Data, std::shared_mutex>;
 
     const api::crypto::Blockchain& parent_;
-    const AccountIndex& account_index_;
     const api::Session& api_;
     const api::session::Contacts& contacts_;
     const opentxs::blockchain::Type chain_;

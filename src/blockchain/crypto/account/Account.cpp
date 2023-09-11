@@ -19,7 +19,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "blockchain/crypto/AccountIndex.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
@@ -67,7 +66,6 @@ auto BlockchainAccountKeys(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const blockchain::crypto::Wallet& parent,
-    const blockchain::crypto::AccountIndex& index,
     const identifier::Nym& id,
     const UnallocatedSet<identifier::Account>& hd,
     const UnallocatedSet<identifier::Account>& imported,
@@ -77,7 +75,7 @@ auto BlockchainAccountKeys(
     using ReturnType = blockchain::crypto::implementation::Account;
 
     return std::make_unique<ReturnType>(
-        api, contacts, parent, index, id, hd, imported, pc);
+        api, contacts, parent, id, hd, imported, pc);
 }
 }  // namespace opentxs::factory
 
@@ -110,7 +108,6 @@ Account::Account(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const crypto::Wallet& parent,
-    const AccountIndex& index,
     const identifier::Nym& nym,
     const Accounts& hd,
     const Accounts& imported,
@@ -118,7 +115,6 @@ Account::Account(
     : api_(api)
     , contacts_(contacts)
     , parent_(parent)
-    , account_index_(index)
     , chain_(parent.Chain())
     , nym_id_(nym)
     , account_id_(GetID(api_, nym_id_, parent.Chain()))
@@ -140,7 +136,12 @@ Account::Account(
         return out;
     }())
 {
-    account_index_.Register(account_id_, nym_id_, chain_);
+    const auto& bc = parent_.Parent().Internal();
+
+    if (false == bc.RegisterAccount(chain_, nym_id_, account_id_)) {
+        LogAbort()(OT_PRETTY_CLASS())("invalid account").Abort();
+    }
+
     init_hd(hd);
     init_payment_code(paymentCode);
 }
@@ -233,14 +234,14 @@ auto Account::AssociateTransaction(
 
 auto Account::ClaimAccountID(
     const identifier::Account& id,
+    bool existing,
     crypto::Subaccount* node) const noexcept -> bool
 {
     if (node_index_.Add(id, node)) {
-        [[maybe_unused]] const auto registered =
-            parent_.Parent().Internal().RegisterSubaccount(
-                node->Type(), chain_, nym_id_, account_id_, id);
 
-        return true;
+        return parent_.Parent().Internal().RegisterSubaccount(
+                   node->Type(), chain_, nym_id_, account_id_, id) ==
+               (!existing);
     } else {
 
         return false;
@@ -410,6 +411,12 @@ auto Account::LookupUTXO(const Coin& coin) const noexcept
 
 auto Account::Subaccount(const identifier::Account& id) const noexcept(false)
     -> const crypto::Subaccount&
+{
+    return const_cast<Account*>(this)->Subaccount(id);
+}
+
+auto Account::Subaccount(const identifier::Account& id) noexcept(false)
+    -> crypto::Subaccount&
 {
     auto* output = node_index_.Find(id);
 

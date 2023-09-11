@@ -36,7 +36,6 @@ class TransactionHash;
 namespace crypto
 {
 class Account;
-class AccountIndex;
 class HD;
 class Notification;
 class PaymentCode;
@@ -75,7 +74,6 @@ auto BlockchainAccountKeys(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const blockchain::crypto::Wallet& parent,
-    const blockchain::crypto::AccountIndex& index,
     const identifier::Nym& id,
     const UnallocatedSet<identifier::Account>& hdAccounts,
     const UnallocatedSet<identifier::Account>& importedAccounts,
@@ -124,7 +122,6 @@ auto BlockchainWalletKeys(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const api::crypto::Blockchain& parent,
-    const blockchain::crypto::AccountIndex& index,
     const blockchain::Type chain) noexcept
     -> std::unique_ptr<blockchain::crypto::Wallet>;
 }  // namespace opentxs::factory

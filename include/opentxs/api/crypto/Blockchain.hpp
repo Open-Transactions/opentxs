@@ -87,8 +87,7 @@ public:
     using Key = opentxs::blockchain::crypto::Key;
     using Style = opentxs::blockchain::crypto::AddressStyle;
     using Subchain = opentxs::blockchain::crypto::Subchain;
-    using DecodedAddress =
-        std::tuple<ByteArray, Style, UnallocatedSet<Chain>, bool>;
+    using DecodedAddress = std::tuple<ByteArray, Style, Set<Chain>, bool>;
     using ContactList = UnallocatedSet<identifier::Generic>;
     using Txid = opentxs::blockchain::block::TransactionHash;
     using TxidHex = UnallocatedCString;

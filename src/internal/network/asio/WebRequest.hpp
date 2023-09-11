@@ -13,8 +13,8 @@
 #include <string_view>
 
 #include "BoostAsio.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 
 namespace beast = boost::beast;
 namespace http = boost::beast::http;
@@ -41,7 +41,7 @@ namespace opentxs::network::asio
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 template <typename CRTP>
-class WebRequest : public opentxs::implementation::Allocated,
+class WebRequest : public opentxs::pmr::Allocated,
                    public std::enable_shared_from_this<CRTP>
 {
 public:

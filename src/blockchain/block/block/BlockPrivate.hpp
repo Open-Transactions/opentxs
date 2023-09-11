@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/util/PMR.hpp"
-#include "util/Allocated.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -40,7 +40,7 @@ class BlockPrivate;
 namespace opentxs::blockchain::block
 {
 class BlockPrivate : virtual public internal::Block,
-                     public opentxs::implementation::Allocated
+                     public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

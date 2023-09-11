@@ -21,11 +21,11 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 #include "util/Gatekeeper.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -51,7 +51,7 @@ class Message;
 namespace opentxs::network::zeromq
 {
 class Pipeline::Imp final : virtual public internal::Pipeline,
-                            public opentxs::implementation::Allocated
+                            public opentxs::pmr::Allocated
 {
 public:
     auto BatchID() const noexcept -> std::size_t;

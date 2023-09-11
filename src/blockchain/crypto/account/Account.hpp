@@ -45,14 +45,6 @@ class Contacts;
 class Session;
 }  // namespace api
 
-namespace blockchain
-{
-namespace crypto
-{
-class AccountIndex;
-}  // namespace crypto
-}  // namespace blockchain
-
 namespace proto
 {
 class HDPath;
@@ -85,6 +77,7 @@ public:
     }
     [[nodiscard]] auto ClaimAccountID(
         const identifier::Account& id,
+        bool existing,
         crypto::Subaccount* node) const noexcept -> bool final;
     auto FindNym(const identifier::Nym& id) const noexcept -> void final;
     auto GetDepositAddress(
@@ -160,12 +153,13 @@ public:
             out, contacts_, local, remote, path, txid, reason);
     }
     auto Startup() noexcept -> void final { init_notification(); }
+    auto Subaccount(const identifier::Account& id) noexcept(false)
+        -> crypto::Subaccount& final;
 
     Account(
         const api::Session& api,
         const api::session::Contacts& contacts,
         const crypto::Wallet& parent,
-        const AccountIndex& index,
         const identifier::Nym& nym,
         const Accounts& hd,
         const Accounts& imported,
@@ -190,7 +184,6 @@ private:
     const api::Session& api_;
     const api::session::Contacts& contacts_;
     const crypto::Wallet& parent_;
-    const AccountIndex& account_index_;
     const opentxs::blockchain::Type chain_;
     const identifier::Nym nym_id_;
     const identifier::Account account_id_;

@@ -7,10 +7,10 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -185,7 +185,7 @@ class Message;
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {
-class MessagePrivate : public opentxs::implementation::Allocated
+class MessagePrivate : public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

@@ -206,7 +206,7 @@ HD::HD(
     , cached_external_()
     , name_()
 {
-    init();
+    init(true);
 }
 
 auto HD::account_already_exists(const rLock&) const noexcept -> bool

@@ -169,7 +169,7 @@ public:
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Parent() const noexcept -> const Wallet& = 0;
     virtual auto Subaccount(const identifier::Account& id) const noexcept(false)
-        -> const Subaccount& = 0;
+        -> const crypto::Subaccount& = 0;
 
     Account(const Account&) = delete;
     Account(Account&&) = delete;

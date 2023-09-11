@@ -10,11 +10,11 @@
 
 #include "BoostIostreams.hpp"
 #include "internal/util/PMR.hpp"
-#include "util/Allocated.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 
 namespace opentxs::storage::file
 {
-class ReaderPrivate final : public opentxs::implementation::Allocated
+class ReaderPrivate final : public opentxs::pmr::Allocated
 {
 public:
     const boost::iostreams::mapped_file_source file_;

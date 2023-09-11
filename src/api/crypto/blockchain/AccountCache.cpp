@@ -34,11 +34,17 @@
 
 namespace opentxs::api::crypto::blockchain
 {
-AccountCache::AccountCache(const api::Session& api) noexcept
-    : api_(api)
+AccountCache::AccountCache(
+    const api::Session& api,
+    alloc::Default alloc) noexcept
+    : HasUpstreamAllocator(alloc.resource())
+    , AllocatesChildren(parent_resource())
+    , api_(api)
     , populated_(false)
-    , index_()
-    , params_()
+    , nym_index_(child_alloc_)
+    , account_index_(child_alloc_)
+    , account_params_(child_alloc_)
+    , subaccount_params_(child_alloc_)
     , socket_([&] {
         using enum opentxs::network::zeromq::socket::Type;
         auto out = api_.Network().ZeroMQ().Internal().RawSocket(Publish);
@@ -52,6 +58,71 @@ AccountCache::AccountCache(const api::Session& api) noexcept
 {
 }
 
+auto AccountCache::AccountData(const identifier::Account& id) const noexcept
+    -> crypto::Blockchain::AccountData
+{
+    if (const auto i = account_params_.find(id); account_params_.end() != i) {
+
+        return i->second;
+    } else {
+
+        return {};
+    }
+}
+
+auto AccountCache::AccountList(const identifier::Nym& nymID) const noexcept
+    -> UnallocatedSet<identifier::Account>
+{
+    auto out = UnallocatedSet<identifier::Account>{};
+    const auto get_matching_accounts = [&](const auto& item) {
+        const auto& [chain, map] = item;
+
+        if (const auto i = map.find(nymID); map.end() != i) {
+            const auto& [id, subaccounts] = i->second;
+            out.emplace(id);
+        }
+    };
+    std::for_each(nym_index_.begin(), nym_index_.end(), get_matching_accounts);
+
+    return out;
+}
+
+auto AccountCache::AccountList(const opentxs::blockchain::Type chain)
+    const noexcept -> UnallocatedSet<identifier::Account>
+{
+    auto out = UnallocatedSet<identifier::Account>{};
+    const auto get_account = [&](const auto& item) {
+        const auto& [nymID, index] = item;
+        const auto& [id, subaccounts] = index;
+        out.emplace(id);
+    };
+
+    if (const auto i = nym_index_.find(chain); nym_index_.end() != i) {
+        const auto& map = i->second;
+        std::for_each(map.begin(), map.end(), get_account);
+    }
+
+    return out;
+}
+
+auto AccountCache::AccountList() const noexcept
+    -> UnallocatedSet<identifier::Account>
+{
+    auto out = UnallocatedSet<identifier::Account>{};
+    const auto get_account = [&](const auto& item) {
+        const auto& [nymID, index] = item;
+        const auto& [id, subaccounts] = index;
+        out.emplace(id);
+    };
+    const auto get_accounts = [&](const auto& item) {
+        const auto& [chain, map] = item;
+        std::for_each(map.begin(), map.end(), get_account);
+    };
+    std::for_each(nym_index_.begin(), nym_index_.end(), get_accounts);
+
+    return out;
+}
+
 auto AccountCache::build_account_map(
     const opentxs::blockchain::Type chain,
     NymIndex& map) noexcept -> void
@@ -63,19 +134,22 @@ auto AccountCache::build_account_map(
     std::for_each(std::begin(nyms), std::end(nyms), load_nym);
 }
 
-auto AccountCache::List(
+auto AccountCache::SubaccountList(
     const identifier::Nym& nymID,
     const opentxs::blockchain::Type chain) const noexcept
     -> UnallocatedSet<identifier::Account>
 {
     OT_ASSERT(populated_);
 
-    if (const auto i = index_.find(chain); index_.end() != i) {
+    if (const auto i = nym_index_.find(chain); nym_index_.end() != i) {
         const auto& index = i->second;
 
         if (const auto j = index.find(nymID); index.end() != j) {
+            const auto& in = j->second.second;
+            auto out = UnallocatedSet<identifier::Account>{};
+            std::copy(in.begin(), in.end(), std::inserter(out, out.end()));
 
-            return j->second;
+            return out;
         } else {
 
             return {};
@@ -94,9 +168,14 @@ auto AccountCache::load_nym(
     const auto parent =
         opentxs::blockchain::crypto::internal::Account::GetID(api_, nym, chain);
     auto populate = [&, this](const auto type, auto& subaccount) {
-        params_.try_emplace(subaccount, type, chain, nym, parent);
-        auto& set = output[nym];
-        set.emplace(std::move(subaccount));
+        account_index_[parent].emplace(subaccount);
+        account_params_.try_emplace(parent, chain, nym);
+        subaccount_params_.try_emplace(subaccount, type, chain, nym, parent);
+        auto& index = output[nym];
+
+        if (index.first.empty()) { index.first = parent; }
+
+        index.second.emplace(std::move(subaccount));
     };
     using enum opentxs::blockchain::crypto::SubaccountType;
     auto populate_hd = [&](auto& id) { populate(HD, id); };
@@ -114,9 +193,15 @@ auto AccountCache::Owner(const identifier::Account& id) const noexcept
 {
     OT_ASSERT(populated_);
 
-    if (const auto i = params_.find(id); params_.end() != i) {
+    const auto& account = account_params_;
+    const auto& subaccount = subaccount_params_;
+
+    if (const auto i = subaccount.find(id); subaccount.end() != i) {
 
         return i->second.owner_;
+    } else if (const auto j = account.find(id); account.end() != j) {
+
+        return j->second.owner_;
     } else {
         static const auto blank = identifier::Nym{};
 
@@ -127,11 +212,38 @@ auto AccountCache::Owner(const identifier::Account& id) const noexcept
 auto AccountCache::Populate() noexcept -> void
 {
     for (const auto& chain : opentxs::blockchain::supported_chains()) {
-        auto& map = index_[chain];
+        auto& map = nym_index_[chain];
         build_account_map(chain, map);
     }
 
     populated_ = true;
+}
+
+auto AccountCache::RegisterAccount(
+    const opentxs::blockchain::Type chain,
+    const identifier::Nym& owner,
+    const identifier::Account& account) noexcept -> bool
+{
+    if (owner.empty()) {
+        LogError()(OT_PRETTY_CLASS())("invalid owner").Flush();
+
+        return false;
+    }
+
+    const auto expected = opentxs::blockchain::crypto::internal::Account::GetID(
+        api_, owner, chain);
+
+    if (account != expected) {
+        LogError()(OT_PRETTY_CLASS())("invalid account").Flush();
+
+        return false;
+    }
+
+    account_params_.try_emplace(account, chain, owner);
+    nym_index_[chain][owner].first = account;
+    account_index_[account];
+
+    return true;
 }
 
 auto AccountCache::RegisterSubaccount(
@@ -159,8 +271,23 @@ auto AccountCache::RegisterSubaccount(
         return false;
     }
 
-    if (params_.try_emplace(subaccount, type, chain, owner, account).second) {
-        index_[chain][owner].emplace(subaccount);
+    if (subaccount_params_.try_emplace(subaccount, type, chain, owner, account)
+            .second) {
+        account_params_.try_emplace(account, chain, owner);
+        auto& index = nym_index_[chain][owner];
+
+        if (index.first.empty()) {
+            index.first = account;
+        } else if (index.first != account) {
+            LogError()(OT_PRETTY_CLASS())(
+                "aubaccount parent does not match existing recorded value")
+                .Flush();
+
+            return false;
+        }
+
+        index.second.emplace(subaccount);
+        account_index_[account].emplace(subaccount);
         socket_.SendDeferred(
             [&] {
                 auto work = opentxs::network::zeromq::tagged_message(
@@ -182,12 +309,13 @@ auto AccountCache::RegisterSubaccount(
     }
 }
 
-auto AccountCache::Type(const identifier::Account& id) const noexcept
+auto AccountCache::SubaccountType(const identifier::Account& id) const noexcept
     -> opentxs::blockchain::crypto::SubaccountType
 {
     OT_ASSERT(populated_);
 
-    if (const auto i = params_.find(id); params_.end() != i) {
+    if (const auto i = subaccount_params_.find(id);
+        subaccount_params_.end() != i) {
 
         return i->second.type_;
     } else {

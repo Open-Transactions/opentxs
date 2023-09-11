@@ -7,6 +7,7 @@
 
 #include "internal/identity/wot/Claim.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -14,7 +15,6 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -31,7 +31,7 @@ class Writer;
 namespace opentxs::identity::wot
 {
 class ClaimPrivate : virtual public internal::Claim,
-                     public opentxs::implementation::Allocated
+                     public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

@@ -9,6 +9,7 @@
 
 #include "internal/core/contract/peer/Reply.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -16,7 +17,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -61,7 +61,7 @@ namespace opentxs::contract::peer
 {
 class ReplyPrivate : virtual public internal::Reply,
                      virtual public contract::Signable<identifier::Generic>,
-                     public opentxs::implementation::Allocated
+                     public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

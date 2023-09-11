@@ -9,7 +9,6 @@
 
 #include <cs_shared_guarded.h>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <shared_mutex>
 #include <span>
@@ -18,14 +17,15 @@
 
 #include "api/crypto/blockchain/AccountCache.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
-#include "api/crypto/blockchain/Wallets.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
-#include "internal/util/Mutex.hpp"
+#include "internal/util/alloc/AllocatesChildren.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -69,7 +69,6 @@ class Element;
 class HD;
 class PaymentCode;
 class Subaccount;
-class Wallet;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -93,9 +92,7 @@ class PaymentCode;
 
 namespace opentxs::api::crypto::imp
 {
-struct Blockchain::Imp {
-    using IDLock = UnallocatedMap<identifier::Generic, std::mutex>;
-
+struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::BoostPoolSync> {
     auto Account(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept(false)
@@ -238,6 +235,10 @@ struct Blockchain::Imp {
     auto PubkeyHash(const opentxs::blockchain::Type chain, const Data& pubkey)
         const noexcept(false) -> ByteArray;
     auto RecipientContact(const Key& key) const noexcept -> identifier::Generic;
+    [[nodiscard]] auto RegisterAccount(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account) const noexcept -> bool;
     [[nodiscard]] auto RegisterSubaccount(
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::Type chain,
@@ -277,21 +278,13 @@ struct Blockchain::Imp {
         const api::session::Contacts& contacts,
         api::crypto::Blockchain& parent) noexcept;
 
-    virtual ~Imp() = default;
+    ~Imp() override = default;
 
 protected:
-    using AccountCache =
-        libguarded::shared_guarded<blockchain::AccountCache, std::shared_mutex>;
-
     const api::Session& api_;
     const api::session::Contacts& contacts_;
-    const DecodedAddress blank_;
-    const CString balance_oracle_endpoint_;
     const api::crypto::Blockchain& parent_;
-    mutable std::mutex lock_;
-    mutable IDLock nym_lock_;
-    mutable AccountCache accounts_;
-    mutable blockchain::Wallets wallets_;
+    const CString balance_oracle_endpoint_;
 
     auto bip44_type(const UnitType type) const noexcept -> Bip44Type;
     auto decode_bech23(const std::string_view encoded) const noexcept
@@ -307,7 +300,6 @@ protected:
         const opentxs::blockchain::crypto::HDProtocol standard,
         proto::HDPath& path) const noexcept -> void;
     auto new_payment_code(
-        const Lock& lock,
         const identifier::Nym& nymID,
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
@@ -320,13 +312,46 @@ protected:
         const noexcept -> UnallocatedCString;
     auto p2wpkh(const opentxs::blockchain::Type chain, const Data& pubkeyHash)
         const noexcept -> UnallocatedCString;
-    auto nym_mutex(const identifier::Nym& nym) const noexcept -> std::mutex&;
     auto validate_nym(const identifier::Nym& nymID) const noexcept -> bool;
 
 private:
+    using AccountCache =
+        libguarded::shared_guarded<blockchain::AccountCache, std::shared_mutex>;
+    using Wallets =
+        Map<opentxs::blockchain::Type,
+            std::unique_ptr<opentxs::blockchain::crypto::Wallet>>;
+    using GuardedWallets =
+        libguarded::shared_guarded<Wallets, std::shared_mutex>;
+
+    const DecodedAddress blank_;
+    mutable AccountCache accounts_;
+    mutable GuardedWallets wallets_;
+
+    auto account(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner) const noexcept(false)
+        -> const opentxs::blockchain::crypto::Account&;
+    auto account_mutable(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner) const noexcept(false)
+        -> opentxs::blockchain::crypto::Account&;
     auto get(std::span<std::pair<
                  const opentxs::blockchain::crypto::Account*,
                  opentxs::blockchain::crypto::Notifications*>>) const noexcept
         -> void;
+    auto subaccount(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& id) const noexcept(false)
+        -> const opentxs::blockchain::crypto::Subaccount&;
+    auto subaccount_mutable(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& id) const noexcept(false)
+        -> opentxs::blockchain::crypto::Subaccount&;
+    auto wallet(const opentxs::blockchain::Type chain) const noexcept(false)
+        -> const opentxs::blockchain::crypto::Wallet&;
+    auto wallet_mutable(const opentxs::blockchain::Type chain) const
+        noexcept(false) -> opentxs::blockchain::crypto::Wallet&;
 };
 }  // namespace opentxs::api::crypto::imp

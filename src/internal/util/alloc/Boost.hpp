@@ -133,4 +133,6 @@ private:
 
 using BoostMonotonic = Boost<boost::container::pmr::monotonic_buffer_resource>;
 using BoostPoolSync = Boost<boost::container::pmr::synchronized_pool_resource>;
+using BoostPoolUnsync =
+    Boost<boost::container::pmr::unsynchronized_pool_resource>;
 }  // namespace opentxs::alloc

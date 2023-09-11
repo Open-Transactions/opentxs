@@ -101,6 +101,10 @@ public:
     virtual auto PubkeyHash(
         const opentxs::blockchain::Type chain,
         const Data& pubkey) const noexcept(false) -> ByteArray = 0;
+    [[nodiscard]] virtual auto RegisterAccount(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto RegisterSubaccount(
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::Type chain,
