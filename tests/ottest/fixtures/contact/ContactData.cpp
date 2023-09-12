@@ -6,12 +6,12 @@
 #include "ottest/fixtures/contact/ContactData.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <memory>
 #include <string_view>
 
 #include "internal/identity/wot/claim/Types.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

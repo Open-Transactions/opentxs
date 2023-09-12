@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,7 +9,6 @@
 #include <iterator>
 #include <memory>
 #include <string_view>
-#include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -18,7 +17,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/crypto/Envelope.hpp"
 
 namespace ot = opentxs;
 
@@ -27,176 +26,9 @@ namespace ottest
 using namespace opentxs::literals;
 using namespace std::literals;
 
-class Test_Envelope : public ::testing::Test
-{
-public:
-    using Nyms = ot::UnallocatedVector<ot::Nym_p>;
-    using Test = std::pair<bool, ot::UnallocatedVector<int>>;
-    using Expected = ot::UnallocatedVector<Test>;
+TEST_F(Envelope, init_ot) {}
 
-    static const bool have_rsa_;
-    static const bool have_secp256k1_;
-    static const bool have_ed25519_;
-    static const Expected expected_;
-    static Nyms nyms_;
-
-    static bool init_;
-
-    const ot::api::Session& sender_;
-    const ot::api::Session& recipient_;
-    const ot::PasswordPrompt reason_s_;
-    const ot::PasswordPrompt reason_r_;
-    const ot::OTString plaintext_;
-
-    static auto can_seal(const std::size_t row) -> bool
-    {
-        return expected_.at(row).first;
-    }
-    static auto can_open(const std::size_t row, const std::size_t column)
-        -> bool
-    {
-        return can_seal(row) && should_seal(row, column);
-    }
-    static auto is_active(const std::size_t row, const std::size_t column)
-        -> bool
-    {
-        return 0 != (row & (1_uz << column));
-    }
-    static auto should_seal(const std::size_t row, const std::size_t column)
-        -> bool
-    {
-        return expected_.at(row).second.at(column);
-    }
-
-    Test_Envelope()
-        : sender_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , recipient_(OTTestEnvironment::GetOT().StartClientSession(1))
-        , reason_s_(sender_.Factory().PasswordPrompt(__func__))
-        , reason_r_(recipient_.Factory().PasswordPrompt(__func__))
-        , plaintext_(ot::String::Factory(
-              "The quick brown fox jumped over the lazy dog"))
-    {
-        if (false == init_) {
-            init_ = true;
-            {
-                auto params = [this] {
-                    using Type = ot::crypto::ParameterType;
-
-                    if (have_ed25519_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::ed25519};
-                    } else if (have_secp256k1_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::secp256k1};
-                    } else if (have_rsa_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::rsa};
-                    } else {
-
-                        return ot::crypto::Parameters{recipient_.Factory()};
-                    }
-                }();
-                auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
-
-                OT_ASSERT(rNym);
-
-                auto bytes = ot::Space{};
-                OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
-                nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
-
-                OT_ASSERT(bool(*nyms_.crbegin()));
-            }
-            {
-                auto params = [this] {
-                    using Type = ot::crypto::ParameterType;
-
-                    if (have_secp256k1_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::secp256k1};
-                    } else if (have_rsa_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::rsa};
-                    } else if (have_ed25519_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::ed25519};
-                    } else {
-
-                        return ot::crypto::Parameters{recipient_.Factory()};
-                    }
-                }();
-                auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
-
-                OT_ASSERT(rNym);
-
-                auto bytes = ot::Space{};
-                OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
-                nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
-
-                OT_ASSERT(bool(*nyms_.crbegin()));
-            }
-            {
-                auto params = [this] {
-                    using Type = ot::crypto::ParameterType;
-
-                    if (have_rsa_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::rsa};
-                    } else if (have_ed25519_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::ed25519};
-                    } else if (have_secp256k1_) {
-
-                        return ot::crypto::Parameters{
-                            recipient_.Factory(), Type::secp256k1};
-                    } else {
-
-                        return ot::crypto::Parameters{recipient_.Factory()};
-                    }
-                }();
-                auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
-
-                OT_ASSERT(rNym);
-
-                auto bytes = ot::Space{};
-                OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
-                nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
-
-                OT_ASSERT(bool(*nyms_.crbegin()));
-            }
-        }
-    }
-};
-
-bool Test_Envelope::init_{false};
-const bool Test_Envelope::have_rsa_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Legacy)};
-const bool Test_Envelope::have_secp256k1_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::Secp256k1)};
-const bool Test_Envelope::have_ed25519_{
-    ot::api::crypto::HaveSupport(ot::crypto::asymmetric::Algorithm::ED25519)};
-Test_Envelope::Nyms Test_Envelope::nyms_{};
-const Test_Envelope::Expected Test_Envelope::expected_{
-    {false, {false, false, false}},
-    {true, {true, false, false}},
-    {true, {false, true, false}},
-    {true, {true, true, false}},
-    {true, {false, false, true}},
-    {true, {true, false, true}},
-    {true, {false, true, true}},
-    {true, {true, true, true}},
-};
-
-TEST_F(Test_Envelope, init_ot) {}
-
-TEST_F(Test_Envelope, one_recipient)
+TEST_F(Envelope, one_recipient)
 {
     for (const auto& pNym : nyms_) {
         const auto& nym = *pNym;
@@ -234,7 +66,7 @@ TEST_F(Test_Envelope, one_recipient)
     }
 }
 
-TEST_F(Test_Envelope, multiple_recipients)
+TEST_F(Envelope, multiple_recipients)
 {
     constexpr auto one = 1_uz;
 

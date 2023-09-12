@@ -6,8 +6,8 @@
 #include "ottest/fixtures/blockchain/NumericHash.hpp"  // IWYU pragma: associated
 
 #include <boost/endian/buffers.hpp>
+#include <opentxs/opentxs.hpp>
 
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

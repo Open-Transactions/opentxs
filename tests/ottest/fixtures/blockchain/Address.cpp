@@ -5,7 +5,8 @@
 
 #include "ottest/fixtures/blockchain/Address.hpp"  // IWYU pragma: associated
 
-#include "opentxs/opentxs.hpp"
+#include <opentxs/opentxs.hpp>
+
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

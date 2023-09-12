@@ -5,11 +5,11 @@
 
 #include "ottest/fixtures/blockchain/BIP44.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <memory>
 
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

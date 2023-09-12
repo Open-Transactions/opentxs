@@ -11,7 +11,6 @@
 #include <frozen/set.h>
 #include <algorithm>
 #include <chrono>
-#include <functional>
 #include <iterator>
 #include <random>
 #include <span>

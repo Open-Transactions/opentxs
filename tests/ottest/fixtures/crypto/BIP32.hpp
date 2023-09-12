@@ -7,23 +7,23 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <cstddef>
 
-namespace ot = opentxs;
+#include "ottest/data/crypto/Bip32.hpp"
 
 namespace ottest
 {
-class OPENTXS_EXPORT Test_Hash : public ::testing::Test
+namespace ot = opentxs;
+
+class OPENTXS_EXPORT BIP32 : public ::testing::Test
 {
-public:
-    const ot::api::Crypto& crypto_;
+protected:
+    using Path = ot::UnallocatedVector<ot::Bip32Index>;
 
-    auto GetHash(
-        const ot::api::Session& api,
-        const ot::crypto::symmetric::Key& key,
-        const ot::PasswordPrompt& reason,
-        std::size_t bytes) const noexcept -> ot::ByteArray;
+    const ot::api::session::Client& api_;
+    const ot::PasswordPrompt reason_;
 
-    Test_Hash();
+    auto make_path(const Child::Path& path) const noexcept -> Path;
+
+    BIP32();
 };
 }  // namespace ottest

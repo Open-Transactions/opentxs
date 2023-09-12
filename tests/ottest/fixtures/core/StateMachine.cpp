@@ -5,10 +5,9 @@
 
 #include "ottest/fixtures/core/StateMachine.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <chrono>
-
-#include "opentxs/opentxs.hpp"
 
 namespace ottest
 {

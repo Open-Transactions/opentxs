@@ -5,7 +5,8 @@
 
 // IWYU pragma: no_forward_declare ottest::User
 
-#include "opentxs/opentxs.hpp"
+#include <opentxs/opentxs.hpp>
+
 #include "ottest/fixtures/ui/AccountActivity.hpp"
 #include "ottest/fixtures/ui/AccountList.hpp"
 #include "ottest/fixtures/ui/AccountTree.hpp"
