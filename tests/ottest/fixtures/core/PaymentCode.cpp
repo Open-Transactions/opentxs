@@ -5,10 +5,10 @@
 
 #include "ottest/fixtures/core/PaymentCode.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <memory>
 #include <string_view>
 
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

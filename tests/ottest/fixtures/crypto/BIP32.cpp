@@ -5,7 +5,8 @@
 
 #include "ottest/fixtures/crypto/BIP32.hpp"  // IWYU pragma: associated
 
-#include "opentxs/opentxs.hpp"
+#include <opentxs/opentxs.hpp>
+
 #include "ottest/data/crypto/Bip32.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

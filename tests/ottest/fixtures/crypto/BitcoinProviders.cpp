@@ -6,10 +6,10 @@
 #include "ottest/fixtures/crypto/BitcoinProviders.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 #include <string_view>
 #include <tuple>
 
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

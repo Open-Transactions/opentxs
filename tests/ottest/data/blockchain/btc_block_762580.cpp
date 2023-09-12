@@ -5,11 +5,10 @@
 
 #include "ottest/data/blockchain/Blocks.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <string_view>
 #include <utility>
-
-#include "opentxs/opentxs.hpp"
 
 namespace ottest
 {

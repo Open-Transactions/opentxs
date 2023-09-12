@@ -6,12 +6,12 @@
 #include "ottest/fixtures/crypto/AsymmetricProvider.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <string_view>
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "util/HDIndex.hpp"
 

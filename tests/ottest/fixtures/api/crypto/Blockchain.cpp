@@ -5,12 +5,12 @@
 
 #include "ottest/fixtures/api/crypto/Blockchain.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <memory>
 #include <optional>
 
 #include "internal/util/DeferredConstruction.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

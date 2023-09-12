@@ -5,8 +5,9 @@
 
 #include "ottest/fixtures/contact/ContactItem.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
+
 #include "internal/identity/wot/claim/Types.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

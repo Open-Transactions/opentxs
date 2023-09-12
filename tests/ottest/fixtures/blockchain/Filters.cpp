@@ -6,9 +6,9 @@
 #include "ottest/fixtures/blockchain/Filters.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 
 #include "internal/blockchain/Blockchain.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

@@ -5,6 +5,7 @@
 
 #include "ottest/fixtures/crypto/Envelope.hpp"  // IWYU pragma: associated
 
+#include <opentxs/opentxs.hpp>
 #include <cstddef>
 #include <memory>
 #include <string_view>
@@ -13,7 +14,6 @@
 #include "internal/core/String.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

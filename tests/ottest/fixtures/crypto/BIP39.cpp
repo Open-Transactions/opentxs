@@ -6,13 +6,13 @@
 #include "ottest/fixtures/crypto/BIP39.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 #include <cctype>
 #include <cstddef>
 #include <functional>
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
-#include "opentxs/opentxs.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

@@ -7,6 +7,7 @@
 
 #include <BlockchainTransaction.pb.h>
 #include <gtest/gtest.h>
+#include <opentxs/opentxs.hpp>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -19,7 +20,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/opentxs.hpp"
 
 namespace ottest
 {

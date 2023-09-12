@@ -5,7 +5,8 @@
 
 #include "ottest/fixtures/paymentcode/PaymentCode_v1.hpp"  // IWYU pragma: associated
 
-#include "opentxs/opentxs.hpp"
+#include <opentxs/opentxs.hpp>
+
 #include "ottest/data/crypto/PaymentCodeV1.hpp"
 #include "ottest/fixtures/paymentcode/Helpers.hpp"
 
