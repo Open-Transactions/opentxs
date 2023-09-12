@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <span>
 #include <string_view>
 
@@ -157,6 +158,7 @@ private:
     const api::session::Client& client_;
     const api::session::Activity& activity_;
     const CString key_generated_endpoint_;
+    mutable std::mutex lock_;
     OTZMQPublishSocket transaction_updates_;
     OTZMQPublishSocket key_updates_;
     OTZMQPublishSocket scan_updates_;

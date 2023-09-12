@@ -16,13 +16,13 @@
 #include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -89,7 +89,7 @@ struct EncodedOutpoint {
     auto operator=(EncodedOutpoint&&) noexcept -> EncodedOutpoint& = default;
 };
 
-struct EncodedInput final : opentxs::implementation::Allocated {
+struct EncodedInput final : opentxs::pmr::Allocated {
     EncodedOutpoint outpoint_;
     CompactSize cs_;
     ByteArray script_;
@@ -160,7 +160,7 @@ struct EncodedInput final : opentxs::implementation::Allocated {
     ~EncodedInput() final = default;
 };
 
-struct EncodedOutput final : opentxs::implementation::Allocated {
+struct EncodedOutput final : opentxs::pmr::Allocated {
     be::little_uint64_buf_t value_;
     CompactSize cs_;
     std::optional<protocol::bitcoin::bitcoincash::token::cashtoken::Value>
@@ -232,7 +232,7 @@ struct EncodedOutput final : opentxs::implementation::Allocated {
     ~EncodedOutput() final = default;
 };
 
-struct EncodedWitnessItem final : opentxs::implementation::Allocated {
+struct EncodedWitnessItem final : opentxs::pmr::Allocated {
     CompactSize cs_;
     ByteArray item_;
 
@@ -294,7 +294,7 @@ struct EncodedWitnessItem final : opentxs::implementation::Allocated {
     ~EncodedWitnessItem() final = default;
 };
 
-struct EncodedInputWitness final : opentxs::implementation::Allocated {
+struct EncodedInputWitness final : opentxs::pmr::Allocated {
     CompactSize cs_;
     Vector<EncodedWitnessItem> items_;
 
@@ -358,7 +358,7 @@ struct EncodedInputWitness final : opentxs::implementation::Allocated {
     ~EncodedInputWitness() final = default;
 };
 
-struct EncodedTransaction final : opentxs::implementation::Allocated {
+struct EncodedTransaction final : opentxs::pmr::Allocated {
     be::little_int32_buf_t version_;
     std::optional<std::byte> segwit_flag_;
     CompactSize input_count_;

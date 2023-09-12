@@ -252,8 +252,7 @@ auto swap(T*& lhs, T*& rhs) noexcept -> void
         OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
     }
 
-    using std::swap;
-    swap(lhs, rhs);
+    std::swap(lhs, rhs);
 }
 
 template <typename T, typename Swapper>

@@ -15,6 +15,7 @@
 #include "blockchain/node/headeroracle/HeaderOraclePrivate.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -69,7 +69,7 @@ class Data;
 
 namespace opentxs::blockchain::node::internal
 {
-class HeaderOracle::Shared final : public opentxs::implementation::Allocated
+class HeaderOracle::Shared final : public opentxs::pmr::Allocated
 {
 public:
     using Data =

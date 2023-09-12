@@ -10,12 +10,12 @@
 #include <compare>
 
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "util/Allocated.hpp"
 
 namespace opentxs::blockchain
 {
-class WorkPrivate final : public opentxs::implementation::Allocated
+class WorkPrivate final : public opentxs::pmr::Allocated
 {
 public:
     using Type = boost::multiprecision::cpp_bin_float_double;

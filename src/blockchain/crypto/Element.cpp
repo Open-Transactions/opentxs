@@ -402,6 +402,9 @@ auto Element::SetContact(const identifier::Generic& contact) noexcept -> void
     {
         auto handle = data_.lock();
         auto& data = *handle;
+
+        if (data.contact_ == contact) { return; }
+
         data.contact_ = contact;
         data.cached_ = std::nullopt;
     }
@@ -414,6 +417,9 @@ auto Element::SetLabel(const std::string_view label) noexcept -> void
     {
         auto handle = data_.lock();
         auto& data = *handle;
+
+        if (data.label_ == label) { return; }
+
         data.label_ = label;
         data.cached_ = std::nullopt;
     }

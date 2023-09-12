@@ -10,12 +10,12 @@
 
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,8 +46,7 @@ class Writer;
 
 namespace opentxs::crypto::asymmetric
 {
-class KeyPrivate : virtual public internal::Key,
-                   public opentxs::implementation::Allocated
+class KeyPrivate : virtual public internal::Key, public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

@@ -12,6 +12,7 @@
 #include "internal/network/otdht/Node.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
@@ -20,13 +21,12 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Allocated.hpp"
 
 namespace opentxs::network::otdht
 {
 using namespace std::literals;
 
-class Node::Shared final : public opentxs::implementation::Allocated
+class Node::Shared final : public opentxs::pmr::Allocated
 {
 public:
     class Data final : opentxs::Allocated

@@ -294,6 +294,13 @@ public:
     {
         return {id_};
     }
+    [[nodiscard]] auto RegisterAccount(
+        const opentxs::blockchain::Type,
+        const identifier::Nym&,
+        const identifier::Account&) const noexcept -> bool final
+    {
+        return {};
+    }
     [[nodiscard]] auto RegisterSubaccount(
         const opentxs::blockchain::crypto::SubaccountType,
         const opentxs::blockchain::Type,

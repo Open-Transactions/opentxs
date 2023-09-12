@@ -508,7 +508,7 @@ auto Deterministic::get_contact() const noexcept -> identifier::Generic
     return blank;
 }
 
-auto Deterministic::init() noexcept(false) -> void
+auto Deterministic::init(bool existing) noexcept(false) -> void
 {
     const auto& log = LogTrace();
     const auto cb = [&](const auto& data) {
@@ -548,7 +548,7 @@ auto Deterministic::init() noexcept(false) -> void
             "Generate keys to repair inconsistent blockchain account");
         init(reason);
     } else {
-        Subaccount::init();
+        Subaccount::init(existing);
     }
 }
 
@@ -570,7 +570,7 @@ auto Deterministic::init(const PasswordPrompt& reason) noexcept(false) -> void
         }
     }
 
-    Subaccount::init();
+    Subaccount::init(false);
 }
 
 auto Deterministic::Key(const Subchain type, const Bip32Index index)

@@ -32,8 +32,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/PaymentCode.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Subaccount.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Wallet.hpp"
-    "AccountIndex.cpp"
-    "AccountIndex.hpp"
     "Crypto.cpp"
     "Deterministic.cpp"
     "Deterministic.hpp"

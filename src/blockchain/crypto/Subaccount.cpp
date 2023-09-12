@@ -273,9 +273,9 @@ auto Subaccount::IncomingTransactions(const Key& element) const noexcept
     return output;
 }
 
-auto Subaccount::init() noexcept(false) -> void
+auto Subaccount::init(bool existing) noexcept(false) -> void
 {
-    if (false == parent_.Internal().ClaimAccountID(id_, this)) {
+    if (false == parent_.Internal().ClaimAccountID(id_, existing, this)) {
         throw std::runtime_error{"duplicate subaccount id"};
     }
 }

@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "internal/util/PMR.hpp"
-#include "util/Allocated.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,7 +34,7 @@ class Input;
 namespace opentxs::blockchain::protocol::bitcoin::base::block
 {
 class InputPrivate : virtual public internal::Input,
-                     public opentxs::implementation::Allocated
+                     public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept

@@ -266,7 +266,7 @@ PaymentCode::PaymentCode(
 {
     if (contact_id_.empty()) { throw std::runtime_error("Missing contact"); }
 
-    init();
+    init(true);
     parent_.Internal().FindNym(remote_.get().ID());
 }
 

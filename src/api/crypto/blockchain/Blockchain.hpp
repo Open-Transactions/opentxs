@@ -219,6 +219,10 @@ public:
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto RecipientContact(const Key& key) const noexcept
         -> identifier::Generic final;
+    [[nodiscard]] auto RegisterAccount(
+        const opentxs::blockchain::Type chain,
+        const identifier::Nym& owner,
+        const identifier::Account& account) const noexcept -> bool final;
     [[nodiscard]] auto RegisterSubaccount(
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::Type chain,

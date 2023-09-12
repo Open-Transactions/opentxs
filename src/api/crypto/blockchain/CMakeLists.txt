@@ -17,8 +17,6 @@ target_sources(
     "Blockchain.hpp"
     "Imp.cpp"
     "Imp.hpp"
-    "Wallets.cpp"
-    "Wallets.hpp"
 )
 libopentxs_parallel_algorithms()
 libopentxs_link_internal(opentxs-bech32)
