@@ -5,10 +5,7 @@
 
 #pragma once
 
-#include <utility>
-
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -29,8 +26,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -46,8 +41,6 @@ auto blockchain_thread_item_id(
 
 namespace opentxs::blockchain::crypto
 {
-using ActivityMap = UnallocatedMap<Coin, std::pair<Key, Amount>>;
-
 struct Notifications {
     Set<opentxs::PaymentCode> incoming_{};
     Set<opentxs::PaymentCode> outgoing_{};

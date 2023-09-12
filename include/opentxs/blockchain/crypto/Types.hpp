@@ -62,11 +62,8 @@ enum class HDProtocol : std::uint16_t;      // IWYU pragma: export
 enum class SubaccountType : std::uint16_t;  // IWYU pragma: export
 enum class Subchain : std::uint8_t;         // IWYU pragma: export
 
-/// transaction id, output index
-using Coin = std::pair<UnallocatedCString, std::size_t>;
-/// account id, chain, index
+/// subaccount id, chain, index
 using Key = std::tuple<identifier::Account, Subchain, Bip32Index>;
-using Activity = std::tuple<Coin, Key, Amount>;
 
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;
 OPENTXS_EXPORT auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool;

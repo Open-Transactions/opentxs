@@ -12,6 +12,7 @@
 #include <iterator>
 #include <sstream>
 #include <string_view>
+#include <utility>
 
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Factory.hpp"

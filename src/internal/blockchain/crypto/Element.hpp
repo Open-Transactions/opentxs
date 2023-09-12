@@ -52,8 +52,6 @@ struct Element : virtual public crypto::Element {
 
     virtual auto Elements() const noexcept -> UnallocatedSet<ByteArray> = 0;
     virtual auto ID() const noexcept -> const identifier::Account& = 0;
-    virtual auto IncomingTransactions() const noexcept
-        -> UnallocatedSet<UnallocatedCString> = 0;
     virtual auto IsAvailable(
         const identifier::Generic& contact,
         const std::string_view memo) const noexcept -> Availability = 0;

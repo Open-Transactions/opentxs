@@ -10,27 +10,21 @@
 #include <Bip47Channel.pb.h>
 #include <HDAccount.pb.h>
 #include <boost/endian/conversion.hpp>
-#include <cstddef>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <tuple>
 #include <type_traits>
-#include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
-#include "internal/blockchain/crypto/Subaccount.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -43,7 +37,6 @@
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -123,9 +116,6 @@ Account::Account(
     , notification_(api_, SubaccountType::Notification, *this)
     , payment_code_(api_, SubaccountType::PaymentCode, *this)
     , node_index_()
-    , lock_()
-    , unspent_()
-    , spent_()
     , find_nym_([&] {
         using Dir = network::zeromq::socket::Direction;
         auto out = api_.Network().ZeroMQ().Internal().PushSocket(Dir::Connect);
@@ -155,81 +145,6 @@ auto Account::AddHDNode(
     init_notification();
 
     return hd_.Construct(id, path, standard, reason);
-}
-
-auto Account::AssociateTransaction(
-    const UnallocatedVector<Activity>& unspent,
-    const UnallocatedVector<Activity>& spent,
-    UnallocatedSet<identifier::Generic>& contacts,
-    const PasswordPrompt& reason) const noexcept -> bool
-{
-    using ActivityVector = UnallocatedVector<Activity>;
-    using ActivityPair = std::pair<ActivityVector, ActivityVector>;
-    using ActivityMap = UnallocatedMap<identifier::Account, ActivityPair>;
-
-    Lock lock(lock_);
-    auto sorted = ActivityMap{};
-    auto outputs =
-        UnallocatedMap<UnallocatedCString, UnallocatedMap<std::size_t, int>>{};
-
-    for (const auto& [coin, key, amount] : unspent) {
-        const auto& [transaction, output] = coin;
-        const auto& [account, subchain, index] = key;
-
-        if (1 < ++outputs[transaction][output]) { return false; }
-        if (0 >= amount) { return false; }
-
-        sorted[account].first.emplace_back(coin, key, amount);
-    }
-
-    for (const auto& [coin, key, amount] : spent) {
-        const auto& [transaction, output] = coin;
-        const auto& [account, subchain, index] = key;
-
-        if (1 < ++outputs[transaction][output]) { return false; }
-        if (0 >= amount) { return false; }
-
-        sorted[account].second.emplace_back(coin, key, amount);
-    }
-
-    for (const auto& [accountID, value] : sorted) {
-        auto* pNode = node_index_.Find(accountID);
-
-        if (nullptr == pNode) {
-            LogVerbose()(OT_PRETTY_CLASS())("Account ")(
-                accountID, api_.Crypto())(" not found")
-                .Flush();
-
-            continue;
-        }
-
-        const auto& node = *pNode;
-        const auto accepted = node.Internal().AssociateTransaction(
-            value.first, value.second, contacts, reason);
-
-        if (accepted) {
-            for (const auto& [coin, key, amount] : value.first) {
-                unspent_.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(coin),
-                    std::forward_as_tuple(key, amount));
-            }
-
-            for (const auto& [coin, key, amount] : value.second) {
-                spent_.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(coin),
-                    std::forward_as_tuple(key, amount));
-            }
-        } else {
-            LogError()(OT_PRETTY_CLASS())("Failed processing transaction")
-                .Flush();
-
-            return false;
-        }
-    }
-
-    return true;
 }
 
 auto Account::ClaimAccountID(
@@ -392,20 +307,6 @@ auto Account::init_payment_code(const Accounts& accounts) noexcept -> void
 
         auto notUsed = identifier::Account{};
         payment_code_.Construct(notUsed, contacts_, account);
-    }
-}
-
-auto Account::LookupUTXO(const Coin& coin) const noexcept
-    -> std::optional<std::pair<Key, Amount>>
-{
-    Lock lock(lock_);
-
-    try {
-
-        return unspent_.at(coin);
-    } catch (...) {
-
-        return {};
     }
 }
 

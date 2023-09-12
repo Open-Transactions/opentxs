@@ -53,19 +53,12 @@ struct Account : virtual public crypto::Account {
         const identifier::Nym& owner,
         blockchain::Type chain) noexcept -> identifier::Account;
 
-    virtual auto AssociateTransaction(
-        const UnallocatedVector<Activity>& unspent,
-        const UnallocatedVector<Activity>& spent,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto ClaimAccountID(
         const identifier::Account& id,
         bool existing,
         crypto::Subaccount* node) const noexcept -> bool = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
-    virtual auto LookupUTXO(const Coin& coin) const noexcept
-        -> std::optional<std::pair<Key, Amount>> = 0;
 
     virtual auto AddHDNode(
         const proto::HDPath& path,

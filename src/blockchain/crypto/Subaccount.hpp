@@ -8,7 +8,6 @@
 #pragma once
 
 #include <BlockchainAccountData.pb.h>
-#include <BlockchainActivity.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -16,7 +15,6 @@
 #include <string_view>
 
 #include "internal/blockchain/crypto/Subaccount.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -24,7 +22,6 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -57,6 +54,11 @@ class Element;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace proto
+{
+class BlockchainActivity;
+}  // namespace proto
+
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -66,11 +68,6 @@ namespace opentxs::blockchain::crypto::implementation
 class Subaccount : virtual public internal::Subaccount
 {
 public:
-    auto AssociateTransaction(
-        const UnallocatedVector<Activity>& unspent,
-        const UnallocatedVector<Activity>& outgoing,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool final;
     auto Describe() const noexcept -> std::string_view final
     {
         return description_;
@@ -80,8 +77,6 @@ public:
     {
         return const_cast<Subaccount&>(*this);
     }
-    auto IncomingTransactions(const Key& key) const noexcept
-        -> UnallocatedSet<UnallocatedCString> final;
     auto Parent() const noexcept -> const crypto::Account& final
     {
         return parent_;
@@ -156,23 +151,11 @@ protected:
     const CString description_;
     mutable std::recursive_mutex lock_;
     mutable std::atomic<Revision> revision_;
-    mutable ActivityMap unspent_;
-    mutable ActivityMap spent_;
 
     using SerializedActivity =
         google::protobuf::RepeatedPtrField<proto::BlockchainActivity>;
     using SerializedType = proto::BlockchainAccountData;
 
-    static auto convert(const api::Session& api, Activity&& in) noexcept
-        -> proto::BlockchainActivity;
-    static auto convert(
-        const api::Session& api,
-        const proto::BlockchainActivity& in) noexcept -> Activity;
-    static auto convert(
-        const api::Session& api,
-        const SerializedActivity& in) noexcept -> UnallocatedVector<Activity>;
-    static auto convert(const UnallocatedVector<Activity>& in) noexcept
-        -> ActivityMap;
     static auto describe(
         const api::Session& api,
         const opentxs::blockchain::Type chain,
@@ -181,16 +164,6 @@ protected:
 
     virtual auto account_already_exists(const rLock& lock) const noexcept
         -> bool = 0;
-    void process_spent(
-        const rLock& lock,
-        const Coin& coin,
-        const Key key,
-        const Amount value) const noexcept;
-    void process_unspent(
-        const rLock& lock,
-        const Coin& coin,
-        const Key key,
-        const Amount value) const noexcept;
     virtual auto save(const rLock& lock) const noexcept -> bool = 0;
     auto serialize_common(const rLock& lock, SerializedType& out) const noexcept
         -> void;
@@ -219,12 +192,6 @@ private:
     static constexpr auto ActivityVersion = VersionNumber{1};
     static constexpr auto BlockchainAccountDataVersion = VersionNumber{1};
 
-    virtual auto check_activity(
-        const rLock& lock,
-        const UnallocatedVector<Activity>& unspent,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
-
     virtual auto confirm(
         const rLock& lock,
         const Subchain type,
@@ -244,8 +211,6 @@ private:
         const SubaccountType type,
         identifier::Account&& id,
         const Revision revision,
-        const UnallocatedVector<Activity>& unspent,
-        const UnallocatedVector<Activity>& spent,
         identifier::Account& out) noexcept;
 };
 }  // namespace opentxs::blockchain::crypto::implementation
