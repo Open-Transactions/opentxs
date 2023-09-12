@@ -11,7 +11,6 @@
 #include <frozen/unordered_set.h>
 #include <algorithm>
 #include <cstddef>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
