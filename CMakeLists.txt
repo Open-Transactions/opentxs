@@ -406,18 +406,6 @@ if(OT_IWYU)
   otcommon_make_iwyu_target()
 endif()
 
-if(OPENTXS_BUILD_TESTS
-   AND NOT
-       (CMAKE_BUILD_TYPE
-        STREQUAL
-        "Debug"
-        OR CMAKE_BUILD_TYPE
-           STREQUAL
-           "RelWithDebInfo")
-)
-  message(FATAL_ERROR "opentxs unit tests require CMAKE_BUILD_TYPE=Debug")
-endif()
-
 if(OT_WITH_BLOCKCHAIN)
   if("${CMAKE_SIZEOF_VOID_P}"
      EQUAL
@@ -527,18 +515,8 @@ endif()
 # -----------------------------------------------------------------------------
 # Source Definitions
 
-if(CMAKE_BUILD_TYPE
-   STREQUAL
-   "Debug"
-)
+if(OPENTXS_BUILD_TESTS)
   set(OPENTXS_HIDDEN_SYMBOLS OFF)
-
-  if(WIN32 AND BUILD_SHARED_LIBS)
-    message(
-      FATAL_ERROR
-        "Building as a shared library in debug mode is impossible on windows due to linker limitations"
-    )
-  endif()
 else()
   set(OPENTXS_HIDDEN_SYMBOLS ON)
 endif()
@@ -550,6 +528,13 @@ if(OPENTXS_HIDDEN_SYMBOLS)
 else()
   set(CMAKE_VISIBILITY_INLINES_HIDDEN OFF)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+  if(WIN32 AND BUILD_SHARED_LIBS)
+    message(
+      FATAL_ERROR
+        "Building as a shared library without hidden symbols is impossible on windows due to linker limitations"
+    )
+  endif()
 endif()
 
 # Storage backends
