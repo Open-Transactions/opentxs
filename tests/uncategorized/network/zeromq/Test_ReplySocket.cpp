@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -10,25 +10,14 @@
 #include "internal/network/zeromq/ReplyCallback.hpp"
 #include "internal/network/zeromq/socket/Reply.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/zeromq/ReplySocket.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
 
 namespace ottest
 {
-class Test_ReplySocket : public ::testing::Test
-{
-public:
-    const zmq::Context& context_;
-
-    Test_ReplySocket()
-        : context_(OTTestEnvironment::GetOT().ZMQ())
-    {
-    }
-};
-
-TEST_F(Test_ReplySocket, ReplySocket_Factory)
+TEST_F(ReplySocket, ReplySocket_Factory)
 {
     auto replyCallback = zmq::ReplyCallback::Factory(
         [](zmq::Message&& input) -> ot::network::zeromq::Message {

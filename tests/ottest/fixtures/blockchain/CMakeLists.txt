@@ -57,6 +57,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "SyncListener.hpp"
       "SyncRequestor.cpp"
       "SyncRequestor.hpp"
+      "SyncServerDB.cpp"
+      "SyncServerDB.hpp"
       "SyncSubscriber.cpp"
       "SyncSubscriber.hpp"
       "TXOState.cpp"

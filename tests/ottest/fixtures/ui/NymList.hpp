@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -14,10 +15,10 @@ struct Counter;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace ot = opentxs;
-
 namespace ottest
 {
+namespace ot = opentxs;
+
 struct OPENTXS_EXPORT NymListRow {
     ot::UnallocatedCString id_{};
     ot::UnallocatedCString name_{};
@@ -36,4 +37,20 @@ OPENTXS_EXPORT auto check_nym_list_qt(
 OPENTXS_EXPORT auto init_nym_list(
     const ot::api::session::Client& api,
     Counter& counter) noexcept -> void;
+
+class OPENTXS_EXPORT NymList : public ::testing::Test
+{
+public:
+    static constexpr auto alex_{"Alex"};
+    static constexpr auto chris_{"Chris"};
+    static constexpr auto daniel_{"Daniel"};
+
+    static Counter counter_;
+    static NymListData expected_;
+
+    const ot::api::session::Client& api_;
+    ot::PasswordPrompt reason_;
+
+    NymList();
+};
 }  // namespace ottest

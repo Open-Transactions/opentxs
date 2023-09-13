@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ottest/fixtures/ui/ContactList.hpp"
+#include "ottest/fixtures/ui/ContactList.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
@@ -18,13 +18,29 @@
 #include "internal/interface/ui/MessagableList.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
+namespace ot = opentxs;
+
 using namespace opentxs::literals;
 using namespace std::literals;
+
+const User ContactList::alice_{words_, name_};
+
+ContactList::ContactList()
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+    , reason_(api_.Factory().PasswordPrompt(__func__))
+    , bob_payment_code_(api_.Factory().PaymentCodeFromBase58(
+          ot::UnallocatedCString{payment_code_1_}))
+    , chris_payment_code_(api_.Factory().PaymentCodeFromBase58(
+          ot::UnallocatedCString{payment_code_2_}))
+{
+    const_cast<User&>(alice_).init(api_);
+}
 
 auto check_contact_list(
     const User& user,

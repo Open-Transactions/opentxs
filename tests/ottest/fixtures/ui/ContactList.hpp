@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -15,10 +16,26 @@ struct Counter;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace ot = opentxs;
-
 namespace ottest
 {
+namespace ot = opentxs;
+
+constexpr auto words_{"response seminar brave tip suit recall often sound "
+                      "stick owner lottery motion"};
+constexpr auto name_{"Alice"};
+constexpr auto payment_code_1_{
+    "PM8TJS2JxQ5ztXUpBBRnpTbcUXbUHy2T1abfrb3KkAAtMEGNbey4oumH7Hc578WgQJhPjBxteQ"
+    "5GHHToTYHE3A1w6p7tU6KSoFmWBVbFGjKPisZDbP97"};
+constexpr auto payment_code_2_{
+    "PM8TJfV1DQD6VScd5AWsSax8RgK9cUREe939M1d85MwGCKJukyghX6B5E7kqcCyEYu6Tu1ZvdG"
+    "8aWh6w8KGhSfjgL8fBKuZS6aUjhV9xLV1R16CcgWhw"};
+
+constexpr auto bob_{"Bob"};
+constexpr auto chris_{"Chris"};
+constexpr auto daniel_{"Daniel"};
+constexpr auto payment_code_3_{
+    "PD1kEC92CeshFRQ3V78XPAGmE1ZWy3YR4Ptsjxw8SxHgZvFVkwqjf"};
+
 struct OPENTXS_EXPORT ContactListRow {
     bool check_contact_id_{};
     ot::UnallocatedCString contact_id_index_{};
@@ -58,4 +75,17 @@ OPENTXS_EXPORT auto init_contact_list(
 OPENTXS_EXPORT auto init_messagable_list(
     const User& user,
     Counter& counter) noexcept -> void;
+
+class OPENTXS_EXPORT ContactList : public ::testing::Test
+{
+public:
+    static const User alice_;
+
+    const ot::api::session::Client& api_;
+    ot::PasswordPrompt reason_;
+    const ot::PaymentCode bob_payment_code_;
+    const ot::PaymentCode chris_payment_code_;
+
+    ContactList();
+};
 }  // namespace ottest

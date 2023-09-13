@@ -12,6 +12,8 @@ target_sources(
     "Armored.hpp"
     "Identifier.cpp"
     "Identifier.hpp"
+    "Ledger.cpp"
+    "Ledger.hpp"
     "PaymentCode.cpp"
     "PaymentCode.hpp"
     "StateMachine.cpp"
