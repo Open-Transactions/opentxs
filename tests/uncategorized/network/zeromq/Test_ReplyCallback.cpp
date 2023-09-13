@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,17 +9,12 @@
 #include <utility>
 
 #include "internal/network/zeromq/ReplyCallback.hpp"
+#include "ottest/fixtures/zeromq/ReplyCallback.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-class Test_ReplyCallback : public ::testing::Test
-{
-public:
-    const ot::UnallocatedCString test_message_{"zeromq test message"};
-};
-
 TEST(ReplyCallback, ReplyCallback_Factory)
 {
     auto replyCallback = ot::network::zeromq::ReplyCallback::Factory(
@@ -31,7 +26,7 @@ TEST(ReplyCallback, ReplyCallback_Factory)
     ASSERT_NE(nullptr, &replyCallback.get());
 }
 
-TEST_F(Test_ReplyCallback, ReplyCallback_Process)
+TEST_F(ReplyCallback, ReplyCallback_Process)
 {
     auto replyCallback = ot::network::zeromq::ReplyCallback::Factory(
         [this](ot::network::zeromq::Message&& input)

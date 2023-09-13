@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
-#include <ctime>
 #include <span>
 #include <string_view>
 #include <thread>
@@ -17,7 +16,7 @@
 #include "internal/network/zeromq/socket/Reply.hpp"
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/zeromq/RequestReply.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -26,91 +25,7 @@ namespace ottest
 {
 using namespace std::literals::chrono_literals;
 
-class Test_RequestReply : public ::testing::Test
-{
-public:
-    const zmq::Context& context_;
-
-    const ot::UnallocatedCString test_message_{"zeromq test message"};
-    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
-    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
-
-    const ot::UnallocatedCString endpoint_{
-        "inproc://opentxs/test/request_reply_test"};
-    const ot::UnallocatedCString endpoint2_{
-        "inproc://opentxs/test/request_reply_test2"};
-
-    void requestSocketThread(const ot::UnallocatedCString& msg);
-    void replySocketThread(const ot::UnallocatedCString& endpoint);
-
-    Test_RequestReply()
-        : context_(OTTestEnvironment::GetOT().ZMQ())
-    {
-    }
-};
-
-void Test_RequestReply::requestSocketThread(const ot::UnallocatedCString& msg)
-{
-    auto requestSocket = context_.Internal().RequestSocket();
-
-    ASSERT_NE(nullptr, &requestSocket.get());
-    ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
-
-    requestSocket->SetTimeouts(0ms, -1ms, 30000ms);
-    requestSocket->Start(endpoint_);
-
-    auto [result, message] = requestSocket->Send([&] {
-        auto out = opentxs::network::zeromq::Message{};
-        out.AddFrame(msg);
-
-        return out;
-    }());
-
-    ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
-
-    const auto messageString =
-        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
-    ASSERT_EQ(msg, messageString);
-}
-
-void Test_RequestReply::replySocketThread(
-    const ot::UnallocatedCString& endpoint)
-{
-    bool replyReturned{false};
-
-    auto replyCallback = zmq::ReplyCallback::Factory(
-        [this,
-         &replyReturned](zmq::Message&& input) -> ot::network::zeromq::Message {
-            const auto inputString =
-                ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
-                inputString == test_message2_ || inputString == test_message3_;
-            EXPECT_TRUE(match);
-
-            auto reply = ot::network::zeromq::reply_to_message(input);
-            reply.AddFrame(inputString);
-            replyReturned = true;
-            return reply;
-        });
-
-    ASSERT_NE(nullptr, &replyCallback.get());
-
-    auto replySocket = context_.Internal().ReplySocket(
-        replyCallback, zmq::socket::Direction::Bind);
-
-    ASSERT_NE(nullptr, &replySocket.get());
-    ASSERT_EQ(zmq::socket::Type::Reply, replySocket->Type());
-
-    replySocket->SetTimeouts(0ms, 30000ms, -1ms);
-    replySocket->Start(endpoint);
-
-    auto end = std::time(nullptr) + 15;
-    while (!replyReturned && std::time(nullptr) < end) { ot::Sleep(100ms); }
-
-    EXPECT_TRUE(replyReturned);
-}
-
-TEST_F(Test_RequestReply, Request_Reply)
+TEST_F(RequestReply, Request_Reply)
 {
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
@@ -156,7 +71,7 @@ TEST_F(Test_RequestReply, Request_Reply)
     ASSERT_EQ(test_message_, messageString);
 }
 
-TEST_F(Test_RequestReply, Request_2_Reply_1)
+TEST_F(RequestReply, Request_2_Reply_1)
 {
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
@@ -183,20 +98,20 @@ TEST_F(Test_RequestReply, Request_2_Reply_1)
     replySocket->Start(endpoint_);
 
     std::thread requestSocketThread1(
-        &Test_RequestReply::requestSocketThread, this, test_message2_);
+        &RequestReply::requestSocketThread, this, test_message2_);
     std::thread requestSocketThread2(
-        &Test_RequestReply::requestSocketThread, this, test_message3_);
+        &RequestReply::requestSocketThread, this, test_message3_);
 
     requestSocketThread1.join();
     requestSocketThread2.join();
 }
 
-TEST_F(Test_RequestReply, Request_1_Reply_2)
+TEST_F(RequestReply, Request_1_Reply_2)
 {
     std::thread replySocketThread1(
-        &Test_RequestReply::replySocketThread, this, endpoint_);
+        &RequestReply::replySocketThread, this, endpoint_);
     std::thread replySocketThread2(
-        &Test_RequestReply::replySocketThread, this, endpoint2_);
+        &RequestReply::replySocketThread, this, endpoint2_);
 
     auto requestSocket = context_.Internal().RequestSocket();
 
@@ -236,7 +151,7 @@ TEST_F(Test_RequestReply, Request_1_Reply_2)
     replySocketThread2.join();
 }
 
-TEST_F(Test_RequestReply, Request_Reply_Multipart)
+TEST_F(RequestReply, Request_Reply_Multipart)
 {
     auto replyCallback = zmq::ReplyCallback::Factory(
         [this](const auto& input) -> ot::network::zeromq::Message {

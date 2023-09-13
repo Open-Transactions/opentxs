@@ -22,7 +22,7 @@ using namespace std::literals;
 
 namespace ottest
 {
-TEST(Test_Stress, Pub_10000)
+TEST(Stress, Pub_10000)
 {
     const auto& ot = OTTestEnvironment::GetOT();
     auto endpoints = ot::UnallocatedVector<ot::UnallocatedCString>{};
@@ -38,7 +38,7 @@ TEST(Test_Stress, Pub_10000)
     }
 }
 
-TEST(Test_Stress, PubSub_100)
+TEST(Stress, PubSub_100)
 {
     const auto& ot = OTTestEnvironment::GetOT();
     auto endpoints = ot::UnallocatedVector<ot::UnallocatedCString>{};

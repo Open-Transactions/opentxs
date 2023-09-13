@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -9,57 +9,15 @@
 #include <optional>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/SeedTree.hpp"
 
 namespace ottest
 {
-class Test_SeedTree : public ::testing::Test
-{
-public:
-    static constexpr auto alex_name_{"Alex"};
-    static constexpr auto bob_name_{"Bob"};
-    static constexpr auto chris_name_{"Chris"};
-    static constexpr auto daniel_name_{"Daniel"};
-    static constexpr auto pkt_words_{
-        "forum school old approve bubble warfare robust figure pact glance "
-        "farm leg taxi sing ankle"};
-    static constexpr auto pkt_passphrase_{"Password123#"};
+TEST_F(SeedTree, initialize_opentxs) { init_seed_tree(api_, counter_); }
 
-    static Counter counter_;
-    static std::optional<User> alex_;
-    static std::optional<User> bob_;
-    static std::optional<User> chris_;
-
-    const ot::api::session::Client& api_;
-    const ot::crypto::SeedID seed_1_id_;
-    const ot::crypto::SeedID seed_2_id_;
-    const ot::crypto::SeedID seed_3_id_;
-    ot::PasswordPrompt reason_;
-
-    Test_SeedTree()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , seed_1_id_(api_.Factory().SeedIDFromBase58(
-              "ot2xku1FsJryQkxUnHpY7thRc7ActebtanLZcfTs3rGaUfyTefpsTne"))
-        , seed_2_id_(api_.Factory().SeedIDFromBase58(
-              "ot2xkue7cSsxNN4wGoz3wvoTNFyFTbMfLfXd8Bk6yqQE4awnhWsezNM"))
-        , seed_3_id_(api_.Factory().SeedIDFromBase58(
-              "ot2xkuFMFyL3JbDg8377CWX7eNNga7X7KHi11qF7xKZNTAYeXXwmgi3"))
-        , reason_(api_.Factory().PasswordPrompt(__func__))
-    {
-    }
-};
-
-Counter Test_SeedTree::counter_{};
-std::optional<User> Test_SeedTree::alex_{std::nullopt};
-std::optional<User> Test_SeedTree::bob_{std::nullopt};
-std::optional<User> Test_SeedTree::chris_{std::nullopt};
-
-TEST_F(Test_SeedTree, initialize_opentxs) { init_seed_tree(api_, counter_); }
-
-TEST_F(Test_SeedTree, empty)
+TEST_F(SeedTree, empty)
 {
     const auto expected = SeedTreeData{};
 
@@ -68,7 +26,7 @@ TEST_F(Test_SeedTree, empty)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, create_nyms)
+TEST_F(SeedTree, create_nyms)
 {
     counter_.expected_ += 7;
 
@@ -114,7 +72,7 @@ TEST_F(Test_SeedTree, create_nyms)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, add_seed)
+TEST_F(SeedTree, add_seed)
 {
     counter_.expected_ += 1;
     const auto& v = GetPaymentCodeVector3().bob_;
@@ -150,7 +108,7 @@ TEST_F(Test_SeedTree, add_seed)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, rename_nym)
+TEST_F(SeedTree, rename_nym)
 {
     counter_.expected_ += 1;
     {
@@ -182,7 +140,7 @@ TEST_F(Test_SeedTree, rename_nym)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, rename_seed)
+TEST_F(SeedTree, rename_seed)
 {
     counter_.expected_ += 1;
     api_.Crypto().Seed().SetSeedComment(seed_2_id_, "Backup");
@@ -210,7 +168,7 @@ TEST_F(Test_SeedTree, rename_seed)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, change_default_seed)
+TEST_F(SeedTree, change_default_seed)
 {
     counter_.expected_ += 3;
     api_.Crypto().Seed().SetDefault(seed_2_id_);
@@ -238,7 +196,7 @@ TEST_F(Test_SeedTree, change_default_seed)
     EXPECT_TRUE(check_seed_tree_qt(api_, expected));
 }
 
-TEST_F(Test_SeedTree, change_default_nym)
+TEST_F(SeedTree, change_default_nym)
 {
     counter_.expected_ += 3;
     api_.Wallet().SetDefaultNym(bob_->nym_id_);

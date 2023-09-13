@@ -1,21 +1,24 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ottest/fixtures/ui/SeedTree.hpp"
+#include "ottest/fixtures/ui/SeedTree.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <compare>
 #include <iterator>
+#include <optional>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/SeedTree.hpp"
 #include "internal/interface/ui/SeedTreeItem.hpp"
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
+#include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
 {
@@ -26,6 +29,23 @@ auto check_seed_tree_items(
 
 namespace ottest
 {
+Counter SeedTree::counter_{};
+std::optional<User> SeedTree::alex_{std::nullopt};
+std::optional<User> SeedTree::bob_{std::nullopt};
+std::optional<User> SeedTree::chris_{std::nullopt};
+
+SeedTree::SeedTree()
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+    , seed_1_id_(api_.Factory().SeedIDFromBase58(
+          "ot2xku1FsJryQkxUnHpY7thRc7ActebtanLZcfTs3rGaUfyTefpsTne"))
+    , seed_2_id_(api_.Factory().SeedIDFromBase58(
+          "ot2xkue7cSsxNN4wGoz3wvoTNFyFTbMfLfXd8Bk6yqQE4awnhWsezNM"))
+    , seed_3_id_(api_.Factory().SeedIDFromBase58(
+          "ot2xkuFMFyL3JbDg8377CWX7eNNga7X7KHi11qF7xKZNTAYeXXwmgi3"))
+    , reason_(api_.Factory().PasswordPrompt(__func__))
+{
+}
+
 auto check_seed_tree(
     const ot::api::session::Client& api,
     const SeedTreeData& expected) noexcept -> bool

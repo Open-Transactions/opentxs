@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2021 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,9 +16,8 @@
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
-#include "ottest/fixtures/common/Client.hpp"
-#include "ottest/fixtures/common/Notary.hpp"
 #include "ottest/fixtures/common/User.hpp"
+#include "ottest/fixtures/ui/AmountValidator.hpp"
 
 namespace ot = opentxs;
 
@@ -30,21 +29,7 @@ using namespace std::literals;
 constexpr auto issuer_{
     "ot2xuVPJDdweZvKLQD42UMCzhCmT3okn3W1PktLgCbmQLRnaKy848sX"};
 
-class Test_AmountValidator : public Notary_fixture, public Client_fixture
-{
-public:
-    struct ChainAmounts {
-        ot::UnitType unittype_;
-        std::vector<std::pair<std::string_view, std::string_view>> amounts_;
-        std::vector<
-            std::tuple<std::string_view, std::string_view, std::string_view>>
-            invalid_amounts_;
-    };
-
-    Test_AmountValidator() noexcept = default;
-};
-
-TEST_F(Test_AmountValidator, preconditions)
+TEST_F(AmountValidator, preconditions)
 {
     StartNotarySession(0);
 
@@ -142,7 +127,7 @@ TEST_F(Test_AmountValidator, preconditions)
     }
 }
 
-TEST_F(Test_AmountValidator, decimals)
+TEST_F(AmountValidator, decimals)
 {
     const auto& session = ot_.ClientSession(0);
 
@@ -201,7 +186,7 @@ TEST_F(Test_AmountValidator, decimals)
     EXPECT_EQ(inputString.toStdString(), "1.234 units");
 }
 
-TEST_F(Test_AmountValidator, fixup)
+TEST_F(AmountValidator, fixup)
 {
     const auto& session = ot_.ClientSession(0);
 
@@ -230,7 +215,7 @@ TEST_F(Test_AmountValidator, fixup)
     EXPECT_EQ(inputString.toStdString(), "1.000\u202F0 units");
 }
 
-TEST_F(Test_AmountValidator, revise)
+TEST_F(AmountValidator, revise)
 {
     const auto& session = ot_.ClientSession(0);
 
@@ -273,7 +258,7 @@ TEST_F(Test_AmountValidator, revise)
     EXPECT_EQ(revised.toStdString(), "123,456,789 satoshis");
 }
 
-TEST_F(Test_AmountValidator, scale)
+TEST_F(AmountValidator, scale)
 {
     const auto& session = ot_.ClientSession(0);
 
@@ -336,7 +321,7 @@ TEST_F(Test_AmountValidator, scale)
     EXPECT_EQ(inputString.toStdString(), "1.234\u202F567\u202F89 satoshis");
 }
 
-TEST_F(Test_AmountValidator, validate)
+TEST_F(AmountValidator, validate)
 {
     static const auto chains = std::vector<ChainAmounts>{
         {ot::UnitType::Btc,
@@ -494,7 +479,7 @@ TEST_F(Test_AmountValidator, validate)
     }
 }
 
-TEST_F(Test_AmountValidator, cleanup)
+TEST_F(AmountValidator, cleanup)
 {
     CleanupClient();
     CleanupNotary();

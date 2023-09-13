@@ -1,24 +1,53 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
+#include <optional>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace ottest
 {
+class User;
 struct Counter;
 }  // namespace ottest
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace ot = opentxs;
-
 namespace ottest
 {
+namespace ot = opentxs;
+
+class OPENTXS_EXPORT SeedTree : public ::testing::Test
+{
+public:
+    static constexpr auto alex_name_{"Alex"};
+    static constexpr auto bob_name_{"Bob"};
+    static constexpr auto chris_name_{"Chris"};
+    static constexpr auto daniel_name_{"Daniel"};
+    static constexpr auto pkt_words_{
+        "forum school old approve bubble warfare robust figure pact glance "
+        "farm leg taxi sing ankle"};
+    static constexpr auto pkt_passphrase_{"Password123#"};
+
+    static Counter counter_;
+    static std::optional<User> alex_;
+    static std::optional<User> bob_;
+    static std::optional<User> chris_;
+
+    const ot::api::session::Client& api_;
+    const ot::crypto::SeedID seed_1_id_;
+    const ot::crypto::SeedID seed_2_id_;
+    const ot::crypto::SeedID seed_3_id_;
+    ot::PasswordPrompt reason_;
+
+    SeedTree();
+};
+
 struct OPENTXS_EXPORT SeedTreeNym {
     std::size_t index_{};
     ot::UnallocatedCString id_{};

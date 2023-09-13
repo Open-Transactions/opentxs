@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -16,7 +16,7 @@
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/zeromq/PushSubscribe.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -25,30 +25,7 @@ namespace ottest
 {
 using namespace std::literals::chrono_literals;
 
-class Test_PushSubscribe : public ::testing::Test
-{
-public:
-    const zmq::Context& context_;
-    const ot::UnallocatedCString test_message_;
-    const ot::UnallocatedCString endpoint_1_;
-    const ot::UnallocatedCString endpoint_2_;
-    std::atomic<int> counter_1_;
-    std::atomic<int> counter_2_;
-    std::atomic<int> counter_3_;
-
-    Test_PushSubscribe()
-        : context_(OTTestEnvironment::GetOT().ZMQ())
-        , test_message_("zeromq test message")
-        , endpoint_1_("inproc://opentxs/test/push_subscribe_test")
-        , endpoint_2_("inproc://opentxs/test/publish_subscribe_test")
-        , counter_1_(0)
-        , counter_2_(0)
-        , counter_3_(0)
-    {
-    }
-};
-
-TEST_F(Test_PushSubscribe, Push_Subscribe)
+TEST_F(PushSubscribe, Push_Subscribe)
 {
     auto promise = std::promise<bool>{};
     auto future = promise.get_future();
@@ -86,7 +63,7 @@ TEST_F(Test_PushSubscribe, Push_Subscribe)
     EXPECT_TRUE(future.get());
 }
 
-TEST_F(Test_PushSubscribe, Push_Publish_Subscribe)
+TEST_F(PushSubscribe, Push_Publish_Subscribe)
 {
     const ot::UnallocatedCString message1{"1"};
     const ot::UnallocatedCString message2{"2"};
