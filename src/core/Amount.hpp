@@ -25,7 +25,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
-// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace be = boost::endian;
 

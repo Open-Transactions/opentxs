@@ -346,6 +346,7 @@ auto SubchainStateData::do_reorg(
     const node::internal::HeaderOraclePrivate& data,
     Reorg::Params& params) noexcept -> bool
 {
+    auto alloc = alloc::Strategy{get_allocator()};  // TODO
     auto& [position, tx] = params;
     log_(OT_PRETTY_CLASS())(name_)(" processing reorg to ")(position).Flush();
     const auto tip = db_.SubchainLastScanned(db_key_);
@@ -369,7 +370,16 @@ auto SubchainStateData::do_reorg(
             need_reorg_ = true;
         }
 
-        if (db_.ReorgTo(data, tx, oracle, id_, subchain_, db_key_, reorg)) {
+        if (db_.ReorgTo(
+                log_,
+                data,
+                oracle,
+                id_,
+                subchain_,
+                db_key_,
+                reorg,
+                tx,
+                alloc)) {
             LogError()(OT_PRETTY_CLASS())(name_)(" database error").Flush();
         } else {
 
@@ -646,7 +656,7 @@ auto SubchainStateData::ProcessBlock(
     OT_ASSERT(header.IsValid());
     OT_ASSERT(position == header.Position());
 
-    handle_confirmed_matches(block, position, confirmed, log, monotonic);
+    handle_block_matches(block, position, confirmed, log, monotonic);
     LogConsole()(name)(" processed block ")(position).Flush();
     log(OT_PRETTY_CLASS())(name)(" ")(general.size())(" of ")(
         keyMatches)(" potential key matches confirmed.")
@@ -678,7 +688,7 @@ auto SubchainStateData::ProcessTransaction(
     log(OT_PRETTY_CLASS())(name_)(" mempool transaction ")(tx.ID().asHex())(
         " matches ")(utxo.size())(" utxos and ")(general.size())(" keys")
         .Flush();
-    handle_mempool_matches(matches, tx, monotonic);
+    handle_mempool_match(matches, tx, monotonic);
 }
 
 auto SubchainStateData::RescanFinished() const noexcept -> void

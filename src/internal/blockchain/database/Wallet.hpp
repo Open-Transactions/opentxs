@@ -70,6 +70,8 @@ namespace lmdb
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
+
+class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -108,6 +110,9 @@ public:
     virtual auto GetPatterns(const SubchainID& index, alloc::Default alloc = {})
         const noexcept -> Patterns = 0;
     virtual auto GetPosition() const noexcept -> block::Position = 0;
+    virtual auto GetReserved(
+        const identifier::Generic& proposal,
+        alloc::Strategy alloc) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetSubchainID(
         const SubaccountID& account,
         const crypto::Subchain subchain) const noexcept -> SubchainID = 0;
@@ -135,58 +140,85 @@ public:
         -> std::optional<Bip32Index> = 0;
     virtual auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position = 0;
-    virtual auto SubchainSetLastScanned(
-        const SubchainID& index,
-        const block::Position& position) const noexcept -> bool = 0;
 
     virtual auto AddConfirmedTransactions(
+        const Log& log,
         const SubaccountID& account,
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed) noexcept -> bool = 0;
+        TXOs& txoConsumed,
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto AddMempoolTransaction(
+        const Log& log,
         const SubaccountID& account,
         const crypto::Subchain subchain,
-        const Vector<std::uint32_t> outputIndices,
-        const block::Transaction& transaction,
-        TXOs& txoCreated) noexcept -> bool = 0;
-    virtual auto AddOutgoingTransaction(
+        MatchedTransaction&& match,
+        TXOs& txoCreated,
+        alloc::Strategy alloc) noexcept -> bool = 0;
+    virtual auto AddProposal(
+        const Log& log,
+        const identifier::Generic& id,
+        const proto::BlockchainTransactionProposal& tx,
+        alloc::Strategy alloc) noexcept -> bool = 0;
+    virtual auto AdvanceTo(
+        const Log& log,
+        const block::Position& pos,
+        alloc::Strategy alloc) noexcept -> bool = 0;
+    virtual auto CancelProposal(
+        const Log& log,
+        const identifier::Generic& id,
+        alloc::Strategy alloc) noexcept -> bool = 0;
+    virtual auto FinalizeProposal(
+        const Log& log,
         const identifier::Generic& proposalID,
         const proto::BlockchainTransactionProposal& proposal,
-        const block::Transaction& transaction) noexcept -> bool = 0;
-    virtual auto AddProposal(
-        const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx) noexcept -> bool = 0;
-    virtual auto AdvanceTo(const block::Position& pos) noexcept -> bool = 0;
-    virtual auto CancelProposal(const identifier::Generic& id) noexcept
-        -> bool = 0;
+        const block::Transaction& transaction,
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto FinalizeReorg(
+        const Log& log,
+        const block::Position& pos,
         storage::lmdb::Transaction& tx,
-        const block::Position& pos) noexcept -> bool = 0;
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto ForgetProposals(
-        const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool = 0;
+        const Log& log,
+        const UnallocatedSet<identifier::Generic>& ids,
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto ReorgTo(
+        const Log& log,
         const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const SubchainID& index,
-        std::span<const block::Position> reorg) noexcept -> bool = 0;
+        std::span<const block::Position> reorg,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto ReserveUTXO(
+        const Log& log,
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        const node::internal::SpendPolicy& policy) noexcept
-        -> std::optional<UTXO> = 0;
+        const node::internal::SpendPolicy& policy,
+        alloc::Strategy alloc) noexcept
+        -> std::pair<std::optional<UTXO>, bool> = 0;
     virtual auto ReserveUTXO(
+        const Log& log,
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        const block::Outpoint& id) noexcept -> std::optional<UTXO> = 0;
-    virtual auto StartReorg() noexcept -> storage::lmdb::Transaction = 0;
+        const block::Outpoint& id,
+        alloc::Strategy alloc) noexcept -> std::optional<UTXO> = 0;
+    virtual auto StartReorg(const Log& log) noexcept
+        -> storage::lmdb::Transaction = 0;
     virtual auto SubchainAddElements(
+        const Log& log,
         const SubchainID& index,
-        const ElementMap& elements) noexcept -> bool = 0;
+        const ElementMap& elements,
+        alloc::Strategy alloc) noexcept -> bool = 0;
+    virtual auto SubchainSetLastScanned(
+        const Log& log,
+        const SubchainID& index,
+        const block::Position& position,
+        alloc::Strategy alloc) noexcept -> bool = 0;
 
     virtual ~Wallet() = default;
 };

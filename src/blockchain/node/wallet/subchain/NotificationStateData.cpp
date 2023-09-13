@@ -116,7 +116,7 @@ auto NotificationStateData::get_index(
     Index::NotificationFactory(me, pc_).Init();
 }
 
-auto NotificationStateData::handle_confirmed_matches(
+auto NotificationStateData::handle_block_matches(
     const block::Block& block,
     const block::Position& position,
     const block::Matches& confirmed,
@@ -148,7 +148,7 @@ auto NotificationStateData::handle_confirmed_matches(
     }
 }
 
-auto NotificationStateData::handle_mempool_matches(
+auto NotificationStateData::handle_mempool_match(
     const block::Matches& matches,
     block::Transaction tx,
     allocator_type) const noexcept -> void

@@ -159,6 +159,8 @@ Accounts::Imp::Imp(
 
 auto Accounts::Imp::do_reorg() noexcept -> void
 {
+    auto alloc = alloc::Strategy{get_allocator()};  // TODO
+
     try {
         if (false == reorg_data_.has_value()) {
             throw std::runtime_error{"missing reorg data"};
@@ -167,20 +169,21 @@ auto Accounts::Imp::do_reorg() noexcept -> void
         const auto& [ancestor, tip] = *reorg_data_;
 
         {
-            auto& [position, tx] = reorg_.GetReorg(ancestor, db_.StartReorg());
+            auto& [position, tx] =
+                reorg_.GetReorg(ancestor, db_.StartReorg(log_));
 
             if (false == reorg_.PerformReorg(node_.HeaderOracle())) {
                 throw std::runtime_error{"perform reorg error"};
             }
 
-            if (false == db_.FinalizeReorg(tx, ancestor)) {
+            if (false == db_.FinalizeReorg(log_, ancestor, tx, alloc)) {
                 throw std::runtime_error{"finalize reorg error"};
             }
 
             reorg_.ClearReorg();
         }
 
-        if (false == db_.AdvanceTo(tip)) {
+        if (false == db_.AdvanceTo(log_, tip, alloc)) {
             throw std::runtime_error{"Advance chain failed"};
         }
 
@@ -266,6 +269,8 @@ auto Accounts::Imp::pipeline(
 
 auto Accounts::Imp::process_block_header(Message&& in) noexcept -> void
 {
+    auto alloc = alloc::Strategy{get_allocator()};  // TODO
+
     if (startup_reorg_.has_value()) {
         defer(std::move(in));
 
@@ -285,7 +290,7 @@ auto Accounts::Imp::process_block_header(Message&& in) noexcept -> void
     const auto position =
         block::Position{body[3].as<block::Height>(), body[2].Bytes()};
     log_(OT_PRETTY_CLASS())("processing block header for ")(position).Flush();
-    db_.AdvanceTo(position);
+    db_.AdvanceTo(log_, position, alloc);
 }
 
 auto Accounts::Imp::process_nym(Message&& in) noexcept -> void

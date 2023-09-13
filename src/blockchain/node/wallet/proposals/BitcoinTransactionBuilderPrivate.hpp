@@ -32,6 +32,7 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Types.hpp"
@@ -221,6 +222,7 @@ private:
 
     auto add_change() noexcept -> bool;
     auto add_change_output(Output output) noexcept(false) -> void;
+    auto add_existing_inputs(alloc::Strategy alloc) noexcept(false) -> void;
     auto add_input(const UTXO& utxo) noexcept -> bool;
     auto add_output(
         const identifier::Generic& contact,

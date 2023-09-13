@@ -129,6 +129,7 @@ public:
         const Log& log,
         Matches& out,
         alloc::Default monotonic) const noexcept -> void final;
+    auto HasKeys() const noexcept -> bool final { return cache_.has_keys(); }
     auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void final;
     auto IsValid() const noexcept -> bool final { return true; }
@@ -259,6 +260,7 @@ private:
             auto lock = Lock{lock_};
             std::for_each(std::begin(keys_), std::end(keys_), cb);
         }
+        auto has_keys() const noexcept -> bool;
         auto keys(Set<crypto::Key>& out) const noexcept -> void;
         auto payee() const noexcept -> identifier::Generic;
         auto payer() const noexcept -> identifier::Generic;

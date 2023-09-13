@@ -10,6 +10,8 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -122,6 +124,8 @@ public:
     auto operator-() -> Amount;
 
     auto Serialize(Writer&& dest) const noexcept -> bool;
+    auto Unscaled() const noexcept -> UnallocatedCString;
+    auto Unscaled(alloc::Strategy alloc) const noexcept -> CString;
 
     auto swap(Amount& rhs) noexcept -> void;
 

@@ -39,6 +39,7 @@
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -143,9 +144,10 @@ auto Index::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 
 auto Index::Imp::done(database::ElementMap&& elements) noexcept -> void
 {
+    auto alloc = alloc::Strategy{get_allocator()};  // TODO
     auto& db = parent_.db_;
     const auto& index = parent_.db_key_;
-    db.SubchainAddElements(index, elements);
+    db.SubchainAddElements(log_, index, elements, alloc);
     last_indexed_ = parent_.db_.SubchainLastIndexed(index);
     parent_.element_cache_.lock()->Add(std::move(elements));
 }

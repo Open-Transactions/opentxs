@@ -72,9 +72,10 @@ auto Progress::Imp::do_process_update(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
+    auto alloc = alloc::Strategy{get_allocator(), monotonic};
     const auto& log = log_;
-    auto clean = Set<ScanStatus>{get_allocator()};
-    auto dirty = Set<block::Position>{get_allocator()};
+    auto clean = Set<ScanStatus>{alloc.work_};
+    auto dirty = Set<block::Position>{alloc.work_};
     decode(api_, msg, clean, dirty);
 
     OT_ASSERT(0u == dirty.size());
@@ -86,7 +87,7 @@ auto Progress::Imp::do_process_update(
     auto& last = *handle;
 
     if ((false == last.has_value()) || (last.value() != best)) {
-        parent_.db_.SubchainSetLastScanned(parent_.db_key_, best);
+        parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
         log(OT_PRETTY_CLASS())(name_)(" progress saved to database").Flush();
         last = best;
         notify(best);
@@ -123,9 +124,10 @@ auto Progress::Imp::notify(const block::Position& pos) const noexcept -> void
 
 auto Progress::Imp::process_do_rescan(Message&& in) noexcept -> void
 {
+    auto alloc = alloc::Strategy{get_allocator()};  // TODO monotonic
     parent_.progress_position_.lock()->reset();
     const auto& best = parent_.null_position_;
-    parent_.db_.SubchainSetLastScanned(parent_.db_key_, best);
+    parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
     parent_.RescanFinished();
     notify(best);
     to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);

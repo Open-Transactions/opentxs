@@ -6,13 +6,14 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include <cstddef>
 #include <optional>
+#include <string_view>
+#include <utility>
 
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/util/storage/lmdb/Types.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -22,7 +23,9 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -62,6 +65,8 @@ class Transaction;
 
 namespace opentxs::blockchain::database::wallet
 {
+enum class ProposalAssociation { none, created, consumed };
+
 constexpr auto accounts_{Table::AccountOutputs};
 constexpr auto generation_{Table::GenerationOutputs};
 constexpr auto keys_{Table::KeyOutputs};
@@ -75,13 +80,21 @@ constexpr auto proposal_spent_{Table::ProposalSpentOutputs};
 constexpr auto states_{Table::StateOutputs};
 constexpr auto subchains_{Table::SubchainOutputs};
 
-using Dir = storage::lmdb::Dir;
-using Mode = storage::lmdb::Mode;
+template <typename Key, typename Value>
+using MapType = ankerl::unordered_dense::map<Key, Value>;
+template <typename Value>
+using SetType = ankerl::unordered_dense::set<Value>;
 using States = UnallocatedVector<node::TxoState>;
 using Matches = UnallocatedVector<block::Outpoint>;
-using Outpoints = ankerl::unordered_dense::set<block::Outpoint>;
-using NymBalances = UnallocatedMap<identifier::Nym, Balance>;
-using Nyms = ankerl::unordered_dense::set<identifier::Nym>;
+using Outpoints = Set<block::Outpoint>;
+using Nyms = SetType<identifier::Nym>;
+using OrphanedGeneration = Set<block::Outpoint>;
+using Reserved = Outpoints;
+using ParsedTXOs =
+    Map<block::Outpoint,
+        std::pair<
+            protocol::bitcoin::base::block::Output,
+            Vector<identifier::Generic>>>;
 
 auto all_states() noexcept -> const States&;
 
@@ -92,8 +105,19 @@ public:
     auto Exists(const SubchainID& subchain, const block::Outpoint& id)
         const noexcept -> bool;
     auto GetAccount(const AccountID& id) const noexcept -> const Outpoints&;
+    auto GetAssociation(
+        const identifier::Generic& proposal,
+        const block::Outpoint& output) const noexcept -> ProposalAssociation;
+    auto GetConsumed(const identifier::Generic& proposal) const noexcept
+        -> const Outpoints&;
+    auto GetCreated(const identifier::Generic& proposal) const noexcept
+        -> const Outpoints&;
     auto GetKey(const crypto::Key& id) const noexcept -> const Outpoints&;
     auto GetHeight() const noexcept -> block::Height;
+    auto GetMatured(
+        block::Height first,
+        block::Height last,
+        alloc::Strategy alloc) const noexcept -> Vector<block::Outpoint>;
     auto GetNym(const identifier::Nym& id) const noexcept -> const Outpoints&;
     auto GetNyms() const noexcept -> const Nyms&;
     auto GetOutput(const block::Outpoint& id) const noexcept(false)
@@ -101,11 +125,19 @@ public:
     auto GetPosition() const noexcept -> const db::Position&;
     auto GetPosition(const block::Position& id) const noexcept
         -> const Outpoints&;
+    auto GetProposals(const block::Outpoint& id, alloc::Strategy alloc)
+        const noexcept -> Vector<identifier::Generic>;
+    auto GetReserved(alloc::Strategy alloc) const noexcept -> Reserved;
+    auto GetReserved(const identifier::Generic& proposal, alloc::Strategy alloc)
+        const noexcept -> Vector<UTXO>;
     auto GetState(const node::TxoState id) const noexcept -> const Outpoints&;
     auto GetSubchain(const SubchainID& id) const noexcept -> const Outpoints&;
-    auto Populate() const noexcept -> void;
     auto Print() const noexcept -> void;
 
+    auto AddGenerationOutput(
+        block::Height height,
+        const block::Outpoint& output,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto AddOutput(
         const block::Outpoint& id,
         storage::lmdb::Transaction& tx,
@@ -129,7 +161,7 @@ public:
     auto AddToNym(
         const identifier::Nym& id,
         const block::Outpoint& output,
-        storage::lmdb::Transaction& tx) noexcept -> bool;
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto AddToPosition(
         const block::Position& id,
         const block::Outpoint& output,
@@ -153,12 +185,51 @@ public:
         const block::Outpoint& output,
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
+    auto CheckProposals(
+        Vector<identifier::Generic> proposals,
+        alloc::Strategy alloc) noexcept(false) -> Vector<identifier::Generic>;
+    auto ConsumeOutput(
+        const Log& log,
+        const identifier::Generic& proposal,
+        const block::Outpoint& output,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto CreateOutput(
+        const Log& log,
+        const identifier::Generic& proposal,
+        const block::Outpoint& output,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto DeleteGenerationAbove(
+        block::Height good,
+        OrphanedGeneration& out,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto FinishProposal(
+        const Log& log,
+        const identifier::Generic& proposal,
+        const Outpoints& consumed,
+        const Outpoints& created,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto GetOutput(const block::Outpoint& id) noexcept(false)
         -> protocol::bitcoin::base::block::Output&;
     auto GetOutput(
         const SubchainID& subchain,
         const block::Outpoint& id) noexcept(false)
         -> protocol::bitcoin::base::block::Output&;
+    auto Populate() noexcept -> void;
+    auto ProposalConfirmConsumed(
+        const Log& log,
+        const identifier::Generic& proposal,
+        const block::Outpoint& output,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto ProposalConfirmCreated(
+        const Log& log,
+        const identifier::Generic& proposal,
+        const block::Outpoint& output,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto Release(
+        const Log& log,
+        const block::Outpoint& output,
+        const identifier::Generic& proposal,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto UpdateOutput(
         const block::Outpoint& id,
         const protocol::bitcoin::base::block::Output& output,
@@ -176,7 +247,9 @@ public:
     ~OutputCache();
 
 private:
-    static constexpr std::size_t reserve_{10000u};
+    using Generation = Multimap<block::Height, block::Outpoint>;
+
+    static constexpr auto reserve_ = 10000_uz;
     static const Outpoints empty_outputs_;
     static const Nyms empty_nyms_;
 
@@ -185,16 +258,18 @@ private:
     const blockchain::Type chain_;
     const block::Position& blank_;
     std::optional<db::Position> position_;
-    ankerl::unordered_dense::
-        map<block::Outpoint, protocol::bitcoin::base::block::Output>
-            outputs_;
-    ankerl::unordered_dense::map<identifier::Generic, Outpoints> accounts_;
-    ankerl::unordered_dense::map<crypto::Key, Outpoints> keys_;
-    ankerl::unordered_dense::map<identifier::Nym, Outpoints> nyms_;
+    MapType<block::Outpoint, protocol::bitcoin::base::block::Output> outputs_;
+    MapType<identifier::Generic, Outpoints> accounts_;
+    MapType<crypto::Key, Outpoints> keys_;
+    MapType<identifier::Nym, Outpoints> nyms_;
     Nyms nym_list_;
-    ankerl::unordered_dense::map<block::Position, Outpoints> positions_;
-    ankerl::unordered_dense::map<node::TxoState, Outpoints> states_;
-    ankerl::unordered_dense::map<identifier::Generic, Outpoints> subchains_;
+    MapType<block::Position, Outpoints> positions_;
+    MapType<node::TxoState, Outpoints> states_;
+    MapType<identifier::Generic, Outpoints> subchains_;
+    Multimap<block::Height, block::Outpoint> generation_outputs_;
+    Multimap<block::Outpoint, identifier::Generic> output_to_proposal_;
+    MapType<identifier::Generic, Outpoints> created_by_proposal_;
+    MapType<identifier::Generic, Outpoints> consumed_by_proposal_;
     bool populated_;
 
     auto get_position() const noexcept -> const db::Position&;
@@ -204,12 +279,27 @@ private:
     auto load_output_index(const MapKeyType& key, MapType& map) const noexcept
         -> const Outpoints&;
 
+    auto associate_proposal(
+        const Log& log,
+        const block::Outpoint& output,
+        const identifier::Generic& proposal,
+        std::string_view type,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto dissociate_proposal(
+        const Log& log,
+        const block::Outpoint& output,
+        const identifier::Generic& proposal,
+        storage::lmdb::Transaction& tx) noexcept(false) -> void;
+    auto is_finished(const identifier::Generic& id) noexcept -> bool;
     auto load_output(const block::Outpoint& id) noexcept(false)
-        -> protocol::bitcoin::base::block::Output&;
+        -> protocol::bitcoin::base::block::Output&
+    {
+        return const_cast<protocol::bitcoin::base::block::Output&>(
+            std::as_const(*this).load_output(id));
+    }
     template <typename MapKeyType, typename MapType>
     auto load_output_index(const MapKeyType& key, MapType& map) noexcept
         -> Outpoints&;
-    auto populate() noexcept -> void;
     auto write_output(
         const block::Outpoint& id,
         const protocol::bitcoin::base::block::Output& output,

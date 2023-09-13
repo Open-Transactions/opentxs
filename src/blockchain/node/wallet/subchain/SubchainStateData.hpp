@@ -297,13 +297,13 @@ private:
         -> void;
     auto get_targets(const TXOs& utxos, Targets& targets) const noexcept
         -> void;
-    virtual auto handle_confirmed_matches(
+    virtual auto handle_block_matches(
         const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
         allocator_type monotonic) const noexcept -> void = 0;
-    virtual auto handle_mempool_matches(
+    virtual auto handle_mempool_match(
         const block::Matches& matches,
         block::Transaction tx,
         allocator_type monotonic) const noexcept -> void = 0;

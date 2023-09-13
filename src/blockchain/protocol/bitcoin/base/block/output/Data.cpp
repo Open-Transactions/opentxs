@@ -83,6 +83,13 @@ auto Output::Cache::add(node::TxoTag tag) noexcept -> void
     tags_.emplace(tag);
 }
 
+auto Output::Cache::has_keys() const noexcept -> bool
+{
+    auto lock = Lock{lock_};
+
+    return false == keys_.empty();
+}
+
 auto Output::Cache::keys(Set<crypto::Key>& out) const noexcept -> void
 {
     auto lock = Lock{lock_};

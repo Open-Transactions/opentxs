@@ -103,23 +103,47 @@ private:
         const noexcept -> void final;
     auto flush_cache(database::BatchedMatches& matches, FinishedCallback cb)
         const noexcept -> bool;
-
-    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
-        const noexcept -> void final;
-    auto handle_confirmed_matches(
-        const block::Block& block,
-        const block::Position& position,
-        const block::Matches& confirmed,
+    auto merge(
         const Log& log,
-        allocator_type monotonic) const noexcept -> void final;
-    auto handle_mempool_matches(
-        const block::Matches& matches,
-        block::Transaction tx,
-        allocator_type monotonic) const noexcept -> void final;
-    auto process(
-        const block::Match match,
-        block::Transaction tx,
+        block::Position block,
+        database::BlockMatches& matches,
+        database::BatchedMatches& into) const noexcept(false) -> void;
+    auto merge(
+        const Log& log,
+        database::BlockMatches& matches,
+        database::BlockMatches& into) const noexcept(false) -> void;
+    auto merge(
+        const Log& log,
+        const database::MatchedTransaction& tx,
+        database::MatchedTransaction& into) const noexcept(false) -> void;
+    auto prune_false_positives(const Log& log, database::BlockMatches& matches)
+        const noexcept -> void;
+
+    auto confirm_match_by_key(
+        const Log& log,
+        const block::Position& position,
+        const block::Match& match,
+        const block::Transaction& tx,
         database::MatchedTransaction& matched,
         allocator_type monotonic) const noexcept -> void;
+    auto confirm_match_by_outpoint(
+        const Log& log,
+        const block::Position& position,
+        const block::InputMatch& match,
+        const block::Transaction& tx,
+        database::MatchedTransaction& matched,
+        allocator_type monotonic) const noexcept -> void;
+    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+        const noexcept -> void final;
+    auto handle_block_matches(
+        const block::Block& block,
+        const block::Position& position,
+        const block::Matches& mined,
+        const Log& log,
+        allocator_type monotonic) const noexcept -> void final;
+    auto handle_mempool_match(
+        const block::Matches& mempool,
+        block::Transaction tx,
+        allocator_type monotonic) const noexcept -> void final;
 };
 }  // namespace opentxs::blockchain::node::wallet

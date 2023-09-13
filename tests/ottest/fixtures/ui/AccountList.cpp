@@ -61,7 +61,7 @@ auto check_account_list(
         output &= (lastVector == lastRow);
 
         EXPECT_EQ(row->AccountID(), it->account_id_);
-        EXPECT_EQ(row->Balance(), it->balance_);
+        EXPECT_EQ(row->Balance().Unscaled(), it->balance_.Unscaled());
         EXPECT_EQ(row->ContractID(), it->contract_id_);
         EXPECT_EQ(row->DisplayBalance(), it->display_balance_);
         EXPECT_EQ(row->DisplayUnit(), it->display_unit_);

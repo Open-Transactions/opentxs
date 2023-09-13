@@ -55,6 +55,8 @@ auto Output::FindMatches(
 
 auto Output::ForTestingOnlyAddKey(const crypto::Key&) noexcept -> void {}
 
+auto Output::HasKeys() const noexcept -> bool { return {}; }
+
 auto Output::IndexElements(const api::Session&, ElementHashes&) const noexcept
     -> void
 {

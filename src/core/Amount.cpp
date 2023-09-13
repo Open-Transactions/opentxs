@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "core/Amount.hpp"
+#include "opentxs/core/display/Definition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -362,6 +363,16 @@ auto Amount::Serialize(Writer&& dest) const noexcept -> bool
 }
 
 auto Amount::swap(Amount& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
+
+auto Amount::Unscaled() const noexcept -> UnallocatedCString
+{
+    return display::UnityDefinition().Format(*this);
+}
+
+auto Amount::Unscaled(alloc::Strategy alloc) const noexcept -> CString
+{
+    return display::UnityDefinition().Format(*this, alloc);
+}
 
 Amount::~Amount()
 {

@@ -70,4 +70,5 @@ private:
 };
 
 OPENTXS_EXPORT auto GetDefinition(UnitType) noexcept -> const Definition&;
+OPENTXS_EXPORT auto UnityDefinition() noexcept -> const Definition&;
 }  // namespace opentxs::display

@@ -17,7 +17,7 @@ namespace ottest
 using namespace opentxs::literals;
 using namespace std::literals;
 
-auto Args(bool lowlevel, int argc, char** argv) noexcept -> const ot::Options&
+auto Args(bool lowlevel, int argc, char** argv) noexcept -> ot::Options&
 {
     using Connection = opentxs::ConnectionMode;
     static const auto parsed = [&] {
@@ -29,14 +29,14 @@ auto Args(bool lowlevel, int argc, char** argv) noexcept -> const ot::Options&
             return ot::Options{};
         }
     }();
-    static const auto minimal = ot::Options{parsed}
-                                    .SetDefaultMintKeyBytes(288)
-                                    .SetHome(Home().c_str())
-                                    .SetIpv4ConnectionMode(Connection::off)
-                                    .SetIpv6ConnectionMode(Connection::off)
-                                    .SetNotaryInproc(true)
-                                    .SetTestMode(true);
-    static const auto full = ot::Options{minimal}.SetStoragePlugin("mem");
+    static auto minimal = ot::Options{parsed}
+                              .SetDefaultMintKeyBytes(288)
+                              .SetHome(Home().c_str())
+                              .SetIpv4ConnectionMode(Connection::off)
+                              .SetIpv6ConnectionMode(Connection::off)
+                              .SetNotaryInproc(true)
+                              .SetTestMode(true);
+    static auto full = ot::Options{minimal}.SetStoragePlugin("mem");
 
     if (lowlevel) {
 
