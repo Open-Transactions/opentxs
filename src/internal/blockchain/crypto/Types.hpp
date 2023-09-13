@@ -6,6 +6,7 @@
 #pragma once
 
 #include "opentxs/blockchain/Types.hpp"
+
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"

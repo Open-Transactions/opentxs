@@ -310,17 +310,17 @@ auto AccountCache::RegisterSubaccount(
 }
 
 auto AccountCache::SubaccountType(const identifier::Account& id) const noexcept
-    -> opentxs::blockchain::crypto::SubaccountType
+    -> std::pair<opentxs::blockchain::crypto::SubaccountType, identifier::Nym>
 {
     OT_ASSERT(populated_);
 
     if (const auto i = subaccount_params_.find(id);
         subaccount_params_.end() != i) {
 
-        return i->second.type_;
+        return std::make_pair(i->second.type_, i->second.owner_);
     } else {
 
-        return opentxs::blockchain::crypto::SubaccountType::Error;
+        return {opentxs::blockchain::crypto::SubaccountType::Error, {}};
     }
 }
 }  // namespace opentxs::api::crypto::blockchain

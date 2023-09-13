@@ -706,25 +706,23 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     -> const opentxs::blockchain::crypto::Element&
 {
     const auto& [account, subchain, index] = id;
-    using Type = opentxs::blockchain::crypto::SubaccountType;
-    const auto handle = accounts_.lock_shared();
-    const auto& accounts = *handle;
+    const auto [type, owner] = accounts_.lock_shared()->SubaccountType(account);
 
-    switch (accounts.SubaccountType(account)) {
-        case Type::HD: {
-            const auto& hd = HDSubaccount(accounts.Owner(account), account);
+    switch (type) {
+        using enum opentxs::blockchain::crypto::SubaccountType;
+        case HD: {
+            const auto& hd = HDSubaccount(owner, account);
 
             return hd.BalanceElement(subchain, index);
         }
-        case Type::PaymentCode: {
-            const auto& pc =
-                PaymentCodeSubaccount(accounts.Owner(account), account);
+        case PaymentCode: {
+            const auto& pc = PaymentCodeSubaccount(owner, account);
 
             return pc.BalanceElement(subchain, index);
         }
-        case Type::Imported:
-        case Type::Error:
-        case Type::Notification:
+        case Imported:
+        case Error:
+        case Notification:
         default: {
             throw std::out_of_range("key not found");
         }
@@ -734,41 +732,43 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
 auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
-    const auto handle = accounts_.lock_shared();
-    const auto& accounts = *handle;
-    const auto& nymID = accounts.Owner(accountID);
+    const auto clangWorkaround =
+        accounts_.lock_shared()->SubaccountType(accountID);
     const auto& wallet = [&]() -> auto& {
-        const auto type =
+        const auto [type, owner] = clangWorkaround;
+        const auto chain =
             api_.Storage().Internal().BlockchainSubaccountAccountType(
-                nymID, accountID);
+                owner, accountID);
 
-        if (UnitType::Error == type) {
+        if (UnitType::Error == chain) {
             const auto error =
                 UnallocatedCString{"unable to determine unit type for "
                                    "blockchain subaccount "} +
                 accountID.asBase58(api_.Crypto()) + " belonging to nym " +
-                nymID.asBase58(api_.Crypto());
+                owner.asBase58(api_.Crypto());
 
             throw std::out_of_range(error);
         }
 
-        return this->wallet(unit_to_blockchain(type));
+        return this->wallet(unit_to_blockchain(chain));
     }();
-    const auto& account = wallet.Account(nymID);
+    const auto& account = wallet.Account(clangWorkaround.second);
     const auto& subaccount =
         [&]() -> const opentxs::blockchain::crypto::Subaccount& {
-        switch (accounts.SubaccountType(accountID)) {
-            case opentxs::blockchain::crypto::SubaccountType::HD: {
+        const auto [type, owner] = clangWorkaround;
+        switch (type) {
+            using enum opentxs::blockchain::crypto::SubaccountType;
+            case HD: {
 
                 return account.GetHD().at(accountID);
             }
-            case opentxs::blockchain::crypto::SubaccountType::PaymentCode: {
+            case PaymentCode: {
 
                 return account.GetPaymentCode().at(accountID);
             }
-            case opentxs::blockchain::crypto::SubaccountType::Imported:
-            case opentxs::blockchain::crypto::SubaccountType::Error:
-            case opentxs::blockchain::crypto::SubaccountType::Notification:
+            case Imported:
+            case Error:
+            case Notification:
             default: {
                 throw std::out_of_range("subaccount type not supported");
             }
