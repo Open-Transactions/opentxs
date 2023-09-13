@@ -46,13 +46,6 @@ class PasswordPrompt;
 namespace opentxs::blockchain::crypto::internal
 {
 struct Subaccount : virtual public crypto::Subaccount {
-    virtual auto AssociateTransaction(
-        const UnallocatedVector<Activity>& unspent,
-        const UnallocatedVector<Activity>& spent,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool = 0;
-    virtual auto IncomingTransactions(const Key& key) const noexcept
-        -> UnallocatedSet<UnallocatedCString> = 0;
     virtual auto PrivateKey(
         const implementation::Element& element,
         const Subchain type,

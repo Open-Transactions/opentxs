@@ -169,11 +169,5 @@ private:
     }
     auto has_private(const PasswordPrompt& reason) const noexcept -> bool;
     auto save(const rLock& lock) const noexcept -> bool final;
-    auto set_deterministic_contact(
-        UnallocatedSet<identifier::Generic>& contacts) const noexcept
-        -> void final
-    {
-        contacts.emplace(get_contact());
-    }
 };
 }  // namespace opentxs::blockchain::crypto::implementation

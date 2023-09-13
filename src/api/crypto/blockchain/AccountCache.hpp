@@ -50,8 +50,8 @@ public:
         -> UnallocatedSet<identifier::Account>;
     auto Owner(const identifier::Account& id) const noexcept
         -> const identifier::Nym&;
-    auto SubaccountType(const identifier::Account& id) const noexcept
-        -> opentxs::blockchain::crypto::SubaccountType;
+    auto SubaccountType(const identifier::Account& id) const noexcept -> std::
+        pair<opentxs::blockchain::crypto::SubaccountType, identifier::Nym>;
 
     auto Populate() noexcept -> void;
     [[nodiscard]] auto RegisterAccount(

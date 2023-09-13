@@ -238,11 +238,6 @@ private:
 
     mutable CachedKey cached_key_;
 
-    static auto extract_contacts(
-        const Bip32Index index,
-        const AddressMap& map,
-        UnallocatedSet<identifier::Generic>& contacts) noexcept -> void;
-
     auto accept(
         const rLock& lock,
         const Subchain type,
@@ -264,11 +259,6 @@ private:
         Fallback& fallback,
         std::size_t& gap,
         Batch& generated) const noexcept(false) -> std::optional<Bip32Index>;
-    auto check_activity(
-        const rLock& lock,
-        const UnallocatedVector<Activity>& unspent,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool final;
     auto check_lookahead(
         const rLock& lock,
         Batch& internal,
@@ -299,10 +289,6 @@ private:
         const rLock& lock,
         const Subchain type,
         const Bip32Index index) noexcept(false) -> crypto::Element& final;
-    virtual auto set_deterministic_contact(
-        UnallocatedSet<identifier::Generic>&) const noexcept -> void
-    {
-    }
     auto set_metadata(
         const rLock& lock,
         const Subchain subchain,

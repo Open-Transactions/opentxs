@@ -30,7 +30,6 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
@@ -229,43 +228,6 @@ auto Deterministic::check(
     }
 }
 
-auto Deterministic::check_activity(
-    const rLock& lock,
-    const UnallocatedVector<Activity>& unspent,
-    UnallocatedSet<identifier::Generic>& contacts,
-    const PasswordPrompt& reason) const noexcept -> bool
-{
-    set_deterministic_contact(contacts);
-
-    try {
-        for (const auto& [coin, key, value] : unspent) {
-            const auto& [account, subchain, index] = key;
-
-            if (const auto& external = data_.external_;
-                external.type_ == subchain) {
-
-                if (external.set_contact_) {
-                    extract_contacts(index, external.map_, contacts);
-                }
-            } else if (const auto& internal = data_.internal_;
-                       internal.type_ == subchain) {
-
-                if (internal.set_contact_) {
-                    extract_contacts(index, internal.map_, contacts);
-                }
-            } else {
-
-                return false;
-            }
-        }
-
-        return true;
-    } catch (...) {
-
-        return false;
-    }
-}
-
 void Deterministic::check_lookahead(
     const rLock& lock,
     Batch& internal,
@@ -368,19 +330,6 @@ auto Deterministic::element(
                                .append(" subchain");
 
         throw std::out_of_range(error.c_str());
-    }
-}
-
-auto Deterministic::extract_contacts(
-    const Bip32Index index,
-    const AddressMap& map,
-    UnallocatedSet<identifier::Generic>& contacts) noexcept -> void
-{
-    try {
-        auto contact = map.at(index)->Contact();
-
-        if (false == contact.empty()) { contacts.emplace(std::move(contact)); }
-    } catch (...) {
     }
 }
 

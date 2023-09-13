@@ -233,12 +233,6 @@ auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
     return output;
 }
 
-auto Element::IncomingTransactions() const noexcept
-    -> UnallocatedSet<UnallocatedCString>
-{
-    return parent_.Internal().IncomingTransactions(KeyID());
-}
-
 auto Element::instantiate(
     const api::Session& api,
     const proto::AsymmetricKey& serialized) noexcept(false)

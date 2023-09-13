@@ -94,8 +94,6 @@ public:
     {
         return parent_.ID();
     }
-    auto IncomingTransactions() const noexcept
-        -> UnallocatedSet<UnallocatedCString> final;
     auto Internal() const noexcept -> internal::Element& final
     {
         return const_cast<Element&>(*this);

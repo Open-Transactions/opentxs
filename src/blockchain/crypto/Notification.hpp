@@ -37,13 +37,6 @@ namespace crypto
 class Account;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -99,14 +92,6 @@ private:
         const opentxs::PaymentCode& code) noexcept -> identifier::Account;
 
     auto account_already_exists(const rLock&) const noexcept -> bool final
-    {
-        return false;
-    }
-    auto check_activity(
-        const rLock&,
-        const UnallocatedVector<Activity>&,
-        UnallocatedSet<identifier::Generic>&,
-        const PasswordPrompt&) const noexcept -> bool final
     {
         return false;
     }

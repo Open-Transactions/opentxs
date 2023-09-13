@@ -7,14 +7,9 @@
 
 #pragma once
 
-#include <mutex>
-#include <optional>
-#include <utility>
-
 #include "blockchain/crypto/account/NodeGroup.hpp"
 #include "blockchain/crypto/account/NodeIndex.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -45,12 +40,19 @@ class Contacts;
 class Session;
 }  // namespace api
 
+namespace blockchain
+{
+namespace crypto
+{
+struct Notifications;
+}  // namespace crypto
+}  // namespace blockchain
+
 namespace proto
 {
 class HDPath;
 }  // namespace proto
 
-class Amount;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -66,11 +68,6 @@ public:
     {
         return account_id_;
     }
-    auto AssociateTransaction(
-        const UnallocatedVector<Activity>& unspent,
-        const UnallocatedVector<Activity>& spent,
-        UnallocatedSet<identifier::Generic>& contacts,
-        const PasswordPrompt& reason) const noexcept -> bool final;
     auto Chain() const noexcept -> opentxs::blockchain::Type final
     {
         return chain_;
@@ -113,8 +110,6 @@ public:
     {
         return const_cast<Account&>(*this);
     }
-    auto LookupUTXO(const Coin& coin) const noexcept
-        -> std::optional<std::pair<Key, Amount>> final;
     auto NymID() const noexcept -> const identifier::Nym& final
     {
         return nym_id_;
@@ -192,9 +187,6 @@ private:
     NotificationNodes notification_;
     PaymentCodeNodes payment_code_;
     mutable account::NodeIndex node_index_;
-    mutable std::mutex lock_;
-    mutable ActivityMap unspent_;
-    mutable ActivityMap spent_;
     OTZMQPushSocket find_nym_;
 
     auto init_hd(const Accounts& HDAccounts) noexcept -> void;
