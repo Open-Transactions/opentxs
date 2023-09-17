@@ -404,7 +404,7 @@ auto Regtest_fixture_base::Connect(
         }
     }();
 
-    const auto status = connection_.done_.wait_for(2min);
+    const auto status = connection_.done_.wait_for(5min);
     const auto future = (std::future_status::ready == status);
 
     OT_ASSERT(future);
@@ -890,10 +890,10 @@ auto Regtest_fixture_base::TestWallet(
         out &= (nBalance == eBalance);
         out &= outpoints;
 
-        EXPECT_EQ(wBalance.first, eBalance.first);
-        EXPECT_EQ(wBalance.second, eBalance.second);
-        EXPECT_EQ(nBalance.first, eBalance.first);
-        EXPECT_EQ(nBalance.second, eBalance.second);
+        EXPECT_EQ(wBalance.first.Unscaled(), eBalance.first.Unscaled());
+        EXPECT_EQ(wBalance.second.Unscaled(), eBalance.second.Unscaled());
+        EXPECT_EQ(nBalance.first.Unscaled(), eBalance.first.Unscaled());
+        EXPECT_EQ(nBalance.second.Unscaled(), eBalance.second.Unscaled());
         EXPECT_TRUE(outpoints);
 
         return out;

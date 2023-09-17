@@ -219,6 +219,19 @@ auto BitcoinTransactionBuilderPrivate::add_change_output(
     output_count_ = outputs_.size() + change_.size();
 }
 
+auto BitcoinTransactionBuilderPrivate::add_existing_inputs(
+    alloc::Strategy alloc) noexcept(false) -> void
+{
+    const auto existing = db_.GetReserved(proposal_.ID(), alloc);
+    const auto add_existing = [this](const auto& txo) {
+        if (false == add_input(txo)) {
+
+            throw std::runtime_error{"failed to add input"};
+        }
+    };
+    std::for_each(existing.begin(), existing.end(), add_existing);
+}
+
 auto BitcoinTransactionBuilderPrivate::add_input(const UTXO& utxo) noexcept
     -> bool
 {
@@ -601,6 +614,9 @@ auto BitcoinTransactionBuilderPrivate::add_sweep_inputs(
     BuildResult& output,
     SendResult& rc) noexcept -> bool
 {
+    const auto& log = LogTrace();
+    auto alloc = alloc::Strategy{};  // TODO
+
     try {
         const auto utxos = [&, this] {
             const auto get = [&, this](auto state) {
@@ -643,7 +659,7 @@ auto BitcoinTransactionBuilderPrivate::add_sweep_inputs(
         }();
 
         for (const auto& [outpoint, _] : utxos) {
-            auto utxo = db_.ReserveUTXO(spender(), id_, outpoint);
+            auto utxo = db_.ReserveUTXO(log, spender(), id_, outpoint, alloc);
 
             if (utxo.has_value()) {
                 if (false == add_input(utxo.value())) {
@@ -707,6 +723,9 @@ auto BitcoinTransactionBuilderPrivate::bip_69() noexcept -> void
 auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
     -> BuildResult
 {
+    const auto& log = LogTrace();
+    const auto& crypto = api_.Crypto();
+    auto alloc = alloc::Strategy{};  // TODO
     auto output = Success;
     auto rc = UnspecifiedError;
     auto txid = block::TransactionHash{};
@@ -753,31 +772,26 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
 
     while (false == is_funded()) {
         using node::internal::SpendPolicy;
-        static constexpr auto conservative = SpendPolicy{false, false};
-        auto utxo = db_.ReserveUTXO(spender(), id_, conservative);
+        const auto policy = proposal_.Internal().Policy();
+        log(OT_PRETTY_CLASS())("asking database for outputs to fund proposal ")(
+            id_, crypto)
+            .Flush();
+        auto candidate = db_.ReserveUTXO(log, spender(), id_, policy, alloc);
+        auto [utxo, haveMore] = candidate;
 
         if (false == utxo.has_value()) {
-            const auto policy = proposal_.Internal().Policy();
-            utxo = db_.ReserveUTXO(spender(), id_, policy);
-
-            if (false == utxo.has_value()) {
-                static constexpr auto anything = SpendPolicy{true, true};
-                const auto check = db_.ReserveUTXO(spender(), id_, anything);
-
-                if (check.has_value()) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Insufficient confirmed funds")
-                        .Flush();
-                    output = PermanentFailure;
-                    rc = InsufficientConfirmedFunds;
-                } else {
-                    LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
-                    output = PermanentFailure;
-                    rc = InsufficientFunds;
-                }
-
-                return output;
+            if (haveMore) {
+                LogError()(OT_PRETTY_CLASS())("Insufficient confirmed funds")
+                    .Flush();
+                output = PermanentFailure;
+                rc = InsufficientConfirmedFunds;
+            } else {
+                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                output = PermanentFailure;
+                rc = InsufficientFunds;
             }
+
+            return output;
         }
 
         if (false == add_input(utxo.value())) {
@@ -1055,6 +1069,9 @@ auto BitcoinTransactionBuilderPrivate::finalize(
     SendResult& rc,
     block::TransactionHash& txid) noexcept -> BuildResult
 {
+    const auto& log = LogTrace();
+    auto alloc = alloc::Strategy{};  // TODO
+
     try {
         if (false == sign_inputs()) {
             rc = SignatureError;
@@ -1095,16 +1112,10 @@ auto BitcoinTransactionBuilderPrivate::finalize(
             return out;
         }();
 
-        if (false == db_.AddProposal(id_, proto)) {
+        if (!db_.FinalizeProposal(log, id_, proto, transaction, alloc)) {
             rc = DatabaseError;
 
-            throw std::runtime_error{"database error (proposal)"};
-        }
-
-        if (false == db_.AddOutgoingTransaction(id_, proto, transaction)) {
-            rc = DatabaseError;
-
-            throw std::runtime_error{"database error (transaction)"};
+            throw std::runtime_error{"database error finalizing proposal"};
         }
 
         txid = transaction.ID();
@@ -1119,7 +1130,7 @@ auto BitcoinTransactionBuilderPrivate::finalize(
                 .asHex(txid)
                 .Flush();
             LogConsole().asHex(bytes).Flush();
-            LogVerbose()(transaction.Print(api_.Crypto())).Flush();
+            log(transaction.Print(api_.Crypto())).Flush();
         } else {
             rc = SendFailed;
 
@@ -1482,6 +1493,17 @@ auto BitcoinTransactionBuilderPrivate::next_change_element(
 
 auto BitcoinTransactionBuilderPrivate::operator()() noexcept -> BuildResult
 {
+    auto alloc = alloc::Strategy{};  // TODO
+
+    try {
+        add_existing_inputs(alloc);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        promise_.set_value({InputCreationError, {}});
+
+        return PermanentFailure;
+    }
+
     if (Default == proposal_.Funding()) {
 
         return BuildNormalTransaction();

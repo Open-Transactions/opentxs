@@ -15,6 +15,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -66,16 +67,22 @@ struct Proposal::Imp {
     {
         try {
             const auto bytes = [&] {
-                auto out = Space{};
+                auto out = ByteArray{};
 
-                if (false == proto::write(tx, writer(out))) {
+                if (false == proto::write(tx, out.WriteInto())) {
                     throw std::runtime_error{"failed to serialize proposal"};
                 }
 
                 return out;
             }();
+            const auto cb = [&](const auto) {
+                auto out = Space{};
+                copy(bytes.Bytes(), writer(out));
 
-            if (lmdb_.Store(table_, id.Bytes(), reader(bytes)).first) {
+                return out;
+            };
+
+            if (lmdb_.StoreOrUpdate(table_, id.Bytes(), cb).first) {
                 LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
                     " added ")
                     .Flush();

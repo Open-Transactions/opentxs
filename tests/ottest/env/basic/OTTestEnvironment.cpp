@@ -29,7 +29,7 @@ namespace ottest
 {
 OTTestEnvironment::OTTestEnvironment() noexcept
 {
-    auto& args = const_cast<ot::Options&>(ottest::Args(false));
+    auto& args = ottest::Args(false);
     args.SetQtRootObject(GetQT());
 }
 

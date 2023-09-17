@@ -108,6 +108,7 @@ public:
         const Log& log,
         Matches& out,
         alloc::Default monotonic) const noexcept -> void;
+    virtual auto HasKeys() const noexcept -> bool;
     virtual auto IndexElements(const api::Session& api, ElementHashes& out)
         const noexcept -> void;
     virtual auto IsValid() const noexcept -> bool;

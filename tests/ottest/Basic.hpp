@@ -26,7 +26,7 @@ namespace fs = std::filesystem;
 OPENTXS_EXPORT auto Args(
     bool lowlevel = false,
     int argc = 0,
-    char** argv = nullptr) noexcept -> const ot::Options&;
+    char** argv = nullptr) noexcept -> ot::Options&;
 OPENTXS_EXPORT auto GetQT() noexcept -> QObject*;
 OPENTXS_EXPORT auto Home() noexcept -> const fs::path&;
 OPENTXS_EXPORT auto StartQT(bool lowlevel = false) noexcept -> void;

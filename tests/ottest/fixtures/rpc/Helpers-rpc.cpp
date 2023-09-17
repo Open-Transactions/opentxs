@@ -74,9 +74,11 @@ auto check_account_activity_rpc(
         output &= (event.WorkflowID() == required.workflow_);
 
         EXPECT_EQ(event.AccountID(), expected.id_);
-        EXPECT_EQ(event.ConfirmedAmount(), required.amount_);
+        EXPECT_EQ(
+            event.ConfirmedAmount().Unscaled(), required.amount_.Unscaled());
         EXPECT_EQ(event.Memo(), required.memo_);
-        EXPECT_EQ(event.PendingAmount(), required.amount_);
+        EXPECT_EQ(
+            event.PendingAmount().Unscaled(), required.amount_.Unscaled());
         EXPECT_EQ(event.UUID(), required.uuid_);
         EXPECT_EQ(event.WorkflowID(), required.workflow_);
     }
@@ -156,7 +158,7 @@ auto verify_account_balance(
 
         output &= (item.PendingBalance() == required);
 
-        EXPECT_EQ(item.PendingBalance(), required);
+        EXPECT_EQ(item.PendingBalance().Unscaled(), required.Unscaled());
     }
 
     return output;

@@ -10,6 +10,7 @@ extern "C" {
 }
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <initializer_list>
 #include <memory>
@@ -76,7 +77,8 @@ Database::Database(
     const database::common::Database& common,
     const blockchain::Type chain,
     const blockchain::cfilter::Type filter) noexcept
-    : api_(api)
+    : AllocatesChildren()
+    , api_(api)
     , chain_(chain)
     , common_(common)
     , lmdb_([&] {
@@ -122,7 +124,7 @@ Database::Database(
     , blocks_(api_, lmdb_, chain_)
     , filters_(api_, common_, lmdb_, chain_)
     , headers_(api_, endpoints, common_, lmdb_, chain_)
-    , wallet_(api_, common_, lmdb_, chain_, filter)
+    , wallet_(api_, common_, lmdb_, chain_, filter, child_alloc_)
     , sync_(api_, common_, lmdb_, chain_)
 {
 }
@@ -180,7 +182,7 @@ auto Database::init_db(
                     {GenerationOutputs, MDB_DUPSORT | MDB_DUPFIXED},
                     {KeyOutputs, MDB_DUPSORT},
                     {NymOutputs, MDB_DUPSORT},
-                    {OutputProposals, 0},
+                    {OutputProposals, MDB_DUPSORT},
                     {PositionOutputs, MDB_DUPSORT | MDB_DUPFIXED},
                     {ProposalCreatedOutputs, MDB_DUPSORT},
                     {ProposalSpentOutputs, MDB_DUPSORT},
@@ -214,7 +216,7 @@ auto Database::init_db(
     }
 }
 
-auto Database::StartReorg() noexcept -> storage::lmdb::Transaction
+auto Database::StartReorg(const Log&) noexcept -> storage::lmdb::Transaction
 {
     return lmdb_.TransactionRW();
 }

@@ -834,6 +834,10 @@ auto Transaction::SetMemo(const std::string_view memo) noexcept -> void
 
 auto Transaction::SetMinedPosition(const block::Position& pos) noexcept -> void
 {
+    std::for_each(outputs_.begin(), outputs_.end(), [&](auto& output) {
+        output.Internal().SetMinedPosition(pos);
+    });
+
     return data_.lock()->set_position(pos);
 }
 

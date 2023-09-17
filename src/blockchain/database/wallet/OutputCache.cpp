@@ -6,11 +6,13 @@
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
+#include <boost/endian/conversion.hpp>
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
 #include <functional>
 #include <iosfwd>
+#include <iterator>
 #include <ostream>
 #include <stdexcept>
 #include <string_view>
@@ -25,7 +27,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -97,6 +98,9 @@ auto OutputCache::load_output_index(const MapKeyType& key, MapType& map)
 
 namespace opentxs::blockchain::database::wallet
 {
+using namespace std::literals;
+using enum storage::lmdb::Dir;
+
 const Outpoints OutputCache::empty_outputs_{};
 const Nyms OutputCache::empty_nyms_{};
 
@@ -118,11 +122,33 @@ OutputCache::OutputCache(
     , positions_()
     , states_()
     , subchains_()
+    , generation_outputs_()
+    , output_to_proposal_()
+    , created_by_proposal_()
+    , consumed_by_proposal_()
     , populated_(false)
 {
     outputs_.reserve(reserve_);
     keys_.reserve(reserve_);
     positions_.reserve(reserve_);
+}
+
+auto OutputCache::AddGenerationOutput(
+    block::Height height,
+    const block::Outpoint& output,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto key = static_cast<std::size_t>(height);
+    boost::endian::native_to_little_inplace(key);
+    const auto rc = lmdb_.Store(generation_, key, output.Bytes(), tx).first;
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to save generation index for "s + output.str() +
+            " at height "s + std::to_string(height)};
+    }
+
+    generation_outputs_.emplace(height, output);
 }
 
 auto OutputCache::AddOutput(
@@ -222,30 +248,23 @@ auto OutputCache::AddToKey(
 auto OutputCache::AddToNym(
     const identifier::Nym& id,
     const block::Outpoint& output,
-    storage::lmdb::Transaction& tx) noexcept -> bool
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
 {
-    OT_ASSERT(0 < outputs_.count(output));
-    OT_ASSERT(false == id.empty());
+    if (id.empty()) { throw std::runtime_error{"invalid nym"}; }
 
-    try {
-        auto& index = load_output_index(id, nyms_);
-        auto& list = nym_list_;
-        auto rc =
-            lmdb_.Store(wallet::nyms_, id.Bytes(), output.Bytes(), tx).first;
-
-        if (false == rc) {
-            throw std::runtime_error{"Failed to update nym index"};
-        }
-
-        index.emplace(output);
-        list.emplace(id);
-
-        return true;
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return false;
+    if (false == outputs_.contains(output)) {
+        throw std::runtime_error{
+            "output "s.append(output.str()).append(" does not exists")};
     }
+
+    auto& index = load_output_index(id, nyms_);
+    auto& list = nym_list_;
+    auto rc = lmdb_.Store(wallet::nyms_, id.Bytes(), output.Bytes(), tx).first;
+
+    if (false == rc) { throw std::runtime_error{"Failed to update nym index"}; }
+
+    index.emplace(output);
+    list.emplace(id);
 }
 
 auto OutputCache::AddToPosition(
@@ -335,6 +354,38 @@ auto OutputCache::AddToSubchain(
 
         return false;
     }
+}
+
+auto OutputCache::associate_proposal(
+    const Log& log,
+    const block::Outpoint& output,
+    const identifier::Generic& proposal,
+    std::string_view type,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    const auto& crypto = api_.Crypto();
+    auto& map = output_to_proposal_;
+
+    if (const auto i = map.find(output); map.end() != i) {
+        throw std::runtime_error{"output "s.append(output.str())
+                                     .append(" already associated with ")
+                                     .append(i->second.asBase58(crypto))};
+    }
+
+    const auto rc =
+        lmdb_.Store(output_proposal_, output.Bytes(), proposal.Bytes(), tx)
+            .first;
+
+    if (false == rc) {
+        throw std::runtime_error{"failed to associate "s.append(output.str())
+                                     .append(" to ")
+                                     .append(proposal.asBase58(crypto))};
+    }
+
+    map.emplace(output, proposal);
+    log(OT_PRETTY_CLASS())("associated ")(type)(" output ")(output.str())(
+        " to proposal ")(proposal, crypto)
+        .Flush();
 }
 
 auto OutputCache::ChangePosition(
@@ -448,6 +499,25 @@ auto OutputCache::ChangeState(
     }
 }
 
+auto OutputCache::CheckProposals(
+    Vector<identifier::Generic> proposals,
+    alloc::Strategy alloc) noexcept(false) -> Vector<identifier::Generic>
+{
+    auto out = Vector<identifier::Generic>{alloc.result_};
+    out.reserve(proposals.size());
+    out.clear();
+    const auto is_finished = [this](const auto& id) {
+        return this->is_finished(id);
+    };
+    std::copy_if(
+        std::make_move_iterator(proposals.begin()),
+        std::make_move_iterator(proposals.end()),
+        std::back_inserter(out),
+        is_finished);
+
+    return out;
+}
+
 auto OutputCache::Clear() noexcept -> void
 {
     position_ = std::nullopt;
@@ -460,6 +530,144 @@ auto OutputCache::Clear() noexcept -> void
     states_.clear();
     subchains_.clear();
     populated_ = false;
+}
+
+auto OutputCache::ConsumeOutput(
+    const Log& log,
+    const identifier::Generic& proposal,
+    const block::Outpoint& output,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& set = consumed_by_proposal_[proposal];
+
+    if (set.contains(output)) {
+        throw std::runtime_error{
+            "proposal "s.append(proposal.asBase58(api_.Crypto()))
+                .append(" already contains consumed output ")
+                .append(output.str())};
+    }
+
+    const auto rc =
+        lmdb_.Store(proposal_spent_, proposal.Bytes(), output.Bytes(), tx)
+            .first;
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to save consumed output "s.append(output.str())
+                .append(" association to proposal ")
+                .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    set.emplace(output);
+    associate_proposal(log, output, proposal, "consumed", tx);
+}
+
+auto OutputCache::CreateOutput(
+    const Log& log,
+    const identifier::Generic& proposal,
+    const block::Outpoint& output,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& set = created_by_proposal_[proposal];
+
+    if (set.contains(output)) {
+        throw std::runtime_error{
+            "proposal "s.append(proposal.asBase58(api_.Crypto()))
+                .append(" already contains created output ")
+                .append(output.str())};
+    }
+
+    const auto rc =
+        lmdb_.Store(proposal_created_, proposal.Bytes(), output.Bytes(), tx)
+            .first;
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to save created output "s.append(output.str())
+                .append(" association to proposal ")
+                .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    set.emplace(output);
+    associate_proposal(log, output, proposal, "created", tx);
+}
+
+auto OutputCache::DeleteGenerationAbove(
+    block::Height good,
+    OrphanedGeneration& out,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& map = generation_outputs_;
+
+    if (map.empty()) { return; }
+
+    const auto first = [&]() -> std::optional<Generation::iterator> {
+        auto i = map.lower_bound(good);
+
+        if (map.end() == i) { return std::nullopt; }
+
+        if (i->first == good) {
+
+            return std::next(i);
+        } else {
+
+            return i;
+        }
+    }();
+
+    if (false == first.has_value()) { return; }
+
+    const auto delete_output = [&](const auto& item) {
+        auto key = static_cast<std::size_t>(item.first);
+        boost::endian::native_to_little_inplace(key);
+
+        if (false == lmdb_.Delete(generation_, key, tx)) {
+            throw std::runtime_error{
+                "failed to delete generation output index for height "s +
+                std::to_string(item.first)};
+        }
+
+        out.emplace(item.second);
+    };
+    std::for_each(*first, map.end(), delete_output);
+    map.erase(*first, map.end());
+}
+
+auto OutputCache::dissociate_proposal(
+    const Log& log,
+    const block::Outpoint& output,
+    const identifier::Generic& proposal,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    const auto& crypto = api_.Crypto();
+    auto& map = output_to_proposal_;
+
+    if (const auto i = map.find(output); map.end() != i) {
+        const auto& id = i->second;
+
+        if (id != proposal) {
+            throw std::runtime_error{
+                "expected output "s.append(output.str())
+                    .append(" to be associated with ")
+                    .append(proposal.asBase58(crypto))
+                    .append(" however it is currently registered with ")
+                    .append(id.asBase58(crypto))};
+        }
+    } else {
+        throw std::runtime_error{
+            output.str().append(" is not associated with any proposal")};
+    }
+
+    const auto rc = lmdb_.Delete(output_proposal_, output.Bytes(), tx);
+
+    if (false == rc) {
+        throw std::runtime_error{"failed to update outpoint - proposal index"};
+    }
+
+    map.erase(output);
+    log(OT_PRETTY_CLASS())("dissociating output ")(output.str())(
+        " from proposal ")(proposal, crypto)
+        .Flush();
 }
 
 auto OutputCache::Exists(const block::Outpoint& id) const noexcept -> bool
@@ -480,10 +688,118 @@ auto OutputCache::Exists(const SubchainID& subchain, const block::Outpoint& id)
     }
 }
 
+auto OutputCache::FinishProposal(
+    const Log& log,
+    const identifier::Generic& proposal,
+    const Outpoints& consumed,
+    const Outpoints& created,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& createdMap = created_by_proposal_;
+    auto& createdSet = createdMap[proposal];
+    auto& consumedMap = consumed_by_proposal_;
+    auto& consumedSet = consumedMap[proposal];
+    auto purge = [&, this](auto table, auto& set, const auto& output) {
+        if (false == set.contains(output)) {
+            throw std::runtime_error{
+                "output "s.append(output.str())
+                    .append(" is not associated with proposal ")
+                    .append(proposal.asBase58(api_.Crypto()))};
+        }
+
+        const auto rc =
+            lmdb_.Delete(table, proposal.Bytes(), output.Bytes(), tx);
+
+        if (false == rc) {
+            throw std::runtime_error{
+                "failed to dissociate output "s.append(output.str())
+                    .append(" from proposal ")
+                    .append(proposal.asBase58(api_.Crypto()))};
+        }
+
+        dissociate_proposal(log, output, proposal, tx);
+        set.erase(output);
+    };
+    auto purge_created = [&](const auto& output) {
+        purge(proposal_created_, createdSet, output);
+    };
+    auto purge_consumed = [&](const auto& output) {
+        purge(proposal_spent_, consumedSet, output);
+    };
+    std::for_each(created.begin(), created.end(), purge_created);
+    std::for_each(consumed.begin(), consumed.end(), purge_consumed);
+
+    if (false == createdSet.empty()) {
+        throw std::runtime_error{
+            "proposal "s.append(proposal.asBase58(api_.Crypto()))
+                .append(" still has ")
+                .append(std::to_string(createdSet.size()))
+                .append("created outputs unaccounted for")};
+    }
+
+    if (false == createdSet.empty()) {
+        throw std::runtime_error{
+            "proposal "s.append(proposal.asBase58(api_.Crypto()))
+                .append(" still has ")
+                .append(std::to_string(createdSet.size()))
+                .append("consumed outputs unaccounted for")};
+    }
+
+    createdMap.erase(proposal);
+    consumedMap.erase(proposal);
+}
+
 auto OutputCache::GetAccount(const AccountID& id) const noexcept
     -> const Outpoints&
 {
     return load_output_index(id, accounts_);
+}
+
+auto OutputCache::GetAssociation(
+    const identifier::Generic& proposal,
+    const block::Outpoint& output) const noexcept -> ProposalAssociation
+{
+    constexpr auto check = [](const auto& map, const auto& p, const auto& o) {
+        if (const auto i = map.find(p); map.end() != i) {
+
+            return i->second.contains(o);
+        } else {
+
+            return false;
+        }
+    };
+    const auto spends = check(consumed_by_proposal_, proposal, output);
+    const auto creates = check(created_by_proposal_, proposal, output);
+    using enum ProposalAssociation;
+
+    if ((false == spends) && (false == creates)) {
+
+        return none;
+    } else if (spends && (false == creates)) {
+
+        return consumed;
+    } else if ((false == spends) && creates) {
+
+        return created;
+    } else {
+        LogAbort()(OT_PRETTY_CLASS())(
+            "irrecoverable database corruption: proposal ")(
+            proposal,
+            api_.Crypto())(" both creates and consumes output ")(output)
+            .Abort();
+    }
+}
+
+auto OutputCache::GetConsumed(const identifier::Generic& id) const noexcept
+    -> const Outpoints&
+{
+    return load_output_index(id, consumed_by_proposal_);
+}
+
+auto OutputCache::GetCreated(const identifier::Generic& id) const noexcept
+    -> const Outpoints&
+{
+    return load_output_index(id, created_by_proposal_);
 }
 
 auto OutputCache::GetKey(const crypto::Key& id) const noexcept
@@ -495,6 +811,21 @@ auto OutputCache::GetKey(const crypto::Key& id) const noexcept
 auto OutputCache::GetHeight() const noexcept -> block::Height
 {
     return get_position().Height();
+}
+
+auto OutputCache::GetMatured(
+    block::Height first,
+    block::Height last,
+    alloc::Strategy alloc) const noexcept -> Vector<block::Outpoint>
+{
+    const auto start = generation_outputs_.lower_bound(first);
+    const auto limit = generation_outputs_.upper_bound(last);
+    auto out = Vector<block::Outpoint>{alloc.result_};
+    out.clear();
+    constexpr auto get_value = [](const auto& data) { return data.second; };
+    std::transform(start, limit, std::back_inserter(out), get_value);
+
+    return out;
 }
 
 auto OutputCache::GetNym(const identifier::Nym& id) const noexcept
@@ -554,6 +885,65 @@ auto OutputCache::get_position() const noexcept -> const db::Position&
     }
 }
 
+auto OutputCache::GetProposals(const block::Outpoint& id, alloc::Strategy alloc)
+    const noexcept -> Vector<identifier::Generic>
+{
+    const auto [start, limit] = output_to_proposal_.equal_range(id);
+    auto out = Vector<identifier::Generic>{alloc.result_};
+    out.reserve(std::distance(start, limit));
+    out.clear();
+    constexpr auto get_value = [](const auto& item) { return item.second; };
+    std::transform(start, limit, std::back_inserter(out), get_value);
+
+    return out;
+}
+
+auto OutputCache::GetReserved(alloc::Strategy alloc) const noexcept -> Reserved
+{
+    const auto& map = consumed_by_proposal_;
+    auto out = Reserved{alloc.result_};
+    out.clear();
+    const auto get_values = [&](const auto& item) {
+        const auto& [key, value] = item;
+        std::copy(value.begin(), value.end(), std::inserter(out, out.end()));
+    };
+    std::for_each(map.begin(), map.end(), get_values);
+
+    return out;
+}
+
+auto OutputCache::GetReserved(
+    const identifier::Generic& proposal,
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
+{
+    auto out = Vector<UTXO>{alloc.result_};
+    const auto& map = consumed_by_proposal_;
+
+    if (auto i = map.find(proposal); map.end() == i) {
+        out.clear();
+    } else {
+        try {
+            const auto& set = i->second;
+            out.reserve(set.size());
+            out.clear();
+            const auto make_utxo = [&, this](const auto& id) {
+                const auto& output = outputs_.at(id);
+
+                return std::make_pair(id, output);
+            };
+            std::transform(
+                set.begin(), set.end(), std::back_inserter(out), make_utxo);
+        } catch (const std::exception& e) {
+            LogAbort()(OT_PRETTY_CLASS())(
+                "fatal database corruption: an output referenced by proposal ")(
+                proposal, api_.Crypto())(" does not exist in index: ")(e.what())
+                .Abort();
+        }
+    }
+
+    return out;
+}
+
 auto OutputCache::GetState(const node::TxoState id) const noexcept
     -> const Outpoints&
 {
@@ -566,8 +956,34 @@ auto OutputCache::GetSubchain(const SubchainID& id) const noexcept
     return load_output_index(id, subchains_);
 }
 
-auto OutputCache::load_output(const block::Outpoint& id) noexcept(false)
-    -> protocol::bitcoin::base::block::Output&
+auto OutputCache::is_finished(const identifier::Generic& proposal) noexcept
+    -> bool
+{
+    const auto check = [](auto& map, const auto& id) {
+        if (auto i = map.find(id); map.end() != i) {
+
+            return i->second.empty();
+        } else {
+
+            return true;
+        }
+    };
+    const auto consumed = check(consumed_by_proposal_, proposal);
+    const auto created = check(created_by_proposal_, proposal);
+
+    if (consumed && created) {
+        consumed_by_proposal_.erase(proposal);
+        created_by_proposal_.erase(proposal);
+
+        return true;
+    } else {
+
+        return false;
+    }
+}
+
+auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
+    -> const protocol::bitcoin::base::block::Output&
 {
     auto it = outputs_.find(id);
 
@@ -579,23 +995,10 @@ auto OutputCache::load_output(const block::Outpoint& id) noexcept(false)
         return out;
     }
 
-    const auto error = UnallocatedCString{"output "} + id.str() + " not found";
-
-    throw std::out_of_range{error};
+    throw std::out_of_range{"output "s + id.str() + " not found"};
 }
 
-auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
-    -> const protocol::bitcoin::base::block::Output&
-{
-    return const_cast<OutputCache*>(this)->load_output(id);
-}
-
-auto OutputCache::Populate() const noexcept -> void
-{
-    const_cast<OutputCache*>(this)->populate();
-}
-
-auto OutputCache::populate() noexcept -> void
+auto OutputCache::Populate() noexcept -> void
 {
     if (populated_) { return; }
 
@@ -681,33 +1084,96 @@ auto OutputCache::populate() noexcept -> void
 
         return true;
     };
+    const auto generation = [&](const auto key, const auto value) {
+        auto& map = generation_outputs_;
+        const auto height = [&] {
+            auto out = block::Height{};
+            boost::endian::little_to_native_inplace(out);
+            std::memcpy(
+                std::addressof(out),
+                key.data(),
+                std::min(key.size(), sizeof(out)));
+
+            return out;
+        }();
+        map.emplace(height, value);
+
+        return true;
+    };
+    const auto output_proposal = [&](const auto key, const auto value) {
+        auto& map = output_to_proposal_;
+        map.emplace(key, api_.Factory().IdentifierFromHash(value));
+
+        return true;
+    };
+    const auto proposal_created = [&](const auto key, const auto value) {
+        auto& map = created_by_proposal_;
+        auto id = [&] {
+            auto out = identifier::Generic{};
+            out.Assign(key);
+
+            return out;
+        }();
+        auto& set = map[std::move(id)];
+        set.emplace(value);
+
+        return true;
+    };
+    const auto proposal_consumed = [&](const auto key, const auto value) {
+        auto& map = consumed_by_proposal_;
+        auto id = [&] {
+            auto out = identifier::Generic{};
+            out.Assign(key);
+
+            return out;
+        }();
+        auto& set = map[std::move(id)];
+        set.emplace(value);
+
+        return true;
+    };
     auto tx = lmdb_.TransactionRO();
-    static constexpr auto fwd = storage::lmdb::Dir::Forward;
-    auto rc = lmdb_.Read(wallet::outputs_, outputs, fwd, tx);
+    auto rc = lmdb_.Read(wallet::outputs_, outputs, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::accounts_, accounts, fwd, tx);
+    rc = lmdb_.Read(wallet::accounts_, accounts, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::keys_, keys, fwd, tx);
+    rc = lmdb_.Read(wallet::keys_, keys, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::nyms_, nyms, fwd, tx);
+    rc = lmdb_.Read(wallet::nyms_, nyms, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::positions_, positions, fwd, tx);
+    rc = lmdb_.Read(wallet::positions_, positions, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::states_, states, fwd, tx);
+    rc = lmdb_.Read(wallet::states_, states, Forward, tx);
 
     OT_ASSERT(rc);
 
-    rc = lmdb_.Read(wallet::subchains_, subchains, fwd, tx);
+    rc = lmdb_.Read(wallet::subchains_, subchains, Forward, tx);
+
+    OT_ASSERT(rc);
+
+    rc = lmdb_.Read(wallet::generation_, generation, Forward, tx);
+
+    OT_ASSERT(rc);
+
+    rc = lmdb_.Read(wallet::output_proposal_, output_proposal, Forward, tx);
+
+    OT_ASSERT(rc);
+
+    rc = lmdb_.Read(wallet::proposal_created_, proposal_created, Forward, tx);
+
+    OT_ASSERT(rc);
+
+    rc = lmdb_.Read(wallet::proposal_spent_, proposal_consumed, Forward, tx);
 
     OT_ASSERT(rc);
 
@@ -725,6 +1191,88 @@ auto OutputCache::populate() noexcept -> void
     OT_ASSERT(outputs_.size() == outputCount);
 
     populated_ = true;
+}
+
+auto OutputCache::ProposalConfirmConsumed(
+    const Log& log,
+    const identifier::Generic& proposal,
+    const block::Outpoint& output,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& set = [&, this]() -> auto& {
+        auto& map = consumed_by_proposal_;
+
+        if (auto i = map.find(proposal); map.end() != i) {
+
+            return i->second;
+        } else {
+
+            throw std::runtime_error{
+                "consumed outputs for proposal "s
+                    .append(proposal.asBase58(api_.Crypto()))
+                    .append(" not found")};
+        }
+    }();
+
+    if (false == set.contains(output)) {
+        throw std::runtime_error{"output "s.append(output.str())
+                                     .append(" is not consumed by proposal ")
+                                     .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    const auto rc =
+        lmdb_.Delete(proposal_spent_, proposal.Bytes(), output.Bytes(), tx);
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to delete consumed output "s.append(output.str())
+                .append(" association to proposal ")
+                .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    dissociate_proposal(log, output, proposal, tx);
+    set.erase(output);
+}
+
+auto OutputCache::ProposalConfirmCreated(
+    const Log& log,
+    const identifier::Generic& proposal,
+    const block::Outpoint& output,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& set = [&, this]() -> auto& {
+        auto& map = created_by_proposal_;
+
+        if (auto i = map.find(proposal); map.end() != i) {
+
+            return i->second;
+        } else {
+
+            throw std::runtime_error{
+                "created outputs for proposal "s
+                    .append(proposal.asBase58(api_.Crypto()))
+                    .append(" not found")};
+        }
+    }();
+
+    if (false == set.contains(output)) {
+        throw std::runtime_error{"output "s.append(output.str())
+                                     .append(" is not created by proposal ")
+                                     .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    const auto rc =
+        lmdb_.Delete(proposal_created_, proposal.Bytes(), output.Bytes(), tx);
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to delete created output "s.append(output.str())
+                .append(" association to proposal ")
+                .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    dissociate_proposal(log, output, proposal, tx);
+    set.erase(output);
 }
 
 auto OutputCache::Print() const noexcept -> void
@@ -869,26 +1417,40 @@ auto OutputCache::Print() const noexcept -> void
 
     log.Flush();
     log(OT_PRETTY_CLASS())("Generation outputs:\n");
-    lmdb_.Read(
-        generation_,
-        [&](const auto key, const auto value) -> bool {
-            const auto height = [&] {
-                auto out = block::Height{};
 
-                OT_ASSERT(sizeof(out) == key.size());
-
-                std::memcpy(&out, key.data(), key.size());
-
-                return out;
-            }();
-            const auto outpoint = block::Outpoint{value};
-            log("  * height ")(height)(", ")(outpoint.str())("\n");
-
-            return true;
-        },
-        Dir::Forward);
+    for (const auto& [height, outpoint] : generation_outputs_) {
+        log("  *  ")(outpoint.str())(" at height ")(height)("\n");
+    }
 
     log.Flush();
+}
+
+auto OutputCache::Release(
+    const Log& log,
+    const block::Outpoint& output,
+    const identifier::Generic& proposal,
+    storage::lmdb::Transaction& tx) noexcept(false) -> void
+{
+    auto& set = consumed_by_proposal_[proposal];
+
+    if (set.contains(output)) {
+        throw std::runtime_error{
+            "proposal "s.append(proposal.asBase58(api_.Crypto()))
+                .append(" does not contain consumed output ")
+                .append(output.str())};
+    }
+
+    const auto rc =
+        lmdb_.Delete(proposal_spent_, proposal.Bytes(), output.Bytes(), tx);
+
+    if (false == rc) {
+        throw std::runtime_error{
+            "failed to delete consumed output "s.append(output.str())
+                .append(" association to proposal ")
+                .append(proposal.asBase58(api_.Crypto()))};
+    }
+
+    dissociate_proposal(log, output, proposal, tx);
 }
 
 auto OutputCache::UpdateOutput(
@@ -949,10 +1511,7 @@ auto OutputCache::write_output(
                     return it->second;
                 }
 
-                auto& out = keys_[key];
-                out.reserve(reserve_);
-
-                return out;
+                return keys_[key];
             }();
             cache.emplace(id);
         }

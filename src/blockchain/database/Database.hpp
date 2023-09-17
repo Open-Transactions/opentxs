@@ -8,7 +8,6 @@
 #pragma once
 
 #include <BlockchainTransactionProposal.pb.h>
-#include <cstdint>
 #include <optional>
 #include <span>
 #include <utility>
@@ -23,6 +22,8 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
+#include "internal/util/alloc/AllocatesChildren.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -86,41 +87,44 @@ class Nym;
 }  // namespace identifier
 
 class Data;
+class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::database::implementation
 {
-class Database final : public database::Database
+class Database final : public database::Database,
+                       private pmr::AllocatesChildren<alloc::BoostPoolSync>
 {
 public:
     auto AddConfirmedTransactions(
+        const Log& log,
         const SubaccountID& account,
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed) noexcept -> bool final
+        TXOs& txoConsumed,
+        alloc::Strategy alloc) noexcept -> bool final
     {
         return wallet_.AddConfirmedTransactions(
-            account, index, std::move(transactions), txoCreated, txoConsumed);
+            log,
+            account,
+            index,
+            std::move(transactions),
+            txoCreated,
+            txoConsumed,
+            alloc);
     }
     auto AddMempoolTransaction(
+        const Log& log,
         const SubaccountID& account,
         const crypto::Subchain subchain,
-        const Vector<std::uint32_t> outputIndices,
-        const block::Transaction& transaction,
-        TXOs& txoCreated) noexcept -> bool final
+        MatchedTransaction&& match,
+        TXOs& txoCreated,
+        alloc::Strategy alloc) noexcept -> bool final
     {
         return wallet_.AddMempoolTransaction(
-            account, subchain, outputIndices, transaction, txoCreated);
-    }
-    auto AddOutgoingTransaction(
-        const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
-        const block::Transaction& transaction) noexcept -> bool final
-    {
-        return wallet_.AddOutgoingTransaction(
-            proposalID, proposal, transaction);
+            log, account, subchain, std::move(match), txoCreated, alloc);
     }
     auto AddOrUpdate(network::blockchain::Address address) noexcept
         -> bool final
@@ -128,14 +132,19 @@ public:
         return common_.AddOrUpdate(std::move(address));
     }
     auto AddProposal(
+        const Log& log,
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx) noexcept -> bool final
+        const proto::BlockchainTransactionProposal& tx,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.AddProposal(id, tx);
+        return wallet_.AddProposal(log, id, tx, alloc);
     }
-    auto AdvanceTo(const block::Position& pos) noexcept -> bool final
+    auto AdvanceTo(
+        const Log& log,
+        const block::Position& pos,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.AdvanceTo(pos);
+        return wallet_.AdvanceTo(log, pos, alloc);
     }
     auto ApplyUpdate(const node::UpdateTransaction& update) noexcept
         -> bool final
@@ -187,9 +196,12 @@ public:
     {
         return headers_.CurrentCheckpoint();
     }
-    auto CancelProposal(const identifier::Generic& id) noexcept -> bool final
+    auto CancelProposal(
+        const Log& log,
+        const identifier::Generic& id,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.CancelProposal(id);
+        return wallet_.CancelProposal(log, id, alloc);
     }
     auto Confirm(const network::blockchain::AddressID& id) noexcept
         -> void final
@@ -210,16 +222,30 @@ public:
     {
         return filters_.CurrentTip(type);
     }
-    auto FinalizeReorg(
-        storage::lmdb::Transaction& tx,
-        const block::Position& pos) noexcept -> bool final
+    auto FinalizeProposal(
+        const Log& log,
+        const identifier::Generic& proposalID,
+        const proto::BlockchainTransactionProposal& proposal,
+        const block::Transaction& transaction,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.FinalizeReorg(tx, pos);
+        return wallet_.FinalizeProposal(
+            log, proposalID, proposal, transaction, alloc);
+    }
+    auto FinalizeReorg(
+        const Log& log,
+        const block::Position& pos,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) noexcept -> bool final
+    {
+        return wallet_.FinalizeReorg(log, pos, tx, alloc);
     }
     auto ForgetProposals(
-        const UnallocatedSet<identifier::Generic>& ids) noexcept -> bool final
+        const Log& log,
+        const UnallocatedSet<identifier::Generic>& ids,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.ForgetProposals(ids);
+        return wallet_.ForgetProposals(log, ids, alloc);
     }
     auto DisconnectedHashes() const noexcept -> database::DisconnectedList final
     {
@@ -293,6 +319,11 @@ public:
     auto GetPosition() const noexcept -> block::Position final
     {
         return wallet_.GetPosition();
+    }
+    auto GetReserved(const identifier::Generic& proposal, alloc::Strategy alloc)
+        const noexcept -> Vector<UTXO> final
+    {
+        return wallet_.GetReserved(proposal, alloc);
     }
     auto GetSubchainID(
         const SubaccountID& account,
@@ -440,32 +471,38 @@ public:
         return sync_.Reorg(height);
     }
     auto ReorgTo(
+        const Log& log,
         const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::Transaction& tx,
         const node::HeaderOracle& headers,
         const SubaccountID& account,
         const crypto::Subchain subchain,
         const SubchainID& index,
-        std::span<const block::Position> reorg) noexcept -> bool final
+        std::span<const block::Position> reorg,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) noexcept -> bool final
     {
         return wallet_.ReorgTo(
-            data, tx, headers, account, subchain, index, reorg);
+            log, data, headers, account, subchain, index, reorg, tx, alloc);
     }
     auto ReportHeaderTip() noexcept -> void final { headers_.ReportTip(); }
     auto ReserveUTXO(
+        const Log& log,
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        const node::internal::SpendPolicy& policy) noexcept
-        -> std::optional<UTXO> final
+        const node::internal::SpendPolicy& policy,
+        alloc::Strategy alloc) noexcept
+        -> std::pair<std::optional<UTXO>, bool> final
     {
-        return wallet_.ReserveUTXO(spender, proposal, policy);
+        return wallet_.ReserveUTXO(log, spender, proposal, policy, alloc);
     }
     auto ReserveUTXO(
+        const Log& log,
         const identifier::Nym& spender,
         const identifier::Generic& proposal,
-        const block::Outpoint& id) noexcept -> std::optional<UTXO> final
+        const block::Outpoint& id,
+        alloc::Strategy alloc) noexcept -> std::optional<UTXO> final
     {
-        return wallet_.ReserveUTXO(spender, proposal, id);
+        return wallet_.ReserveUTXO(log, spender, proposal, id, alloc);
     }
     auto SetBlockTip(const block::Position& position) noexcept -> bool final
     {
@@ -491,7 +528,8 @@ public:
     {
         return headers_.SiblingHashes();
     }
-    auto StartReorg() noexcept -> storage::lmdb::Transaction final;
+    auto StartReorg(const Log& log) noexcept
+        -> storage::lmdb::Transaction final;
     auto StoreFilters(
         const cfilter::Type type,
         Vector<CFilterParams> filters,
@@ -522,10 +560,12 @@ public:
         return sync_.Store(tip, items);
     }
     auto SubchainAddElements(
+        const Log& log,
         const SubchainID& index,
-        const ElementMap& elements) noexcept -> bool final
+        const ElementMap& elements,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.SubchainAddElements(index, elements);
+        return wallet_.SubchainAddElements(log, index, elements, alloc);
     }
     auto SubchainLastIndexed(const SubchainID& index) const noexcept
         -> std::optional<Bip32Index> final
@@ -538,10 +578,12 @@ public:
         return wallet_.SubchainLastScanned(index);
     }
     auto SubchainSetLastScanned(
+        const Log& log,
         const SubchainID& index,
-        const block::Position& position) const noexcept -> bool final
+        const block::Position& position,
+        alloc::Strategy alloc) noexcept -> bool final
     {
-        return wallet_.SubchainSetLastScanned(index, position);
+        return wallet_.SubchainSetLastScanned(log, index, position, alloc);
     }
     auto SyncTip() const noexcept -> block::Position final
     {

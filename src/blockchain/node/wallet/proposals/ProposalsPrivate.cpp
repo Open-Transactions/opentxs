@@ -33,6 +33,7 @@
 #include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -68,6 +69,9 @@ auto ProposalsPrivate::Add(
     const node::Spend& spend,
     std::promise<SendOutcome>&& promise) const noexcept -> bool
 {
+    const auto& log = LogTrace();
+    auto alloc = alloc::Strategy{};  // TODO
+
     try {
         static const auto blank = block::TransactionHash{};
         const auto& id = spend.ID();
@@ -86,7 +90,7 @@ auto ProposalsPrivate::Add(
         auto handle = data_.lock();
         auto& data = *handle;
 
-        if (false == data.db_.AddProposal(id, proto)) {
+        if (false == data.db_.AddProposal(log, id, proto, alloc)) {
             promise.set_value({DatabaseError, blank});
 
             throw std::runtime_error{"failed to save spend"};
@@ -113,6 +117,8 @@ auto ProposalsPrivate::build_transaction_bitcoin(
 
 auto ProposalsPrivate::cleanup(Data& data) noexcept -> void
 {
+    const auto& log = LogTrace();
+    auto alloc = alloc::Strategy{};  // TODO
     const auto finished = data.db_.CompletedProposals();
 
     for (const auto& id : finished) {
@@ -120,7 +126,7 @@ auto ProposalsPrivate::cleanup(Data& data) noexcept -> void
         data.confirming_.erase(id);
     }
 
-    data.db_.ForgetProposals(finished);
+    data.db_.ForgetProposals(log, finished, alloc);
 }
 
 auto ProposalsPrivate::get_builder(Data& data) const noexcept -> Builder
@@ -181,6 +187,8 @@ auto ProposalsPrivate::send(Data& data) noexcept -> void
 {
     if (false == data.pending_.HasData()) { return; }
 
+    const auto& log = LogTrace();
+    auto alloc = alloc::Strategy{};  // TODO
     auto job = data.pending_.Pop();
     auto wipe{false};
     auto erase{false};
@@ -188,7 +196,7 @@ auto ProposalsPrivate::send(Data& data) noexcept -> void
         const auto& [id, promise] = job;
 
         if (wipe) {
-            data.db_.CancelProposal(id);
+            data.db_.CancelProposal(log, id, alloc);
             erase = true;
         }
 
@@ -203,6 +211,8 @@ auto ProposalsPrivate::send(Data& data) noexcept -> void
         auto& proto = *serialized;
         auto spend = node::Spend{
             std::make_unique<SpendPrivate>(api_, chain_, proto).release()};
+        // TODO check to see if a transaction was already created. If so,
+        // rebroadcast it.
 
         if (spend.Internal().IsExpired()) {
             wipe = true;

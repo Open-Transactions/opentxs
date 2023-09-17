@@ -118,7 +118,7 @@ auto check_contact_activity(
 
         EXPECT_EQ(row->Loading(), it->loading_);
         EXPECT_EQ(row->Pending(), it->pending_);
-        EXPECT_EQ(row->Amount(), it->amount_);
+        EXPECT_EQ(row->Amount().Unscaled(), it->amount_.Unscaled());
         EXPECT_EQ(row->DisplayAmount(), it->display_amount_);
         EXPECT_EQ(row->From(), it->from_);
         EXPECT_EQ(row->Memo(), it->memo_);

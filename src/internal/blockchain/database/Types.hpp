@@ -66,7 +66,10 @@ using Segments = UnallocatedSet<ChainSegment>;
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
 using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
 using MatchingIndices = Vector<Bip32Index>;
-using MatchedTransaction = std::pair<MatchingIndices, block::Transaction>;
+using MatchingInputs = MatchingIndices;
+using MatchingOutputs = MatchingIndices;
+using MatchedTransaction =
+    std::tuple<MatchingInputs, MatchingOutputs, block::Transaction>;
 using BlockMatches = Map<block::TransactionHash, MatchedTransaction>;
 using BatchedMatches = Map<block::Position, BlockMatches>;
 using TXOs =

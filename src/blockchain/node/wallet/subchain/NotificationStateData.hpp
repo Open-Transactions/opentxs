@@ -106,13 +106,13 @@ private:
     auto do_startup(allocator_type monotonic) noexcept -> bool final;
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
-    auto handle_confirmed_matches(
+    auto handle_block_matches(
         const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
         allocator_type monotonic) const noexcept -> void final;
-    auto handle_mempool_matches(
+    auto handle_mempool_match(
         const block::Matches& matches,
         block::Transaction tx,
         allocator_type monotonic) const noexcept -> void final;

@@ -77,7 +77,7 @@ auto check_account_activity(
     }
 
     EXPECT_EQ(widget.AccountID(), expected.id_);
-    EXPECT_EQ(widget.Balance(), expected.balance_);
+    EXPECT_EQ(widget.Balance().Unscaled(), expected.balance_.Unscaled());
     EXPECT_EQ(widget.BalancePolarity(), expected.polarity_);
     EXPECT_EQ(widget.ContractID(), expected.contract_id_);
     EXPECT_EQ(widget.DepositChains(), expected.deposit_chains_);
@@ -129,7 +129,7 @@ auto check_account_activity(
         const auto lastRow = row->Last();
         output &= (lastVector == lastRow);
 
-        EXPECT_EQ(row->Amount(), it->amount_);
+        EXPECT_EQ(row->Amount().Unscaled(), it->amount_.Unscaled());
         EXPECT_EQ(row->Confirmations(), it->confirmations_);
         EXPECT_EQ(row->Contacts(), it->contacts_);
         EXPECT_EQ(row->DisplayAmount(), it->display_amount_);

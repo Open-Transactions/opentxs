@@ -9,10 +9,13 @@
 #include <array>  // IWYU pragma: keep
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <utility>
 
 #include "core/display/DefinitionPrivate.hpp"
+#include "internal/core/display/Types.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"       // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"  // IWYU pragma: keep
@@ -57,10 +60,23 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
 
         return i->second;
     } else {
-        static const auto defaultDefinition = Definition{};
 
-        return defaultDefinition;
+        return UnityDefinition();
     }
 #undef MAKE_SCALE
+}
+
+auto UnityDefinition() noexcept -> const Definition&
+{
+    static constexpr auto ratio = std::array<Ratio, 1>{Ratio{10, 0}};
+    static constexpr auto params = std::array<ScaleDef, 1_uz>{
+        ScaleDef{""sv, ScaleInit{""sv, ""sv, ratio, 0, 0}}};
+    static constexpr auto scale = std::array<ScaleRef, 1_uz>{ScaleRef{params}};
+    static constexpr auto def =
+        std::array<DefInit, 1_uz>{DefInit{""sv, 0, 0, scale}};
+    static const auto definition =
+        Definition{std::make_unique<DefinitionPrivate>(def).release()};
+
+    return definition;
 }
 }  // namespace opentxs::display

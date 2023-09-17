@@ -86,7 +86,7 @@ auto ElementCache::Add(
         }
     }
 
-    for (const auto& [outpoint, output] : consumed) {
+    for (const auto& [outpoint, _] : consumed) {
         elements_.txos_.erase(outpoint);
     }
 }

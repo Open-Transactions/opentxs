@@ -5,15 +5,19 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cs_shared_guarded.h>
 #include <optional>
+#include <shared_mutex>
 #include <span>
+#include <utility>
 
 #include "blockchain/database/wallet/Output.hpp"
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/util/alloc/AllocatesChildren.hpp"
+#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -82,42 +86,18 @@ class Transaction;
 }  // namespace storage
 
 class Data;
+class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::database::implementation
 {
-class Wallet
+class Wallet final : private pmr::HasUpstreamAllocator,
+                     private pmr::AllocatesChildren<alloc::BoostPoolSync>
 {
 public:
-    auto AddConfirmedTransactions(
-        const SubaccountID& account,
-        const SubchainID& index,
-        BatchedMatches&& transactions,
-        TXOs& txoCreated,
-        TXOs& txoConsumed) noexcept -> bool;
-    auto AddMempoolTransaction(
-        const SubaccountID& balanceNode,
-        const crypto::Subchain subchain,
-        const Vector<std::uint32_t> outputIndices,
-        const block::Transaction& transaction,
-        TXOs& txoCreated) const noexcept -> bool;
-    auto AddOutgoingTransaction(
-        const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
-        const block::Transaction& transaction) const noexcept -> bool;
-    auto AddProposal(
-        const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx) const noexcept -> bool;
-    auto AdvanceTo(const block::Position& pos) const noexcept -> bool;
-    auto CancelProposal(const identifier::Generic& id) const noexcept -> bool;
     auto CompletedProposals() const noexcept
         -> UnallocatedSet<identifier::Generic>;
-    auto FinalizeReorg(
-        storage::lmdb::Transaction& tx,
-        const block::Position& pos) const noexcept -> bool;
-    auto ForgetProposals(
-        const UnallocatedSet<identifier::Generic>& ids) const noexcept -> bool;
     auto GetBalance() const noexcept -> Balance;
     auto GetBalance(const identifier::Nym& owner) const noexcept -> Balance;
     auto GetBalance(const identifier::Nym& owner, const SubaccountID& node)
@@ -143,6 +123,8 @@ public:
     auto GetPatterns(const SubchainID& index, alloc::Default alloc)
         const noexcept -> Patterns;
     auto GetPosition() const noexcept -> block::Position;
+    auto GetReserved(const identifier::Generic& proposal, alloc::Strategy alloc)
+        const noexcept -> Vector<UTXO>;
     auto GetSubchainID(
         const SubaccountID& balanceNode,
         const crypto::Subchain subchain) const noexcept -> SubchainID;
@@ -165,51 +147,108 @@ public:
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto PublishBalance() const noexcept -> void;
-    auto ReorgTo(
-        const node::internal::HeaderOraclePrivate& data,
-        storage::lmdb::Transaction& tx,
-        const node::HeaderOracle& headers,
-        const SubaccountID& balanceNode,
-        const crypto::Subchain subchain,
-        const SubchainID& index,
-        std::span<const block::Position> reorg) const noexcept -> bool;
-    auto ReserveUTXO(
-        const identifier::Nym& spender,
-        const identifier::Generic& proposal,
-        const node::internal::SpendPolicy& policy) const noexcept
-        -> std::optional<UTXO>;
-    auto ReserveUTXO(
-        const identifier::Nym& spender,
-        const identifier::Generic& proposal,
-        const block::Outpoint& id) const noexcept -> std::optional<UTXO>;
-    auto SubchainAddElements(
-        const SubchainID& index,
-        const ElementMap& elements) const noexcept -> bool;
     auto SubchainLastIndexed(const SubchainID& index) const noexcept
         -> std::optional<Bip32Index>;
     auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position;
-    auto SubchainSetLastScanned(
+
+    auto AddConfirmedTransactions(
+        const Log& log,
+        const SubaccountID& account,
         const SubchainID& index,
-        const block::Position& position) const noexcept -> bool;
+        BatchedMatches&& transactions,
+        TXOs& txoCreated,
+        TXOs& txoConsumed,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto AddMempoolTransaction(
+        const Log& log,
+        const SubaccountID& subaccount,
+        const crypto::Subchain subchain,
+        MatchedTransaction&& match,
+        TXOs& txoCreated,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto AddProposal(
+        const Log& log,
+        const identifier::Generic& id,
+        const proto::BlockchainTransactionProposal& tx,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto AdvanceTo(
+        const Log& log,
+        const block::Position& pos,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto CancelProposal(
+        const Log& log,
+        const identifier::Generic& id,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto FinalizeProposal(
+        const Log& log,
+        const identifier::Generic& proposalID,
+        const proto::BlockchainTransactionProposal& proposal,
+        const block::Transaction& transaction,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto FinalizeReorg(
+        const Log& log,
+        const block::Position& pos,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto ForgetProposals(
+        const Log& log,
+        const UnallocatedSet<identifier::Generic>& ids,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto ReorgTo(
+        const Log& log,
+        const node::internal::HeaderOraclePrivate& data,
+        const node::HeaderOracle& headers,
+        const SubaccountID& balanceNode,
+        const crypto::Subchain subchain,
+        const SubchainID& index,
+        std::span<const block::Position> reorg,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto ReserveUTXO(
+        const Log& log,
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const node::internal::SpendPolicy& policy,
+        alloc::Strategy alloc) noexcept -> std::pair<std::optional<UTXO>, bool>;
+    auto ReserveUTXO(
+        const Log& log,
+        const identifier::Nym& spender,
+        const identifier::Generic& proposal,
+        const block::Outpoint& id,
+        alloc::Strategy alloc) noexcept -> std::optional<UTXO>;
+    auto SubchainAddElements(
+        const Log& log,
+        const SubchainID& index,
+        const ElementMap& elements,
+        alloc::Strategy alloc) noexcept -> bool;
+    auto SubchainSetLastScanned(
+        const Log& log,
+        const SubchainID& index,
+        const block::Position& position,
+        alloc::Strategy alloc) noexcept -> bool;
 
     Wallet(
         const api::Session& api,
         const common::Database& common,
         const storage::lmdb::Database& lmdb,
         const blockchain::Type chain,
-        const blockchain::cfilter::Type filter) noexcept;
+        const blockchain::cfilter::Type filter,
+        alloc::Default alloc) noexcept;
     Wallet() = delete;
     Wallet(const Wallet&) = delete;
     auto operator=(const Wallet&) -> Wallet& = delete;
     auto operator=(Wallet&&) -> Wallet& = delete;
 
 private:
+    using Outputs =
+        libguarded::shared_guarded<wallet::Output, std::shared_mutex>;
+
     const api::Session& api_;
     const common::Database& common_;
     const storage::lmdb::Database& lmdb_;
-    mutable wallet::SubchainData subchains_;
+    wallet::SubchainData subchains_;
     mutable wallet::Proposal proposals_;
-    mutable wallet::Output outputs_;
+    mutable Outputs outputs_;
 };
 }  // namespace opentxs::blockchain::database::implementation

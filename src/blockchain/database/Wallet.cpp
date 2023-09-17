@@ -6,6 +6,7 @@
 #include "blockchain/database/Wallet.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionProposal.pb.h>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -27,64 +28,75 @@ Wallet::Wallet(
     const common::Database& common,
     const storage::lmdb::Database& lmdb,
     const blockchain::Type chain,
-    const blockchain::cfilter::Type filter) noexcept
-    : api_(api)
+    const blockchain::cfilter::Type filter,
+    alloc::Default alloc) noexcept
+    : HasUpstreamAllocator(alloc.resource())
+    , AllocatesChildren(parent_resource())
+    , api_(api)
     , common_(common)
     , lmdb_(lmdb)
     , subchains_(api_, lmdb_, filter)
     , proposals_(api_.Crypto(), lmdb_)
-    , outputs_(api_, lmdb_, chain, subchains_, proposals_)
+    , outputs_(api_, lmdb_, chain, subchains_, proposals_, child_alloc_)
 {
 }
 
 auto Wallet::AddConfirmedTransactions(
+    const Log& log,
     const SubaccountID& account,
     const SubchainID& index,
     BatchedMatches&& transactions,
     TXOs& txoCreated,
-    TXOs& txoConsumed) noexcept -> bool
+    TXOs& txoConsumed,
+    alloc::Strategy alloc) noexcept -> bool
 {
-    return outputs_.AddConfirmedTransactions(
-        account, index, std::move(transactions), txoCreated, txoConsumed);
+    return outputs_.lock()->AddConfirmedTransactions(
+        log,
+        account,
+        index,
+        std::move(transactions),
+        txoCreated,
+        txoConsumed,
+        alloc);
 }
 
 auto Wallet::AddMempoolTransaction(
-    const SubaccountID& balanceNode,
+    const Log& log,
+    const SubaccountID& subaccount,
     const crypto::Subchain subchain,
-    const Vector<std::uint32_t> outputIndices,
-    const block::Transaction& original,
-    TXOs& txoCreated) const noexcept -> bool
+    MatchedTransaction&& match,
+    TXOs& txoCreated,
+    alloc::Strategy alloc) noexcept -> bool
 {
-    const auto id = subchains_.GetSubchainID(balanceNode, subchain);
+    const auto id = subchains_.GetSubchainID(subaccount, subchain);
 
-    return outputs_.AddMempoolTransaction(
-        balanceNode, id, outputIndices, original, txoCreated);
-}
-
-auto Wallet::AddOutgoingTransaction(
-    const identifier::Generic& proposalID,
-    const proto::BlockchainTransactionProposal& proposal,
-    const block::Transaction& transaction) const noexcept -> bool
-{
-    return outputs_.AddOutgoingTransaction(proposalID, proposal, transaction);
+    return outputs_.lock()->AddMempoolTransaction(
+        log, subaccount, id, std::move(match), txoCreated, alloc);
 }
 
 auto Wallet::AddProposal(
+    const Log& log,
     const identifier::Generic& id,
-    const proto::BlockchainTransactionProposal& tx) const noexcept -> bool
+    const proto::BlockchainTransactionProposal& tx,
+    alloc::Strategy alloc) noexcept -> bool
 {
     return proposals_.AddProposal(id, tx);
 }
 
-auto Wallet::AdvanceTo(const block::Position& pos) const noexcept -> bool
+auto Wallet::AdvanceTo(
+    const Log& log,
+    const block::Position& pos,
+    alloc::Strategy alloc) noexcept -> bool
 {
-    return outputs_.AdvanceTo(pos);
+    return outputs_.lock()->AdvanceTo(log, pos, alloc);
 }
 
-auto Wallet::CancelProposal(const identifier::Generic& id) const noexcept
-    -> bool
+auto Wallet::CancelProposal(
+    const Log& log,
+    const identifier::Generic& id,
+    alloc::Strategy alloc) noexcept -> bool
 {
-    return outputs_.CancelProposal(id);
+    return outputs_.lock()->CancelProposal(log, id, alloc);
 }
 
 auto Wallet::CompletedProposals() const noexcept
@@ -93,44 +105,59 @@ auto Wallet::CompletedProposals() const noexcept
     return proposals_.CompletedProposals();
 }
 
-auto Wallet::FinalizeReorg(
-    storage::lmdb::Transaction& tx,
-    const block::Position& pos) const noexcept -> bool
+auto Wallet::FinalizeProposal(
+    const Log& log,
+    const identifier::Generic& proposalID,
+    const proto::BlockchainTransactionProposal& proposal,
+    const block::Transaction& transaction,
+    alloc::Strategy alloc) noexcept -> bool
 {
-    return outputs_.FinalizeReorg(tx, pos);
+    return outputs_.lock()->FinalizeProposal(
+        log, proposalID, proposal, transaction, alloc);
+}
+
+auto Wallet::FinalizeReorg(
+    const Log& log,
+    const block::Position& pos,
+    storage::lmdb::Transaction& tx,
+    alloc::Strategy alloc) noexcept -> bool
+{
+    return outputs_.lock()->FinalizeReorg(log, pos, tx, alloc);
 }
 
 auto Wallet::ForgetProposals(
-    const UnallocatedSet<identifier::Generic>& ids) const noexcept -> bool
+    const Log& log,
+    const UnallocatedSet<identifier::Generic>& ids,
+    alloc::Strategy alloc) noexcept -> bool
 {
     return proposals_.ForgetProposals(ids);
 }
 
 auto Wallet::GetBalance() const noexcept -> Balance
 {
-    return outputs_.GetBalance();
+    return outputs_.lock_shared()->GetBalance();
 }
 
 auto Wallet::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 {
-    return outputs_.GetBalance(owner);
+    return outputs_.lock_shared()->GetBalance(owner);
 }
 
 auto Wallet::GetBalance(const identifier::Nym& owner, const SubaccountID& node)
     const noexcept -> Balance
 {
-    return outputs_.GetBalance(owner, node);
+    return outputs_.lock_shared()->GetBalance(owner, node);
 }
 
 auto Wallet::GetBalance(const crypto::Key& key) const noexcept -> Balance
 {
-    return outputs_.GetBalance(key);
+    return outputs_.lock_shared()->GetBalance(key);
 }
 
 auto Wallet::GetOutputs(node::TxoState type, alloc::Default alloc)
     const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(type, alloc);
+    return outputs_.lock_shared()->GetOutputs(type, alloc);
 }
 
 auto Wallet::GetOutputs(
@@ -138,7 +165,7 @@ auto Wallet::GetOutputs(
     node::TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(owner, type, alloc);
+    return outputs_.lock_shared()->GetOutputs(owner, type, alloc);
 }
 
 auto Wallet::GetOutputs(
@@ -147,7 +174,7 @@ auto Wallet::GetOutputs(
     node::TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(owner, node, type, alloc);
+    return outputs_.lock_shared()->GetOutputs(owner, node, type, alloc);
 }
 
 auto Wallet::GetOutputs(
@@ -155,13 +182,13 @@ auto Wallet::GetOutputs(
     node::TxoState type,
     alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
-    return outputs_.GetOutputs(key, type, alloc);
+    return outputs_.lock_shared()->GetOutputs(key, type, alloc);
 }
 
 auto Wallet::GetOutputTags(const block::Outpoint& output) const noexcept
     -> UnallocatedSet<node::TxoTag>
 {
-    return outputs_.GetOutputTags(output);
+    return outputs_.lock_shared()->GetOutputTags(output);
 }
 
 auto Wallet::GetPatterns(const SubchainID& index, alloc::Default alloc)
@@ -172,7 +199,14 @@ auto Wallet::GetPatterns(const SubchainID& index, alloc::Default alloc)
 
 auto Wallet::GetPosition() const noexcept -> block::Position
 {
-    return outputs_.GetPosition();
+    return outputs_.lock_shared()->GetPosition();
+}
+
+auto Wallet::GetReserved(
+    const identifier::Generic& proposal,
+    alloc::Strategy alloc) const noexcept -> Vector<UTXO>
+{
+    return outputs_.lock_shared()->GetReserved(proposal, alloc);
 }
 
 auto Wallet::GetSubchainID(
@@ -185,25 +219,25 @@ auto Wallet::GetSubchainID(
 auto Wallet::GetTransactions() const noexcept
     -> UnallocatedVector<block::TransactionHash>
 {
-    return outputs_.GetTransactions();
+    return outputs_.lock_shared()->GetTransactions();
 }
 
 auto Wallet::GetTransactions(const identifier::Nym& account) const noexcept
     -> UnallocatedVector<block::TransactionHash>
 {
-    return outputs_.GetTransactions(account);
+    return outputs_.lock_shared()->GetTransactions(account);
 }
 
 auto Wallet::GetUnconfirmedTransactions() const noexcept
     -> UnallocatedSet<block::TransactionHash>
 {
-    return outputs_.GetUnconfirmedTransactions();
+    return outputs_.lock_shared()->GetUnconfirmedTransactions();
 }
 
 auto Wallet::GetUnspentOutputs(alloc::Default alloc) const noexcept
     -> Vector<UTXO>
 {
-    return outputs_.GetUnspentOutputs(alloc);
+    return outputs_.lock_shared()->GetUnspentOutputs(alloc);
 }
 
 auto Wallet::GetUnspentOutputs(
@@ -213,12 +247,12 @@ auto Wallet::GetUnspentOutputs(
 {
     const auto id = subchains_.GetSubchainID(balanceNode, subchain);
 
-    return outputs_.GetUnspentOutputs(id, alloc);
+    return outputs_.lock_shared()->GetUnspentOutputs(id, alloc);
 }
 
 auto Wallet::GetWalletHeight() const noexcept -> block::Height
 {
-    return outputs_.GetWalletHeight();
+    return outputs_.lock_shared()->GetWalletHeight();
 }
 
 auto Wallet::LoadProposal(const identifier::Generic& id) const noexcept
@@ -241,17 +275,19 @@ auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
 
 auto Wallet::PublishBalance() const noexcept -> void
 {
-    outputs_.PublishBalance();
+    outputs_.lock_shared()->PublishBalance();
 }
 
 auto Wallet::ReorgTo(
+    const Log& log,
     const node::internal::HeaderOraclePrivate& data,
-    storage::lmdb::Transaction& tx,
     const node::HeaderOracle& headers,
     const SubaccountID& balanceNode,
     const crypto::Subchain subchain,
     const SubchainID& index,
-    std::span<const block::Position> reorg) const noexcept -> bool
+    std::span<const block::Position> reorg,
+    storage::lmdb::Transaction& tx,
+    alloc::Strategy alloc) noexcept -> bool
 {
     if (reorg.empty()) { return true; }
 
@@ -267,10 +303,14 @@ auto Wallet::ReorgTo(
         LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
     }
 
-    for (const auto& position : reorg) {
-        if (false == outputs_.StartReorg(tx, subchainID, position)) {
+    {
+        auto handle = outputs_.lock();
 
-            return false;
+        for (const auto& position : reorg) {
+            if (!handle->StartReorg(log, subchainID, position, tx, alloc)) {
+
+                return false;
+            }
         }
     }
 
@@ -278,26 +318,29 @@ auto Wallet::ReorgTo(
 }
 
 auto Wallet::ReserveUTXO(
+    const Log& log,
     const identifier::Nym& spender,
     const identifier::Generic& id,
-    const node::internal::SpendPolicy& policy) const noexcept
-    -> std::optional<UTXO>
+    const node::internal::SpendPolicy& policy,
+    alloc::Strategy alloc) noexcept -> std::pair<std::optional<UTXO>, bool>
 {
     if (false == proposals_.Exists(id)) {
         LogError()(OT_PRETTY_CLASS())("Proposal ")(id, api_.Crypto())(
             " does not exist")
             .Flush();
 
-        return std::nullopt;
+        return std::make_pair(std::nullopt, false);
     }
 
-    return outputs_.ReserveUTXO(spender, id, policy);
+    return outputs_.lock()->ReserveUTXO(log, spender, id, policy, alloc);
 }
 
 auto Wallet::ReserveUTXO(
+    const Log& log,
     const identifier::Nym& spender,
     const identifier::Generic& proposal,
-    const block::Outpoint& id) const noexcept -> std::optional<UTXO>
+    const block::Outpoint& id,
+    alloc::Strategy alloc) noexcept -> std::optional<UTXO>
 {
     if (false == proposals_.Exists(proposal)) {
         LogError()(OT_PRETTY_CLASS())("Proposal ")(proposal, api_.Crypto())(
@@ -307,12 +350,14 @@ auto Wallet::ReserveUTXO(
         return std::nullopt;
     }
 
-    return outputs_.ReserveUTXO(spender, proposal, id);
+    return outputs_.lock()->ReserveUTXO(log, spender, proposal, id, alloc);
 }
 
 auto Wallet::SubchainAddElements(
+    const Log& log,
     const SubchainID& index,
-    const ElementMap& elements) const noexcept -> bool
+    const ElementMap& elements,
+    alloc::Strategy alloc) noexcept -> bool
 {
     return subchains_.SubchainAddElements(index, elements);
 }
@@ -330,8 +375,10 @@ auto Wallet::SubchainLastScanned(const SubchainID& index) const noexcept
 }
 
 auto Wallet::SubchainSetLastScanned(
+    const Log& log,
     const SubchainID& index,
-    const block::Position& position) const noexcept -> bool
+    const block::Position& position,
+    alloc::Strategy alloc) noexcept -> bool
 {
     return subchains_.SubchainSetLastScanned(index, position);
 }
