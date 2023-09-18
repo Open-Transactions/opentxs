@@ -57,18 +57,14 @@ TEST_F(PaymentCodeAPI, alice)
 
         return out;
     }();
-    const auto id1 = alice_.Crypto().Blockchain().NewPaymentCodeSubaccount(
-        nym.ID(), localPC, remotePC, ot::reader(path), receiveChain, reason);
-    const auto id2 = alice_.Crypto().Blockchain().NewPaymentCodeSubaccount(
-        nym.ID(), localPC, remotePC, ot::reader(path), sendChain, reason);
+    const auto& account1 = alice_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        nym.ID(), remotePC, receiveChain, reason);
+    const auto& account2 = alice_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        nym.ID(), remotePC, sendChain, reason);
 
-    ASSERT_FALSE(id1.empty());
-    ASSERT_FALSE(id2.empty());
+    EXPECT_TRUE(account1);
+    EXPECT_TRUE(account2);
 
-    const auto& account1 =
-        alice_.Crypto().Blockchain().PaymentCodeSubaccount(nym.ID(), id1);
-    const auto& account2 =
-        alice_.Crypto().Blockchain().PaymentCodeSubaccount(nym.ID(), id2);
     using Subchain = ot::blockchain::crypto::Subchain;
     const auto populate = [&](const auto& account, const auto& target) {
         const auto generate = [&](const auto subchain) {
@@ -157,18 +153,14 @@ TEST_F(PaymentCodeAPI, bob)
 
         return out;
     }();
-    const auto id1 = bob_.Crypto().Blockchain().NewPaymentCodeSubaccount(
-        nym.ID(), localPC, remotePC, ot::reader(path), receiveChain, reason);
-    const auto id2 = bob_.Crypto().Blockchain().NewPaymentCodeSubaccount(
-        nym.ID(), localPC, remotePC, ot::reader(path), sendChain, reason);
+    const auto& account1 = bob_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        nym.ID(), remotePC, receiveChain, reason);
+    const auto& account2 = bob_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        nym.ID(), remotePC, sendChain, reason);
 
-    ASSERT_FALSE(id1.empty());
-    ASSERT_FALSE(id2.empty());
+    EXPECT_TRUE(account1.IsValid());
+    EXPECT_TRUE(account2.IsValid());
 
-    const auto& account1 =
-        bob_.Crypto().Blockchain().PaymentCodeSubaccount(nym.ID(), id1);
-    const auto& account2 =
-        bob_.Crypto().Blockchain().PaymentCodeSubaccount(nym.ID(), id2);
     using Subchain = ot::blockchain::crypto::Subchain;
     const auto populate = [&](const auto& account, const auto& target) {
         const auto generate = [&](const auto subchain) {

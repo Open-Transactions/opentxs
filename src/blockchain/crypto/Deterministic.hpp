@@ -73,11 +73,6 @@ public:
         noexcept(false) -> const crypto::Element& final;
     auto GenerateNext(const Subchain type, const PasswordPrompt& reason)
         const noexcept -> std::optional<Bip32Index> final;
-    auto InternalDeterministic() const noexcept
-        -> internal::Deterministic& final
-    {
-        return const_cast<Deterministic&>(*this);
-    }
     auto Key(const Subchain type, const Bip32Index index) const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
     auto LastGenerated(const Subchain type) const noexcept

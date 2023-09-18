@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
@@ -169,6 +170,30 @@ public:
         -> void final
     {
     }
+    auto LoadOrCreateSubaccount(
+        const identifier::Nym&,
+        const opentxs::PaymentCode&,
+        const Chain,
+        const PasswordPrompt&) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& final
+    {
+        static const auto blank =
+            opentxs::blockchain::crypto::internal::PaymentCode{};
+
+        return blank;
+    }
+    auto LoadOrCreateSubaccount(
+        const identity::Nym&,
+        const opentxs::PaymentCode&,
+        const Chain,
+        const PasswordPrompt&) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& final
+    {
+        static const auto blank =
+            opentxs::blockchain::crypto::internal::PaymentCode{};
+
+        return blank;
+    }
     auto LoadTransaction(const Txid&) const noexcept
         -> opentxs::blockchain::block::Transaction final
     {
@@ -211,26 +236,6 @@ public:
         return {account_};
     }
     auto NewNym(const identifier::Nym& id) const noexcept -> void final {}
-    auto NewPaymentCodeSubaccount(
-        const identifier::Nym&,
-        const opentxs::PaymentCode&,
-        const opentxs::PaymentCode&,
-        const proto::HDPath&,
-        const Chain,
-        const PasswordPrompt&) const noexcept -> identifier::Account final
-    {
-        return {account_};
-    }
-    auto NewPaymentCodeSubaccount(
-        const identifier::Nym&,
-        const opentxs::PaymentCode&,
-        const opentxs::PaymentCode&,
-        const ReadView&,
-        const Chain,
-        const PasswordPrompt&) const noexcept -> identifier::Account final
-    {
-        return {account_};
-    }
     auto Owner(const identifier::Account&) const noexcept
         -> const identifier::Nym& final
     {
@@ -239,17 +244,6 @@ public:
     auto Owner(const Key&) const noexcept -> const identifier::Nym& final
     {
         return id_;
-    }
-    auto PaymentCodeSubaccount(
-        const identifier::Nym&,
-        const opentxs::PaymentCode&,
-        const opentxs::PaymentCode&,
-        const proto::HDPath&,
-        const Chain,
-        const PasswordPrompt&) const noexcept(false)
-        -> const opentxs::blockchain::crypto::PaymentCode& final
-    {
-        throw std::out_of_range{""};
     }
     auto PaymentCodeSubaccount(
         const identifier::Nym&,

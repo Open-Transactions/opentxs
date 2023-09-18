@@ -18,6 +18,7 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -145,6 +146,18 @@ auto Account::AddHDNode(
     init_notification();
 
     return hd_.Construct(id, path, standard, reason);
+}
+
+auto Account::AddOrUpdatePaymentCode(
+    const opentxs::PaymentCode& local,
+    const opentxs::PaymentCode& remote,
+    const proto::HDPath& path,
+    const PasswordPrompt& reason,
+    identifier::Account& out) noexcept -> bool
+{
+    out = internal::PaymentCode::GetID(api_, chain_, local, remote);
+
+    return payment_code_.Construct(out, contacts_, local, remote, path, reason);
 }
 
 auto Account::ClaimAccountID(

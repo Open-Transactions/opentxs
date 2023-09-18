@@ -60,14 +60,14 @@ namespace crypto
 {
 class Account;
 class HD;
-class PaymentCode;
+class PaymentCode;  // IWYU pragma: keep
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace identity
 {
-class HDPath;
-}  // namespace proto
+class Nym;
+}  // namespace identity
 
 class ByteArray;
 class Contact;
@@ -153,6 +153,18 @@ public:
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void final;
+    auto LoadOrCreateSubaccount(
+        const identifier::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& final;
+    auto LoadOrCreateSubaccount(
+        const identity::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& final;
     auto LoadTransaction(const TxidHex& id) const noexcept
         -> opentxs::blockchain::block::Transaction final;
     auto LoadTransaction(const Txid& id) const noexcept
@@ -177,36 +189,12 @@ public:
         const PasswordPrompt& reason) const noexcept
         -> identifier::Account final;
     auto NewNym(const identifier::Nym& id) const noexcept -> void final;
-    auto NewPaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const Chain chain,
-        const PasswordPrompt& reason) const noexcept
-        -> identifier::Account final;
-    auto NewPaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const ReadView& view,
-        const Chain chain,
-        const PasswordPrompt& reason) const noexcept
-        -> identifier::Account final;
     auto Owner(const identifier::Account& accountID) const noexcept
         -> const identifier::Nym& final;
     auto Owner(const Key& key) const noexcept -> const identifier::Nym& final;
     auto PaymentCodeSubaccount(
         const identifier::Nym& nymID,
         const identifier::Account& accountID) const noexcept(false)
-        -> const opentxs::blockchain::crypto::PaymentCode& final;
-    auto PaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const Chain chain,
-        const PasswordPrompt& reason) const noexcept(false)
         -> const opentxs::blockchain::crypto::PaymentCode& final;
     auto PubkeyHash(const Chain chain, const Data& pubkey) const noexcept(false)
         -> ByteArray final;

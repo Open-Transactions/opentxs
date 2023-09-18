@@ -43,11 +43,8 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -61,7 +58,6 @@ auto BlockchainPCSubaccount(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
     identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>
@@ -71,7 +67,7 @@ auto BlockchainPCSubaccount(
     try {
 
         return std::make_unique<ReturnType>(
-            api, contacts, parent, local, remote, path, txid, reason, id);
+            api, contacts, parent, local, remote, path, reason, id);
     } catch (const std::exception& e) {
         LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
 
@@ -106,26 +102,6 @@ auto BlockchainPCSubaccount(
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::blockchain::crypto::internal
-{
-auto PaymentCode::GetID(
-    const api::Session& api,
-    const blockchain::Type chain,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote) noexcept -> identifier::Account
-{
-    auto out = identifier::Account{};
-    auto preimage = api.Factory().Data();
-    preimage.Assign(&chain, sizeof(chain));
-    preimage.Concatenate(local.ID().Bytes());
-    preimage.Concatenate(remote.ID().Bytes());
-    using enum identifier::AccountSubtype;
-
-    return api.Factory().AccountIDFromPreimage(
-        preimage.Bytes(), blockchain_subaccount);
-}
-}  // namespace opentxs::blockchain::crypto::internal
-
 namespace opentxs::blockchain::crypto::implementation
 {
 PaymentCode::PaymentCode(
@@ -135,7 +111,6 @@ PaymentCode::PaymentCode(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const opentxs::blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
     identifier::Account& id) noexcept(false)
     : Deterministic(
@@ -148,14 +123,7 @@ PaymentCode::PaymentCode(
           id)
     , version_(DefaultVersion)
     , outgoing_notifications_()
-    , incoming_notifications_([&] {
-        auto out =
-            UnallocatedSet<opentxs::blockchain::block::TransactionHash>{};
-
-        if (false == txid.IsNull()) { out.emplace(txid); }
-
-        return out;
-    }())
+    , incoming_notifications_()
     , local_(local, compare_)
     , remote_(remote, compare_)
     , contact_id_(contacts.PaymentCodeToContact(remote_, chain_))

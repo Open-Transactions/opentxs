@@ -107,7 +107,6 @@ auto BlockchainPCSubaccount(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const blockchain::block::TransactionHash& txid,
     const PasswordPrompt& reason,
     identifier::Account& id) noexcept
     -> std::unique_ptr<blockchain::crypto::PaymentCode>;

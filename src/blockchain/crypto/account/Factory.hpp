@@ -117,36 +117,8 @@ struct Factory<
         const PasswordPrompt& reason) noexcept
         -> std::unique_ptr<crypto::PaymentCode>
     {
-        static const auto blank = block::TransactionHash{};
-
         return factory::BlockchainPCSubaccount(
-            api, contacts, parent, local, remote, path, blank, reason, id);
-    }
-};
-
-template <>
-struct Factory<
-    crypto::PaymentCode,
-    api::session::Contacts,
-    opentxs::PaymentCode,
-    opentxs::PaymentCode,
-    proto::HDPath,
-    opentxs::blockchain::block::TransactionHash,
-    PasswordPrompt> {
-    static auto get(
-        const api::Session& api,
-        const crypto::Account& parent,
-        identifier::Account& id,
-        const api::session::Contacts& contacts,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const opentxs::blockchain::block::TransactionHash& txid,
-        const PasswordPrompt& reason) noexcept
-        -> std::unique_ptr<crypto::PaymentCode>
-    {
-        return factory::BlockchainPCSubaccount(
-            api, contacts, parent, local, remote, path, txid, reason, id);
+            api, contacts, parent, local, remote, path, reason, id);
     }
 };
 

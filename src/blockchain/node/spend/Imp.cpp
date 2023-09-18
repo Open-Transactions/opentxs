@@ -22,7 +22,6 @@
 #include <tuple>
 
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
@@ -47,6 +46,7 @@
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/blockchain/node/Funding.hpp"     // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
@@ -157,17 +157,16 @@ auto SpendPrivate::account(const PaymentCode& recipient) const noexcept(false)
             .Abort();
     }
 
-    const auto& api = api_.Crypto().Blockchain();
-    const auto& account = api.Account(spender_, chain_);
-    const auto id = api.Internal().NewPaymentCodeSubaccount(
-        spender_, sender_payment_code(), recipient, path(), chain_, reason_);
+    const auto& out = api_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        spender_, recipient, chain_, reason_);
 
-    if (id.empty()) {
+    if (false == out.IsValid()) {
         throw std::runtime_error{
-            "failed to instantiate account for "s.append(recipient.asBase58())};
+            "failed to instantiate or load account for "s.append(
+                recipient.asBase58())};
     }
 
-    return account.GetPaymentCode().at(id);
+    return out;
 }
 
 auto SpendPrivate::Add(const proto::BlockchainTransaction& tx) noexcept -> void
@@ -393,9 +392,12 @@ auto SpendPrivate::deserialize_output(
     } else if (in.has_pubkey()) {
         auto subaccountID =
             api_.Factory().AccountIDFromBase58(in.paymentcodechannel());
-        const auto& subaccount =
-            api_.Crypto().Blockchain().PaymentCodeSubaccount(
-                spender_, subaccountID);
+        const auto& subaccount = api_.Crypto()
+                                     .Blockchain()
+                                     .Wallet(chain_)
+                                     .Account(spender_)
+                                     .GetPaymentCode()
+                                     .at(subaccountID);
         add_payment_code(
             subaccount.Remote(),
             amount,
@@ -449,9 +451,12 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
         const auto check = [this](const auto& item) {
             const auto& [contact, amount, recipient, keyID, pubkey] = item;
             const auto& [accountID, subchain, index] = keyID;
-            const auto& account =
-                api_.Crypto().Blockchain().PaymentCodeSubaccount(
-                    spender_, accountID);
+            const auto& account = api_.Crypto()
+                                      .Blockchain()
+                                      .Wallet(chain_)
+                                      .Account(spender_)
+                                      .GetPaymentCode()
+                                      .at(accountID);
             matterfi::paymentcode_extra_notifications(
                 LogTrace(), account, notifications_);
         };

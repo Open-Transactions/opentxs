@@ -12,7 +12,6 @@
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/Imported.hpp"
@@ -126,27 +125,12 @@ public:
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
         identifier::Account& id) noexcept -> bool final;
-    auto AddUpdatePaymentCode(
+    auto AddOrUpdatePaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
         const PasswordPrompt& reason,
-        identifier::Account& out) noexcept -> bool final
-    {
-        return payment_code_.Construct(
-            out, contacts_, local, remote, path, reason);
-    }
-    auto AddUpdatePaymentCode(
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const opentxs::blockchain::block::TransactionHash& txid,
-        const PasswordPrompt& reason,
-        identifier::Account& out) noexcept -> bool final
-    {
-        return payment_code_.Construct(
-            out, contacts_, local, remote, path, txid, reason);
-    }
+        identifier::Account& out) noexcept -> bool final;
     auto Startup() noexcept -> void final { init_notification(); }
     auto Subaccount(const identifier::Account& id) noexcept(false)
         -> crypto::Subaccount& final;

@@ -137,6 +137,8 @@ public:
     {
         auto handle = data_.lock();
 
+        if (handle->index_.contains(out)) { return true; }
+
         return construct(*handle, out, args...);
     }
 

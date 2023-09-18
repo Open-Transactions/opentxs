@@ -795,27 +795,13 @@ TEST_F(ApiCryptoBlockchain, paymentcode)
     const auto& chain = btc_chain_;
     const auto pNym = api_.Wallet().Nym(nym);
     auto bytes = ot::Space{};
-    const auto accountID = api_.Crypto().Blockchain().NewPaymentCodeSubaccount(
+    const auto& account = api_.Crypto().Blockchain().LoadOrCreateSubaccount(
         nym,
-        pNym->PaymentCodeSecret(reason_),
         api_.Factory().PaymentCodeFromBase58(
             "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM"sv),
-        [&] {
-            pNym->PaymentCodePath(ot::writer(bytes));
-            return ot::reader(bytes);
-        }(),
         chain,
         reason_);
 
-    ASSERT_FALSE(accountID.empty());
-
-    const auto& account = api_.Crypto()
-                              .Blockchain()
-                              .Account(nym, chain)
-                              .GetPaymentCode()
-                              .at(accountID);
-
-    EXPECT_EQ(account.ID(), accountID);
     EXPECT_TRUE(check_initial_state(account, Subchain::Outgoing));
     EXPECT_TRUE(check_initial_state(account, Subchain::Incoming));
 

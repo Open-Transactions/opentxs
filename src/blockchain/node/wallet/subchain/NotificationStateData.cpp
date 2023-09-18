@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"
-#include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/blockchain/crypto/Notification.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
@@ -293,9 +292,8 @@ auto NotificationStateData::process(
 
     if (remote == pc_) { return; }
 
-    const auto& account =
-        api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
-            owner_, pc_, remote, path_, chain_, reason);
+    const auto& account = api_.Crypto().Blockchain().LoadOrCreateSubaccount(
+        owner_, remote, chain_, reason);
 
     if (confirmed) {
         account.InternalPaymentCode().AddIncomingNotification(tx);

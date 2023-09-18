@@ -67,6 +67,11 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
+namespace identity
+{
+class Nym;
+}  // namespace identity
+
 class Contact;
 class PasswordPrompt;
 class PaymentCode;
@@ -156,6 +161,18 @@ public:
         -> const opentxs::blockchain::crypto::HD& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> const crypto::internal::Blockchain& = 0;
+    virtual auto LoadOrCreateSubaccount(
+        const identifier::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& = 0;
+    virtual auto LoadOrCreateSubaccount(
+        const identity::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode& = 0;
     virtual auto LoadTransaction(const Txid& id) const noexcept
         -> opentxs::blockchain::block::Transaction = 0;
     virtual auto LoadTransaction(const TxidHex& id) const noexcept
@@ -176,13 +193,6 @@ public:
         const opentxs::blockchain::crypto::HDProtocol standard,
         const Chain derivationChain,
         const Chain targetChain,
-        const PasswordPrompt& reason) const noexcept -> identifier::Account = 0;
-    virtual auto NewPaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const ReadView& view,
-        const Chain chain,
         const PasswordPrompt& reason) const noexcept -> identifier::Account = 0;
     virtual auto Owner(const identifier::Account& accountID) const noexcept
         -> const identifier::Nym& = 0;

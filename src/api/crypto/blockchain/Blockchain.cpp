@@ -16,7 +16,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
@@ -251,6 +250,26 @@ auto Blockchain::KeyGenerated(
     imp_->KeyGenerated(chain, account, subaccount, type, subchain);
 }
 
+auto Blockchain::LoadOrCreateSubaccount(
+    const identifier::Nym& nym,
+    const opentxs::PaymentCode& remote,
+    const Chain chain,
+    const PasswordPrompt& reason) const noexcept
+    -> const opentxs::blockchain::crypto::PaymentCode&
+{
+    return imp_->LoadOrCreateSubaccount(nym, remote, chain, reason);
+}
+
+auto Blockchain::LoadOrCreateSubaccount(
+    const identity::Nym& nym,
+    const opentxs::PaymentCode& remote,
+    const Chain chain,
+    const PasswordPrompt& reason) const noexcept
+    -> const opentxs::blockchain::crypto::PaymentCode&
+{
+    return imp_->LoadOrCreateSubaccount(nym, remote, chain, reason);
+}
+
 auto Blockchain::LoadTransaction(const TxidHex& txid) const noexcept
     -> opentxs::blockchain::block::Transaction
 {
@@ -313,31 +332,6 @@ auto Blockchain::NewNym(const identifier::Nym& id) const noexcept -> void
     return imp_->NewNym(id);
 }
 
-auto Blockchain::NewPaymentCodeSubaccount(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
-    const Chain chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Account
-{
-    return imp_->NewPaymentCodeSubaccount(
-        nymID, local, remote, path, chain, reason);
-}
-
-auto Blockchain::NewPaymentCodeSubaccount(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const ReadView& view,
-    const Chain chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Account
-{
-    auto path = proto::Factory<proto::HDPath>(view);
-    return imp_->NewPaymentCodeSubaccount(
-        nymID, local, remote, path, chain, reason);
-}
-
 auto Blockchain::Owner(const identifier::Account& accountID) const noexcept
     -> const identifier::Nym&
 {
@@ -355,19 +349,6 @@ auto Blockchain::PaymentCodeSubaccount(
     -> const opentxs::blockchain::crypto::PaymentCode&
 {
     return imp_->PaymentCodeSubaccount(nymID, accountID);
-}
-
-auto Blockchain::PaymentCodeSubaccount(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
-    const Chain chain,
-    const PasswordPrompt& reason) const noexcept(false)
-    -> const opentxs::blockchain::crypto::PaymentCode&
-{
-    return imp_->PaymentCodeSubaccount(
-        nymID, local, remote, path, chain, reason);
 }
 
 auto Blockchain::ProcessContact(const Contact& contact) const noexcept -> bool

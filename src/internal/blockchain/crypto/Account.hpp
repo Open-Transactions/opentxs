@@ -65,17 +65,10 @@ struct Account : virtual public crypto::Account {
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason,
         identifier::Account& id) noexcept -> bool = 0;
-    virtual auto AddUpdatePaymentCode(
+    virtual auto AddOrUpdatePaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool = 0;
-    virtual auto AddUpdatePaymentCode(
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const block::TransactionHash& notification,
         const PasswordPrompt& reason,
         identifier::Account& id) noexcept -> bool = 0;
     virtual auto Startup() noexcept -> void = 0;

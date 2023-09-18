@@ -35,6 +35,7 @@ target_sources(
     "Crypto.cpp"
     "Deterministic.cpp"
     "Deterministic.hpp"
+    "DeterministicInternal.cpp"
     "Element.cpp"
     "Element.hpp"
     "HD.cpp"
@@ -43,8 +44,10 @@ target_sources(
     "Notification.hpp"
     "PaymentCode.cpp"
     "PaymentCode.hpp"
+    "PaymentCodeInternal.cpp"
     "Subaccount.cpp"
     "Subaccount.hpp"
+    "SubaccountInternal.cpp"
     "Wallet.cpp"
     "Wallet.hpp"
 )
