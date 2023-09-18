@@ -71,23 +71,6 @@ public:
         -> opentxs::blockchain::block::ElementHash = 0;
     auto Internal() const noexcept -> const Blockchain& final { return *this; }
     virtual auto NewNym(const identifier::Nym& id) const noexcept -> void = 0;
-    using crypto::Blockchain::NewPaymentCodeSubaccount;
-    virtual auto NewPaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const Chain chain,
-        const PasswordPrompt& reason) const noexcept -> identifier::Account = 0;
-    using crypto::Blockchain::PaymentCodeSubaccount;
-    virtual auto PaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const Chain chain,
-        const PasswordPrompt& reason) const noexcept(false)
-        -> const opentxs::blockchain::crypto::PaymentCode& = 0;
     virtual auto ProcessContact(const Contact& contact) const noexcept
         -> bool = 0;
     virtual auto ProcessMergedContact(

@@ -80,10 +80,6 @@ public:
     auto AddNotification(const block::TransactionHash& tx) const noexcept
         -> bool final;
     auto IncomingNotificationCount() const noexcept -> std::size_t final;
-    auto InternalPaymentCode() const noexcept -> internal::PaymentCode& final
-    {
-        return const_cast<PaymentCode&>(*this);
-    }
     auto Local() const noexcept -> const opentxs::PaymentCode& final
     {
         return local_;
@@ -121,7 +117,6 @@ public:
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const opentxs::blockchain::block::TransactionHash& txid,
         const PasswordPrompt& reason,
         identifier::Account& id) noexcept(false);
     PaymentCode(

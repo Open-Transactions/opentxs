@@ -385,8 +385,8 @@ auto Account::Imp::process_contact(
     const auto reason =
         api_.Factory().PasswordPrompt("Generate payment code channel keys");
     const auto check_account = [&, this](const auto& remote) {
-        api_.Crypto().Blockchain().Internal().PaymentCodeSubaccount(
-            nym_->ID(), local_, remote, path_, chain_, reason);
+        api_.Crypto().Blockchain().LoadOrCreateSubaccount(
+            nym_->ID(), remote, chain_, reason);
     };
     std::for_each(nyms.begin(), nyms.end(), parse_nym);
     std::for_each(published.begin(), published.end(), parse_base58);

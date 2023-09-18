@@ -77,6 +77,11 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
+namespace identity
+{
+class Nym;
+}  // namespace identity
+
 namespace proto
 {
 class HDPath;
@@ -177,6 +182,18 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::BoostPoolSync> {
         const opentxs::blockchain::crypto::SubaccountType type,
         const opentxs::blockchain::crypto::Subchain subchain) const noexcept
         -> void;
+    auto LoadOrCreateSubaccount(
+        const identifier::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode&;
+    auto LoadOrCreateSubaccount(
+        const identity::Nym& nym,
+        const opentxs::PaymentCode& remote,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> const opentxs::blockchain::crypto::PaymentCode&;
     virtual auto LoadTransaction(
         const TxidHex& txid,
         alloc::Default alloc,
@@ -211,14 +228,6 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::BoostPoolSync> {
     auto PaymentCodeSubaccount(
         const identifier::Nym& nymID,
         const identifier::Account& accountID) const noexcept(false)
-        -> const opentxs::blockchain::crypto::PaymentCode&;
-    auto PaymentCodeSubaccount(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath path,
-        const opentxs::blockchain::Type chain,
-        const PasswordPrompt& reason) const noexcept(false)
         -> const opentxs::blockchain::crypto::PaymentCode&;
     virtual auto ProcessContact(
         const Contact& contact,
@@ -299,13 +308,6 @@ protected:
         const Bip32Index account,
         const opentxs::blockchain::crypto::HDProtocol standard,
         proto::HDPath& path) const noexcept -> void;
-    auto new_payment_code(
-        const identifier::Nym& nymID,
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath path,
-        const opentxs::blockchain::Type chain,
-        const PasswordPrompt& reason) const noexcept -> identifier::Account;
     auto p2pkh(const opentxs::blockchain::Type chain, const Data& pubkeyHash)
         const noexcept -> UnallocatedCString;
     auto p2sh(const opentxs::blockchain::Type chain, const Data& scriptHash)

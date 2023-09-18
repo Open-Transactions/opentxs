@@ -73,10 +73,7 @@ public:
         return description_;
     }
     auto ID() const noexcept -> const identifier::Account& final { return id_; }
-    auto Internal() const noexcept -> internal::Subaccount& final
-    {
-        return const_cast<Subaccount&>(*this);
-    }
+    auto IsValid() const noexcept -> bool final { return true; }
     auto Parent() const noexcept -> const crypto::Account& final
     {
         return parent_;

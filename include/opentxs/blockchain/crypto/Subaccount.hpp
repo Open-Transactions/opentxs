@@ -43,6 +43,8 @@ namespace opentxs::blockchain::crypto
 class OPENTXS_EXPORT Subaccount
 {
 public:
+    operator bool() const noexcept { return IsValid(); }
+
     virtual auto AllowedSubchains() const noexcept
         -> UnallocatedSet<Subchain> = 0;
     /// Throws std::out_of_range for invalid index
@@ -52,6 +54,7 @@ public:
     virtual auto ID() const noexcept -> const identifier::Account& = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> internal::Subaccount& = 0;
+    virtual auto IsValid() const noexcept -> bool = 0;
     virtual auto Parent() const noexcept -> const Account& = 0;
     virtual auto ScanProgress(Subchain subchain) const noexcept
         -> block::Position = 0;

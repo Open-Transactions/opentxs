@@ -71,13 +71,14 @@ public:
         }();
         pc_acct_[local.payment_code_].emplace(
             remote.payment_code_,
-            api.Crypto().Blockchain().NewPaymentCodeSubaccount(
-                local.nym_id_,
-                api.Factory().PaymentCodeFromBase58(local.payment_code_),
-                api.Factory().PaymentCodeFromBase58(remote.payment_code_),
-                path.Bytes(),
-                chain_,
-                local.Reason()));
+            api.Crypto()
+                .Blockchain()
+                .LoadOrCreateSubaccount(
+                    local.nym_id_,
+                    api.Factory().PaymentCodeFromBase58(remote.payment_code_),
+                    chain_,
+                    local.Reason())
+                .ID());
     }
 
 #pragma GCC diagnostic push

@@ -53,6 +53,7 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/HDSeed.hpp"
@@ -862,6 +863,112 @@ auto Blockchain::Imp::KeyGenerated(
 {
 }
 
+auto Blockchain::Imp::LoadOrCreateSubaccount(
+    const identifier::Nym& id,
+    const opentxs::PaymentCode& remote,
+    const Chain chain,
+    const PasswordPrompt& reason) const noexcept
+    -> const opentxs::blockchain::crypto::PaymentCode&
+{
+    static const auto blank =
+        opentxs::blockchain::crypto::internal::PaymentCode{};
+
+    try {
+        if (false == validate_nym(id)) {
+            throw std::runtime_error{
+                "not a local nym: "s.append(id.asBase58(api_.Crypto()))};
+        }
+
+        auto nym = api_.Wallet().Nym(id);
+
+        if (false == bool(nym)) {
+            throw std::runtime_error{
+                "failed to load nym: "s.append(id.asBase58(api_.Crypto()))};
+        }
+
+        return LoadOrCreateSubaccount(*nym, remote, chain, reason);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return blank;
+    }
+}
+
+auto Blockchain::Imp::LoadOrCreateSubaccount(
+    const identity::Nym& nym,
+    const opentxs::PaymentCode& remote,
+    const Chain chain,
+    const PasswordPrompt& reason) const noexcept
+    -> const opentxs::blockchain::crypto::PaymentCode&
+{
+    static const auto blank =
+        opentxs::blockchain::crypto::internal::PaymentCode{};
+
+    try {
+        if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
+            throw std::runtime_error{"invalid chain: "s.append(print(chain))};
+        }
+
+        if (false == remote.Valid()) {
+            throw std::runtime_error{"invalid remote payment code"};
+        }
+
+        if (nym.PaymentCodePublic() == remote) {
+            throw std::runtime_error{
+                "remote payment code matches local payment code: "s.append(
+                    remote.asBase58())};
+        }
+
+        const auto& api = api_.Crypto();
+        const auto& nymID = nym.ID();
+        const auto path = [&] {
+            auto out = proto::HDPath{};
+
+            if (false == nym.Internal().PaymentCodePath(out)) {
+                throw std::runtime_error{
+                    "failed to extract payment code path from nym "s.append(
+                        nymID.asBase58(api))};
+            }
+
+            return out;
+        }();
+
+        if (false == path.has_seed()) {
+            throw std::runtime_error{
+                "nym "s.append(nymID.asBase58(api))
+                    .append(" does not contain an HD seed")};
+        }
+
+        if (3 > path.child().size()) {
+            throw std::runtime_error{
+                "nym "s.append(nymID.asBase58(api))
+                    .append(" does not contain a valid HD path")};
+        }
+
+        auto accountID = identifier::Account{};
+        auto& account = this->account_mutable(chain, nymID);
+        const auto got = account.Internal().AddOrUpdatePaymentCode(
+            nym.PaymentCodeSecret(reason), remote, path, reason, accountID);
+
+        if ((false == got) || accountID.empty()) {
+            throw std::runtime_error{"failed to create or load subaccount"};
+        }
+
+        LogVerbose()(OT_PRETTY_CLASS())(
+            "Loaded or created new payment code subaccount ")(accountID, api)(
+            " for ")(print(chain))(" account ")(account.AccountID(), api)(
+            " owned by ")(nymID, api)(" in reference to remote payment code ")(
+            remote)
+            .Flush();
+
+        return account.GetPaymentCode().at(accountID);
+    } catch (const std::exception& e) {
+        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+
+        return blank;
+    }
+}
+
 auto Blockchain::Imp::LoadTransaction(
     const TxidHex&,
     alloc::Default alloc,
@@ -973,81 +1080,6 @@ auto Blockchain::Imp::NewNym(const identifier::Nym& id) const noexcept -> void
 {
     for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain).Account(id);
-    }
-}
-
-auto Blockchain::Imp::NewPaymentCodeSubaccount(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const proto::HDPath path,
-    const opentxs::blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Account
-{
-    return new_payment_code(nymID, local, remote, path, chain, reason);
-}
-
-auto Blockchain::Imp::new_payment_code(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const proto::HDPath path,
-    const opentxs::blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept -> identifier::Account
-{
-    static const auto blank = identifier::Account{};
-
-    try {
-        if (false == validate_nym(nymID)) {
-            throw std::runtime_error{
-                "invalid nym: "s.append(nymID.asBase58(api_.Crypto()))};
-        }
-
-        if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
-            throw std::runtime_error{"invalid chain: "s.append(print(chain))};
-        }
-
-        auto nym = api_.Wallet().Nym(nymID);
-
-        if (false == bool(nym)) {
-            throw std::runtime_error{
-                "failed to load nym: "s.append(nymID.asBase58(api_.Crypto()))};
-        }
-
-        if (false == path.has_seed()) {
-            throw std::runtime_error{
-                "nym "s.append(nymID.asBase58(api_.Crypto()))
-                    .append(" does not contain an HD seed")};
-        }
-
-        if (3 > path.child().size()) {
-            throw std::runtime_error{
-                "nym "s.append(nymID.asBase58(api_.Crypto()))
-                    .append(" does not contain a valid HD path")};
-        }
-
-        auto accountID{blank};
-        auto& account = this->account_mutable(chain, nymID);
-        const auto got = account.Internal().AddUpdatePaymentCode(
-            local, remote, path, reason, accountID);
-
-        if ((false == got) || accountID.empty()) {
-            throw std::runtime_error{"failed to create or load subaccount"};
-        }
-
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "Loaded or created new payment code subaccount ")(
-            accountID, api_.Crypto())(" for ")(print(chain))(" account ")(
-            account.AccountID(),
-            api_.Crypto())(" owned by ")(nymID, api_.Crypto())(
-            " in reference to remote payment code ")(remote)
-            .Flush();
-
-        return accountID;
-    } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
-
-        return blank;
     }
 }
 
@@ -1172,32 +1204,6 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     auto& account = wallet.Account(nymID);
 
     return account.GetPaymentCode().at(accountID);
-}
-
-auto Blockchain::Imp::PaymentCodeSubaccount(
-    const identifier::Nym& nymID,
-    const opentxs::PaymentCode& local,
-    const opentxs::PaymentCode& remote,
-    const proto::HDPath path,
-    const opentxs::blockchain::Type chain,
-    const PasswordPrompt& reason) const noexcept(false)
-    -> const opentxs::blockchain::crypto::PaymentCode&
-{
-    const auto accountID =
-        opentxs::blockchain::crypto::internal::PaymentCode::GetID(
-            api_, chain, local, remote);
-    const auto type = api_.Storage().Internal().Bip47Chain(nymID, accountID);
-
-    if (UnitType::Error == type) {
-        const auto id =
-            new_payment_code(nymID, local, remote, path, chain, reason);
-
-        if (accountID != id) {
-            throw std::out_of_range("Failed to create account");
-        }
-    }
-
-    return account(chain, nymID).GetPaymentCode().at(accountID);
 }
 
 auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Default)
