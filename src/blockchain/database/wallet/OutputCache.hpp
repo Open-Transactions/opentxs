@@ -205,8 +205,6 @@ public:
     auto FinishProposal(
         const Log& log,
         const identifier::Generic& proposal,
-        const Outpoints& consumed,
-        const Outpoints& created,
         storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto GetOutput(const block::Outpoint& id) noexcept(false)
         -> protocol::bitcoin::base::block::Output&;

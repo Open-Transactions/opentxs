@@ -511,10 +511,8 @@ auto Output::CancelProposal(
     auto& cache = this->cache();
 
     try {
-        const auto& reserved = cache.GetConsumed(id);
-        const auto& created = cache.GetCreated(id);
         auto tx = lmdb_.TransactionRW();
-        cache.FinishProposal(log, id, reserved, created, tx);
+        cache.FinishProposal(log, id, tx);
         const auto rc = proposals_.CancelProposal(tx, id);
 
         if (false == rc) {
