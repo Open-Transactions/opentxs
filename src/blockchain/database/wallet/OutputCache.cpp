@@ -691,22 +691,13 @@ auto OutputCache::Exists(const SubchainID& subchain, const block::Outpoint& id)
 auto OutputCache::FinishProposal(
     const Log& log,
     const identifier::Generic& proposal,
-    const Outpoints& consumed,
-    const Outpoints& created,
     storage::lmdb::Transaction& tx) noexcept(false) -> void
 {
     auto& createdMap = created_by_proposal_;
     auto& createdSet = createdMap[proposal];
     auto& consumedMap = consumed_by_proposal_;
     auto& consumedSet = consumedMap[proposal];
-    auto purge = [&, this](auto table, auto& set, const auto& output) {
-        if (false == set.contains(output)) {
-            throw std::runtime_error{
-                "output "s.append(output.str())
-                    .append(" is not associated with proposal ")
-                    .append(proposal.asBase58(api_.Crypto()))};
-        }
-
+    auto purge = [&, this](auto table, const auto& output) {
         const auto rc =
             lmdb_.Delete(table, proposal.Bytes(), output.Bytes(), tx);
 
@@ -718,16 +709,17 @@ auto OutputCache::FinishProposal(
         }
 
         dissociate_proposal(log, output, proposal, tx);
-        set.erase(output);
     };
-    auto purge_created = [&](const auto& output) {
-        purge(proposal_created_, createdSet, output);
-    };
-    auto purge_consumed = [&](const auto& output) {
-        purge(proposal_spent_, consumedSet, output);
-    };
-    std::for_each(created.begin(), created.end(), purge_created);
-    std::for_each(consumed.begin(), consumed.end(), purge_consumed);
+
+    for (auto i = createdSet.begin(); i != createdSet.end();) {
+        purge(proposal_created_, *i);
+        i = createdSet.erase(i);
+    }
+
+    for (auto i = consumedSet.begin(); i != consumedSet.end();) {
+        purge(proposal_spent_, *i);
+        i = consumedSet.erase(i);
+    }
 
     if (false == createdSet.empty()) {
         throw std::runtime_error{
