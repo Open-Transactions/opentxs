@@ -26,6 +26,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -133,6 +134,7 @@ Account::Account(
         LogAbort()(OT_PRETTY_CLASS())("invalid account").Abort();
     }
 
+    init_notification();
     init_hd(hd);
     init_payment_code(paymentCode);
 }
@@ -143,9 +145,7 @@ auto Account::AddHDNode(
     const PasswordPrompt& reason,
     identifier::Account& id) noexcept -> bool
 {
-    init_notification();
-
-    return hd_.Construct(id, path, standard, reason);
+    return init_hd(path, standard, reason, id);
 }
 
 auto Account::AddOrUpdatePaymentCode(
@@ -157,7 +157,7 @@ auto Account::AddOrUpdatePaymentCode(
 {
     out = internal::PaymentCode::GetID(api_, chain_, local, remote);
 
-    return payment_code_.Construct(out, contacts_, local, remote, path, reason);
+    return init_payment_code(local, remote, path, reason, out);
 }
 
 auto Account::ClaimAccountID(
@@ -165,7 +165,7 @@ auto Account::ClaimAccountID(
     bool existing,
     crypto::Subaccount* node) const noexcept -> bool
 {
-    if (node_index_.Add(id, node)) {
+    if (node_index_.Add(api_.Crypto(), id, node)) {
 
         return parent_.Parent().Internal().RegisterSubaccount(
                    node->Type(), chain_, nym_id_, account_id_, id) ==
@@ -284,17 +284,39 @@ auto Account::GetDepositAddress(
 
 auto Account::init_hd(const Accounts& accounts) noexcept -> void
 {
-    for (const auto& accountID : accounts) {
-        init_notification();
-        auto account = proto::HDAccount{};
-        const auto loaded =
-            api_.Storage().Internal().Load(nym_id_, accountID, account);
+    LogTrace()(OT_PRETTY_CLASS())("loading ")(accounts.size())(
+        " hd subaccounts for ")(nym_id_, api_.Crypto())(" on ")(print(chain_))
+        .Flush();
 
-        if (false == loaded) { continue; }
-
-        auto notUsed = identifier::Account{};
-        hd_.Construct(notUsed, account);
+    for (const auto& id : accounts) {
+        auto copy = id;
+        init_hd(copy);
     }
+}
+
+auto Account::init_hd(identifier::Account& id) noexcept -> bool
+{
+    auto proto = proto::HDAccount{};
+    const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
+
+    if (loaded) {
+
+        return hd_.Construct(id, proto);
+    } else {
+
+        return false;
+    }
+}
+
+auto Account::init_hd(
+    const proto::HDPath& path,
+    const crypto::HDProtocol standard,
+    const PasswordPrompt& reason,
+    identifier::Account& id) noexcept -> bool
+{
+    if (init_hd(id)) { return true; }
+
+    return hd_.Construct(id, path, standard, reason);
 }
 
 auto Account::init_notification() noexcept -> void
@@ -311,16 +333,41 @@ auto Account::init_notification() noexcept -> void
 
 auto Account::init_payment_code(const Accounts& accounts) noexcept -> void
 {
+    LogTrace()(OT_PRETTY_CLASS())("loading ")(accounts.size())(
+        " payment code subaccounts for ")(nym_id_, api_.Crypto())(" on ")(
+        print(chain_))
+        .Flush();
+
     for (const auto& id : accounts) {
-        auto account = proto::Bip47Channel{};
-        const auto loaded =
-            api_.Storage().Internal().Load(nym_id_, id, account);
-
-        if (false == loaded) { continue; }
-
-        auto notUsed = identifier::Account{};
-        payment_code_.Construct(notUsed, contacts_, account);
+        auto copy = id;
+        init_payment_code(copy);
     }
+}
+
+auto Account::init_payment_code(identifier::Account& id) noexcept -> bool
+{
+    auto proto = proto::Bip47Channel{};
+    const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
+
+    if (loaded) {
+
+        return payment_code_.Construct(id, contacts_, proto);
+    } else {
+
+        return false;
+    }
+}
+
+auto Account::init_payment_code(
+    const opentxs::PaymentCode& local,
+    const opentxs::PaymentCode& remote,
+    const proto::HDPath& path,
+    const PasswordPrompt& reason,
+    identifier::Account& id) noexcept -> bool
+{
+    if (init_payment_code(id)) { return true; }
+
+    return payment_code_.Construct(id, contacts_, local, remote, path, reason);
 }
 
 auto Account::Subaccount(const identifier::Account& id) const noexcept(false)

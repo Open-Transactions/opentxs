@@ -40,6 +40,8 @@
 
 namespace opentxs::blockchain::crypto::implementation
 {
+using namespace std::literals;
+
 Deterministic::Deterministic(
     const api::Session& api,
     const crypto::Account& parent,
@@ -507,7 +509,10 @@ auto Deterministic::init(const PasswordPrompt& reason) noexcept(false) -> void
         auto lock = rLock{lock_};
 
         if (account_already_exists(lock)) {
-            throw std::runtime_error("Account already exists");
+            throw std::runtime_error(
+                "attempting to initialize new subaccount "s
+                    .append(id_.asBase58(api_.Crypto()))
+                    .append(" which has already been created"));
         }
 
         auto internal = Batch{};

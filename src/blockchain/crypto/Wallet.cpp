@@ -12,12 +12,14 @@
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -150,6 +152,10 @@ auto Wallet::init() noexcept -> void
             api_.Storage().Internal().BlockchainAccountList(nymID, unit);
         const auto pc =
             api_.Storage().Internal().Bip47ChannelsByChain(nymID, unit);
+        LogConsole()("Loading ")(print(chain_))(" key manager for ")(
+            nymID, api_.Crypto())(" with ")(hd.size())(" HD subaccounts and ")(
+            pc.size())(" payment code subaccounts")
+            .Flush();
         add(data, nymID, factory(nymID, hd, pc));
     }
 }

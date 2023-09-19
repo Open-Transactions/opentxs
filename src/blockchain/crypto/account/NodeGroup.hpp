@@ -14,6 +14,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
@@ -225,12 +226,13 @@ private:
         identifier::Account& id,
         const Args&... args) noexcept -> bool
     {
+        const auto& crypto = api_.Crypto();
         auto node{
             Factory<PayloadType, Args...>::get(api_, parent_, id, args...)};
 
         if (nullptr == node) {
             if (data.index_.contains(id)) {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
+                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(
                     " already exists")
                     .Flush();
 
@@ -244,14 +246,15 @@ private:
         }
 
         if (data.index_.contains(id)) {
-            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
+            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(
                 " already exists")
                 .Flush();
 
             return true;
         } else {
-            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, api_.Crypto())(
-                " created")
+            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(" for ")(
+                parent_.NymID(),
+                crypto)(" on ")(print(parent_.Chain()))(" created or loaded")
                 .Flush();
         }
 

@@ -30,6 +30,8 @@
 
 namespace opentxs::blockchain::crypto::implementation
 {
+using namespace std::literals;
+
 Subaccount::Subaccount(
     const api::Session& api,
     const crypto::Account& parent,
@@ -150,8 +152,15 @@ auto Subaccount::describe(
 
 auto Subaccount::init(bool existing) noexcept(false) -> void
 {
+    using opentxs::blockchain::is_supported;
+
+    if (existing && (false == is_supported(chain_))) { existing = false; }
+
     if (false == parent_.Internal().ClaimAccountID(id_, existing, this)) {
-        throw std::runtime_error{"duplicate subaccount id"};
+        throw std::runtime_error{
+            "unable to claim subaccount id "s
+                .append(id_.asBase58(api_.Crypto()))
+                .append(" apparently due to an id collision")};
     }
 }
 

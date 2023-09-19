@@ -174,8 +174,21 @@ private:
     OTZMQPushSocket find_nym_;
 
     auto init_hd(const Accounts& HDAccounts) noexcept -> void;
+    auto init_hd(identifier::Account& id) noexcept -> bool;
+    auto init_hd(
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason,
+        identifier::Account& id) noexcept -> bool;
     auto init_notification() noexcept -> void;
     auto init_payment_code(const Accounts& HDAccounts) noexcept -> void;
+    auto init_payment_code(identifier::Account& id) noexcept -> bool;
+    auto init_payment_code(
+        const opentxs::PaymentCode& local,
+        const opentxs::PaymentCode& remote,
+        const proto::HDPath& path,
+        const PasswordPrompt& reason,
+        identifier::Account& id) noexcept -> bool;
 
     auto find_next_element(
         Subchain subchain,

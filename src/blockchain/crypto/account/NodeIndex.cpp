@@ -9,7 +9,9 @@
 #include <memory>
 #include <utility>
 
+#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::crypto::account
 {
@@ -19,14 +21,27 @@ NodeIndex::NodeIndex() noexcept
 }
 
 auto NodeIndex::Add(
+    const api::Crypto& api,
     const identifier::Account& id,
     crypto::Subaccount* node) noexcept -> bool
 {
-    if (nullptr == node) { return false; }
+    if (nullptr == node) {
+        LogError()(OT_PRETTY_CLASS())("invalid subaccount").Flush();
 
-    const auto [i, _] = map_.lock()->try_emplace(id, node);
+        return false;
+    }
 
-    return node == i->second;
+    auto handle = map_.lock();
+    auto& map = *handle;
+
+    if (map.contains(id)) {
+        LogError()(OT_PRETTY_CLASS())("subaccount ")(id, api)(" already exists")
+            .Flush();
+
+        return false;
+    }
+
+    return map.try_emplace(id, node).second;
 }
 
 auto NodeIndex::Find(const identifier::Account& id) const noexcept
