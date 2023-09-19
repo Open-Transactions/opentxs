@@ -437,9 +437,10 @@ auto SeedTree::process_nym(Message&& in) noexcept -> void
 
     OT_ASSERT(1 < body.size());
 
-    auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
+    const auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
     check_default_nym();
-    process_nym(id);
+
+    if (api_.Wallet().IsLocalNym(id)) { process_nym(id); }
 }
 
 auto SeedTree::process_nym(const identifier::Nym& id) noexcept -> void
