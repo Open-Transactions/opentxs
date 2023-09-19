@@ -14,6 +14,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Crypto;
+}  // namespace api
+
 namespace blockchain
 {
 namespace crypto
@@ -33,6 +38,7 @@ public:
         -> crypto::Subaccount*;
 
     [[nodiscard]] auto Add(
+        const api::Crypto& api,
         const identifier::Account& id,
         crypto::Subaccount* node) noexcept -> bool;
 

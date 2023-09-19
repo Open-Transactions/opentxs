@@ -15,6 +15,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -271,8 +272,13 @@ auto AccountCache::RegisterSubaccount(
         return false;
     }
 
+    const auto& crypto = api_.Crypto();
+
     if (subaccount_params_.try_emplace(subaccount, type, chain, owner, account)
             .second) {
+        LogTrace()(OT_PRETTY_CLASS())("subaccount ")(subaccount, crypto)(
+            " for ")(owner, crypto)(" on ")(print(chain))(" registered")
+            .Flush();
         account_params_.try_emplace(account, chain, owner);
         auto& index = nym_index_[chain][owner];
 
@@ -304,6 +310,9 @@ auto AccountCache::RegisterSubaccount(
 
         return true;
     } else {
+        LogTrace()(OT_PRETTY_CLASS())("subaccount ")(subaccount, crypto)(
+            " for ")(owner, crypto)(" on ")(print(chain))(" already registered")
+            .Flush();
 
         return false;
     }
