@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -13,6 +13,7 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/core/Ledger.hpp"
 
 namespace ot = opentxs;
 
@@ -20,21 +21,6 @@ namespace ottest
 {
 ot::identifier::Nym nym_id_{};
 ot::identifier::Notary server_id_{};
-
-struct Ledger : public ::testing::Test {
-    const ot::api::session::Client& client_;
-    const ot::api::session::Notary& server_;
-    ot::PasswordPrompt reason_c_;
-    ot::PasswordPrompt reason_s_;
-
-    Ledger()
-        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , server_(OTTestEnvironment::GetOT().StartNotarySession(0))
-        , reason_c_(client_.Factory().PasswordPrompt(__func__))
-        , reason_s_(server_.Factory().PasswordPrompt(__func__))
-    {
-    }
-};
 
 TEST_F(Ledger, init)
 {
