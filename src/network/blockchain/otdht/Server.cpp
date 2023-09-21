@@ -6,6 +6,7 @@
 #include "network/blockchain/otdht/Server.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <compare>
 #include <iterator>
 #include <span>
 #include <stdexcept>

@@ -897,11 +897,11 @@ auto Shared::reset_tips_to(
     auto counter{0};
 
     if (false == resetHeader.has_value()) {
-        resetHeader = headerTip > position;
+        resetHeader = headerTip.IsReplacedBy(position);
     }
 
     if (false == resetfilter.has_value()) {
-        resetfilter = filterTip > position;
+        resetfilter = filterTip.IsReplacedBy(position);
     }
 
     OT_ASSERT(resetHeader.has_value());

@@ -207,13 +207,13 @@ auto Process::Imp::do_reorg(
         std::remove_if(
             waiting_.begin(),
             waiting_.end(),
-            [&, pos{target}](const auto& p) { return p > pos; }),
+            [&, pos{target}](const auto& p) { return p.IsReplacedBy(pos); }),
         waiting_.end());
 
     for (auto i{ready_.begin()}, end{ready_.end()}; i != end;) {
         const auto& [ready, block] = *i;
 
-        if (ready > target) {
+        if (ready.IsReplacedBy(target)) {
             ready_.erase(i, end);
 
             break;
@@ -225,7 +225,7 @@ auto Process::Imp::do_reorg(
     for (auto i{processing_.begin()}, end{processing_.end()}; i != end;) {
         const auto& [processing, block] = *i;
 
-        if (processing > target) {
+        if (processing.IsReplacedBy(target)) {
             processing_.erase(i, end);
 
             break;
@@ -241,7 +241,7 @@ auto Process::Imp::do_reorg(
         for (auto i = map.begin(), end = map.end(); i != end;) {
             const auto& downloading = *i;
 
-            if (erase || (downloading > target)) {
+            if (erase || (downloading.IsReplacedBy(target))) {
                 erase = true;
                 downloading_index_.erase(downloading.hash_);
                 i = map.erase(i);

@@ -396,7 +396,7 @@ auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
 auto Peer::Imp::check_positions() noexcept -> void
 {
     if (false == is_caught_up_) {
-        is_caught_up_ = local_position_ >= remote_position_;
+        is_caught_up_ = local_position_.NotReplacedBy(remote_position_);
 
         if (is_caught_up_) {
             log_(OT_PRETTY_CLASS())(name_)(": local tip ")(

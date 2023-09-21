@@ -340,7 +340,7 @@ auto OTDHT::Actor::filter_peers(
 
         if (PeerData::Type::incoming == peer.type_) { continue; }
 
-        if (peer.position_ > target) {
+        if (peer.position_.IsReplacedBy(target)) {
             const auto& val = out.emplace_back(id);
 
             OT_ASSERT(false == val.empty());
