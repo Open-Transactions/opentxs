@@ -37,8 +37,8 @@
 #if defined(__AVX512F__)
 static void fill_block_fucklibsodium(
     __m512i* state,
-    const block* ref_block,
-    block* next_block,
+    const block_fucklibsodium* ref_block,
+    block_fucklibsodium* next_block,
     int with_xor)
 {
     __m512i block_XY[ARGON2_512BIT_WORDS_IN_BLOCK];
@@ -78,8 +78,8 @@ static void fill_block_fucklibsodium(
 #elif defined(__AVX2__)
 static void fill_block_fucklibsodium(
     __m256i* state,
-    const block* ref_block,
-    block* next_block,
+    const block_fucklibsodium* ref_block,
+    block_fucklibsodium* next_block,
     int with_xor)
 {
     __m256i block_XY[ARGON2_HWORDS_IN_BLOCK];

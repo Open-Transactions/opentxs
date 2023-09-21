@@ -46,6 +46,7 @@ if(${CMAKE_CXX_COMPILER_ID}
       "-Wno-cast-align"
       "-Wno-cast-qual"
       "-Wno-documentation-unknown-command"
+      "-Wno-extra-semi-stmt"
       "-Wno-implicit-fallthrough"
       "-Wno-long-long"
       "-Wno-reserved-identifier"
