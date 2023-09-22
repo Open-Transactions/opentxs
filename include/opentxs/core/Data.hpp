@@ -29,6 +29,8 @@ namespace opentxs
 OPENTXS_EXPORT auto operator==(const Data&, const Data&) noexcept -> bool;
 OPENTXS_EXPORT auto operator<=>(const Data&, const Data&) noexcept
     -> std::strong_ordering;
+OPENTXS_EXPORT auto operator<=>(const Data&, ReadView) noexcept
+    -> std::strong_ordering;
 OPENTXS_EXPORT auto to_hex(const std::byte* in, std::size_t size) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto to_hex(

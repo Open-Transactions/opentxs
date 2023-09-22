@@ -5,14 +5,13 @@
 
 #include "opentxs/crypto/asymmetric/Key.hpp"  // IWYU pragma: associated
 
-#include <cstring>
 #include <string_view>
 #include <utility>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/Spaceship.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -23,37 +22,10 @@ auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
     return lhs.PublicKey() == rhs.PublicKey();
 }
 
-auto operator<=>(const Key& lKey, const Key& rKey) noexcept
+auto operator<=>(const Key& lhs, const Key& rhs) noexcept
     -> std::strong_ordering
 {
-    const auto lhs = lKey.PublicKey();
-    const auto rhs = rKey.PublicKey();
-    // TODO someday when fucking Android uses a less broken version of fucking
-    // libc++ that actually fucking implements modern c++ standards use the
-    // std::string_view overload of operator<=>
-
-    if (auto l = lhs.size(), r = rhs.size(); l < r) {
-
-        return std::strong_ordering::less;
-    } else if (r < l) {
-
-        return std::strong_ordering::greater;
-    } else {
-        if (0_uz == l) {
-
-            return std::strong_ordering::equal;
-        } else if (auto c = std::memcmp(lhs.data(), rhs.data(), lhs.size());
-                   0 == c) {
-
-            return std::strong_ordering::equal;
-        } else if (0 < c) {
-
-            return std::strong_ordering::greater;
-        } else {
-
-            return std::strong_ordering::less;
-        }
-    }
+    return llvm_sucks(lhs.PublicKey(), rhs.PublicKey());
 }
 
 Key::Key(KeyPrivate* imp) noexcept
