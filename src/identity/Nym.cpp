@@ -1194,7 +1194,9 @@ auto Nym::path(const sLock& lock, proto::HDPath& output) const -> bool
         }
     }
 
-    LogError()(OT_PRETTY_CLASS())("No authority contains a path.").Flush();
+    LogError()(OT_PRETTY_CLASS())(": no authority in ")(id_, api_.Crypto())(
+        " contains a path")
+        .Flush();
 
     return false;
 }

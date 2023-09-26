@@ -1078,6 +1078,8 @@ auto Blockchain::Imp::NewHDSubaccount(
 
 auto Blockchain::Imp::NewNym(const identifier::Nym& id) const noexcept -> void
 {
+    if (false == api_.Storage().LocalNyms().contains(id)) { return; }
+
     for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain).Account(id);
     }
