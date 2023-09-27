@@ -391,7 +391,9 @@
                 "OT_VALGRIND": "OFF",
                 "OT_STORAGE_SQLITE": "OFF",
                 "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
-                "OT_ENABLE_RPC": "OFF"
+                "OT_ENABLE_RPC": "OFF",
+                "OT_USE_PSTL": "OFF",
+                "OT_WITH_TBB": "OFF"
             }
         },
         {

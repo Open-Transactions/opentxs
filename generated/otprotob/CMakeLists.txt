@@ -28,6 +28,7 @@ else()
       -Wno-effc++
       -Wno-extra-semi
       -Wno-extra-semi-stmt
+      -Wno-gnu-offsetof-extensions
       -Wno-missing-declarations
       -Wno-reserved-identifier
       -Wno-shorten-64-to-32

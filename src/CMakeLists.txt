@@ -87,7 +87,13 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<vector$<ANGLE-R>>"
   )
 
-  if(APPLE OR ANDROID)
+  if(CMAKE_CXX_COMPILER_ID
+     MATCHES
+     AppleClang
+     AND CMAKE_CXX_COMPILER_VERSION
+         VERSION_LESS
+         15
+  )
     target_precompile_headers(
       opentxs-common
       PUBLIC
@@ -107,6 +113,8 @@ if(OT_PCH)
       opentxs-common
       PUBLIC
       "$<$<COMPILE_LANGUAGE:CXX>:<memory_resource$<ANGLE-R>>"
+      "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
+      "$<$<COMPILE_LANGUAGE:CXX>:<source_location$<ANGLE-R>>"
     )
   endif()
 
@@ -115,7 +123,6 @@ if(OT_PCH)
       opentxs-common
       PUBLIC
       "$<$<COMPILE_LANGUAGE:CXX>:<execution$<ANGLE-R>>"
-      "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
     )
   endif()
 endif()

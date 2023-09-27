@@ -62,10 +62,10 @@ Basic build instructions:
     ctest -j4
     sudo cmake --install .
 
-#### Supported Compilers
+#### Minimum Supported Compiler Versions
 
 - gcc-12.2
-- gcc-13.0
 - clang-16
-- AppleClang-14
+- xcode 14
 - msvc-19.33
+- ndk r26

@@ -13,12 +13,13 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/util/Container.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunneeded-member-function"
+#pragma GCC diagnostic ignored "-Wunused-member-function"
 namespace opentxs::blockchain::protocol::bitcoin::base::block::implementation
 {
 auto Block::calculate_transaction_sizes() const noexcept -> std::size_t
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-member-function"
     struct Visitor {
         auto operator()(
             std::size_t lhs,
@@ -47,10 +48,10 @@ auto Block::calculate_transaction_sizes() const noexcept -> std::size_t
             return lhs + rhs;
         }
     };
-#pragma GCC diagnostic pop
 
     return std::reduce(
         transactions_.begin(), transactions_.end(), 0_uz, Visitor{});
 }
 }  // namespace
    // opentxs::blockchain::protocol::bitcoin::base::block::implementation
+#pragma GCC diagnostic pop
