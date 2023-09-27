@@ -177,6 +177,10 @@ public:
     auto AddSignatures(const Signatures& signatures) noexcept -> bool final;
     auto AssociatePreviousOutput(const block::Output& output) noexcept
         -> bool final;
+    auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates) noexcept -> bool final;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return pmr::make_deleter(this);
@@ -186,6 +190,8 @@ public:
         const internal::Input& rhs,
         const std::size_t index,
         const Log& log) noexcept -> void final;
+    auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void final;
     auto ReplaceScript() noexcept -> bool final;
     auto SetKeyData(const KeyData& data) noexcept -> void final
     {
@@ -266,6 +272,11 @@ private:
     const ByteArray coinbase_;
     const std::uint32_t sequence_;
     mutable libguarded::plain_guarded<input::Data> cache_;
+
+    static auto refresh_contacts(
+        const api::crypto::Blockchain& api,
+        input::Data& cache,
+        allocator_type alloc) noexcept -> void;
 
     auto classify() const noexcept -> Redeem;
     auto decode_coinbase() const noexcept -> UnallocatedCString;

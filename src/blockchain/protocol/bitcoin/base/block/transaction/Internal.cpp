@@ -11,6 +11,7 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -122,6 +123,11 @@ auto Transaction::Outputs() const noexcept -> std::span<const block::Output>
     return {};
 }
 
+auto Transaction::RefreshContacts(const api::crypto::Blockchain&) noexcept
+    -> void
+{
+}
+
 auto Transaction::SegwitFlag() const noexcept -> std::byte { return {}; }
 
 auto Transaction::Serialize(EncodedTransaction&) const noexcept -> bool
@@ -144,8 +150,6 @@ auto Transaction::Serialize(const api::Session&) const noexcept
 auto Transaction::SetKeyData(const KeyData&) noexcept -> void {}
 
 auto Transaction::SetMemo(const std::string_view) noexcept -> void {}
-
-auto Transaction::SetMinedPosition(const block::Position&) noexcept -> void {}
 
 auto Transaction::SetPosition(std::size_t) noexcept -> void {}
 

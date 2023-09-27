@@ -25,6 +25,7 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -83,7 +84,7 @@ SpendPrivate::SpendPrivate(
     , notifications_()
     , policy_(Funding::Default)
     , spend_unconfirmed_change_(true)
-    , spend_unconfirmed_incoming_(false)
+    , spend_unconfirmed_incoming_(params::get(chain).SpendUnconfirmed())
     , use_enhanced_notifications_(true)
     , payment_code_path_()
     , sender_payment_code_()

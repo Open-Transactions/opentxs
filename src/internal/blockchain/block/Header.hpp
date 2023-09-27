@@ -109,6 +109,7 @@ public:
     virtual auto RemoveBlacklistState() noexcept -> void;
     virtual auto RemoveCheckpointState() noexcept -> void;
     virtual auto SetDisconnectedState() noexcept -> void;
+    virtual auto SetHeight(block::Height) noexcept -> void;
 
     virtual ~Header() = default;
 };

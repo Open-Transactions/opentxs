@@ -199,6 +199,21 @@ auto Block::calculate_size(const network::blockchain::bitcoin::CompactSize& cs)
            calculate_transaction_sizes();
 }
 
+auto Block::ConfirmMatches(
+    const Log& log,
+    const api::crypto::Blockchain& api,
+    const Matches& candidates,
+    alloc::Strategy alloc) noexcept -> database::BlockMatches
+{
+    auto out = database::BlockMatches{alloc.result_};
+    const auto confirm = [&](auto& tx) {
+        tx.Internal().ConfirmMatches(log, api, candidates, out, alloc);
+    };
+    std::for_each(transactions_.begin(), transactions_.end(), confirm);
+
+    return out;
+}
+
 auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
     const noexcept -> Elements
 {

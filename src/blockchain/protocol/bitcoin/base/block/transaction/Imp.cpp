@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -42,6 +43,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/cfilter/Types.hpp"
@@ -259,6 +261,54 @@ auto Transaction::Chains(allocator_type alloc) const noexcept
 auto Transaction::ConfirmationHeight() const noexcept -> block::Height
 {
     return data_.lock()->height();
+}
+
+auto Transaction::ConfirmMatches(
+    const Log& log,
+    const api::crypto::Blockchain& api,
+    const Matches& candiates,
+    database::BlockMatches& out,
+    alloc::Strategy alloc) noexcept -> void
+{
+    auto spent = database::MatchingInputs{alloc.result_};
+    auto created = database::MatchingOutputs{alloc.result_};
+
+    for (auto n = 0_uz; n < inputs_.size(); ++n) {
+        if (inputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
+            log(OT_PRETTY_CLASS())("match found for input ")(
+                n)(" of transaction ")
+                .asHex(id_)
+                .Flush();
+            spent.emplace(n);
+        }
+    }
+
+    for (auto n = 0_uz; n < outputs_.size(); ++n) {
+        if (outputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
+            log(OT_PRETTY_CLASS())("match found for output ")(
+                n)(" of transaction ")
+                .asHex(id_)
+                .Flush();
+            created.emplace(n);
+        }
+    }
+
+    const auto inCount = spent.size();
+    const auto outCount = created.size();
+    const auto transactionSpendsMyMoney = (0_uz < inCount);
+    const auto transactionPaysMe = (0_uz < outCount);
+
+    if (transactionSpendsMyMoney || transactionPaysMe) {
+        log(OT_PRETTY_CLASS())(inCount)(" input matches and ")(
+            outCount)(" output matches in transaction ")
+            .asHex(id_)
+            .Flush();
+        RefreshContacts(api);
+        const auto [_, added] = out.try_emplace(
+            id_, std::move(spent), std::move(created), clone(alloc.result_));
+
+        OT_ASSERT(added);
+    }
 }
 
 auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
@@ -566,6 +616,16 @@ auto Transaction::Print(const api::Crypto& crypto, alloc::Default alloc)
     out << "  locktime: " << std::to_string(lock_time_) << '\n';
 
     return {out.str().c_str(), alloc};
+}
+
+auto Transaction::RefreshContacts(const api::crypto::Blockchain& api) noexcept
+    -> void
+{
+    const auto refresh = [&](auto&& item) {
+        item.Internal().RefreshContacts(api);
+    };
+    std::for_each(inputs_.begin(), inputs_.end(), refresh);
+    std::for_each(outputs_.begin(), outputs_.end(), refresh);
 }
 
 auto Transaction::serialize(

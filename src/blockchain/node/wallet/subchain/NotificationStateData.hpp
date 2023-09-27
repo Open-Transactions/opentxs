@@ -15,7 +15,6 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -40,6 +39,11 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class Block;
+}  // namespace block
+
 namespace crypto
 {
 class Notification;
@@ -107,10 +111,10 @@ private:
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_block_matches(
-        const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
+        block::Block& block,
         allocator_type monotonic) const noexcept -> void final;
     auto handle_mempool_match(
         const block::Matches& matches,

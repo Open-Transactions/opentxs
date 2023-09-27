@@ -57,6 +57,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -74,7 +75,6 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -609,7 +609,7 @@ auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 
 auto SubchainStateData::ProcessBlock(
     const block::Position& position,
-    const block::Block& block,
+    block::Block& block,
     allocator_type monotonic) const noexcept -> bool
 {
     const auto& name = name_;
@@ -656,7 +656,7 @@ auto SubchainStateData::ProcessBlock(
     OT_ASSERT(header.IsValid());
     OT_ASSERT(position == header.Position());
 
-    handle_block_matches(block, position, confirmed, log, monotonic);
+    handle_block_matches(position, confirmed, log, block, monotonic);
     LogConsole()(name)(" processed block ")(position).Flush();
     log(OT_PRETTY_CLASS())(name)(" ")(general.size())(" of ")(
         keyMatches)(" potential key matches confirmed.")
@@ -1232,22 +1232,6 @@ auto SubchainStateData::select_targets(
             ChooseTxo(outpoint, stxo);
         }
     }
-}
-
-auto SubchainStateData::set_key_data(
-    block::Transaction& tx,
-    allocator_type monotonic) const noexcept -> void
-{
-    const auto keys = tx.asBitcoin().Keys(monotonic);
-    auto data = block::KeyData{monotonic};
-    const auto& api = api_.Crypto().Blockchain();
-
-    for (const auto& key : keys) {
-        data.try_emplace(
-            key, api.SenderContact(key), api.RecipientContact(key));
-    }
-
-    tx.Internal().asBitcoin().SetKeyData(data);
 }
 
 auto SubchainStateData::start_rescan() const noexcept -> void

@@ -295,6 +295,11 @@ auto ChainData::SegwitScaleFactor() const noexcept -> unsigned int
     return imp_->segwit_scale_factor_;
 }
 
+auto ChainData::SpendUnconfirmed() const noexcept -> bool
+{
+    return imp_->spend_unconfirmed_;
+}
+
 auto ChainData::SupportsSegwit() const noexcept -> bool
 {
     return imp_->segwit_;

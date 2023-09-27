@@ -12,6 +12,7 @@
 #include "blockchain/block/block/Imp.hpp"
 #include "blockchain/protocol/bitcoin/base/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
@@ -27,6 +28,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
+
 class Crypto;
 class Session;
 }  // namespace api
@@ -71,6 +77,11 @@ public:
         -> CString override;
     auto Serialize(Writer&& bytes) const noexcept -> bool final;
 
+    auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates,
+        alloc::Strategy alloc) noexcept -> database::BlockMatches final;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function override
     {
         return pmr::make_deleter(this);

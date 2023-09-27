@@ -50,6 +50,14 @@ auto Input::CalculateSize(const bool) const noexcept -> std::size_t
 
 auto Input::Coinbase() const noexcept -> ReadView { return {}; }
 
+auto Input::ConfirmMatches(
+    const Log&,
+    const api::crypto::Blockchain&,
+    const Matches&) noexcept -> bool
+{
+    return {};
+}
+
 auto Input::ExtractElements(const cfilter::Type, Elements&) const noexcept
     -> void
 {
@@ -119,6 +127,8 @@ auto Input::Print(const api::Crypto&, alloc::Default alloc) const noexcept
 {
     return CString{alloc};
 }
+
+auto Input::RefreshContacts(const api::crypto::Blockchain&) noexcept -> void {}
 
 auto Input::ReplaceScript() noexcept -> bool { return {}; }
 

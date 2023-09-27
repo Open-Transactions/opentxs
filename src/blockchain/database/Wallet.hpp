@@ -158,7 +158,7 @@ public:
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed,
+        ConsumedTXOs& txoConsumed,
         alloc::Strategy alloc) noexcept -> bool;
     auto AddMempoolTransaction(
         const Log& log,

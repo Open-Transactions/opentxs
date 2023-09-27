@@ -514,96 +514,172 @@
     ],
     "buildPresets": [
         {
+            "hidden": true,
+            "name": "ninja",
+            "nativeToolOptions": [
+                "-k 0"
+            ]
+        },
+        {
             "name": "default",
-            "configurePreset": "default"
+            "configurePreset": "default",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "full",
-            "configurePreset": "full"
+            "configurePreset": "full",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "prod",
-            "configurePreset": "prod"
+            "configurePreset": "prod",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "release",
-            "configurePreset": "release"
+            "configurePreset": "release",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "nopch",
-            "configurePreset": "nopch"
+            "configurePreset": "nopch",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "tidy",
-            "configurePreset": "tidy"
+            "configurePreset": "tidy",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "matterfi",
-            "configurePreset": "matterfi"
+            "configurePreset": "matterfi",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test01",
-            "configurePreset": "test01"
+            "configurePreset": "test01",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test02",
-            "configurePreset": "test02"
+            "configurePreset": "test02",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test03",
-            "configurePreset": "test03"
+            "configurePreset": "test03",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test04",
-            "configurePreset": "test04"
+            "configurePreset": "test04",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test05",
-            "configurePreset": "test05"
+            "configurePreset": "test05",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test06",
-            "configurePreset": "test06"
+            "configurePreset": "test06",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test07",
-            "configurePreset": "test07"
+            "configurePreset": "test07",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "test08",
-            "configurePreset": "test08"
+            "configurePreset": "test08",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "android-arm64",
-            "configurePreset": "android-arm64"
+            "configurePreset": "android-arm64",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "android-arm",
-            "configurePreset": "android-arm"
+            "configurePreset": "android-arm",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "android-x64",
-            "configurePreset": "android-x64"
+            "configurePreset": "android-x64",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "android-x86",
-            "configurePreset": "android-x86"
+            "configurePreset": "android-x86",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "macos",
-            "configurePreset": "macos"
+            "configurePreset": "macos",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "msvc",
-            "configurePreset": "msvc"
+            "configurePreset": "msvc",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "windows-debug",
-            "configurePreset": "windows-debug"
+            "configurePreset": "windows-debug",
+            "inherits": [
+                "ninja"
+            ]
         },
         {
             "name": "iwyu",
-            "configurePreset": "iwyu"
+            "configurePreset": "iwyu",
+            "inherits": [
+                "ninja"
+            ]
         }
     ],
     "testPresets": [

@@ -5,9 +5,13 @@
 
 #include "blockchain/block/block/Imp.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
+#include "internal/blockchain/block/Header.hpp"
+#include "internal/blockchain/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block::implementation
@@ -67,6 +71,14 @@ auto Block::FindByID(const TransactionHash& id) const noexcept
 
         return block::Transaction::Blank();
     }
+}
+
+auto Block::SetMinedPosition(block::Height height) noexcept -> void
+{
+    header_.Internal().SetHeight(height);
+    const auto pos = block::Position{height, ID()};
+    const auto set = [&](auto& tx) { tx.Internal().SetMinedPosition(pos); };
+    std::for_each(transactions_.begin(), transactions_.end(), set);
 }
 
 Block::~Block() = default;

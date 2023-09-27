@@ -62,8 +62,10 @@ public:
     auto get_allocator() const noexcept -> allocator_type final;
 
     auto Add(database::ElementMap&& data) noexcept -> void;
-    auto Add(database::TXOs&& created, database::TXOs&& consumed) noexcept
-        -> void;
+    auto Add(
+        const database::ConsumedTXOs& consumed,
+        database::TXOs&& created) noexcept -> void;
+    auto Add(database::TXOs&& created) noexcept -> void;
     auto get_deleter() noexcept -> delete_function final
     {
         return pmr::make_deleter(this);

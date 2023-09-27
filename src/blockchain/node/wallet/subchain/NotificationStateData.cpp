@@ -32,6 +32,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -116,10 +117,10 @@ auto NotificationStateData::get_index(
 }
 
 auto NotificationStateData::handle_block_matches(
-    const block::Block& block,
     const block::Position& position,
     const block::Matches& confirmed,
     const Log& log,
+    block::Block& block,
     allocator_type) const noexcept -> void
 {
     const auto& [utxo, general] = confirmed;

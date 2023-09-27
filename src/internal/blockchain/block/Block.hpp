@@ -11,7 +11,9 @@
 #include <span>
 
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -23,6 +25,11 @@ namespace api
 {
 class Crypto;
 class Session;
+
+namespace crypto
+{
+class Blockchain;
+}  // namespace crypto
 }  // namespace api
 
 namespace blockchain
@@ -96,6 +103,12 @@ public:
 
     virtual auto asBitcoin() noexcept
         -> protocol::bitcoin::base::block::internal::Block&;
+    virtual auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates,
+        alloc::Strategy alloc) noexcept -> database::BlockMatches;
+    virtual auto SetMinedPosition(block::Height) noexcept -> void;
 
     virtual ~Block() = default;
 };

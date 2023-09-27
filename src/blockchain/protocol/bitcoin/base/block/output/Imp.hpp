@@ -171,6 +171,10 @@ public:
     auto Value() const noexcept -> Amount final { return value_; }
 
     auto AddTag(node::TxoTag tag) noexcept -> void final { cache_.add(tag); }
+    auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates) noexcept -> bool final;
     auto ForTestingOnlyAddKey(const crypto::Key& key) noexcept -> void final
     {
         cache_.add(crypto::Key{key});
@@ -183,6 +187,8 @@ public:
         const api::Crypto& crypto,
         const internal::Output& rhs,
         const Log& log) noexcept -> void final;
+    auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void final;
     auto SetIndex(const std::uint32_t index) noexcept -> void final
     {
         const_cast<std::uint32_t&>(index_) = index;
@@ -278,7 +284,9 @@ private:
         auto reset_size() noexcept -> void;
         auto set(const KeyData& data) noexcept -> void;
         auto set_payee(const identifier::Generic& contact) noexcept -> void;
+        auto set_payee(identifier::Generic&& contact) noexcept -> void;
         auto set_payer(const identifier::Generic& contact) noexcept -> void;
+        auto set_payer(identifier::Generic&& contact) noexcept -> void;
         auto set_position(const block::Position& pos) noexcept -> void;
         auto set_state(node::TxoState state) noexcept -> void;
         template <typename F>
@@ -311,9 +319,6 @@ private:
         block::Position mined_position_;
         node::TxoState state_;
         UnallocatedSet<node::TxoTag> tags_;
-
-        auto set_payee(identifier::Generic&& contact) noexcept -> void;
-        auto set_payer(identifier::Generic&& contact) noexcept -> void;
     };
 
     using PubkeyMap =

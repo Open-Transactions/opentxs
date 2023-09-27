@@ -5,6 +5,7 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"  // IWYU pragma: associated
 
+#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstring>
 #include <iterator>
@@ -73,21 +74,25 @@ auto ElementCache::Add(database::ElementMap&& data) noexcept -> void
 }
 
 auto ElementCache::Add(
-    database::TXOs&& created,
-    database::TXOs&& consumed) noexcept -> void
+    const database::ConsumedTXOs& consumed,
+    database::TXOs&& created) noexcept -> void
 {
-    for (auto& [outpoint, output] : created) {
-        auto& map = elements_.txos_;
+    Add(std::move(created));
+    auto& map = elements_.txos_;
 
+    for (const auto& outpoint : consumed) { map.erase(outpoint); }
+}
+
+auto ElementCache::Add(database::TXOs&& created) noexcept -> void
+{
+    auto& map = elements_.txos_;
+
+    for (auto& [outpoint, output] : created) {
         if (auto i = map.find(outpoint); map.end() != i) {
             i->second = std::move(output);
         } else {
             map.emplace(outpoint, std::move(output));
         }
-    }
-
-    for (const auto& [outpoint, _] : consumed) {
-        elements_.txos_.erase(outpoint);
     }
 }
 

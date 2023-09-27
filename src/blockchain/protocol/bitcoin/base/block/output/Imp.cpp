@@ -14,6 +14,7 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
@@ -32,6 +33,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Element.hpp"      // IWYU pragma: keep
@@ -39,6 +41,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
@@ -46,6 +49,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -53,6 +58,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
+#include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::protocol::bitcoin::base::block::implementation
 {
@@ -233,6 +239,119 @@ auto Output::Cashtoken() const noexcept
 
         return nullptr;
     }
+}
+
+auto Output::ConfirmMatches(
+    const Log& log,
+    const api::crypto::Blockchain& api,
+    const Matches& candiates) noexcept -> bool
+{
+    const auto& [_, byKey] = candiates;
+
+    for (const auto& match : byKey) {
+        const auto& [txid, data1] = match;
+        const auto& [index, data2] = data1;
+        const auto& [subchain, subaccount] = data2;
+        auto alloc = get_allocator();
+        auto keyID = crypto::Key{{subaccount, alloc}, subchain, index};
+        auto haveKey = false;
+        auto haveMatch = false;
+        const auto spendable = crypto::Subchain::Outgoing != subchain;
+        auto post2 = ScopeGuard{[&] {
+            if (haveMatch) {
+                // TODO llvm sucks
+                const auto confirmed = api.Confirm(keyID, match.first);
+
+                OT_ASSERT(confirmed);
+            }
+
+            if (haveKey) {
+                if (spendable) {
+                    cache_.add(std::move(keyID));
+                } else {
+                    cache_.set_payer(api.SenderContact(keyID));
+                    cache_.set_payee(api.RecipientContact(keyID));
+                }
+            }
+        }};
+        const auto& element = api.GetKey(keyID);
+
+        switch (script_.Type()) {
+            using enum script::Pattern;
+            case PayToPubkey: {
+                const auto& key = element.Key();
+
+                OT_ASSERT(key.IsValid());
+                OT_ASSERT(script_.Pubkey().has_value());
+
+                if (key.PublicKey() == script_.Pubkey().value()) {
+                    log(OT_PRETTY_CLASS())("found P2PK match").Flush();
+                    haveMatch = spendable;
+                    haveKey = true;
+
+                    return haveMatch;
+                }
+            } break;
+            case PayToPubkeyHash: {
+                const auto hash = element.PubkeyHash();
+
+                OT_ASSERT(script_.PubkeyHash().has_value());
+
+                if (hash.Bytes() == script_.PubkeyHash().value()) {
+                    log(OT_PRETTY_CLASS())("found P2PKH match").Flush();
+                    haveMatch = spendable;
+                    haveKey = true;
+
+                    return haveMatch;
+                }
+            } break;
+            case PayToWitnessPubkeyHash: {
+                const auto hash = element.PubkeyHash();
+
+                OT_ASSERT(script_.PubkeyHash().has_value());
+
+                if (hash.Bytes() == script_.PubkeyHash().value()) {
+                    log(OT_PRETTY_CLASS())("found P2WPKH match").Flush();
+                    haveMatch = spendable;
+                    haveKey = true;
+
+                    return haveMatch;
+                }
+            } break;
+            case PayToMultisig: {
+                const auto required = script_.M();
+                const auto of = script_.N();
+
+                OT_ASSERT(required.has_value());
+                OT_ASSERT(of.has_value());
+
+                if (1u != required.value() || (3u != of.value())) {
+                    // TODO handle non-payment code multisig eventually
+
+                    continue;
+                }
+
+                const auto& key = element.Key();
+
+                OT_ASSERT(key.IsValid());
+
+                if (key.PublicKey() == script_.MultisigPubkey(0).value()) {
+                    log(OT_PRETTY_CLASS())(" found ")(required.value())(" of ")(
+                        of.value())(" P2MS match")
+                        .Flush();
+                    haveMatch = spendable;
+                    haveKey = true;
+
+                    return haveMatch;
+                }
+            } break;
+            case PayToScriptHash:
+            default: {
+            }
+        }
+    }
+
+    return false;
 }
 
 auto Output::ExtractElements(const cfilter::Type style, Elements& out)
@@ -469,6 +588,26 @@ auto Output::Print(const api::Crypto& api, alloc::Default alloc) const noexcept
     });
 
     return CString{out.str(), alloc};
+}
+
+auto Output::RefreshContacts(const api::crypto::Blockchain& api) noexcept
+    -> void
+{
+    auto alloc = get_allocator();
+    const auto keys = [&] {
+        auto out = Set<crypto::Key>{alloc};
+        cache_.keys(out);
+
+        return out;
+    }();
+    auto data = block::KeyData{alloc};
+
+    for (const auto& key : keys) {
+        data.try_emplace(
+            key, api.SenderContact(key), api.RecipientContact(key));
+    }
+
+    cache_.set(data);
 }
 
 auto Output::Script() const noexcept -> const block::Script& { return script_; }

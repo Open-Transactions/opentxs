@@ -91,6 +91,8 @@ auto Header::Serialize(Writer&&, const bool) const noexcept -> bool
 
 auto Header::SetDisconnectedState() noexcept -> void {}
 
+auto Header::SetHeight(block::Height) noexcept -> void {}
+
 auto Header::Target() const noexcept -> block::NumericHash { return {}; }
 
 auto Header::Type() const noexcept -> blockchain::Type { return {}; }

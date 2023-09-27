@@ -151,11 +151,17 @@ public:
     virtual auto AddSignatures(const Signatures& signatures) noexcept -> bool;
     virtual auto AssociatePreviousOutput(const block::Output& output) noexcept
         -> bool;
+    virtual auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates) noexcept -> bool;
     virtual auto MergeMetadata(
         const api::Crypto& crypto,
         const Input& rhs,
         const std::size_t index,
         const Log& log) noexcept -> void;
+    virtual auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void;
     virtual auto ReplaceScript() noexcept -> bool;
     virtual auto SetKeyData(const KeyData& data) noexcept -> void;
 

@@ -32,7 +32,6 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -61,6 +60,11 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class Block;
+}  // namespace block
+
 namespace crypto
 {
 class Element;
@@ -176,7 +180,7 @@ public:
         database::ElementMap& output) const noexcept -> void;
     auto ProcessBlock(
         const block::Position& position,
-        const block::Block& block,
+        block::Block& block,
         allocator_type monotonic) const noexcept -> bool;
     auto ProcessTransaction(
         const block::Transaction& tx,
@@ -215,8 +219,6 @@ public:
 
 protected:
     using TXOs = database::TXOs;
-    auto set_key_data(block::Transaction& tx, allocator_type monotonic)
-        const noexcept -> void;
 
     virtual auto do_startup(allocator_type monotonic) noexcept -> bool;
     virtual auto work(allocator_type monotonic) noexcept -> bool;
@@ -298,10 +300,10 @@ private:
     auto get_targets(const TXOs& utxos, Targets& targets) const noexcept
         -> void;
     virtual auto handle_block_matches(
-        const block::Block& block,
         const block::Position& position,
         const block::Matches& confirmed,
         const Log& log,
+        block::Block& block,
         allocator_type monotonic) const noexcept -> void = 0;
     virtual auto handle_mempool_match(
         const block::Matches& matches,

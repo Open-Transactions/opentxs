@@ -46,6 +46,7 @@ struct Data {
     bool supported_{};
     bool testnet_{};
     bool segwit_{};
+    bool spend_unconfirmed_{};
     unsigned segwit_scale_factor_{};
     blockchain::Type associated_mainnet_{};
     blockchain::Category category_{};

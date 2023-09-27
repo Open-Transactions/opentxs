@@ -187,6 +187,11 @@ auto Header::SetDisconnectedState() noexcept -> void
     inherit_status_ = Status::Error;
 }
 
+auto Header::SetHeight(block::Height height) noexcept -> void
+{
+    height_ = height;
+}
+
 auto Header::Valid() const noexcept -> bool { return NumericHash() < Target(); }
 
 auto Header::Work() const noexcept -> blockchain::Work
