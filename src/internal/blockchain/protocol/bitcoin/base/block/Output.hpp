@@ -142,11 +142,17 @@ public:
     virtual auto Value() const noexcept -> Amount;
 
     virtual auto AddTag(node::TxoTag tag) noexcept -> void;
+    virtual auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates) noexcept -> bool;
     virtual auto ForTestingOnlyAddKey(const crypto::Key& key) noexcept -> void;
     virtual auto MergeMetadata(
         const api::Crypto& crypto,
         const Output& rhs,
         const Log& log) noexcept -> void;
+    virtual auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void;
     virtual auto SetIndex(const std::uint32_t index) noexcept -> void;
     virtual auto SetKeyData(const KeyData& data) noexcept -> void;
     virtual auto SetMinedPosition(const block::Position& pos) noexcept -> void;

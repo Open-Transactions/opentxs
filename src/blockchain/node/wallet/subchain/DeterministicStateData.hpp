@@ -16,7 +16,6 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -40,6 +39,7 @@ namespace blockchain
 {
 namespace block
 {
+class Block;
 class Position;
 }  // namespace block
 
@@ -116,30 +116,14 @@ private:
         const Log& log,
         const database::MatchedTransaction& tx,
         database::MatchedTransaction& into) const noexcept(false) -> void;
-    auto prune_false_positives(const Log& log, database::BlockMatches& matches)
-        const noexcept -> void;
 
-    auto confirm_match_by_key(
-        const Log& log,
-        const block::Position& position,
-        const block::Match& match,
-        const block::Transaction& tx,
-        database::MatchedTransaction& matched,
-        allocator_type monotonic) const noexcept -> void;
-    auto confirm_match_by_outpoint(
-        const Log& log,
-        const block::Position& position,
-        const block::InputMatch& match,
-        const block::Transaction& tx,
-        database::MatchedTransaction& matched,
-        allocator_type monotonic) const noexcept -> void;
     auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_block_matches(
-        const block::Block& block,
         const block::Position& position,
         const block::Matches& mined,
         const Log& log,
+        block::Block& block,
         allocator_type monotonic) const noexcept -> void final;
     auto handle_mempool_match(
         const block::Matches& mempool,

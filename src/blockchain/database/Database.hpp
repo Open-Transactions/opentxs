@@ -103,7 +103,7 @@ public:
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed,
+        ConsumedTXOs& txoConsumed,
         alloc::Strategy alloc) noexcept -> bool final
     {
         return wallet_.AddConfirmedTransactions(

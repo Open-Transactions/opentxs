@@ -108,15 +108,13 @@ private:
 
     auto check_cache() noexcept -> void;
     auto check_process() noexcept -> bool;
-    auto do_process(
-        const Ready::value_type& data,
-        allocator_type monotonic) noexcept -> void;
-    auto do_process(
-        const block::Position position,
-        const block::Block block) noexcept -> void;
+    auto do_process(Ready::value_type& data, allocator_type monotonic) noexcept
+        -> void;
+    auto do_process(const block::Position position, block::Block block) noexcept
+        -> void;
     auto do_process_common(
         const block::Position position,
-        const block::Block& block,
+        block::Block& block,
         allocator_type monotonic) noexcept -> void;
     auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
         -> void final;

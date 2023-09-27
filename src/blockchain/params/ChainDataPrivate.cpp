@@ -34,6 +34,7 @@ ChainDataPrivate::ChainDataPrivate(
     , supported_(data_.supported_)
     , testnet_(data_.testnet_)
     , segwit_(data_.segwit_)
+    , spend_unconfirmed_(data_.spend_unconfirmed_)
     , segwit_scale_factor_(data_.segwit_scale_factor_)
     , currency_type_(data_.itemtype_)
     , bip44_(data_.bip44_)

@@ -6,10 +6,16 @@
 target_sources(
   opentxs-common
   PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/blockchain/database/wallet/Types.hpp"
+    "Common.cpp"
+    "Modification.cpp"
+    "Modification.hpp"
     "Output.cpp"
     "Output.hpp"
     "OutputCache.cpp"
     "OutputCache.hpp"
+    "ParsedBlockMatches.cpp"
+    "ParsedBlockMatches.hpp"
     "Pattern.cpp"
     "Pattern.hpp"
     "Position.cpp"

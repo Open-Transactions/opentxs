@@ -30,6 +30,15 @@ auto Block::asBitcoin() noexcept
 
 auto Block::CalculateSize() const noexcept -> std::size_t { return {}; }
 
+auto Block::ConfirmMatches(
+    const Log&,
+    const api::crypto::Blockchain&,
+    const Matches&,
+    alloc::Strategy alloc) noexcept -> database::BlockMatches
+{
+    return database::BlockMatches{alloc.result_};
+}
+
 auto Block::ContainsHash(const TransactionHash&) const noexcept -> bool
 {
     return {};
@@ -103,6 +112,8 @@ auto Block::Print(const api::Crypto&, alloc::Default alloc) const noexcept
 }
 
 auto Block::Serialize(Writer&&) const noexcept -> bool { return {}; }
+
+auto Block::SetMinedPosition(block::Height) noexcept -> void {}
 
 auto Block::size() const noexcept -> std::size_t { return {}; }
 }  // namespace opentxs::blockchain::block::internal

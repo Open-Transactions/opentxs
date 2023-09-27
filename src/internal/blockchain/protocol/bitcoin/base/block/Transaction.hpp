@@ -16,7 +16,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -41,6 +40,11 @@ class Session;
 
 namespace blockchain
 {
+namespace block
+{
+class Position;
+}  // namespace block
+
 namespace protocol
 {
 namespace bitcoin
@@ -148,9 +152,10 @@ public:
         const blockchain::Type chain,
         const Transaction& rhs,
         const Log& log) noexcept -> void;
+    virtual auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void;
     virtual auto SetKeyData(const KeyData& data) noexcept -> void;
     virtual auto SetMemo(const std::string_view memo) noexcept -> void;
-    virtual auto SetMinedPosition(const block::Position& pos) noexcept -> void;
     virtual auto SetPosition(std::size_t position) noexcept -> void;
 
     ~Transaction() override = default;

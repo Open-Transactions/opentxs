@@ -8,7 +8,10 @@
 #include <cstddef>
 #include <optional>
 
+#include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -62,6 +65,8 @@ namespace identifier
 class Generic;
 class Nym;
 }  // namespace identifier
+
+class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -101,6 +106,13 @@ public:
 
     virtual auto asBitcoin() noexcept
         -> protocol::bitcoin::base::block::internal::Transaction&;
+    virtual auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates,
+        database::BlockMatches& out,
+        alloc::Strategy alloc) noexcept -> void;
+    virtual auto SetMinedPosition(const block::Position& pos) noexcept -> void;
 
     virtual ~Transaction() = default;
 };

@@ -66,6 +66,7 @@ public:
     auto RemoveBlacklistState() noexcept -> void final;
     auto RemoveCheckpointState() noexcept -> void final;
     auto SetDisconnectedState() noexcept -> void final;
+    auto SetHeight(block::Height) noexcept -> void final;
 
     Header() = delete;
     Header(const Header& rhs, allocator_type alloc) noexcept;

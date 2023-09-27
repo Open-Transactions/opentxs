@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -13,6 +12,7 @@
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/database/wallet/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -65,39 +65,6 @@ class Transaction;
 
 namespace opentxs::blockchain::database::wallet
 {
-enum class ProposalAssociation { none, created, consumed };
-
-constexpr auto accounts_{Table::AccountOutputs};
-constexpr auto generation_{Table::GenerationOutputs};
-constexpr auto keys_{Table::KeyOutputs};
-constexpr auto nyms_{Table::NymOutputs};
-constexpr auto output_config_{Table::Config};
-constexpr auto output_proposal_{Table::OutputProposals};
-constexpr auto outputs_{Table::WalletOutputs};
-constexpr auto positions_{Table::PositionOutputs};
-constexpr auto proposal_created_{Table::ProposalCreatedOutputs};
-constexpr auto proposal_spent_{Table::ProposalSpentOutputs};
-constexpr auto states_{Table::StateOutputs};
-constexpr auto subchains_{Table::SubchainOutputs};
-
-template <typename Key, typename Value>
-using MapType = ankerl::unordered_dense::map<Key, Value>;
-template <typename Value>
-using SetType = ankerl::unordered_dense::set<Value>;
-using States = UnallocatedVector<node::TxoState>;
-using Matches = UnallocatedVector<block::Outpoint>;
-using Outpoints = Set<block::Outpoint>;
-using Nyms = SetType<identifier::Nym>;
-using OrphanedGeneration = Set<block::Outpoint>;
-using Reserved = Outpoints;
-using ParsedTXOs =
-    Map<block::Outpoint,
-        std::pair<
-            protocol::bitcoin::base::block::Output,
-            Vector<identifier::Generic>>>;
-
-auto all_states() noexcept -> const States&;
-
 class OutputCache
 {
 public:
@@ -186,7 +153,7 @@ public:
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto Clear() noexcept -> void;
     auto CheckProposals(
-        Vector<identifier::Generic> proposals,
+        const FlatSet<identifier::Generic>& proposals,
         alloc::Strategy alloc) noexcept(false) -> Vector<identifier::Generic>;
     auto ConsumeOutput(
         const Log& log,

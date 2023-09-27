@@ -17,6 +17,7 @@
 #include "blockchain/protocol/bitcoin/base/block/transaction/Data.hpp"
 #include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
 #include "internal/blockchain/block/Types.hpp"
+#include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -180,6 +181,12 @@ public:
     auto AssociatePreviousOutput(
         const std::size_t index,
         const block::Output& output) noexcept -> bool final;
+    auto ConfirmMatches(
+        const Log& log,
+        const api::crypto::Blockchain& api,
+        const Matches& candiates,
+        database::BlockMatches& out,
+        alloc::Strategy alloc) noexcept -> void final;
     auto ForTestingOnlyAddKey(
         const std::size_t index,
         const blockchain::crypto::Key& key) noexcept -> bool final;
@@ -192,6 +199,8 @@ public:
         const blockchain::Type chain,
         const internal::Transaction& rhs,
         const Log& log) noexcept -> void final;
+    auto RefreshContacts(const api::crypto::Blockchain& api) noexcept
+        -> void final;
     auto SetKeyData(const KeyData& data) noexcept -> void final;
     auto SetMemo(const std::string_view memo) noexcept -> void final;
     auto SetMinedPosition(const block::Position& pos) noexcept -> void final;

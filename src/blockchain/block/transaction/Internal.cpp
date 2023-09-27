@@ -54,6 +54,15 @@ auto Transaction::Chains(alloc::Default alloc) const noexcept
     return Set<blockchain::Type>{alloc};
 }
 
+auto Transaction::ConfirmMatches(
+    const Log&,
+    const api::crypto::Blockchain&,
+    const Matches&,
+    database::BlockMatches&,
+    alloc::Strategy) noexcept -> void
+{
+}
+
 auto Transaction::Hash() const noexcept -> const TransactionHash&
 {
     static const auto blank = TransactionHash{};
@@ -102,4 +111,6 @@ auto Transaction::Print(const api::Crypto&, alloc::Default alloc) const noexcept
 {
     return CString{alloc};
 }
+
+auto Transaction::SetMinedPosition(const block::Position&) noexcept -> void {}
 }  // namespace opentxs::blockchain::block::internal

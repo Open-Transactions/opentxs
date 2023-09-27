@@ -12,8 +12,6 @@ extern "C" {
 #include <sys/resource.h>
 }
 
-#include "opentxs/util/Allocator.hpp"
-
 namespace opentxs
 {
 auto SetThisThreadsPriority(ThreadPriority) noexcept -> void
@@ -39,13 +37,3 @@ auto Common::sync(DescriptorType::handle_type fd) noexcept -> bool
     return 0 == ::fcntl(fd, F_FULLFSYNC);
 }
 }  // namespace opentxs::storage::driver::filesystem
-
-// TODO after libc++ finally incorporates this into std, and after Apple ships
-// that version of libc++, then this can be removed
-namespace std::experimental::fundamentals_v1::pmr
-{
-auto get_default_resource() noexcept -> opentxs::alloc::Resource*
-{
-    return opentxs::alloc::System();
-}
-}  // namespace std::experimental::fundamentals_v1::pmr

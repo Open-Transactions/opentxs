@@ -37,6 +37,14 @@ auto Output::Cashtoken() const noexcept
     return nullptr;
 }
 
+auto Output::ConfirmMatches(
+    const Log&,
+    const api::crypto::Blockchain&,
+    const Matches&) noexcept -> bool
+{
+    return {};
+}
+
 auto Output::ExtractElements(const cfilter::Type, Elements&) const noexcept
     -> void
 {
@@ -119,6 +127,8 @@ auto Output::Print(const api::Crypto&, alloc::Default alloc) const noexcept
 {
     return CString{alloc};
 }
+
+auto Output::RefreshContacts(const api::crypto::Blockchain&) noexcept -> void {}
 
 auto Output::Script() const noexcept -> const block::Script&
 {

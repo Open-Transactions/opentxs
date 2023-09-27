@@ -6,8 +6,6 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
-#include <cstring>
-#include <functional>
 #include <optional>
 #include <span>
 #include <utility>
@@ -15,6 +13,7 @@
 #include "blockchain/database/wallet/OutputCache.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "internal/blockchain/database/wallet/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
 #include "internal/util/alloc/Boost.hpp"
@@ -25,7 +24,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -53,6 +51,7 @@ namespace wallet
 {
 class Proposal;
 class SubchainData;
+struct Modification;
 }  // namespace wallet
 }  // namespace database
 
@@ -72,10 +71,7 @@ namespace base
 {
 namespace block
 {
-namespace internal
-{
-class Transaction;
-}  // namespace internal
+class Output;
 }  // namespace block
 }  // namespace base
 }  // namespace bitcoin
@@ -150,14 +146,14 @@ public:
         const SubchainID& index,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed,
+        ConsumedTXOs& txoConsumed,
         alloc::Strategy alloc) noexcept -> bool;
     auto AddMempoolTransaction(
         const Log& log,
         const AccountID& account,
         const SubchainID& subchain,
         MatchedTransaction&& match,
-        TXOs& txoConsumed,
+        TXOs& txoCreated,
         alloc::Strategy alloc) noexcept -> bool;
     auto AdvanceTo(
         const Log& log,
@@ -212,30 +208,6 @@ public:
     ~Output() final;
 
 private:
-    struct ParsedBlockMatches {
-        ParsedTXOs gen_;
-        ParsedTXOs created_;
-        ParsedTXOs confirmed_;
-        ParsedTXOs consumed_;
-        ParsedTXOs consumed_new_;
-        ParsedTXOs consume_confirm_;
-        Map<identifier::Generic, Outpoints> proposals_;
-
-        ParsedBlockMatches() = default;
-        ParsedBlockMatches(alloc::Default alloc) noexcept
-            : gen_(alloc)
-            , created_(alloc)
-            , confirmed_(alloc)
-            , consumed_(alloc)
-            , consumed_new_(alloc)
-            , consume_confirm_(alloc)
-            , proposals_(alloc)
-        {
-        }
-        ParsedBlockMatches(ParsedBlockMatches&& rhs) noexcept = default;
-        ParsedBlockMatches(const ParsedBlockMatches&) = delete;
-    };
-
     using GuardedSocket =
         libguarded::plain_guarded<network::zeromq::socket::Raw>;
 
@@ -249,21 +221,6 @@ private:
     mutable OutputCache cache_dont_use_without_populating_;
     mutable GuardedSocket to_balance_oracle_;
 
-    static auto allowed_initial_states(
-        node::TxoState finalState,
-        alloc::Strategy alloc) noexcept -> Vector<node::TxoState>;
-    static auto associate_input(
-        const std::size_t index,
-        const protocol::bitcoin::base::block::Output& output,
-        protocol::bitcoin::base::block::internal::Transaction&
-            tx) noexcept(false) -> void;
-    static auto filter_existing(
-        const Log& log,
-        const OutputCache& cache,
-        node::TxoState consumeState,
-        node::TxoState createState,
-        ParsedBlockMatches& parsed,
-        alloc::Strategy alloc) noexcept(false) -> void;
     [[nodiscard]] static auto get_inputs(
         const block::Transaction& transaction,
         alloc::Strategy alloc) noexcept(false) -> Outpoints;
@@ -297,11 +254,10 @@ private:
         const Log& log,
         const AccountID& account,
         const SubchainID& subchain,
-        node::TxoState consumed,
-        node::TxoState created,
+        bool mempool,
         BatchedMatches&& transactions,
         TXOs& txoCreated,
-        TXOs& txoConsumed,
+        ConsumedTXOs& txoConsumed,
         OutputCache& cache,
         alloc::Strategy alloc) const noexcept(false) -> bool;
     auto add_transactions_in_block(
@@ -309,12 +265,11 @@ private:
         const AccountID& account,
         const SubchainID& subchain,
         const block::Position& block,
-        node::TxoState consumeState,
-        node::TxoState createState,
+        bool mempool,
         BlockMatches& blockMatches,
         Set<block::Transaction>& processed,
         TXOs& txoCreated,
-        TXOs& txoConsumed,
+        ConsumedTXOs& txoConsumed,
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
         alloc::Strategy alloc) const noexcept(false) -> void;
@@ -335,9 +290,8 @@ private:
     auto check_proposals(
         const Log& log,
         const block::Outpoint& outpoint,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        ParsedBlockMatches& matches,
+        const Set<identifier::Generic>& proposals,
+        bool mempool,
         OutputCache& cache,
         storage::lmdb::Transaction& tx) const noexcept(false) -> void;
     [[nodiscard]] auto choose(
@@ -348,47 +302,12 @@ private:
         OutputCache& cache,
         storage::lmdb::Transaction& tx) const noexcept(false)
         -> std::optional<UTXO>;
-    auto confirm(
-        const Log& log,
-        const block::Position& block,
-        const block::Outpoint& outpoint,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        ParsedBlockMatches& matches,
-        OutputCache& cache,
-        storage::lmdb::Transaction& tx,
-        alloc::Strategy alloc) const noexcept(false) -> void;
     auto confirm_proposal(
         const Log& log,
         const identifier::Generic& proposal,
         const block::Outpoint& output,
-        ParsedBlockMatches& matches,
         OutputCache& cache,
         storage::lmdb::Transaction& tx) const noexcept(false) -> void;
-    auto create_generation(
-        const AccountID& account,
-        const SubchainID& subchain,
-        const block::Position& block,
-        const block::Outpoint& outpoint,
-        protocol::bitcoin::base::block::Output& output,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        OutputCache& cache,
-        storage::lmdb::Transaction& tx,
-        alloc::Strategy alloc) const noexcept(false) -> void;
-    auto create_new(
-        const Log& log,
-        const AccountID& account,
-        const SubchainID& subchain,
-        const block::Position& block,
-        const block::Outpoint& outpoint,
-        protocol::bitcoin::base::block::Output& output,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        ParsedBlockMatches& matches,
-        OutputCache& cache,
-        storage::lmdb::Transaction& tx,
-        alloc::Strategy alloc) const noexcept(false) -> void;
     auto create_state(
         const AccountID& accountID,
         const SubchainID& subchainID,
@@ -449,16 +368,6 @@ private:
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
         alloc::Strategy alloc) const noexcept(false) -> void;
-    // NOTE: a mature output is available to be spent in the next block
-    [[nodiscard]] auto is_mature(
-        const OutputCache& cache,
-        const block::Height minedAt) const noexcept -> bool;
-    [[nodiscard]] auto is_mature(
-        const block::Height minedAt,
-        const block::Position& bestChain) const noexcept -> bool;
-    [[nodiscard]] auto is_mature(
-        const block::Height minedAt,
-        const block::Height bestChain) const noexcept -> bool;
     [[nodiscard]] auto match(
         const OutputCache& cache,
         const States states,
@@ -466,43 +375,42 @@ private:
         const AccountID* account,
         const SubaccountID* subchain,
         const crypto::Key* key) const noexcept -> Matches;
-    [[nodiscard]] auto parse(
+    auto process(
         const Log& log,
-        const OutputCache& cache,
+        const AccountID& account,
+        const SubchainID& subchain,
         const block::Position& block,
-        BlockMatches& matches,
-        Set<block::Transaction>& processed,
-        TXOs& txoCreated,
-        TXOs& txoConsumed,
-        alloc::Strategy alloc) const noexcept(false) -> ParsedBlockMatches;
+        const block::Outpoint& id,
+        Modification& data,
+        bool mempool,
+        OutputCache& cache,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) const noexcept(false) -> void;
+    auto process_create(
+        const Log& log,
+        const AccountID& account,
+        const SubchainID& subchain,
+        const block::Position& block,
+        const block::Outpoint& id,
+        Modification& data,
+        bool mempool,
+        OutputCache& cache,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) const noexcept(false) -> void;
+    auto process_modify(
+        const Log& log,
+        const block::Position& block,
+        const block::Outpoint& id,
+        const Modification& data,
+        bool mempool,
+        OutputCache& cache,
+        storage::lmdb::Transaction& tx,
+        alloc::Strategy alloc) const noexcept(false) -> void;
     auto publish_balance(const OutputCache& cache) const noexcept -> void;
     auto release_unused_inputs(
         const Log& log,
         const identifier::Generic& proposal,
         const Outpoints& consumed,
-        OutputCache& cache,
-        storage::lmdb::Transaction& tx,
-        alloc::Strategy alloc) const noexcept(false) -> void;
-    auto spend(
-        const Log& log,
-        const block::Position& block,
-        const block::Outpoint& outpoint,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        ParsedBlockMatches& matches,
-        OutputCache& cache,
-        storage::lmdb::Transaction& tx,
-        alloc::Strategy alloc) const noexcept(false) -> void;
-    auto spend_new(
-        const Log& log,
-        const AccountID& account,
-        const SubchainID& subchain,
-        const block::Position& block,
-        const block::Outpoint& outpoint,
-        protocol::bitcoin::base::block::Output& output,
-        std::span<const identifier::Generic> proposals,
-        node::TxoState state,
-        ParsedBlockMatches& matches,
         OutputCache& cache,
         storage::lmdb::Transaction& tx,
         alloc::Strategy alloc) const noexcept(false) -> void;

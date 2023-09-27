@@ -46,6 +46,7 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
@@ -56,6 +57,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -352,6 +354,42 @@ auto Input::classify() const noexcept -> Redeem
 }
 
 auto Input::Coinbase() const noexcept -> ReadView { return coinbase_.Bytes(); }
+
+auto Input::ConfirmMatches(
+    const Log& log,
+    const api::crypto::Blockchain& api,
+    const Matches& candiates) noexcept -> bool
+{
+    const auto& [utxo, _] = candiates;
+    auto handle = cache_.lock();
+    auto& cache = *handle;
+
+    for (const auto& [txid, outpoint, element] : utxo) {
+        const auto& [index, data] = element;
+        const auto& [subchain, subaccount] = data;
+        using enum crypto::Subchain;
+
+        if (Outgoing == subchain) {
+            LogAbort()(OT_PRETTY_CLASS())(
+                "critical database error: outputs owed by a payment code "
+                "recipient were recorded as spendable by the sender")
+                .Abort();
+        }
+
+        auto alloc = get_allocator();
+        auto key = crypto::Key{{subaccount, alloc}, subchain, index};
+
+        if (outpoint == previous_) {
+            log(OT_PRETTY_CLASS())("found spend of previous output ")(previous_)
+                .Flush();
+            cache.add(std::move(key));
+
+            return true;
+        }
+    }
+
+    return false;
+}
 
 auto Input::decode_coinbase() const noexcept -> UnallocatedCString
 {
@@ -698,6 +736,32 @@ auto Input::Print(const api::Crypto& crypto, alloc::Default alloc)
     });
 
     return CString{out.str(), alloc};
+}
+
+auto Input::RefreshContacts(const api::crypto::Blockchain& api) noexcept -> void
+{
+    refresh_contacts(api, *cache_.lock(), get_allocator());
+}
+
+auto Input::refresh_contacts(
+    const api::crypto::Blockchain& api,
+    input::Data& cache,
+    allocator_type alloc) noexcept -> void
+{
+    const auto keys = [&] {
+        auto out = Set<crypto::Key>{alloc};
+        cache.keys(out);
+
+        return out;
+    }();
+    auto data = block::KeyData{alloc};
+
+    for (const auto& key : keys) {
+        data.try_emplace(
+            key, api.SenderContact(key), api.RecipientContact(key));
+    }
+
+    cache.set(data);
 }
 
 auto Input::ReplaceScript() noexcept -> bool

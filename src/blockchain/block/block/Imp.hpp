@@ -15,6 +15,7 @@
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/Types.hpp"
 
 namespace opentxs::blockchain::block::implementation
 {
@@ -53,6 +54,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
+    auto SetMinedPosition(block::Height) noexcept -> void final;
 
     Block() = delete;
     Block(const Block& rhs, allocator_type alloc) noexcept;
@@ -64,10 +66,10 @@ public:
     ~Block() override;
 
 protected:
-    const block::Header header_;
+    block::Header header_;
     const TxidIndex id_index_;
     const TxidIndex hash_index_;
-    const TransactionMap transactions_;
+    TransactionMap transactions_;
 
     Block(
         block::Header header,

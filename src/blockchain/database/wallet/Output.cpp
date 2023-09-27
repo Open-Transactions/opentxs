@@ -6,9 +6,9 @@
 #include "blockchain/database/wallet/Output.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
+#include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstdint>
-#include <cstring>
 #include <functional>
 #include <iterator>
 #include <memory>
@@ -20,18 +20,18 @@
 #include <tuple>
 #include <utility>
 
+#include "blockchain/database/wallet/Modification.hpp"
 #include "blockchain/database/wallet/OutputCache.hpp"
+#include "blockchain/database/wallet/ParsedBlockMatches.hpp"
 #include "blockchain/database/wallet/Position.hpp"
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"  // IWYU pragma: keep
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
@@ -55,7 +55,7 @@
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/TxoTag.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -116,7 +116,7 @@ auto Output::AddConfirmedTransactions(
     const SubchainID& subchain,
     BatchedMatches&& transactions,
     TXOs& txoCreated,
-    TXOs& txoConsumed,
+    ConsumedTXOs& txoConsumed,
     alloc::Strategy alloc) noexcept -> bool
 {
     auto& cache = this->cache();
@@ -127,8 +127,7 @@ auto Output::AddConfirmedTransactions(
             log,
             account,
             subchain,
-            ConfirmedSpend,
-            ConfirmedNew,
+            false,
             std::move(transactions),
             txoCreated,
             txoConsumed,
@@ -150,7 +149,7 @@ auto Output::AddMempoolTransaction(
     alloc::Strategy alloc) noexcept -> bool
 {
     static const auto block = block::Position{};
-    auto txoConsumed = TXOs{alloc.work_};
+    auto txoConsumed = ConsumedTXOs{alloc.work_};
     auto txid = std::get<2>(match).ID();
     auto& cache = this->cache();
 
@@ -160,8 +159,7 @@ auto Output::AddMempoolTransaction(
             log,
             account,
             subchain,
-            UnconfirmedSpend,
-            UnconfirmedNew,
+            true,
             [&] {
                 auto out = BatchedMatches{alloc.work_};
                 auto& matches = out[block];
@@ -184,11 +182,10 @@ auto Output::add_transactions(
     const Log& log,
     const AccountID& account,
     const SubchainID& subchain,
-    node::TxoState consumed,
-    node::TxoState created,
+    bool mempool,
     BatchedMatches&& transactions,
     TXOs& txoCreated,
-    TXOs& txoConsumed,
+    ConsumedTXOs& txoConsumed,
     OutputCache& cache,
     alloc::Strategy alloc) const noexcept(false) -> bool
 {
@@ -199,20 +196,26 @@ auto Output::add_transactions(
         log(OT_PRETTY_CLASS())("processing block ")(block)(" with ")(
             blockMatches.size())(" transactions ")
             .Flush();
-        add_transactions_in_block(
-            log,
-            account,
-            subchain,
-            block,
-            consumed,
-            created,
-            blockMatches,
-            processed,
-            txoCreated,
-            txoConsumed,
-            cache,
-            tx,
-            alloc);
+        try {
+            add_transactions_in_block(
+                log,
+                account,
+                subchain,
+                block,
+                mempool,
+                blockMatches,
+                processed,
+                txoCreated,
+                txoConsumed,
+                cache,
+                tx,
+                alloc);
+        } catch (const std::exception& e) {
+            throw std::runtime_error{"failed to process transactions in block "s
+                                         .append(block.print())
+                                         .append(": ")
+                                         .append(e.what())};
+        }
     }
 
     transaction_success(tx);
@@ -239,17 +242,17 @@ auto Output::add_transactions_in_block(
     const AccountID& account,
     const SubchainID& subchain,
     const block::Position& block,
-    node::TxoState consumeState,
-    node::TxoState createState,
+    bool mempool,
     BlockMatches& blockMatches,
     Set<block::Transaction>& processed,
     TXOs& txoCreated,
-    TXOs& txoConsumed,
+    ConsumedTXOs& txoConsumed,
     OutputCache& cache,
     storage::lmdb::Transaction& tx,
     alloc::Strategy alloc) const noexcept(false) -> void
 {
-    auto p = parse(
+    auto p = ParsedBlockMatches::Parse(
+        api_,
         log,
         cache,
         block,
@@ -257,123 +260,37 @@ auto Output::add_transactions_in_block(
         processed,
         txoCreated,
         txoConsumed,
+        mempool,
+        maturation_target_,
         alloc);
-    filter_existing(log, cache, consumeState, createState, p, alloc);
-    const auto create_generation = [&, this](auto& item) {
-        auto& [outpoint, data] = item;
-        auto& [output, proposal] = data;
-        log(OT_PRETTY_CLASS())("created generation output ")(outpoint)(" has ")(
-            print(createState))(" state")
-            .Flush();
-        this->create_generation(
-            account,
-            subchain,
-            block,
-            outpoint,
-            output,
-            proposal,
-            createState,
-            cache,
-            tx,
-            alloc);
-    };
-    const auto create_new = [&, this](auto& item) {
-        auto& [outpoint, data] = item;
-        auto& [output, proposal] = data;
-        log(OT_PRETTY_CLASS())("created output ")(outpoint)(" has ")(
-            print(createState))(" state")
-            .Flush();
-        this->create_new(
+    const auto process = [&, this](auto& data) {
+        this->process(
             log,
             account,
             subchain,
             block,
-            outpoint,
-            output,
-            proposal,
-            createState,
-            p,
+            data.first,
+            data.second,
+            mempool,
             cache,
             tx,
             alloc);
     };
-    const auto spend_new = [&, this](auto& item) {
-        auto& [outpoint, data] = item;
-        auto& [output, proposal] = data;
-        log(OT_PRETTY_CLASS())("consumed output ")(outpoint)(" has ")(
-            print(consumeState))(" state")
-            .Flush();
-        this->spend_new(
-            log,
-            account,
-            subchain,
-            block,
-            outpoint,
-            output,
-            proposal,
-            consumeState,
-            p,
-            cache,
-            tx,
-            alloc);
-    };
-    const auto spend = [&, this](auto& item) {
-        auto& [outpoint, data] = item;
-        auto& [output, proposal] = data;
-        log(OT_PRETTY_CLASS())("consumed output ")(outpoint)(" has ")(
-            print(consumeState))(" state")
-            .Flush();
-        this->spend(
-            log, block, outpoint, proposal, consumeState, p, cache, tx, alloc);
-    };
-    const auto confirm = [&, this](auto& item) {
-        auto& [outpoint, data] = item;
-        auto& [output, proposal] = data;
-        log(OT_PRETTY_CLASS())("created output ")(outpoint)(" has ")(
-            print(createState))(" state")
-            .Flush();
-        this->confirm(
-            log, block, outpoint, proposal, createState, p, cache, tx, alloc);
-    };
-    const auto finish = [&](const auto& item) {
-        const auto& [proposal, outputs] = item;
-        const auto f = [&](const auto& output) {
-            confirm_proposal(log, item.first, output, p, cache, tx);
+    std::for_each(p.transaction_.begin(), p.transaction_.end(), process);
+
+    if (false == mempool) {
+        const auto finished =
+            cache.CheckProposals(p.proposals_, alloc.WorkOnly());
+        const auto close = [&, this](const auto& id) {
+            const auto rc = proposals_.FinishProposal(tx, id);
+
+            if (false == rc) {
+                throw std::runtime_error{"failed to finish proposals "s.append(
+                    id.asBase58(api_.Crypto()))};
+            }
         };
-        std::for_each(outputs.begin(), outputs.end(), f);
-    };
-    std::for_each(p.gen_.begin(), p.gen_.end(), create_generation);
-    std::for_each(p.created_.begin(), p.created_.end(), create_new);
-    std::for_each(p.confirmed_.begin(), p.confirmed_.end(), confirm);
-    std::for_each(p.consumed_new_.begin(), p.consumed_new_.end(), spend_new);
-    std::for_each(p.consumed_.begin(), p.consumed_.end(), spend);
-    std::for_each(p.consume_confirm_.begin(), p.consume_confirm_.end(), spend);
-
-    if (is_confirmed(createState)) {
-        std::for_each(p.proposals_.begin(), p.proposals_.end(), finish);
+        std::for_each(finished.begin(), finished.end(), close);
     }
-
-    const auto get_proposal_ids = [&] {
-        const auto& in = p.proposals_;
-        auto out = Vector<identifier::Generic>{alloc.work_};
-        out.reserve(in.size());
-        out.clear();
-        constexpr auto get_key = [](const auto& i) { return i.first; };
-        std::transform(in.begin(), in.end(), std::back_inserter(out), get_key);
-
-        return out;
-    };
-    const auto finished =
-        cache.CheckProposals(get_proposal_ids(), alloc.WorkOnly());
-    const auto close = [&, this](const auto& id) {
-        const auto rc = proposals_.FinishProposal(tx, id);
-
-        if (false == rc) {
-            throw std::runtime_error{"failed to finish proposals "s.append(
-                id.asBase58(api_.Crypto()))};
-        }
-    };
-    std::for_each(finished.begin(), finished.end(), close);
 }
 
 auto Output::AdvanceTo(
@@ -452,46 +369,6 @@ auto Output::AdvanceTo(
         LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
 
         return fail_transaction();
-    }
-}
-
-auto Output::allowed_initial_states(
-    node::TxoState finalState,
-    alloc::Strategy alloc) noexcept -> Vector<node::TxoState>
-{
-    using ReturnType = Vector<node::TxoState>;
-
-    if (ConfirmedNew == finalState) {
-
-        return ReturnType{{UnconfirmedNew}, alloc.result_};
-    } else if (ConfirmedSpend == finalState) {
-        // NOTE OrphanedNew is the state of an output in a proposal we cancelled
-        // assuming it was never broadcast. If the transaction was in fact
-        // broadcast we need to be able to handle the case where the transaction
-        // shows up either in the mempool or in a confirmed block.
-
-        return ReturnType{
-            {ConfirmedNew, UnconfirmedSpend, OrphanedNew}, alloc.result_};
-
-    } else if (UnconfirmedSpend == finalState) {
-        // NOTE see above
-
-        return ReturnType{{OrphanedNew}, alloc.result_};
-
-    } else {
-
-        return ReturnType{alloc.result_};
-    }
-}
-
-auto Output::associate_input(
-    const std::size_t index,
-    const protocol::bitcoin::base::block::Output& output,
-    protocol::bitcoin::base::block::internal::Transaction& tx) noexcept(false)
-    -> void
-{
-    if (false == tx.AssociatePreviousOutput(index, output)) {
-        throw std::runtime_error{"error associating previous output to input"};
     }
 }
 
@@ -584,20 +461,19 @@ auto Output::change_state(
 auto Output::check_proposals(
     const Log& log,
     const block::Outpoint& outpoint,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    ParsedBlockMatches& matches,
+    const Set<identifier::Generic>& proposals,
+    bool mempool,
     OutputCache& cache,
     storage::lmdb::Transaction& tx) const noexcept(false) -> void
 {
     const auto check = [&, this](const auto& proposal) {
-        if (is_confirmed(state)) {
-            confirm_proposal(log, proposal, outpoint, matches, cache, tx);
-        } else {
+        if (mempool) {
             log(OT_PRETTY_CLASS())("output ")(
                 outpoint)(" will not be dissociated from proposal ")(
                 proposal, api_.Crypto())(" until the transaction is confirmed")
                 .Flush();
+        } else {
+            confirm_proposal(log, proposal, outpoint, cache, tx);
         }
     };
     std::for_each(proposals.begin(), proposals.end(), check);
@@ -617,26 +493,10 @@ auto Output::choose(
     return std::make_optional<UTXO>(std::make_pair(outpoint, existing));
 }
 
-auto Output::confirm(
-    const Log& log,
-    const block::Position& block,
-    const block::Outpoint& outpoint,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    ParsedBlockMatches& matches,
-    OutputCache& cache,
-    storage::lmdb::Transaction& tx,
-    alloc::Strategy alloc) const noexcept(false) -> void
-{
-    check_proposals(log, outpoint, proposals, state, matches, cache, tx);
-    change_state(outpoint, block, state, cache, tx);
-}
-
 auto Output::confirm_proposal(
     const Log& log,
     const identifier::Generic& proposal,
     const block::Outpoint& output,
-    ParsedBlockMatches& matches,
     OutputCache& cache,
     storage::lmdb::Transaction& tx) const noexcept(false) -> void
 {
@@ -656,69 +516,6 @@ auto Output::confirm_proposal(
                     .append(proposal.asBase58(api_.Crypto()))};
         }
     }
-
-    matches.proposals_.at(proposal).erase(output);
-}
-
-auto Output::create_generation(
-    const AccountID& account,
-    const SubchainID& subchain,
-    const block::Position& block,
-    const block::Outpoint& outpoint,
-    protocol::bitcoin::base::block::Output& output,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    OutputCache& cache,
-    storage::lmdb::Transaction& tx,
-    alloc::Strategy alloc) const noexcept(false) -> void
-{
-    if (false == proposals.empty()) {
-        throw std::runtime_error{
-            "generation output "s.append(outpoint.str())
-                .append(" claims an association with one or more proposals")};
-    }
-
-    const auto keys = output.Keys(alloc.work_);
-    create_state(
-        account,
-        subchain,
-        outpoint,
-        block,
-        std::move(output),
-        true,
-        state,
-        cache,
-        tx);
-    index_keys(outpoint, keys, cache, tx, alloc);
-}
-
-auto Output::create_new(
-    const Log& log,
-    const AccountID& account,
-    const SubchainID& subchain,
-    const block::Position& block,
-    const block::Outpoint& outpoint,
-    protocol::bitcoin::base::block::Output& output,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    ParsedBlockMatches& matches,
-    OutputCache& cache,
-    storage::lmdb::Transaction& tx,
-    alloc::Strategy alloc) const noexcept(false) -> void
-{
-    check_proposals(log, outpoint, proposals, state, matches, cache, tx);
-    const auto keys = output.Keys(alloc.work_);
-    create_state(
-        account,
-        subchain,
-        outpoint,
-        block,
-        std::move(output),
-        false,
-        state,
-        cache,
-        tx);
-    index_keys(outpoint, keys, cache, tx, alloc);
 }
 
 auto Output::create_state(
@@ -738,26 +535,7 @@ auto Output::create_state(
     }
 
     const auto& pos = effective_position(state, blank_, position);
-    const auto effState = [&] {
-        if (isGeneration) {
-            if (is_confirmed(state)) {
-                if (is_mature(cache, position.height_)) {
 
-                    return ConfirmedNew;
-                } else {
-
-                    return Immature;
-                }
-            } else {
-                throw std::runtime_error{"generation output "s.append(id.str())
-                                             .append(" has invalid state")
-                                             .append(print(state))};
-            }
-        } else {
-
-            return state;
-        }
-    }();
     {
         auto& internal = output.Internal();
 
@@ -766,7 +544,7 @@ auto Output::create_state(
                 "output "s.append(id.str()).append(" missing keys")};
         }
 
-        internal.SetState(effState);
+        internal.SetState(state);
         internal.SetMinedPosition(pos);
 
         if (isGeneration) {
@@ -777,7 +555,7 @@ auto Output::create_state(
     }
 
     const auto rc = cache.AddOutput(
-        id, effState, pos, accountID, subchainID, tx, std::move(output));
+        id, state, pos, accountID, subchainID, tx, std::move(output));
 
     if (false == rc) {
         throw std::runtime_error{"failed to write output "s.append(id.str())};
@@ -811,93 +589,6 @@ auto Output::fail_transaction() noexcept -> bool
     cache_dont_use_without_populating_.Clear();
 
     return false;
-}
-
-auto Output::filter_existing(
-    const Log& log,
-    const OutputCache& cache,
-    node::TxoState consumeState,
-    node::TxoState createState,
-    ParsedBlockMatches& parsed,
-    alloc::Strategy alloc) noexcept(false) -> void
-{
-    auto check = [&](const auto finalState, auto& from, auto& to) {
-        for (auto i = from.begin(); i != from.end();) {
-            const auto& outpoint = i->first;
-
-            if (cache.Exists(outpoint)) {
-                const auto requiredState = cache.GetState(finalState);
-
-                if (requiredState.contains(outpoint)) {
-                    log(OT_PRETTY_STATIC(Output))("ignoring output ")(
-                        outpoint)(" which is already in correct state of ")(
-                        print(finalState))
-                        .Flush();
-                    i = from.erase(i);
-                } else {
-                    const auto allowed =
-                        allowed_initial_states(finalState, alloc.WorkOnly());
-                    auto startState = std::optional<node::TxoState>{};
-                    auto acceptable = false;
-
-                    for (const auto state : allowed) {
-                        const auto initialState = cache.GetState(state);
-
-                        if (initialState.contains(outpoint)) {
-                            log(OT_PRETTY_STATIC(Output))("output ")(
-                                outpoint)(" was already present in ")(print(
-                                state))(" state and will be transitioned to ")(
-                                print(finalState))(" state")
-                                .Flush();
-                            startState = state;
-                            acceptable = true;
-                            break;
-                        }
-                    }
-
-                    if (false == startState.has_value()) {
-                        for (auto state : all_states()) {
-                            const auto outputs = cache.GetState(state);
-
-                            if (outputs.contains(outpoint)) {
-                                startState = state;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (false == startState.has_value()) {
-                        throw std::runtime_error{
-                            "unable to determine state of output "s.append(
-                                outpoint.str())};
-                    }
-
-                    if (acceptable) {
-                        auto next = std::next(i);
-                        to.insert(from.extract(i));
-                        i = next;
-                    } else if (*startState == ConfirmedSpend) {
-                        log(OT_PRETTY_STATIC(Output))("ignoring output ")(
-                            outpoint)(" which is already spent")
-                            .Flush();
-                        i = from.erase(i);
-                    } else {
-                        throw std::runtime_error{
-                            "output "s.append(outpoint.str())
-                                .append(" transition from state ")
-                                .append(print(*startState))
-                                .append(" to state ")
-                                .append(print(finalState))
-                                .append(" is not allowed")};
-                    }
-                }
-            } else {
-                ++i;
-            }
-        }
-    };
-    check(createState, parsed.created_, parsed.confirmed_);
-    check(consumeState, parsed.consumed_new_, parsed.consume_confirm_);
 }
 
 auto Output::FinalizeProposal(
@@ -1416,28 +1107,6 @@ auto Output::is_confirmed(node::TxoState state) noexcept -> bool
     return (ConfirmedNew == state) || (ConfirmedSpend == state);
 }
 
-auto Output::is_mature(const OutputCache& cache, const block::Height minedAt)
-    const noexcept -> bool
-{
-    const auto bestChain = cache.GetPosition().Decode(api_);
-
-    return is_mature(minedAt, bestChain);
-}
-
-auto Output::is_mature(
-    const block::Height minedAt,
-    const block::Position& bestChain) const noexcept -> bool
-{
-    return is_mature(minedAt, bestChain.height_);
-}
-
-auto Output::is_mature(
-    const block::Height minedAt,
-    const block::Height bestChain) const noexcept -> bool
-{
-    return (bestChain - minedAt) >= maturation_target_;
-}
-
 auto Output::match(
     const OutputCache& cache,
     const States states,
@@ -1473,188 +1142,6 @@ auto Output::match(
     }
 
     return output;
-}
-
-auto Output::parse(
-    const Log& log,
-    const OutputCache& cache,
-    const block::Position& block,
-    BlockMatches& matches,
-    Set<block::Transaction>& processed,
-    TXOs& txoCreated,
-    TXOs& txoConsumed,
-    alloc::Strategy alloc) const noexcept(false) -> ParsedBlockMatches
-{
-    const auto indices = [&] {
-        auto generation = Outpoints{alloc.work_};
-        auto created = Outpoints{alloc.work_};
-        auto consumedExisting = Outpoints{alloc.work_};
-
-        for (auto& item : matches) {
-            auto& [txid, match] = item;
-            auto& [inputs, outputs, txn] = match;
-            log(OT_PRETTY_CLASS())("processing transaction ")
-                .asHex(txid)(" with ")(inputs.size())(" input matches and ")(
-                    outputs.size())(" output matches")
-                .Flush();
-            const auto& tx = [&]() -> const auto& {
-                auto& llvmWorkaround = std::get<2>(std::get<1>(item));
-                auto& out = llvmWorkaround.Internal().asBitcoin();
-                out.SetMinedPosition(block);
-                processed.emplace(llvmWorkaround);
-
-                return out;
-            }();
-            const auto txin = tx.Inputs();
-            const auto txout = tx.Outputs();
-
-            for (auto index : inputs) {
-                const auto& input = txin[index];
-                const auto& outpoint = input.PreviousOutput();
-                txoConsumed[outpoint];
-                consumedExisting.emplace(outpoint);
-                log(OT_PRETTY_CLASS())
-                    .asHex(txid)(" input ")(index)(" consumes ")(outpoint)
-                    .Flush();
-            }
-
-            for (auto index : outputs) {
-                const auto& output = txout[index];
-                const auto outpoint = block::Outpoint{txid, index};
-                txoCreated.try_emplace(outpoint, output);
-
-                if (tx.IsGeneration()) {
-                    generation.emplace(outpoint);
-                    log(OT_PRETTY_CLASS())("found generation output ")(outpoint)
-                        .Flush();
-                } else {
-                    created.emplace(outpoint);
-                    log(OT_PRETTY_CLASS())("found regular output ")(outpoint)
-                        .Flush();
-                }
-            }
-        }
-
-        // outputs created and consumed in the same block
-        const auto consumedNew = [&] {
-            auto out = Outpoints{alloc.work_};
-            std::set_intersection(
-                created.begin(),
-                created.end(),
-                consumedExisting.begin(),
-                consumedExisting.end(),
-                std::inserter(out, out.end()));
-
-            return out;
-        }();
-        // created outputs without being consumed
-        created = [&] {
-            auto out = Outpoints{alloc.work_};
-            std::set_difference(
-                created.begin(),
-                created.end(),
-                consumedNew.begin(),
-                consumedNew.end(),
-                std::inserter(out, out.end()));
-
-            return out;
-        }();
-        // consumed outputs created in an earlier block
-        consumedExisting = [&] {
-            auto out = Outpoints{alloc.work_};
-            std::set_difference(
-                consumedExisting.begin(),
-                consumedExisting.end(),
-                consumedNew.begin(),
-                consumedNew.end(),
-                std::inserter(out, out.end()));
-
-            return out;
-        }();
-
-        return std::make_tuple(
-            std::move(generation),
-            std::move(created),
-            std::move(consumedExisting),
-            std::move(consumedNew));
-    }();
-    const auto& [generation, created, consumedExisting, consumedNew] = indices;
-    auto out = ParsedBlockMatches{alloc.result_};
-    auto sameBlock = TXOs{alloc.work_};
-
-    for (const auto& item : matches) {
-        const auto& [txid, match] = item;
-        const auto& [_, outputs, txn] = match;
-        const auto& tx = txn.asBitcoin();
-        const auto txout = tx.Outputs();
-
-        for (auto index : outputs) {
-            const auto& output = txout[index];
-            auto outpoint = block::Outpoint{txid, index};
-            auto proposals = cache.GetProposals(outpoint, alloc);
-            const auto prepare = [&](const auto& proposal) {
-                log(OT_PRETTY_CLASS())("output ")(
-                    outpoint)(" associated with proposal ")(
-                    proposal, api_.Crypto())(" is created by transaction ")
-                    .asHex(item.first)
-                    .Flush();
-                out.proposals_[proposal];
-            };
-            std::for_each(proposals.begin(), proposals.end(), prepare);
-
-            if (created.contains(outpoint)) {
-                out.created_.try_emplace(
-                    std::move(outpoint), output, std::move(proposals));
-            } else if (generation.contains(outpoint)) {
-                out.gen_.try_emplace(
-                    std::move(outpoint), output, std::move(proposals));
-            } else {
-                const auto remember = [&](const auto& proposal) {
-                    out.proposals_[std::move(proposal)].emplace(outpoint);
-                };
-                std::for_each(proposals.begin(), proposals.end(), remember);
-                sameBlock.try_emplace(std::move(outpoint), output);
-            }
-        }
-    }
-
-    for (auto& item : matches) {
-        auto& [txid, match] = item;
-        auto& [inputs, _, txn] = match;
-        auto& tx = txn.asBitcoin();
-        const auto txin = tx.Inputs();
-
-        for (auto index : inputs) {
-            const auto& input = txin[index];
-            const auto& outpoint = input.PreviousOutput();
-            auto proposals = cache.GetProposals(outpoint, alloc);
-            const auto remember = [&](const auto& proposal) {
-                log(OT_PRETTY_CLASS())("output ")(
-                    outpoint)(" associated with proposal ")(
-                    proposal, api_.Crypto())(" is consumed by transaction ")
-                    .asHex(std::get<0>(item))
-                    .Flush();
-                out.proposals_[proposal];
-            };
-            std::for_each(proposals.begin(), proposals.end(), remember);
-
-            if (consumedNew.contains(outpoint)) {
-                const auto& spends = sameBlock.at(outpoint);
-                txoConsumed.try_emplace(outpoint, spends);
-                associate_input(index, spends, tx.Internal().asBitcoin());
-                out.consumed_new_.try_emplace(
-                    outpoint, sameBlock.at(outpoint), std::move(proposals));
-            } else {
-                const auto& spends = cache.GetOutput(outpoint);
-                txoConsumed.try_emplace(outpoint, spends);
-                associate_input(index, spends, tx.Internal().asBitcoin());
-                out.consumed_.try_emplace(
-                    outpoint, spends, std::move(proposals));
-            }
-        }
-    }
-
-    return out;
 }
 
 auto Output::pick_one(
@@ -1720,6 +1207,94 @@ auto Output::pick_one(
     } else {
 
         return std::make_pair(*selected, false);
+    }
+}
+
+auto Output::process(
+    const Log& log,
+    const AccountID& account,
+    const SubchainID& subchain,
+    const block::Position& block,
+    const block::Outpoint& id,
+    Modification& data,
+    bool mempool,
+    OutputCache& cache,
+    storage::lmdb::Transaction& tx,
+    alloc::Strategy alloc) const noexcept(false) -> void
+{
+    if (data.initial_state_.has_value()) {
+        process_modify(log, block, id, data, mempool, cache, tx, alloc);
+    } else {
+        process_create(
+            log, account, subchain, block, id, data, mempool, cache, tx, alloc);
+    }
+}
+
+auto Output::process_create(
+    const Log& log,
+    const AccountID& account,
+    const SubchainID& subchain,
+    const block::Position& block,
+    const block::Outpoint& id,
+    Modification& data,
+    bool mempool,
+    OutputCache& cache,
+    storage::lmdb::Transaction& tx,
+    alloc::Strategy alloc) const noexcept(false) -> void
+{
+    try {
+        if (false == data.output_.has_value()) {
+            throw std::runtime_error{"missing txout"};
+        }
+
+        if (false == data.CreatesGeneration()) {
+            check_proposals(log, id, data.proposals_, mempool, cache, tx);
+        } else if (false == data.proposals_.empty()) {
+            throw std::runtime_error{"generation output claims an association "
+                                     "with one or more proposals"};
+        }
+
+        const auto keys = data.output_->Keys(alloc.work_);
+        create_state(
+            account,
+            subchain,
+            id,
+            block,
+            std::move(*data.output_),
+            true,
+            data.final_state_,
+            cache,
+            tx);
+        index_keys(id, keys, cache, tx, alloc);
+    } catch (const std::exception& e) {
+        throw std::runtime_error{"failed to create output "s.append(id.str())
+                                     .append(" in state ")
+                                     .append(print(data.final_state_))
+                                     .append(": ")
+                                     .append(e.what())};
+    }
+}
+
+auto Output::process_modify(
+    const Log& log,
+    const block::Position& block,
+    const block::Outpoint& id,
+    const Modification& data,
+    bool mempool,
+    OutputCache& cache,
+    storage::lmdb::Transaction& tx,
+    alloc::Strategy alloc) const noexcept(false) -> void
+{
+    try {
+        check_proposals(log, id, data.proposals_, mempool, cache, tx);
+        change_state(id, block, data.final_state_, cache, tx);
+    } catch (const std::exception& e) {
+        throw std::runtime_error{
+            "failed to transition output "s.append(id.str())
+                .append(" to state ")
+                .append(print(data.final_state_))
+                .append(": ")
+                .append(e.what())};
     }
 }
 
@@ -2002,50 +1577,6 @@ auto Output::states(node::TxoState in) noexcept -> States
     if (All == in) { return all_states(); }
 
     return States{in};
-}
-
-auto Output::spend(
-    const Log& log,
-    const block::Position& block,
-    const block::Outpoint& outpoint,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    ParsedBlockMatches& matches,
-    OutputCache& cache,
-    storage::lmdb::Transaction& tx,
-    alloc::Strategy alloc) const noexcept(false) -> void
-{
-    check_proposals(log, outpoint, proposals, state, matches, cache, tx);
-    change_state(outpoint, block, state, cache, tx);
-}
-
-auto Output::spend_new(
-    const Log& log,
-    const AccountID& account,
-    const SubchainID& subchain,
-    const block::Position& block,
-    const block::Outpoint& outpoint,
-    protocol::bitcoin::base::block::Output& output,
-    std::span<const identifier::Generic> proposals,
-    node::TxoState state,
-    ParsedBlockMatches& matches,
-    OutputCache& cache,
-    storage::lmdb::Transaction& tx,
-    alloc::Strategy alloc) const noexcept(false) -> void
-{
-    check_proposals(log, outpoint, proposals, state, matches, cache, tx);
-    const auto keys = output.Keys(alloc.work_);
-    create_state(
-        account,
-        subchain,
-        outpoint,
-        block,
-        std::move(output),
-        false,
-        state,
-        cache,
-        tx);
-    index_keys(outpoint, keys, cache, tx, alloc);
 }
 
 auto Output::transaction_success(storage::lmdb::Transaction& tx) const

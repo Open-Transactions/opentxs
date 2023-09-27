@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <boost/container/flat_set.hpp>
 #include <cstdint>
 #include <memory>
 #include <shared_mutex>
@@ -14,6 +15,7 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -65,7 +67,8 @@ using Segments = UnallocatedSet<ChainSegment>;
 // parent block hash, disconnected block hash
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
 using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
-using MatchingIndices = Vector<Bip32Index>;
+using MatchingIndices = boost::container::
+    flat_set<Bip32Index, std::less<Bip32Index>, alloc::PMR<Bip32Index>>;
 using MatchingInputs = MatchingIndices;
 using MatchingOutputs = MatchingIndices;
 using MatchedTransaction =
@@ -74,6 +77,10 @@ using BlockMatches = Map<block::TransactionHash, MatchedTransaction>;
 using BatchedMatches = Map<block::Position, BlockMatches>;
 using TXOs =
     Map<blockchain::block::Outpoint, protocol::bitcoin::base::block::Output>;
+using ConsumedTXOs = boost::container::flat_set<
+    blockchain::block::Outpoint,
+    std::less<blockchain::block::Outpoint>,
+    alloc::PMR<blockchain::block::Outpoint>>;
 using node::UTXO;
 
 enum Table {

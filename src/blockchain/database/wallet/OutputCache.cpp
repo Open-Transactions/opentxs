@@ -6,6 +6,8 @@
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
+#include <ankerl/unordered_dense.h>
+#include <boost/container/vector.hpp>
 #include <boost/endian/conversion.hpp>
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
@@ -56,22 +58,6 @@
 
 namespace opentxs::blockchain::database::wallet
 {
-auto all_states() noexcept -> const States&
-{
-    using State = node::TxoState;
-    static const auto data = States{
-        State::UnconfirmedNew,
-        State::UnconfirmedSpend,
-        State::ConfirmedNew,
-        State::ConfirmedSpend,
-        State::OrphanedNew,
-        State::OrphanedSpend,
-        State::Immature,
-    };
-
-    return data;
-}
-
 template <typename MapKeyType, typename MapType>
 auto OutputCache::load_output_index(
     const MapKeyType& key,
@@ -500,7 +486,7 @@ auto OutputCache::ChangeState(
 }
 
 auto OutputCache::CheckProposals(
-    Vector<identifier::Generic> proposals,
+    const FlatSet<identifier::Generic>& proposals,
     alloc::Strategy alloc) noexcept(false) -> Vector<identifier::Generic>
 {
     auto out = Vector<identifier::Generic>{alloc.result_};
@@ -510,8 +496,8 @@ auto OutputCache::CheckProposals(
         return this->is_finished(id);
     };
     std::copy_if(
-        std::make_move_iterator(proposals.begin()),
-        std::make_move_iterator(proposals.end()),
+        proposals.begin(),
+        proposals.end(),
         std::back_inserter(out),
         is_finished);
 

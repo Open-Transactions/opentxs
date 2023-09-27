@@ -147,16 +147,16 @@ auto Process::Imp::check_cache() noexcept -> void
 auto Process::Imp::check_process() noexcept -> bool { return queue_process(); }
 
 auto Process::Imp::do_process(
-    const Ready::value_type& data,
+    Ready::value_type& data,
     allocator_type monotonic) noexcept -> void
 {
-    const auto& [position, block] = data;
+    auto& [position, block] = data;
     do_process_common(position, block, monotonic);
 }
 
 auto Process::Imp::do_process(
     const block::Position position,
-    const block::Block block) noexcept -> void
+    block::Block block) noexcept -> void
 {
     // WARNING this function must not be be called from a zmq thread
     auto alloc = alloc::Monotonic{get_allocator().resource()};
@@ -172,7 +172,7 @@ auto Process::Imp::do_process(
 
 auto Process::Imp::do_process_common(
     const block::Position position,
-    const block::Block& block,
+    block::Block& block,
     allocator_type monotonic) noexcept -> void
 {
     if (false == parent_.ProcessBlock(position, block, monotonic)) { OT_FAIL; }
@@ -428,11 +428,12 @@ auto Process::Imp::queue_downloads(allocator_type monotonic) noexcept -> void
 auto Process::Imp::queue_process() noexcept -> bool
 {
     auto counter = 0u;
+    const auto hardCap = 1_uz;  // TODO download_limit_;
     const auto limit = MaxJobs();
     const auto CanProcess = [&] {
         ++counter;
 
-        return (counter <= limit) && (processing_.size() < download_limit_) &&
+        return (counter <= limit) && (processing_.size() < hardCap) &&
                (false == running_.is_limited());
     };
 
