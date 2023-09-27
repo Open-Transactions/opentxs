@@ -48,6 +48,7 @@
 #define SPH_TYPES_H__
 
 #include <limits.h>
+#include <string.h>
 
 /*
  * All our I/O functions are defined over octet streams. We do not know
@@ -1489,7 +1490,7 @@ sph_enc32le(void *dst, sph_u32 val)
 #if SPH_BIG_ENDIAN
 	val = sph_bswap32(val);
 #endif
-	*(sph_u32 *)dst = val;
+	memcpy(dst, &val, sizeof(val));
 #else
 	if (((SPH_UPTR)dst & 3) == 0) {
 #if SPH_BIG_ENDIAN

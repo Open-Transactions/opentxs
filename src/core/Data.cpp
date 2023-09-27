@@ -12,6 +12,7 @@
 
 #include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Spaceship.hpp"
 
 namespace opentxs
 {
@@ -54,31 +55,12 @@ auto operator==(const Data& lhs, const Data& rhs) noexcept -> bool
 auto operator<=>(const Data& lhs, const Data& rhs) noexcept
     -> std::strong_ordering
 {
-    // TODO someday when Android uses a less broken version of libc++ use the
-    // std::string_view overload of operator<=>
+    return llvm_sucks(lhs.Bytes(), rhs.Bytes());
+}
 
-    if (auto l = lhs.size(), r = rhs.size(); l < r) {
-
-        return std::strong_ordering::less;
-    } else if (r < l) {
-
-        return std::strong_ordering::greater;
-    } else {
-        if (0_uz == l) {
-
-            return std::strong_ordering::equal;
-        } else if (auto c = std::memcmp(lhs.data(), rhs.data(), lhs.size());
-                   0 == c) {
-
-            return std::strong_ordering::equal;
-        } else if (0 < c) {
-
-            return std::strong_ordering::greater;
-        } else {
-
-            return std::strong_ordering::less;
-        }
-    }
+auto operator<=>(const Data& lhs, ReadView rhs) noexcept -> std::strong_ordering
+{
+    return llvm_sucks(lhs.Bytes(), rhs);
 }
 
 auto to_hex(const std::byte* in, std::size_t size) noexcept

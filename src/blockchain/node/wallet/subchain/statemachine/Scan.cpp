@@ -7,6 +7,7 @@
 
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
+#include <compare>
 #include <limits>
 #include <memory>
 #include <utility>
@@ -113,7 +114,7 @@ auto Scan::Imp::do_reorg(
         last_scanned_ = target;
     }
 
-    if (filter_tip_.has_value() && (filter_tip_.value() > position)) {
+    if (filter_tip_.has_value() && (filter_tip_->IsReplacedBy(position))) {
         log_(OT_PRETTY_CLASS())(name_)(" filter tip reset to ")(position)
             .Flush();
         filter_tip_ = position;
@@ -140,7 +141,7 @@ auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
         last_scanned_.value())(" from filter oracle")
         .Flush();
 
-    if (last_scanned_.value() > filter_tip_.value()) {
+    if (last_scanned_->IsReplacedBy(*filter_tip_)) {
         log(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(
             filter_tip_.value())
             .Flush();

@@ -12,6 +12,38 @@
 
 namespace opentxs::blockchain::block
 {
+auto operator==(const Position& lhs, const Position& rhs) noexcept -> bool
+{
+    return (lhs.height_ == rhs.height_) && (lhs.hash_ == rhs.hash_);
+}
+
+auto operator<=>(const Position& lhs, const Position& rhs) noexcept
+    -> std::strong_ordering
+{
+    // TODO it sure will be nice when we aren't limited by the ancient standard
+    // library in Android NDK 25.
+    // TODO constexpr auto& equal = std::strong_ordering::equal;
+    //
+    // TODO if (const auto out = lhs.height_ <=> rhs.height_; equal != out) {
+    // TODO
+    // TODO     return out;
+    // TODO } else {
+    // TODO
+    // TODO     return lhs.hash_ <=> rhs.hash_;
+    // TODO }
+
+    if (lhs.height_ < rhs.height_) {
+
+        return std::strong_ordering::less;
+    } else if (rhs.height_ < lhs.height_) {
+
+        return std::strong_ordering::greater;
+    } else {
+
+        return lhs.hash_ <=> rhs.hash_;
+    }
+}
+
 auto swap(Position& lhs, Position& rhs) noexcept -> void { lhs.swap(rhs); }
 }  // namespace opentxs::blockchain::block
 
@@ -73,6 +105,24 @@ Position::Position(Position&& rhs) noexcept
 {
 }
 
+auto Position::IsReplacedBy(const Position& rhs) const noexcept -> bool
+{
+    if (height_ > rhs.height_) { return true; }
+
+    if (height_ < rhs.height_) { return false; }
+
+    return hash_ != rhs.hash_;
+}
+
+auto Position::NotReplacedBy(const Position& rhs) const noexcept -> bool
+{
+    if (height_ > rhs.height_) { return true; }
+
+    if (height_ < rhs.height_) { return false; }
+
+    return true;
+}
+
 auto Position::operator=(const Position& rhs) noexcept -> Position&
 {
     if (this != std::addressof(rhs)) {
@@ -90,6 +140,7 @@ auto Position::operator=(Position&& rhs) noexcept -> Position&
     return *this;
 }
 
+/* FIXME
 auto Position::operator==(const Position& rhs) const noexcept -> bool
 {
     return (height_ == rhs.height_) && (hash_ == rhs.hash_);
@@ -117,24 +168,7 @@ auto Position::operator<=(const Position& rhs) const noexcept -> bool
 
     return hash_ <= rhs.hash_;
 }
-
-auto Position::operator>(const Position& rhs) const noexcept -> bool
-{
-    if (height_ > rhs.height_) { return true; }
-
-    if (height_ < rhs.height_) { return false; }
-
-    return hash_ != rhs.hash_;
-}
-
-auto Position::operator>=(const Position& rhs) const noexcept -> bool
-{
-    if (height_ > rhs.height_) { return true; }
-
-    if (height_ < rhs.height_) { return false; }
-
-    return true;
-}
+*/
 
 auto Position::print() const noexcept -> UnallocatedCString
 {

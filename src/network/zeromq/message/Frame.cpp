@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "internal/util/Spaceship.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -72,30 +73,7 @@ auto operator==(std::span<const Frame> lhs, std::span<const Frame> rhs) noexcept
 auto operator<=>(const Frame& lhs, const Frame& rhs) noexcept
     -> std::strong_ordering
 {
-    // TODO The version of libc++ in the Android NDK doesn't support operator
-    // <=> for std::string_view. return lhs.Bytes() <=> rhs.Bytes();
-    if (auto l = lhs.size(), r = rhs.size(); l < r) {
-
-        return std::strong_ordering::less;
-    } else if (r < l) {
-
-        return std::strong_ordering::greater;
-    } else {
-        if (0_uz == l) {
-
-            return std::strong_ordering::equal;
-        } else if (auto c = std::memcmp(lhs.data(), rhs.data(), lhs.size());
-                   0 == c) {
-
-            return std::strong_ordering::equal;
-        } else if (0 < c) {
-
-            return std::strong_ordering::greater;
-        } else {
-
-            return std::strong_ordering::less;
-        }
-    }
+    return llvm_sucks(lhs.Bytes(), rhs.Bytes());
 }
 
 auto operator<=>(

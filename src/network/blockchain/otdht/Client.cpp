@@ -118,7 +118,7 @@ auto Client::fill_queue() noexcept -> void
         log(OT_PRETTY_CLASS())(name_)(
             ": avoiding requests for new data while queue is full")
             .Flush();
-    } else if (local >= target) {
+    } else if (local.NotReplacedBy(target)) {
         log(OT_PRETTY_CLASS())(name_)(
             ": no peers report data better than current position ")(local)
             .Flush();

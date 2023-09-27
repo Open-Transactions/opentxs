@@ -31,6 +31,7 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -202,7 +203,7 @@ auto Rescan::Imp::do_reorg(
         set_last_scanned(target);
     }
 
-    if (filter_tip_.has_value() && (filter_tip_.value() > position)) {
+    if (filter_tip_.has_value() && (filter_tip_->IsReplacedBy(position))) {
         log_(OT_PRETTY_CLASS())(name_)(" filter tip reset to ")(position)
             .Flush();
         filter_tip_ = position;
@@ -230,7 +231,7 @@ auto Rescan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
         last_scanned_.value())(" from filter oracle")
         .Flush();
 
-    if (last_scanned_.value() > filter_tip_.value()) {
+    if (last_scanned_->IsReplacedBy(*filter_tip_)) {
         log_(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(
             filter_tip_.value())
             .Flush();
@@ -295,7 +296,7 @@ auto Rescan::Imp::process_dirty(const Set<block::Position>& dirty) noexcept
         const auto limit = before(lowestDirty);
         const auto current = this->current();
 
-        if (current > limit) {
+        if (current.IsReplacedBy(limit)) {
             log_(OT_PRETTY_CLASS())(name_)(" adjusting last scanned to ")(
                 limit)(" based on dirty block ")(lowestDirty)
                 .Flush();
@@ -360,8 +361,20 @@ auto Rescan::Imp::prune() noexcept -> void
 
     for (auto i = dirty_.begin(), end = dirty_.end(); i != end;) {
         const auto& position = *i;
+        constexpr auto is_finished = [](const auto& lhs, const auto& rhs) {
+            if (lhs.height_ < rhs.height_) {
 
-        if (position <= target) {
+                return true;
+            } else if (lhs.height_ > rhs.height_) {
+
+                return false;
+            } else {
+
+                return lhs.hash_ == rhs.hash_;
+            }
+        };
+
+        if (is_finished(position, target)) {
             log_(OT_PRETTY_CLASS())(name_)(" pruning re-scanned position ")(
                 position)
                 .Flush();

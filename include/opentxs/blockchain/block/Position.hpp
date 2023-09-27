@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstddef>
 #include <functional>
 #include <utility>
@@ -53,7 +54,11 @@ struct OPENTXS_EXPORT less<opentxs::blockchain::block::Position> {
 
 namespace opentxs::blockchain::block
 {
-auto swap(Position& lhs, Position& rhs) noexcept -> void;
+OPENTXS_EXPORT auto operator==(const Position&, const Position&) noexcept
+    -> bool;
+OPENTXS_EXPORT auto operator<=>(const Position&, const Position&) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto swap(Position& lhs, Position& rhs) noexcept -> void;
 }  // namespace opentxs::blockchain::block
 
 namespace opentxs::blockchain::block
@@ -64,14 +69,8 @@ public:
     Height height_;
     Hash hash_;
 
-    auto operator==(const Position& rhs) const noexcept -> bool;
-    auto operator!=(const Position& rhs) const noexcept -> bool;
-    auto operator<(const Position& rhs) const noexcept -> bool;
-    auto operator<=(const Position& rhs) const noexcept -> bool;
-    /// Use this to test for a chain reorg. rhs is the new position which may or
-    /// may not replace the current position.
-    auto operator>(const Position& rhs) const noexcept -> bool;
-    auto operator>=(const Position& rhs) const noexcept -> bool;
+    auto IsReplacedBy(const Position& rhs) const noexcept -> bool;
+    auto NotReplacedBy(const Position& rhs) const noexcept -> bool;
     auto print() const noexcept -> UnallocatedCString;
     auto print(alloc::Default alloc) const noexcept -> CString;
 
