@@ -28,6 +28,16 @@ elseif(UNIX)
   if(APPLE)
     target_sources(opentxs-common PRIVATE "Apple.cpp")
 
+    if(CMAKE_CXX_COMPILER_ID
+       MATCHES
+       AppleClang
+       AND CMAKE_CXX_COMPILER_VERSION
+           VERSION_LESS
+           15
+    )
+      target_sources(opentxs-common PRIVATE "libc++_pmr_workaround.cpp")
+    endif()
+
     if(IOS)
       target_sources(opentxs-common PRIVATE "iOS.cpp")
     else()
@@ -40,6 +50,7 @@ elseif(UNIX)
 
     if(ANDROID)
       target_sources(opentxs-common PRIVATE "Android.cpp")
+      target_sources(opentxs-common PRIVATE "libc++_pmr_workaround.cpp")
     else()
       target_sources(opentxs-common PRIVATE "Linux.cpp")
     endif()

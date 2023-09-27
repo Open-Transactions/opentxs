@@ -12,8 +12,6 @@ extern "C" {
 
 #include <sstream>
 
-#include "opentxs/util/Allocator.hpp"
-
 namespace opentxs::api::imp
 {
 auto Legacy::use_dot() noexcept -> bool { return false; }
@@ -59,14 +57,3 @@ auto Log::print(
     __android_log_write(prio, tag.str().c_str(), nullTerminated.c_str());
 }
 }  // namespace opentxs::api::imp
-
-// TODO after libc++ finally incorporates this into std, and after a new version
-// of the ndk is released which uses that version of libc++, then this can be
-// removed
-namespace std::experimental::fundamentals_v1::pmr
-{
-auto get_default_resource() noexcept -> opentxs::alloc::Resource*
-{
-    return opentxs::alloc::System();
-}
-}  // namespace std::experimental::fundamentals_v1::pmr
