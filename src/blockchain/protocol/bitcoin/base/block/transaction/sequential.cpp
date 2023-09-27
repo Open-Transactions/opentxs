@@ -16,13 +16,14 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/util/Container.hpp"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunneeded-member-function"
+#pragma GCC diagnostic ignored "-Wunused-member-function"
 namespace opentxs::blockchain::protocol::bitcoin::base::block::implementation
 {
 auto Transaction::calculate_input_sizes(const bool normalize) const noexcept
     -> std::size_t
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-member-function"
     struct Visitor {
         bool normalize_;
 
@@ -48,7 +49,6 @@ auto Transaction::calculate_input_sizes(const bool normalize) const noexcept
             return lhs + rhs;
         }
     };
-#pragma GCC diagnostic pop
 
     return std::reduce(
         inputs_.begin(), inputs_.end(), 0_uz, Visitor{normalize});
@@ -56,8 +56,6 @@ auto Transaction::calculate_input_sizes(const bool normalize) const noexcept
 
 auto Transaction::calculate_output_sizes() const noexcept -> std::size_t
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-member-function"
     struct Visitor {
         auto operator()(std::size_t lhs, const block::Output& rhs)
             const noexcept -> std::size_t
@@ -81,15 +79,12 @@ auto Transaction::calculate_output_sizes() const noexcept -> std::size_t
             return lhs + rhs;
         }
     };
-#pragma GCC diagnostic pop
 
     return std::reduce(outputs_.begin(), outputs_.end(), 0_uz, Visitor{});
 }
 
 auto Transaction::calculate_witness_sizes() const noexcept -> std::size_t
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-member-function"
     struct Visitor {
         auto operator()(std::size_t lhs, const block::Input& rhs) const noexcept
             -> std::size_t
@@ -113,7 +108,6 @@ auto Transaction::calculate_witness_sizes() const noexcept -> std::size_t
             return lhs + rhs;
         }
     };
-#pragma GCC diagnostic pop
 
     return std::reduce(inputs_.begin(), inputs_.end(), 0_uz, Visitor{});
 }
@@ -121,8 +115,6 @@ auto Transaction::calculate_witness_sizes() const noexcept -> std::size_t
 auto Transaction::calculate_witness_sizes(
     std::span<const WitnessItem> in) noexcept -> std::size_t
 {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunneeded-member-function"
     struct Visitor {
         auto operator()(std::size_t lhs, const WitnessItem& rhs) const noexcept
             -> std::size_t
@@ -145,7 +137,6 @@ auto Transaction::calculate_witness_sizes(
             return lhs + rhs;
         }
     };
-#pragma GCC diagnostic pop
 
     return std::reduce(in.begin(), in.end(), 0_uz, Visitor{});
 }
@@ -173,3 +164,4 @@ auto Transaction::merge_metadata(
 }
 }  // namespace
    // opentxs::blockchain::protocol::bitcoin::base::block::implementation
+#pragma GCC diagnostic pop

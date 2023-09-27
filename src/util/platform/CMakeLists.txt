@@ -50,7 +50,6 @@ elseif(UNIX)
 
     if(ANDROID)
       target_sources(opentxs-common PRIVATE "Android.cpp")
-      target_sources(opentxs-common PRIVATE "libc++_pmr_workaround.cpp")
     else()
       target_sources(opentxs-common PRIVATE "Linux.cpp")
     endif()
