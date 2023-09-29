@@ -9,25 +9,25 @@ namespace opentxs
 {
 inline namespace literals
 {
-constexpr auto operator"" _kib(const unsigned long long int in)
+constexpr auto operator""_kib(const unsigned long long int in)
     -> unsigned long long int
 {
     return in * 1024u;
 }
 
-constexpr auto operator"" _mib(const unsigned long long int in)
+constexpr auto operator""_mib(const unsigned long long int in)
     -> unsigned long long int
 {
     return in * 1024u * 1024u;
 }
 
-constexpr auto operator"" _gib(const unsigned long long int in)
+constexpr auto operator""_gib(const unsigned long long int in)
     -> unsigned long long int
 {
     return in * 1024u * 1024u * 1024u;
 }
 
-constexpr auto operator"" _tib(const unsigned long long int in)
+constexpr auto operator""_tib(const unsigned long long int in)
     -> unsigned long long int
 {
     static_assert(8u <= sizeof(unsigned long long int));

@@ -1254,6 +1254,43 @@ TEST_F(Regtest_payment_code, bob_contact_activity_after_unconfirmed_spend)
     EXPECT_TRUE(check_contact_activity_qt(bob_, contact, expected));
 }
 
+TEST_F(Regtest_payment_code, send_to_alex_again)
+{
+    account_activity_alex_.expected_ += 2;
+    account_activity_bob_.expected_ += 2;
+    account_list_alex_.expected_ += 1;
+    account_list_bob_.expected_ += 1;
+    account_tree_alex_.expected_ += 1;
+    account_tree_bob_.expected_ += 1;
+    contact_activity_alex_bob_.expected_ += 1;
+    contact_activity_bob_alex_.expected_ += 1;
+    const auto handle = client_2_.Network().Blockchain().GetChain(test_chain_);
+
+    ASSERT_TRUE(handle);
+
+    const auto recipient = client_2_.Factory().PaymentCodeFromBase58(
+        GetPaymentCodeVector3().alice_.payment_code_);
+    const auto& wallet = handle.get().Wallet();
+    auto spend = wallet.CreateSpend(bob_.nym_id_);
+
+    if (false == spend.SetUseEnhancedNotifications(false)) { ADD_FAILURE(); }
+
+    if (false == spend.SetMemo(memo_outgoing_)) { ADD_FAILURE(); }
+
+    if (false == spend.SendToPaymentCode(recipient, 100000000)) {
+        ADD_FAILURE();
+    }
+
+    if (false == spend.SetSpendUnconfirmedChange(true)) { ADD_FAILURE(); }
+
+    if (false == spend.SetSpendUnconfirmedIncoming(true)) { ADD_FAILURE(); }
+
+    auto future = wallet.Execute(spend);
+    const auto& txid = transactions_.emplace_back(future.get().second);
+
+    ASSERT_FALSE(txid.IsNull());
+}
+
 TEST_F(Regtest_payment_code, confirm_send)
 {
     constexpr auto orphan{0};
@@ -1267,18 +1304,21 @@ TEST_F(Regtest_payment_code, confirm_send)
         listener_bob_.get_future(ReceivePC(), Subchain::Incoming, end);
     auto future5 =
         listener_bob_.get_future(ReceiveHD(), Subchain::Internal, end);
-    account_activity_alex_.expected_ += 8;
-    account_activity_bob_.expected_ += 5;
+    account_activity_alex_.expected_ += 9;
+    account_activity_bob_.expected_ += 6;
     account_list_alex_.expected_ += 2;
     account_list_bob_.expected_ += 0;
     account_tree_alex_.expected_ += 2;
     account_tree_bob_.expected_ += 0;
     const auto& first = transactions_.at(1);
     const auto& second = transactions_.at(2);
+    const auto& third = transactions_.at(3);
     const auto extra = [&] {
         auto output = ot::UnallocatedVector<Transaction>{};
         output.emplace_back(
             client_2_.Crypto().Blockchain().LoadTransaction(second));
+        output.emplace_back(
+            client_2_.Crypto().Blockchain().LoadTransaction(third));
         output.emplace_back(
             client_1_.Crypto().Blockchain().LoadTransaction(first));
 
@@ -1309,16 +1349,30 @@ TEST_F(Regtest_payment_code, alex_account_activity_after_confirmation)
         expected_notary_.asBase58(ot_.Crypto()),
         expected_notary_name_,
         1,
-        9099999684,
-        u8"90.999\u202F996\u202F84 units",
+        9199999684,
+        u8"91.999\u202F996\u202F84 units",
         "",
         {},
         {test_chain_},
         100,
         {height_, height_},
         {},
-        {{u8"90.99999684", u8"90.999\u202F996\u202F84 units"}},
+        {{u8"91.99999684", u8"91.999\u202F996\u202F84 units"}},
         {
+            {
+                ot::otx::client::StorageBox::BLOCKCHAIN,
+                1,
+                100000000,
+                u8"1 units",
+                {expectedContact.asBase58(ot_.Crypto())},
+                "",
+                "",
+                "Incoming Unit Test Simulation transaction from "
+                "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
+                ot::blockchain::HashToNumber(transactions_.at(3)),
+                std::nullopt,
+                1,
+            },
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 1,
@@ -1381,8 +1435,8 @@ TEST_F(Regtest_payment_code, alex_account_list_after_confirmation)
          expected_account_type_,
          expected_unit_type_,
          1,
-         9099999684,
-         u8"90.999\u202F996\u202F84 units"},
+         9199999684,
+         u8"91.999\u202F996\u202F84 units"},
     }};
     wait_for_counter(account_list_alex_, false);
 
@@ -1406,8 +1460,8 @@ TEST_F(Regtest_payment_code, alex_account_tree_after_confirmation)
                ot::AccountType::Blockchain,
                expected_unit_type_,
                1,
-               9099999684,
-               u8"90.999\u202F996\u202F84 units"},
+               9199999684,
+               u8"91.999\u202F996\u202F84 units"},
           }}}};
     wait_for_counter(account_tree_alex_, false);
 
@@ -1457,6 +1511,21 @@ TEST_F(Regtest_payment_code, alex_contact_activity_after_confirmation)
                 std::nullopt,
                 ot::blockchain::HashToNumber(transactions_.at(2)),
             },
+            {
+                false,
+                false,
+                false,
+                1,
+                100000000,
+                u8"1 units",
+                "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
+                "Incoming Unit Test Simulation transaction from "
+                "PD1jFsimY3DQUe7qGtx3z8BohTaT6r4kwJMCYXwp7uY8z6BSaFrpM",
+                "",
+                ot::otx::client::StorageBox::BLOCKCHAIN,
+                std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(3)),
+            },
         },
     };
     wait_for_counter(contact_activity_alex_bob_, false);
@@ -1479,8 +1548,8 @@ TEST_F(Regtest_payment_code, bob_account_activity_after_confirmation)
         expected_notary_.asBase58(ot_.Crypto()),
         expected_notary_name_,
         1,
-        899999684,
-        u8"8.999\u202F996\u202F84 units",
+        799999448,
+        u8"7.999\u202F994\u202F48 units",
         "",
         {},
         {test_chain_},
@@ -1489,6 +1558,20 @@ TEST_F(Regtest_payment_code, bob_account_activity_after_confirmation)
         {},
         {{u8"9", u8"9 units"}},
         {
+            {
+                ot::otx::client::StorageBox::BLOCKCHAIN,
+                -1,
+                -100000236,
+                u8"-1.000\u202F002\u202F36 units",
+                {expectedContact.asBase58(ot_.Crypto())},
+                "",
+                "",
+                "Outgoing Unit Test Simulation transaction to "
+                "PD1jTsa1rjnbMMLVbj5cg2c8KkFY32KWtPRqVVpSBkv1jf8zjHJVu",
+                ot::blockchain::HashToNumber(transactions_.at(3)),
+                std::nullopt,
+                1,
+            },
             {
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 -1,
@@ -1538,8 +1621,8 @@ TEST_F(Regtest_payment_code, bob_account_list_after_confirmation)
          expected_account_type_,
          expected_unit_type_,
          1,
-         899999684,
-         u8"8.999\u202F996\u202F84 units"},
+         799999448,
+         u8"7.999\u202F994\u202F48 units"},
     }};
     wait_for_counter(account_list_bob_, false);
 
@@ -1563,8 +1646,8 @@ TEST_F(Regtest_payment_code, bob_account_tree_after_confirmation)
                ot::AccountType::Blockchain,
                expected_unit_type_,
                1,
-               899999684,
-               u8"8.999\u202F996\u202F84 units"},
+               799999448,
+               u8"7.999\u202F994\u202F48 units"},
           }}}};
     wait_for_counter(account_tree_bob_, false);
 
@@ -1613,6 +1696,21 @@ TEST_F(Regtest_payment_code, bob_contact_activity_after_confirmation)
                 ot::otx::client::StorageBox::BLOCKCHAIN,
                 std::nullopt,
                 ot::blockchain::HashToNumber(transactions_.at(2)),
+            },
+            {
+                false,
+                false,
+                true,
+                -1,
+                -100000236,
+                u8"-1.000\u202F002\u202F36 units",
+                bob_.name_,
+                "Outgoing Unit Test Simulation transaction to "
+                "PD1jTsa1rjnbMMLVbj5cg2c8KkFY32KWtPRqVVpSBkv1jf8zjHJVu",
+                "",
+                ot::otx::client::StorageBox::BLOCKCHAIN,
+                std::nullopt,
+                ot::blockchain::HashToNumber(transactions_.at(3)),
             },
         },
     };
