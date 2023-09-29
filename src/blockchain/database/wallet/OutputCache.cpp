@@ -346,16 +346,34 @@ auto OutputCache::associate_proposal(
     const Log& log,
     const block::Outpoint& output,
     const identifier::Generic& proposal,
-    std::string_view type,
+    Kind kind,
     storage::lmdb::Transaction& tx) noexcept(false) -> void
 {
     const auto& crypto = api_.Crypto();
     auto& map = output_to_proposal_;
 
     if (const auto i = map.find(output); map.end() != i) {
-        throw std::runtime_error{"output "s.append(output.str())
-                                     .append(" already associated with ")
-                                     .append(i->second.asBase58(crypto))};
+        const auto allowed = [&] {
+            if (Kind::consume != kind) { return false; }
+
+            const auto& other = i->second;
+            const auto& index = created_by_proposal_;
+
+            if (const auto j = index.find(other); index.end() != j) {
+                const auto created = j->second;
+
+                return created.contains(output);
+            } else {
+
+                return false;
+            }
+        }();
+
+        if (false == allowed) {
+            throw std::runtime_error{"output "s.append(output.str())
+                                         .append(" already associated with ")
+                                         .append(i->second.asBase58(crypto))};
+        }
     }
 
     const auto rc =
@@ -369,8 +387,9 @@ auto OutputCache::associate_proposal(
     }
 
     map.emplace(output, proposal);
-    log(OT_PRETTY_CLASS())("associated ")(type)(" output ")(output.str())(
-        " to proposal ")(proposal, crypto)
+    log(OT_PRETTY_CLASS())("associated ")(
+        (kind == Kind::create) ? "created" : "consumed")(" output ")(
+        output.str())(" to proposal ")(proposal, crypto)
         .Flush();
 }
 
@@ -545,7 +564,7 @@ auto OutputCache::ConsumeOutput(
     }
 
     set.emplace(output);
-    associate_proposal(log, output, proposal, "consumed", tx);
+    associate_proposal(log, output, proposal, Kind::consume, tx);
 }
 
 auto OutputCache::CreateOutput(
@@ -575,7 +594,7 @@ auto OutputCache::CreateOutput(
     }
 
     set.emplace(output);
-    associate_proposal(log, output, proposal, "created", tx);
+    associate_proposal(log, output, proposal, Kind::create, tx);
 }
 
 auto OutputCache::DeleteGenerationAbove(

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <optional>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/database/wallet/Position.hpp"
@@ -214,6 +213,8 @@ public:
 private:
     using Generation = Multimap<block::Height, block::Outpoint>;
 
+    enum class Kind : bool { create, consume };
+
     static constexpr auto reserve_ = 10000_uz;
     static const Outpoints empty_outputs_;
     static const Nyms empty_nyms_;
@@ -248,7 +249,7 @@ private:
         const Log& log,
         const block::Outpoint& output,
         const identifier::Generic& proposal,
-        std::string_view type,
+        Kind kind,
         storage::lmdb::Transaction& tx) noexcept(false) -> void;
     auto dissociate_proposal(
         const Log& log,
