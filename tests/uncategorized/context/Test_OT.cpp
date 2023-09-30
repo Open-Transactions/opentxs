@@ -19,22 +19,10 @@ namespace ot_mocks = common::mocks::util;
 using ::testing::StrictMock;
 using namespace std::literals;
 
-TEST(OT_suite, ShouldSuccessfullyInitializeAndGetValidContext)
-{
-    const ot::UnallocatedCString expected = "";
-    ot::UnallocatedCString error_message;
+// NOTE calling opentxs::InitContext without passing an opentxs::Options
+// argument in a unit test is not allowed.
 
-    try {
-        opentxs::InitContext();
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-
-    EXPECT_EQ(expected, error_message);
-    opentxs::Cleanup();
-}
-
-TEST(OT_suite, ShouldSuccessfullyInitializeContextWithArgs)
+TEST(OT_suite, ShouldSuccessfullyInitializeContext)
 {
     const ot::UnallocatedCString expected = "";
     ot::UnallocatedCString error_message;
@@ -49,44 +37,9 @@ TEST(OT_suite, ShouldSuccessfullyInitializeContextWithArgs)
     opentxs::Cleanup();
 }
 
-TEST(OT_suite, ShouldSuccessfullyInitializeContextWithInvalidPasswordCallback)
-{
-    const ot::UnallocatedCString expected = "";
-    ot::UnallocatedCString error_message;
-    try {
-        opentxs::InitContext(nullptr);
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-    EXPECT_EQ(expected, error_message);
-    opentxs::Cleanup();
-}
-
-TEST(OT_suite, ShouldSuccessfullyInitializeContextWithValidPasswordCaller)
-{
-    const ot::UnallocatedCString expected = "";
-    ot::UnallocatedCString error_message;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
-    StrictMock<ot_mocks::PasswordCallbackMock> mock;
-    opentxs::PasswordCaller caller;
-    caller.SetCallback(&mock);
-#pragma GCC diagnostic pop
-
-    try {
-        opentxs::InitContext(&caller);
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-
-    EXPECT_EQ(expected, error_message);
-    opentxs::Cleanup();
-}
-
 TEST(
     OT_suite,
-    ShouldInitializeContextWithArgsAndInvalidPasswordCallerWithoutThrowingAnException)
+    ShouldInitializeContextAndInvalidPasswordCallerWithoutThrowingAnException)
 {
     const ot::UnallocatedCString expected = "";
     ot::UnallocatedCString error_message;
@@ -103,7 +56,7 @@ TEST(
 
 TEST(
     OT_suite,
-    ShouldInitializeContextWithArgsAndValidPasswordCallerWithoutThrowingAnException)
+    ShouldInitializeContextAndValidPasswordCallerWithoutThrowingAnException)
 {
     const ot::UnallocatedCString expected = "";
     ot::UnallocatedCString error_message;
@@ -125,22 +78,7 @@ TEST(
     opentxs::Cleanup();
 }
 
-TEST(OT_suite, ShouldDoubleDefaultInitializeContextAndThrowAnException)
-{
-    const ot::UnallocatedCString expected = "Context is already initialized";
-    ot::UnallocatedCString error_message;
-    try {
-        opentxs::InitContext();
-        opentxs::InitContext();
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-
-    EXPECT_EQ(expected, error_message);
-    opentxs::Cleanup();
-}
-
-TEST(OT_suite, ShouldDoubleInitializeContextWithArgsAndThrowAnException)
+TEST(OT_suite, ShouldDoubleInitializeContextAndThrowAnException)
 {
     const ot::UnallocatedCString expected = "Context is already initialized";
     ot::UnallocatedCString error_message;
@@ -157,32 +95,7 @@ TEST(OT_suite, ShouldDoubleInitializeContextWithArgsAndThrowAnException)
 
 TEST(
     OT_suite,
-    ShouldDoubleInitializeContextWithValidPasswordCallerAndThrowAnException)
-{
-    const ot::UnallocatedCString expected = "Context is already initialized";
-    ot::UnallocatedCString error_message;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
-    StrictMock<ot_mocks::PasswordCallbackMock> mock;
-    opentxs::PasswordCaller caller;
-    caller.SetCallback(&mock);
-#pragma GCC diagnostic pop
-
-    try {
-        opentxs::InitContext(&caller);
-        opentxs::InitContext(&caller);
-    } catch (const std::runtime_error& er) {
-        error_message = er.what();
-    }
-
-    EXPECT_EQ(expected, error_message);
-    opentxs::Cleanup();
-}
-
-TEST(
-    OT_suite,
-    ShouldDoubleInitializeContextWithArgsAndValidPasswordCallerAndThrowAnException)
+    ShouldDoubleInitializeContextAndValidPasswordCallerAndThrowAnException)
 {
     const ot::UnallocatedCString expected = "Context is already initialized";
     ot::UnallocatedCString error_message;
@@ -207,7 +120,7 @@ TEST(
 
 TEST(
     OT_suite,
-    ShouldDoubleInitializeContextWithArgsAndNotValidPasswordCallerAndThrowAnException)
+    ShouldDoubleInitializeContextAndNotValidPasswordCallerAndThrowAnException)
 {
     const ot::UnallocatedCString expected = "Context is already initialized";
     ot::UnallocatedCString error_message;

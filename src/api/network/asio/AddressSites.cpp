@@ -9,38 +9,35 @@ namespace opentxs::api::network::asio
 {
 auto Shared::sites() -> const Vector<Site>&
 {
+    using enum opentxs::network::asio::TLS;
     static const auto sites = Vector<Site>{
         {
+            std::nullopt,
             "ip4only.me",
-            "http",
             "/api/",
             ResponseType::IPvonly,
             IPversion::IPV4,
-            11,
         },
         {
+            std::nullopt,
             "ip6only.me",
-            "http",
             "/api/",
             ResponseType::IPvonly,
             IPversion::IPV6,
-            11,
         },
         {
+            tls1_2,
             "ip4.seeip.org",
-            "https",
             "/",
             ResponseType::AddressOnly,
             IPversion::IPV4,
-            11,
         },
         {
+            tls1_2,
             "ip6.seeip.org",
-            "https",
             "/",
             ResponseType::AddressOnly,
             IPversion::IPV6,
-            11,
         }};
 
     return sites;
