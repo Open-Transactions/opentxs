@@ -128,7 +128,8 @@ auto Shared::FetchJson(
         (https) ? &Shared::retrieve_json_https : &Shared::retrieve_json_http;
     const auto handle = me->data_.lock_shared();
     const auto& data = *handle;
-    std::invoke(f, me, data, host, path, notify, std::move(promise));
+    using enum opentxs::network::asio::TLS;
+    std::invoke(f, me, tls1_3, data, host, path, notify, std::move(promise));
 
     return future;
 }
@@ -499,6 +500,7 @@ auto Shared::retrieve_address_async(
 }
 
 auto Shared::retrieve_address_async_ssl(
+    opentxs::network::asio::TLS tls,
     const Data& data,
     const Site& site,
     std::shared_ptr<std::promise<ByteArray>> pPromise) const noexcept -> void
@@ -507,6 +509,7 @@ auto Shared::retrieve_address_async_ssl(
     post(
         data,
         [job = std::make_shared<HTTPS>(
+             tls,
              site.host_,
              site.target_,
              *data.io_context_,
@@ -519,6 +522,7 @@ auto Shared::retrieve_address_async_ssl(
 
 auto Shared::retrieve_json_http(
     boost::shared_ptr<const Shared> me,
+    opentxs::network::asio::TLS,
     const Data& data,
     const ReadView host,
     const ReadView path,
@@ -550,6 +554,7 @@ auto Shared::retrieve_json_http(
 
 auto Shared::retrieve_json_https(
     boost::shared_ptr<const Shared> me,
+    opentxs::network::asio::TLS tls,
     const Data& data,
     const ReadView host,
     const ReadView path,
@@ -560,6 +565,7 @@ auto Shared::retrieve_json_https(
     me->post(
         data,
         [job = std::make_shared<HTTPS>(
+             tls,
              host,
              path,
              *data.io_context_,
@@ -656,16 +662,18 @@ auto Shared::StateMachine() noexcept -> bool
             if (IPversion::IPV4 == site.protocol_) {
                 futures4.emplace_back(promise->get_future());
 
-                if ("https" == site.service_) {
-                    retrieve_address_async_ssl(data, site, std::move(promise));
+                if (site.tls_.has_value()) {
+                    retrieve_address_async_ssl(
+                        *site.tls_, data, site, std::move(promise));
                 } else {
                     retrieve_address_async(data, site, std::move(promise));
                 }
             } else {
                 futures6.emplace_back(promise->get_future());
 
-                if ("https" == site.service_) {
-                    retrieve_address_async_ssl(data, site, std::move(promise));
+                if (site.tls_.has_value()) {
+                    retrieve_address_async_ssl(
+                        *site.tls_, data, site, std::move(promise));
                 } else {
                     retrieve_address_async(data, site, std::move(promise));
                 }

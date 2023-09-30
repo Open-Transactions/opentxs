@@ -9,6 +9,7 @@
 #include <string_view>
 
 #include "BoostAsio.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/asio/WebRequest.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/util/Container.hpp"
@@ -46,6 +47,7 @@ public:
     auto Start() noexcept -> void;
 
     HTTPS(
+        TLS level,
         const std::string_view hostname,
         const std::string_view file,
         api::network::asio::Context& asio,

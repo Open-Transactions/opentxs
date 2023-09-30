@@ -33,6 +33,8 @@ class ByteArray;
 
 namespace opentxs::network::asio
 {
+enum class TLS : bool { tls1_2, tls1_3 };  // IWYU pragma: export
+
 auto address_from_binary(ReadView in) noexcept
     -> std::optional<boost::asio::ip::address>;
 auto address_from_string(std::string_view in) noexcept

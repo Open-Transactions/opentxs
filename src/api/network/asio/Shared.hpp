@@ -14,12 +14,14 @@
 #include <cstdint>
 #include <future>
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <string_view>
 
 #include "BoostAsio.hpp"
 #include "api/network/asio/Data.hpp"
 #include "internal/api/network/Asio.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -130,16 +132,16 @@ private:
     using Type = opentxs::network::asio::Endpoint::Type;
 
     struct Site {
+        const std::optional<opentxs::network::asio::TLS> tls_{};
         const CString host_{};
-        const CString service_{};
         const CString target_{};
         const ResponseType response_type_{};
         const IPversion protocol_{};
-        const unsigned http_version_{};
     };
 
     static auto retrieve_json_http(
         boost::shared_ptr<const Shared> me,
+        opentxs::network::asio::TLS tls,
         const Data& data,
         const ReadView host,
         const ReadView path,
@@ -148,6 +150,7 @@ private:
         -> void;
     static auto retrieve_json_https(
         boost::shared_ptr<const Shared> me,
+        opentxs::network::asio::TLS tls,
         const Data& data,
         const ReadView host,
         const ReadView path,
@@ -199,6 +202,7 @@ private:
         std::shared_ptr<std::promise<ByteArray>> promise) const noexcept
         -> void;
     auto retrieve_address_async_ssl(
+        opentxs::network::asio::TLS tls,
         const Data& data,
         const Site& site,
         std::shared_ptr<std::promise<ByteArray>> promise) const noexcept

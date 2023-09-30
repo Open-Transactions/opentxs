@@ -30,13 +30,14 @@ namespace opentxs::network::asio
 using namespace std::literals;
 
 HTTPS::HTTPS(
+    TLS level,
     const std::string_view hostname,
     const std::string_view file,
     api::network::asio::Context& asio,
     Finish&& cb,
     allocator_type alloc) noexcept
     : WebRequest(hostname, file, asio, std::move(cb), std::move(alloc))
-    , ssl_([this] {
+    , ssl_([this, level] {
         // NOTE Initializing an ssl::context works 100% of the time with
         // versions of OpenSSL < 3, but randomly fails with versions of OpenSSL
         // >= 3 apparently due to some race condition in the SSL library
@@ -46,22 +47,35 @@ HTTPS::HTTPS(
         //
         // Alternately it might be an Asio / Beast incompatibility with
         // OpenSSL 3 instead of an OpenSSL bug.
-        static constexpr auto max = 16s;
+        static constexpr auto max = 32s;
         auto retry = 1s;
 
         while (retry <= max) {
             try {
-                auto out = ssl::context{ssl::context::tlsv13_client};
-                // clang-format off
-                out.set_options(
-                    ssl::context::default_workarounds |
-                    ssl::context::no_compression |
-                    ssl::context::no_sslv2 |
-                    ssl::context::no_sslv3 |
-                    ssl::context::no_tlsv1 |
-                    ssl::context::no_tlsv1_1 |
-                    ssl::context::no_tlsv1_2);
-                // clang-format on
+                auto out = [&] {
+                    using enum TLS;
+                    // clang-format off
+                    constexpr auto opts =
+                        ssl::context::default_workarounds |
+                        ssl::context::no_compression |
+                        ssl::context::no_sslv2 |
+                        ssl::context::no_sslv3 |
+                        ssl::context::no_tlsv1 |
+                        ssl::context::no_tlsv1_1;
+                    // clang-format on
+
+                    if (tls1_2 == level) {
+                        auto ctx = ssl::context{ssl::context::tlsv12_client};
+                        ctx.set_options(opts);
+
+                        return ctx;
+                    } else {
+                        auto ctx = ssl::context{ssl::context::tlsv13_client};
+                        ctx.set_options(opts | ssl::context::no_tlsv1_2);
+
+                        return ctx;
+                    }
+                }();
                 out.set_default_verify_paths();
                 out.set_verify_mode(ssl::verify_peer);
 
