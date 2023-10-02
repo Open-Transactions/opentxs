@@ -23,6 +23,8 @@ target_sources(
     "ContactActivity.hpp"
     "ContactList.cpp"
     "ContactList.hpp"
+    "Items.cpp"
+    "Items.hpp"
     "NymList.cpp"
     "NymList.hpp"
     "SeedTree.cpp"

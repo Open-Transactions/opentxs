@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -14,67 +14,9 @@
 
 #include "interface/ui/base/Items.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "ottest/fixtures/ui/Items.hpp"
 
 namespace ot = opentxs;
-
-namespace ottest
-{
-using Key = ot::UnallocatedCString;
-using ValueType = ot::UnallocatedCString;
-using ID = int;
-using Active = ot::UnallocatedVector<ID>;
-
-struct Value final : public opentxs::ui::internal::Row {
-    ValueType data_;
-
-    auto operator==(const Value& rhs) const noexcept -> bool
-    {
-        return data_ == rhs.data_;
-    }
-    auto operator==(const ValueType& rhs) const noexcept -> bool
-    {
-        return data_ == rhs;
-    }
-
-    auto ClearCallbacks() const noexcept -> void final {}
-    auto index() const noexcept -> std::ptrdiff_t final { return row_index_; }
-    auto Last() const noexcept -> bool final { return false; }
-    auto SetCallback(opentxs::SimpleCallback) const noexcept -> void final {}
-    auto Valid() const noexcept -> bool final { return false; }
-    auto WidgetID() const noexcept -> opentxs::identifier::Generic final
-    {
-        abort();
-    }
-
-    auto AddChildren(opentxs::ui::implementation::CustomData&& data) noexcept
-        -> void final
-    {
-    }
-
-    Value(const char* in) noexcept
-        : data_(in)
-        , row_index_(next_index())
-    {
-    }
-    Value(Value&& rhs) noexcept
-        : data_(std::move(rhs.data_))
-        , row_index_(rhs.row_index_)
-    {
-    }
-    Value(const Value& rhs) noexcept
-        : data_(rhs.data_)
-        , row_index_(rhs.row_index_)
-    {
-    }
-
-private:
-    const std::ptrdiff_t row_index_;
-};
-
-using Type =
-    opentxs::ui::implementation::ListItems<ID, Key, std::shared_ptr<Value>>;
-
-}  // namespace ottest
 
 namespace opentxs::ui::implementation
 {
@@ -101,14 +43,6 @@ auto ListItems<ottest::ID, ottest::Key, std::shared_ptr<ottest::Value>>::
 
 namespace ottest
 {
-struct Data {
-    Key key_;
-    ID id_;
-    Value value_;
-};
-
-using Vector = ot::UnallocatedVector<Data>;
-
 Type items_{0, false};
 const Vector vector_{
     {"a", 0, "first"},
