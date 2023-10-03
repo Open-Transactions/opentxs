@@ -12,14 +12,56 @@ auto Shared::sites() -> const Vector<Site>&
     using enum opentxs::network::asio::TLS;
     static const auto sites = Vector<Site>{
         {
-            std::nullopt,
+            tls1_3,
+            "ipv4.wtfismyip.com",
+            "/text",
+            ResponseType::AddressOnly,
+            IPversion::IPV4,
+        },
+        {
+            tls1_3,
+            "ipv6.wtfismyip.com",
+            "/text",
+            ResponseType::AddressOnly,
+            IPversion::IPV6,
+        },
+        {
+            tls1_3,
+            "api-ipv4.ip.sb",
+            "/ip",
+            ResponseType::AddressOnly,
+            IPversion::IPV4,
+        },
+        {
+            tls1_3,
+            "api-ipv6.ip.sb",
+            "/ip",
+            ResponseType::AddressOnly,
+            IPversion::IPV6,
+        },
+        {
+            tls1_3,
+            "api4.my-ip.io",
+            "/ip",
+            ResponseType::AddressOnly,
+            IPversion::IPV4,
+        },
+        {
+            tls1_3,
+            "api6.my-ip.io",
+            "/ip",
+            ResponseType::AddressOnly,
+            IPversion::IPV6,
+        },
+        {
+            tls1_3,
             "ip4only.me",
             "/api/",
             ResponseType::IPvonly,
             IPversion::IPV4,
         },
         {
-            std::nullopt,
+            tls1_3,
             "ip6only.me",
             "/api/",
             ResponseType::IPvonly,
