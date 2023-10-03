@@ -6,10 +6,6 @@
 target_sources(
   opentxs-testlib
   PRIVATE
-    "Hash.cpp"
-    "Hash.hpp"
-    "Symmetric.cpp"
-    "Symmetric.hpp"
     "AsymmetricProvider.cpp"
     "AsymmetricProvider.hpp"
     "BIP32.cpp"
@@ -20,4 +16,8 @@ target_sources(
     "BitcoinProviders.hpp"
     "Envelope.cpp"
     "Envelope.hpp"
+    "Hash.cpp"
+    "Hash.hpp"
+    "Symmetric.cpp"
+    "Symmetric.hpp"
 )

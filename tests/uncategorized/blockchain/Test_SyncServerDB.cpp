@@ -1,19 +1,16 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <algorithm>
-#include <cstddef>
-#include <memory>
 #include <span>
 #include <string_view>
 
 #include "internal/util/P0330.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
+#include "ottest/fixtures/blockchain/SyncServerDB.hpp"
 
 namespace ot = opentxs;
 
@@ -21,45 +18,6 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
-
-class SyncServerDB : public ::testing::Test
-{
-protected:
-    using Endpoints = ot::Vector<ot::CString>;
-
-    static constexpr auto first_server_{"tcp://example.com:1"};
-    static constexpr auto second_server_{"tcp://example.com:2"};
-    static constexpr auto other_server_{"tcp://example.com:3"};
-    static std::unique_ptr<Listener> listener_p_;
-
-    const ot::api::session::Client& api_;
-    Listener& listener_;
-
-    static auto count(
-        const Endpoints& endpoints,
-        std::string_view value) noexcept -> std::size_t
-    {
-        return std::count(endpoints.begin(), endpoints.end(), value);
-    }
-
-    auto cleanup() noexcept { listener_p_.reset(); }
-
-    SyncServerDB()
-        : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , listener_([&]() -> auto& {
-            if (!listener_p_) {
-                listener_p_ = std::make_unique<Listener>(
-                    api_,
-                    api_.Endpoints().BlockchainSyncServerUpdated().data());
-            }
-
-            return *listener_p_;
-        }())
-    {
-    }
-};
-
-std::unique_ptr<Listener> SyncServerDB::listener_p_{};
 
 static constexpr auto default_server_count_ = 0_uz;
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -15,10 +15,9 @@
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/zeromq/RequestRouter.hpp"
 
 namespace ot = opentxs;
 namespace zmq = ot::network::zeromq;
@@ -27,94 +26,7 @@ namespace ottest
 {
 using namespace std::literals::chrono_literals;
 
-class Test_RequestRouter : public ::testing::Test
-{
-public:
-    const zmq::Context& context_;
-
-    const ot::UnallocatedCString test_message_{"zeromq test message"};
-    const ot::UnallocatedCString test_message2_{"zeromq test message 2"};
-    const ot::UnallocatedCString test_message3_{"zeromq test message 3"};
-
-    const ot::UnallocatedCString endpoint_{
-        "inproc://opentxs/test/request_router_test"};
-
-    std::atomic_int callback_finished_count_{0};
-
-    int callback_count_{0};
-
-    void requestSocketThread(const ot::UnallocatedCString& msg);
-    void requestSocketThreadMultipart();
-
-    Test_RequestRouter()
-        : context_(OTTestEnvironment::GetOT().ZMQ())
-    {
-    }
-};
-
-void Test_RequestRouter::requestSocketThread(const ot::UnallocatedCString& msg)
-{
-    auto requestSocket = context_.Internal().RequestSocket();
-
-    ASSERT_NE(nullptr, &requestSocket.get());
-    ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
-
-    requestSocket->SetTimeouts(0ms, -1ms, 30000ms);
-    requestSocket->Start(endpoint_);
-
-    auto [result, message] = requestSocket->Send([&] {
-        auto out = ot::network::zeromq::Message{};
-        out.AddFrame(msg);
-
-        return out;
-    }());
-
-    ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
-    // RouterSocket removes the identity frame and RequestSocket removes the
-    // delimiter.
-    ASSERT_EQ(1, message.get().size());
-
-    const auto messageString =
-        ot::UnallocatedCString{message.Payload().begin()->Bytes()};
-    ASSERT_EQ(msg, messageString);
-}
-
-void Test_RequestRouter::requestSocketThreadMultipart()
-{
-    auto requestSocket = context_.Internal().RequestSocket();
-
-    ASSERT_NE(nullptr, &requestSocket.get());
-    ASSERT_EQ(zmq::socket::Type::Request, requestSocket->Type());
-
-    requestSocket->SetTimeouts(0ms, -1ms, 30000ms);
-    requestSocket->Start(endpoint_);
-
-    auto multipartMessage = ot::network::zeromq::Message{};
-    multipartMessage.AddFrame(test_message_);
-    multipartMessage.StartBody();
-    multipartMessage.AddFrame(test_message2_);
-    multipartMessage.AddFrame(test_message3_);
-
-    auto [result, message] = requestSocket->Send(std::move(multipartMessage));
-
-    ASSERT_EQ(result, ot::otx::client::SendResult::VALID_REPLY);
-    // RouterSocket removes the identity frame and RequestSocket removes the
-    // delimiter.
-    ASSERT_EQ(4, message.get().size());
-
-    const auto messageHeader =
-        ot::UnallocatedCString{message.Envelope().get()[0].Bytes()};
-
-    ASSERT_EQ(test_message_, messageHeader);
-
-    for (const auto& frame : message.Payload()) {
-        bool match =
-            frame.Bytes() == test_message2_ || frame.Bytes() == test_message3_;
-        ASSERT_TRUE(match);
-    }
-}
-
-TEST_F(Test_RequestRouter, Request_Router)
+TEST_F(RequestRouter, Request_Router)
 {
     auto replyMessage = ot::network::zeromq::Message{};
 
@@ -153,7 +65,7 @@ TEST_F(Test_RequestRouter, Request_Router)
     // Send the request on a separate thread so this thread can continue and
     // wait for the ListenCallback to finish, then send the reply.
     std::thread requestSocketThread1(
-        &Test_RequestRouter::requestSocketThread, this, test_message_);
+        &RequestRouter::requestSocketThread, this, test_message_);
 
     auto end = std::time(nullptr) + 5;
     while (!callback_finished_count_ && std::time(nullptr) < end) {
@@ -167,7 +79,7 @@ TEST_F(Test_RequestRouter, Request_Router)
     requestSocketThread1.join();
 }
 
-TEST_F(Test_RequestRouter, Request_2_Router_1)
+TEST_F(RequestRouter, Request_2_Router_1)
 {
     callback_count_ = 2;
 
@@ -213,9 +125,9 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
     routerSocket->Start(endpoint_);
 
     std::thread requestSocketThread1(
-        &Test_RequestRouter::requestSocketThread, this, test_message2_);
+        &RequestRouter::requestSocketThread, this, test_message2_);
     std::thread requestSocketThread2(
-        &Test_RequestRouter::requestSocketThread, this, test_message3_);
+        &RequestRouter::requestSocketThread, this, test_message3_);
 
     const auto& replyMessage1 = replyMessages.at(test_message2_);
     const auto& replyMessage2 = replyMessages.at(test_message3_);
@@ -251,7 +163,7 @@ TEST_F(Test_RequestRouter, Request_2_Router_1)
     requestSocketThread2.join();
 }
 
-TEST_F(Test_RequestRouter, Request_Router_Multipart)
+TEST_F(RequestRouter, Request_Router_Multipart)
 {
     auto replyMessage = ot::network::zeromq::Message{};
 
@@ -292,7 +204,7 @@ TEST_F(Test_RequestRouter, Request_Router_Multipart)
     // Send the request on a separate thread so this thread can continue and
     // wait for the ListenCallback to finish, then send the reply.
     std::thread requestSocketThread1(
-        &Test_RequestRouter::requestSocketThreadMultipart, this);
+        &RequestRouter::requestSocketThreadMultipart, this);
 
     auto end = std::time(nullptr) + 15;
     while (0 == replyMessage.get().size() && std::time(nullptr) < end) {

@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ottest/fixtures/ui/NymList.hpp"
+#include "ottest/fixtures/ui/NymList.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
@@ -14,10 +14,20 @@
 #include "internal/interface/ui/NymList.hpp"
 #include "internal/interface/ui/NymListItem.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 
 namespace ottest
 {
+Counter NymList::counter_{};
+NymListData NymList::expected_{};
+
+NymList::NymList()
+    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+    , reason_(api_.Factory().PasswordPrompt(__func__))
+{
+}
+
 auto check_nym_list(
     const ot::api::session::Client& api,
     const NymListData& expected) noexcept -> bool

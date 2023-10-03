@@ -1,14 +1,16 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ottest/fixtures/ui/BlockchainAccountStatus.hpp"
+#include "ottest/fixtures/ui/BlockchainAccountStatus.hpp"  // IWYU pragma: associated
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <compare>
 #include <iterator>
+#include <memory>
+#include <optional>
 #include <sstream>
 #include <string_view>
 
@@ -18,8 +20,12 @@
 #include "internal/interface/ui/BlockchainSubaccountSource.hpp"
 #include "internal/interface/ui/BlockchainSubchain.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
+
+namespace ot = opentxs;
 
 namespace ottest
 {
@@ -194,4 +200,87 @@ auto init_blockchain_account_status(
         }()));
     wait_for_counter(counter);
 }
+
+std::optional<User> BlockchainAccountStatus::alice_s_{std::nullopt};
+std::optional<User> BlockchainAccountStatus::bob_s_{std::nullopt};
+std::optional<User> BlockchainAccountStatus::chris_s_{std::nullopt};
+BlockchainAccountStatus::HDAccountMap BlockchainAccountStatus::hd_acct_{};
+BlockchainAccountStatus::PCAccountMap BlockchainAccountStatus::pc_acct_{};
+
+auto BlockchainAccountStatus::Account(
+    const User& user,
+    ot::blockchain::Type chain) const noexcept
+    -> const ot::blockchain::crypto::Account&
+{
+    return user.api_->Crypto().Blockchain().Account(user.nym_id_, chain);
+}
+
+auto BlockchainAccountStatus::make_hd_account(
+    const User& user,
+    const Protocol type) noexcept -> void
+{
+    hd_acct_[user.nym_id_].emplace(
+        type,
+        user.api_->Crypto().Blockchain().NewHDSubaccount(
+            user.nym_id_, type, chain_, user.Reason()));
+}
+auto BlockchainAccountStatus::make_pc_account(
+    const User& local,
+    const User& remote) noexcept -> void
+{
+    const auto& api = *local.api_;
+    const auto path = [&] {
+        auto out = api.Factory().Data();
+        local.nym_->PaymentCodePath(out.WriteInto());
+
+        return out;
+    }();
+    pc_acct_[local.payment_code_].emplace(
+        remote.payment_code_,
+        api.Crypto()
+            .Blockchain()
+            .LoadOrCreateSubaccount(
+                local.nym_id_,
+                api.Factory().PaymentCodeFromBase58(remote.payment_code_),
+                chain_,
+                local.Reason())
+            .ID());
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
+BlockchainAccountStatus::BlockchainAccountStatus()
+    : alice_([&]() -> auto& {
+        if (false == alice_s_.has_value()) {
+            const auto& v = GetPaymentCodeVector3().alice_;
+            alice_s_.emplace(v.words_, "Alice");
+            alice_s_->init(OTTestEnvironment::GetOT().StartClientSession(0));
+        }
+
+        return alice_s_.value();
+    }())
+    , bob_([&]() -> auto& {
+        if (false == bob_s_.has_value()) {
+            const auto& v = GetPaymentCodeVector3().bob_;
+            bob_s_.emplace(v.words_, "Bob");
+            bob_s_->init(OTTestEnvironment::GetOT().StartClientSession(1));
+        }
+
+        return bob_s_.value();
+    }())
+    , chris_([&]() -> auto& {
+        if (false == chris_s_.has_value()) {
+            chris_s_.emplace(pkt_words_, "Chris", pkt_passphrase_);
+            chris_s_->init(
+                OTTestEnvironment::GetOT().StartClientSession(1),
+                ot::identity::Type::individual,
+                0,
+                ot::crypto::SeedStyle::PKT);
+        }
+
+        return chris_s_.value();
+    }())
+{
+}
+#pragma GCC diagnostic pop
 }  // namespace ottest

@@ -1,4 +1,4 @@
-// Copyright (c) 2010-2022 The Open-Transactions developers
+// Copyright (c) 2010-2023 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -7,81 +7,18 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 
-#include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/BlockchainSelection.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
+#include "ottest/fixtures/ui/BlockchainSelector.hpp"
 
 namespace ot = opentxs;
 
 namespace ottest
 {
-Counter counter_full_{};
-Counter counter_main_{};
-Counter counter_test_{};
+TEST_F(BlockchainSelector, initialize_opentxs) {}
 
-class Test_BlockchainSelector : public ::testing::Test
-{
-public:
-    using Type = ot::blockchain::Type;
-
-    const ot::api::session::Client& client_;
-    const ot::ui::BlockchainSelection& full_;
-    const ot::ui::BlockchainSelection& main_;
-    const ot::ui::BlockchainSelection& test_;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdangling-reference"  // NOLINT
-    Test_BlockchainSelector()
-        : client_(OTTestEnvironment::GetOT().StartClientSession(0))
-        , full_([&]() -> auto& {
-            static std::atomic_bool init{true};
-            static auto cb =
-                make_cb(counter_full_, "Blockchain selector (full)");
-
-            if (init) {
-                counter_full_.expected_ = 14;
-                init = false;
-            }
-
-            return client_.UI().Internal().BlockchainSelection(
-                ot::ui::Blockchains::All, cb);
-        }())
-        , main_([&]() -> auto& {
-            static std::atomic_bool init{true};
-            static auto cb =
-                make_cb(counter_main_, "Blockchain selector (main)");
-
-            if (init) {
-                counter_main_.expected_ = 7;
-                init = false;
-            }
-
-            return client_.UI().Internal().BlockchainSelection(
-                ot::ui::Blockchains::Main, cb);
-        }())
-        , test_([&]() -> auto& {
-            static std::atomic_bool init{true};
-            static auto cb =
-                make_cb(counter_test_, "Blockchain selector (test)");
-
-            if (init) {
-                counter_test_.expected_ = 7;
-                init = false;
-            }
-
-            return client_.UI().Internal().BlockchainSelection(
-                ot::ui::Blockchains::Test, cb);
-        }())
-    {
-    }
-#pragma GCC diagnostic pop
-};
-
-TEST_F(Test_BlockchainSelector, initialize_opentxs) {}
-
-TEST_F(Test_BlockchainSelector, initial_state)
+TEST_F(BlockchainSelector, initial_state)
 {
     const auto expectedA = BlockchainSelectionData{{
         {"Bitcoin", false, false, Type::Bitcoin},
@@ -135,7 +72,7 @@ TEST_F(Test_BlockchainSelector, initial_state)
         client_, ot::ui::Blockchains::Test, expectedT));
 }
 
-TEST_F(Test_BlockchainSelector, disable_disabled)
+TEST_F(BlockchainSelector, disable_disabled)
 {
     {
         counter_full_.expected_ += 0;
@@ -196,7 +133,7 @@ TEST_F(Test_BlockchainSelector, disable_disabled)
         client_, ot::ui::Blockchains::Test, expectedT));
 }
 
-TEST_F(Test_BlockchainSelector, enable_disabled)
+TEST_F(BlockchainSelector, enable_disabled)
 {
     {
         counter_full_.expected_ += 1;
@@ -257,7 +194,7 @@ TEST_F(Test_BlockchainSelector, enable_disabled)
         client_, ot::ui::Blockchains::Test, expectedT));
 }
 
-TEST_F(Test_BlockchainSelector, enable_enabled)
+TEST_F(BlockchainSelector, enable_enabled)
 {
     {
         counter_full_.expected_ += 0;
@@ -318,7 +255,7 @@ TEST_F(Test_BlockchainSelector, enable_enabled)
         client_, ot::ui::Blockchains::Test, expectedT));
 }
 
-TEST_F(Test_BlockchainSelector, disable_enabled)
+TEST_F(BlockchainSelector, disable_enabled)
 {
     {
         counter_full_.expected_ += 1;
@@ -379,7 +316,7 @@ TEST_F(Test_BlockchainSelector, disable_enabled)
         client_, ot::ui::Blockchains::Test, expectedT));
 }
 
-TEST_F(Test_BlockchainSelector, shutdown)
+TEST_F(BlockchainSelector, shutdown)
 {
     EXPECT_EQ(counter_full_.expected_, counter_full_.updated_);
     EXPECT_EQ(counter_main_.expected_, counter_main_.updated_);

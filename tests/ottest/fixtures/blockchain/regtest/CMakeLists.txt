@@ -20,6 +20,8 @@ target_sources(
     "Simple.hpp"
     "Single.cpp"
     "Single.hpp"
+    "Stress.cpp"
+    "Stress.hpp"
     "SyncClient.cpp"
     "SyncClient.hpp"
     "SyncServer.cpp"
