@@ -48,6 +48,15 @@ TEST_F(BlockchainBlocks, btc_block_762580)
     EXPECT_FALSE(CheckBlock(Bitcoin, id, badWtxid));
 }
 
+TEST_F(BlockchainBlocks, tn_btc_block_1489260)
+{
+    const auto& [id, good] = GetTnBtcBlock1489260();
+    const auto& api = ot_.StartClientSession(0);
+
+    EXPECT_TRUE(CheckBlock(Bitcoin_testnet3, id, good));
+    EXPECT_TRUE(CheckTxids(api, Bitcoin_testnet3, good));
+}
+
 TEST_F(BlockchainBlocks, tn_dash_block_7000)
 {
     const auto& [id, good] = GetTnDashBlock7000();

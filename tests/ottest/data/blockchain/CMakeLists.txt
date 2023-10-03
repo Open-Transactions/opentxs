@@ -18,6 +18,7 @@ target_sources(
     "bch_filter_1307544.cpp"
     "bch_filter_1307723.cpp"
     "btc_block_762580.cpp"
+    "tn_btc_block_1489260.cpp"
     "tn_dash_block_7000.cpp"
 )
 target_include_directories(

@@ -46,6 +46,7 @@ struct Data {
     bool supported_{};
     bool testnet_{};
     bool segwit_{};
+    bool cashtoken_{};
     bool spend_unconfirmed_{};
     unsigned segwit_scale_factor_{};
     blockchain::Type associated_mainnet_{};
