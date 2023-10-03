@@ -300,6 +300,11 @@ auto ChainData::SpendUnconfirmed() const noexcept -> bool
     return imp_->spend_unconfirmed_;
 }
 
+auto ChainData::SupportsCashtoken() const noexcept -> bool
+{
+    return imp_->cashtoken_;
+}
+
 auto ChainData::SupportsSegwit() const noexcept -> bool
 {
     return imp_->segwit_;

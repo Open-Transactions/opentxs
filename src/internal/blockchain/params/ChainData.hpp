@@ -117,6 +117,7 @@ public:
         -> network::blockchain::bitcoin::message::ProtocolVersion;
     auto SegwitScaleFactor() const noexcept -> unsigned int;
     auto SpendUnconfirmed() const noexcept -> bool;
+    auto SupportsCashtoken() const noexcept -> bool;
     auto SupportsSegwit() const noexcept -> bool;
     auto TranslateBip158(cfilter::Type) const noexcept
         -> std::optional<std::uint8_t>;

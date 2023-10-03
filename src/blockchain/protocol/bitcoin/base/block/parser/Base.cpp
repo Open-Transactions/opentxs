@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
+#include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
@@ -47,6 +48,7 @@ ParserBase::ParserBase(
     alloc::Strategy alloc) noexcept
     : crypto_(crypto)
     , chain_(type)
+    , cashtoken_(params::get(chain_).SupportsCashtoken())
     , alloc_(alloc)
     , data_()
     , bytes_()
@@ -854,7 +856,10 @@ auto ParserBase::parse_outputs(
         }
 
         if (construct) {
-            bitcoincash::token::cashtoken::deserialize(view, next->cashtoken_);
+            if (cashtoken_) {
+                bitcoincash::token::cashtoken::deserialize(
+                    view, next->cashtoken_);
+            }
 
             if (false == copy(view, next->script_.WriteInto())) {
                 throw std::runtime_error{"failed to copy script opcodes"};
@@ -945,7 +950,8 @@ auto ParserBase::parse_transactions() noexcept -> bool
 {
     for (auto i = 0_uz; i < transaction_count_; ++i) {
         if (false == parse_next_transaction(0_uz == i)) {
-            LogError()(OT_PRETTY_CLASS())("failed to parse transaction")
+            LogError()(OT_PRETTY_CLASS())("failed to parse transaction ")(
+                i + 1)(" of ")(transaction_count_)
                 .Flush();
 
             return false;

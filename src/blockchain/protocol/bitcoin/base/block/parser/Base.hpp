@@ -102,6 +102,7 @@ protected:
 
     const api::Crypto& crypto_;
     const blockchain::Type chain_;
+    const bool cashtoken_;
     alloc::Strategy alloc_;
     ReadView data_;
     std::size_t bytes_;

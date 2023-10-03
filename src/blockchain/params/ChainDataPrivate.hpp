@@ -71,6 +71,7 @@ public:
     const bool supported_;
     const bool testnet_;
     const bool segwit_;
+    const bool cashtoken_;
     const bool spend_unconfirmed_;
     const unsigned segwit_scale_factor_;
     const UnitType currency_type_;
