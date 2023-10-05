@@ -287,8 +287,7 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
             }
 
             for (const auto& server : defaultServers) {
-                // TODO c++20 use contains
-                if (0 == out.count(server)) {
+                if (false == out.contains(server)) {
                     if (false == options.TestMode()) { AddPeer(server); }
 
                     out.emplace(server);
@@ -300,8 +299,7 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
 
         try {
             for (const auto& endpoint : options.RemoteBlockchainSyncServers()) {
-                // TODO c++20 use contains
-                if (0_uz == existing.count(endpoint)) { AddPeer(endpoint); }
+                if (false == existing.contains(endpoint)) { AddPeer(endpoint); }
             }
         } catch (...) {
         }

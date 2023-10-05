@@ -251,16 +251,14 @@ auto Listener::Actor::forward_to_chain(
 {
     const auto& log = log_;
 
-    // TODO c++20 use contains
-    if (0_uz == active_chains_.count(chain)) {
+    if (false == active_chains_.contains(chain)) {
         log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" is not active")
             .Flush();
 
         return;
     }
 
-    // TODO c++20 use contains
-    if (0_uz == registered_chains_.count(chain)) {
+    if (false == registered_chains_.contains(chain)) {
         log(OT_PRETTY_CLASS())(name_)(": adding message to queue until ")(
             print(chain))(" completes registration")
             .Flush();

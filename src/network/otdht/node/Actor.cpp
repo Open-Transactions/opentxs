@@ -605,11 +605,10 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
     const auto publishBind = body[3].Bytes();
     const auto publishAdvertise = body[4].Bytes();
 
-    // TODO c++20 use contains
-    if (0_uz < listen_endpoints_.count(routerBind)) { return; }
-    if (0_uz < listen_endpoints_.count(routerAdvertise)) { return; }
-    if (0_uz < listen_endpoints_.count(publishBind)) { return; }
-    if (0_uz < listen_endpoints_.count(publishAdvertise)) { return; }
+    if (listen_endpoints_.contains(routerBind)) { return; }
+    if (listen_endpoints_.contains(routerAdvertise)) { return; }
+    if (listen_endpoints_.contains(publishBind)) { return; }
+    if (listen_endpoints_.contains(publishAdvertise)) { return; }
 
     listen_endpoints_.emplace(routerBind);
     listen_endpoints_.emplace(routerAdvertise);
@@ -996,8 +995,7 @@ auto Node::Actor::process_new_peer(Message&& msg) noexcept -> void
 
 auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
 {
-    // TODO c++20 use contains
-    if (0_uz < peers_.count(endpoint)) {
+    if (peers_.contains(endpoint)) {
         log_(OT_PRETTY_CLASS())(name_)(": already connected to ")(endpoint)
             .Flush();
 
