@@ -16,5 +16,5 @@ target_sources(
     "TransactionPrivate.cpp"
     "TransactionPrivate.hpp"
 )
-libopentxs_link_internal(lmdb)
-libopentxs_link_external(lmdb)
+libopentxs_link_internal("${OT_LMDB_TARGET}")
+libopentxs_link_external("${OT_LMDB_TARGET}")

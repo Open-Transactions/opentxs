@@ -66,6 +66,6 @@ Basic build instructions:
 
 - gcc-12.2
 - clang-16
-- xcode 14
+- xcode 15
 - msvc-19.33
 - ndk r26
