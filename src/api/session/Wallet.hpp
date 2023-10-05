@@ -9,6 +9,7 @@
 #include <cs_plain_guarded.h>
 #include <chrono>
 #include <ctime>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>

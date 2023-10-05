@@ -8,7 +8,6 @@
 #include <HDPath.pb.h>
 #include <algorithm>
 #include <cstddef>
-#include <iosfwd>
 #include <iterator>
 #include <memory>
 #include <optional>

@@ -21,7 +21,7 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"

@@ -13,9 +13,8 @@
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
 #include <functional>
-#include <iosfwd>
 #include <iterator>
-#include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -48,7 +47,6 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

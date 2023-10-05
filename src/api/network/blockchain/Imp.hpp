@@ -19,7 +19,6 @@
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Config.hpp"
-#include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"

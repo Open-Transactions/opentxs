@@ -13,7 +13,6 @@
 #include <compare>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
-#include <chrono>
 #include <filesystem>
 #include <shared_mutex>
 #include <string_view>

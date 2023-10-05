@@ -9,7 +9,6 @@ extern "C" {
 #include <lmdb.h>
 }
 
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <initializer_list>

@@ -8,7 +8,7 @@
 #include <optional>
 #include <utility>
 
-#include "blockchain/database/wallet/Position.hpp"
+#include "blockchain/database/wallet/Position.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/wallet/Types.hpp"

@@ -9,7 +9,6 @@
 #include <optional>
 #include <utility>
 
-#include "blockchain/database/wallet/Modification.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/wallet/Types.hpp"
 #include "internal/util/PMR.hpp"
@@ -19,8 +18,6 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -45,6 +42,7 @@ namespace database
 namespace wallet
 {
 class OutputCache;
+struct Modification;
 }  // namespace wallet
 }  // namespace database
 
@@ -65,6 +63,11 @@ class Transaction;
 }  // namespace bitcoin
 }  // namespace protocol
 }  // namespace blockchain
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

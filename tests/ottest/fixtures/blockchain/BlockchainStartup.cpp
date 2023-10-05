@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdlib>
 #include <span>
-#include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"

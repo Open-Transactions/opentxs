@@ -5,8 +5,6 @@
 
 #include "api/network/blockchain/StartupPublisher.hpp"  // IWYU pragma: associated
 
-#include <utility>
-
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"

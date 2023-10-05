@@ -5,7 +5,6 @@
 
 #include "interface/ui/accounttree/AccountCurrency.hpp"  // IWYU pragma: associated
 
-#include <iosfwd>
 #include <memory>
 #include <sstream>
 #include <string_view>

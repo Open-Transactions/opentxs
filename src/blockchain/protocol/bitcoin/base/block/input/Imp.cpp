@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iosfwd>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -57,7 +57,6 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"

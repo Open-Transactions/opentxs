@@ -5,6 +5,7 @@
 
 #include "api/session/ui/Imp-base.hpp"  // IWYU pragma: associated
 
+#include <functional>
 #include <memory>
 #include <tuple>
 

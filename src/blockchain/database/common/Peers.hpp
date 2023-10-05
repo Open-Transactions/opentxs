@@ -18,6 +18,7 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"

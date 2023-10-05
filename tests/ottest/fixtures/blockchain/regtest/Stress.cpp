@@ -11,7 +11,6 @@
 #include <functional>
 #include <memory>
 #include <string_view>
-#include <tuple>
 
 #include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"

@@ -9,7 +9,6 @@
 
 #include <array>
 #include <fstream>
-#include <ios>
 #include <memory>
 #include <span>
 #include <stdexcept>

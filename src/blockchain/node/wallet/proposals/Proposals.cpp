@@ -10,6 +10,8 @@
 #include "blockchain/node/wallet/proposals/ProposalsPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Spend.hpp"             // IWYU pragma: keep
 
 namespace opentxs::blockchain::node::wallet
 {

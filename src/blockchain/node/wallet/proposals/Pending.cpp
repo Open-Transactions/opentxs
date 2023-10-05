@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

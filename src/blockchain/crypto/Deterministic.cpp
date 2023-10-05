@@ -8,6 +8,7 @@
 #include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -26,6 +27,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"

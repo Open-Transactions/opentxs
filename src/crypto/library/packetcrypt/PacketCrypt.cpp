@@ -29,7 +29,6 @@ extern "C" {
 #include <optional>
 #include <span>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/pkt/block/block/Imp.hpp"

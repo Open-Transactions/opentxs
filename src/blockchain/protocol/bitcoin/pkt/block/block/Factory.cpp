@@ -11,6 +11,7 @@
 #include "blockchain/protocol/bitcoin/base/block/block/BlockPrivate.hpp"
 #include "blockchain/protocol/bitcoin/pkt/block/block/Imp.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
 #include "opentxs/util/Log.hpp"
 

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
+#include <functional>
 #include <shared_mutex>
 
 #include "opentxs/core/identifier/Account.hpp"

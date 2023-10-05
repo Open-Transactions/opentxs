@@ -13,7 +13,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <ratio>
 #include <span>
 #include <string_view>
 #include <utility>

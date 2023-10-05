@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <iosfwd>
 #include <sstream>
 
 #include "internal/api/session/Wallet.hpp"

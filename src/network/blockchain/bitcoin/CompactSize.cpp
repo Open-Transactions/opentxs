@@ -5,7 +5,6 @@
 
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"  // IWYU pragma: associated
 
-#include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
 #include <algorithm>
 #include <cstdint>

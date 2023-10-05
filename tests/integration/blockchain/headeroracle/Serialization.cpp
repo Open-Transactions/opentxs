@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "ottest/data/blockchain/Headers.hpp"
+#include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/HeaderOracle.hpp"
 
 namespace ottest

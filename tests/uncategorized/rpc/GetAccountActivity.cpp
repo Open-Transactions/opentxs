@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <atomic>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <string_view>

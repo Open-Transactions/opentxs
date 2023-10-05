@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Signature.pb.h>
+#include <Signature.pb.h>  // IWYU pragma: keep
 #include <cs_shared_guarded.h>
 #include <shared_mutex>
 
@@ -26,7 +26,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
 class PasswordPrompt;
 class Writer;
 }  // namespace opentxs

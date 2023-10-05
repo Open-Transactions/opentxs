@@ -12,8 +12,7 @@
 #include <functional>
 #include <future>
 #include <optional>
-#include <ostream>
-#include <ratio>
+#include <sstream>
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
@@ -26,6 +25,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/SyncListener.hpp"

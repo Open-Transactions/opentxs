@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <utility>
 
 #include "core/Worker.hpp"

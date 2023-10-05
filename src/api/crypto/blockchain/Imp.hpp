@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <shared_mutex>

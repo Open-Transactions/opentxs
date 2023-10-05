@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <functional>
 #include <future>
 #include <string_view>
 #include <utility>

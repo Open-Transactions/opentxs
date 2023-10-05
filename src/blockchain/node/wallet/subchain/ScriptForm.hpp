@@ -6,8 +6,8 @@
 #pragma once
 
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

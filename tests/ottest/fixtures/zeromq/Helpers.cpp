@@ -9,7 +9,6 @@
 #include <chrono>
 #include <future>
 #include <mutex>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 

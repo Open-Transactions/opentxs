@@ -7,7 +7,6 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <functional>
 
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/common/User.hpp"

@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <string_view>
 #include <utility>

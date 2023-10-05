@@ -7,7 +7,9 @@
 
 #include <cs_ordered_guarded.h>
 #include <cstddef>
+#include <functional>
 #include <memory>
+#include <memory_resource>
 #include <shared_mutex>
 #include <string_view>
 #include <utility>
@@ -16,6 +18,7 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -40,7 +43,6 @@ namespace blockchain
 namespace block
 {
 class Block;
-class Position;
 }  // namespace block
 
 namespace crypto

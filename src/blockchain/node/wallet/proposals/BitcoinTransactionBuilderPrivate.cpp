@@ -5,15 +5,12 @@
 
 #include "blockchain/node/wallet/proposals/BitcoinTransactionBuilderPrivate.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <functional>
-#include <iosfwd>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -81,7 +78,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"

@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <ctime>
-#include <span>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"

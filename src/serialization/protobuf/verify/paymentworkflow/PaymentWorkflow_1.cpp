@@ -10,6 +10,7 @@
 #include <PaymentWorkflowEnums.pb.h>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 

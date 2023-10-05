@@ -9,6 +9,7 @@
 #include <Credential.pb.h>
 #include <Enums.pb.h>
 #include <cstdint>
+#include <memory>
 #include <sstream>
 
 #include "internal/serialization/protobuf/verify/ChildCredentialParameters.hpp"  // IWYU pragma: keep

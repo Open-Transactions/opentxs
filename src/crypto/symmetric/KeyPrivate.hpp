@@ -20,7 +20,7 @@
 #include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
@@ -28,7 +28,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace crypto
 {
 class SymmetricProvider;

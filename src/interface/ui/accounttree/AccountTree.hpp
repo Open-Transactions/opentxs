@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <functional>
 #include <tuple>
 
 #include "core/Worker.hpp"

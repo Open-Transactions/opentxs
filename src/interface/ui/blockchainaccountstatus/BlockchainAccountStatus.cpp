@@ -8,6 +8,7 @@
 #include <HDPath.pb.h>
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <span>

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <BlockchainTransactionProposal.pb.h>
+#include <functional>
 #include <optional>
 #include <span>
 #include <utility>

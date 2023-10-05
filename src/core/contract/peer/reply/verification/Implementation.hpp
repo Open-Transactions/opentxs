@@ -15,7 +15,7 @@
 #include "opentxs/core/contract/peer/reply/Verification.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
-#include "opentxs/identity/wot/Verification.hpp"
+#include "opentxs/identity/wot/Verification.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 

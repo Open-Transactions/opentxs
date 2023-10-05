@@ -9,7 +9,6 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <ctime>
-#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"

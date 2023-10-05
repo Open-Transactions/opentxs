@@ -14,7 +14,6 @@
 #include <iterator>
 #include <limits>
 #include <memory>
-#include <ratio>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/Legacy.hpp"

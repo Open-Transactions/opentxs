@@ -7,6 +7,7 @@
 
 #include <string_view>
 
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/storage/Types.hpp"

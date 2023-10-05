@@ -11,6 +11,7 @@
 #include <chrono>
 #include <compare>
 #include <exception>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 

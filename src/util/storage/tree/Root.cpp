@@ -9,7 +9,6 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"

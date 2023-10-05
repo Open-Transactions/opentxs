@@ -9,7 +9,6 @@
 
 #include <Ciphertext.pb.h>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <tuple>
 

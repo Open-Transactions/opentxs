@@ -7,6 +7,7 @@
 
 #include <boost/container/flat_map.hpp>
 #include <boost/container/vector.hpp>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>

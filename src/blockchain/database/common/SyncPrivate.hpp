@@ -7,6 +7,7 @@
 
 #include <cs_plain_guarded.h>
 #include <filesystem>
+#include <functional>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/PMR.hpp"

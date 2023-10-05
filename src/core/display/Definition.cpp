@@ -11,7 +11,7 @@
 
 #include "core/display/DefinitionPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

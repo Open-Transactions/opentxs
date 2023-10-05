@@ -8,7 +8,6 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <cstring>
-#include <iosfwd>
 #include <iterator>
 #include <sstream>
 #include <string_view>

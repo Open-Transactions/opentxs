@@ -8,6 +8,7 @@
 #include <PaymentEvent.pb.h>
 #include <PaymentWorkflowEnums.pb.h>
 #include <cstdint>
+#include <functional>
 #include <stdexcept>
 
 #include "internal/serialization/protobuf/verify/VerifyWorkflows.hpp"
