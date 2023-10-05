@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include <functional>
 #include <optional>
 
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
+#include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 
@@ -22,11 +24,6 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class Header;
-}  // namespace block
-
 namespace database
 {
 class Header;

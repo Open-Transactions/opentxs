@@ -6,6 +6,7 @@
 #include "blockchain/database/Wallet.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionProposal.pb.h>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <utility>

@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "ottest/fixtures/blockchain/CfilterListener.hpp"
+// IWYU pragma: no_include "ottest/fixtures/blockchain/SyncListener.hpp"
+
 #include "ottest/fixtures/blockchain/TXOs.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>

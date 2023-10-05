@@ -6,7 +6,6 @@
 #pragma once
 
 #include <opentxs/Export.hpp>
-#include <chrono>
 #include <filesystem>
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

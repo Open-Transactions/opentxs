@@ -26,7 +26,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/Secret.hpp"
+#include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

@@ -5,10 +5,9 @@
 
 #pragma once
 
-#include <BlockchainTransaction.pb.h>
-#include <HDPath.pb.h>
+#include <BlockchainTransaction.pb.h>  // IWYU pragma: keep
+#include <HDPath.pb.h>                 // IWYU pragma: keep
 #include <boost/container/flat_set.hpp>
-#include <functional>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -22,7 +21,6 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -68,6 +66,7 @@ class BlockchainTransactionProposedOutput;
 class BlockchainTransactionProposedSweep;
 }  // namespace proto
 
+class ByteArray;
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

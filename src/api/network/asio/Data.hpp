@@ -6,13 +6,14 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
+#include <functional>
 #include <future>
 #include <memory>
 #include <string_view>
 
 #include "BoostAsio.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

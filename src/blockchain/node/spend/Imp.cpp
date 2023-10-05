@@ -5,19 +5,21 @@
 
 #include "blockchain/node/spend/Imp.hpp"  // IWYU pragma: associated
 
+#include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
 #include <BlockchainTransactionProposedNotification.pb.h>
 #include <BlockchainTransactionProposedOutput.pb.h>
 #include <BlockchainTransactionProposedSweep.pb.h>
 #include <BlockchainWalletKey.pb.h>
+#include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
 #include <algorithm>
 #include <chrono>
 #include <compare>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <stdexcept>
 #include <tuple>
 
@@ -50,6 +52,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/blockchain/node/Funding.hpp"     // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"

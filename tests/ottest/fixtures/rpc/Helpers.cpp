@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <compare>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <mutex>

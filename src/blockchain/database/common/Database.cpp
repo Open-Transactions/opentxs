@@ -11,8 +11,6 @@ extern "C" {
 }
 
 #include <BlockchainBlockHeader.pb.h>
-#include <algorithm>
-#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

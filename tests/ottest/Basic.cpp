@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cassert>
 #include <filesystem>
+#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "util/Sodium.hpp"

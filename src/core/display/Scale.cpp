@@ -6,11 +6,11 @@
 #include "opentxs/core/display/Scale.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <sstream>
 #include <utility>
 
 #include "core/display/ScalePrivate.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)

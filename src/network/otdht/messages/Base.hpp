@@ -9,6 +9,8 @@
 
 #include <string_view>
 
+#include "opentxs/network/otdht/Block.hpp"
+#include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/WorkType.hpp"

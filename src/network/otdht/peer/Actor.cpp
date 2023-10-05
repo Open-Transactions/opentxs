@@ -10,7 +10,6 @@
 #include <compare>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <span>
 #include <stdexcept>
 #include <utility>

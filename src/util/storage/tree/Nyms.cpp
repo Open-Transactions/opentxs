@@ -10,7 +10,6 @@
 #include <atomic>
 #include <functional>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 #include <utility>
 #include <variant>

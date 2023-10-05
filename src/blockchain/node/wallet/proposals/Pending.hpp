@@ -9,7 +9,7 @@
 #include <future>
 #include <utility>
 
-#include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"

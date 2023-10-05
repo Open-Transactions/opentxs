@@ -5,6 +5,7 @@
 
 #include "core/contract/Signable.hpp"  // IWYU pragma: associated
 
+#include <memory>
 #include <stdexcept>
 #include <utility>
 

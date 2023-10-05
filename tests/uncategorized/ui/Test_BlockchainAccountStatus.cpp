@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <atomic>
+#include <functional>
 #include <memory>
 
 #include "ottest/fixtures/common/Counter.hpp"

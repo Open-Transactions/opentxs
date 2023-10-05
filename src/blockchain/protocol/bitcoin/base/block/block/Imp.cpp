@@ -11,7 +11,6 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
-#include <iosfwd>
 #include <iterator>
 #include <optional>
 #include <span>

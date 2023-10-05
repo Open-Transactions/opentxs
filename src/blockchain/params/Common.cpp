@@ -10,6 +10,7 @@
 #include <boost/json.hpp>
 #include <cstdint>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <utility>

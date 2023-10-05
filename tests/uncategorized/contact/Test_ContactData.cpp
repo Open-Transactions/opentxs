@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "internal/core/String.hpp"

@@ -7,6 +7,7 @@
 
 #include <cs_plain_guarded.h>
 #include <chrono>
+#include <functional>
 #include <tuple>
 
 #include "internal/util/Timer.hpp"

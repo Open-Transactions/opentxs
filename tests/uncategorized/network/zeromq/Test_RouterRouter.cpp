@@ -8,7 +8,6 @@
 #include <zmq.h>
 #include <chrono>
 #include <span>
-#include <string_view>
 
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/zeromq/Helpers.hpp"

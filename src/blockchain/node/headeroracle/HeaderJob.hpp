@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
-#include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

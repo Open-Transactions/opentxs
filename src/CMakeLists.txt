@@ -65,10 +65,12 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<ostream$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<queue$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<random$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<ratio$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<regex$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<set$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<shared_mutex$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<source_location$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<span$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<sstream$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<stdexcept$<ANGLE-R>>"
@@ -77,9 +79,9 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<system_error$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<thread$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<tuple$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<type_traits$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<typeindex$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<typeinfo$<ANGLE-R>>"
-    "$<$<COMPILE_LANGUAGE:CXX>:<type_traits$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<unordered_map$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<unordered_set$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<utility$<ANGLE-R>>"
@@ -90,9 +92,9 @@ if(OT_PCH)
   if(CMAKE_CXX_COMPILER_ID
      MATCHES
      AppleClang
-     AND CMAKE_CXX_COMPILER_VERSION
+     AND CMAKE_OSX_DEPLOYMENT_TARGET
          VERSION_LESS
-         15
+         14
   )
     target_precompile_headers(
       opentxs-common
@@ -113,8 +115,6 @@ if(OT_PCH)
       opentxs-common
       PUBLIC
       "$<$<COMPILE_LANGUAGE:CXX>:<memory_resource$<ANGLE-R>>"
-      "$<$<COMPILE_LANGUAGE:CXX>:<ranges$<ANGLE-R>>"
-      "$<$<COMPILE_LANGUAGE:CXX>:<source_location$<ANGLE-R>>"
     )
   endif()
 

@@ -16,6 +16,7 @@
 #include "internal/api/session/Client.hpp"
 #include "internal/otx/client/Pair.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/fixtures/common/Notary.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/ui/AmountValidator.hpp"
 

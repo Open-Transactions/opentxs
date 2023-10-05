@@ -8,7 +8,6 @@
 #include <exception>
 #include <future>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/spend/Imp.hpp"

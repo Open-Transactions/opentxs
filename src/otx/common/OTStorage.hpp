@@ -221,14 +221,14 @@ public:
 };
 
 #define DEFINE_OT_DYNAMIC_CAST(CLASS_NAME)                                     \
-    auto clone() const->CLASS_NAME* override                                   \
+    auto clone() const -> CLASS_NAME* override                                 \
     {                                                                          \
         std::cout                                                              \
             << "********* THIS SHOULD NEVER HAPPEN!!!!! *****************"     \
             << std::endl;                                                      \
         OT_FAIL;                                                               \
     }                                                                          \
-    static auto ot_dynamic_cast(Storable* pObject)->CLASS_NAME*                \
+    static auto ot_dynamic_cast(Storable* pObject) -> CLASS_NAME*              \
     {                                                                          \
         return dynamic_cast<CLASS_NAME*>(pObject);                             \
     }
@@ -698,10 +698,10 @@ protected:                                                                     \
     UnallocatedDeque<std::shared_ptr<name>> list_##name##s;                    \
                                                                                \
 public:                                                                        \
-    auto Get##name##Count()->std::size_t;                                      \
-    auto Get##name(std::size_t nIndex)->name*;                                 \
-    auto Remove##name(std::size_t nIndex##name)->bool;                         \
-    auto Add##name(name& disownObject)->bool
+    auto Get##name##Count() -> std::size_t;                                    \
+    auto Get##name(std::size_t nIndex) -> name*;                               \
+    auto Remove##name(std::size_t nIndex##name) -> bool;                       \
+    auto Add##name(name& disownObject) -> bool
 
 // Serialized types...
 //

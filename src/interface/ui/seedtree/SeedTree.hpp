@@ -6,7 +6,6 @@
 #pragma once
 
 #include <cs_ordered_guarded.h>
-#include <functional>
 #include <shared_mutex>
 #include <tuple>
 #include <utility>

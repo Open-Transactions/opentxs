@@ -9,7 +9,6 @@
 #include <BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <cstddef>
-#include <iosfwd>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -22,6 +21,7 @@
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Script.hpp"
+#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Bytes.hpp"
@@ -49,7 +49,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

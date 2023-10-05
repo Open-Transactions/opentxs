@@ -8,6 +8,7 @@
 #include <ankerl/unordered_dense.h>
 #include <cs_plain_guarded.h>
 #include <robin_hood.h>
+#include <functional>
 #include <optional>
 
 #include "blockchain/database/wallet/Pattern.hpp"     // IWYU pragma: keep
@@ -19,7 +20,6 @@
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

@@ -14,14 +14,14 @@ jobs:
         platform: [macos-13, windows-2022]
         include:
           - platform: macos-13
-            vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
+            vcpkg_installed_repo: 'git://metier2.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: '/Users/runner/work/opentxs/opentxs/deps/vcpkg_installed'
             preset: macos
             static_deps: 'ON'
             triplet: 'x64-osx-13'
             runner: 'macos-13'
           - platform: windows-2022
-            vcpkg_installed_repo: 'git://metier1.opentransactions.org/vcpkg.git/'
+            vcpkg_installed_repo: 'git://metier2.opentransactions.org/vcpkg.git/'
             vcpkg_installed_root: 'c:\vcpkg_installed'
             preset: msvc
             static_deps: 'OFF'

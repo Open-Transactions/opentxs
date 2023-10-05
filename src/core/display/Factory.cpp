@@ -10,6 +10,7 @@
 
 #include "core/display/DefinitionPrivate.hpp"
 #include "core/display/ScalePrivate.hpp"
+#include "opentxs/core/display/Scale.hpp"
 
 namespace opentxs::factory
 {

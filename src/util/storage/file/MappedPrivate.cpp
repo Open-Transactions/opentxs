@@ -6,7 +6,6 @@
 #include "util/storage/file/MappedPrivate.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <fstream>

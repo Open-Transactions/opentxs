@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <chrono>
-#include <string_view>
 
 #include "ottest/fixtures/blockchain/regtest/Single.hpp"
 

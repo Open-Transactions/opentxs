@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <chrono>
 #include <memory>
-#include <shared_mutex>
 #include <string_view>
 #include <utility>
 

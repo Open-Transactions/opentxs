@@ -9,7 +9,6 @@
 #include <HDPath.pb.h>
 #include <boost/container/flat_map.hpp>
 #include <cstddef>
-#include <functional>
 #include <mutex>
 #include <optional>
 #include <string_view>

@@ -10,7 +10,6 @@
 #include <atomic>
 #include <functional>
 #include <stdexcept>
-#include <string_view>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"

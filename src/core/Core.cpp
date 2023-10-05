@@ -11,7 +11,6 @@
 #include <frozen/unordered_map.h>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
 #include <mutex>
 #include <span>
 #include <sstream>

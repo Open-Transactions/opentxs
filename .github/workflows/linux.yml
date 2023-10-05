@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [gcc-12.2, gcc-13.0, clang-16]
+        toolchain: [gcc-12.2, gcc-13.0, gcc-13.2, clang-16, clang-17]
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb, release, matterfi]
         include:
           - toolchain: gcc-12.2
@@ -20,8 +20,14 @@ jobs:
           - toolchain: gcc-13.0
             docker: 38_6
             compiler: gcc
+          - toolchain: gcc-13.2
+            docker: 39_0
+            compiler: gcc
           - toolchain: clang-16
             docker: 38_6
+            compiler: clang
+          - toolchain: clang-17
+            docker: 39_0
             compiler: clang
     steps:
     - name: Checkout opentxs

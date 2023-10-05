@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "ottest/fixtures/blockchain/SyncListener.hpp"
+// IWYU pragma: no_include "ottest/fixtures/blockchain/TXOState.hpp"
+
 #pragma once
 
 #include <opentxs/opentxs.hpp>
@@ -23,7 +26,6 @@ class SyncListener;
 
 namespace ottest
 {
-
 struct OPENTXS_EXPORT RegtestListener {
     RegtestListener(const ot::api::session::Client& client);
 

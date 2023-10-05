@@ -11,6 +11,7 @@
 #include <TaggedKey.pb.h>
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <numeric>
 #include <stdexcept>

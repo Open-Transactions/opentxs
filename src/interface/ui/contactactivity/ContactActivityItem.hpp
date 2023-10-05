@@ -10,8 +10,6 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
@@ -31,6 +29,8 @@ class Client;
 
 namespace identifier
 {
+class Account;
+class Generic;
 class Nym;
 }  // namespace identifier
 

@@ -9,7 +9,6 @@
 #include <chrono>
 #include <exception>
 #include <memory>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/blockoracle/Shared.hpp"

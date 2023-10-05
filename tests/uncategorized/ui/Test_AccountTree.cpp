@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <atomic>
+#include <functional>
 #include <iostream>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"

@@ -9,7 +9,7 @@
 #include <optional>
 #include <string_view>
 
-#include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Container.hpp"

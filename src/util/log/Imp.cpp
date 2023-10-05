@@ -6,6 +6,7 @@
 #include "util/log/Imp.hpp"  // IWYU pragma: associated
 
 #include <boost/multiprecision/cpp_dec_float.hpp>  // IWYU pragma: keep
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/system/error_code.hpp>
 #include <chrono>
 #include <compare>

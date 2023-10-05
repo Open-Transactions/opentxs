@@ -10,9 +10,9 @@
 #include <functional>
 #include <span>
 #include <stdexcept>
-#include <string_view>
 #include <tuple>
 
+#include "blockchain/database/wallet/Modification.hpp"
 #include "blockchain/database/wallet/OutputCache.hpp"
 #include "blockchain/database/wallet/Position.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
@@ -26,6 +26,7 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic error "-Wswitch-enum"

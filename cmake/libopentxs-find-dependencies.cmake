@@ -126,8 +126,10 @@ if(OT_STORAGE_LMDB)
       CONFIG
       REQUIRED
     )
+    set(OT_LMDB_TARGET "unofficial::lmdb::lmdb")
   else()
     find_package(lmdb REQUIRED)
+    set(OT_LMDB_TARGET "lmdb")
   endif()
 endif()
 

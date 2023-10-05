@@ -16,7 +16,6 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
-#include "util/storage/tree/Nym.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -40,6 +39,7 @@ namespace storage
 {
 namespace tree
 {
+class Nym;
 class Trunk;
 }  // namespace tree
 

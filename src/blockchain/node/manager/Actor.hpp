@@ -8,7 +8,6 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <memory>
-#include <string_view>
 
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/util/PMR.hpp"

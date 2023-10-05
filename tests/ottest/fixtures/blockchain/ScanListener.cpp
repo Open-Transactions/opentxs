@@ -9,7 +9,6 @@
 #include <chrono>
 #include <functional>
 #include <mutex>
-#include <ratio>
 #include <span>
 #include <utility>
 

@@ -7,7 +7,6 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
-#include <functional>
 #include <memory>
 
 #include "ottest/fixtures/common/Base.hpp"

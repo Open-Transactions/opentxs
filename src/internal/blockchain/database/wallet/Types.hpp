@@ -12,6 +12,7 @@
 #include <ankerl/unordered_dense.h>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
+#include <functional>
 #include <utility>
 
 #include "internal/blockchain/database/Types.hpp"

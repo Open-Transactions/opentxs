@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <random>
 
+#include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 
 namespace ottest

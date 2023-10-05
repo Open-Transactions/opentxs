@@ -9,7 +9,6 @@
 #include <mutex>
 #include <span>
 #include <stdexcept>
-#include <utility>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"

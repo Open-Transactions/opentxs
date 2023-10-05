@@ -8,7 +8,6 @@
 
 #include <zmq.h>
 #include <atomic>
-#include <chrono>
 #include <cstdint>
 #include <sstream>
 

@@ -15,7 +15,7 @@
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/core/Secret.hpp"
+#include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -47,7 +47,6 @@ class Session;
 
 namespace network
 {
-
 namespace zeromq
 {
 class Context;

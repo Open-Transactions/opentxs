@@ -14,7 +14,6 @@
 #include <future>
 #include <limits>
 #include <memory>
-#include <ratio>
 #include <stdexcept>
 #include <utility>
 

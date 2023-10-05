@@ -7,6 +7,7 @@
 
 #include <opentxs/opentxs.hpp>
 
+#include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 
 namespace ottest

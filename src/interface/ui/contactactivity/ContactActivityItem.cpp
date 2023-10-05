@@ -15,6 +15,7 @@
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 
 namespace opentxs::ui::implementation
 {

@@ -7,7 +7,6 @@
 
 #include <cs_shared_guarded.h>
 #include <functional>
-#include <memory>
 #include <shared_mutex>
 #include <span>
 #include <string_view>

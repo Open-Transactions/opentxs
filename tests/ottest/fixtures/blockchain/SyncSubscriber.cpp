@@ -10,7 +10,6 @@
 #include <compare>
 #include <iostream>
 #include <stdexcept>
-#include <utility>
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
