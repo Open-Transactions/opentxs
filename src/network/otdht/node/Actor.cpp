@@ -702,19 +702,18 @@ auto Node::Actor::process_blockchain_external(
                 queued.StartBody();
                 queued.MoveFrames(payload);
             }
-            // TODO c++20 capture structured binding
             const auto& endpoint = external_endpoints_[index];
             router_.SendDeferred(
-                [&](const auto& p, const auto& c) {
+                [&]() {
                     using enum opentxs::blockchain::node::PeerManagerJobs;
-                    auto out =
-                        zeromq::tagged_reply_to_message(p, spawn_peer, true);
-                    out.AddFrame(c);
+                    auto out = zeromq::tagged_reply_to_message(
+                        peerManager, spawn_peer, true);
+                    out.AddFrame(cookie);
                     out.AddFrame(endpoint.Subtype());
                     out.AddFrame(endpoint.Display());
 
                     return out;
-                }(peerManager, cookie),
+                }(),
                 __FILE__,
                 __LINE__);
         } else {

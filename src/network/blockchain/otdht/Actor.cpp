@@ -370,11 +370,10 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
 
     try {
         const auto& [start, id] = *last_request_;
-        // TODO c++20
-        const auto weight = [&](const auto& starttime) {
+        const auto weight = [&]() {
             if (success) {
                 const auto elapsed = std::chrono::duration_cast<ScoreInterval>(
-                    sClock::now() - starttime);
+                    sClock::now() - start);
                 const auto remaining =
                     std::chrono::duration_cast<ScoreInterval>(
                         request_timeout_ - elapsed);
@@ -385,7 +384,7 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
 
                 return min_weight_;
             }
-        }(start);
+        }();
         auto& peer = peers_.at(id);
         add_contribution(peer.samples_, peer.weight_, weight);
         log(OT_PRETTY_CLASS())(name_)(": weight for ")(id)(" updated to ")(
@@ -651,15 +650,14 @@ auto OTDHT::Actor::process_pushtx_external(
 
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
-    // TODO c++20 capture structured binding
     for (const auto& [peerid, _] : peers_) {
         to_dht().SendDeferred(
-            [&](const auto& id) {
-                auto out = make_envelope(id);
+            [&]() {
+                auto out = make_envelope(peerid);
                 out.MoveFrames(msg.Payload());
 
                 return out;
-            }(peerid),
+            }(),
             __FILE__,
             __LINE__);
     }
@@ -837,16 +835,15 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
 {
     for (auto& [peerid, peer] : peers_) {
         if (PeerData::Type::incoming == peer.type_) {
-            // TODO c++20
             to_dht().SendDeferred(
-                [&](const auto& id) {
-                    auto out = make_envelope(id);
+                [&]() {
+                    auto out = make_envelope(peerid);
                     auto body = msg.Payload();
 
                     for (auto& frame : body) { out.AddFrame(std::move(frame)); }
 
                     return out;
-                }(peerid),
+                }(),
                 __FILE__,
                 __LINE__);
         }

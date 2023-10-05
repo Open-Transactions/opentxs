@@ -299,16 +299,15 @@ auto Write(
     const auto& [cb, size] = in;
     const auto& [fileoffset, _] = location;
     const auto& [filename, offset] = fileoffset;
-    // TODO c++20
-    auto& file = [&](const auto& f) -> auto& {
-        if (auto i = map.find(f); map.end() != i) {
+    auto& file = [&]() -> auto& {
+        if (auto i = map.find(filename); map.end() != i) {
 
             return i->second;
         } else {
 
-            return map.try_emplace(f, f.string()).first->second;
+            return map.try_emplace(filename, filename.string()).first->second;
         }
-    }(filename);
+    }();
 
     OT_ASSERT(file.is_open());
     OT_ASSERT(cb);

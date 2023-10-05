@@ -419,12 +419,9 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
 {
     const auto& log = log_;
     auto work = queue_.lock()->GetWork(alloc);
-    // TODO c++20
-    auto post = ScopeGuard{[&] {
-        auto& [id, hashes, jobs, downloading] = work;
-        publish_queue(std::make_pair(jobs, downloading));
-    }};
     auto& [id, hashes, jobs, downloading] = work;
+    auto post =
+        ScopeGuard{[&] { publish_queue(std::make_pair(jobs, downloading)); }};
 
     if (hashes.empty()) {
         OT_ASSERT(0 > id);
@@ -625,16 +622,15 @@ auto BlockOracle::Shared::load_blocks(
 auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 {
     const auto& [jobs, downloading] = queue;
-    // TODO c++20
     to_blockchain_api_.lock()->SendDeferred(
-        [&](const auto& value) {
+        [&]() {
             auto work = network::zeromq::tagged_message(
                 WorkType::BlockchainBlockDownloadQueue, true);
             work.AddFrame(chain_);
-            work.AddFrame(value);
+            work.AddFrame(downloading);
 
             return work;
-        }(downloading),
+        }(),
         __FILE__,
         __LINE__);
 

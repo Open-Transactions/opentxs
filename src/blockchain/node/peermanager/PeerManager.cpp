@@ -740,14 +740,13 @@ auto Actor::check_seeds() noexcept -> void
         if (seed.RetryDNS(now)) {
             log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
                 .Flush();
-            // TODO c++20
-            pipeline_.Internal().SendFromThread([](const auto& name) {
+            pipeline_.Internal().SendFromThread([&]() {
                 auto out = MakeWork(WorkType::AsioResolve);
-                out.AddFrame(name.data(), name.size());
+                out.AddFrame(host.data(), host.size());
                 out.AddFrame(network::blockchain::otdht_listen_port_);
 
                 return out;
-            }(host));
+            }());
             seed.last_dns_query_.emplace(now);
         }
     }
@@ -909,14 +908,13 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
             } else {
                 log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
                     .Flush();
-                // TODO c++20
-                pipeline_.Internal().SendFromThread([](const auto& name) {
+                pipeline_.Internal().SendFromThread([&]() {
                     auto out = MakeWork(WorkType::AsioResolve);
-                    out.AddFrame(name.data(), name.size());
+                    out.AddFrame(host.data(), host.size());
                     out.AddFrame(network::blockchain::otdht_listen_port_);
 
                     return out;
-                }(host));
+                }());
                 seed.last_dns_query_.emplace(now);
             }
         }

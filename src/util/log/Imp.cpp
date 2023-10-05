@@ -306,19 +306,18 @@ auto Log::Imp::send(const LogAction action, const Console console)
         auto& [buffer, socket] = *p;
 
         if (active() || terminate) {
-            // TODO c++20
             socket.SendDeferred(
-                [&](const auto& text) {
+                [&]() {
                     auto message = network::zeromq::Message{};
                     message.StartBody();
                     message.AddFrame(level_);
-                    message.AddFrame(text.data(), text.size());
+                    message.AddFrame(buffer.data(), buffer.size());
                     message.AddFrame(id.data(), id.size());
                     message.AddFrame(action);
                     message.AddFrame(console);
 
                     return message;
-                }(buffer),
+                }(),
                 __FILE__,
                 __LINE__);
             buf.Reset(buffer);

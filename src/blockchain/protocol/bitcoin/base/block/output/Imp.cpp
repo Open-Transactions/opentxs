@@ -247,8 +247,7 @@ auto Output::ConfirmMatches(
 {
     const auto& [_, byKey] = candiates;
 
-    for (const auto& match : byKey) {
-        const auto& [txid, data1] = match;
+    for (const auto& [txid, data1] : byKey) {
         const auto& [index, data2] = data1;
         const auto& [subchain, subaccount] = data2;
         auto alloc = get_allocator();
@@ -258,8 +257,7 @@ auto Output::ConfirmMatches(
         const auto spendable = crypto::Subchain::Outgoing != subchain;
         auto post2 = ScopeGuard{[&] {
             if (haveMatch) {
-                // TODO llvm sucks
-                const auto confirmed = api.Confirm(keyID, match.first);
+                const auto confirmed = api.Confirm(keyID, txid);
 
                 OT_ASSERT(confirmed);
             }

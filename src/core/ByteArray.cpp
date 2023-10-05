@@ -204,7 +204,7 @@ auto ByteArray::Extract(std::uint16_t& output, const std::size_t pos)
 }
 
 auto ByteArray::Extract(std::uint32_t& output, const std::size_t pos)
-    const noexcept -> bool  // TODO c++20
+    const noexcept -> bool
 {
     return imp_->Extract(output, pos);
 }

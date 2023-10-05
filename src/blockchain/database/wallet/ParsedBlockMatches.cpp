@@ -502,8 +502,8 @@ auto ParsedBlockMatches::parse_created(
                 "duplicate output: "s.append(outpoint.str())};
         }
 
-        const auto finalState = [&](auto llvmSucks) {
-            if (generation.contains(llvmSucks)) {
+        const auto finalState = [&]() {
+            if (generation.contains(outpoint)) {
                 const auto best = cache.GetPosition().Decode(api).height_;
 
                 if (is_mature(block.height_, best, target_)) {
@@ -520,7 +520,7 @@ auto ParsedBlockMatches::parse_created(
 
                 return ConfirmedNew;
             }
-        }(outpoint);
+        }();
         const auto [initialState, transition] =
             initial_state(log, outpoint, cache, finalState);
 
@@ -600,10 +600,9 @@ auto ParsedBlockMatches::scan_transactions(
                 outputs.size())(" output matches")
             .Flush();
         const auto& tx = [&]() -> const auto& {
-            auto& llvmWorkaround = std::get<2>(std::get<1>(item));
-            auto& out = llvmWorkaround.Internal().asBitcoin();
+            auto& out = txn.Internal().asBitcoin();
             out.SetMinedPosition(block);
-            processed.emplace(llvmWorkaround);
+            processed.emplace(txn);
 
             return out;
         }();

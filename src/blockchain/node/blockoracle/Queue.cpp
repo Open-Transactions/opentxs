@@ -104,14 +104,13 @@ auto Queue::GetWork(allocator_type alloc) noexcept -> Work
         next_job(), Vector<block::Hash>{alloc}, Available(), Waiting());
     auto& [jobID, hashes, jobs, downloading] = out;
     hashes.reserve(target);
-    // TODO c++20
-    auto& [count, index] = [&, this](const auto& id) -> auto& {
-        auto [i, rc] = jobs_.try_emplace(id, target, Index{get_allocator()});
+    auto& [count, index] = [&, this]() -> auto& {
+        auto [i, rc] = jobs_.try_emplace(jobID, target, Index{get_allocator()});
 
         OT_ASSERT(rc);
 
         return i->second;
-    }(jobID);
+    }();
 
     while (hashes.size() < target) {
         const auto& hash = queue_.front();
