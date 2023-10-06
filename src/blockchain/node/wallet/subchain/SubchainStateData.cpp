@@ -50,7 +50,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -896,7 +896,7 @@ auto SubchainStateData::scan(
     auto filterFuture = filterPromise.get_future();
     RunJob([me = shared_from_this(), &filterPromise, &blocks] {
         auto alloc = me->get_allocator();
-        auto mr = alloc::Monotonic{alloc.resource()};
+        auto mr = alloc::MonotonicSync{alloc.resource()};
         filterPromise.set_value(me->node_.FilterOracle().LoadFilters(
             me->filter_type_, blocks, {alloc, std::addressof(mr)}));
     });

@@ -23,10 +23,16 @@ namespace opentxs::alloc
 template <typename T>
 using PMR = std::pmr::polymorphic_allocator<T>;
 using Resource = std::pmr::memory_resource;
+using MonotonicUnsync = std::pmr::monotonic_buffer_resource;
+using PoolSync = std::pmr::synchronized_pool_resource;
+using PoolUnsync = std::pmr::unsynchronized_pool_resource;
 #else
 template <typename T>
 using PMR = std::experimental::pmr::polymorphic_allocator<T>;
 using Resource = std::experimental::pmr::memory_resource;
+using MonotonicUnsync = std::experimental::pmr::monotonic_buffer_resource;
+using PoolSync = std::experimental::pmr::synchronized_pool_resource;
+using PoolUnsync = std::experimental::pmr::unsynchronized_pool_resource;
 #endif
 using Default = PMR<std::byte>;
 auto OPENTXS_EXPORT System() noexcept -> Resource*;

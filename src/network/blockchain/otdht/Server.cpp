@@ -22,7 +22,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -102,7 +102,7 @@ auto Server::background(
     OT_ASSERT(post);
 
     // WARNING this function must not be be called from a zmq thread
-    auto alloc = alloc::Monotonic{me->get_allocator().resource()};
+    auto alloc = alloc::MonotonicSync{me->get_allocator().resource()};
     auto handle = me->shared_.lock();
     auto& shared = *handle;
     me->fill_queue(shared);

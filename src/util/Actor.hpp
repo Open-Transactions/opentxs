@@ -33,8 +33,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
-#include "internal/util/alloc/Boost.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -48,6 +47,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -503,7 +503,7 @@ private:
     auto worker(network::zeromq::Message&& in) noexcept -> void
     {
         log_(OT_PRETTY_CLASS())(name_)(": Message received").Flush();
-        auto alloc = alloc::Monotonic{get_allocator().resource()};
+        auto alloc = alloc::MonotonicSync{get_allocator().resource()};
 
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);

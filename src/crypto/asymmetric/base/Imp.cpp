@@ -30,7 +30,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -51,6 +50,7 @@
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Key.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -496,7 +496,7 @@ auto Key::get_private_key(const Lock&, const PasswordPrompt& reason) const
 
         const auto& privateKey = *encrypted_key_;
         std::byte b[512_uz];  // NOLINT(modernize-avoid-c-arrays)
-        auto mono = alloc::BoostMonotonic{std::addressof(b), sizeof(b)};
+        auto mono = alloc::MonotonicUnsync{std::addressof(b), sizeof(b)};
         auto sessionKey = api_.Crypto().Symmetric().InternalSymmetric().Key(
             privateKey.key(),
             opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305,

@@ -9,14 +9,14 @@
 #include <cstddef>
 
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::alloc
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
-class Monotonic final : public Resource
+class MonotonicSync final : public Resource
 {
 public:
     auto do_allocate(std::size_t bytes, std::size_t alignment) -> void* final
@@ -34,22 +34,23 @@ public:
         return other == *alloc_.lock();
     }
 
-    Monotonic(Resource* upstream)
-        : upstream_((nullptr == upstream) ? System() : upstream)
-        , alloc_(buf_, sizeof(buf_), std::addressof(upstream_))
+    MonotonicSync(Resource* upstream)
+        : alloc_(
+              buf_,
+              sizeof(buf_),
+              (nullptr == upstream) ? System() : upstream)
     {
     }
-    Monotonic(const Monotonic&) = delete;
-    Monotonic(Monotonic&&) = delete;
-    auto operator=(const Monotonic&) -> Monotonic& = delete;
-    auto operator=(Monotonic&&) -> Monotonic& = delete;
+    MonotonicSync(const MonotonicSync&) = delete;
+    MonotonicSync(MonotonicSync&&) = delete;
+    auto operator=(const MonotonicSync&) -> MonotonicSync& = delete;
+    auto operator=(MonotonicSync&&) -> MonotonicSync& = delete;
 
-    ~Monotonic() final = default;
+    ~MonotonicSync() final = default;
 
 private:
     std::byte buf_[thread_pool_monotonic_];  // NOLINT(modernize-avoid-c-arrays)
-    StandardToBoost upstream_;
-    mutable libguarded::plain_guarded<BoostMonotonic> alloc_;
+    mutable libguarded::plain_guarded<MonotonicUnsync> alloc_;
 };
 #pragma GCC diagnostic pop
 }  // namespace opentxs::alloc

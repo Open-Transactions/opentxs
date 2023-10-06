@@ -16,7 +16,6 @@
 #include "internal/blockchain/database/wallet/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -99,7 +98,7 @@ namespace opentxs::blockchain::database::wallet
 using NymBalances = UnallocatedMap<identifier::Nym, Balance>;
 
 class Output final : private pmr::HasUpstreamAllocator,
-                     private pmr::AllocatesChildren<alloc::BoostPoolSync>
+                     private pmr::AllocatesChildren<alloc::PoolSync>
 {
 public:
     auto GetBalance() const noexcept -> Balance;

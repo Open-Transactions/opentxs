@@ -38,7 +38,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -264,7 +264,7 @@ auto BlockIndexer::Imp::background(
 
         auto parent = me->get_allocator();
         // WARNING this function must not be be called from a zmq thread
-        auto monotonic = alloc::Monotonic{parent.resource()};
+        auto monotonic = alloc::MonotonicSync{parent.resource()};
         auto alloc = alloc::Strategy{parent, std::addressof(monotonic)};
         auto block = block::Block{alloc.work_};
         const auto parsed = Parser::Construct(

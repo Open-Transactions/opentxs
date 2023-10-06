@@ -21,7 +21,6 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -98,7 +97,7 @@ class PaymentCode;
 
 namespace opentxs::api::crypto::imp
 {
-struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::BoostPoolSync> {
+struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
     auto Account(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept(false)

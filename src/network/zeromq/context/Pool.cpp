@@ -27,11 +27,11 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "network/zeromq/context/Thread.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
@@ -121,7 +121,7 @@ auto Pool::allocate_next_batch() const noexcept -> BatchID
 
 auto Pool::BelongsToThreadPool(const std::thread::id id) const noexcept -> bool
 {
-    auto alloc = alloc::BoostMonotonic{1024};
+    auto alloc = alloc::MonotonicUnsync{1024};
     auto threads = Set<std::thread::id>{&alloc};
 
     for (const auto& [tid, thread] : threads_) { threads.emplace(thread.ID()); }

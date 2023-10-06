@@ -10,35 +10,31 @@ extern "C" {
 #include <sodium.h>
 }
 
-#include <boost/container/pmr/global_resource.hpp>
 #include <cstddef>
 #include <new>
 #include <utility>
 
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::alloc
 {
 auto System() noexcept -> Resource*
 {
-    // TODO replace with std::pmr::new_delete_resource once Android and Apple
-    // catch up
-    static auto resource =
-        BoostWrap{boost::container::pmr::new_delete_resource()};
-
-    return &resource;
+#if __has_include(<memory_resource>)
+    return std::pmr::new_delete_resource();
+#else
+    return std::experimental::pmr::new_delete_resource();
+#endif
 }
 
 auto Null() noexcept -> Resource*
 {
-    // TODO replace with std::pmr::null_memory_resource once Android and Apple
-    // catch up
-    static auto resource =
-        BoostWrap{boost::container::pmr::null_memory_resource()};
-
-    return &resource;
+#if __has_include(<memory_resource>)
+    return std::pmr::new_delete_resource();
+#else
+    return std::experimental::pmr::null_memory_resource();
+#endif
 }
 }  // namespace opentxs::alloc
 

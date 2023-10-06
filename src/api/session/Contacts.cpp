@@ -28,7 +28,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/LogMacros.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -62,6 +61,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -145,7 +145,7 @@ void Contacts::check_identifiers(
 auto Contacts::check_nyms() noexcept -> void
 {
     auto buf = std::array<std::byte, 4096>{};
-    auto alloc = alloc::BoostMonotonic{buf.data(), buf.size()};
+    auto alloc = alloc::MonotonicUnsync{buf.data(), buf.size()};
     const auto contacts = [&] {
         auto out = Vector<identifier::Generic>{&alloc};
         auto handle = contact_name_map_.lock();

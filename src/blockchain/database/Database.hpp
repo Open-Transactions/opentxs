@@ -24,7 +24,6 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -95,7 +94,7 @@ class Log;
 namespace opentxs::blockchain::database::implementation
 {
 class Database final : public database::Database,
-                       private pmr::AllocatesChildren<alloc::BoostPoolSync>
+                       private pmr::AllocatesChildren<alloc::PoolSync>
 {
 public:
     auto AddConfirmedTransactions(

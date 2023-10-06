@@ -29,7 +29,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -159,7 +159,7 @@ auto Process::Imp::do_process(
     block::Block block) noexcept -> void
 {
     // WARNING this function must not be be called from a zmq thread
-    auto alloc = alloc::Monotonic{get_allocator().resource()};
+    auto alloc = alloc::MonotonicSync{get_allocator().resource()};
     do_process_common(position, block, std::addressof(alloc));
     pipeline_.Push([&] {
         auto out = MakeWork(Work::process);

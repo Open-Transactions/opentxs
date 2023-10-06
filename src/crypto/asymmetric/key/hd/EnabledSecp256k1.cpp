@@ -15,7 +15,6 @@
 #include "internal/api/Crypto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -52,7 +51,7 @@ auto Secp256k1Key(
     try {
         // TODO use alloc::Strategy::work_
         std::byte b[512_uz];  // NOLINT(modernize-avoid-c-arrays)
-        auto mono = alloc::BoostMonotonic{std::addressof(b), sizeof(b)};
+        auto mono = alloc::MonotonicUnsync{std::addressof(b), sizeof(b)};
         auto sessionKey =
             api.Crypto().Symmetric().Key(reason, {std::addressof(mono)});
 
