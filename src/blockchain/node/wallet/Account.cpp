@@ -23,7 +23,6 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Types.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -139,7 +138,7 @@ Account::Imp::Imp(
     , nym_([&] {
         auto out = api_.Wallet().Nym(account_.NymID());
 
-        OT_ASSERT(out);
+        assert_false(nullptr == out);
 
         return out;
     }())
@@ -148,7 +147,7 @@ Account::Imp::Imp(
         auto out = decltype(path_){};
         const auto rc = nym_->Internal().PaymentCodePath(out);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -162,7 +161,7 @@ Account::Imp::Imp(
     , incoming_(alloc)
     , reorg_(reorg.GetSlave(pipeline_, name_, alloc))
 {
-    OT_ASSERT(false == self_contact_.empty());
+    assert_false(self_contact_.empty());
 }
 
 Account::Imp::Imp(
@@ -208,7 +207,7 @@ auto Account::Imp::check(
             from_parent_,
             batchID);
 
-        OT_ASSERT(ptr);
+        assert_false(nullptr == ptr);
 
         ptr->Init(ptr);
     }
@@ -253,7 +252,7 @@ auto Account::Imp::check_notification(
             from_parent_,
             batchID);
 
-        OT_ASSERT(ptr);
+        assert_false(nullptr == ptr);
 
         ptr->Init(ptr);
     }
@@ -264,7 +263,7 @@ auto Account::Imp::check_pc(const identifier::Account& id) noexcept -> void
     try {
         check_pc(account_.GetPaymentCode().at(id));
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -336,7 +335,7 @@ auto Account::Imp::pipeline(
             // NOTE do nothing
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid state").Abort();
+            LogAbort()()(name_)(": invalid state").Abort();
         }
     }
 }
@@ -347,7 +346,7 @@ auto Account::Imp::process_contact(
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     process_contact(
         api_.Factory().IdentifierFromProtobuf(body[1].Bytes()), monotonic);
@@ -397,7 +396,7 @@ auto Account::Imp::process_key(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(5u < body.size());
+    assert_true(5u < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -417,7 +416,7 @@ auto Account::Imp::process_prepare_reorg(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1u < body.size());
+    assert_true(1u < body.size());
 
     transition_state_reorg(body[1].as<StateSequence>());
 }
@@ -431,7 +430,7 @@ auto Account::Imp::process_subaccount(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -461,8 +460,7 @@ auto Account::Imp::process_subaccount(
         case crypto::SubaccountType::Imported:
         case crypto::SubaccountType::Notification:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid subaccount type")
-                .Abort();
+            LogAbort()()(name_)(": invalid subaccount type").Abort();
         }
     }
 }
@@ -512,19 +510,17 @@ auto Account::Imp::state_normal(
             transition_state_pre_shutdown();
         } break;
         case Work::finish_reorg: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(" unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            LogAbort()()(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -544,19 +540,17 @@ auto Account::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
         case Work::prepare_reorg:
         case Work::finish_reorg:
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(" unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            LogAbort()()(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -577,19 +571,17 @@ auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
             transition_state_normal();
         } break;
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(" unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            LogAbort()()(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -599,7 +591,7 @@ auto Account::Imp::state_reorg(const Work work, Message&& msg) noexcept -> void
 auto Account::Imp::transition_state_normal() noexcept -> void
 {
     state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(name_)(" transitioned to normal state ").Flush();
+    log_()(name_)(" transitioned to normal state ").Flush();
     trigger();
 }
 
@@ -607,25 +599,23 @@ auto Account::Imp::transition_state_pre_shutdown() noexcept -> void
 {
     reorg_.AcknowledgeShutdown();
     state_ = State::pre_shutdown;
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to pre_shutdown state")
-        .Flush();
+    log_()(name_)(": transitioned to pre_shutdown state").Flush();
 }
 
 auto Account::Imp::transition_state_reorg(StateSequence id) noexcept -> void
 {
-    OT_ASSERT(0_uz < id);
+    assert_true(0_uz < id);
 
     if (0_uz == reorgs_.count(id)) {
         reorgs_.emplace(id);
         state_ = State::reorg;
-        log_(OT_PRETTY_CLASS())(name_)(" ready to process reorg ")(id).Flush();
+        log_()(name_)(" ready to process reorg ")(id).Flush();
         reorg_.AcknowledgePrepareReorg(
             [this](const auto& header, const auto& lock, auto& params) {
                 return do_reorg(header, lock, params);
             });
     } else {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" reorg ")(id)(" already handled")
-            .Abort();
+        LogAbort()()(name_)(" reorg ")(id)(" already handled").Abort();
     }
 }
 
@@ -646,8 +636,8 @@ Account::Account(
     std::shared_ptr<const node::Manager> node,
     std::string_view fromParent) noexcept
     : imp_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(node);
+        assert_false(nullptr == api);
+        assert_false(nullptr == node);
 
         const auto& asio = api->Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
@@ -666,7 +656,7 @@ Account::Account(
 
 auto Account::Init() noexcept -> void
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 
     imp_->Init(imp_);
     imp_.reset();

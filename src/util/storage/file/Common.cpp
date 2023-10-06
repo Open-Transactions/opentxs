@@ -8,9 +8,9 @@
 #include <algorithm>
 #include <iterator>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/file/ReaderPrivate.hpp"
 
 namespace opentxs::storage::file
@@ -30,8 +30,8 @@ auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
 
 auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader
 {
-    OT_ASSERT(in.IsValid());
-    OT_ASSERT(IsPageAligned(in.offset_));
+    assert_true(in.IsValid());
+    assert_true(IsPageAligned(in.offset_));
 
     return pmr::construct<ReaderPrivate>(
         alloc, *in.file_name_, in.offset_, in.length_);

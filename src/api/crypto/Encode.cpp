@@ -27,7 +27,6 @@
 #include "internal/core/Core.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -105,24 +104,24 @@ auto Encode::Base58CheckEncode(ReadView input, Writer&& output) const noexcept
             return out;
         }();
 
-        OT_ASSERT(checksumBytes == checksum.size());
+        assert_true(checksumBytes == checksum.size());
 
         const auto size = input.size();
         const auto total = checksumBytes + size;
         const auto preimage = [&] {
             auto out = factory::Secret(total);
 
-            OT_ASSERT(total == out.size());
+            assert_true(total == out.size());
 
             auto* i = static_cast<std::byte*>(out.data());
             auto rc = copy(input, preallocated(size, i));
             std::advance(i, size);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             rc = copy(checksum.Bytes(), preallocated(checksumBytes, i));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }();
@@ -135,7 +134,7 @@ auto Encode::Base58CheckEncode(ReadView input, Writer&& output) const noexcept
 
         return copy(temp, std::move(output));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -183,7 +182,7 @@ auto Encode::Base58CheckDecode(std::string_view input, Writer&& output)
 
         return copy(payload, std::move(output));
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return false;
     }
@@ -221,7 +220,7 @@ auto Encode::base64_decode(const UnallocatedCString&& input, RawData& output)
 
     if (0 == decoded) { return false; }
 
-    OT_ASSERT(decoded <= output.size());
+    assert_true(decoded <= output.size());
 
     output.resize(decoded);
 
@@ -311,7 +310,7 @@ auto Encode::Nonce(const std::uint32_t size, Data& rawOutput) const -> OTString
     rawOutput.resize(size);
     auto factory = factory_.lock();
 
-    OT_ASSERT(factory);
+    assert_false(nullptr == factory);
 
     auto source = factory->Secret(0);
     source.Randomize(size);

@@ -24,7 +24,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -95,7 +94,7 @@ Peer::Actor::Actor(
         auto& socket = pipeline_.Internal().ExtraSocket(1_uz);
         const auto rc = socket.ClearSubscriptions();
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -108,12 +107,12 @@ Peer::Actor::Actor(
             auto& socket = pipeline_.Internal().ExtraSocket(++index);
             auto rc = socket.SetRoutingID(routing_id_);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             rc = socket.Connect(
                 api_.Endpoints().Internal().OTDHTBlockchain(chain).data());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             out.emplace(chain, socket);
         }
@@ -209,8 +208,6 @@ auto Peer::Actor::check_registration() noexcept -> void
 
                 return out;
             }(),
-            __FILE__,
-            __LINE__,
             true);
     }
 
@@ -262,22 +259,19 @@ auto Peer::Actor::forward_to_chain(
     const auto& log = log_;
 
     if (false == active_chains_.contains(chain)) {
-        log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" is not active")
-            .Flush();
+        log()(name_)(": ")(print(chain))(" is not active").Flush();
 
         return;
     }
 
     if (false == registered_chains_.contains(chain)) {
-        log(OT_PRETTY_CLASS())(name_)(": adding message to queue until ")(
-            print(chain))(" completes registration")
+        log()(name_)(": adding message to queue until ")(print(chain))(
+            " completes registration")
             .Flush();
         queue_[chain].emplace_back(std::move(msg));
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": forwarding message to ")(print(chain))
-            .Flush();
-        blockchain_.at(chain).SendDeferred(
-            std::move(msg), __FILE__, __LINE__, true);
+        log()(name_)(": forwarding message to ")(print(chain)).Flush();
+        blockchain_.at(chain).SendDeferred(std::move(msg), true);
     }
 }
 
@@ -294,19 +288,16 @@ auto Peer::Actor::forward_to_subscribers(
 auto Peer::Actor::ping() noexcept -> void
 {
     const auto& log = log_;
-    log(OT_PRETTY_CLASS())(name_)(": requesting status").Flush();
-    external_dealer_.SendExternal(
-        [&] {
-            auto msg = zeromq::Message{};
-            msg.StartBody();
-            const auto query = factory::BlockchainSyncQuery(0);
+    log()(name_)(": requesting status").Flush();
+    external_dealer_.SendExternal([&] {
+        auto msg = zeromq::Message{};
+        msg.StartBody();
+        const auto query = factory::BlockchainSyncQuery(0);
 
-            if (false == query.Serialize(msg)) { OT_FAIL; }
+        if (false == query.Serialize(msg)) { LogAbort()().Abort(); }
 
-            return msg;
-        }(),
-        __FILE__,
-        __LINE__);
+        return msg;
+    }());
 }
 
 auto Peer::Actor::pipeline(
@@ -346,12 +337,11 @@ auto Peer::Actor::pipeline_external(const Work work, Message&& msg) noexcept
         case Work::registration:
         case Work::init:
         case Work::statemachine: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogError()()(name_)(": unhandled message type ")(print(work))
                 .Flush();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogError()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Flush();
         }
@@ -381,12 +371,11 @@ auto Peer::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
         case Work::response:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -397,9 +386,7 @@ auto Peer::Actor::process_chain_state(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (2 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (2 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<opentxs::blockchain::Type>();
     const auto enabled = body[2].as<bool>();
@@ -414,10 +401,8 @@ auto Peer::Actor::process_chain_state(Message&& msg) noexcept -> void
 
 auto Peer::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(": forwarding pushtx to remote peer")
-        .Flush();
-    external_dealer_.SendExternal(
-        strip_header(std::move(msg)), __FILE__, __LINE__);
+    log_()(name_)(": forwarding pushtx to remote peer").Flush();
+    external_dealer_.SendExternal(strip_header(std::move(msg)));
 }
 
 auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
@@ -425,19 +410,17 @@ auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
     const auto& log = log_;
     const auto body = msg.Payload();
 
-    if (1 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (1 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<opentxs::blockchain::Type>();
-    log(OT_PRETTY_CLASS())(name_)(": received registration message from ")(
-        print(chain))(" worker")
+    log()(name_)(": received registration message from ")(print(chain))(
+        " worker")
         .Flush();
     registered_chains_.emplace(chain);
 
     if (auto i = queue_.find(chain); queue_.end() != i) {
-        log(OT_PRETTY_CLASS())(name_)(": flushing ")(queue_.size())(
-            " queued messages for ")(print(chain))(" worker")
+        log()(name_)(": flushing ")(queue_.size())(" queued messages for ")(
+            print(chain))(" worker")
             .Flush();
         auto post = ScopeGuard{[&] { queue_.erase(i); }};
 
@@ -451,9 +434,8 @@ auto Peer::Actor::process_registration(Message&& msg) noexcept -> void
 
         for (const auto& state : ack.State()) {
             if (state.Chain() == chain) {
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": sending last acknowledgement message to ")(print(chain))(
-                    " worker")
+                log()(name_)(": sending last acknowledgement message to ")(
+                    print(chain))(" worker")
                     .Flush();
                 forward_to_chain(chain, last);
                 break;
@@ -499,7 +481,7 @@ auto Peer::Actor::process_response(Message&& msg) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -510,7 +492,7 @@ auto Peer::Actor::process_sync(Message&& msg) noexcept -> void
     try {
         const auto sync = api_.Factory().BlockchainSyncMessage(msg);
         const auto type = sync->Type();
-        log(OT_PRETTY_CLASS())(name_)(": received ")(print(type)).Flush();
+        log()(name_)(": received ")(print(type)).Flush();
         using enum opentxs::network::otdht::MessageType;
 
         switch (type) {
@@ -547,16 +529,14 @@ auto Peer::Actor::process_sync(Message&& msg) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
 auto Peer::Actor::process_sync_request_internal(Message&& msg) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(": forwarding sync request to remote peer")
-        .Flush();
-    external_dealer_.SendExternal(
-        strip_header(std::move(msg)), __FILE__, __LINE__);
+    log_()(name_)(": forwarding sync request to remote peer").Flush();
+    external_dealer_.SendExternal(strip_header(std::move(msg)));
 }
 
 auto Peer::Actor::reset_ping_timer(std::chrono::microseconds interval) noexcept
@@ -591,12 +571,11 @@ auto Peer::Actor::subscribe(const Acknowledgement& ack) noexcept -> void
     if (subscriptions_.contains(endpoint)) { return; }
 
     if (external_sub_.Connect(endpoint.data())) {
-        log(OT_PRETTY_CLASS())(name_)(": subscribed to endpoint ")(
+        log()(name_)(": subscribed to endpoint ")(
             endpoint)(" for new block notifications")
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            name_)(": failed to subscribe to endpoint ")(endpoint)
+        LogError()()(name_)(": failed to subscribe to endpoint ")(endpoint)
             .Flush();
     }
 

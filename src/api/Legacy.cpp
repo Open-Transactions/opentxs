@@ -12,7 +12,6 @@
 
 #include "internal/api/Factory.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -330,7 +329,7 @@ auto Legacy::get_home_directory() noexcept -> fs::path
 
     LogConsole()("Unable to determine home directory.").Flush();
 
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 // NOTE: Legacy::get_home_platform defined in src/util/platform
@@ -372,7 +371,7 @@ auto Legacy::get_path(const fs::path& fragment, const int instance)
     auto output = fs::path{};
     const auto success = AppendFolder(output, app_data_folder_, name);
 
-    OT_ASSERT(success);
+    assert_true(success);
 
     return output;
 }

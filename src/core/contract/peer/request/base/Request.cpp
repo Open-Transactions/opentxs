@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
@@ -21,6 +20,7 @@
 #include "opentxs/core/contract/peer/request/Verification.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::contract::peer
@@ -44,7 +44,7 @@ namespace opentxs::contract::peer
 Request::Request(RequestPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Request::Request(allocator_type alloc) noexcept

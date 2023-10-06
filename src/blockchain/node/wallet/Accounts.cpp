@@ -22,7 +22,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -189,7 +188,7 @@ auto Accounts::Imp::do_reorg() noexcept -> void
         // TODO ensure filter oracle has processed the reorg before proceeding
         reorg_.FinishReorg();
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 
     transition_state_normal();
@@ -213,19 +212,16 @@ auto Accounts::Imp::do_startup(allocator_type) noexcept -> bool
     for (const auto& id : api_.Wallet().LocalNyms()) { process_nym(id); }
 
     const auto oldPosition = db_.GetPosition();
-    log_(OT_PRETTY_CLASS())(name_)(" last wallet position is ")(oldPosition)
-        .Flush();
+    log_()(name_)(" last wallet position is ")(oldPosition).Flush();
 
     if (0 > oldPosition.height_) { return false; }
 
     const auto [parent, best] = node_.HeaderOracle().CommonParent(oldPosition);
 
     if (parent == oldPosition) {
-        log_(OT_PRETTY_CLASS())(name_)(" last wallet position is in best chain")
-            .Flush();
+        log_()(name_)(" last wallet position is in best chain").Flush();
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(" last wallet position is stale")
-            .Flush();
+        log_()(name_)(" last wallet position is stale").Flush();
         startup_reorg_.emplace(++reorg_counter_);
         pipeline_.Push([&](const auto& ancestor, const auto& tip) {
             auto out = MakeWork(Work::reorg);
@@ -261,7 +257,7 @@ auto Accounts::Imp::pipeline(
             // NOTE do nothing
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid state").Abort();
+            LogAbort()()(name_)(": invalid state").Abort();
         }
     }
 }
@@ -278,9 +274,7 @@ auto Accounts::Imp::process_block_header(Message&& in) noexcept -> void
 
     const auto body = in.Payload();
 
-    if (3 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (3 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -288,7 +282,7 @@ auto Accounts::Imp::process_block_header(Message&& in) noexcept -> void
 
     const auto position =
         block::Position{body[3].as<block::Height>(), body[2].Bytes()};
-    log_(OT_PRETTY_CLASS())("processing block header for ")(position).Flush();
+    log_()("processing block header for ")(position).Flush();
     db_.AdvanceTo(log_, position, alloc);
 }
 
@@ -296,7 +290,7 @@ auto Accounts::Imp::process_nym(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
 
@@ -325,9 +319,7 @@ auto Accounts::Imp::process_reorg(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    if (6 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (6 > body.size()) { LogError()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -344,7 +336,7 @@ auto Accounts::Imp::process_reorg(
     block::Position&& ancestor,
     block::Position&& tip) noexcept -> void
 {
-    OT_ASSERT(false == reorg_data_.has_value());
+    assert_false(reorg_data_.has_value());
 
     reorg_data_.emplace(std::move(ancestor), std::move(tip));
     transition_state_pre_reorg();
@@ -352,7 +344,7 @@ auto Accounts::Imp::process_reorg(
 
 auto Accounts::Imp::process_rescan(Message&& in) noexcept -> void
 {
-    to_children_.Send(MakeWork(AccountJobs::rescan), __FILE__, __LINE__);
+    to_children_.Send(MakeWork(AccountJobs::rescan));
 }
 
 auto Accounts::Imp::state_normal(const Work work, Message&& msg) noexcept
@@ -376,19 +368,17 @@ auto Accounts::Imp::state_normal(const Work work, Message&& msg) noexcept
             transition_state_pre_shutdown();
         } break;
         case Work::reorg_ready: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown_ready:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -413,12 +403,11 @@ auto Accounts::Imp::state_pre_reorg(const Work work, Message&& msg) noexcept
         case Work::shutdown_ready:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -440,19 +429,17 @@ auto Accounts::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
             // NOTE ignore message
         } break;
         case Work::reorg_ready: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown_ready:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -461,7 +448,7 @@ auto Accounts::Imp::state_pre_shutdown(const Work work, Message&& msg) noexcept
 
 auto Accounts::Imp::transition_state_normal() noexcept -> void
 {
-    OT_ASSERT(reorg_data_.has_value());
+    assert_true(reorg_data_.has_value());
 
     const auto& [ancestor, tip] = *reorg_data_;
     auto post = ScopeGuard{[&] { reorg_data_.reset(); }};
@@ -481,21 +468,18 @@ auto Accounts::Imp::transition_state_pre_reorg() noexcept -> void
             return ++reorg_counter_;
         }
     }();
-    log_(OT_PRETTY_CLASS())(name_)(": processing reorg ")(id).Flush();
+    log_()(name_)(": processing reorg ")(id).Flush();
     state_ = State::pre_reorg;
     startup_reorg_.reset();
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to pre_reorg state").Flush();
+    log_()(name_)(": transitioned to pre_reorg state").Flush();
 
-    if (reorg_.PrepareReorg(id)) {
-        log_(OT_PRETTY_CLASS())(name_)(": zero children").Flush();
-    }
+    if (reorg_.PrepareReorg(id)) { log_()(name_)(": zero children").Flush(); }
 }
 
 auto Accounts::Imp::transition_state_pre_shutdown() noexcept -> void
 {
     state_ = State::pre_shutdown;
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to pre_shutdown state")
-        .Flush();
+    log_()(name_)(": transitioned to pre_shutdown state").Flush();
 
     if (reorg_.PrepareShutdown()) { shutdown_actor(); }
 }
@@ -514,8 +498,8 @@ Accounts::Accounts(
     std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept
     : imp_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(node);
+        assert_false(nullptr == api);
+        assert_false(nullptr == node);
 
         const auto& asio = api->Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
@@ -527,7 +511,7 @@ Accounts::Accounts(
             batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Accounts::Init() noexcept -> void { imp_->Init(imp_); }

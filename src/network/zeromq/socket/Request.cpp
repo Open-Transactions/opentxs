@@ -16,7 +16,6 @@
 
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Socket.hpp"
@@ -58,20 +57,20 @@ auto Request::clone() const noexcept -> Request*
 auto Request::Send(zeromq::Message&& request) const noexcept
     -> Socket::SendResult
 {
-    OT_ASSERT(nullptr != socket_);
+    assert_false(nullptr == socket_);
 
     Lock lock(lock_);
     auto output = SendResult{otx::client::SendResult::Error, {}};
     auto& [status, reply] = output;
 
     if (false == send_message(lock, std::move(request))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to deliver message.").Flush();
+        LogError()()("Failed to deliver message.").Flush();
 
         return output;
     }
 
     if (false == wait(lock)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Receive timeout.").Flush();
+        LogVerbose()()("Receive timeout.").Flush();
         status = otx::client::SendResult::TIMEOUT;
 
         return output;
@@ -80,7 +79,7 @@ auto Request::Send(zeromq::Message&& request) const noexcept
     if (receive_message(lock, reply)) {
         status = otx::client::SendResult::VALID_REPLY;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to receive reply.").Flush();
+        LogError()()("Failed to receive reply.").Flush();
     }
 
     return output;
@@ -94,7 +93,7 @@ auto Request::SetSocksProxy(const UnallocatedCString& proxy) const noexcept
 
 auto Request::wait(const Lock& lock) const noexcept -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const auto start = Clock::now();
     auto poll = std::array<::zmq_pollitem_t, 1>{};
@@ -106,7 +105,7 @@ auto Request::wait(const Lock& lock) const noexcept -> bool
         const auto events = ::zmq_poll(poll.data(), 1, poll_milliseconds_);
 
         if (0 == events) {
-            LogVerbose()(OT_PRETTY_CLASS())("No messages.").Flush();
+            LogVerbose()()("No messages.").Flush();
 
             const auto now = Clock::now();
 
@@ -120,9 +119,7 @@ auto Request::wait(const Lock& lock) const noexcept -> bool
 
         if (0 > events) {
             const auto error = zmq_errno();
-            LogError()(OT_PRETTY_CLASS())("Poll error: ")(zmq_strerror(error))(
-                ".")
-                .Flush();
+            LogError()()("Poll error: ")(zmq_strerror(error))(".").Flush();
 
             continue;  // TODO
         }

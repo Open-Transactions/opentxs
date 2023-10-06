@@ -131,7 +131,7 @@ auto BitcoinTransactionInput(
             prevOut,
             std::move(keys));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -190,7 +190,7 @@ auto BitcoinTransactionInput(
                 outpoint.size() + cs.Total() + sequence.size());
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -284,7 +284,7 @@ auto BitcoinTransactionInput(
                 std::move(spends));
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

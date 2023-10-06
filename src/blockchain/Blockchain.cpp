@@ -16,7 +16,6 @@
 #include <stdexcept>
 
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -35,6 +34,7 @@
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -74,7 +74,7 @@ auto BitReader::read(std::size_t nbits) -> std::uint64_t
     // nbits is the number of bits the programmer is trying to read from our
     // internal data and, interpreted as big endian, return to the caller in
     // native format. Let's say he's trying to read 19 bits.
-    OT_ASSERT(nbits < 32u);
+    assert_true(nbits < 32u);
 
     auto ret = std::uint64_t{0_uz};
 
@@ -164,7 +164,7 @@ void BitWriter::flush()
         // Assert n is smaller than 8 because if it were larger, it should
         // already have been handled in the write function. Remember, n_ is
         // the number of bits stored in accum_.
-        OT_ASSERT(n_ < 8u);
+        assert_true(n_ < 8u);
 
         auto result{static_cast<std::uint8_t>(accum_ & BITMASK(n_))};
         result <<= (8u - n_);

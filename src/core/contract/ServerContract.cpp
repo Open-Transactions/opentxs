@@ -31,7 +31,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ServerContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -91,7 +90,7 @@ auto Factory::ServerContract(
         auto output = std::make_unique<ReturnType>(
             api, nym, version, terms, name, std::move(list), std::move(key));
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         auto& contract = *output;
 
@@ -105,7 +104,7 @@ auto Factory::ServerContract(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Factory))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -205,7 +204,7 @@ auto Server::calculate_id() const -> identifier_type
 
 auto Server::EffectiveName() const -> UnallocatedCString
 {
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     // TODO The version stored in Signer() might be out of date so load it from
     // the wallet. This can be fixed correctly by implementing in-place updates
@@ -344,7 +343,7 @@ auto Server::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
     auto serialized = proto::ServerContract{};
     if (false == Serialize(serialized, includeNym)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize server.").Flush();
+        LogError()()("Failed to serialize server.").Flush();
         return false;
     }
 
@@ -385,7 +384,7 @@ auto Server::TransportKey() const -> const Data& { return transport_key_; }
 auto Server::TransportKey(Data& pubkey, const PasswordPrompt& reason) const
     -> Secret
 {
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     return Signer()->TransportKey(pubkey, reason);
 }
@@ -405,7 +404,7 @@ auto Server::update_signature(const PasswordPrompt& reason) -> bool
         sigs.emplace_back(new proto::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to create signature.").Flush();
+        LogError()()("failed to create signature.").Flush();
     }
 
     return success;
@@ -418,7 +417,7 @@ auto Server::validate() const -> bool
     if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (!validNym) {
-        LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
+        LogError()()("Invalid nym.").Flush();
 
         return false;
     }
@@ -426,7 +425,7 @@ auto Server::validate() const -> bool
     const bool validSyntax = proto::Validate(contract(), VERBOSE);
 
     if (!validSyntax) {
-        LogError()(OT_PRETTY_CLASS())("Invalid syntax.").Flush();
+        LogError()()("Invalid syntax.").Flush();
 
         return false;
     }
@@ -434,7 +433,7 @@ auto Server::validate() const -> bool
     const auto sigs = signatures();
 
     if (1_uz != sigs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Missing signature.").Flush();
+        LogError()()("Missing signature.").Flush();
 
         return false;
     }
@@ -445,7 +444,7 @@ auto Server::validate() const -> bool
     if (signature) { validSig = verify_signature(*signature); }
 
     if (!validSig) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature.").Flush();
+        LogError()()("Invalid signature.").Flush();
 
         return false;
     }

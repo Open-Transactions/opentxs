@@ -18,7 +18,6 @@
 #include "internal/core/Core.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -150,7 +149,7 @@ auto Bip32::Imp::derive_private(
         preallocated(hash.size(), hash.data()));
 
     if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate hash").Flush();
+        LogError()()("Failed to calculate hash").Flush();
 
         return false;
     }
@@ -161,7 +160,7 @@ auto Bip32::Imp::derive_private(
             node.ParentPrivate(), {hash.as<char>(), 32}, node.ChildPrivate());
 
         if (false == success) {
-            LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
+            LogError()()("Invalid scalar").Flush();
 
             return false;
         }
@@ -170,13 +169,12 @@ auto Bip32::Imp::derive_private(
             node.ChildPrivate().Reserve(32), node.ChildPublic());
 
         if (false == success) {
-            LogError()(OT_PRETTY_CLASS())("Failed to calculate public key")
-                .Flush();
+            LogError()()("Failed to calculate public key").Flush();
 
             return false;
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -238,9 +236,7 @@ auto Bip32::Imp::derive_public(
     auto i = be::big_uint32_buf_t{child};
 
     if (IsHard(child)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Hardened public derivation is not possible")
-            .Flush();
+        LogError()()("Hardened public derivation is not possible").Flush();
 
         return false;
     } else {
@@ -254,7 +250,7 @@ auto Bip32::Imp::derive_public(
         preallocated(hash.size(), hash.data()));
 
     if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate hash").Flush();
+        LogError()()("Failed to calculate hash").Flush();
 
         return false;
     }
@@ -265,13 +261,12 @@ auto Bip32::Imp::derive_public(
             node.ParentPublic(), {hash.as<char>(), 32}, node.ChildPublic());
 
         if (false == success) {
-            LogError()(OT_PRETTY_CLASS())("Failed to calculate public key")
-                .Flush();
+            LogError()()("Failed to calculate public key").Flush();
 
             return false;
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -297,8 +292,7 @@ auto Bip32::Imp::DeserializePrivate(
     const auto size = input.size();
 
     if (78 != size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid input size (")(size)(")")
-            .Flush();
+        LogError()()("Invalid input size (")(size)(")").Flush();
 
         return {};
     }
@@ -306,7 +300,7 @@ auto Bip32::Imp::DeserializePrivate(
     bool output = extract(input, network, depth, parent, index, chainCode);
 
     if (std::byte(0) != input.get()[45]) {
-        LogError()(OT_PRETTY_CLASS())("Invalid padding bit").Flush();
+        LogError()()("Invalid padding bit").Flush();
 
         return {};
     }
@@ -329,8 +323,7 @@ auto Bip32::Imp::DeserializePublic(
     const auto size = input.size();
 
     if (78 != size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid input size (")(size)(")")
-            .Flush();
+        LogError()()("Invalid input size (")(size)(")").Flush();
 
         return {};
     }
@@ -362,7 +355,7 @@ auto Bip32::Imp::extract(
 auto Bip32::Imp::Init(
     const std::shared_ptr<const api::Factory>& factory) noexcept -> void
 {
-    OT_ASSERT(factory);
+    assert_false(nullptr == factory);
 
     factory_ = factory;
     blank_.set_value(
@@ -402,7 +395,7 @@ auto Bip32::Imp::SeedID(const ReadView entropy) const noexcept -> crypto::SeedID
 {
     const auto f = factory_.lock();
 
-    OT_ASSERT(f);
+    assert_false(nullptr == f);
 
     return f->SeedIDFromPreimage(entropy);
 }
@@ -419,7 +412,7 @@ auto Bip32::Imp::SerializePrivate(
     const auto size = key.size();
 
     if (32_uz != size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid key size (")(size)(")").Flush();
+        LogError()()("Invalid key size (")(size)(")").Flush();
 
         return {};
     }
@@ -427,11 +420,11 @@ auto Bip32::Imp::SerializePrivate(
     auto input = factory::Secret(0_uz);
     input.DecodeHex("0x00");
 
-    OT_ASSERT(1_uz == input.size());
+    assert_true(1_uz == input.size());
 
     input.Concatenate(key);
 
-    OT_ASSERT(33_uz == input.size());
+    assert_true(33_uz == input.size());
 
     return SerializePublic(
         network,
@@ -455,7 +448,7 @@ auto Bip32::Imp::SerializePublic(
     auto size = key.size();
 
     if (33_uz != size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid key size (")(size)(")").Flush();
+        LogError()()("Invalid key size (")(size)(")").Flush();
 
         return {};
     }
@@ -463,8 +456,7 @@ auto Bip32::Imp::SerializePublic(
     size = chainCode.size();
 
     if (32_uz != size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid chain code size (")(size)(")")
-            .Flush();
+        LogError()()("Invalid chain code size (")(size)(")").Flush();
 
         return {};
     }
@@ -476,7 +468,7 @@ auto Bip32::Imp::SerializePublic(
     output += chainCode;
     output += key;
 
-    OT_ASSERT_MSG(78 == output.size(), std::to_string(output.size()).c_str());
+    assert_true(78 == output.size(), std::to_string(output.size()));
 
     return crypto_.Encode().Base58CheckEncode(output.Bytes(), std::move(out));
 }

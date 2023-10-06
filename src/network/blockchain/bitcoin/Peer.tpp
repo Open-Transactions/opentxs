@@ -309,7 +309,7 @@ auto Peer::transmit_protocol(allocator_type monotonic, Args&&... args) noexcept
 
             throw std::runtime_error{error.c_str()};
         }
-        log_(OT_PRETTY_CLASS())(name_)(": sending ")(factory.Name()).Flush();
+        log_()(name_)(": sending ")(factory.Name()).Flush();
         transmit(message);
     } catch (const std::exception& e) {
         disconnect(e.what(), monotonic);

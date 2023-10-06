@@ -14,7 +14,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/consensus/Client.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -102,9 +101,7 @@ void ReplyMessage::attach_request()
         case MessageType::getMarketList:
         case MessageType::requestAdmin:
         case MessageType::addClaim: {
-            LogVerbose()(OT_PRETTY_CLASS())("Attaching original ")(
-                command)(" message.")
-                .Flush();
+            LogVerbose()()("Attaching original ")(command)(" message.").Flush();
             message_.in_reference_to_->SetString(String::Factory(original_));
         } break;
         case MessageType::pingNotary:
@@ -128,9 +125,7 @@ void ReplyMessage::clear_request()
         case MessageType::getAccountData:
         case MessageType::getInstrumentDefinition:
         case MessageType::getMint: {
-            LogVerbose()(OT_PRETTY_CLASS())("Clearing original ")(
-                command)(" message.")
-                .Flush();
+            LogVerbose()()("Clearing original ")(command)(" message.").Flush();
             message_.in_reference_to_->Release();
         } break;
         case MessageType::getMarketOffers:
@@ -166,7 +161,7 @@ void ReplyMessage::ClearRequest() { message_.in_reference_to_->Release(); }
 
 auto ReplyMessage::Context() -> otx::context::Client&
 {
-    OT_ASSERT(context_);
+    assert_false(nullptr == context_);
 
     return context_->get();
 }
@@ -221,8 +216,7 @@ auto ReplyMessage::init_nym() -> bool
 auto ReplyMessage::LoadContext(const PasswordPrompt& reason) -> bool
 {
     if (false == init_nym()) {
-        LogError()(OT_PRETTY_CLASS())("Nym (")(original_.nym_id_.get())(
-            ") does not exist")
+        LogError()()("Nym (")(original_.nym_id_.get())(") does not exist")
             .Flush();
 
         return false;
@@ -243,7 +237,7 @@ void ReplyMessage::OverrideType(const String& replyCommand)
 
 void ReplyMessage::SetAccount(const String& accountID)
 {
-    OT_ASSERT(accountID.Exists());
+    assert_true(accountID.Exists());
 
     message_.acct_id_ = accountID;
 }

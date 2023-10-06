@@ -10,20 +10,20 @@
 #include <numeric>
 #include <ranges>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
 auto Plugin::empty_bucket(Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
-    auto store = [=, this](auto& row) {
+    auto store = [=](auto& row) {
         auto& [driver, result] = row;
         result = driver->EmptyBucket(bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error emptying bucket in ")(
-                driver->Description())(" driver")
+            LogError()()("error emptying bucket in ")(driver->Description())(
+                " driver")
                 .Flush();
         }
     };
@@ -87,8 +87,8 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
         result = driver->Commit(root, data, bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error committing to ")(
-                driver->Description())(" driver")
+            LogError()()("error committing to ")(driver->Description())(
+                " driver")
                 .Flush();
         }
     };
@@ -100,13 +100,12 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
 auto Plugin::store(Transaction data, Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
-    auto save = [&, this](auto& row) {
+    auto save = [&](auto& row) {
         auto& [driver, result] = row;
         result = driver->Store(data, bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error storing to ")(
-                driver->Description())(" driver")
+            LogError()()("error storing to ")(driver->Description())(" driver")
                 .Flush();
         }
     };

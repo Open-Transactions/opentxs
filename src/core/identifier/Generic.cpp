@@ -12,7 +12,6 @@
 
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
@@ -21,6 +20,7 @@
 #include "opentxs/core/identifier/Algorithm.hpp"       // IWYU pragma: keep
 #include "opentxs/core/identifier/Type.hpp"            // IWYU pragma: keep
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -186,7 +186,7 @@ namespace opentxs::identifier
 Generic::Generic(IdentifierPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Generic::Generic(allocator_type alloc) noexcept

@@ -15,9 +15,9 @@
 #include "blockchain/params/Json.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::blockchain::params
@@ -128,7 +128,7 @@ ChainDataPrivate::ChainDataPrivate(
                 const auto rc =
                     block.DecodeHex(checkpoint.at("block").as_string().c_str());
 
-                OT_ASSERT(rc);
+                assert_true(rc);
 
                 using enum cfilter::Type;
                 static const auto types = {Basic_BIP158, Basic_BCHVariant, ES};
@@ -150,7 +150,7 @@ ChainDataPrivate::ChainDataPrivate(
             auto& [block, map] = out[0];
             const auto rc = block.DecodeHex(data.genesis_hash_hex_);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             for (const auto& [type, genesis] : data.genesis_bip158_) {
                 const auto& [cfheader, cfilter] = genesis;
@@ -200,8 +200,8 @@ auto ChainDataPrivate::GenesisBlock(const api::Crypto& crypto) const noexcept
         block = factory::BlockchainBlock(
             crypto, chain_, serialized_genesis_block_.Bytes(), {});
 
-        OT_ASSERT(block.IsValid());
-        OT_ASSERT(0 == block.Header().Position().height_);
+        assert_true(block.IsValid());
+        assert_true(0 == block.Header().Position().height_);
     }
 
     return block;

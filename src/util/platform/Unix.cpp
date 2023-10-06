@@ -44,7 +44,7 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
     if (-1 == rc) {
         auto buf = std::array<char, 1024>{};
         const auto* text = ::strerror_r(error, buf.data(), buf.size());
-        LogDebug()(__func__)(": failed to set thread priority to ")(
+        LogDebug()()("failed to set thread priority to ")(
             opentxs::print(priority))(" due to: ")(text)
             .Flush();
     }

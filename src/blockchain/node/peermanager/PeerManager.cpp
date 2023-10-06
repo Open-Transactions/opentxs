@@ -47,7 +47,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/blockchain/Seednodes.hpp"
@@ -299,7 +298,7 @@ Actor::Actor(
         auto out = decltype(nonce_){0};
         const auto rc = api_.Crypto().Util().RandomizeMemory(&out, sizeof(out));
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -318,8 +317,7 @@ Actor::Actor(
             case server: {
             } break;
             default: {
-                LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid profile ")(
-                    print(profile))
+                LogAbort()()(name_)(": invalid profile ")(print(profile))
                     .Abort();
             }
         }
@@ -396,8 +394,8 @@ Actor::Actor(
             const auto& hostname =
                 seed.get_object().at("hostname").get_string();
             const auto& key = seed.get_object().at("key").get_string();
-            log_(OT_PRETTY_CLASS())(name_)(": loaded seed node ")(
-                hostname.c_str())(" with pubkey ")(key.c_str())
+            log_()(name_)(": loaded seed node ")(hostname.c_str())(
+                " with pubkey ")(key.c_str())
                 .Flush();
             const auto& [_, pubkey] = out.emplace_back(hostname.c_str(), [&] {
                 auto pub = CString{alloc};
@@ -405,14 +403,13 @@ Actor::Actor(
                 const auto rc =
                     api_.Crypto().Encode().Z85Decode(view, writer(pub));
 
-                OT_ASSERT(rc);
+                assert_true(rc);
 
                 return pub;
             }());
 
             if (pubkey == api_.Network().OTDHT().CurvePublicKey()) {
-                log_(OT_PRETTY_CLASS())(name_)(": skipping connection to self")
-                    .Flush();
+                log_()(name_)(": skipping connection to self").Flush();
                 out.pop_back();
             }
         }
@@ -478,7 +475,7 @@ auto Actor::accept(
     std::shared_ptr<Actor> me) noexcept -> void
 
 {
-    OT_ASSERT(me);
+    assert_false(nullptr == me);
 
     auto address = factory::BlockchainAddress(
         me->api_,
@@ -498,9 +495,7 @@ auto Actor::accept(
             std::move(address), std::move(socket));
         me->pipeline_.Push(MakeWork(Work::statemachine));
     } else {
-        LogError()(OT_PRETTY_STATIC(Actor))(": invalid address: ")(
-            address.Display())
-            .Flush();
+        LogError()()(": invalid address: ")(address.Display()).Flush();
     }
 }
 
@@ -537,19 +532,17 @@ auto Actor::add_peer(
 {
     const auto& log = log_;
 
-    OT_ASSERT(endpoint.IsValid());
+    assert_true(endpoint.IsValid());
 
     endpoint.Internal().SetIncoming(incoming);
 
     if (is_active(endpoint)) {
-        log(OT_PRETTY_CLASS())(name_)(": address ")(endpoint.Display())(
-            " is already active")
+        log()(name_)(": address ")(endpoint.Display())(" is already active")
             .Flush();
 
         return invalid_peer_;
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": adding peer ")(endpoint.Display())
-            .Flush();
+        log()(name_)(": adding peer ")(endpoint.Display()).Flush();
     }
 
     const auto inproc = network::zeromq::MakeArbitraryInproc();
@@ -564,14 +557,14 @@ auto Actor::add_peer(
             incoming,
             get_allocator());
 
-        OT_ASSERT(isNew);
+        assert_true(isNew);
 
         auto& [_1, socket, external, internal, cache, _2, _3] = it->second;
         const auto listen = socket.Bind(inproc.data());
 
-        OT_ASSERT(listen);
-        OT_ASSERT(external == connection);
-        OT_ASSERT(false == internal.IsValid());
+        assert_true(listen);
+        assert_true(external == connection);
+        assert_false(internal.IsValid());
 
         if (msg.has_value()) { cache.emplace_back(std::move(*msg)); }
 
@@ -599,8 +592,8 @@ auto Actor::add_peer(
         case opentxs:
         case ethereum:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(
-                name_)(": unsupported network protocol ")(print(protocol))
+            LogAbort()()(name_)(": unsupported network protocol ")(
+                print(protocol))
                 .Abort();
         }
     }
@@ -616,35 +609,28 @@ auto Actor::add_peer(
 
 auto Actor::broadcast_active() noexcept -> void
 {
-    to_blockchain_api_.SendDeferred(
-        [&] {
-            using enum WorkType;
-            auto work =
-                network::zeromq::tagged_message(BlockchainPeerConnected, true);
-            work.AddFrame(chain_);
-            work.AddFrame(active_.size());
+    to_blockchain_api_.SendDeferred([&] {
+        using enum WorkType;
+        auto work =
+            network::zeromq::tagged_message(BlockchainPeerConnected, true);
+        work.AddFrame(chain_);
+        work.AddFrame(active_.size());
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Actor::broadcast_verified(std::string_view address) noexcept -> void
 {
-    to_blockchain_api_.SendDeferred(
-        [&] {
-            using enum WorkType;
-            auto work =
-                network::zeromq::tagged_message(BlockchainPeerAdded, true);
-            work.AddFrame(chain_);
-            work.AddFrame(address.data(), address.size());
-            work.AddFrame(verified_.size());
+    to_blockchain_api_.SendDeferred([&] {
+        using enum WorkType;
+        auto work = network::zeromq::tagged_message(BlockchainPeerAdded, true);
+        work.AddFrame(chain_);
+        work.AddFrame(address.data(), address.size());
+        work.AddFrame(verified_.size());
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Actor::check_command_line_peers() noexcept -> void
@@ -691,25 +677,22 @@ auto Actor::check_peers(allocator_type monotonic) noexcept -> void
     const auto& log = log_;
 
     if (false == have_target_zmq_peers()) {
-        log(OT_PRETTY_CLASS())(name_)(": attempting to add a zmq peer").Flush();
+        log()(name_)(": attempting to add a zmq peer").Flush();
 
         if (auto peer = get_peer(true, monotonic); peer.IsValid()) {
             add_peer(std::move(peer), false);
         } else {
-            log(OT_PRETTY_CLASS())(name_)(": no valid zmq peer not found")
-                .Flush();
+            log()(name_)(": no valid zmq peer not found").Flush();
         }
     }
 
     if (false == have_target_peers()) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": attempting to add a peer on any network")
-            .Flush();
+        log()(name_)(": attempting to add a peer on any network").Flush();
 
         if (auto peer = get_peer(false, monotonic); peer.IsValid()) {
             add_peer(std::move(peer), false);
         } else {
-            log(OT_PRETTY_CLASS())(name_)(": no valid peer not found").Flush();
+            log()(name_)(": no valid peer not found").Flush();
         }
     }
 }
@@ -718,15 +701,12 @@ auto Actor::check_registration() noexcept -> void
 {
     if (false == registered_) {
         using enum network::otdht::NodeJob;
-        to_otdht_.SendDeferred(
-            [this] {
-                auto out = MakeWork(connect_peer_manager);
-                out.AddFrame(chain_);
+        to_otdht_.SendDeferred([this] {
+            auto out = MakeWork(connect_peer_manager);
+            out.AddFrame(chain_);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
         reset_registration_timer();
     }
 }
@@ -737,8 +717,7 @@ auto Actor::check_seeds() noexcept -> void
 
     for (auto& [host, seed] : seeds_) {
         if (seed.RetryDNS(now)) {
-            log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
-                .Flush();
+            log_()(name_)(": resolving seed peer ")(host).Flush();
             pipeline_.Internal().SendFromThread([&]() {
                 auto out = MakeWork(WorkType::AsioResolve);
                 out.AddFrame(host.data(), host.size());
@@ -754,15 +733,12 @@ auto Actor::check_seeds() noexcept -> void
 auto Actor::do_shutdown() noexcept -> void
 {
     using enum network::otdht::NodeJob;
-    to_otdht_.SendDeferred(
-        [this] {
-            auto out = MakeWork(disconnect_peer_manager);
-            out.AddFrame(chain_);
+    to_otdht_.SendDeferred([this] {
+        auto out = MakeWork(disconnect_peer_manager);
+        out.AddFrame(chain_);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 
     dns_timer_.Cancel();
 
@@ -772,7 +748,7 @@ auto Actor::do_shutdown() noexcept -> void
 
     for (auto& [id, data] : peers_) {
         using enum WorkType;
-        data.socket_.SendDeferred(MakeWork(Shutdown), __FILE__, __LINE__);
+        data.socket_.SendDeferred(MakeWork(Shutdown));
     }
 
     me_.reset();
@@ -831,7 +807,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 {});
             listen(address, monotonic);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             continue;
         }
@@ -870,7 +846,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 {});
             listen(address, monotonic);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             continue;
         }
@@ -897,16 +873,14 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                     key);
 
                 if (addr.IsValid()) {
-                    log_(OT_PRETTY_CLASS())(name_)(
-                        ": added peer from hardcoded seed list: ")(
+                    log_()(name_)(": added peer from hardcoded seed list: ")(
                         addr.Display())
                         .Flush();
                     db_.AddOrUpdate(addr);
                     add_peer(addr, false);
                 }
             } else {
-                log_(OT_PRETTY_CLASS())(name_)(": resolving seed peer ")(host)
-                    .Flush();
+                log_()(name_)(": resolving seed peer ")(host).Flush();
                 pipeline_.Internal().SendFromThread([&]() {
                     auto out = MakeWork(WorkType::AsioResolve);
                     out.AddFrame(host.data(), host.size());
@@ -940,20 +914,19 @@ auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
 
         if (peer.IsValid()) {
             if (peer.Key() == selfKey) {
-                log(OT_PRETTY_CLASS())(name_)(": avoiding connection to self")
-                    .Flush();
+                log()(name_)(": avoiding connection to self").Flush();
                 exclude.emplace(peer.ID());
             } else if (
                 (zmq == peer.Type()) &&
                 (false == transports.contains(peer.Subtype()))) {
-                log(OT_PRETTY_CLASS())(name_)(
+                log()(name_)(
                     ": ignoring zmq peer due to unsupported transport ")(
                     print(peer.Subtype()))
                     .Flush();
                 exclude.emplace(peer.ID());
             } else {
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": attempting to connect to zmq peer ")(peer.Display())
+                log()(name_)(": attempting to connect to zmq peer ")(
+                    peer.Display())
                     .Flush();
 
                 return peer;
@@ -965,9 +938,7 @@ auto Actor::get_peer(bool zmqOnly, allocator_type monotonic) noexcept
     }
 
     if (0_uz == count) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": did not find a suitable zmq peer in database")
-            .Flush();
+        log()(name_)(": did not find a suitable zmq peer in database").Flush();
     }
 
     if (zmqOnly) { return {}; }
@@ -1020,8 +991,7 @@ auto Actor::listen(
     allocator_type monotonic) noexcept -> void
 {
     if (false == address.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("invalid address: ")(address.Display())
-            .Flush();
+        LogError()()("invalid address: ")(address.Display()).Flush();
 
         return;
     }
@@ -1040,8 +1010,7 @@ auto Actor::listen(
         case cjdns:
         case zmq:
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unsupported network type ")(
-                print(type))
+            LogError()()(name_)(": unsupported network type ")(print(type))
                 .Flush();
         }
     }
@@ -1079,34 +1048,30 @@ auto Actor::listen_tcp(const network::blockchain::Address& address) noexcept
             });
 
         if (accepted) {
-            log_(OT_PRETTY_CLASS())(name_)(
-                ": listening for incoming connections on ")(address.Display())
+            log_()(name_)(": listening for incoming connections on ")(
+                address.Display())
                 .Flush();
             external_addresses_.emplace(address);
-            to_peers_.SendDeferred(
-                [&] {
-                    using enum network::blockchain::PeerJob;
-                    auto out = MakeWork(gossip_address);
-                    const auto proto = [&] {
-                        auto p = proto::BlockchainPeerAddress{};
-                        address.Internal().Serialize(p);
+            to_peers_.SendDeferred([&] {
+                using enum network::blockchain::PeerJob;
+                auto out = MakeWork(gossip_address);
+                const auto proto = [&] {
+                    auto p = proto::BlockchainPeerAddress{};
+                    address.Internal().Serialize(p);
 
-                        return p;
-                    }();
-                    proto::write(proto, out.AppendBytes());
+                    return p;
+                }();
+                proto::write(proto, out.AppendBytes());
 
-                    return out;
-                }(),
-                __FILE__,
-                __LINE__);
+                return out;
+            }());
         } else {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unable to bind to ")(
-                address.Display())
+            LogError()()(name_)(": unable to bind to ")(address.Display())
                 .Flush();
             asio_listeners_.pop_back();
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -1252,7 +1217,7 @@ auto Actor::process_addlistener(
     allocator_type monotonic) noexcept -> void
 {
     const auto body = msg.Payload();
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     auto address = api_.Factory().InternalSession().BlockchainAddress(
         proto::Factory<proto::BlockchainPeerAddress>(body[1]));
@@ -1260,14 +1225,14 @@ auto Actor::process_addlistener(
     if (address.IsValid()) {
         listen(address, monotonic);
     } else {
-        LogError()(OT_PRETTY_CLASS())(name_)(": invalid address").Flush();
+        LogError()()(name_)(": invalid address").Flush();
     }
 }
 
 auto Actor::process_addpeer(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     auto address = api_.Factory().InternalSession().BlockchainAddress(
         proto::Factory<proto::BlockchainPeerAddress>(body[1]));
@@ -1275,20 +1240,20 @@ auto Actor::process_addpeer(Message&& msg) noexcept -> void
     if (address.IsValid()) {
         add_peer(std::move(address), false);
     } else {
-        LogError()(OT_PRETTY_CLASS())(name_)(": invalid address").Flush();
+        LogError()()(name_)(": invalid address").Flush();
     }
 }
 
 auto Actor::process_broadcasttx(Message&& msg) noexcept -> void
 {
-    broadcast_tx_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    broadcast_tx_.SendDeferred(std::move(msg));
 }
 
 auto Actor::process_disconnect(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(2_uz < body.size());
+    assert_true(2_uz < body.size());
 
     process_disconnect(body[1].as<PeerID>(), body[2].Bytes());
 }
@@ -1297,7 +1262,7 @@ auto Actor::process_disconnect(PeerID id, std::string_view display) noexcept
     -> void
 {
     if (auto i = peers_.find(id); peers_.end() != i) {
-        log_(OT_PRETTY_CLASS())(name_)(": disconnecting peer ")(id);
+        log_()(name_)(": disconnecting peer ")(id);
         {
             auto& [address, socket, external, internal, _, transport, incoming] =
                 i->second;
@@ -1314,7 +1279,7 @@ auto Actor::process_disconnect(PeerID id, std::string_view display) noexcept
         broadcast_verified(display);
         broadcast_active();
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": peer ")(id)(" not found").Flush();
+        log_()(name_)(": peer ")(id)(" not found").Flush();
     }
 }
 
@@ -1335,22 +1300,20 @@ auto Actor::process_gossip_address(Message&& msg) noexcept -> void
             proto::Factory<proto::BlockchainPeerAddress>(frame));
 
         if (addr.IsValid()) {
-            log(OT_PRETTY_CLASS())(name_)(": adding ")(addr.Display())(" on ")(
+            log()(name_)(": adding ")(addr.Display())(" on ")(
                 print(addr.Type()))(" to list of external endpoints to gossip")
                 .Flush();
             external_addresses_.emplace(std::move(addr));
             message.AddFrame(std::move(frame));
             ++good;
         } else {
-            LogError()(OT_PRETTY_CLASS())(name_)(": ignoring invalid address")
-                .Flush();
+            LogError()()(name_)(": ignoring invalid address").Flush();
         }
     }
 
     if (0_uz < good) {
-        to_peers_.SendDeferred(std::move(message), __FILE__, __LINE__);
-        log(OT_PRETTY_CLASS())(name_)(": broadcasting ")(
-            good)(" external endpoints to peers")
+        to_peers_.SendDeferred(std::move(message));
+        log()(name_)(": broadcasting ")(good)(" external endpoints to peers")
             .Flush();
     }
 }
@@ -1373,7 +1336,7 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
     static constexpr auto success = std::byte{0x01};
     const auto body = msg.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     dns_.GotResponse();
     const auto query = CString{body[2].Bytes(), get_allocator()};
@@ -1401,8 +1364,8 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                         return ipv6;
                     }
                     default: {
-                        LogAbort()(OT_PRETTY_CLASS())(
-                            name_)(": invalid address size (")(size)(")")
+                        LogAbort()()(name_)(": invalid address size (")(
+                            size)(")")
                             .Abort();
                     }
                 }
@@ -1414,7 +1377,7 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                         if (host == query) { return pubkey; }
                     }
 
-                    OT_FAIL;
+                    LogAbort()().Abort();
                 }();
                 auto& seed = j->second;
                 seed.last_dns_query_.reset();
@@ -1429,8 +1392,8 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                     key);
 
                 if (addr.IsValid()) {
-                    log(OT_PRETTY_CLASS())(name_)(": resolved zmq seed ")(
-                        query)(":")(port)(" to ")(addr.Display())
+                    log()(name_)(": resolved zmq seed ")(query)(":")(
+                        port)(" to ")(addr.Display())
                         .Flush();
                     db_.AddOrUpdate(addr);
                     add_peer(addr, false);
@@ -1446,8 +1409,8 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
                     {});
 
                 if (addr.IsValid()) {
-                    log(OT_PRETTY_CLASS())(name_)(": resolved dns seed ")(
-                        query)(":")(port)(": to ")(addr.Display())
+                    log()(name_)(": resolved dns seed ")(query)(":")(
+                        port)(": to ")(addr.Display())
                         .Flush();
 
                     db_.AddOrUpdate(std::move(addr));
@@ -1455,10 +1418,10 @@ auto Actor::process_resolve(Message&& msg) noexcept -> void
             }
         }
     } else {
-        OT_ASSERT(4 < body.size());
+        assert_true(4 < body.size());
 
-        log(OT_PRETTY_CLASS())(name_)(": error while resolving ")(query)(":")(
-            port)(": ")(body[4].Bytes())
+        log()(name_)(": error while resolving ")(query)(":")(port)(": ")(
+            body[4].Bytes())
             .Flush();
     }
 }
@@ -1469,7 +1432,7 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
     if (database_is_ready_) {
         const auto payload = msg.Payload();
 
-        OT_ASSERT(3_uz < payload.size());
+        assert_true(3_uz < payload.size());
 
         const auto cookie = payload[1].Bytes();
         const auto subtype = payload[2].as<network::blockchain::Transport>();
@@ -1495,7 +1458,7 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
             std::move(msg).Envelope(),
             std::nullopt);
 
-        OT_ASSERT(invalid_peer_ != peer);
+        assert_true(invalid_peer_ != peer);
     } else {
         queue_.emplace_back(Work::spawn_peer, std::move(msg));
     }
@@ -1505,7 +1468,7 @@ auto Actor::process_verify(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(2_uz < body.size());
+    assert_true(2_uz < body.size());
 
     process_verify(body[1].as<PeerID>(), body[2].Bytes());
 }
@@ -1513,8 +1476,7 @@ auto Actor::process_verify(Message&& msg) noexcept -> void
 auto Actor::process_verify(PeerID id, std::string_view display) noexcept -> void
 {
     verified_.insert(active_.extract(id));
-    log_(OT_PRETTY_CLASS())(name_)(": peer ")(id)(" reached verified state")
-        .Flush();
+    log_()(name_)(": peer ")(id)(" reached verified state").Flush();
     broadcast_verified(display);
 }
 

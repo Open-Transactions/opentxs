@@ -10,12 +10,12 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -57,7 +57,7 @@ Secp256k1::Secp256k1(
          alloc)
     , self_(this)
 {
-    OT_ASSERT(false == plaintext_key_.empty());
+    assert_false(plaintext_key_.empty());
 }
 
 Secp256k1::Secp256k1(

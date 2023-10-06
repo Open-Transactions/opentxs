@@ -9,7 +9,6 @@
 
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -59,8 +58,8 @@ OTDHT::OTDHT(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node) noexcept
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();

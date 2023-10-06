@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -72,7 +71,7 @@ Contact::Contact(
     setup_listeners(api, listeners_);
     startup_ = std::make_unique<std::thread>(&Contact::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto Contact::check_type(const identity::wot::claim::SectionType type) noexcept
@@ -175,18 +174,18 @@ auto Contact::process_contact(const Message& message) noexcept -> void
 
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromProtobuf(id.Bytes());
 
-    OT_ASSERT(false == contactID.empty());
+    assert_false(contactID.empty());
 
     if (contactID != primary_id_) { return; }
 
     const auto contact = api_.Contacts().Contact(contactID);
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     process_contact(*contact);
 }
@@ -205,12 +204,10 @@ auto Contact::sort_key(const identity::wot::claim::SectionType type) noexcept
 
 auto Contact::startup() noexcept -> void
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Loading contact ")(
-        primary_id_, api_.Crypto())
-        .Flush();
+    LogVerbose()()("Loading contact ")(primary_id_, api_.Crypto()).Flush();
     const auto contact = api_.Contacts().Contact(primary_id_);
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     process_contact(*contact);
     finish_startup();

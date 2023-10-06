@@ -9,7 +9,6 @@
 
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/blockchain/node/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"
@@ -17,6 +16,7 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -58,7 +58,7 @@ FilterOracle::FilterOracle(
           filter))
     , shared_(*shared_p_)
 {
-    OT_ASSERT(shared_p_);
+    assert_false(nullptr == shared_p_);
 
     RunJob([shared = shared_p_] { shared->Init(); });
 }

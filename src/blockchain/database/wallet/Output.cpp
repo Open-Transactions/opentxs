@@ -34,7 +34,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -103,7 +102,7 @@ Output::Output(
                                         .BalanceOracleEndpoint()
                                         .data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -134,7 +133,7 @@ auto Output::AddConfirmedTransactions(
             cache,
             alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }
@@ -172,7 +171,7 @@ auto Output::AddMempoolTransaction(
             cache,
             alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }
@@ -193,8 +192,8 @@ auto Output::add_transactions(
     auto tx = lmdb_.TransactionRW();
 
     for (auto& [block, blockMatches] : transactions) {
-        log(OT_PRETTY_CLASS())("processing block ")(block)(" with ")(
-            blockMatches.size())(" transactions ")
+        log()("processing block ")(block)(" with ")(blockMatches.size())(
+            " transactions ")
             .Flush();
         try {
             add_transactions_in_block(
@@ -309,13 +308,13 @@ auto Output::AdvanceTo(
         if (pos == current) { return true; }
         if (pos.height_ < current.height_) { return true; }
 
-        OT_ASSERT(pos.height_ > start);
+        assert_true(pos.height_ > start);
 
         const auto firstMatureHeight = start - maturation_target_;
         const auto lastMatureHeight = pos.height_ - maturation_target_;
 
         if (0 > lastMatureHeight) {
-            log(OT_PRETTY_CLASS())("chain height of ")(pos.height_)(
+            log()("chain height of ")(pos.height_)(
                 " is too low to mature outputs ")
                 .Flush();
 
@@ -325,9 +324,8 @@ auto Output::AdvanceTo(
         const auto first = std::max<block::Height>(0, firstMatureHeight);
         // TODO allocator
         const auto matured = cache.GetMatured(first, lastMatureHeight, {});
-        log(OT_PRETTY_CLASS())("found ")(matured.size())(
-            " generation outputs between block ")(start)(" and block ")(
-            lastMatureHeight)
+        log()("found ")(matured.size())(" generation outputs between block ")(
+            start)(" and block ")(lastMatureHeight)
             .Flush();
         auto tx = lmdb_.TransactionRW();
 
@@ -336,8 +334,7 @@ auto Output::AdvanceTo(
             const auto& out = cache.GetOutput(outpoint);
 
             if (out.Internal().State() == state) {
-                log(OT_PRETTY_CLASS())("output ")(
-                    outpoint)(" already in state ")(print(state))
+                log()("output ")(outpoint)(" already in state ")(print(state))
                     .Flush();
                 continue;
             }
@@ -349,7 +346,7 @@ auto Output::AdvanceTo(
                     "failed to mature output: "s.append(e.what())};
             }
 
-            log(OT_PRETTY_CLASS())("matured output ")(
+            log()("matured output ")(
                 outpoint)(" due to best chain reaching block height ")(
                 pos.height_)
                 .Flush();
@@ -366,7 +363,7 @@ auto Output::AdvanceTo(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }
@@ -399,7 +396,7 @@ auto Output::CancelProposal(
 
         return transaction_success(tx);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }
@@ -468,7 +465,7 @@ auto Output::check_proposals(
 {
     const auto check = [&, this](const auto& proposal) {
         if (mempool) {
-            log(OT_PRETTY_CLASS())("output ")(
+            log()("output ")(
                 outpoint)(" will not be dissociated from proposal ")(
                 proposal, api_.Crypto())(" until the transaction is confirmed")
                 .Flush();
@@ -598,7 +595,7 @@ auto Output::FinalizeProposal(
     const block::Transaction& transaction,
     alloc::Strategy alloc) noexcept -> bool
 {
-    OT_ASSERT(false == transaction.asBitcoin().IsGeneration());
+    assert_false(transaction.asBitcoin().IsGeneration());
 
     const auto work = alloc.WorkOnly();
     auto& cache = this->cache();
@@ -680,7 +677,7 @@ auto Output::FinalizeProposal(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }
@@ -717,7 +714,7 @@ auto Output::FinalizeReorg(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         output = false;
 
         return fail_transaction();
@@ -1293,31 +1290,25 @@ auto Output::publish_balance(const OutputCache& cache) const noexcept -> void
     const auto total = get_balance(cache);
     const auto byNym = get_balances(cache);
     auto handle = to_balance_oracle_.lock();
-    handle->SendDeferred(
-        [&] {
+    handle->SendDeferred([&] {
+        auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
+        out.AddFrame(chain_);
+        out.AddFrame(total.first);
+        out.AddFrame(total.second);
+
+        return out;
+    }());
+
+    for (const auto& [nym, balance] : byNym) {
+        handle->SendDeferred([&]() {
             auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
             out.AddFrame(chain_);
-            out.AddFrame(total.first);
-            out.AddFrame(total.second);
+            out.AddFrame(balance.first);
+            out.AddFrame(balance.second);
+            out.AddFrame(nym);
 
             return out;
-        }(),
-        __FILE__,
-        __LINE__);
-
-    for (const auto& data : byNym) {
-        handle->SendDeferred(
-            [&](const auto& nym, const auto& balance) {
-                auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
-                out.AddFrame(chain_);
-                out.AddFrame(balance.first);
-                out.AddFrame(balance.second);
-                out.AddFrame(nym);
-
-                return out;
-            }(data.first, data.second),
-            __FILE__,
-            __LINE__);
+        }());
     }
 }
 
@@ -1363,8 +1354,7 @@ auto Output::ReserveUTXO(
     alloc::Strategy alloc) noexcept -> std::pair<std::optional<UTXO>, bool>
 {
     const auto& crypto = api_.Crypto();
-    log(OT_PRETTY_CLASS())("reserving outputs for proposal ")(proposal, crypto)
-        .Flush();
+    log()("reserving outputs for proposal ")(proposal, crypto).Flush();
     static const auto blank =
         std::make_pair(std::optional<UTXO>{std::nullopt}, false);
     auto output = blank;
@@ -1391,31 +1381,28 @@ auto Output::ReserveUTXO(
             }
         };
         const auto& confirmed = cache.GetState(ConfirmedNew);
-        log(OT_PRETTY_CLASS())(confirmed.size())(" confirmed outputs available")
-            .Flush();
+        log()(confirmed.size())(" confirmed outputs available").Flush();
         output = select(confirmed, std::nullopt);
         const auto spendUnconfirmed =
             policy.unconfirmed_incoming_ || policy.unconfirmed_change_;
 
         if ((!output.first.has_value()) && spendUnconfirmed) {
             const auto changeOnly = !policy.unconfirmed_incoming_;
-            log(OT_PRETTY_CLASS())("allowing selection of unconfirmed outputs");
+            log()("allowing selection of unconfirmed outputs");
 
             if (changeOnly) { log(", limited to change outputs only"); }
 
             log.Flush();
             const auto& unconfirmed = cache.GetState(UnconfirmedNew);
-            log(OT_PRETTY_CLASS())(unconfirmed.size())(
-                " unconfirmed outputs available")
-                .Flush();
+            log()(unconfirmed.size())(" unconfirmed outputs available").Flush();
             constexpr auto changeTag = std::make_optional(node::TxoTag::Change);
             const auto tag = changeOnly ? changeTag : std::nullopt;
             output = select(unconfirmed, tag);
         }
 
         if (output.first.has_value()) {
-            log(OT_PRETTY_CLASS())("reserved output ")(output.first->first)(
-                " for proposal ")(proposal, crypto)
+            log()("reserved output ")(output.first->first)(" for proposal ")(
+                proposal, crypto)
                 .Flush();
         } else {
             throw std::runtime_error{"No spendable outputs for specified nym"};
@@ -1425,7 +1412,7 @@ auto Output::ReserveUTXO(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         fail_transaction();
 
         return blank;
@@ -1451,7 +1438,7 @@ auto Output::ReserveUTXO(
 
         return utxo;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         fail_transaction();
 
         return std::nullopt;
@@ -1491,7 +1478,7 @@ auto Output::StartReorg(
     storage::lmdb::Transaction& tx,
     alloc::Strategy alloc) noexcept -> bool
 {
-    LogTrace()(OT_PRETTY_CLASS())("rolling back block ")(position).Flush();
+    LogTrace()()("rolling back block ")(position).Flush();
     const auto& api = api_.Crypto().Blockchain();
     auto& cache = this->cache();
 
@@ -1509,8 +1496,7 @@ auto Output::StartReorg(
 
             return out;
         }();
-        LogTrace()(OT_PRETTY_CLASS())(outpoints.size())(" affected outpoints")
-            .Flush();
+        LogTrace()()(outpoints.size())(" affected outpoints").Flush();
 
         for (const auto& id : outpoints) {
             auto& output = cache.GetOutput(id);
@@ -1546,7 +1532,7 @@ auto Output::StartReorg(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return fail_transaction();
     }

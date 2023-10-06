@@ -29,7 +29,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -173,8 +172,8 @@ auto Factory::id_from_base58(
                 return expectedType;
             } else {
                 if (type != expectedType) {
-                    log(OT_PRETTY_CLASS())("instantiating ")(print(type))(
-                        " identifier as ")(print(expectedType))
+                    log()("instantiating ")(print(type))(" identifier as ")(
+                        print(expectedType))
                         .Flush();
                 }
 
@@ -206,7 +205,7 @@ auto Factory::id_from_base58(
         return factory::Identifier(
             effectiveType, algo, hash, accountSubtype, std::move(alloc));
     } catch (const std::exception& e) {
-        log(OT_PRETTY_CLASS())(e.what()).Flush();
+        log()(e.what()).Flush();
 
         return factory::IdentifierInvalid(std::move(alloc));
     }
@@ -235,8 +234,8 @@ auto Factory::id_from_hash(
     if (const auto size = bytes.size(); size == expected) {
         out.Assign(bytes);
     } else {
-        LogError()(OT_PRETTY_CLASS())("expected ")(
-            bytes)(" bytes but supplied hash is ")(size)(" bytes")
+        LogError()()("expected ")(bytes)(" bytes but supplied hash is ")(
+            size)(" bytes")
             .Flush();
     }
 
@@ -274,7 +273,7 @@ auto Factory::id_from_preimage(
 
         return out;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return factory::IdentifierInvalid(alloc);
     }
@@ -300,7 +299,7 @@ auto Factory::id_from_preimage(
         return id_from_preimage<IDType>(
             type, serialized.Bytes(), std::move(alloc));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return factory::IdentifierInvalid(alloc);
     }
@@ -343,7 +342,7 @@ auto Factory::id_from_protobuf(
             deserialize_account_subtype(proto.account_subtype()),
             std::move(alloc));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return factory::IdentifierInvalid(std::move(alloc));
     }
@@ -375,7 +374,7 @@ auto Factory::id_from_random(
             throw std::runtime_error{"failed to reserve space for hash"};
         }
 
-        OT_ASSERT(out.size() == size);
+        assert_true(out.size() == size);
 
         if (false == crypto_.Util().RandomizeMemory(out.data(), out.size())) {
             throw std::runtime_error{"failed to randomize hash"};
@@ -383,7 +382,7 @@ auto Factory::id_from_random(
 
         return out;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -632,7 +631,7 @@ auto Factory::DataFromHex(ReadView input) const -> ByteArray
 
         return {IsHex, input};
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }

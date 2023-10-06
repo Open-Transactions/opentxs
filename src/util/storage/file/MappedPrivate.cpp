@@ -16,7 +16,6 @@
 #include <utility>
 
 #include "BoostIostreams.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/Thread.hpp"
@@ -107,7 +106,7 @@ auto MappedPrivate::Data::can_read(const Index& index) const noexcept -> bool
     const auto size = index.ItemSize();
 
     if (0_uz == size) {
-        LogTrace()(OT_PRETTY_CLASS())("empty index").Flush();
+        LogTrace()()("empty index").Flush();
 
         return false;
     }
@@ -118,8 +117,7 @@ auto MappedPrivate::Data::can_read(const Index& index) const noexcept -> bool
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("attempting to read past end of file")
-            .Flush();
+        LogError()()("attempting to read past end of file").Flush();
 
         return false;
     }
@@ -138,10 +136,10 @@ auto MappedPrivate::Data::create_or_load(FileCounter file) noexcept -> void
         using namespace boost::iostreams;
         using namespace std::filesystem;
 
-        LogTrace()(OT_PRETTY_CLASS())("initializing file ")(path).Flush();
+        LogTrace()()("initializing file ")(path).Flush();
 
         if (exists(path) && mapped_file_size() != file_size(path)) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect size for ")(path).Flush();
+            LogError()()("Incorrect size for ")(path).Flush();
             remove(path);
         }
 
@@ -157,7 +155,7 @@ auto MappedPrivate::Data::create_or_load(FileCounter file) noexcept -> void
 
         files_.emplace_back(path.string());
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -169,8 +167,7 @@ auto MappedPrivate::Data::Erase(
 
         return update_next_position(pos, tx);
     } else {
-        LogError()(OT_PRETTY_CLASS())("position ")(pos)(" is already deleted")
-            .Flush();
+        LogError()()("position ")(pos)(" is already deleted").Flush();
 
         return false;
     }
@@ -199,7 +196,7 @@ auto MappedPrivate::Data::init_position() noexcept -> void
         db_.Store(position_table_, tsv(position_key_), tsv(next_position_));
     }
 
-    OT_ASSERT(IsPageAligned(next_position_));
+    assert_true(IsPageAligned(next_position_));
 }
 
 auto MappedPrivate::Data::Read(
@@ -221,7 +218,7 @@ auto MappedPrivate::Data::Read(
         }
     }
 
-    OT_ASSERT(out.size() == indices.size());
+    assert_true(out.size() == indices.size());
 
     Mapped::preload(out);
 
@@ -233,7 +230,7 @@ auto MappedPrivate::Data::update_index(
     std::size_t bytes,
     Index& out) noexcept -> void
 {
-    OT_ASSERT(0_uz < bytes);
+    assert_true(0_uz < bytes);
 
     const auto position = [&] {
         const auto start = get_offset(next).first;
@@ -244,7 +241,7 @@ auto MappedPrivate::Data::update_index(
 
             return next;
         } else {
-            OT_ASSERT(end > start);
+            assert_true(end > start);
 
             return get_start_position(end);
         }
@@ -263,14 +260,14 @@ auto MappedPrivate::Data::update_next_position(
         db_.Store(position_table_, tsv(position_key_), tsv(effective), tx);
 
     if (false == result.first) {
-        LogError()(OT_PRETTY_CLASS())("Failed to next write position").Flush();
+        LogError()()("Failed to next write position").Flush();
 
         return false;
     }
 
     next_position_ = effective;
 
-    OT_ASSERT(IsPageAligned(next_position_));
+    assert_true(IsPageAligned(next_position_));
 
     return true;
 }
@@ -282,7 +279,7 @@ auto MappedPrivate::Data::Write(
     const auto count = items.size();
     using Output = WriteParam;
     auto out = Output{count, items.get_allocator()};
-    auto post = ScopeGuard{[&] { OT_ASSERT(out.size() == items.size()); }};
+    auto post = ScopeGuard{[&] { assert_true(out.size() == items.size()); }};
 
     if (items.empty()) { return out; }
 
@@ -306,8 +303,7 @@ auto MappedPrivate::Data::Write(
     }
 
     if (false == update_next_position(next, tx)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "failed to update next write position to database")
+        LogError()()("failed to update next write position to database")
             .Flush();
         out = Output{count, items.get_allocator()};
     }

@@ -25,7 +25,6 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -79,7 +78,7 @@ BlockchainImp::BlockchainImp(
         const auto listen =
             out->Start(api_.Endpoints().BlockchainTransactions().data());
 
-        OT_ASSERT(listen);
+        assert_true(listen);
 
         return out;
     }())
@@ -87,7 +86,7 @@ BlockchainImp::BlockchainImp(
         auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto listen = out->Start(key_generated_endpoint_);
 
-        OT_ASSERT(listen);
+        assert_true(listen);
 
         return out;
     }())
@@ -96,7 +95,7 @@ BlockchainImp::BlockchainImp(
         const auto listen =
             out->Start(api_.Endpoints().BlockchainScanProgress().data());
 
-        OT_ASSERT(listen);
+        assert_true(listen);
 
         return out;
     }())
@@ -113,7 +112,7 @@ auto BlockchainImp::ActivityDescription(
     auto data = proto::StorageThread{};
 
     if (false == api_.Storage().Internal().Load(nym, thread, data)) {
-        LogError()(OT_PRETTY_CLASS())("thread ")(thread, api_.Crypto())(
+        LogError()()("thread ")(thread, api_.Crypto())(
             " does not exist for nym ")(nym, api_.Crypto())
             .Flush();
 
@@ -129,9 +128,7 @@ auto BlockchainImp::ActivityDescription(
         const auto tx = LoadTransaction(txid, monotonic, monotonic);
 
         if (false == tx.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("failed to load transaction ")
-                .asHex(txid)
-                .Flush();
+            LogError()()("failed to load transaction ").asHex(txid).Flush();
 
             return {};
         }
@@ -139,7 +136,7 @@ auto BlockchainImp::ActivityDescription(
         return ActivityDescription(nym, chain, tx);
     }
 
-    LogError()(OT_PRETTY_CLASS())("item ")(itemID)(" not found ").Flush();
+    LogError()()("item ")(itemID)(" not found ").Flush();
 
     return {};
 }
@@ -214,8 +211,7 @@ auto BlockchainImp::AssignTransactionMemo(
     auto transaction = load_transaction(lock, id, proto, monotonic, monotonic);
 
     if (false == transaction.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("transaction ")(label)(" does not exist")
-            .Flush();
+        LogError()()("transaction ")(label)(" does not exist").Flush();
 
         return false;
     }
@@ -224,8 +220,7 @@ auto BlockchainImp::AssignTransactionMemo(
     const auto& db = api_.Network().Blockchain().Internal().Database();
 
     if (false == db.StoreTransaction(transaction)) {
-        LogError()(OT_PRETTY_CLASS())("failed to save updated transaction ")(id)
-            .Flush();
+        LogError()()("failed to save updated transaction ")(id).Flush();
 
         return false;
     }
@@ -284,7 +279,7 @@ auto BlockchainImp::IndexItem(const ReadView bytes) const noexcept
         bytes,
         preallocated(sizeof(output), &output));
 
-    OT_ASSERT(hashed);
+    assert_true(hashed);
 
     return output;
 }
@@ -435,16 +430,14 @@ auto BlockchainImp::ProcessTransactions(
                 parent_, chain, tx.Internal().asBitcoin(), log);
 
             if (false == db.StoreTransaction(old, proto)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "failed to save updated transaction ")(id.asHex())
+                LogError()()("failed to save updated transaction ")(id.asHex())
                     .Flush();
 
                 return false;
             }
         } else {
             if (false == db.StoreTransaction(tx, proto)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "failed to save new transaction ")(id.asHex())
+                LogError()()("failed to save new transaction ")(id.asHex())
                     .Flush();
 
                 return false;
@@ -455,8 +448,7 @@ auto BlockchainImp::ProcessTransactions(
         if (false ==
             db.AssociateTransaction(
                 id, tx.Internal().asBitcoin().IndexElements(api_, {}))) {
-            LogError()(OT_PRETTY_CLASS())(
-                "associate patterns for transaction ")(id.asHex())
+            LogError()()("associate patterns for transaction ")(id.asHex())
                 .Flush();
 
             return false;
@@ -505,8 +497,8 @@ auto BlockchainImp::ReportScan(
     const Blockchain::Subchain subchain,
     const opentxs::blockchain::block::Position& progress) const noexcept -> void
 {
-    OT_ASSERT(false == owner.empty());
-    OT_ASSERT(false == id.empty());
+    assert_false(owner.empty());
+    assert_false(id.empty());
 
     const auto hash = progress.hash_.Bytes();
     scan_updates_->Send([&] {
@@ -547,8 +539,7 @@ auto BlockchainImp::Unconfirm(
         const auto& db = api_.Network().Blockchain().Internal().Database();
 
         if (false == db.StoreTransaction(tx)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "failed to save updated transaction ")(txid.asHex())
+            LogError()()("failed to save updated transaction ")(txid.asHex())
                 .Flush();
 
             return false;

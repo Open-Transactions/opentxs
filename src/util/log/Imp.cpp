@@ -10,6 +10,7 @@
 #include <boost/system/error_code.hpp>
 #include <chrono>
 #include <compare>
+#include <cstddef>
 #include <cstdlib>
 #include <sstream>
 #include <utility>
@@ -76,23 +77,19 @@ auto Log::Imp::asHex(std::string_view in) const noexcept -> void
     buffer(to_hex(reinterpret_cast<const std::byte*>(in.data()), in.size()));
 }
 
-auto Log::Imp::Assert(
-    const char* file,
-    const std::size_t line,
-    const char* message) const noexcept -> void
+auto Log::Imp::Assert(const std::source_location& loc, std::string_view message)
+    const noexcept -> void
 {
-    const auto text = [&] {
-        auto out = std::stringstream{"OT ASSERT"};
+    Buffer(loc);
 
-        if (nullptr != file) { out << " in " << file << " line " << line; }
+    if (message.empty()) {
+        buffer("fatal error");
+    } else {
+        buffer(message);
+    }
 
-        if (nullptr != message) { out << ": " << message; }
-
-        out << "\n" << PrintStackTrace();
-
-        return out;
-    }();
-    buffer(text.str());
+    buffer("\n");
+    buffer(PrintStackTrace());
     Abort();
 }
 
@@ -229,6 +226,18 @@ auto Log::Imp::Buffer(const std::filesystem::path& in) const noexcept -> void
     buffer(in.string().c_str());
 }
 
+auto Log::Imp::Buffer(const std::source_location& loc) const noexcept -> void
+{
+    if (false == active()) { return; }
+
+    buffer(loc.function_name());
+    buffer(" in ");
+    buffer(loc.file_name());
+    buffer(": ");
+    buffer(std::to_string(loc.line()));
+    buffer(":\n * ");
+}
+
 auto Log::Imp::Buffer(const std::string_view in) const noexcept -> void
 {
     if (false == active()) { return; }
@@ -306,20 +315,17 @@ auto Log::Imp::send(const LogAction action, const Console console)
         auto& [buffer, socket] = *p;
 
         if (active() || terminate) {
-            socket.SendDeferred(
-                [&]() {
-                    auto message = network::zeromq::Message{};
-                    message.StartBody();
-                    message.AddFrame(level_);
-                    message.AddFrame(buffer.data(), buffer.size());
-                    message.AddFrame(id.data(), id.size());
-                    message.AddFrame(action);
-                    message.AddFrame(console);
+            socket.SendDeferred([&]() {
+                auto message = network::zeromq::Message{};
+                message.StartBody();
+                message.AddFrame(level_);
+                message.AddFrame(buffer.data(), buffer.size());
+                message.AddFrame(id.data(), id.size());
+                message.AddFrame(action);
+                message.AddFrame(console);
 
-                    return message;
-                }(),
-                __FILE__,
-                __LINE__);
+                return message;
+            }());
             buf.Reset(buffer);
         }
     }
@@ -327,23 +333,19 @@ auto Log::Imp::send(const LogAction action, const Console console)
     if (terminate) { wait_for_terminate(); }
 }
 
-auto Log::Imp::Trace(
-    const char* file,
-    const std::size_t line,
-    const char* message) const noexcept -> void
+auto Log::Imp::Trace(const std::source_location& loc, std::string_view message)
+    const noexcept -> void
 {
-    const auto text = [&] {
-        auto out = std::stringstream{"Stack trace requested"};
+    Buffer(loc);
 
-        if (nullptr != file) { out << " in " << file << " line " << line; }
+    if (message.empty()) {
+        buffer("stack trace requested");
+    } else {
+        buffer(message);
+    }
 
-        if (nullptr != message) { out << ": " << message; }
-
-        out << "\n" << PrintStackTrace();
-
-        return out;
-    }();
-    buffer(text.str());
+    buffer("\n");
+    buffer(PrintStackTrace());
     Flush();
 }
 

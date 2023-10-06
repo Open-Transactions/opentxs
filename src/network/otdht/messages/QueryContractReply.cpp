@@ -78,7 +78,7 @@ auto BlockchainSyncQueryContractReply(const identity::Nym& payload) noexcept
                    }())
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return BlockchainSyncQueryContractReply();
     }
@@ -105,7 +105,7 @@ auto BlockchainSyncQueryContractReply(const contract::Server& payload) noexcept
                    }())
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return BlockchainSyncQueryContractReply();
     }
@@ -131,7 +131,7 @@ auto BlockchainSyncQueryContractReply(const contract::Unit& payload) noexcept
                    }())
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return BlockchainSyncQueryContractReply();
     }

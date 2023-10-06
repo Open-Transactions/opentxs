@@ -22,7 +22,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
@@ -193,7 +192,7 @@ auto AddressVersion::Encode(
     switch (type) {
         case network::blockchain::Transport::ipv6:
         case network::blockchain::Transport::cjdns: {
-            OT_ASSERT(output.size() == bytes.size());
+            assert_true(output.size() == bytes.size());
 
             std::memcpy(output.data(), bytes.data(), output.size());
         } break;
@@ -201,7 +200,7 @@ auto AddressVersion::Encode(
             auto encoded{ipv4_prefix()};
             encoded += bytes;
 
-            OT_ASSERT(output.size() == encoded.size());
+            assert_true(output.size() == encoded.size());
 
             std::memcpy(output.data(), encoded.data(), output.size());
         } break;
@@ -209,7 +208,7 @@ auto AddressVersion::Encode(
             auto encoded{onion_prefix()};
             encoded += bytes;
 
-            OT_ASSERT(output.size() == encoded.size());
+            assert_true(output.size() == encoded.size());
 
             std::memcpy(output.data(), encoded.data(), output.size());
         } break;
@@ -217,7 +216,7 @@ auto AddressVersion::Encode(
         case network::blockchain::Transport::eep:
         case network::blockchain::Transport::zmq:
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 
@@ -344,7 +343,7 @@ auto Bip155::Serialize(WriteBuffer& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(": ")(e.what()).Flush();
+        LogError()()(": ")(e.what()).Flush();
 
         return false;
     }
@@ -391,7 +390,7 @@ auto Bip155::ToAddress(
                 false,
                 {});
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(": ")(e.what()).Flush();
+            LogError()()(": ")(e.what()).Flush();
 
             return {};
         }
@@ -531,7 +530,7 @@ auto SerializeCommand(const Command command) noexcept -> CommandField
     try {
         const auto string = print(command);
 
-        OT_ASSERT(output.size() >= string.size());
+        assert_true(output.size() >= string.size());
 
         std::memcpy(output.data(), string.data(), string.size());
     } catch (...) {
@@ -565,9 +564,7 @@ auto TranslateServices(
             }
         });
     } catch (const std::exception& e) {
-        LogAbort()("opentxs::network::blockchain::bitcoin::message::")(
-            __func__)(": ")(e.what())
-            .Abort();
+        LogAbort()()(e.what()).Abort();
     }
 
     return output;
@@ -692,7 +689,7 @@ FilterRequest::FilterRequest(
     static_assert(37 == sizeof(FilterRequest));
     static_assert(sizeof(std::uint32_t) == sizeof(start_));
 
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= start);
+    assert_true(std::numeric_limits<std::uint32_t>::max() >= start);
 
     if (stop.size() != stop_.size()) {
         throw std::runtime_error("Invalid stop hash");

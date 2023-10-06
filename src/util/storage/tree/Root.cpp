@@ -8,6 +8,7 @@
 #include <StorageRoot.pb.h>
 #include <functional>
 #include <memory>
+#include <source_location>
 #include <stdexcept>
 #include <utility>
 
@@ -16,7 +17,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/StorageRoot.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
@@ -38,7 +38,13 @@ Root::Root(
     const driver::Plugin& storage,
     const Hash& hash,
     std::atomic<Bucket>& bucket)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          current_version_)
     , current_bucket_(bucket)
     , sequence_(0)
     , gc_params_()
@@ -85,7 +91,7 @@ auto Root::CheckSequence(
 
         return proto.sequence();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Root))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -144,8 +150,8 @@ auto Root::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -159,7 +165,7 @@ auto Root::mutable_Trunk() -> Editor<tree::Trunk>
 
 auto Root::save(const Lock& lock) const -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     sequence_++;
     auto serialized = serialize(lock);
@@ -171,9 +177,8 @@ auto Root::save(const Lock& lock) const -> bool
 
 auto Root::save(tree::Trunk* tree, const Lock& lock) -> void
 {
-    OT_ASSERT(verify_write_lock(lock));
-
-    OT_ASSERT(nullptr != tree);
+    assert_true(verify_write_lock(lock));
+    assert_false(nullptr == tree);
 
     Lock treeLock(tree_lock_);
     tree_root_ = tree->root_;
@@ -181,7 +186,7 @@ auto Root::save(tree::Trunk* tree, const Lock& lock) -> void
 
     const bool saved = save(lock);
 
-    OT_ASSERT(saved);
+    assert_true(saved);
 }
 
 auto Root::Sequence() const -> std::uint64_t { return sequence_.load(); }
@@ -232,7 +237,7 @@ auto Root::trunk() const -> tree::Trunk*
         tree_.reset(new tree::Trunk(crypto_, factory_, plugin_, tree_root_));
     }
 
-    OT_ASSERT(tree_);
+    assert_false(nullptr == tree_);
 
     lock.unlock();
 

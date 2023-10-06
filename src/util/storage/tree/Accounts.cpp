@@ -11,6 +11,7 @@
 #include <StorageIDList.pb.h>
 #include <atomic>
 #include <memory>
+#include <source_location>
 #include <stdexcept>
 #include <utility>
 
@@ -19,7 +20,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageAccounts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -101,7 +101,13 @@ Accounts::Accounts(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), ACCOUNT_VERSION)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          ACCOUNT_VERSION)
 {
     if (is_valid(hash)) {
         init(hash);
@@ -188,15 +194,15 @@ auto Accounts::add_set_index(
         mapID = argID;
     } else {
         if (mapID != argID) {
-            LogError()(OT_PRETTY_STATIC(Accounts))("Provided index id (")(
-                argID, crypto)(") for account ")(accountID, crypto)(
+            LogError()()("Provided index id (")(argID, crypto)(
+                ") for account ")(accountID, crypto)(
                 " does not match existing index id ")(mapID, crypto)
                 .Flush();
 
             return false;
         }
 
-        OT_ASSERT(1 == index.at(argID).count(accountID));
+        assert_true(1 == index.at(argID).count(accountID));
     }
 
     return true;
@@ -218,42 +224,42 @@ auto Accounts::check_update_account(
     const UnitType unit) -> bool
 {
     if (accountID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account ID.").Flush();
+        LogError()()("Invalid account ID.").Flush();
 
         return false;
     }
 
     if (ownerNym.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid owner nym ID.").Flush();
+        LogError()()("Invalid owner nym ID.").Flush();
 
         return false;
     }
 
     if (signerNym.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signer nym ID.").Flush();
+        LogError()()("Invalid signer nym ID.").Flush();
 
         return false;
     }
 
     if (issuerNym.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid issuer nym ID.").Flush();
+        LogError()()("Invalid issuer nym ID.").Flush();
 
         return false;
     }
 
     if (server.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid server ID.").Flush();
+        LogError()()("Invalid server ID.").Flush();
 
         return false;
     }
 
     if (contract.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid unit ID.").Flush();
+        LogError()()("Invalid unit ID.").Flush();
 
         return false;
     }
 
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     auto& [mapOwner, mapSigner, mapIssuer, mapServer, mapContract, mapUnit] =
         get_account_data(lock, accountID);
@@ -317,7 +323,7 @@ auto Accounts::get_account_data(
     const Lock& lock,
     const identifier::Account& accountID) const -> Accounts::AccountData&
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     auto data = account_data_.find(accountID);
 
@@ -325,7 +331,7 @@ auto Accounts::get_account_data(
         auto [output, added] = account_data_.emplace(
             accountID, AccountData{{}, {}, {}, {}, {}, UnitType::Unknown});
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         return output->second;
     }
@@ -368,8 +374,8 @@ auto Accounts::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -385,8 +391,8 @@ auto Accounts::Load(
 auto Accounts::save(const Lock& lock) const -> bool
 {
     if (!verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
-        OT_FAIL;
+        LogError()()("Lock failure.").Flush();
+        LogAbort()().Abort();
     }
 
     auto serialized = serialize();

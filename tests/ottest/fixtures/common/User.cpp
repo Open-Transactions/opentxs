@@ -12,7 +12,6 @@
 #include <sstream>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
 
@@ -99,7 +98,7 @@ auto User::init_basic(
         Reason(),
         name_);
 
-    OT_ASSERT(nym_);
+    opentxs::assert_false(nullptr == nym_);
 
     nym_id_ = nym_->ID();
     payment_code_ =
@@ -174,14 +173,14 @@ auto User::init_custom(
 
 auto User::PaymentCode() const -> ot::PaymentCode
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     return api_->Factory().PaymentCodeFromBase58(payment_code_);
 }
 
 auto User::Reason() const noexcept -> ot::PasswordPrompt
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     return api_->Factory().PasswordPrompt(__func__);
 }
@@ -189,7 +188,7 @@ auto User::Reason() const noexcept -> ot::PasswordPrompt
 auto User::SetAccount(std::string_view type, std::string_view id) const noexcept
     -> bool
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     return SetAccount(type, api_->Factory().AccountIDFromBase58(id));
 }
@@ -197,7 +196,7 @@ auto User::SetAccount(std::string_view type, std::string_view id) const noexcept
 auto User::SetAccount(std::string_view type, const ot::identifier::Account& id)
     const noexcept -> bool
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     ot::Lock lock(lock_);
     const auto [it, added] = accounts_.emplace(type, id);
@@ -208,7 +207,7 @@ auto User::SetAccount(std::string_view type, const ot::identifier::Account& id)
 auto User::SetContact(std::string_view contact, std::string_view id)
     const noexcept -> bool
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     return SetContact(contact, api_->Factory().IdentifierFromBase58(id));
 }
@@ -217,7 +216,7 @@ auto User::SetContact(
     std::string_view contact,
     const ot::identifier::Generic& id) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     ot::Lock lock(lock_);
     const auto [it, added] = contacts_.emplace(contact, id);

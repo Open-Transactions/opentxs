@@ -9,12 +9,12 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -28,7 +28,7 @@ Data::Data(
         const auto rc =
             out.Connect(node->Internal().Endpoints().wallet_pull_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())

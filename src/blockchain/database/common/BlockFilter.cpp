@@ -20,7 +20,6 @@
 #include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
@@ -69,7 +68,7 @@ auto BlockFilter::HaveCfilter(
     try {
         return lmdb_.Exists(translate_filter(type), blockHash);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -82,7 +81,7 @@ auto BlockFilter::HaveCfheader(
     try {
         return lmdb_.Exists(translate_header(type), blockHash);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -131,7 +130,7 @@ auto BlockFilter::LoadCfilter(
 
         return results.front();
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return {alloc.result_};
     }
@@ -157,7 +156,7 @@ auto BlockFilter::LoadCfilters(
                 auto& index = out.emplace_back();
                 load_cfilter_index(type, hash.Bytes(), tx, index);
             } catch (const std::exception& e) {
-                LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogVerbose()()(e.what()).Flush();
                 out.pop_back();
 
                 break;
@@ -168,14 +167,14 @@ auto BlockFilter::LoadCfilters(
     }();
     const auto files = bulk_.Read(indices, alloc.work_);
 
-    OT_ASSERT(files.size() == indices.size());
+    assert_true(files.size() == indices.size());
 
     for (const auto& file : files) {
         try {
             output.emplace_back(factory::GCS(
                 api_, proto::Factory<proto::GCS>(file), alloc.result_));
         } catch (const std::exception& e) {
-            LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogVerbose()()(e.what()).Flush();
 
             break;
         }
@@ -209,7 +208,7 @@ auto BlockFilter::LoadCfilterHash(
     try {
         lmdb_.Load(translate_header(type), blockHash, cb);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;
@@ -235,7 +234,7 @@ auto BlockFilter::LoadCfheader(
     try {
         lmdb_.Load(translate_header(type), blockHash, cb);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;
@@ -295,8 +294,7 @@ auto BlockFilter::parse(
 
         const auto& size = sizes.emplace_back(proto.ByteSizeLong());
 
-        LogInsane()(OT_PRETTY_STATIC(BlockFilter))(
-            "serialized cfilter for block ")
+        LogInsane()()("serialized cfilter for block ")
             .asHex(hash)(" to ")(size)(" bytes")
             .Flush();
     }
@@ -313,12 +311,12 @@ auto BlockFilter::store(
         const auto& [hashes, protos, sizes] = parsed;
         const auto count = hashes.size();
 
-        OT_ASSERT(count == protos.size());
-        OT_ASSERT(count == sizes.size());
+        assert_true(count == protos.size());
+        assert_true(count == sizes.size());
 
         auto write = bulk_.Write(tx, sizes);
 
-        OT_ASSERT(count == write.size());
+        assert_true(count == write.size());
 
         // TODO monotonic allocator
         auto in = Vector<storage::file::SourceData>{};
@@ -339,7 +337,7 @@ auto BlockFilter::store(
                     "failed to get write position for cfilter"};
             }
 
-            OT_ASSERT(nullptr != proto);
+            assert_false(nullptr == proto);
 
             in.emplace_back(
                 [proto](auto&& writer) {
@@ -352,9 +350,8 @@ auto BlockFilter::store(
                 lmdb_.Store(translate_filter(type), hash, sIndex.Bytes(), tx);
 
             if (result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("saved ")(
-                    bytes)(" bytes at position ")(index.MemoryPosition())(
-                    " for cfilter ")
+                LogTrace()()("saved ")(bytes)(" bytes at position ")(
+                    index.MemoryPosition())(" for cfilter ")
                     .asHex(hash)
                     .Flush();
             } else {
@@ -371,7 +368,7 @@ auto BlockFilter::store(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -407,7 +404,7 @@ auto BlockFilter::store_cfheaders(
 
             if (false == stored.first) { return false; }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }
@@ -429,7 +426,7 @@ auto BlockFilter::StoreCfilters(
 
         return tx.Finalize(result);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -459,7 +456,7 @@ auto BlockFilter::StoreCfilters(
 
         return tx.Finalize(result);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

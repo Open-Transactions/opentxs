@@ -13,11 +13,11 @@
 #include <limits>
 #include <optional>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace be = boost::endian;
 
@@ -69,7 +69,7 @@ auto EncodeBip34(block::Height height) noexcept -> Space
 
         return out;
     } else {
-        OT_ASSERT(std::numeric_limits<std::int32_t>::max() >= height);
+        assert_true(std::numeric_limits<std::int32_t>::max() >= height);
 
         auto buf = be::little_int32_buf_t(static_cast<std::int32_t>(height));
         auto out = space(sizeof(buf) + 1u);

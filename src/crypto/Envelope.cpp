@@ -27,7 +27,6 @@
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -168,8 +167,8 @@ auto Envelope::attach_session_keys(
     const symmetric::Key& masterKey,
     const PasswordPrompt& reason) noexcept -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Recipient ")(nym.ID(), api_.Crypto())(
-        " has ")(nym.size())(" master credentials")
+    LogVerbose()()("Recipient ")(nym.ID(), api_.Crypto())(" has ")(nym.size())(
+        " master credentials")
         .Flush();
 
     for (const auto& authority : nym) {
@@ -181,9 +180,7 @@ auto Envelope::attach_session_keys(
             authority, type, reason, tag, password);
 
         if (false == haveTag) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to calculate session password")
-                .Flush();
+            LogError()()("Failed to calculate session password").Flush();
 
             return false;
         }
@@ -193,7 +190,7 @@ auto Envelope::attach_session_keys(
         const auto locked = key.ChangePassword(password, previousPassword);
 
         if (false == locked) {
-            LogError()(OT_PRETTY_CLASS())("Failed to lock session key").Flush();
+            LogError()()("Failed to lock session key").Flush();
 
             return false;
         }
@@ -212,8 +209,7 @@ auto Envelope::calculate_requirements(
         const auto& targets = output.emplace_back(nym->EncryptionTargets());
 
         if (targets.second.empty()) {
-            LogError()(OT_PRETTY_STATIC(Envelope))("Invalid recipient nym ")(
-                nym->ID(), api.Crypto())
+            LogError()()("Invalid recipient nym ")(nym->ID(), api.Crypto())
                 .Flush();
 
             throw std::runtime_error("Invalid recipient nym");
@@ -305,11 +301,11 @@ auto Envelope::get_dh_key(
     if (crypto::asymmetric::Algorithm::Legacy != type) {
         const auto& set = dh_keys_.at(type);
 
-        OT_ASSERT(1 == set.size());
+        assert_true(1 == set.size());
 
         return *set.cbegin();
     } else {
-        OT_ASSERT(
+        assert_true(
             api::crypto::HaveSupport(crypto::asymmetric::Algorithm::Legacy));
 
         auto params = Parameters{api_.Factory(), type};
@@ -319,9 +315,9 @@ auto Envelope::get_dh_key(
             crypto::asymmetric::Role::Encrypt, params, reason));
         const auto& key = *set.crbegin();
 
-        OT_ASSERT(key.Type() == type);
-        OT_ASSERT(key.Role() == crypto::asymmetric::Role::Encrypt);
-        OT_ASSERT(0 < key.Internal().Params().size());
+        assert_true(key.Type() == type);
+        assert_true(key.Role() == crypto::asymmetric::Role::Encrypt);
+        assert_true(0 < key.Internal().Params().size());
 
         return key;
     }
@@ -333,7 +329,7 @@ auto Envelope::Open(
     const PasswordPrompt& reason) const noexcept -> bool
 {
     if (false == bool(ciphertext_)) {
-        LogError()(OT_PRETTY_CLASS())("Nothing to decrypt").Flush();
+        LogError()()("Nothing to decrypt").Flush();
 
         return false;
     }
@@ -348,7 +344,7 @@ auto Envelope::Open(
         return key.Internal().Decrypt(
             ciphertext, std::move(plaintext), password);
     } catch (...) {
-        LogVerbose()(OT_PRETTY_CLASS())("No session keys for this nym").Flush();
+        LogVerbose()()("No session keys for this nym").Flush();
 
         return false;
     }
@@ -403,7 +399,7 @@ auto Envelope::Seal(
     auto nyms = Nyms{};
 
     for (const auto& nym : recipients) {
-        OT_ASSERT(nym);
+        assert_false(nullptr == nym);
 
         nyms.emplace_back(nym.get());
     }
@@ -446,34 +442,28 @@ auto Envelope::seal(
     };
 
     if (ciphertext_) {
-        LogError()(OT_PRETTY_CLASS())("Envelope has already been sealed")
-            .Flush();
+        LogError()()("Envelope has already been sealed").Flush();
 
         return false;
     }
 
     if (0 == recipients.size()) {
-        LogVerbose()(OT_PRETTY_CLASS())("No recipients").Flush();
+        LogVerbose()()("No recipients").Flush();
 
         return false;
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(recipients.size())(" recipient(s)")
-            .Flush();
+        LogVerbose()()(recipients.size())(" recipient(s)").Flush();
     }
 
     auto solution = Solution{};
     const auto dhkeys = find_solution(api_, recipients, solution);
 
     if (0 == dhkeys.size()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "A recipient requires an unsupported key type")
-            .Flush();
+        LogError()()("A recipient requires an unsupported key type").Flush();
 
         return false;
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(dhkeys.size())(
-            " dhkeys will be created")
-            .Flush();
+        LogVerbose()()(dhkeys.size())(" dhkeys will be created").Flush();
     }
 
     auto cleanup = Cleanup(*this);
@@ -490,12 +480,12 @@ auto Envelope::seal(
                     reason));
                 const auto& key = *set.crbegin();
 
-                OT_ASSERT(key.Type() == type);
-                OT_ASSERT(
+                assert_true(key.Type() == type);
+                assert_true(
                     key.Role() == opentxs::crypto::asymmetric::Role::Encrypt);
             }
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Failed to generate DH key").Flush();
+            LogError()()("Failed to generate DH key").Flush();
 
             return false;
         }
@@ -506,13 +496,13 @@ auto Envelope::seal(
     auto masterKey = api_.Crypto().Symmetric().Key(password);
     ciphertext_ = std::make_unique<proto::Ciphertext>();
 
-    OT_ASSERT(ciphertext_);
+    assert_false(nullptr == ciphertext_);
 
     const auto encrypted =
         masterKey.Internal().Encrypt(plaintext, *ciphertext_, password, false);
 
     if (false == encrypted) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encrypt plaintext").Flush();
+        LogError()()("Failed to encrypt plaintext").Flush();
 
         return false;
     }

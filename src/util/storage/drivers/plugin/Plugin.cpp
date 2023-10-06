@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <variant>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
@@ -103,8 +102,8 @@ auto Plugin::check_revision(const Log& log, Results::value_type& in) noexcept
     if (false == is_valid(hash)) { return; }
 
     revision = tree::Root::CheckSequence(log, hash, driver);
-    log(OT_PRETTY_STATIC(Plugin))(driver.Description())(
-        " driver has root hash ")(hash)(" and revision ")(revision)
+    log()(driver.Description())(" driver has root hash ")(
+        hash)(" and revision ")(revision)
         .Flush();
 }
 
@@ -117,12 +116,11 @@ auto Plugin::DoGC(const tree::GCParams& params) noexcept -> bool
     const auto& log = LogTrace();
     const auto from = params.from_;
     const auto to = next(from);
-    log(OT_PRETTY_CLASS())("migrating all active objects from ")(print(from))(
-        " to ")(print(to))
+    log()("migrating all active objects from ")(print(from))(" to ")(print(to))
         .Flush();
 
     if (migrate(params.root_, from, to, nullptr, false)) {
-        log(OT_PRETTY_CLASS())("purging stale bucket ")(print(from)).Flush();
+        log()("purging stale bucket ")(print(from)).Flush();
 
         return EmptyBucket(from);
     } else {
@@ -160,13 +158,11 @@ auto Plugin::FindBestRoot() noexcept -> Hash
     const auto& log = LogTrace();
 
     if (drivers_.empty()) {
-        LogError()(OT_PRETTY_CLASS())(" no storage drivers instantiated")
-            .Flush();
+        LogError()()(" no storage drivers instantiated").Flush();
 
         return NullHash{};
     } else {
-        log(OT_PRETTY_CLASS())("searching ")(drivers_.size())(
-            " drivers for best root hash")
+        log()("searching ")(drivers_.size())(" drivers for best root hash")
             .Flush();
     }
 
@@ -176,11 +172,11 @@ auto Plugin::FindBestRoot() noexcept -> Hash
     const auto& bestDriver = *p;
 
     if (0u == bestRevision) {
-        log(OT_PRETTY_CLASS())("initializing empty database").Flush();
+        log()("initializing empty database").Flush();
 
         return NullHash{};
     } else {
-        log(OT_PRETTY_CLASS())(bestDriver.Description())(" at index ")(
+        log()(bestDriver.Description())(" at index ")(
             pos)(" has best root hash")
             .Flush();
     }
@@ -199,7 +195,7 @@ auto Plugin::FindBestRoot() noexcept -> Hash
         synchronize_drivers(bestHash, bucket);
     }
 
-    log(OT_PRETTY_CLASS())("best root hash is ")(bestHash).Flush();
+    log()("best root hash is ")(bestHash).Flush();
 
     return bestHash;
 }
@@ -218,13 +214,12 @@ auto Plugin::init(
         init_fs(plugin);
     }
 
-    OT_ASSERT(plugin);
+    assert_false(nullptr == plugin);
 }
 
 auto Plugin::init_memdb(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Initializing primary MemDB plugin.")
-        .Flush();
+    LogVerbose()()("Initializing primary MemDB plugin.").Flush();
     plugin = factory::StorageMemDB(crypto_, config_);
 }
 
@@ -237,14 +232,14 @@ auto Plugin::Init_Plugin() -> void
         init(config_.primary_plugin_, primary_driver_);
     }
 
-    OT_ASSERT(primary_driver_);
+    assert_false(nullptr == primary_driver_);
 
     // TODO init backup plugins
     drivers_.reserve(1_uz + backup_drivers_.size());
     drivers_.clear();
     drivers_.emplace_back(primary_driver_.get());
     const auto get_pointer = [](const auto& sp) {
-        OT_ASSERT(sp);
+        assert_false(nullptr == sp);
 
         return sp.get();
     };
@@ -297,19 +292,19 @@ auto Plugin::load(
 
                 return true;
             } else {
-                log(OT_PRETTY_CLASS())("key ")(key)(" not found by ")(
-                    driver->Description())(" driver")
+                log()("key ")(key)(" not found by ")(driver->Description())(
+                    " driver")
                     .Flush();
             }
         }
 
-        log(OT_PRETTY_CLASS())("key ")(key)(" not found by any driver").Flush();
+        log()("key ")(key)(" not found by any driver").Flush();
     } else {
         if (specifiedDriver->Load(log, key, order, value)) {
 
             return true;
         } else {
-            log(OT_PRETTY_CLASS())("key ")(key)(" not found by ")(
+            log()("key ")(key)(" not found by ")(
                 specifiedDriver->Description())(" driver")
                 .Flush();
         }
@@ -358,7 +353,7 @@ auto Plugin::migrate(
 
             return out;
         }();
-        log(OT_PRETTY_CLASS())("copying ")(hashes.size())(" objects").Flush();
+        log()("copying ")(hashes.size())(" objects").Flush();
 
         return migrate(
             hashes,
@@ -367,7 +362,7 @@ auto Plugin::migrate(
             driver,
             setRoot ? std::make_optional<Hash>(rootHash) : std::nullopt);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -436,7 +431,7 @@ auto Plugin::migrate(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -449,12 +444,12 @@ auto Plugin::migrate_primary(
     auto& old = primary_driver_;
     init(from, old);
 
-    OT_ASSERT(old);
+    assert_false(nullptr == old);
 
     std::unique_ptr<storage::Driver> newDriver{nullptr};
     init(to, newDriver);
 
-    OT_ASSERT(newDriver);
+    assert_false(nullptr == newDriver);
 
     const auto rootHash = old->LoadRoot();
     const auto fromBucket = [&] {
@@ -468,8 +463,7 @@ auto Plugin::migrate_primary(
         migrate(old->LoadRoot(), fromBucket, fromBucket, newDriver.get(), true);
 
     if (false == migrated) {
-        LogAbort()(OT_PRETTY_CLASS())("Failed to migrate from primary driver")
-            .Abort();
+        LogAbort()()("Failed to migrate from primary driver").Abort();
     }
 
     old.reset(newDriver.release());
@@ -485,11 +479,9 @@ auto Plugin::Primary() noexcept -> storage::Driver& { return *primary_driver_; }
 auto Plugin::Store(ReadView value, Hash& key) const noexcept -> bool
 {
     if (calculate_hash(value, key)) {
-        LogTrace()(OT_PRETTY_CLASS())("queueing hash ")(key)(" for next save")
-            .Flush();
+        LogTrace()()("queueing hash ")(key)(" for next save").Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to calculate hash for item")
-            .Flush();
+        LogError()()("failed to calculate hash for item").Flush();
 
         return false;
     }
@@ -501,9 +493,7 @@ auto Plugin::Store(ReadView value, Hash& key) const noexcept -> bool
 
 auto Plugin::StoreRoot(const Hash& hash) const noexcept -> bool
 {
-    LogTrace()(OT_PRETTY_CLASS())(
-        "committing queue and updating root hash to ")(hash)
-        .Flush();
+    LogTrace()()("committing queue and updating root hash to ")(hash).Flush();
     auto handle = write_.lock();
     auto& data = *handle;
     const auto write = [&] {
@@ -529,20 +519,20 @@ auto Plugin::synchronize(
 {
     if (hash == driver.LoadRoot()) { return; }
 
-    LogConsole()(OT_PRETTY_STATIC(Plugin))("synchronizing ")(
-        driver.Description())(" driver which is uninitialized or out of date")
+    LogConsole()()("synchronizing ")(driver.Description())(
+        " driver which is uninitialized or out of date")
         .Flush();
 
     const auto migrated =
         migrate(hash, bucket, bucket, std::addressof(driver), true);
 
     if (migrated) {
-        LogConsole()(OT_PRETTY_STATIC(Plugin))("successfully synchronised ")(
-            driver.Description())(" driver leaf nodes")
+        LogConsole()()("successfully synchronised ")(driver.Description())(
+            " driver leaf nodes")
             .Flush();
     } else {
-        LogError()(OT_PRETTY_STATIC(Plugin))("failed to synchronize ")(
-            driver.Description())(" driver leaf nodes")
+        LogError()()("failed to synchronize ")(driver.Description())(
+            " driver leaf nodes")
             .Flush();
     }
 }

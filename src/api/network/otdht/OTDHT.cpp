@@ -22,7 +22,6 @@
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -30,7 +29,6 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -74,7 +72,7 @@ OTDHT::OTDHT(
         const auto rc =
             out.Connect(endpoints.Internal().OTDHTNodePull().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -103,7 +101,7 @@ auto OTDHT::create_config(
     {
         auto rc = ::zmq_curve_keypair(bufPublic.data(), bufSecret.data());
 
-        OT_ASSERT(0 == rc);
+        assert_true(0 == rc);
     }
     const auto pubkey = std::string_view{bufPublic.data(), encoded_key_size_};
     const auto seckey = std::string_view{bufSecret.data(), encoded_key_size_};
@@ -119,7 +117,7 @@ auto OTDHT::create_config(
         const auto rc =
             api.Crypto().Encode().Z85Decode(pubkey, out.WriteInto());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }());
@@ -128,7 +126,7 @@ auto OTDHT::create_config(
         const auto rc =
             api.Crypto().Encode().Z85Decode(seckey, out.WriteInto());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }());
@@ -177,7 +175,7 @@ auto OTDHT::load_config(const api::Session& api) noexcept -> void
         legacy.AppendFile(out, base, "otdht.json");
         const auto rc = legacy.BuildFilePath(out);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }();
@@ -229,7 +227,7 @@ auto OTDHT::read_config(
                 {view.data(), view.size()},
                 preallocated(bufSecret.size(), bufSecret.data()));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         }
 
         {
@@ -241,7 +239,7 @@ auto OTDHT::read_config(
                 {view.data(), view.size()},
                 preallocated(bufPublic.size(), bufPublic.data()));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         }
 
         public_key_.set_value([&] {
@@ -249,7 +247,7 @@ auto OTDHT::read_config(
             const auto rc = api.Crypto().Encode().Z85Decode(
                 {bufPublic.data(), encoded_key_size_}, out.WriteInto());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }());
@@ -258,12 +256,12 @@ auto OTDHT::read_config(
             const auto rc = api.Crypto().Encode().Z85Decode(
                 {bufSecret.data(), encoded_key_size_}, out.WriteInto());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }());
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_STATIC(Data))(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -316,20 +314,16 @@ auto OTDHT::StartListener(
     std::string_view updateEndpoint,
     std::string_view publicUpdateEndpoint) const noexcept -> bool
 {
-    return to_node_.lock()->SendDeferred(
-        [&] {
-            using Job = opentxs::network::otdht::NodeJob;
-            auto out = MakeWork(Job::add_listener);
-            out.AddFrame(syncEndpoint.data(), syncEndpoint.size());
-            out.AddFrame(publicSyncEndpoint.data(), publicSyncEndpoint.size());
-            out.AddFrame(updateEndpoint.data(), updateEndpoint.size());
-            out.AddFrame(
-                publicUpdateEndpoint.data(), publicUpdateEndpoint.size());
+    return to_node_.lock()->SendDeferred([&] {
+        using Job = opentxs::network::otdht::NodeJob;
+        auto out = MakeWork(Job::add_listener);
+        out.AddFrame(syncEndpoint.data(), syncEndpoint.size());
+        out.AddFrame(publicSyncEndpoint.data(), publicSyncEndpoint.size());
+        out.AddFrame(updateEndpoint.data(), updateEndpoint.size());
+        out.AddFrame(publicUpdateEndpoint.data(), publicUpdateEndpoint.size());
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto OTDHT::write_config(
@@ -352,7 +346,7 @@ auto OTDHT::write_config(
 
         file.close();
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_STATIC(Data))(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 

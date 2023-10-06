@@ -9,7 +9,6 @@
 #include <stdexcept>
 
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -84,7 +83,7 @@ auto reader(const BlockLocation& in, alloc::Default monotonic) noexcept
         }
         auto operator()(const CachedBlock& block) noexcept -> ReadView
         {
-            OT_ASSERT(block);
+            assert_false(nullptr == block);
 
             return block->Bytes();
         }
@@ -116,7 +115,7 @@ auto serialize(const BlockLocation& bytes, Writer&& out) noexcept -> bool
 
                 return true;
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
 
                 return false;
             }
@@ -132,7 +131,7 @@ auto serialize(const BlockLocation& bytes, Writer&& out) noexcept -> bool
 
                 return true;
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
 
                 return false;
             }

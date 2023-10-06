@@ -36,7 +36,7 @@ auto BitcoinP2PHeaders(
             std::nullopt,
             move_construct<blockchain::block::Header>(headers, alloc));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

@@ -9,7 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -26,7 +25,7 @@ auto NodeIndex::Add(
     crypto::Subaccount* node) noexcept -> bool
 {
     if (nullptr == node) {
-        LogError()(OT_PRETTY_CLASS())("invalid subaccount").Flush();
+        LogError()()("invalid subaccount").Flush();
 
         return false;
     }
@@ -35,8 +34,7 @@ auto NodeIndex::Add(
     auto& map = *handle;
 
     if (map.contains(id)) {
-        LogError()(OT_PRETTY_CLASS())("subaccount ")(id, api)(" already exists")
-            .Flush();
+        LogError()()("subaccount ")(id, api)(" already exists").Flush();
 
         return false;
     }

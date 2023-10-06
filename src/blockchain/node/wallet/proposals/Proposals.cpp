@@ -8,10 +8,10 @@
 #include <utility>
 
 #include "blockchain/node/wallet/proposals/ProposalsPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Spend.hpp"             // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -22,7 +22,7 @@ Proposals::Proposals(
     const Type chain) noexcept
     : imp_(std::make_unique<ProposalsPrivate>(api, node, db, chain))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Proposals::Add(

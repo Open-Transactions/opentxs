@@ -12,10 +12,10 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/api/network/Factory.hpp"
 #include "internal/api/network/OTDHT.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Notary.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -47,8 +47,8 @@ Network::Network(
     , blockchain_(std::move(blockchain))
     , otdht_(factory::OTDHT(api, zmq, endpoints, *blockchain_))
 {
-    OT_ASSERT(blockchain_);
-    OT_ASSERT(otdht_);
+    assert_false(nullptr == blockchain_);
+    assert_false(nullptr == otdht_);
 }
 
 auto Network::Start(

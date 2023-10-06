@@ -30,7 +30,7 @@ auto SessionFactoryAPI(
 
         return std::make_unique<ReturnType>(api, parent);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }

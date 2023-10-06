@@ -12,7 +12,6 @@
 
 #include "api/network/blockchain/Blockchain.hpp"
 #include "internal/api/network/Blockchain.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -76,7 +75,7 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     auto Database() const noexcept
         -> const opentxs::blockchain::database::common::Database& override
     {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
     auto DeleteSyncServer([[maybe_unused]] const std::string_view endpoint)
         const noexcept -> bool override

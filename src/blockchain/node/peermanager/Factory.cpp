@@ -10,12 +10,12 @@
 
 #include "blockchain/node/peermanager/PeerManager.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -25,8 +25,8 @@ auto BlockchainPeerManager(
     blockchain::database::Peer& db,
     std::string_view peers) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
@@ -35,7 +35,7 @@ auto BlockchainPeerManager(
     auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc}, api, node, db, peers, batchID);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

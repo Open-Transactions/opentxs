@@ -12,7 +12,6 @@
 
 #include "crypto/parameters/Imp.hpp"
 #include "internal/crypto/Parameters.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/ParameterType.hpp"         // IWYU pragma: keep
@@ -24,6 +23,7 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::crypto
@@ -56,7 +56,7 @@ Parameters::Parameters(
     : imp_(std::make_unique<Imp>(factory, type, credential, source, pcVersion)
                .release())
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 Parameters::Parameters(
@@ -105,7 +105,7 @@ auto Parameters::operator=(const Parameters& rhs) noexcept -> Parameters&
 {
     auto temp = std::unique_ptr<Imp>(imp_);
 
-    OT_ASSERT(temp);
+    assert_false(nullptr == temp);
 
     imp_ = rhs.imp_->clone();
 

@@ -11,7 +11,6 @@
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -127,7 +126,7 @@ auto Token::reencrypt(
         ciphertext, plaintext.WriteInto(), oldPassword);
 
     if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decrypt ciphertext.").Flush();
+        LogError()()("Failed to decrypt ciphertext.").Flush();
 
         return false;
     }
@@ -140,7 +139,7 @@ auto Token::reencrypt(
         false);
 
     if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encrypt ciphertext.").Flush();
+        LogError()()("Failed to encrypt ciphertext.").Flush();
 
         return false;
     }

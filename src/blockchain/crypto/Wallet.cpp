@@ -10,7 +10,6 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -130,11 +129,11 @@ auto Wallet::get_or_create(Data& data, const identifier::Nym& id) const noexcept
     if (false == data.index_.contains(id)) {
         auto pTree = factory(id, {}, {});
 
-        OT_ASSERT(pTree);
+        assert_false(nullptr == pTree);
 
         const auto added = add(data, id, std::move(pTree));
 
-        OT_ASSERT(added);
+        assert_true(added);
     }
 
     return at(data, data.index_.at(id));

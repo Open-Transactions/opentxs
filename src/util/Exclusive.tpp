@@ -7,7 +7,6 @@
 
 #include "internal/util/Exclusive.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -34,7 +33,7 @@ Exclusive<C>::Exclusive(
     , success_{true}
     , callback_{callback}
 {
-    OT_ASSERT(lock_);
+    assert_false(nullptr == lock_);
 }
 
 template <class C>
@@ -100,7 +99,7 @@ auto Exclusive<C>::Abort() -> bool
 template <class C>
 auto Exclusive<C>::get() const -> const C&
 {
-    OT_ASSERT(*this);
+    assert_true(*this);
 
     return **p_;
 }
@@ -108,7 +107,7 @@ auto Exclusive<C>::get() const -> const C&
 template <class C>
 auto Exclusive<C>::get() -> C&
 {
-    OT_ASSERT(*this);
+    assert_true(*this);
 
     return **p_;
 }
@@ -118,9 +117,9 @@ auto Exclusive<C>::Release() -> bool
 {
     if (false == bool(*this)) { return false; }
 
-    OT_ASSERT(lock_);
-    OT_ASSERT(p_);
-    OT_ASSERT(*p_);
+    assert_false(nullptr == lock_);
+    assert_false(nullptr == p_);
+    assert_false(nullptr == *p_);
 
     save_(*p_, *lock_, success_);
 

@@ -11,7 +11,6 @@
 
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -47,7 +46,7 @@ Header::Header(
                 PayloadSizeField{shorten(payload)},
                 std::move(checksum)};
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }

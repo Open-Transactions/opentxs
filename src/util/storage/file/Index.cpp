@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -74,8 +73,7 @@ auto Index::Serialize(Writer&& destination) const noexcept -> bool
     auto dest = destination.Reserve(index_bytes_);
 
     if (false == dest.IsValid(index_bytes_)) {
-        LogError()(OT_PRETTY_CLASS())("insufficient space for serialization")
-            .Flush();
+        LogError()()("insufficient space for serialization").Flush();
 
         return false;
     }

@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -82,9 +81,9 @@ auto NymList::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -93,7 +92,7 @@ auto NymList::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -122,9 +121,9 @@ auto NymList::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -133,11 +132,11 @@ auto NymList::process_new_nym(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == nymID.empty());
+    assert_false(nymID.empty());
 
     load(std::move(nymID));
 }
@@ -147,11 +146,11 @@ auto NymList::process_nym_changed(Message&& in) noexcept -> void
     const auto& api = api_;
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     auto nymID = api.Factory().NymIDFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == nymID.empty());
+    assert_false(nymID.empty());
 
     if (false == api.Wallet().IsLocalNym(nymID)) { return; }
 

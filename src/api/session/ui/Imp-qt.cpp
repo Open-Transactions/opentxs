@@ -12,7 +12,6 @@
 
 #include "internal/interface/qt/Factory.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/interface/qt/BlockchainStatistics.hpp"
 #include "opentxs/interface/qt/SeedValidator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::session::ui
 {
@@ -92,7 +92,7 @@ auto ImpQt::AccountActivityQt(
                      opentxs::factory::AccountActivityQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -113,7 +113,7 @@ auto ImpQt::AccountListQt(const identifier::Nym& nymID, const SimpleCallback cb)
                      opentxs::factory::AccountListQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -136,7 +136,7 @@ auto ImpQt::AccountSummaryQt(
                      opentxs::factory::AccountSummaryQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -157,7 +157,7 @@ auto ImpQt::AccountTreeQt(const identifier::Nym& nymID, const SimpleCallback cb)
                      opentxs::factory::AccountTreeQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -179,7 +179,7 @@ auto ImpQt::ActivitySummaryQt(
                      opentxs::factory::ActivitySummaryQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -209,7 +209,7 @@ auto ImpQt::BlockchainAccountStatusQt(
                      opentxs::factory::BlockchainAccountStatusQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -232,7 +232,7 @@ auto ImpQt::BlockchainSelectionQt(
                          *native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -249,7 +249,7 @@ auto ImpQt::BlockchainStatisticsQt(const SimpleCallback cb) const noexcept
             opentxs::factory::BlockchainStatisticsQtModel(*native);
     }
 
-    OT_ASSERT(blockchain_statistics_qt_);
+    assert_false(nullptr == blockchain_statistics_qt_);
 
     return blockchain_statistics_qt_.get();
 }
@@ -269,7 +269,7 @@ auto ImpQt::ContactQt(
                      std::move(key), opentxs::factory::ContactQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -292,7 +292,7 @@ auto ImpQt::contact_activity_qt(
                      opentxs::factory::ContactActivityQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -323,7 +323,7 @@ auto ImpQt::ContactActivityQtFilterable(
         auto* parent = contact_activity_qt(lock, nymID, threadID, cb);
         opentxs::ui::claim_ownership(parent);
 
-        OT_ASSERT(nullptr != parent);
+        assert_false(nullptr == parent);
 
         it = map.emplace(
                     std::move(key),
@@ -331,7 +331,7 @@ auto ImpQt::ContactActivityQtFilterable(
                         *parent))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     auto* out = it->second.get();
@@ -355,7 +355,7 @@ auto ImpQt::ContactListQt(const identifier::Nym& nymID, const SimpleCallback cb)
                      opentxs::factory::ContactListQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -377,7 +377,7 @@ auto ImpQt::MessagableListQt(
                      opentxs::factory::MessagableListQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -391,7 +391,7 @@ auto ImpQt::NymListQt(const SimpleCallback cb) const noexcept
     if (!nym_list_qt_) {
         nym_list_qt_ = opentxs::factory::NymListQtModel(nym_list(lock, cb));
 
-        OT_ASSERT(nym_list_qt_);
+        assert_false(nullptr == nym_list_qt_);
     }
 
     return nym_list_qt_.get();
@@ -414,7 +414,7 @@ auto ImpQt::PayableListQt(
                      opentxs::factory::PayableListQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -434,7 +434,7 @@ auto ImpQt::ProfileQt(const identifier::Nym& nymID, const SimpleCallback cb)
                      std::move(key), opentxs::factory::ProfileQtModel(*native))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();
@@ -448,7 +448,7 @@ auto ImpQt::SeedListQt(const SimpleCallback cb) const noexcept
     if (!seed_list_qt_) {
         seed_list_qt_ = opentxs::factory::SeedListQtModel(seed_list(lock, cb));
 
-        OT_ASSERT(seed_list_qt_);
+        assert_false(nullptr == seed_list_qt_);
     }
 
     return seed_list_qt_.get();
@@ -462,7 +462,7 @@ auto ImpQt::SeedTreeQt(const SimpleCallback cb) const noexcept
     if (!seed_tree_qt_) {
         seed_tree_qt_ = opentxs::factory::SeedTreeQtModel(seed_tree(lock, cb));
 
-        OT_ASSERT(seed_tree_qt_);
+        assert_false(nullptr == seed_tree_qt_);
     }
 
     return seed_tree_qt_.get();
@@ -525,7 +525,7 @@ auto ImpQt::UnitListQt(const identifier::Nym& nymID, const SimpleCallback cb)
                          *unit_list(lock, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second.get();

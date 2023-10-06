@@ -15,7 +15,6 @@
 #include "2_Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/verification/Set.hpp"
 #include "opentxs/util/Log.hpp"
@@ -34,8 +33,7 @@ auto Factory::VerificationSet(
 
         return new ReturnType(api, nym, version);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -55,8 +53,7 @@ auto Factory::VerificationSet(
 
         return new ReturnType(api, nym, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -131,7 +128,7 @@ auto Set::AddItem(
     const Time end,
     const VersionNumber version) noexcept -> bool
 {
-    OT_ASSERT(internal_);
+    assert_false(nullptr == internal_);
 
     return internal_->AddItem(
         claimOwner, claim, signer, reason, value, start, end, version);
@@ -141,7 +138,7 @@ auto Set::AddItem(
     const identifier::Nym& verifier,
     const internal::Item::SerializedType verification) noexcept -> bool
 {
-    OT_ASSERT(external_);
+    assert_false(nullptr == external_);
 
     return external_->AddItem(verifier, verification);
 }
@@ -154,7 +151,7 @@ auto Set::DeleteItem(const identifier::Generic& item) noexcept -> bool
 
     auto* pGroup = (it->second ? external_ : internal_).get();
 
-    OT_ASSERT(pGroup);
+    assert_true(pGroup);
 
     auto& group = *pGroup;
 
@@ -205,9 +202,7 @@ auto Set::UpgradeGroupVersion(const VersionNumber groupVersion) noexcept -> bool
                 proto::VerificationSetAllowedGroup().at(nymVersion);
 
             if (groupVersion < min) {
-                LogError()(OT_PRETTY_CLASS())("Version ")(
-                    groupVersion)(" too old")
-                    .Flush();
+                LogError()()("Version ")(groupVersion)(" too old").Flush();
 
                 return false;
             }
@@ -220,8 +215,7 @@ auto Set::UpgradeGroupVersion(const VersionNumber groupVersion) noexcept -> bool
             }
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("No support for version ")(
-            groupVersion)(" groups")
+        LogError()()("No support for version ")(groupVersion)(" groups")
             .Flush();
 
         return false;

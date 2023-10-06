@@ -10,10 +10,10 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "interface/ui/contactactivity/ContactActivityItem.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -59,8 +59,8 @@ PendingSend::PendingSend(
     , display_amount_(std::move(display))
     , memo_(std::move(memo))
 {
-    OT_ASSERT(false == nym_id_.empty());
-    OT_ASSERT(false == item_id_.empty());
+    assert_false(nym_id_.empty());
+    assert_false(item_id_.empty());
 }
 
 auto PendingSend::Amount() const noexcept -> opentxs::Amount

@@ -18,8 +18,8 @@
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -104,8 +104,8 @@ Frame::Imp::Imp(const void* data, std::size_t size) noexcept
 {
     const auto init = ::zmq_msg_init_size(&message_, size);
 
-    OT_ASSERT(0 == init);
-    OT_ASSERT(size <= std::numeric_limits<int>::max());
+    assert_true(0 == init);
+    assert_true(size <= std::numeric_limits<int>::max());
 
     if ((0u < size) && (nullptr != data)) {
         std::memcpy(::zmq_msg_data(&message_), data, size);
@@ -164,7 +164,7 @@ namespace opentxs::network::zeromq
 Frame::Frame(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Frame::Frame() noexcept

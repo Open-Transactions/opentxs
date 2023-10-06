@@ -10,7 +10,6 @@
 #include <stdexcept>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric::key::implementation
@@ -104,7 +104,7 @@ auto RSA::deserialize_key(
     if (proto.has_encryptedkey()) {
         output = std::make_unique<proto::Ciphertext>(proto.encryptedkey());
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
     }
 
     return output;

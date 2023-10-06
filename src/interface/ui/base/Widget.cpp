@@ -25,9 +25,7 @@ auto verify_empty(const CustomData& custom) noexcept -> bool
         ++counter;
 
         if (nullptr != ptr) {
-            LogError()("opentxs::ui::implementation::")(__func__)(
-                ": unused pointer at index ")(counter)
-                .Flush();
+            LogError()()("unused pointer at index ")(counter).Flush();
 
             return false;
         }
@@ -76,7 +74,7 @@ auto Widget::setup_listeners(
                 nextCallback.get(), "Widget"));
         const auto listening = socket->Start(endpoint);
 
-        OT_ASSERT(listening);
+        assert_true(listening);
     }
 }
 

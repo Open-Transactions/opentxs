@@ -24,7 +24,6 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -112,8 +111,7 @@ auto DeterministicStateData::flush_cache(
             alloc);
 
         if (false == updated) {
-            LogError()(OT_PRETTY_CLASS())(
-                name_)(": initiating rescan due to database error")
+            LogError()()(name_)(": initiating rescan due to database error")
                 .Flush();
             matches.clear();
 
@@ -124,7 +122,7 @@ auto DeterministicStateData::flush_cache(
 
         if (cb) { cb(positions); }
     } else {
-        log(OT_PRETTY_CLASS())(name_)(" no cached transactions").Flush();
+        log()(name_)(" no cached transactions").Flush();
     }
 
     return true;
@@ -143,13 +141,13 @@ auto DeterministicStateData::handle_block_matches(
     block::Block& block,
     allocator_type monotonic) const noexcept -> void
 {
-    OT_ASSERT(position.hash_ == block.ID());
+    assert_true(position.hash_ == block.ID());
 
     block.Internal().SetMinedPosition(position.height_);
     auto alloc = alloc::Strategy{get_allocator(), monotonic};
     auto confirmed = block.Internal().ConfirmMatches(
         log, api_.Crypto().Blockchain(), mined, alloc);
-    log(OT_PRETTY_CLASS())(name_)(" adding ")(confirmed.size())(
+    log()(name_)(" adding ")(confirmed.size())(
         " confirmed transaction(s) to cache")
         .Flush();
     cache_.modify([this, &log, position, incoming = std::move(confirmed)](
@@ -159,7 +157,7 @@ auto DeterministicStateData::handle_block_matches(
         try {
             merge(log, position, incoming, existing);
         } catch (const std::exception& e) {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+            LogAbort()()(name_)(": ")(e.what()).Abort();
         }
     });
 }
@@ -169,7 +167,7 @@ auto DeterministicStateData::handle_mempool_match(
     block::Transaction in,
     allocator_type monotonic) const noexcept -> void
 {
-    OT_ASSERT(in.IsValid());
+    assert_true(in.IsValid());
 
     const auto& log = log_;
     auto alloc = alloc::Strategy{get_allocator(), monotonic};
@@ -182,17 +180,17 @@ auto DeterministicStateData::handle_mempool_match(
     auto& match = matches.begin()->second;
     auto& [inputs, outputs, tx] = match;
 
-    OT_ASSERT(tx.IsValid());
+    assert_true(tx.IsValid());
 
     auto txoCreated = TXOs{alloc.result_};
     auto updated = db_.AddMempoolTransaction(
         log_, id_, subchain_, std::move(match), txoCreated, alloc);
 
-    OT_ASSERT(updated);  // TODO handle database errors
+    assert_true(updated);  // TODO handle database errors
 
     element_cache_.lock()->Add(std::move(txoCreated));
-    log(OT_PRETTY_CLASS())(name_)(
-        " finished processing unconfirmed transaction ")(tx.ID().asHex())
+    log()(name_)(" finished processing unconfirmed transaction ")(
+        tx.ID().asHex())
         .Flush();
 }
 
@@ -203,14 +201,10 @@ auto DeterministicStateData::merge(
     database::BatchedMatches& into) const noexcept(false) -> void
 {
     if (auto i = into.find(block); into.end() == i) {
-        log(OT_PRETTY_CLASS())(name_)(" caching transactions for new block ")(
-            block)
-            .Flush();
+        log()(name_)(" caching transactions for new block ")(block).Flush();
         into.try_emplace(std::move(block), std::move(matches));
     } else {
-        log(OT_PRETTY_CLASS())(name_)(
-            " caching transactions for cached block ")(block)
-            .Flush();
+        log()(name_)(" caching transactions for cached block ")(block).Flush();
         merge(log, matches, i->second);
     }
 }
@@ -222,13 +216,10 @@ auto DeterministicStateData::merge(
 {
     for (auto& [txid, tx] : matches) {
         if (auto i = into.find(txid); into.end() == i) {
-            log(OT_PRETTY_CLASS())(name_)(" caching transaction ")
-                .asHex(txid)
-                .Flush();
+            log()(name_)(" caching transaction ").asHex(txid).Flush();
             into.try_emplace(txid, std::move(tx));
         } else {
-            log(OT_PRETTY_CLASS())(name_)(
-                " caching new indices for transaction ")
+            log()(name_)(" caching new indices for transaction ")
                 .asHex(txid)
                 .Flush();
             merge(log, tx, i->second);

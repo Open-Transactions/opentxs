@@ -27,7 +27,6 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -124,7 +123,7 @@ Seed::Seed(
         auto out = zmq.Internal().PublishSocket();
         const auto rc = out->Start(endpoints.SeedUpdated().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -258,7 +257,7 @@ auto Seed::Bip32Root(
 
         return entropy.asHex();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -360,7 +359,7 @@ auto Seed::GetOrCreateDefaultSeed(
 
         return seed.Entropy();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return factory_.Secret(0);
     }
@@ -377,9 +376,7 @@ auto Seed::GetPaymentCode(
     auto seed = GetSeed(fingerprint, notUsed, reason);
 
     if (seed.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid seed: ")(
-            fingerprint, api_.Crypto())
-            .Flush();
+        LogError()()("invalid seed: ")(fingerprint, api_.Crypto()).Flush();
 
         return {};
     }
@@ -393,7 +390,7 @@ auto Seed::GetPaymentCode(
         reason);
 
     if (false == key.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("key derivation failed").Flush();
+        LogError()()("key derivation failed").Flush();
 
         return {};
     }
@@ -453,7 +450,7 @@ auto Seed::GetStorageKey(
         reason);
 
     if (false == key.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive storage key.").Flush();
+        LogError()()("Failed to derive storage key.").Flush();
 
         return {};
     }
@@ -474,8 +471,7 @@ auto Seed::GetSeed(
 
         return seed.Entropy();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what())(" for ")(seedID, api_.Crypto())
-            .Flush();
+        LogError()()(e.what())(" for ")(seedID, api_.Crypto()).Flush();
 
         return factory_.Secret(0);
     }
@@ -491,8 +487,7 @@ auto Seed::GetSeed(
 
         return get_seed(lock, id, reason);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what())(" for ")(id, api_.Crypto())
-            .Flush();
+        LogError()()(e.what())(" for ")(id, api_.Crypto()).Flush();
 
         return std::make_unique<opentxs::crypto::Seed::Imp>(api_).release();
     }
@@ -518,7 +513,7 @@ auto Seed::get_seed(
         api_, bip39_, symmetric_, factory_, storage_, proto, reason);
     const auto& id = seed.ID();
 
-    OT_ASSERT(id == seedID);
+    assert_true(id == seedID);
 
     const auto [it, added] = seeds_.try_emplace(id, std::move(seed));
 
@@ -552,7 +547,7 @@ auto Seed::ImportRaw(
                 created,
                 reason));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -574,7 +569,7 @@ auto Seed::ImportSeed(
         case opentxs::crypto::SeedStyle::Error:
         case opentxs::crypto::SeedStyle::BIP32:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported seed type").Flush();
+            LogError()()("Unsupported seed type").Flush();
 
             return {};
         }
@@ -600,7 +595,7 @@ auto Seed::ImportSeed(
                 created,
                 reason));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -657,7 +652,7 @@ auto Seed::new_seed(
         case opentxs::crypto::SeedStyle::BIP32:
         case opentxs::crypto::SeedStyle::PKT:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported seed type").Flush();
+            LogError()()("Unsupported seed type").Flush();
 
             return {};
         }
@@ -680,7 +675,7 @@ auto Seed::new_seed(
                 Clock::now(),
                 reason));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -712,7 +707,7 @@ auto Seed::Passphrase(
 
         return UnallocatedCString{seed.Phrase().Bytes()};
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -777,7 +772,7 @@ auto Seed::SeedDescription(const opentxs::crypto::SeedID& seedID) const noexcept
 auto Seed::SetDefault(const opentxs::crypto::SeedID& id) const noexcept -> bool
 {
     if (id.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid id").Flush();
+        LogError()()("Invalid id").Flush();
 
         return false;
     }
@@ -791,9 +786,7 @@ auto Seed::SetDefault(const opentxs::crypto::SeedID& id) const noexcept -> bool
     }();
 
     if (false == exists) {
-        LogError()(OT_PRETTY_CLASS())("Seed ")(id, api_.Crypto())(
-            " does not exist")
-            .Flush();
+        LogError()()("Seed ")(id, api_.Crypto())(" does not exist").Flush();
 
         return false;
     }
@@ -810,15 +803,15 @@ auto Seed::SetSeedComment(
     const std::string_view alias) const noexcept -> bool
 {
     if (api_.Storage().Internal().SetSeedAlias(id, alias)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Changed seed comment for ")(
-            id, api_.Crypto())(" to ")(alias)
+        LogVerbose()()("Changed seed comment for ")(id, api_.Crypto())(" to ")(
+            alias)
             .Flush();
         publish(id);
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to set seed comment for ")(
-            id, api_.Crypto())(" to ")(alias)
+        LogError()()("Failed to set seed comment for ")(id, api_.Crypto())(
+            " to ")(alias)
             .Flush();
 
         return false;
@@ -837,7 +830,7 @@ auto Seed::UpdateIndex(
 
         return seed.Internal().IncrementIndex(index);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -875,7 +868,7 @@ auto Seed::WordCount(
         case opentxs::crypto::SeedStyle::Error:
         case opentxs::crypto::SeedStyle::BIP32:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported seed type").Flush();
+            LogError()()("Unsupported seed type").Flush();
 
             return {};
         }
@@ -910,7 +903,7 @@ auto Seed::Words(
 
         return UnallocatedCString{seed.Words().Bytes()};
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }

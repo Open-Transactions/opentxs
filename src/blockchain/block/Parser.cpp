@@ -12,7 +12,6 @@
 #include "blockchain/protocol/bitcoin/base/block/parser/Parser.hpp"
 #include "blockchain/protocol/bitcoin/pkt/block/Parser.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
@@ -50,9 +49,7 @@ auto Parser::Check(
         case unknown_category:
         case balance_based:
         default: {
-            LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
-                print(type))
-                .Flush();
+            LogError()()("unsupported chain: ")(print(type)).Flush();
 
             return false;
         }
@@ -97,9 +94,7 @@ auto Parser::Construct(
         case unknown_category:
         case balance_based:
         default: {
-            LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
-                print(type))
-                .Flush();
+            LogError()()("unsupported chain: ")(print(type)).Flush();
 
             return false;
         }
@@ -150,7 +145,7 @@ auto Parser::Construct(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Parser))(": ")(e.what()).Flush();
+        LogError()()(": ")(e.what()).Flush();
 
         return false;
     }
@@ -176,9 +171,7 @@ auto Parser::Transaction(
         case unknown_category:
         case balance_based:
         default: {
-            LogError()(OT_PRETTY_STATIC(Parser))("unsupported chain: ")(
-                print(type))
-                .Flush();
+            LogError()()("unsupported chain: ")(print(type)).Flush();
 
             return false;
         }

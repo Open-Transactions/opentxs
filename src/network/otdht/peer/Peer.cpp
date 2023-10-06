@@ -11,7 +11,6 @@
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/peer/Actor.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -62,8 +61,8 @@ Peer::Peer(
     std::string_view toRemote,
     std::string_view fromNode) noexcept
     : actor_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(shared);
+        assert_false(nullptr == api);
+        assert_false(nullptr == shared);
 
         const auto& zmq = api->Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
@@ -78,7 +77,7 @@ Peer::Peer(
             batchID);
     }())
 {
-    OT_ASSERT(actor_);
+    assert_false(nullptr == actor_);
 }
 
 auto Peer::NextID(alloc::Default alloc) noexcept -> CString

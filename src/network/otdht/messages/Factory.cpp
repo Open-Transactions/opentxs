@@ -21,7 +21,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainHello.hpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -209,8 +208,7 @@ auto BlockchainSyncMessage(
                 } catch (const std::exception& e) {
                     // NOTE The remote peer might know about a newer blockchain
                     // type than what the local peer understands
-                    LogTrace()("opentxs::factory::")(__func__)(": ")(e.what())
-                        .Flush();
+                    LogTrace()()(e.what()).Flush();
 
                     continue;
                 }
@@ -302,14 +300,14 @@ auto BlockchainSyncMessage(
             case WorkType::P2PResponse:
             case WorkType::P2PPublishContract:
             case WorkType::P2PQueryContract: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
             default: {
                 throw std::runtime_error{"unsupported type"};
             }
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::make_unique<network::otdht::Base>();
     }

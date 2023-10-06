@@ -14,7 +14,6 @@
 #include <stdexcept>
 
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/CompactSize.hpp"
@@ -86,7 +85,7 @@ auto DecodeCompactSize(
 
                 return convert_to_size(effective->Value());
             } catch (const std::exception& e) {
-                LogTrace()(__func__)(": ")(e.what()).Flush();
+                LogTrace()()("")(e.what()).Flush();
                 // NOTE an exception can occur if decoding a CompactSize on a 32
                 // bit platform because it might not be possible to represent
                 // the value as a std::size_t. It is still possible to obtain
@@ -187,7 +186,7 @@ auto CompactSize::Imp::convert_from_raw(ReadView bytes) noexcept -> void
 template <typename SizeType>
 auto CompactSize::Imp::convert_to_raw(Writer&& output) const noexcept -> bool
 {
-    OT_ASSERT(std::numeric_limits<SizeType>::max() >= data_);
+    assert_true(std::numeric_limits<SizeType>::max() >= data_);
 
     auto value{static_cast<SizeType>(data_)};
     be::native_to_little_inplace(value);
@@ -209,8 +208,7 @@ auto CompactSize::Decode(ReadView bytes) noexcept -> bool
     } else if (sizeof(std::uint64_t) == bytes.size()) {
         imp_->convert_from_raw<std::uint64_t>(bytes);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Wrong number of bytes: ")(bytes.size())
-            .Flush();
+        LogError()()("Wrong number of bytes: ")(bytes.size()).Flush();
         output = false;
     }
 
@@ -231,7 +229,7 @@ auto CompactSize::Encode(Writer&& destination) const noexcept -> bool
     auto out = destination.Reserve(size);
 
     if (false == out.IsValid(size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate output").Flush();
+        LogError()()("Failed to allocate output").Flush();
 
         return false;
     }

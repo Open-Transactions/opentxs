@@ -11,8 +11,8 @@
 
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/core/Armored.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
@@ -28,7 +28,7 @@ namespace opentxs
 ByteArray::ByteArray(ByteArrayPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 ByteArray::ByteArray(allocator_type alloc) noexcept

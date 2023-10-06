@@ -19,7 +19,6 @@
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/library/Sodium.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -129,7 +128,7 @@ auto Crypto::Cleanup() noexcept -> void
 
 auto Crypto::Config() const noexcept -> const crypto::Config&
 {
-    OT_ASSERT(config_);
+    assert_false(nullptr == config_);
 
     return *config_;
 }
@@ -148,14 +147,14 @@ auto Crypto::EllipticProvider(opentxs::crypto::asymmetric::Algorithm type)
 
 auto Crypto::Encode() const noexcept -> const crypto::Encode&
 {
-    OT_ASSERT(encode_);
+    assert_false(nullptr == encode_);
 
     return *encode_;
 }
 
 auto Crypto::Hash() const noexcept -> const crypto::Hash&
 {
-    OT_ASSERT(hash_);
+    assert_false(nullptr == hash_);
 
     return *hash_;
 }
@@ -177,7 +176,7 @@ auto Crypto::hasSodium() const noexcept -> bool
 
 auto Crypto::Init() noexcept -> void
 {
-    LogDetail()(OT_PRETTY_CLASS())("Setting up crypto libraries...").Flush();
+    LogDetail()()("Setting up crypto libraries...").Flush();
     Init_Sodium();
     Init_OpenSSL();
     Init_Libsecp256k1();
@@ -193,7 +192,10 @@ auto Crypto::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
     secp256k1_->Init(factory);
 }
 
-auto Crypto::Init_Sodium() noexcept -> void { OT_ASSERT(sodium_); }
+auto Crypto::Init_Sodium() noexcept -> void
+{
+    assert_false(nullptr == sodium_);
+}
 
 auto Crypto::Libsodium() const noexcept -> const opentxs::crypto::Sodium&
 {

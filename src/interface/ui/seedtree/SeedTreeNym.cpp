@@ -9,8 +9,8 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -57,7 +57,7 @@ auto SeedTreeNym::reindex(
     const auto& index = key;
     const auto name = extract_custom<UnallocatedCString>(custom, 0);
 
-    OT_ASSERT(index_ == index);
+    assert_true(index_ == index);
 
     auto lock = Lock{lock_};
     auto changed{false};

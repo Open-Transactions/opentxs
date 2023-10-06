@@ -12,10 +12,10 @@
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/Socket.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Log.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::Proxy>;
 
@@ -55,7 +55,7 @@ Proxy::Proxy(
 {
     thread_ = std::make_unique<std::thread>(&Proxy::proxy, this);
 
-    OT_ASSERT(thread_);
+    assert_false(nullptr == thread_);
 }
 
 auto Proxy::clone() const -> Proxy*

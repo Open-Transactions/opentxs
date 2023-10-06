@@ -12,7 +12,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -63,7 +62,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
                     Subchain::External, index.value_or(0));
                 const auto& key = element.Key();
 
-                OT_ASSERT(key.IsValid());
+                opentxs::assert_true(key.IsValid());
 
                 switch (i) {
                     case 0: {
@@ -115,7 +114,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
             listener_p_ = std::make_unique<ScanListener>(client_1_);
         }
 
-        OT_ASSERT(listener_p_);
+        opentxs::assert_false(nullptr == listener_p_);
 
         return *listener_p_;
     }())
@@ -134,7 +133,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
         auto& alex = const_cast<User&>(alex_);
         alex.init_custom(client_1_, cb);
 
-        OT_ASSERT(
+        opentxs::assert_true(
             alex_.payment_code_ ==
             GetPaymentCodeVector3().alice_.payment_code_);
 

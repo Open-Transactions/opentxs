@@ -12,7 +12,6 @@ extern "C" {
 #include <cerrno>
 #include <cstring>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::imp
@@ -24,9 +23,9 @@ auto Context::Init_CoreDump() noexcept -> void
     rlim.rlim_max = rlim.rlim_cur = 0;
 
     if (setrlimit(RLIMIT_CORE, &rlim)) {
-        LogConsole()(" setrlimit: ")(strerror(errno)).Flush();
-        OT_FAIL_MSG("Crypto::Init: ASSERT: setrlimit failed. (Used for "
-                    "preventing core dumps.)\n");
+        LogAbort()()("setrlimit (used for preventing core dumps) failed: ")(
+            strerror(errno))
+            .Abort();
     }
 }
 }  // namespace opentxs::api::imp

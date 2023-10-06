@@ -12,13 +12,13 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -59,7 +59,7 @@ ContactSubsection::ContactSubsection(
         this,
         extract_custom<identity::wot::claim::Group>(custom));
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto ContactSubsection::construct_row(
@@ -81,12 +81,12 @@ auto ContactSubsection::process_group(
     const identity::wot::claim::Group& group) noexcept
     -> UnallocatedSet<ContactSubsectionRowID>
 {
-    OT_ASSERT(row_id_.second == group.Type());
+    assert_true(row_id_.second == group.Type());
 
     UnallocatedSet<ContactSubsectionRowID> active{};
 
     for (const auto& [id, claim] : group) {
-        OT_ASSERT(claim);
+        assert_false(nullptr == claim);
 
         CustomData custom{new identity::wot::claim::Item(*claim)};
         add_item(id, ++sequence_, custom);

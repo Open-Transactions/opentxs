@@ -21,7 +21,6 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/util/Lockable.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Notary.hpp"
@@ -48,7 +47,7 @@ auto WalletAPI(const api::session::Notary& parent) noexcept
 
         return std::make_unique<ReturnType>(parent);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -106,7 +105,7 @@ auto Wallet::load_legacy_account(
     const auto& rowMutex = std::get<0>(row);
     auto& pAccount = std::get<1>(row);
 
-    OT_ASSERT(CheckLock(lock, rowMutex));
+    assert_true(CheckLock(lock, rowMutex));
 
     pAccount.reset(Account::LoadExistingAccount(api_, accountID, server_.ID()));
 
@@ -115,38 +114,37 @@ auto Wallet::load_legacy_account(
     const auto signerNym = Nym(server_.NymID());
 
     if (false == bool(signerNym)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load signer nym.").Flush();
+        LogError()()("Unable to load signer nym.").Flush();
 
         return false;
     }
 
     if (false == pAccount->VerifySignature(*signerNym)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature.").Flush();
+        LogError()()("Invalid signature.").Flush();
 
         return false;
     }
 
-    LogError()(OT_PRETTY_CLASS())("Legacy account ")(accountID, api_.Crypto())(
-        " exists.")
+    LogError()()("Legacy account ")(accountID, api_.Crypto())(" exists.")
         .Flush();
 
     auto serialized = String::Factory();
     auto saved = pAccount->SaveContractRaw(serialized);
 
-    OT_ASSERT(saved);
+    assert_true(saved);
 
     const auto& ownerID = pAccount->GetNymID();
 
-    OT_ASSERT(false == ownerID.empty());
+    assert_false(ownerID.empty());
 
     const auto& unitID = pAccount->GetInstrumentDefinitionID();
 
-    OT_ASSERT(false == unitID.empty());
+    assert_false(unitID.empty());
 
     const auto contract = UnitDefinition(unitID);
     const auto& serverID = pAccount->GetPurportedNotaryID();
 
-    OT_ASSERT(server_.ID() == serverID);
+    assert_true(server_.ID() == serverID);
 
     saved = api_.Storage().Internal().Store(
         accountID,
@@ -159,7 +157,7 @@ auto Wallet::load_legacy_account(
         unitID,
         extract_unit(unitID));
 
-    OT_ASSERT(saved);
+    assert_true(saved);
 
     return true;
 }
@@ -179,16 +177,18 @@ auto Wallet::mutable_ClientContext(
     };
 
     if (base) {
-        OT_ASSERT(otx::ConsensusType::Client == base->Type());
+        assert_true(otx::ConsensusType::Client == base->Type());
     } else {
         // Obtain nyms.
         const auto local = Nym(serverNymID);
 
-        OT_ASSERT_MSG(local, "Local nym does not exist in the wallet.");
+        assert_false(
+            nullptr == local, "Local nym does not exist in the wallet.");
 
         const auto remote = Nym(remoteNymID);
 
-        OT_ASSERT_MSG(remote, "Remote nym does not exist in the wallet.");
+        assert_false(
+            nullptr == remote, "Remote nym does not exist in the wallet.");
 
         // Create a new Context
         const ContextID contextID = {
@@ -199,11 +199,11 @@ auto Wallet::mutable_ClientContext(
         base = entry;
     }
 
-    OT_ASSERT(base);
+    assert_false(nullptr == base);
 
     auto* child = dynamic_cast<otx::context::Client*>(base.get());
 
-    OT_ASSERT(nullptr != child);
+    assert_false(nullptr == child);
 
     return {child, callback};
 }
@@ -221,7 +221,7 @@ auto Wallet::mutable_Context(
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };
 
-    OT_ASSERT(base);
+    assert_false(nullptr == base);
 
     return {base.get(), callback};
 }

@@ -18,7 +18,6 @@
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
@@ -244,7 +243,7 @@ auto ParsedBlockMatches::find_output(
     } else if (const auto i = first.find(id); first.end() != i) {
         const auto& opt = i->second.output_;
 
-        OT_ASSERT(opt.has_value());
+        assert_true(opt.has_value());
 
         return *opt;
     } else if (const auto j = second.find(id.Txid()); second.end() != j) {
@@ -356,8 +355,7 @@ auto ParsedBlockMatches::parse_consumed(
 {
     using enum Transition;
 
-    log(OT_PRETTY_CLASS())("parsing ")(consumed.size())(" consumed outputs")
-        .Flush();
+    log()("parsing ")(consumed.size())(" consumed outputs").Flush();
 
     for (auto& [outpoint, data] : consumed) {
         const auto finalState = [&] {
@@ -373,8 +371,8 @@ auto ParsedBlockMatches::parse_consumed(
         if (auto i = transaction_.find(outpoint); transaction_.end() != i) {
             auto& params = i->second;
 
-            OT_ASSERT(params.output_.has_value());
-            OT_ASSERT(params.output_->IsValid());
+            assert_true(params.output_.has_value());
+            assert_true(params.output_->IsValid());
 
             if (false == mempool) { out.emplace(outpoint); }
 
@@ -394,21 +392,20 @@ auto ParsedBlockMatches::parse_consumed(
                             .append(" is not allowed")};
                 }
                 case Unnecessary: {
-                    log(OT_PRETTY_CLASS())("skipping transition for output ")(
+                    log()("skipping transition for output ")(
                         outpoint)(" from state ")(print(initialState))(
                         " to state ")(print(finalState))
                         .Flush();
                     continue;
                 }
                 case Allowed: {
-                    log(OT_PRETTY_CLASS())("transitioning output ")(
-                        outpoint)(" from state ")(print(initialState))(
-                        " to state ")(print(finalState))
+                    log()("transitioning output ")(outpoint)(" from state ")(
+                        print(initialState))(" to state ")(print(finalState))
                         .Flush();
                 } break;
                 case Null:
                 default: {
-                    LogAbort()(OT_PRETTY_CLASS())("invalid transition").Abort();
+                    LogAbort()()("invalid transition").Abort();
                 }
             }
 
@@ -420,7 +417,7 @@ auto ParsedBlockMatches::parse_consumed(
 
             switch (transition) {
                 case Disallowed: {
-                    OT_ASSERT(initialState.has_value());
+                    assert_true(initialState.has_value());
 
                     throw std::runtime_error{
                         "transition for output "s.append(outpoint.str())
@@ -431,37 +428,36 @@ auto ParsedBlockMatches::parse_consumed(
                             .append(" is not allowed")};
                 }
                 case Unnecessary: {
-                    OT_ASSERT(initialState.has_value());
+                    assert_true(initialState.has_value());
 
-                    log(OT_PRETTY_CLASS())("skipping transition for output ")(
+                    log()("skipping transition for output ")(
                         outpoint)(" from state ")(print(*initialState))(
                         " to state ")(print(finalState))
                         .Flush();
                     continue;
                 }
                 case Allowed: {
-                    OT_ASSERT(initialState.has_value());
+                    assert_true(initialState.has_value());
 
-                    log(OT_PRETTY_CLASS())("transitioning output ")(
-                        outpoint)(" from state ")(print(*initialState))(
-                        " to state ")(print(finalState))
+                    log()("transitioning output ")(outpoint)(" from state ")(
+                        print(*initialState))(" to state ")(print(finalState))
                         .Flush();
                 } break;
                 case Null: {
-                    OT_ASSERT(false == initialState.has_value());
+                    assert_false(initialState.has_value());
 
                     throw std::runtime_error{
                         "unable to find previous output for consumed for output "s
                             .append(outpoint.str())};
                 }
                 default: {
-                    LogAbort()(OT_PRETTY_CLASS())("invalid transition").Abort();
+                    LogAbort()()("invalid transition").Abort();
                 }
             }
 
             auto [j, added] = transaction_.try_emplace(outpoint, finalState);
 
-            OT_ASSERT(added);
+            assert_true(added);
 
             const auto& spends = find_output(outpoint, cache, matches);
 
@@ -470,8 +466,8 @@ auto ParsedBlockMatches::parse_consumed(
             params.initial_state_ = initialState;
             params.output_.emplace(spends);
 
-            OT_ASSERT(params.output_.has_value());
-            OT_ASSERT(params.output_->IsValid());
+            assert_true(params.output_.has_value());
+            assert_true(params.output_->IsValid());
 
             if (false == mempool) { out.emplace(outpoint); }
 
@@ -493,8 +489,7 @@ auto ParsedBlockMatches::parse_created(
 {
     using enum Transition;
 
-    log(OT_PRETTY_CLASS())("parsing ")(created.size())(" created outputs")
-        .Flush();
+    log()("parsing ")(created.size())(" created outputs").Flush();
 
     for (auto& [outpoint, data] : created) {
         if (transaction_.contains(outpoint)) {
@@ -526,7 +521,7 @@ auto ParsedBlockMatches::parse_created(
 
         switch (transition) {
             case Disallowed: {
-                OT_ASSERT(initialState.has_value());
+                assert_true(initialState.has_value());
 
                 throw std::runtime_error{
                     "transition for output "s.append(outpoint.str())
@@ -537,37 +532,36 @@ auto ParsedBlockMatches::parse_created(
                         .append(" is not allowed")};
             }
             case Unnecessary: {
-                OT_ASSERT(initialState.has_value());
+                assert_true(initialState.has_value());
 
-                log(OT_PRETTY_CLASS())("skipping transition for output ")(
+                log()("skipping transition for output ")(
                     outpoint)(" from state ")(print(*initialState))(
                     " to state ")(print(finalState))
                     .Flush();
                 continue;
             }
             case Allowed: {
-                OT_ASSERT(initialState.has_value());
+                assert_true(initialState.has_value());
 
-                log(OT_PRETTY_CLASS())("transitioning output ")(
-                    outpoint)(" from state ")(print(*initialState))(
-                    " to state ")(print(finalState))
+                log()("transitioning output ")(outpoint)(" from state ")(
+                    print(*initialState))(" to state ")(print(finalState))
                     .Flush();
             } break;
             case Null: {
-                OT_ASSERT(false == initialState.has_value());
+                assert_false(initialState.has_value());
 
-                log(OT_PRETTY_CLASS())("creating new output ")(
-                    outpoint)(" in state ")(print(finalState))
+                log()("creating new output ")(outpoint)(" in state ")(
+                    print(finalState))
                     .Flush();
             } break;
             default: {
-                LogAbort()(OT_PRETTY_CLASS())("invalid transition").Abort();
+                LogAbort()()("invalid transition").Abort();
             }
         }
 
         auto [i, added] = transaction_.try_emplace(outpoint, finalState);
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         auto& [output, proposals] = data;
         auto& params = i->second;
@@ -575,8 +569,8 @@ auto ParsedBlockMatches::parse_created(
         params.initial_state_ = initialState;
         params.output_.emplace(output);
 
-        OT_ASSERT(params.output_.has_value());
-        OT_ASSERT(params.output_->IsValid());
+        assert_true(params.output_.has_value());
+        assert_true(params.output_->IsValid());
 
         out.try_emplace(outpoint, *params.output_);
         get_proposals(outpoint, cache, mempool, params.proposals_, alloc);
@@ -595,7 +589,7 @@ auto ParsedBlockMatches::scan_transactions(
     for (auto& item : matches) {
         auto& [txid, match] = item;
         auto& [inputs, outputs, txn] = match;
-        log(OT_PRETTY_CLASS())("processing transaction ")
+        log()("processing transaction ")
             .asHex(txid)(" with ")(inputs.size())(" input matches and ")(
                 outputs.size())(" output matches")
             .Flush();
@@ -613,9 +607,7 @@ auto ParsedBlockMatches::scan_transactions(
             const auto& input = txin[index];
             const auto& outpoint = input.PreviousOutput();
             consumed[outpoint];
-            log(OT_PRETTY_CLASS())
-                .asHex(txid)(" input ")(index)(" consumes ")(outpoint)
-                .Flush();
+            log().asHex(txid)(" input ")(index)(" consumes ")(outpoint).Flush();
         }
 
         for (auto index : outputs) {
@@ -632,11 +624,9 @@ auto ParsedBlockMatches::scan_transactions(
 
             if (tx.IsGeneration()) {
                 generation.emplace(outpoint);
-                log(OT_PRETTY_CLASS())("found generation output ")(outpoint)
-                    .Flush();
+                log()("found generation output ")(outpoint).Flush();
             } else {
-                log(OT_PRETTY_CLASS())("found regular output ")(outpoint)
-                    .Flush();
+                log()("found regular output ")(outpoint).Flush();
             }
         }
     }

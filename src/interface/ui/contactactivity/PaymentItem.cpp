@@ -15,7 +15,6 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -80,8 +79,8 @@ PaymentItem::PaymentItem(
     , memo_(std::move(memo))
     , payment_(std::move(contract))
 {
-    OT_ASSERT(false == nym_id_.empty());
-    OT_ASSERT(false == item_id_.empty());
+    assert_false(nym_id_.empty());
+    assert_false(item_id_.empty());
 }
 
 auto PaymentItem::Amount() const noexcept -> opentxs::Amount
@@ -119,7 +118,7 @@ auto PaymentItem::Deposit() const noexcept -> bool
     auto lock = sLock{shared_lock_};
 
     if (false == bool(payment_)) {
-        LogError()(OT_PRETTY_CLASS())("Payment not loaded.").Flush();
+        LogError()()("Payment not loaded.").Flush();
 
         return false;
     }
@@ -127,7 +126,7 @@ auto PaymentItem::Deposit() const noexcept -> bool
     auto task = api_.OTX().DepositPayment(nym_id_, payment_);
 
     if (0 == task.first) {
-        LogError()(OT_PRETTY_CLASS())("Failed to queue deposit.").Flush();
+        LogError()()("Failed to queue deposit.").Flush();
 
         return false;
     }
@@ -188,7 +187,7 @@ auto PaymentItem::extract(
                 payment = api.Factory().InternalSession().Payment(
                     String::Factory(*cheque));
 
-                OT_ASSERT(payment);
+                assert_false(nullptr == payment);
 
                 payment->SetTempValues(reason);
             }
@@ -207,7 +206,7 @@ auto PaymentItem::extract(
         case otx::client::StorageBox::DRAFT:
         case otx::client::StorageBox::UNKNOWN:
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 

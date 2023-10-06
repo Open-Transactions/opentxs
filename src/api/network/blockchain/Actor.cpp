@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -177,50 +176,49 @@ auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
 {
     switch (work) {
         case Work::block_header: {
-            reorg_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            reorg_.SendDeferred(std::move(msg));
         } break;
         case Work::peer_active: {
-            active_peers_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            active_peers_.SendDeferred(std::move(msg));
         } break;
         case Work::reorg: {
-            reorg_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            reorg_.SendDeferred(std::move(msg));
         } break;
         case Work::cfilter_progress: {
-            cfilter_progress_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            cfilter_progress_.SendDeferred(std::move(msg));
         } break;
         case Work::cfilter: {
-            cfilter_tip_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            cfilter_tip_.SendDeferred(std::move(msg));
         } break;
         case Work::block_queue: {
-            block_queue_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            block_queue_.SendDeferred(std::move(msg));
         } break;
         case Work::peer_connected: {
-            connected_peers_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            connected_peers_.SendDeferred(std::move(msg));
         } break;
         case Work::mempool: {
-            mempool_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            mempool_.SendDeferred(std::move(msg));
         } break;
         case Work::block_available: {
-            block_available_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            block_available_.SendDeferred(std::move(msg));
         } break;
         case Work::sync_server: {
-            sync_server_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            sync_server_.SendDeferred(std::move(msg));
         } break;
         case Work::block: {
-            block_tip_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            block_tip_.SendDeferred(std::move(msg));
         } break;
         case Work::report_status: {
-            report_status_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            report_status_.SendDeferred(std::move(msg));
         } break;
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }

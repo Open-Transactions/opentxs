@@ -29,9 +29,7 @@ auto BlockchainBlock(
         case unknown_category:
         case balance_based:
         default: {
-            LogError()("opentxs::factory::")(__func__)(": Unsupported type (")(
-                print(chain))(")")
-                .Flush();
+            LogError()()("Unsupported type (")(print(chain))(")").Flush();
 
             return {alloc};
         }

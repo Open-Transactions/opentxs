@@ -27,7 +27,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -104,14 +103,13 @@ Contacts::Contacts(const api::session::Client& api)
     // in blockchain api in cases where the process was interrupted due to
     // library shutdown
 
-    LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(pipeline_.BatchID())
-        .Flush();
+    LogTrace()()("using ZMQ batch ")(pipeline_.BatchID()).Flush();
 }
 
 auto Contacts::add_contact(const rLock& lock, opentxs::Contact* contact) const
     -> Contacts::ContactMap::iterator
 {
-    OT_ASSERT(nullptr != contact);
+    assert_false(nullptr == contact);
 
     if (false == verify_write_lock(lock)) {
         throw std::runtime_error("lock error");
@@ -161,7 +159,7 @@ auto Contacts::check_nyms() noexcept -> void
     for (const auto& id : contacts) {
         const auto contact = Contact(id);
 
-        OT_ASSERT(contact);
+        assert_false(nullptr == contact);
 
         auto ids = contact->Nyms();
         std::ranges::move(ids, std::back_inserter(nyms));
@@ -171,10 +169,9 @@ auto Contacts::check_nyms() noexcept -> void
         const auto nym = api_.Wallet().Nym(id);
 
         if (nym) {
-            LogInsane()(OT_PRETTY_CLASS())(id, api_.Crypto())("found").Flush();
+            LogInsane()()(id, api_.Crypto())("found").Flush();
         } else {
-            LogInsane()(OT_PRETTY_CLASS())(id, api_.Crypto())("not found")
-                .Flush();
+            LogInsane()()(id, api_.Crypto())("not found").Flush();
         }
     }
 }
@@ -199,7 +196,7 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
     auto contact = std::make_unique<opentxs::Contact>(api_, label);
 
     if (false == bool(contact)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to create new contact.").Flush();
+        LogError()()("Unable to create new contact.").Flush();
 
         return {};
     }
@@ -210,7 +207,7 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
 
     const auto& contactID = contact->ID();
 
-    OT_ASSERT(0 == contact_map_.count(contactID));
+    assert_true(0 == contact_map_.count(contactID));
 
     auto it = add_contact(lock, contact.release());
     auto& output = it->second.second;
@@ -221,7 +218,7 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
     }();
 
     if (false == api_.Storage().Internal().Store(proto)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to save contact.").Flush();
+        LogError()()("Unable to save contact.").Flush();
         contact_map_.erase(it);
 
         return {};
@@ -274,7 +271,7 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
         auto& map = contact_name_map(*handle);
         auto [it, added] = map.try_emplace(id, id.asBase58(api_.Crypto()));
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         return it->second;
     };
@@ -318,7 +315,7 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
 
     const auto data = contact->Data();
 
-    OT_ASSERT(data);
+    assert_false(nullptr == data);
 
     if (auto name = data->Name(); false == name.empty()) {
         auto handle = contact_name_map_.lock();
@@ -348,12 +345,12 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
 
     if (procedure) {
         for (const auto& [type, group] : *procedure) {
-            OT_ASSERT(group);
+            assert_false(nullptr == group);
 
             if (0 < group->Size()) {
                 const auto item = group->Best();
 
-                OT_ASSERT(item);
+                assert_false(nullptr == item);
 
                 if (auto value = item->Value(); false == value.empty()) {
 
@@ -846,16 +843,16 @@ auto Contacts::import_contacts(const rLock& lock) -> void
 auto Contacts::init(const std::shared_ptr<const crypto::Blockchain>& blockchain)
     -> void
 {
-    OT_ASSERT(blockchain);
+    assert_false(nullptr == blockchain);
 
     blockchain_ = blockchain;
 
-    OT_ASSERT(false == blockchain_.expired());
+    assert_false(blockchain_.expired());
 }
 
 void Contacts::init_nym_map(const rLock& lock)
 {
-    LogDetail()(OT_PRETTY_CLASS())("Upgrading indices.").Flush();
+    LogDetail()()("Upgrading indices.").Flush();
 
     for (const auto& it : api_.Storage().Internal().ContactList()) {
         const auto& contactID = api_.Factory().IdentifierFromBase58(it.first);
@@ -876,8 +873,7 @@ void Contacts::init_nym_map(const rLock& lock)
         const auto type = contact->Type();
 
         if (identity::wot::claim::ClaimType::Error == type) {
-            LogError()(OT_PRETTY_CLASS())("Invalid contact ")(it.first)(".")
-                .Flush();
+            LogError()()("Invalid contact ")(it.first)(".").Flush();
             api_.Storage().Internal().DeleteContact(contactID);
         }
 
@@ -901,9 +897,7 @@ auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
     const auto loaded = api_.Storage().Internal().Load(id, serialized, silent);
 
     if (false == loaded) {
-        LogDetail()(OT_PRETTY_CLASS())("Unable to load contact ")(
-            id, api_.Crypto())
-            .Flush();
+        LogDetail()()("Unable to load contact ")(id, api_.Crypto()).Flush();
 
         return contact_map_.end();
     }
@@ -911,9 +905,7 @@ auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
     auto contact = std::make_unique<opentxs::Contact>(api_, serialized);
 
     if (false == bool(contact)) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Unable to instantate serialized contact.")
-            .Flush();
+        LogError()()(": Unable to instantate serialized contact.").Flush();
 
         return contact_map_.end();
     }
@@ -930,7 +922,7 @@ auto Contacts::Merge(
     auto childContact = contact(lock, child);
 
     if (false == bool(childContact)) {
-        LogError()(OT_PRETTY_CLASS())("Child contact ")(child, api_.Crypto())(
+        LogError()()("Child contact ")(child, api_.Crypto())(
             " can not be loaded.")
             .Flush();
 
@@ -940,7 +932,7 @@ auto Contacts::Merge(
     const auto& childID = childContact->ID();
 
     if (childID != child) {
-        LogError()(OT_PRETTY_CLASS())("Child contact ")(child, api_.Crypto())(
+        LogError()()("Child contact ")(child, api_.Crypto())(
             " is already merged into ")(childID, api_.Crypto())(".")
             .Flush();
 
@@ -950,7 +942,7 @@ auto Contacts::Merge(
     auto parentContact = contact(lock, parent);
 
     if (false == bool(parentContact)) {
-        LogError()(OT_PRETTY_CLASS())("Parent contact ")(parent, api_.Crypto())(
+        LogError()()("Parent contact ")(parent, api_.Crypto())(
             " can not be loaded.")
             .Flush();
 
@@ -960,15 +952,15 @@ auto Contacts::Merge(
     const auto& parentID = parentContact->ID();
 
     if (parentID != parent) {
-        LogError()(OT_PRETTY_CLASS())("Parent contact ")(parent, api_.Crypto())(
+        LogError()()("Parent contact ")(parent, api_.Crypto())(
             " is merged into ")(parentID, api_.Crypto())(".")
             .Flush();
 
         return {};
     }
 
-    OT_ASSERT(childContact);
-    OT_ASSERT(parentContact);
+    assert_false(nullptr == childContact);
+    assert_false(nullptr == parentContact);
 
     auto& lhs = const_cast<opentxs::Contact&>(*parentContact);
     auto& rhs = const_cast<opentxs::Contact&>(*childContact);
@@ -985,17 +977,15 @@ auto Contacts::Merge(
     }();
 
     if (false == api_.Storage().Internal().Store(rProto)) {
-        LogError()(OT_PRETTY_CLASS())(": Unable to create save child contact.")
-            .Flush();
+        LogError()()(": Unable to create save child contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     if (false == api_.Storage().Internal().Store(lProto)) {
-        LogError()(OT_PRETTY_CLASS())(": Unable to create save parent contact.")
-            .Flush();
+        LogError()()(": Unable to create save parent contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     contact_map_.erase(child);
@@ -1004,8 +994,7 @@ auto Contacts::Merge(
     if (blockchain) {
         blockchain->Internal().ProcessMergedContact(lhs, rhs);
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            ": Warning: contact not updated in blockchain API")
+        LogVerbose()()(": Warning: contact not updated in blockchain API")
             .Flush();
     }
 
@@ -1129,7 +1118,7 @@ auto Contacts::NewContactFromAddress(
     auto blockchain = blockchain_.lock();
 
     if (false == bool(blockchain)) {
-        LogVerbose()(OT_PRETTY_CLASS())("shutting down ").Flush();
+        LogVerbose()()("shutting down ").Flush();
 
         return {};
     }
@@ -1144,9 +1133,7 @@ auto Contacts::NewContactFromAddress(
             return contact(lock, *existing.cbegin());
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())(": multiple contacts claim address ")(
-                address)
-                .Flush();
+            LogError()()(": multiple contacts claim address ")(address).Flush();
 
             return {};
         }
@@ -1154,16 +1141,15 @@ auto Contacts::NewContactFromAddress(
 
     auto newContact = contact(lock, label);
 
-    OT_ASSERT(newContact);
+    assert_false(nullptr == newContact);
 
     auto& it = contact_map_.at(newContact->ID());
     auto& contact = *it.second;
 
     if (false == contact.AddBlockchainAddress(address, currency)) {
-        LogError()(OT_PRETTY_CLASS())(": Failed to add address to contact.")
-            .Flush();
+        LogError()()(": Failed to add address to contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto proto = [&] {
@@ -1173,9 +1159,9 @@ auto Contacts::NewContactFromAddress(
     }();
 
     if (false == api_.Storage().Internal().Store(proto)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to save contact.").Flush();
+        LogError()()("Unable to save contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     blockchain->Internal().ProcessContact(contact);
@@ -1289,9 +1275,9 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -1300,7 +1286,7 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
     switch (work) {
@@ -1309,7 +1295,7 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
         } break;
         case Work::nymcreated:
         case Work::nymupdated: {
-            OT_ASSERT(1 < body.size());
+            assert_true(1 < body.size());
 
             const auto id = [&] {
                 auto out = identifier::Nym{};
@@ -1319,7 +1305,7 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
             }();
             const auto nym = api_.Wallet().Nym(id);
 
-            OT_ASSERT(nym);
+            assert_false(nullptr == nym);
 
             update(*nym);
         } break;
@@ -1327,9 +1313,9 @@ auto Contacts::pipeline(opentxs::network::zeromq::Message&& in) noexcept -> void
             check_nyms();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -1369,8 +1355,7 @@ auto Contacts::refresh_nyms() noexcept -> void
     timer_.Wait([this](const auto& ec) {
         if (ec) {
             if (unexpected_asio_error(ec)) {
-                LogError()(OT_PRETTY_CLASS())("received asio error (")(
-                    ec.value())(") :")(ec)
+                LogError()()("received asio error (")(ec.value())(") :")(ec)
                     .Flush();
             }
         } else {
@@ -1383,7 +1368,7 @@ auto Contacts::refresh_nyms() noexcept -> void
 
 void Contacts::save(opentxs::Contact* contact) const
 {
-    OT_ASSERT(nullptr != contact);
+    assert_false(nullptr == contact);
 
     const auto proto = [&] {
         auto out = proto::Contact{};
@@ -1392,20 +1377,18 @@ void Contacts::save(opentxs::Contact* contact) const
     }();
 
     if (false == api_.Storage().Internal().Store(proto)) {
-        LogError()(OT_PRETTY_CLASS())(": Unable to create or save contact.")
-            .Flush();
+        LogError()()(": Unable to create or save contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto& id = contact->ID();
 
     if (false ==
         api_.Storage().Internal().SetContactAlias(id, contact->Label())) {
-        LogError()(OT_PRETTY_CLASS())(": Unable to create or save contact.")
-            .Flush();
+        LogError()()(": Unable to create or save contact.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     auto lock = rLock{lock_};
@@ -1415,8 +1398,7 @@ void Contacts::save(opentxs::Contact* contact) const
     if (blockchain) {
         blockchain->Internal().ProcessContact(*contact);
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            ": Warning: contact not updated in blockchain API")
+        LogVerbose()()(": Warning: contact not updated in blockchain API")
             .Flush();
     }
 }
@@ -1883,7 +1865,7 @@ auto Contacts::update(const identity::Nym& nym) const
     const auto label = Contact::ExtractLabel(nym);
 
     if (contactID.empty()) {
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+        LogDetail()()("Nym ")(nymID, api_.Crypto())(
             " is not associated with a contact. Creating a new contact "
             "named ")(label)
             .Flush();
@@ -1897,7 +1879,7 @@ auto Contacts::update(const identity::Nym& nym) const
         auto serialized = proto::Nym{};
 
         if (false == nym.Internal().Serialize(serialized)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.").Flush();
+            LogError()()("Failed to serialize nym.").Flush();
 
             return {};
         }
@@ -1912,11 +1894,11 @@ auto Contacts::update(const identity::Nym& nym) const
 
     auto contact = obtain_contact(lock, contactID);
 
-    OT_ASSERT(contact_map_.end() != contact);
+    assert_true(contact_map_.end() != contact);
 
     auto& output = contact->second.second;
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     api_.Storage().Internal().RelabelThread(output->ID(), output->Label());
 
@@ -1936,12 +1918,12 @@ auto Contacts::update_existing_contact(
 
     auto it = obtain_contact(lock, contactID);
 
-    OT_ASSERT(contact_map_.end() != it);
+    assert_true(contact_map_.end() != it);
 
     auto& contactMutex = it->second.first;
     auto& contact = it->second.second;
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     Lock contactLock(contactMutex);
     const auto& existingLabel = contact->Label();
@@ -1994,14 +1976,12 @@ void Contacts::update_nym_map(
             }();
 
             if (false == api_.Storage().Internal().Store(proto)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    ": Unable to create or save contact.")
-                    .Flush();
+                LogError()()(": Unable to create or save contact.").Flush();
 
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         } else {
-            LogError()(OT_PRETTY_CLASS())("Duplicate nym found.").Flush();
+            LogError()()("Duplicate nym found.").Flush();
             contact.RemoveNym(nymID);
             const auto proto = [&] {
                 auto out = proto::Contact{};
@@ -2010,11 +1990,9 @@ void Contacts::update_nym_map(
             }();
 
             if (false == api_.Storage().Internal().Store(proto)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    ": Unable to create or save contact.")
-                    .Flush();
+                LogError()()(": Unable to create or save contact.").Flush();
 
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     }
@@ -2024,8 +2002,7 @@ void Contacts::update_nym_map(
     if (blockchain) {
         blockchain->Internal().ProcessContact(contact);
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            ": Warning: contact not updated in blockchain API")
+        LogVerbose()()(": Warning: contact not updated in blockchain API")
             .Flush();
     }
 }
@@ -2033,13 +2010,13 @@ void Contacts::update_nym_map(
 auto Contacts::verify_write_lock(const rLock& lock) const -> bool
 {
     if (lock.mutex() != &lock_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect mutex.").Flush();
+        LogError()()("Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        LogError()(OT_PRETTY_CLASS())("Lock not owned.").Flush();
+        LogError()()("Lock not owned.").Flush();
 
         return false;
     }

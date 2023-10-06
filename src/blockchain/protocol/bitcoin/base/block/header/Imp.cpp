@@ -24,7 +24,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
@@ -84,7 +83,7 @@ Header::Header(
     , nbits_(nbits)
     , nonce_(nonce)
 {
-    OT_ASSERT(validate || (blockchain::Type::UnitTest == type_));
+    assert_true(validate || (blockchain::Type::UnitTest == type_));
 
     if (validate && (false == check_pow())) {
         if ((blockchain::Type::PKT != type_) &&
@@ -299,7 +298,7 @@ auto Header::calculate_hash(
             static_cast<blockchain::Type>(serialized.type()),
             ReadView(reinterpret_cast<const char*>(&bytes), sizeof(bytes)));
     } catch (const std::invalid_argument& e) {
-        LogError()(OT_PRETTY_STATIC(Header))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -317,7 +316,7 @@ auto Header::calculate_pow(
             static_cast<blockchain::Type>(serialized.type()),
             ReadView(reinterpret_cast<const char*>(&bytes), sizeof(bytes)));
     } catch (const std::invalid_argument& e) {
-        LogError()(OT_PRETTY_STATIC(Header))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -427,7 +426,7 @@ auto Header::Serialize(SerializedType& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         out.clear_bitcoin();
 
         return false;

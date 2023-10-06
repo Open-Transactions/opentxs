@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 #include <string_view>
 
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -43,7 +42,7 @@ Regtest_multiple_payment_code::Regtest_multiple_payment_code()
             listener_chris_p_ = std::make_unique<ScanListener>(client_2_);
         }
 
-        OT_ASSERT(listener_chris_p_);
+        opentxs::assert_false(nullptr == listener_chris_p_);
 
         return *listener_chris_p_;
     }())
@@ -52,7 +51,7 @@ Regtest_multiple_payment_code::Regtest_multiple_payment_code()
             listener_daniel_p_ = std::make_unique<ScanListener>(client_2_);
         }
 
-        OT_ASSERT(listener_daniel_p_);
+        opentxs::assert_false(nullptr == listener_daniel_p_);
 
         return *listener_daniel_p_;
     }())
@@ -74,10 +73,10 @@ Regtest_multiple_payment_code::Regtest_multiple_payment_code()
         chris.init_custom(client_2_, server_1_, cb, individual, 1);
         daniel.init_custom(client_2_, server_1_, cb, individual, 2);
 
-        OT_ASSERT(
+        opentxs::assert_true(
             alex_.payment_code_ ==
             GetPaymentCodeVector3().alice_.payment_code_);
-        OT_ASSERT(
+        opentxs::assert_true(
             bob_.payment_code_ == GetPaymentCodeVector3().bob_.payment_code_);
 
         init_multiple_ = true;

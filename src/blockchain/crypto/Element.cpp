@@ -21,7 +21,6 @@
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -195,7 +194,7 @@ auto Element::Confirmed() const noexcept -> Txids
 auto Element::Confirm(const block::TransactionHash& tx) noexcept -> bool
 {
     if (tx.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid txid").Flush();
+        LogError()()("invalid txid").Flush();
 
         return false;
     }
@@ -223,7 +222,7 @@ auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
     try {
         output.emplace(blockchain_.Internal().PubkeyHash(chain_, pubkey));
     } catch (...) {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return output;
@@ -469,8 +468,7 @@ auto Element::Unreserve() noexcept -> bool
     auto& data = *handle;
 
     if ((0u < data.confirmed_.size()) || (0u < data.confirmed_.size())) {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "element is already associated with transactions")
+        LogVerbose()()("element is already associated with transactions")
             .Flush();
 
         return false;

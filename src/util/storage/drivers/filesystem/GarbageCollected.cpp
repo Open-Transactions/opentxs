@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "internal/api/crypto/Encode.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -34,7 +33,7 @@ auto StorageFSGC(
 
         return std::make_unique<ReturnType>(crypto, config);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -68,7 +67,7 @@ auto GarbageCollected::bucket_name(Bucket bucket) const noexcept -> fs::path
         }
         default: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }

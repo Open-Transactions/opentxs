@@ -37,7 +37,7 @@ Bidirectional<InterfaceType, MessageType>::Bidirectional(
         auto output =
             RawSocket{zmq_socket_wrapper(context, ZMQ_PUSH), zmq_close_wrapper};
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         return output;
     }())
@@ -45,7 +45,7 @@ Bidirectional<InterfaceType, MessageType>::Bidirectional(
         auto output =
             RawSocket{zmq_socket_wrapper(context, ZMQ_PULL), zmq_close_wrapper};
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         return output;
     }())
@@ -62,13 +62,13 @@ auto Bidirectional<InterfaceType, MessageType>::apply_timeouts(
     void* socket,
     std::mutex& socket_mutex) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != socket);
+    assert_false(nullptr == socket);
     Lock lock(socket_mutex);
 
     auto set = zmq_setsockopt(socket, ZMQ_LINGER, &linger_, sizeof(linger_));
 
     if (0 != set) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set ZMQ_LINGER.").Flush();
+        LogError()()("Failed to set ZMQ_LINGER.").Flush();
 
         return false;
     }
@@ -77,7 +77,7 @@ auto Bidirectional<InterfaceType, MessageType>::apply_timeouts(
         socket, ZMQ_SNDTIMEO, &send_timeout_, sizeof(send_timeout_));
 
     if (0 != set) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set ZMQ_SNDTIMEO.").Flush();
+        LogError()()("Failed to set ZMQ_SNDTIMEO.").Flush();
 
         return false;
     }
@@ -86,7 +86,7 @@ auto Bidirectional<InterfaceType, MessageType>::apply_timeouts(
         socket, ZMQ_RCVTIMEO, &receive_timeout_, sizeof(receive_timeout_));
 
     if (0 != set) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set ZMQ_RCVTIMEO.").Flush();
+        LogError()()("Failed to set ZMQ_RCVTIMEO.").Flush();
 
         return false;
     }
@@ -121,16 +121,16 @@ auto Bidirectional<InterfaceType, MessageType>::connect(
 template <typename InterfaceType, typename MessageType>
 void Bidirectional<InterfaceType, MessageType>::init() noexcept
 {
-    OT_ASSERT(pull_socket_);
-    OT_ASSERT(push_socket_);
+    assert_false(nullptr == pull_socket_);
+    assert_false(nullptr == push_socket_);
 
     auto bound = bind(pull_socket_.get(), this->lock_, endpoint_);
 
     if (false == bound) {
         pull_socket_.reset();
         push_socket_.reset();
-        std::cerr << (OT_PRETTY_CLASS()) << zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
         return;
     }
 
@@ -139,8 +139,8 @@ void Bidirectional<InterfaceType, MessageType>::init() noexcept
     if (false == connected) {
         pull_socket_.reset();
         push_socket_.reset();
-        std::cerr << (OT_PRETTY_CLASS()) << zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
         return;
     }
 
@@ -234,7 +234,7 @@ template <typename InterfaceType, typename MessageType>
 void Bidirectional<InterfaceType, MessageType>::thread() noexcept
 {
     Signals::Block();
-    LogTrace()(OT_PRETTY_CLASS())("Starting listener").Flush();
+    LogTrace()()("Starting listener").Flush();
 
     if (!thread_name_.empty()) { SetThisThreadsName(thread_name_); }
 
@@ -244,7 +244,7 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
         Sleep(std::chrono::milliseconds(callback_wait_milliseconds_));
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("Callback ready").Flush();
+    LogTrace()()("Callback ready").Flush();
 
     while (this->running_.get()) {
         std::this_thread::yield();
@@ -266,16 +266,14 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
         const auto events = ::zmq_poll(poll.data(), 2, poll_milliseconds_);
 
         if (0 == events) {
-            LogInsane()(OT_PRETTY_CLASS())("No messages.").Flush();
+            LogInsane()()("No messages.").Flush();
 
             continue;
         }
 
         if (-1 == events) {
             const auto error = zmq_errno();
-            LogError()(OT_PRETTY_CLASS())("Poll error: ")(zmq_strerror(error))(
-                ".")
-                .Flush();
+            LogError()()("Poll error: ")(zmq_strerror(error))(".").Flush();
 
             continue;
         }
@@ -291,6 +289,6 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
         }
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("Shutting down").Flush();
+    LogTrace()()("Shutting down").Flush();
 }
 }  // namespace opentxs::network::zeromq::socket::implementation

@@ -25,7 +25,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -159,13 +158,13 @@ auto RPC_fixture::CreateNym(
         name,
         api.Crypto().Seed().Passphrase(seed, reason));
 
-    OT_ASSERT(added);
+    opentxs::assert_true(added);
 
     auto& user = it->second;
     user.init(api, ot::identity::Type::individual, index);
     auto& nym = user.nym_;
 
-    OT_ASSERT(nym);
+    opentxs::assert_false(nullptr == nym);
 
     const auto id = nym->ID().asBase58(ot_.Crypto());
     auto& nyms = local_nym_map_.at(api.Instance());

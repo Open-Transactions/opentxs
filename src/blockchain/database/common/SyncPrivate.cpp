@@ -30,7 +30,6 @@ extern "C" {
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/TSV.hpp"
@@ -170,7 +169,7 @@ SyncPrivate::SyncPrivate(
         const auto rc = out.Bind(
             api_.Endpoints().Internal().BlockchainSyncChecksumFailure().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -255,7 +254,7 @@ auto SyncPrivate::Load(
 
                     return items.size() < maxBlocks;
                 } catch (const std::exception& e) {
-                    LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                    LogError()()(e.what()).Flush();
 
                     return false;
                 }
@@ -269,8 +268,8 @@ auto SyncPrivate::Load(
         const auto& [items, checksums] = blockData;
         const auto files = Read(items, {});
 
-        OT_ASSERT(items.size() == checksums.size());
-        OT_ASSERT(items.size() == files.size());
+        assert_true(items.size() == checksums.size());
+        assert_true(items.size() == files.size());
 
         auto n = 0_uz;
         auto total = 0_uz;
@@ -298,18 +297,15 @@ auto SyncPrivate::Load(
             }
 
             if (expected != checksum) {
-                checksum_failure_.lock()->SendDeferred(
-                    [&] {
-                        auto out =
-                            MakeWork(OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE);
-                        out.AddFrame(chain);
-                        out.AddFrame(height);
-                        out.AddFrame(output.Version());
+                checksum_failure_.lock()->SendDeferred([&] {
+                    auto out =
+                        MakeWork(OT_ZMQ_BLOCKCHAIN_SYNC_CHECKSUM_FAILURE);
+                    out.AddFrame(chain);
+                    out.AddFrame(height);
+                    out.AddFrame(output.Version());
 
-                        return out;
-                    }(),
-                    __FILE__,
-                    __LINE__);
+                    return out;
+                }());
 
                 throw std::runtime_error("checksum failure");
             }
@@ -322,7 +318,7 @@ auto SyncPrivate::Load(
             haveOne = true;
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return haveOne;
@@ -346,7 +342,7 @@ auto SyncPrivate::reorg(
 
             return true;
         } else {
-            LogError()(OT_PRETTY_CLASS())("Finalize error").Flush();
+            LogError()()("Finalize error").Flush();
 
             return false;
         }
@@ -362,7 +358,7 @@ auto SyncPrivate::reorg(
     const block::Height height) const noexcept -> bool
 {
     if (0 > height) {
-        LogError()(OT_PRETTY_CLASS())("Invalid height").Flush();
+        LogError()()("Invalid height").Flush();
 
         return false;
     }
@@ -373,7 +369,7 @@ auto SyncPrivate::reorg(
 
     for (auto key = block::Height{height + 1}; key <= tip; ++key) {
         if (false == lmdb_.Delete(table, static_cast<std::size_t>(key), tx)) {
-            LogError()(OT_PRETTY_CLASS())("Delete error").Flush();
+            LogError()()("Delete error").Flush();
 
             return false;
         }
@@ -382,7 +378,7 @@ auto SyncPrivate::reorg(
     const auto key = static_cast<std::size_t>(chain);
 
     if (false == lmdb_.Store(tip_table_, key, tsv(height), tx).first) {
-        LogError()(OT_PRETTY_CLASS())("Failed to update tip").Flush();
+        LogError()()("Failed to update tip").Flush();
 
         return false;
     }
@@ -441,17 +437,16 @@ auto SyncPrivate::Store(
                 }
 
                 const auto& size = s.emplace_back(raw.size());
-                LogTrace()(OT_PRETTY_CLASS())("serialized ")(
-                    size)(" bytes for ")(print(chain))(" sync data at height ")(
-                    dbKey)
+                LogTrace()()("serialized ")(size)(" bytes for ")(print(chain))(
+                    " sync data at height ")(dbKey)
                     .Flush();
             }
 
             return out;
         }();
 
-        OT_ASSERT(count == bytes.size());
-        OT_ASSERT(count == sizes.size());
+        assert_true(count == bytes.size());
+        assert_true(count == sizes.size());
 
         auto tx = lmdb_.TransactionRW();
 
@@ -503,9 +498,9 @@ auto SyncPrivate::Store(
                 lmdb_.Store(ChainToSyncTable(chain), dbKey, sData.Bytes(), tx);
 
             if (result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("saved ")(
-                    size)(" bytes at position ")(index.MemoryPosition())(
-                    " for ")(print(chain))(" sync data at height ")(dbKey)
+                LogTrace()()("saved ")(size)(" bytes at position ")(
+                    index.MemoryPosition())(" for ")(print(chain))(
+                    " sync data at height ")(dbKey)
                     .Flush();
             } else {
                 throw std::runtime_error{
@@ -537,7 +532,7 @@ auto SyncPrivate::Store(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

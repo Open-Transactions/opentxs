@@ -27,7 +27,6 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -193,17 +192,16 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         SetCurrencyID(CURRENCY_TYPE_ID);
         SetCurrencyAcctID(CURRENCY_ACCT_ID);
 
-        LogDebug()(OT_PRETTY_CLASS())("Trade. Transaction Number: ")(
+        LogDebug()()("Trade. Transaction Number: ")(
             transaction_num_)("Completed # of Trades: ")(trades_already_done_)
             .Flush();
 
-        LogDetail()(OT_PRETTY_CLASS())("Creation Date: ")(
-            creation)(". Valid From: ")(validFrom)(". Valid To: ")(
-            validTo)(". assetTypeID: ")(instrumentDefinitionID.get())(
-            ". assetAccountID: ")(assetAcctID.get())(". NotaryID: ")(
-            notaryID.get())(". NymID: ")(nymID.get())(". currencyTypeID: ")(
-            currencyTypeID.get())(". currencyAccountID: ")(
-            currencyAcctID.get())(".")
+        LogDetail()()("Creation Date: ")(creation)(". Valid From: ")(
+            validFrom)(". Valid To: ")(validTo)(". assetTypeID: ")(
+            instrumentDefinitionID.get())(". assetAccountID: ")(
+            assetAcctID.get())(". NotaryID: ")(notaryID.get())(". NymID: ")(
+            nymID.get())(". currencyTypeID: ")(currencyTypeID.get())(
+            ". currencyAccountID: ")(currencyAcctID.get())(".")
             .Flush();
 
         returnVal = 1;
@@ -215,10 +213,9 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         if (sign->Compare("0")) {
             stop_sign_ = 0;  // Zero means it isn't a stop order. So why is the
                              // tag in the file?
-            LogError()(OT_PRETTY_CLASS())(
-                "Strange: Stop order tag found in trade, but sign "
-                "character set to 0. "
-                "(Zero means: NOT a stop order).")
+            LogError()()("Strange: Stop order tag found in trade, but sign "
+                         "character set to 0. "
+                         "(Zero means: NOT a stop order).")
                 .Flush();
             return (-1);
         } else if (sign->Compare("<")) {
@@ -227,7 +224,7 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             stop_sign_ = '>';
         } else {
             stop_sign_ = 0;
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Unexpected or nonexistent value in stop order sign: ")(
                 sign.get())(".")
                 .Flush();
@@ -250,7 +247,7 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto unittype =
             api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                 GetInstrumentDefinitionID());
-        LogDebug()(OT_PRETTY_CLASS())("Stop order --")(
+        LogDebug()()("Stop order --")(
             stop_activated_ ? "Already activated" : "Will activate")(
             " when price ")(stop_activated_ ? "was" : "reaches")(
             ('<' == stop_sign_) ? "LESS THAN"
@@ -261,8 +258,8 @@ auto OTTrade::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (!strcmp("offer", xml->getNodeName())) {
         if (!LoadEncodedTextField(api_.Crypto(), xml, market_offer_)) {
 
-            LogError()(OT_PRETTY_CLASS())("Error: Offer field without "
-                                          "value.")
+            LogError()()("Error: Offer field without "
+                         "value.")
                 .Flush();
             return (-1);  // error condition
         }
@@ -315,7 +312,7 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
 
     for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
         std::int64_t closingNumber = GetClosingTransactionNoAt(i);
-        OT_ASSERT(closingNumber > 0);
+        assert_true(closingNumber > 0);
         TagPtr tagClosing(new Tag("closingTransactionNumber"));
         tagClosing->add_attribute("value", std::to_string(closingNumber));
         tag.add_tag(tagClosing);
@@ -362,25 +359,23 @@ auto OTTrade::VerifyOffer(OTOffer& offer) const -> bool
     // Let's verify the thing.
 
     if (GetTransactionNum() != offer.GetTransactionNum()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "While verifying offer, failed matching transaction number.")
             .Flush();
         return false;
     } else if (GetNotaryID() != offer.GetNotaryID()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "While verifying offer, failed matching Notary ID.")
+        LogError()()("While verifying offer, failed matching Notary ID.")
             .Flush();
         return false;
     } else if (
         GetInstrumentDefinitionID() != offer.GetInstrumentDefinitionID()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "While verifying offer, failed matching instrument definition "
             "ID.")
             .Flush();
         return false;
     } else if (GetCurrencyID() != offer.GetCurrencyID()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "While verifying offer, failed matching currency type ID.")
+        LogError()()("While verifying offer, failed matching currency type ID.")
             .Flush();
         return false;
     }
@@ -408,7 +403,7 @@ auto OTTrade::GetOffer(
     const PasswordPrompt& reason,
     OTMarket** market) -> OTOffer*
 {
-    OT_ASSERT(GetCron() != nullptr);
+    assert_true(GetCron() != nullptr);
 
     // See if the offer has already been instantiated onto a market...
     if (offer_ != nullptr) {
@@ -435,9 +430,8 @@ auto OTTrade::GetOffer(
             if (false != bool(pMarket)) {
                 *market = pMarket.get();  // <=================
             } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Offer_ already exists, yet unable to find the "
-                    "market it's supposed to be on.")
+                LogError()()("Offer_ already exists, yet unable to find the "
+                             "market it's supposed to be on.")
                     .Flush();
             }
         }
@@ -450,20 +444,18 @@ auto OTTrade::GetOffer(
     // else (BELOW) offer_ IS nullptr, and thus it didn't exist yet...
 
     if (!market_offer_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Error: Called with empty market_offer_.")
-            .Flush();
+        LogError()()("Error: Called with empty market_offer_.").Flush();
         return nullptr;
     }
 
     auto offer{api_.Factory().InternalSession().Offer()};
-    OT_ASSERT(false != bool(offer));
+    assert_true(false != bool(offer));
 
     // Trying to load the offer from the trader's original signed request
     // (So I can use it to lookup the Market ID, so I can see the offer is
     // already there on the market.)
     if (!offer->LoadContractFromString(market_offer_)) {
-        LogError()(OT_PRETTY_CLASS())("Error loading offer from string.")
-            .Flush();
+        LogError()()("Error loading offer from string.").Flush();
         return nullptr;
     }
 
@@ -492,7 +484,7 @@ auto OTTrade::GetOffer(
 
     // Couldn't find (or create) the market.
     if (false == bool(pMarket)) {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Unable to find or create market within requested parameters.")
             .Flush();
         return nullptr;
@@ -550,9 +542,8 @@ auto OTTrade::GetOffer(
         if (has_trade_activated_) {
             // Error -- how has the trade already activated, yet not on the
             // market and null in my pointer?
-            LogError()(OT_PRETTY_CLASS())(
-                "How has the trade already activated, yet not on the "
-                "market and null in my pointer?")
+            LogError()()("How has the trade already activated, yet not on the "
+                         "market and null in my pointer?")
                 .Flush();
         } else if (!pMarket->AddOffer(
                        this, *offer, reason, true))  // Since
@@ -563,9 +554,8 @@ auto OTTrade::GetOffer(
             // market.
             // bSaveFile=true.
             // Error adding the offer to the market!
-            LogError()(OT_PRETTY_CLASS())(
-                "Error adding the offer to the market! (Even though "
-                "supposedly the right market).")
+            LogError()()("Error adding the offer to the market! (Even though "
+                         "supposedly the right market).")
                 .Flush();
         } else {
             // SUCCESS!
@@ -633,9 +623,8 @@ auto OTTrade::GetOffer(
                                                   // the market (not just
             {  // loading from disk) the we actually want to save the market.
                 // Error adding the offer to the market!    // bSaveFile=true.
-                LogError()(OT_PRETTY_CLASS())(
-                    "Error adding the stop order to the market! (Even "
-                    "though supposedly the right market).")
+                LogError()()("Error adding the stop order to the market! (Even "
+                             "though supposedly the right market).")
                     .Flush();
             } else {
                 // SUCCESS!
@@ -694,7 +683,7 @@ auto OTTrade::GetOffer(
 void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
 {
     OTCron* cron = GetCron();
-    OT_ASSERT(cron != nullptr);
+    assert_true(cron != nullptr);
 
     // If I don't already have an offer on the market, then I will have trouble
     // figuring out
@@ -708,24 +697,22 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
 
     if (offer_ == nullptr) {
         if (!market_offer_->Exists()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: Called with nullptr offer_ and "
-                "empty market_offer_.")
+            LogError()()("Error: Called with nullptr offer_ and "
+                         "empty market_offer_.")
                 .Flush();
             return;
         }
 
         auto offer{api_.Factory().InternalSession().Offer()};
 
-        OT_ASSERT(false != bool(offer));
+        assert_true(false != bool(offer));
 
         // Trying to load the offer from the trader's original signed request
         // (So I can use it to lookup the Market ID, so I can see if the offer
         // is
         // already there on the market.)
         if (!offer->LoadContractFromString(market_offer_)) {
-            LogError()(OT_PRETTY_CLASS())("Error loading offer from string.")
-                .Flush();
+            LogError()()("Error loading offer from string.").Flush();
             return;
         }
 
@@ -742,8 +729,7 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
     // Couldn't find (or create) the market.
     //
     if (false == bool(market)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Unable to find market within requested parameters.")
+        LogError()()("Unable to find market within requested parameters.")
             .Flush();
         return;
     }
@@ -800,7 +786,7 @@ auto OTTrade::CanRemoveItemFromCron(const otx::context::Client& context) -> bool
     // you check first and make sure the Nym who requested it actually has said
     // trans# (and 2 related closing #s) signed out to him on his last receipt.
     if (!context.Signer()->CompareID(GetSenderNymID())) {
-        LogInsane()(OT_PRETTY_CLASS())(
+        LogInsane()()(
             "nym is not the originator of this CronItem. (He could be a "
             "recipient though, so this is normal).")
             .Flush();
@@ -809,7 +795,7 @@ auto OTTrade::CanRemoveItemFromCron(const otx::context::Client& context) -> bool
     }
     // By this point, that means nym is DEFINITELY the originator (sender)...
     else if (GetCountClosingNumbers() < 2) {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Weird: Sender tried to remove a market "
             "trade; expected at "
             "least 2 closing numbers to be available--that weren't. (Found ")(
@@ -822,16 +808,16 @@ auto OTTrade::CanRemoveItemFromCron(const otx::context::Client& context) -> bool
     const auto notaryID = String::Factory(GetNotaryID(), api_.Crypto());
 
     if (!context.VerifyIssuedNumber(GetAssetAcctClosingNum())) {
-        LogConsole()(OT_PRETTY_CLASS())("Closing number didn't verify "
-                                        "for asset account.")
+        LogConsole()()("Closing number didn't verify "
+                       "for asset account.")
             .Flush();
 
         return false;
     }
 
     if (!context.VerifyIssuedNumber(GetCurrencyAcctClosingNum())) {
-        LogConsole()(OT_PRETTY_CLASS())("Closing number didn't verify "
-                                        "for currency account.")
+        LogConsole()()("Closing number didn't verify "
+                       "for currency account.")
             .Flush();
 
         return false;
@@ -875,10 +861,10 @@ void OTTrade::onFinalReceipt(
 {
 
     OTCron* cron = GetCron();
-    OT_ASSERT(cron != nullptr);
+    assert_true(cron != nullptr);
 
     auto serverNym = cron->GetServerNym();
-    OT_ASSERT(serverNym);
+    assert_false(nullptr == serverNym);
 
     auto context = api_.Wallet().Internal().mutable_ClientContext(
         originator->ID(), reason);
@@ -974,14 +960,11 @@ void OTTrade::onFinalReceipt(
                 reason,
                 note,
                 attachment)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failure dropping receipt into nymbox.")
-                .Flush();
+            LogError()()("Failure dropping receipt into nymbox.").Flush();
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Problem verifying Opening Number when calling "
-            "VerifyIssuedNum(openingNumber).")
+        LogError()()("Problem verifying Opening Number when calling "
+                     "VerifyIssuedNum(openingNumber).")
             .Flush();
     }
 
@@ -1001,11 +984,10 @@ void OTTrade::onFinalReceipt(
             note,
             attachment);
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed verifying "
-            "closingAssetNumber=origCronItem. "
-            "GetClosingTransactionNoAt(0)>0 &&  "
-            "originator. VerifyTransactionNum(closingAssetNumber).")
+        LogError()()("Failed verifying "
+                     "closingAssetNumber=origCronItem. "
+                     "GetClosingTransactionNoAt(0)>0 &&  "
+                     "originator. VerifyTransactionNum(closingAssetNumber).")
             .Flush();
     }
 
@@ -1024,10 +1006,9 @@ void OTTrade::onFinalReceipt(
             note,
             attachment);
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed verifying closingCurrencyNumber=origCronItem. "
-            "GetClosingTransactionNoAt(1)>0  && "
-            "originator. VerifyTransactionNum(closingCurrencyNumber).")
+        LogError()()("Failed verifying closingCurrencyNumber=origCronItem. "
+                     "GetClosingTransactionNoAt(1)>0  && "
+                     "originator. VerifyTransactionNum(closingCurrencyNumber).")
             .Flush();
     }
 
@@ -1179,8 +1160,8 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
     if ((stopSign == 0) || (stopSign == '<') || (stopSign == '>')) {
         stop_sign_ = stopSign;
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Bad data in Stop Sign while issuing trade: ")(stopSign)(".")
+        LogError()()("Bad data in Stop Sign while issuing trade: ")(
+            stopSign)(".")
             .Flush();
         return false;
     }
@@ -1189,8 +1170,7 @@ auto OTTrade::IssueTrade(OTOffer& offer, char stopSign, const Amount& stopPrice)
     // and set.
     if ((stop_sign_ == '<') || (stop_sign_ == '>')) {
         if (0 >= stopPrice) {
-            LogError()(OT_PRETTY_CLASS())("Expected Stop Price for trade.")
-                .Flush();
+            LogError()()("Expected Stop Price for trade.").Flush();
             return false;
         }
 

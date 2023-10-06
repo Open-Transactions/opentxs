@@ -10,18 +10,18 @@
 #include <utility>
 
 #include "core/display/DefinitionPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::display
 {
 Definition::Definition(DefinitionPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 Definition::Definition() noexcept
@@ -32,7 +32,7 @@ Definition::Definition() noexcept
 Definition::Definition(const Definition& rhs) noexcept
     : imp_(std::make_unique<DefinitionPrivate>(*rhs.imp_).release())
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 Definition::Definition(Definition&& rhs) noexcept

@@ -12,7 +12,6 @@
 
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
@@ -71,7 +70,7 @@ auto Block::extra_bytes() const noexcept -> std::size_t
             std::accumulate(std::begin(proofs_), std::end(proofs_), 0_uz, cb);
     }
 
-    OT_ASSERT(proof_bytes_.has_value());
+    assert_true(proof_bytes_.has_value());
 
     return proof_bytes_.value();
 }
@@ -87,7 +86,7 @@ auto Block::serialize_aux_pow(WriteBuffer& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

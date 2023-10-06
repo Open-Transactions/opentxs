@@ -10,7 +10,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -38,9 +37,8 @@ StartupPublisher::StartupPublisher(
           "api::network::blockchain::StartupPublisher"))
     , batch_([&]() -> auto& {
         auto& out = handle_.batch_;
-        out.listen_callbacks_.emplace_back(Callback::Factory([this](auto&& in) {
-            publish_.Send(std::move(in), __FILE__, __LINE__);
-        }));
+        out.listen_callbacks_.emplace_back(Callback::Factory(
+            [this](auto&& in) { publish_.Send(std::move(in)); }));
 
         return out;
     }())
@@ -50,7 +48,7 @@ StartupPublisher::StartupPublisher(
         const auto rc =
             out.Bind(endpoints.Internal().BlockchainStartupPublish().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -59,7 +57,7 @@ StartupPublisher::StartupPublisher(
         const auto rc =
             out.Bind(endpoints.Internal().BlockchainStartupPull().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -71,9 +69,9 @@ StartupPublisher::StartupPublisher(
                [&cb = cb_](auto&& m) { cb.Process(std::move(m)); }},
           }))
 {
-    OT_ASSERT(nullptr != thread_);
+    assert_false(nullptr == thread_);
 
-    LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(batch_.id_).Flush();
+    LogTrace()()("using ZMQ batch ")(batch_.id_).Flush();
 }
 
 StartupPublisher::~StartupPublisher() { handle_.Release(); }

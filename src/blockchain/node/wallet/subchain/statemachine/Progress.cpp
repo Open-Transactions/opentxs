@@ -20,7 +20,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -76,20 +75,20 @@ auto Progress::Imp::do_process_update(
     auto dirty = Set<block::Position>{alloc.work_};
     decode(api_, msg, clean, dirty);
 
-    OT_ASSERT(0u == dirty.size());
-    OT_ASSERT(0u < clean.size());
+    assert_true(0u == dirty.size());
+    assert_true(0u < clean.size());
 
     const auto& best = clean.crbegin()->second;
-    log(OT_PRETTY_CLASS())(name_)(" received update: ")(best).Flush();
+    log()(name_)(" received update: ")(best).Flush();
     auto handle = parent_.progress_position_.lock();
     auto& last = *handle;
 
     if ((false == last.has_value()) || (last.value() != best)) {
         parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
-        log(OT_PRETTY_CLASS())(name_)(" progress saved to database").Flush();
+        log()(name_)(" progress saved to database").Flush();
         last = best;
         notify(best);
-        to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
+        to_scan_.SendDeferred(MakeWork(Work::statemachine));
     }
 
     parent_.match_cache_.lock()->Forget(best);
@@ -128,7 +127,7 @@ auto Progress::Imp::process_do_rescan(Message&& in) noexcept -> void
     parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
     parent_.RescanFinished();
     notify(best);
-    to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
+    to_scan_.SendDeferred(MakeWork(Work::statemachine));
 }
 }  // namespace opentxs::blockchain::node::wallet
 
@@ -144,7 +143,7 @@ Progress::Progress(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, parent, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Progress::Init() noexcept -> void

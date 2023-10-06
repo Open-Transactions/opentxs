@@ -32,7 +32,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Log.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Signals.hpp"
@@ -128,8 +127,7 @@ auto Context::Sessions::clear(
     }
 
     if (false == done) {
-        LogError()(OT_PRETTY_CLASS())(
-            "shutdown delayed, possibly due to active zmq batches.")
+        LogError()()("shutdown delayed, possibly due to active zmq batches.")
             .Flush();
         LogError()(zmq.Internal().ActiveBatches()).Flush();
     }
@@ -158,7 +156,7 @@ Context::Context(
     , default_external_password_callback_([&] {
         auto out = std::make_unique<PasswordCaller>();
 
-        OT_ASSERT(out);
+        assert_false(nullptr == out);
 
         out->SetCallback(null_callback_.get());
 
@@ -186,13 +184,13 @@ Context::Context(
     , signal_handler_()
     , me_()
 {
-    OT_ASSERT(null_callback_);
-    OT_ASSERT(default_external_password_callback_);
-    OT_ASSERT(zmq_context_);
-    OT_ASSERT(legacy_);
-    OT_ASSERT(nullptr != external_password_callback_);
-    OT_ASSERT(external_password_callback_->HaveCallback());
-    OT_ASSERT(rpc_);
+    assert_false(nullptr == null_callback_);
+    assert_false(nullptr == default_external_password_callback_);
+    assert_true(zmq_context_);
+    assert_false(nullptr == legacy_);
+    assert_false(nullptr == external_password_callback_);
+    assert_true(external_password_callback_->HaveCallback());
+    assert_false(nullptr == rpc_);
 }
 
 auto Context::Cancel(const TaskID task) const -> bool
@@ -212,7 +210,7 @@ auto Context::ClientSession(const int instance) const
 {
     const auto& output = sessions_.lock_shared()->client_.at(instance);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     return *output;
 }
@@ -230,7 +228,7 @@ auto Context::Config(const std::filesystem::path& path) const noexcept
                 factory::Settings(
                     *legacy_, String::Factory(path.string().c_str())));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out->second;
         } else {
@@ -239,28 +237,28 @@ auto Context::Config(const std::filesystem::path& path) const noexcept
         }
     }();
 
-    OT_ASSERT(config);
+    assert_false(nullptr == config);
 
     return *config;
 }
 
 auto Context::Crypto() const noexcept -> const api::Crypto&
 {
-    OT_ASSERT(crypto_);
+    assert_false(nullptr == crypto_);
 
     return *crypto_;
 }
 
 auto Context::Factory() const noexcept -> const api::Factory&
 {
-    OT_ASSERT(factory_);
+    assert_false(nullptr == factory_);
 
     return *factory_;
 }
 
 auto Context::GetPasswordCaller() const noexcept -> PasswordCaller&
 {
-    OT_ASSERT(nullptr != external_password_callback_);
+    assert_false(nullptr == external_password_callback_);
 
     return *external_password_callback_;
 }
@@ -288,7 +286,7 @@ auto Context::Init_Crypto() -> void
     crypto_ =
         factory::CryptoAPI(Config(legacy_->OpentxsConfigFilePath().string()));
 
-    OT_ASSERT(crypto_);
+    assert_false(nullptr == crypto_);
 
     legacy_->Init(crypto_);
 }
@@ -297,14 +295,14 @@ auto Context::Init_Factory() -> void
 {
     factory_ = factory::FactoryAPI(*crypto_);
 
-    OT_ASSERT(factory_);
+    assert_false(nullptr == factory_);
 
     crypto_->Internal().Init(factory_);
 }
 
 auto Context::Init_Log() -> void
 {
-    OT_ASSERT(legacy_);
+    assert_false(nullptr == legacy_);
 
     const auto& config = Config(legacy_->OpentxsConfigFilePath().string());
     auto notUsed{false};
@@ -334,7 +332,7 @@ auto Context::Init_Periodic() -> void
 {
     periodic_.emplace(asio_);
 
-    OT_ASSERT(periodic_.has_value());
+    assert_true(periodic_.has_value());
 }
 
 auto Context::init_pid() const -> void
@@ -356,7 +354,7 @@ auto Context::init_pid() const -> void
     } catch (const std::exception& e) {
         LogConsole()(e.what()).Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -391,7 +389,7 @@ auto Context::Init_Zap() -> void
 {
     zap_.reset(opentxs::Factory::ZAP(zmq_context_));
 
-    OT_ASSERT(zap_);
+    assert_false(nullptr == zap_);
 }
 
 auto Context::JobCount() noexcept -> std::atomic<unsigned int>&
@@ -406,7 +404,7 @@ auto Context::NotarySession(const int instance) const -> const session::Notary&
 {
     const auto& output = sessions_.lock_shared()->server_.at(instance);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     return *output;
 }
@@ -479,8 +477,8 @@ auto Context::StartClientSession(
 {
     auto handle = sessions_.lock();
 
-    OT_ASSERT(false == handle->shutdown_);
-    OT_ASSERT(me_);
+    assert_false(handle->shutdown_);
+    assert_false(nullptr == me_);
 
     auto& vector = handle->client_;
     const auto existing = vector.size();
@@ -490,7 +488,7 @@ auto Context::StartClientSession(
     if (effective == existing) {
         const auto count = vector.size();
 
-        OT_ASSERT(std::numeric_limits<int>::max() > count);
+        assert_true(std::numeric_limits<int>::max() > count);
 
         const auto next = static_cast<int>(count);
         const auto session = client_instance(next);
@@ -504,7 +502,7 @@ auto Context::StartClientSession(
             legacy_->ClientDataFolder(next),
             session));
 
-        OT_ASSERT(client);
+        assert_false(nullptr == client);
 
         client->InternalClient().Init();
         client->InternalClient().Start(client);
@@ -513,7 +511,7 @@ auto Context::StartClientSession(
     } else {
         const auto& output = vector.at(effective);
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         return *output;
     }
@@ -533,8 +531,8 @@ auto Context::StartClientSession(
     std::string_view recoverWords,
     std::string_view recoverPassphrase) const -> const api::session::Client&
 {
-    OT_ASSERT(crypto::HaveHDKeys());
-    OT_ASSERT(me_);
+    assert_true(crypto::HaveHDKeys());
+    assert_false(nullptr == me_);
 
     const auto& client = StartClientSession(args, instance);
     auto reason = client.Factory().PasswordPrompt("Recovering a BIP-39 seed");
@@ -559,8 +557,8 @@ auto Context::StartNotarySession(
 {
     auto handle = sessions_.lock();
 
-    OT_ASSERT(false == handle->shutdown_);
-    OT_ASSERT(me_);
+    assert_false(handle->shutdown_);
+    assert_false(nullptr == me_);
 
     auto& vector = handle->server_;
     const auto existing = vector.size();
@@ -570,7 +568,7 @@ auto Context::StartNotarySession(
     if (effective == existing) {
         const auto count = vector.size();
 
-        OT_ASSERT(std::numeric_limits<int>::max() > count);
+        assert_true(std::numeric_limits<int>::max() > count);
 
         const auto next = static_cast<int>(count);
         const auto session = server_instance(next);
@@ -584,7 +582,7 @@ auto Context::StartNotarySession(
             legacy_->ServerDataFolder(next),
             session));
 
-        OT_ASSERT(server);
+        assert_false(nullptr == server);
 
         server->InternalNotary().Start(server);
 
@@ -592,7 +590,7 @@ auto Context::StartNotarySession(
     } else {
         const auto& output = vector.at(effective);
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         return *output;
     }
@@ -608,7 +606,7 @@ auto Context::StartNotarySession(const int instance) const
 
 auto Context::ZAP() const noexcept -> const api::network::ZAP&
 {
-    OT_ASSERT(zap_);
+    assert_false(nullptr == zap_);
 
     return *zap_;
 }

@@ -30,7 +30,6 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -117,7 +116,7 @@ Node::Actor::Actor(
             const auto rc =
                 socket.EnableCurveServer(shared_.private_key_.Bytes());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             out[n] = std::addressof(socket);
         }
@@ -221,17 +220,14 @@ auto Node::Actor::forward(
     std::span<zeromq::Frame> payload,
     zeromq::socket::Raw& socket) const noexcept -> void
 {
-    OT_ASSERT(recipient.IsValid());
+    assert_true(recipient.IsValid());
 
-    socket.SendDeferred(
-        [&] {
-            auto out = zeromq::reply_to_message(recipient, true);
-            out.MoveFrames(payload);
+    socket.SendDeferred([&] {
+        auto out = zeromq::reply_to_message(recipient, true);
+        out.MoveFrames(payload);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Node::Actor::get_peers() const noexcept -> Set<CString>
@@ -286,7 +282,7 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
                 const auto rc = api_.Crypto().Encode().Z85Encode(
                     shared_.public_key_.Bytes(), writer(out));
 
-                OT_ASSERT(rc);
+                assert_true(rc);
 
                 return out;
             }();
@@ -312,8 +308,7 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
 auto Node::Actor::load_peers() noexcept -> void
 {
     const auto peers = api_.Network().OTDHT().KnownPeers(get_allocator());
-    log_(OT_PRETTY_CLASS())(name_)(": loading ")(peers.size())(" peers")
-        .Flush();
+    log_()(name_)(": loading ")(peers.size())(" peers").Flush();
 
     for (const auto& peer : peers) { process_peer(peer); }
 }
@@ -441,8 +436,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                     std::make_pair(val.external_type_, val.external_address_)};
             }
             default: {
-                LogError()(OT_PRETTY_CLASS())(
-                    name_)(": unsupported listener type: ")(
+                LogError()()(name_)(": unsupported listener type: ")(
                     print(val.external_type_))
                     .Flush();
 
@@ -450,7 +444,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -495,14 +489,12 @@ auto Node::Actor::pipeline_external(
         case Work::registration:
         case Work::init:
         case Work::statemachine: {
-            log_(OT_PRETTY_CLASS())(name_)(
-                ": received unhandled message type ")(print(work))(
+            log_()(name_)(": received unhandled message type ")(print(work))(
                 " on external socket")
                 .Flush();
         } break;
         default: {
-            log_(OT_PRETTY_CLASS())(name_)(
-                ": received unhandled message type ")(
+            log_()(name_)(": received unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))(" on external socket")
                 .Flush();
         }
@@ -534,12 +526,11 @@ auto Node::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
         case Work::registration:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -577,12 +568,11 @@ auto Node::Actor::pipeline_router(
         case Work::add_listener:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -593,9 +583,7 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (4 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (4 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto routerBind = body[1].Bytes();
     const auto routerAdvertise = body[2].Bytes();
@@ -624,7 +612,7 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
         auto& [routingID, pushEndpoint, socket] = it->second;
         const auto rc = socket.Connect(pushEndpoint.data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         Listener{
             api_p_,
@@ -657,13 +645,13 @@ auto Node::Actor::process_blockchain_external(
         auto& [cookie, localID, queue] = i->second;
 
         if (localID.IsValid()) {
-            log(OT_PRETTY_CLASS())(name_)(": forwarding incoming ")(
-                print(chain))(" ")(type.c_str())(" message to peer ")(cookie)
+            log()(name_)(": forwarding incoming ")(print(chain))(" ")(
+                type.c_str())(" message to peer ")(cookie)
                 .Flush();
             forward(localID, payload, router_);
         } else {
-            log(OT_PRETTY_CLASS())(name_)(": queueing incoming ")(print(chain))(
-                " ")(type.c_str())(" message for peer ")(cookie)
+            log()(name_)(": queueing incoming ")(print(chain))(" ")(
+                type.c_str())(" message for peer ")(cookie)
                 .Flush();
             auto& queued = queue.emplace_back();
             queued.StartBody();
@@ -686,11 +674,11 @@ auto Node::Actor::process_blockchain_external(
             }();
             blockchain_reverse_index_.try_emplace(
                 cookie, std::move(remoteID), index);
-            log(OT_PRETTY_CLASS())(name_)(": notifying ")(print(chain))(
+            log()(name_)(": notifying ")(print(chain))(
                 " peer manager to spawn peer ")(cookie)
                 .Flush();
-            log(OT_PRETTY_CLASS())(name_)(": queueing incoming ")(print(chain))(
-                " ")(type.c_str())(" message for peer ")(cookie)
+            log()(name_)(": queueing incoming ")(print(chain))(" ")(
+                type.c_str())(" message for peer ")(cookie)
                 .Flush();
             {
                 queue.clear();
@@ -699,19 +687,16 @@ auto Node::Actor::process_blockchain_external(
                 queued.MoveFrames(payload);
             }
             const auto& endpoint = external_endpoints_[index];
-            router_.SendDeferred(
-                [&]() {
-                    using enum opentxs::blockchain::node::PeerManagerJobs;
-                    auto out = zeromq::tagged_reply_to_message(
-                        peerManager, spawn_peer, true);
-                    out.AddFrame(cookie);
-                    out.AddFrame(endpoint.Subtype());
-                    out.AddFrame(endpoint.Display());
+            router_.SendDeferred([&]() {
+                using enum opentxs::blockchain::node::PeerManagerJobs;
+                auto out = zeromq::tagged_reply_to_message(
+                    peerManager, spawn_peer, true);
+                out.AddFrame(cookie);
+                out.AddFrame(endpoint.Subtype());
+                out.AddFrame(endpoint.Display());
 
-                    return out;
-                }(),
-                __FILE__,
-                __LINE__);
+                return out;
+            }());
         } else {
             // NOTE there is no peer manager for this chain so drop the message
         }
@@ -729,18 +714,17 @@ auto Node::Actor::process_blockchain_internal(
     const auto localID = std::move(msg).Envelope();
     const auto& map = outgoing_blockchain_index_;
 
-    OT_ASSERT(localID.IsValid());
+    assert_true(localID.IsValid());
 
     if (auto i = map.find(localID); map.end() != i) {
         const auto& [remoteID, cookie, index] = i->second;
-        log(OT_PRETTY_CLASS())(name_)(": forwarding outgoing ")(print(chain))(
-            " ")(type.c_str())(" message from peer ")(cookie)
+        log()(name_)(": forwarding outgoing ")(print(chain))(" ")(type.c_str())(
+            " message from peer ")(cookie)
             .Flush();
         forward(remoteID, payload, *external_[index]);
     } else {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": can not determine outgoing connection for ")(print(chain))(" ")(
-            type.c_str())(" message")
+        log()(name_)(": can not determine outgoing connection for ")(
+            print(chain))(" ")(type.c_str())(" message")
             .Flush();
     }
 }
@@ -771,9 +755,7 @@ auto Node::Actor::process_chain_state(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (2 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (2 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<opentxs::blockchain::Type>();
     auto enabled = body[2].as<bool>();
@@ -799,7 +781,7 @@ auto Node::Actor::process_chain_state(Message&& msg) noexcept -> void
         } else {
             const auto [i, rc] = map.try_emplace(chain, std::move(tip));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         }
     } else {
         map.erase(chain);
@@ -816,8 +798,8 @@ auto Node::Actor::process_connect_peer(
     const auto payload = msg.Payload();
     auto envelope = std::move(msg).Envelope();
 
-    OT_ASSERT(2_uz < payload.size());
-    OT_ASSERT(envelope.IsValid());
+    assert_true(2_uz < payload.size());
+    assert_true(envelope.IsValid());
 
     const auto chain = payload[1].as<opentxs::blockchain::Type>();
     const auto cookie = payload[2].as<Cookie>();
@@ -832,21 +814,17 @@ auto Node::Actor::process_connect_peer(
             auto& [_, localID, queue] = j->second;
             localID = std::move(envelope);
             outgoing[localID] = std::make_tuple(remoteID, cookie, index);
-            router_.SendDeferred(
-                zeromq::tagged_reply_to_message(
-                    localID, WorkType::AsioRegister, true),
-                __FILE__,
-                __LINE__);
-            log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" peer ")(
-                cookie)(" registered")
+            router_.SendDeferred(zeromq::tagged_reply_to_message(
+                localID, WorkType::AsioRegister, true));
+            log()(name_)(": ")(print(chain))(" peer ")(cookie)(" registered")
                 .Flush();
 
             while (false == queue.empty()) {
                 auto& m = queue.front();
                 auto original = m.Payload();
                 const auto type = CString{original[3].Bytes(), monotonic};
-                log(OT_PRETTY_CLASS())(name_)(": delivering queued ")(print(
-                    chain))(" ")(type.c_str())(" message to peer ")(cookie)
+                log()(name_)(": delivering queued ")(print(chain))(" ")(
+                    type.c_str())(" message to peer ")(cookie)
                     .Flush();
                 forward(localID, original, router_);
                 queue.pop_front();
@@ -861,8 +839,8 @@ auto Node::Actor::process_connect_peer_manager(Message&& msg) noexcept -> void
     const auto payload = msg.Payload();
     auto envelope = std::move(msg).Envelope();
 
-    OT_ASSERT(1_uz < payload.size());
-    OT_ASSERT(envelope.IsValid());
+    assert_true(1_uz < payload.size());
+    assert_true(envelope.IsValid());
 
     const auto chain = payload[1].as<opentxs::blockchain::Type>();
     auto& map = peer_manager_index_;
@@ -875,30 +853,23 @@ auto Node::Actor::process_connect_peer_manager(Message&& msg) noexcept -> void
     }
 
     using enum opentxs::blockchain::node::PeerManagerJobs;
-    router_.SendDeferred(
-        [&] {
-            auto out = zeromq::tagged_reply_to_message(
-                std::move(envelope), register_ack, true);
+    router_.SendDeferred([&] {
+        auto out = zeromq::tagged_reply_to_message(
+            std::move(envelope), register_ack, true);
 
-            for (const auto& addr : external_endpoints_) {
-                auto proto = proto::BlockchainPeerAddress{};
+        for (const auto& addr : external_endpoints_) {
+            auto proto = proto::BlockchainPeerAddress{};
 
-                if (addr.Internal().Serialize(proto)) {
-                    proto::write(proto, out.AppendBytes());
-                } else {
-                    LogError()(OT_PRETTY_CLASS())(
-                        name_)(": failed to serialize address")
-                        .Flush();
-                }
+            if (addr.Internal().Serialize(proto)) {
+                proto::write(proto, out.AppendBytes());
+            } else {
+                LogError()()(name_)(": failed to serialize address").Flush();
             }
+        }
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
-    log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(
-        " peer manager registered")
-        .Flush();
+        return out;
+    }());
+    log()(name_)(": ")(print(chain))(" peer manager registered").Flush();
 }
 
 auto Node::Actor::process_disconnect_peer(Message&& msg) noexcept -> void
@@ -907,8 +878,8 @@ auto Node::Actor::process_disconnect_peer(Message&& msg) noexcept -> void
     const auto payload = msg.Payload();
     auto localID = std::move(msg).Envelope();
 
-    OT_ASSERT(2_uz < payload.size());
-    OT_ASSERT(localID.IsValid());
+    assert_true(2_uz < payload.size());
+    assert_true(localID.IsValid());
 
     const auto chain = payload[1].as<opentxs::blockchain::Type>();
     const auto cookie = payload[2].as<Cookie>();
@@ -925,8 +896,7 @@ auto Node::Actor::process_disconnect_peer(Message&& msg) noexcept -> void
         }
 
         blockchain_index_.erase(remoteID);
-        log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" peer ")(
-            cookie)(" unregistered")
+        log()(name_)(": ")(print(chain))(" peer ")(cookie)(" unregistered")
             .Flush();
     }
 }
@@ -937,7 +907,7 @@ auto Node::Actor::process_disconnect_peer_manager(Message&& msg) noexcept
     const auto& log = log_;
     const auto payload = msg.Payload();
 
-    OT_ASSERT(1_uz < payload.size());
+    assert_true(1_uz < payload.size());
 
     const auto chain = payload[1].as<opentxs::blockchain::Type>();
     auto& peer = peer_manager_index_;
@@ -945,8 +915,7 @@ auto Node::Actor::process_disconnect_peer_manager(Message&& msg) noexcept
     if (auto i = peer.find(chain); peer.end() != i) {
         const auto post1 = ScopeGuard{[&] {
             peer.erase(i);
-            log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(
-                " peer manager unregistered")
+            log()(name_)(": ")(print(chain))(" peer manager unregistered")
                 .Flush();
         }};
         const auto& [_1, connections] = i->second;
@@ -968,9 +937,7 @@ auto Node::Actor::process_new_cfilter(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (4 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (4 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     process_cfilter(
         body[1].as<opentxs::blockchain::Type>(),
@@ -981,9 +948,7 @@ auto Node::Actor::process_new_peer(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (2 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (2 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto active = body[2].as<bool>();
 
@@ -993,12 +958,11 @@ auto Node::Actor::process_new_peer(Message&& msg) noexcept -> void
 auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
 {
     if (peers_.contains(endpoint)) {
-        log_(OT_PRETTY_CLASS())(name_)(": already connected to ")(endpoint)
-            .Flush();
+        log_()(name_)(": already connected to ")(endpoint).Flush();
 
         return;
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": connecting to ")(endpoint).Flush();
+        log_()(name_)(": connecting to ")(endpoint).Flush();
     }
 
     auto alloc = get_allocator();
@@ -1009,12 +973,12 @@ auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
         zeromq::MakeArbitraryInproc(alloc),
         api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     auto& [routingID, pushEndpoint, socket] = it->second;
     rc = socket.Connect(pushEndpoint.data());
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     Peer{api_p_, shared_p_, routingID, endpoint, pushEndpoint}.Init();
     publish_peers();
@@ -1024,9 +988,7 @@ auto Node::Actor::process_registration(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (3 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (3 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     process_cfilter(
         body[1].as<opentxs::blockchain::Type>(),
@@ -1049,37 +1011,31 @@ auto Node::Actor::process_registration(Message&& msg) noexcept -> void
 
         return out;
     }();
-    router_.SendDeferred(
-        [&] {
-            auto out = zeromq::tagged_reply_to_message(
-                msg, blockchain::DHTJob::registration);
+    router_.SendDeferred([&] {
+        auto out = zeromq::tagged_reply_to_message(
+            msg, blockchain::DHTJob::registration);
 
-            for (const auto& endpoint : missing) { out.AddFrame(endpoint); }
+        for (const auto& endpoint : missing) { out.AddFrame(endpoint); }
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
     publish_peers();
 }
 
 auto Node::Actor::publish_peers() noexcept -> void
 {
-    publish_.SendDeferred(
-        [&] {
-            auto out = MakeWork(OT_ZMQ_OTDHT_PEER_LIST);
-            get_peers(out);
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+    publish_.SendDeferred([&] {
+        auto out = MakeWork(OT_ZMQ_OTDHT_PEER_LIST);
+        get_peers(out);
+        return out;
+    }());
 }
 
 auto Node::Actor::send_to_peers(Message&& msg) noexcept -> void
 {
     for (auto& [key, value] : peers_) {
         auto& [routingID, endpoint, socket] = value;
-        socket.SendDeferred(Message{msg}, __FILE__, __LINE__);
+        socket.SendDeferred(Message{msg});
     }
 }
 

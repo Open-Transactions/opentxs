@@ -15,7 +15,6 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -161,7 +160,7 @@ auto OTSignedFile::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (!strcmp("filePayload", xml->getNodeName())) {
         if (false ==
             LoadEncodedTextField(api_.Crypto(), xml, signed_file_payload_)) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error in OTSignedFile::ProcessXMLNode: filePayload field "
                 "without value.")
                 .Flush();
@@ -190,9 +189,9 @@ auto OTSignedFile::VerifyFile() -> bool
         return true;
     }
 
-    LogError()(OT_PRETTY_CLASS())("Failed verifying signed file: "
-                                  "Expected directory: ")(local_dir_.get())(
-        ". Found: ")(purported_local_dir_.get())(". Expected filename: ")(
+    LogError()()("Failed verifying signed file: "
+                 "Expected directory: ")(local_dir_.get())(". Found: ")(
+        purported_local_dir_.get())(". Expected filename: ")(
         signed_filename_.get())(". Found: ")(purported_filename_.get())(".")
         .Flush();
     return false;

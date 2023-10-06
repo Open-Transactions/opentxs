@@ -24,7 +24,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -118,7 +117,7 @@ auto HeaderOracle::Actor::do_startup(allocator_type) noexcept -> bool
 
     const auto best = shared_.BestChain();
 
-    OT_ASSERT(0 <= best.height_);
+    assert_true(0 <= best.height_);
 
     LogVerbose()(print(chain_))(" chain initialized with best position ")(best)
         .Flush();
@@ -155,12 +154,11 @@ auto HeaderOracle::Actor::pipeline(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
+            LogAbort()()(name_)(" unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -186,9 +184,7 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
 {
     const auto body = in.Payload();
 
-    if (1_uz > body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())("Invalid message").Abort();
-    }
+    if (1_uz > body.size()) { LogAbort()()("Invalid message").Abort(); }
 
     {
         const auto hash = block::Hash{body[1].Bytes()};
@@ -196,8 +192,7 @@ auto HeaderOracle::Actor::process_submit_submit_block_hash(
         auto& data = *handle;
 
         if (false == data.database_.HeaderExists(hash)) {
-            log_(OT_PRETTY_CLASS())(name_)(
-                ": received notification of unknown block hash ")
+            log_()(name_)(": received notification of unknown block hash ")
                 .asHex(hash)
                 .Flush();
             data.AddUnknownHash(hash);
@@ -212,9 +207,7 @@ auto HeaderOracle::Actor::process_submit_block_header(Message&& in) noexcept
 {
     const auto body = in.Payload();
 
-    if (2_uz > body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())("Invalid message").Abort();
-    }
+    if (2_uz > body.size()) { LogAbort()()("Invalid message").Abort(); }
 
     auto headers = [&] {
         auto alloc = get_allocator();
@@ -239,7 +232,7 @@ auto HeaderOracle::Actor::process_update_remote_height(
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     {
         auto handle = shared_.data_.lock();
@@ -248,15 +241,12 @@ auto HeaderOracle::Actor::process_update_remote_height(
             data.UpdateRemoteHeight(body[1].as<block::Height>());
 
         if (changed) {
-            data.to_parent_.SendDeferred(
-                [&] {
-                    using Job = ManagerJobs;
-                    auto out = MakeWork(Job::statemachine);
+            data.to_parent_.SendDeferred([&] {
+                using Job = ManagerJobs;
+                auto out = MakeWork(Job::statemachine);
 
-                    return out;
-                }(),
-                __FILE__,
-                __LINE__);
+                return out;
+            }());
         }
     }
 
@@ -274,12 +264,11 @@ auto HeaderOracle::Actor::work(allocator_type monotonic) noexcept -> bool
     const auto& data = *handle;
 
     if (data.JobIsAvailable()) {
-        log_(OT_PRETTY_CLASS())(name_)(": signaling job availability").Flush();
-        job_ready_.SendDeferred(
-            MakeWork(OT_ZMQ_HEADER_ORACLE_JOB_READY), __FILE__, __LINE__);
+        log_()(name_)(": signaling job availability").Flush();
+        job_ready_.SendDeferred(MakeWork(OT_ZMQ_HEADER_ORACLE_JOB_READY));
         reset_job_timer();
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": no job available").Flush();
+        log_()(name_)(": no job available").Flush();
     }
 
     return false;

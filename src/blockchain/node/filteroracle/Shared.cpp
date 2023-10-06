@@ -22,7 +22,6 @@
 #include "internal/blockchain/node/filteroracle/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -79,7 +78,7 @@ Shared::Shared(
                 return false;
             }
             default: {
-                LogAbort()(OT_PRETTY_CLASS())("invalid profile").Abort();
+                LogAbort()()("invalid profile").Abort();
             }
         }
     }())
@@ -96,7 +95,7 @@ Shared::Shared(
                 return false;
             }
             default: {
-                LogAbort()(OT_PRETTY_CLASS())("invalid profile").Abort();
+                LogAbort()()("invalid profile").Abort();
             }
         }
     }())
@@ -109,33 +108,25 @@ auto Shared::broadcast_cfilter_tip(
     const block::Position& tip,
     Data& data) const noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(print(chain_))(
-        ": notifying peers of new filter tip ")(tip)
-        .Flush();
+    log_()(print(chain_))(": notifying peers of new filter tip ")(tip).Flush();
     data.last_sync_progress_ = sClock::now();
-    data.filter_notifier_internal_.SendDeferred(
-        [&] {
-            auto work = MakeWork(OT_ZMQ_NEW_FILTER_SIGNAL);
-            work.AddFrame(type);
-            work.AddFrame(tip.height_);
-            work.AddFrame(tip.hash_);
+    data.filter_notifier_internal_.SendDeferred([&] {
+        auto work = MakeWork(OT_ZMQ_NEW_FILTER_SIGNAL);
+        work.AddFrame(type);
+        work.AddFrame(tip.height_);
+        work.AddFrame(tip.hash_);
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
-    data.to_blockchain_api_.SendDeferred(
-        [&] {
-            auto work = MakeWork(WorkType::BlockchainNewFilter);
-            work.AddFrame(chain_);
-            work.AddFrame(type);
-            work.AddFrame(tip.height_);
-            work.AddFrame(tip.hash_);
+        return work;
+    }());
+    data.to_blockchain_api_.SendDeferred([&] {
+        auto work = MakeWork(WorkType::BlockchainNewFilter);
+        work.AddFrame(chain_);
+        work.AddFrame(type);
+        work.AddFrame(tip.height_);
+        work.AddFrame(tip.hash_);
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Shared::CfheaderTip() const noexcept -> block::Position
@@ -230,7 +221,7 @@ auto Shared::compare_cfheader_tip_to_checkpoint(
             checkpoint = params.CfheaderAt(default_type_, height);
         }
 
-        OT_ASSERT(checkpoint.has_value());
+        assert_true(checkpoint.has_value());
 
         const auto& required = *checkpoint;
         const auto existing =
@@ -279,7 +270,7 @@ auto Shared::find_acceptable_cfheader(
     if (1 > tip.height_) {
         tip = headerOracle.GetPosition(0);
 
-        OT_ASSERT(db.HaveFilterHeader(default_type_, tip.hash_));
+        assert_true(db.HaveFilterHeader(default_type_, tip.hash_));
     } else {
         const auto have_data = [&](const auto& prev, const auto& cur) -> bool {
             return db.HaveFilterHeader(default_type_, cur.hash_) &&
@@ -300,7 +291,7 @@ auto Shared::find_acceptable_cfheader(
                     return;
                 } else {
                     tip = {std::move(prior), std::move(previous)};
-                    LogError()(OT_PRETTY_CLASS())(" rewinding ")(print(chain_))(
+                    LogError()()(" rewinding ")(print(chain_))(
                         " cfheader tip to ")(
                         tip)(" due to missing or invalid data")
                         .Flush();
@@ -308,7 +299,7 @@ auto Shared::find_acceptable_cfheader(
             }
         }
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -323,7 +314,7 @@ auto Shared::find_acceptable_cfilter(
                             (cfheaderTip.hash_ != tip.hash_));
 
         if (reset) {
-            LogError()(OT_PRETTY_CLASS())(" rewinding ")(print(chain_))(
+            LogError()()(" rewinding ")(print(chain_))(
                 " cfilter tip to match cfheader tip")
                 .Flush();
             tip = cfheaderTip;
@@ -336,7 +327,7 @@ auto Shared::find_acceptable_cfilter(
     if (1 > tip.height_) {
         tip = headerOracle.GetPosition(0);
 
-        OT_ASSERT(db.HaveFilter(default_type_, tip.hash_));
+        assert_true(db.HaveFilter(default_type_, tip.hash_));
     } else {
         const auto have_data = [&](const auto& cur) -> bool {
             return db.HaveFilter(default_type_, cur.hash_) &&
@@ -355,7 +346,7 @@ auto Shared::find_acceptable_cfilter(
                     auto prior = tip.height_ - 1;
                     auto previous = headerOracle.BestHash(prior);
                     tip = {std::move(prior), std::move(previous)};
-                    LogError()(OT_PRETTY_CLASS())(" rewinding ")(print(chain_))(
+                    LogError()()(" rewinding ")(print(chain_))(
                         " cfilter tip to ")(
                         tip)(" due to missing or invalid data")
                         .Flush();
@@ -363,7 +354,7 @@ auto Shared::find_acceptable_cfilter(
             }
         }
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -386,8 +377,8 @@ auto Shared::find_best_position(block::Position candidate, const Data& data)
     if (blank == candidate.height_) {
         candidate = headerOracle.GetPosition(0);
 
-        OT_ASSERT(db.HaveFilterHeader(default_type_, candidate.hash_));
-        OT_ASSERT(db.HaveFilter(default_type_, candidate.hash_));
+        assert_true(db.HaveFilterHeader(default_type_, candidate.hash_));
+        assert_true(db.HaveFilter(default_type_, candidate.hash_));
     }
 
     if (0 == candidate.height_) {
@@ -433,7 +424,7 @@ auto Shared::find_best_position(block::Position candidate, const Data& data)
             }
         }
 
-        LogAbort()(OT_PRETTY_CLASS())("genesis data not found").Abort();
+        LogAbort()()("genesis data not found").Abort();
     }
 }
 
@@ -468,7 +459,7 @@ auto Shared::Init() noexcept -> void
             .Flush();
         const auto block = params.BlockHeaderAt(resetTarget);
 
-        OT_ASSERT(block);
+        assert_true(block.has_value());
 
         cfheaderTip = {resetTarget, *block};
         find_acceptable_cfheader(data, cfheaderTip);
@@ -482,13 +473,13 @@ auto Shared::Init() noexcept -> void
     if (originalCfheader != cfheaderTip) {
         const auto rc = set_cfheader_tip(default_type_, cfheaderTip, data);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
     }
 
     if (originalCfilter != cfilterTip) {
         const auto rc = set_cfilter_tip(default_type_, cfilterTip, data);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
     }
 
     update_cfilter_tip(default_type_, cfilterTip, data);
@@ -502,8 +493,7 @@ auto Shared::Init(
     std::shared_ptr<Shared> shared) noexcept -> void
 {
     if (standalone_mode_) {
-        LogAbort()(OT_PRETTY_CLASS())("standalone mode is not implemented")
-            .Abort();
+        LogAbort()()("standalone mode is not implemented").Abort();
     } else if (server_mode_) {
         filteroracle::BlockIndexer{api, node, shared}.Start();
     }
@@ -600,9 +590,7 @@ auto Shared::ProcessBlock(
             .second;
 
     if (false == cfilter.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate ")(print(chain_))(
-            " cfilter")
-            .Flush();
+        LogError()()("Failed to calculate ")(print(chain_))(" cfilter").Flush();
 
         return false;
     }
@@ -613,8 +601,7 @@ auto Shared::ProcessBlock(
         load_cfheader(default_type_, header.ParentHash(), data);
 
     if (previousCfheader.IsNull()) {
-        LogError()(OT_PRETTY_CLASS())("failed to load previous")(print(chain_))(
-            " cfheader")
+        LogError()()("failed to load previous")(print(chain_))(" cfheader")
             .Flush();
 
         return false;
@@ -625,8 +612,7 @@ auto Shared::ProcessBlock(
         id, cfilter.Header(previousCfheader.Bytes()), filterHash.Bytes()));
 
     if (cfheader.IsNull()) {
-        LogError()(OT_PRETTY_CLASS())("failed to calculate ")(print(chain_))(
-            " cfheader")
+        LogError()()("failed to calculate ")(print(chain_))(" cfheader")
             .Flush();
 
         return false;
@@ -645,7 +631,7 @@ auto Shared::ProcessBlock(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Database error ").Flush();
+        LogError()()("Database error ").Flush();
 
         return false;
     }
@@ -734,16 +720,14 @@ auto Shared::process_sync_data(
         return;
     }
 
-    log_(OT_PRETTY_CLASS())("current ")(print(chain_))(
-        " filter tip height is ")(current.height_)
+    log_()("current ")(print(chain_))(" filter tip height is ")(current.height_)
         .Flush();
-    log_(OT_PRETTY_CLASS())("incoming ")(print(chain_))(
-        " sync data provides heights ")(incoming)(" to ")(finalFilter.height_)
+    log_()("incoming ")(print(chain_))(" sync data provides heights ")(
+        incoming)(" to ")(finalFilter.height_)
         .Flush();
 
     if (incoming > (current.height_ + 1)) {
-        log_(OT_PRETTY_CLASS())("cannot connect ")(print(chain_))(
-            " sync data to current tip")
+        log_()("cannot connect ")(print(chain_))(" sync data to current tip")
             .Flush();
 
         return;
@@ -753,9 +737,7 @@ auto Shared::process_sync_data(
                            (finalFilter.hash_ == current.hash_);
 
     if (redundant) {
-        log_(OT_PRETTY_CLASS())("ignoring redundant ")(print(chain_))(
-            " sync data")
-            .Flush();
+        log_()("ignoring redundant ")(print(chain_))(" sync data").Flush();
 
         return;
     }
@@ -765,7 +747,7 @@ auto Shared::process_sync_data(
     headers.reserve(count);
 
     try {
-        OT_ASSERT(0 < count);
+        assert_true(0 < count);
 
         const auto previous = [&] {
             if (prior.empty()) {
@@ -776,8 +758,8 @@ auto Shared::process_sync_data(
                 auto output = load_cfheader(filterType, prior, data);
 
                 if (output.IsNull()) {
-                    LogError()(OT_PRETTY_CLASS())("cfheader for ")(
-                        print(chain_))(" block ")(prior.asHex())(" not found")
+                    LogError()()("cfheader for ")(print(chain_))(" block ")(
+                        prior.asHex())(" not found")
                         .Flush();
 
                     throw std::runtime_error(
@@ -806,8 +788,8 @@ auto Shared::process_sync_data(
                     monotonic));
 
             if (false == cfilter.IsValid()) {
-                LogError()(OT_PRETTY_CLASS())("Failed to instantiate ")(
-                    print(chain_))(" cfilter #")(height)
+                LogError()()("Failed to instantiate ")(print(chain_))(
+                    " cfilter #")(height)
                     .Flush();
 
                 throw std::runtime_error("Failed to instantiate gcs");
@@ -840,7 +822,7 @@ auto Shared::process_sync_data(
             throw std::runtime_error{"database error"};
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -904,14 +886,14 @@ auto Shared::reset_tips_to(
         resetfilter = filterTip.IsReplacedBy(position);
     }
 
-    OT_ASSERT(resetHeader.has_value());
-    OT_ASSERT(resetfilter.has_value());
+    assert_true(resetHeader.has_value());
+    assert_true(resetfilter.has_value());
 
     using Future = std::shared_future<cfilter::Header>;
     auto previous = [&]() -> Future {
         const auto& block = header_.LoadHeader(position.hash_);
 
-        OT_ASSERT(block.IsValid());
+        assert_true(block.IsValid());
 
         auto promise = std::promise<cfilter::Header>{};
         promise.set_value(
@@ -934,8 +916,7 @@ auto Shared::reset_tips_to(
     }
 
     if (resetBlock && server_mode_) {
-        data.reindex_blocks_.SendDeferred(
-            MakeWork(BlockIndexerJob::reindex), __FILE__, __LINE__);
+        data.reindex_blocks_.SendDeferred(MakeWork(BlockIndexerJob::reindex));
         headerTipHasBeenReset = true;
         filterTipHasBeenReset = true;
     }

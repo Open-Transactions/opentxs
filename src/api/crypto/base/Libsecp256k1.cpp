@@ -6,13 +6,13 @@
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
 #include "internal/crypto/library/Secp256k1.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::imp
 {
 auto Crypto::Init_Libsecp256k1() noexcept -> void
 {
-    OT_ASSERT(secp256k1_);
+    assert_false(nullptr == secp256k1_);
 
     secp256k1_->Init();
 }

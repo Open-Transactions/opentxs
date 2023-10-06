@@ -26,7 +26,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
 #include "internal/util/Future.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -126,9 +125,7 @@ auto Peers::delete_peer(
     }
 
     lmdb_.Delete(Table::PeerDetails, id.asBase58(api_.Crypto()));
-    log_(OT_PRETTY_CLASS())("deleted stale ")(print(chain))(" peer ")(
-        id, api_.Crypto())
-        .Flush();
+    log_()("deleted stale ")(print(chain))(" peer ")(id, api_.Crypto()).Flush();
 }
 
 auto Peers::exists(
@@ -168,23 +165,20 @@ auto Peers::Find(
     -> network::blockchain::Address
 {
     const auto& log = log_;
-    log(OT_PRETTY_CLASS())("loading a ")(print(chain))(" peer").Flush();
+    log()("loading a ")(print(chain))(" peer").Flush();
     const auto [candidates, haveServices] =
         get_candidates(chain, protocol, onNetworks, withServices, exclude);
     auto handle = get().lock()->chain_index_[chain].lock();
     auto& data = *handle;
     retry_peers(data);
-    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.in_use_.size())(
-        " in-use addresses")
+    log()(print(chain))(" has ")(data.in_use_.size())(" in-use addresses")
         .Flush();
-    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.known_good_.size())(
+    log()(print(chain))(" has ")(data.known_good_.size())(
         " known good addresses")
         .Flush();
-    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.failed_.size())(
-        " failed addresses")
+    log()(print(chain))(" has ")(data.failed_.size())(" failed addresses")
         .Flush();
-    log(OT_PRETTY_CLASS())(print(chain))(" has ")(data.untested_.size())(
-        " untested addresses")
+    log()(print(chain))(" has ")(data.untested_.size())(" untested addresses")
         .Flush();
     const auto use = [&](const auto& in) {
         auto output = Vector<network::blockchain::AddressID>{};
@@ -195,10 +189,10 @@ auto Peers::Find(
             count,
             std::mt19937{std::random_device{}()});
 
-        OT_ASSERT(count == output.size());
+        assert_true(count == output.size());
 
         auto& peer = output.front();
-        log(OT_PRETTY_CLASS())("Loading peer ")(peer, api_.Crypto()).Flush();
+        log()("Loading peer ")(peer, api_.Crypto()).Flush();
         data.in_use_.emplace(peer);
 
         return peer;
@@ -217,11 +211,9 @@ auto Peers::Find(
     };
 
     if (auto p = getType(haveServices, data.known_good_); p.empty()) {
-        log(OT_PRETTY_CLASS())(
-            "No known good peers available with specified services")
-            .Flush();
+        log()("No known good peers available with specified services").Flush();
     } else {
-        log(OT_PRETTY_CLASS())(p.size())(
+        log()(p.size())(
             " candidates with matching services in the known good set")
             .Flush();
 
@@ -237,15 +229,14 @@ auto Peers::Find(
             }
         }
 
-        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
+        log()(" all candidates failed to load").Flush();
     }
 
     if (auto p = getType(haveServices, data.untested_); p.empty()) {
-        log(OT_PRETTY_CLASS())(
-            "No known untested peers available with specified services")
+        log()("No known untested peers available with specified services")
             .Flush();
     } else {
-        log(OT_PRETTY_CLASS())(p.size())(
+        log()(p.size())(
             " candidates with matching services in the untested set")
             .Flush();
 
@@ -261,17 +252,13 @@ auto Peers::Find(
             }
         }
 
-        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
+        log()(" all candidates failed to load").Flush();
     }
 
     if (auto p = getType(candidates, data.untested_); p.empty()) {
-        log(OT_PRETTY_CLASS())("No peer candidates available for ")(
-            print(chain))
-            .Flush();
+        log()("No peer candidates available for ")(print(chain)).Flush();
     } else {
-        log(OT_PRETTY_CLASS())(p.size())(
-            " untested candidates with unknown services")
-            .Flush();
+        log()(p.size())(" untested candidates with unknown services").Flush();
 
         while (false == p.empty()) {
             const auto id = use(p);
@@ -285,7 +272,7 @@ auto Peers::Find(
             }
         }
 
-        log(OT_PRETTY_CLASS())(" all candidates failed to load").Flush();
+        log()(" all candidates failed to load").Flush();
     }
 
     return {};
@@ -305,33 +292,27 @@ auto Peers::get_candidates(
     auto& [candidates, haveServices] = out;
 
     if (false == data.chains_.contains(chain)) {
-        log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(chain))
-            .Flush();
+        log_()(" no known addresses for ")(print(chain)).Flush();
 
         return out;
     }
 
     const auto& chainAddresses = data.chains_.at(chain);
-    log_(OT_PRETTY_CLASS())(chainAddresses.size())(" addresses for ")(
-        print(chain))
-        .Flush();
+    log_()(chainAddresses.size())(" addresses for ")(print(chain)).Flush();
 
     if (false == data.protocols_.contains(protocol)) {
-        log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(protocol))
-            .Flush();
+        log_()(" no known addresses for ")(print(protocol)).Flush();
 
         return out;
     }
 
     const auto& protocolAddresses = data.protocols_.at(protocol);
-    log_(OT_PRETTY_CLASS())(protocolAddresses.size())(" addresses for ")(
-        print(protocol))
+    log_()(protocolAddresses.size())(" addresses for ")(print(protocol))
         .Flush();
 
     for (const auto& network : onNetworks) {
         if (false == data.networks_.contains(network)) {
-            log_(OT_PRETTY_CLASS())(" no known addresses for ")(print(network))
-                .Flush();
+            log_()(" no known addresses for ")(print(network)).Flush();
 
             continue;
         }
@@ -346,13 +327,13 @@ auto Peers::get_candidates(
     }
 
     if (candidates.empty()) {
-        log_(OT_PRETTY_CLASS())("No available peers match the requested "
-                                "chain, protocol, and transport")
+        log_()("No available peers match the requested "
+               "chain, protocol, and transport")
             .Flush();
 
         return out;
     } else {
-        log_(OT_PRETTY_CLASS())(candidates.size())(
+        log_()(candidates.size())(
             " available peers match the requested chain, protocol, and "
             "transport")
             .Flush();
@@ -381,10 +362,9 @@ auto Peers::get_candidates(
     }
 
     if (haveServices.empty()) {
-        log_(OT_PRETTY_CLASS())("No peers available with specified services")
-            .Flush();
+        log_()("No peers available with specified services").Flush();
     } else {
-        log_(OT_PRETTY_CLASS())(haveServices.size())(
+        log_()(haveServices.size())(
             " candidates advertise the requested services")
             .Flush();
     }
@@ -407,7 +387,7 @@ auto Peers::Good(
         try {
             out.emplace_back(load_address(id));
         } catch (const std::exception& e) {
-            log_(OT_PRETTY_CLASS())(e.what()).Flush();
+            log_()(e.what()).Flush();
         }
     }
 
@@ -439,8 +419,8 @@ auto Peers::init(
     std::shared_ptr<const api::Session> p,
     std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void
 {
-    OT_ASSERT(p);
-    OT_ASSERT(promise);
+    assert_false(nullptr == p);
+    assert_false(nullptr == promise);
 
     const auto post = ScopeGuard{[&] { promise->set_value(data_); }};
     const auto& api = p->Internal();
@@ -554,7 +534,7 @@ auto Peers::insert(
     auto parentTxn = lmdb_.TransactionRW();
 
     for (const auto& address : peers) {
-        OT_ASSERT(address.IsValid());
+        assert_true(address.IsValid());
 
         const auto& id = address.ID();
         auto deleteServices = address.Internal().PreviousServices();
@@ -578,8 +558,7 @@ auto Peers::insert(
                 parentTxn);
 
             if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())("Failed to save peer address")
-                    .Flush();
+                LogError()()("Failed to save peer address").Flush();
 
                 return false;
             }
@@ -591,8 +570,7 @@ auto Peers::insert(
                 parentTxn);
 
             if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())("Failed to save peer chain index")
-                    .Flush();
+                LogError()()("Failed to save peer chain index").Flush();
 
                 return false;
             }
@@ -604,9 +582,7 @@ auto Peers::insert(
                 parentTxn);
 
             if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to save peer protocol index")
-                    .Flush();
+                LogError()()("Failed to save peer protocol index").Flush();
 
                 return false;
             }
@@ -619,9 +595,7 @@ auto Peers::insert(
                     parentTxn);
 
                 if (false == result.first) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Failed to save peer service index")
-                        .Flush();
+                    LogError()()("Failed to save peer service index").Flush();
 
                     return false;
                 }
@@ -642,9 +616,7 @@ auto Peers::insert(
                 parentTxn);
 
             if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to save peer network index")
-                    .Flush();
+                LogError()()("Failed to save peer network index").Flush();
 
                 return false;
             }
@@ -657,9 +629,7 @@ auto Peers::insert(
                 parentTxn);
 
             if (false == result.first) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to save peer network index")
-                    .Flush();
+                LogError()()("Failed to save peer network index").Flush();
 
                 return false;
             }
@@ -695,7 +665,7 @@ auto Peers::insert(
     }
 
     if (false == parentTxn.Finalize(true)) {
-        LogError()(OT_PRETTY_CLASS())("Database error").Flush();
+        LogError()()("Database error").Flush();
 
         return false;
     }

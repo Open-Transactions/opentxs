@@ -36,7 +36,6 @@
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/PaymentCode.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -94,7 +93,7 @@ PaymentCode::PaymentCode(
     , id_(calculate_id(api, pubkey, chaincode))
     , key_(std::move(key))
 {
-    OT_ASSERT(id_.Type() == identifier::Type::nym);
+    assert_true(id_.Type() == identifier::Type::nym);
 }
 
 PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept
@@ -108,7 +107,7 @@ PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept
     , id_(rhs.id_)
     , key_(rhs.key_)
 {
-    OT_ASSERT(id_.Type() == identifier::Type::nym);
+    assert_true(id_.Type() == identifier::Type::nym);
 }
 
 PaymentCode::operator const crypto::asymmetric::Key&() const noexcept
@@ -138,22 +137,20 @@ auto PaymentCode::AddPrivateKeys(
         api_.Crypto().Seed().GetPaymentCode(seed, index, version_, reason);
 
     if (false == candidate.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
+        LogError()()("Failed to derive private key").Flush();
 
         return false;
     }
 
     if (0 != pubkey_.Bytes().compare(candidate.PublicKey())) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Derived public key does not match this payment code")
+        LogError()()("Derived public key does not match this payment code")
             .Flush();
 
         return false;
     }
 
     if (0 != chain_code_.Bytes().compare(candidate.Chaincode(reason))) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Derived chain code does not match this payment code")
+        LogError()()("Derived chain code does not match this payment code")
             .Flush();
 
         return false;
@@ -221,7 +218,7 @@ auto PaymentCode::asBase58() const noexcept -> UnallocatedCString
 
         return out;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -298,7 +295,7 @@ auto PaymentCode::Blind(
 
         return copy(pre, std::move(dest));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -355,7 +352,7 @@ auto PaymentCode::BlindV3(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -374,7 +371,7 @@ auto PaymentCode::calculate_id(
     const auto target{pubkey_size_ + chain_code_size_};
     auto raw = preimage.WriteInto().Reserve(target);
 
-    OT_ASSERT(raw.IsValid(target));
+    assert_true(raw.IsValid(target));
 
     auto* it = raw.as<std::byte>();
     std::memcpy(
@@ -501,7 +498,7 @@ auto PaymentCode::DecodeNotificationElements(
 
         return UnblindV3(version, reader(blind), key, reason);
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return {};
     }
@@ -613,7 +610,7 @@ auto PaymentCode::GenerateNotificationElements(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -626,7 +623,7 @@ auto PaymentCode::generate_elements_v1(
 {
     constexpr auto size = 65_uz;
 
-    OT_ASSERT(blind.size() == sizeof(paymentcode::BinaryPreimage));
+    assert_true(blind.size() == sizeof(paymentcode::BinaryPreimage));
 
     const auto* b = blind.data();
     {
@@ -659,7 +656,7 @@ auto PaymentCode::generate_elements_v3(
 {
     constexpr auto size = sizeof(paymentcode::BinaryPreimage_3::key_);
 
-    OT_ASSERT(blind.size() == size);
+    assert_true(blind.size() == size);
 
     {
         auto& F = output.emplace_back(space(size));
@@ -724,7 +721,7 @@ auto PaymentCode::Incoming(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -791,7 +788,7 @@ auto PaymentCode::Locator(Writer&& dest, const std::uint8_t version)
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -817,7 +814,7 @@ auto PaymentCode::match_locator(
         return out;
     }();
 
-    OT_ASSERT(id.size() < element.size());
+    assert_true(id.size() < element.size());
 
     return 0 == std::memcmp(std::next(element.data()), id.data(), id.size());
 }
@@ -870,7 +867,7 @@ auto PaymentCode::Outgoing(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -1061,7 +1058,7 @@ auto PaymentCode::Unblind(
                        ))
             .release();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -1104,7 +1101,7 @@ auto PaymentCode::UnblindV3(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -1236,8 +1233,7 @@ auto PaymentCode::Verify(
                      proto::KEYMODE_PUBLIC,
                      proto::CREDROLE_MASTERKEY,
                      false)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid master credential syntax.")
-            .Flush();
+        LogError()()("Invalid master credential syntax.").Flush();
 
         return false;
     }
@@ -1246,8 +1242,7 @@ auto PaymentCode::Verify(
         (*this == master.masterdata().source().paymentcode());
 
     if (false == sameSource) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Master credential was not derived from this source.")
+        LogError()()("Master credential was not derived from this source.")
             .Flush();
 
         return false;

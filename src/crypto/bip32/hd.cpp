@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/crypto/library/EcdsaProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -67,7 +66,7 @@ auto Bip32::Imp::DeriveKey(
 
         node.Assign(curve, output);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;
@@ -135,7 +134,7 @@ auto Bip32::Imp::derive_private_key(
 
         node.Assign(curve, output);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;
@@ -198,7 +197,7 @@ auto Bip32::Imp::derive_public_key(
 
         node.Assign(curve, output);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;
@@ -212,9 +211,7 @@ auto Bip32::Imp::root_node(
     Writer&& pub) const noexcept -> bool
 {
     if ((16 > entropy.size()) || (64 < entropy.size())) {
-        LogError()(OT_PRETTY_CLASS())("Invalid entropy size (")(entropy.size())(
-            ")")
-            .Flush();
+        LogError()()("Invalid entropy size (")(entropy.size())(")").Flush();
 
         return false;
     }
@@ -225,8 +222,7 @@ auto Bip32::Imp::root_node(
 
     if (false == keyOut.IsValid(keyBytes) ||
         false == codeOut.IsValid(keyBytes)) {
-        LogError()(OT_PRETTY_CLASS())("failed to allocate output space")
-            .Flush();
+        LogError()()("failed to allocate output space").Flush();
 
         return false;
     }
@@ -237,13 +233,12 @@ auto Bip32::Imp::root_node(
     if (false ==
         crypto_.Hash().HMAC(
             crypto::HashType::Sha512, rootKey, entropy, writer(node))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate root node")
-            .Flush();
+        LogError()()("Failed to instantiate root node").Flush();
 
         return false;
     }
 
-    OT_ASSERT(64_uz == node.size());
+    assert_true(64_uz == node.size());
 
     auto* start{node.data()};
     std::memcpy(keyOut, start, keyBytes);
@@ -254,15 +249,14 @@ auto Bip32::Imp::root_node(
 
     try {
         if (false == havePub) {
-            LogError()(OT_PRETTY_CLASS())("Failed to calculate root public key")
-                .Flush();
+            LogError()()("Failed to calculate root public key").Flush();
 
             return false;
         }
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

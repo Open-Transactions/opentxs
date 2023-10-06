@@ -15,9 +15,9 @@
 #include "internal/crypto/key/Null.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/util/Log.hpp"
 
 template class opentxs::Pimpl<opentxs::crypto::key::Keypair>;
 
@@ -93,11 +93,11 @@ auto Keypair::GetPublicKeyBySignature(
     const Signature& theSignature,
     bool bInclusive) const noexcept -> std::int32_t
 {
-    OT_ASSERT(key_public_.IsValid());
+    assert_true(key_public_.IsValid());
 
     const auto* metadata = key_public_.Internal().GetMetadata();
 
-    OT_ASSERT(nullptr != metadata);
+    assert_false(nullptr == metadata);
 
     // We know that EITHER exact metadata matches must occur, and the signature
     // MUST have metadata, (bInclusive=false)

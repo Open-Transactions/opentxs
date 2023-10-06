@@ -23,7 +23,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
@@ -69,8 +68,7 @@ auto Wallet::AssociateTransaction(
     const block::TransactionHash& txid,
     const ElementHashes& in) const noexcept -> bool
 {
-    LogTrace()(OT_PRETTY_CLASS())("Transaction ")(txid.asHex())(
-        " is associated with patterns:")
+    LogTrace()()("Transaction ")(txid.asHex())(" is associated with patterns:")
         .Flush();
     // TODO transaction data never changes so indexing should only happen
     // once.
@@ -88,9 +86,7 @@ auto Wallet::AssociateTransaction(
     std::ranges::set_difference(
         existing, incoming, std::back_inserter(removedElements));
 
-    if (0 < newElements.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("New patterns:").Flush();
-    }
+    if (0 < newElements.size()) { LogTrace()()("New patterns:").Flush(); }
 
     std::ranges::for_each(newElements, [&](const auto& element) {
         pattern_to_transactions_[element].insert(txid);
@@ -98,7 +94,7 @@ auto Wallet::AssociateTransaction(
     });
 
     if (0 < removedElements.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("Obsolete patterns:").Flush();
+        LogTrace()()("Obsolete patterns:").Flush();
     }
 
     std::ranges::for_each(removedElements, [&](const auto& element) {
@@ -152,7 +148,7 @@ auto Wallet::LoadTransaction(
             }();
             const auto files = bulk_.Read(indices, monotonic);
 
-            OT_ASSERT(false == files.empty());
+            assert_false(files.empty());
 
             const auto bytes = files.front();
 
@@ -169,7 +165,7 @@ auto Wallet::LoadTransaction(
         return factory::BitcoinTransaction(
             api_.Crypto().Blockchain(), api_.Factory(), proto, alloc);
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return {};
     }
@@ -253,9 +249,8 @@ auto Wallet::StoreTransaction(
             lmdb_.Store(transaction_table_, hash, sIndex.Bytes(), tx);
 
         if (result.first) {
-            LogTrace()(OT_PRETTY_CLASS())("saved ")(
-                bytes)(" bytes at position ")(index.MemoryPosition())(
-                " for transaction ")
+            LogTrace()()("saved ")(bytes)(" bytes at position ")(
+                index.MemoryPosition())(" for transaction ")
                 .asHex(hash)
                 .Flush();
         } else {
@@ -268,7 +263,7 @@ auto Wallet::StoreTransaction(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

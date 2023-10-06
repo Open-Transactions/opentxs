@@ -16,7 +16,6 @@
 
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/block/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -75,7 +74,7 @@ Regtest_payment_code::Regtest_payment_code()
                 account.BalanceElement(Subchain::External, index.value_or(0));
             const auto& key = element.Key();
 
-            OT_ASSERT(key.IsValid());
+            opentxs::assert_true(key.IsValid());
 
             const auto& [bytes, value, pattern] = meta.emplace_back(
                 client_1_.Factory().DataFromBytes(element.Key().PublicKey()),
@@ -120,7 +119,7 @@ Regtest_payment_code::Regtest_payment_code()
                     Subchain::External, index.value_or(0));
                 const auto& key = element.Key();
 
-                OT_ASSERT(key.IsValid());
+                opentxs::assert_true(key.IsValid());
 
                 switch (i) {
                     case 0: {
@@ -172,7 +171,7 @@ Regtest_payment_code::Regtest_payment_code()
             listener_alex_p_ = std::make_unique<ScanListener>(client_1_);
         }
 
-        OT_ASSERT(listener_alex_p_);
+        opentxs::assert_false(nullptr == listener_alex_p_);
 
         return *listener_alex_p_;
     }())
@@ -181,7 +180,7 @@ Regtest_payment_code::Regtest_payment_code()
             listener_bob_p_ = std::make_unique<ScanListener>(client_2_);
         }
 
-        OT_ASSERT(listener_bob_p_);
+        opentxs::assert_false(nullptr == listener_bob_p_);
 
         return *listener_bob_p_;
     }())
@@ -204,10 +203,10 @@ Regtest_payment_code::Regtest_payment_code()
         alex.init_custom(client_1_, server_1_, cb);
         bob.init_custom(client_2_, server_1_, cb);
 
-        OT_ASSERT(
+        opentxs::assert_true(
             alex_.payment_code_ ==
             GetPaymentCodeVector3().alice_.payment_code_);
-        OT_ASSERT(
+        opentxs::assert_true(
             bob_.payment_code_ == GetPaymentCodeVector3().bob_.payment_code_);
 
         init_payment_code_ = true;

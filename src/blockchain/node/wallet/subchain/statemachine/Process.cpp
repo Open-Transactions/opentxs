@@ -23,7 +23,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -120,22 +119,17 @@ auto Process::Imp::check_cache() noexcept -> void
         }
 
         if (const auto count = status.size(); 0_uz == count) {
-            log_(OT_PRETTY_CLASS())(name_)(": no processed blocks in cache")
-                .Flush();
+            log_()(name_)(": no processed blocks in cache").Flush();
         } else {
-            log_(OT_PRETTY_CLASS())(name_)(": found ")(
-                count)(" processed blocks in cache")
+            log_()(name_)(": found ")(count)(" processed blocks in cache")
                 .Flush();
-            to_index_.SendDeferred(
-                [&] {
-                    auto out = MakeWork(Work::update);
-                    add_last_reorg(out);
-                    encode(status, out);
+            to_index_.SendDeferred([&] {
+                auto out = MakeWork(Work::update);
+                add_last_reorg(out);
+                encode(status, out);
 
-                    return out;
-                }(),
-                __FILE__,
-                __LINE__);
+                return out;
+            }());
         }
     };
     const auto queue = waiting_.size() + downloading_.size() + ready_.size();
@@ -173,7 +167,9 @@ auto Process::Imp::do_process_common(
     block::Block& block,
     allocator_type monotonic) noexcept -> void
 {
-    if (false == parent_.ProcessBlock(position, block, monotonic)) { OT_FAIL; }
+    if (false == parent_.ProcessBlock(position, block, monotonic)) {
+        LogAbort()().Abort();
+    }
 }
 
 auto Process::Imp::do_process_update(
@@ -188,7 +184,7 @@ auto Process::Imp::do_process_update(
         waiting_.emplace_back(std::move(position));
     }
 
-    to_index_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(msg));
     do_work(monotonic);
 }
 
@@ -262,26 +258,23 @@ auto Process::Imp::do_startup_internal(allocator_type monotonic) noexcept
 
 auto Process::Imp::download(Blocks&& blocks) noexcept -> void
 {
-    to_block_oracle_.SendDeferred(
-        [&] {
-            using enum blockchain::node::blockoracle::Job;
-            auto out = MakeWork(request_blocks);
+    to_block_oracle_.SendDeferred([&] {
+        using enum blockchain::node::blockoracle::Job;
+        auto out = MakeWork(request_blocks);
 
-            for (auto& position : blocks) {
-                out.AddFrame(position.hash_);
-                auto [it, added] = downloading_.emplace(std::move(position));
-                downloading_index_.emplace(it->hash_, it);
-            }
+        for (auto& position : blocks) {
+            out.AddFrame(position.hash_);
+            auto [it, added] = downloading_.emplace(std::move(position));
+            downloading_index_.emplace(it->hash_, it);
+        }
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Process::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_index_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(msg));
 }
 
 auto Process::Imp::have_items() const noexcept -> bool
@@ -298,8 +291,7 @@ auto Process::Imp::process_blocks(
 
         if (auto index = downloading_index_.find(id);
             downloading_index_.end() != index) {
-            log_(OT_PRETTY_CLASS())(name_)(" processing block ")(id.asHex())
-                .Flush();
+            log_()(name_)(" processing block ")(id.asHex()).Flush();
 
             for (const auto& tx : block.get()) { txid_cache_.emplace(tx.ID()); }
 
@@ -323,7 +315,7 @@ auto Process::Imp::process_do_rescan(Message&& in) noexcept -> void
     processing_.clear();
     txid_cache_.clear();
     parent_.process_queue_.store(0);
-    to_index_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(in));
 }
 
 auto Process::Imp::process_filter(
@@ -331,7 +323,7 @@ auto Process::Imp::process_filter(
     block::Position&&,
     allocator_type) noexcept -> void
 {
-    to_index_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_index_.SendDeferred(std::move(in));
 }
 
 auto Process::Imp::process_mempool(
@@ -350,7 +342,7 @@ auto Process::Imp::process_mempool(
     // as mempool transactions even if they are erroneously received from peers
     // on a subsequent run of the application
     if (txid_cache_.contains(txid)) {
-        log(OT_PRETTY_CLASS())(name_)(" transaction ")
+        log()(name_)(" transaction ")
             .asHex(txid)(" already process as confirmed")
             .Flush();
 
@@ -367,14 +359,13 @@ auto Process::Imp::process_process(
     allocator_type monotonic) noexcept -> void
 {
     if (const auto i = processing_.find(pos); i == processing_.end()) {
-        log_(OT_PRETTY_CLASS())(name_)(" block ")(
+        log_()(name_)(" block ")(
             pos)(" has been removed from the processing list due to reorg")
             .Flush();
     } else {
         --parent_.process_queue_;
         processing_.erase(i);
-        log_(OT_PRETTY_CLASS())(name_)(" finished processing block ")(pos)
-            .Flush();
+        log_()(name_)(" finished processing block ")(pos).Flush();
     }
 
     do_work(monotonic);
@@ -384,7 +375,7 @@ auto Process::Imp::process_reprocess(
     Message&& msg,
     allocator_type monotonic) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(" received re-process request").Flush();
+    log_()(name_)(" received re-process request").Flush();
     auto dirty = Vector<ScanStatus>{get_allocator()};
     extract_dirty(api_, msg, dirty);
     const auto count = dirty.size();
@@ -393,9 +384,7 @@ auto Process::Imp::process_reprocess(
     blocks.reserve(count);
 
     for (auto& [type, position] : dirty) {
-        log_(OT_PRETTY_CLASS())(name_)(" scheduling re-processing for block ")(
-            position)
-            .Flush();
+        log_()(name_)(" scheduling re-processing for block ")(position).Flush();
         blocks.emplace_back(std::move(position));
     }
 
@@ -413,9 +402,7 @@ auto Process::Imp::queue_downloads(allocator_type monotonic) noexcept -> void
 
     for (auto n = 0_uz; n < count; ++n) {
         auto& position = waiting_.front();
-        log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
-            position)(" to download queue")
-            .Flush();
+        log_()(name_)(" adding block ")(position)(" to download queue").Flush();
         blocks.emplace_back(std::move(position));
         waiting_.pop_front();
     }
@@ -439,12 +426,10 @@ auto Process::Imp::queue_process() noexcept -> bool
         const auto i = processing_.insert(
             processing_.begin(), ready_.extract(ready_.begin()));
 
-        OT_ASSERT(processing_.end() != i);
+        assert_true(processing_.end() != i);
 
         auto& [position, block] = *i;
-        log_(OT_PRETTY_CLASS())(name_)(" adding block ")(
-            position)(" to process queue")
-            .Flush();
+        log_()(name_)(" adding block ")(position)(" to process queue").Flush();
         auto me = shared_from_this();
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
@@ -479,7 +464,7 @@ Process::Process(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, parent, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Process::Init() noexcept -> void

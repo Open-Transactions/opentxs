@@ -13,8 +13,6 @@
 #include <sstream>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
-
 namespace ottest
 {
 auto GetRLPVectors(const ot::api::Session& api) noexcept
@@ -29,26 +27,26 @@ auto GetRLPVectors(const ot::api::Session& api) noexcept
             auto ec = json::error_code{};
             auto parsed = json::parse(view, ec);
 
-            OT_ASSERT(false == ec.operator bool());
+            opentxs::assert_true(false == ec.operator bool());
 
             return parsed;
         }();
 
-        OT_ASSERT(root.is_object());
+        opentxs::assert_true(root.is_object());
 
         for (const auto& [key, value] : root.as_object()) {
-            OT_ASSERT(value.is_object());
+            opentxs::assert_true(value.is_object());
 
             auto& vector = out.emplace_back();
             vector.name_ = {key.data(), key.size()};
             const auto& hex = value.as_object().at("out");
 
-            OT_ASSERT(hex.is_string());
+            opentxs::assert_true(hex.is_string());
 
             const auto str = hex.as_string();
             auto rc = vector.encoded_.DecodeHex({str.data(), str.size()});
 
-            OT_ASSERT(rc);
+            opentxs::assert_true(rc);
 
             const auto& in = value.as_object().at("in");
             parse(api, in, vector.node_);
@@ -134,7 +132,7 @@ auto parse(
             out.data_ = std::move(items);
         } break;
         default: {
-            OT_FAIL;
+            opentxs::LogAbort()().Abort();
         }
     }
 }
@@ -199,7 +197,7 @@ auto parse_as_escaped_unicode(
         out.data_ = api.Factory().DataFromBytes(bytestring7F);
     } else {
 
-        OT_FAIL;
+        opentxs::LogAbort()().Abort();
     }
 }
 }  // namespace ottest

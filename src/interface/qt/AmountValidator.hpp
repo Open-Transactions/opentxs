@@ -17,7 +17,6 @@
 
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/util/Literals.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -59,7 +58,7 @@ struct AmountValidator::Imp {
 
             return fix(input, display::to_scale(previous)).c_str();
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogTrace()()(e.what()).Flush();
 
             return {};
         }
@@ -115,7 +114,7 @@ struct AmountValidator::Imp {
 
             return State::Acceptable;
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogTrace()()(e.what()).Flush();
 
             return State::Invalid;
         }
@@ -192,7 +191,7 @@ private:
         if (0 == input.size()) { return; }
 
         if (decimalSymbol == input.at(0)) {
-            OT_ASSERT(0 == whole);
+            assert_true(0 == whole);
 
             static constexpr auto zero = '0';
             input.prepend(zero);
@@ -240,7 +239,7 @@ private:
         QString& input,
         int& pos) const noexcept -> void
     {
-        OT_ASSERT(3 < input.size());
+        assert_true(3 < input.size());
 
         const auto target = ((whole + (isNegative ? 1 : 0)) % 3);
         const auto seperator = locale_.thousands_sep();

@@ -15,7 +15,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -122,7 +121,7 @@ auto Bip143Hashes::Preimage(
     const auto script =
         input.Internal().Spends().Internal().SigningSubscript({});
 
-    OT_ASSERT(script.IsValid());
+    assert_true(script.IsValid());
 
     const auto scriptBytes = script.CalculateSize();
     const auto cs =
@@ -202,11 +201,11 @@ auto EncodedTransaction::CalculateIDs(
         const auto preimage = preimages();
 
         if (witnesses_.empty()) {
-            OT_ASSERT(false == preimage.legacy_.empty());
-            OT_ASSERT(preimage.segwit_.empty());
+            assert_false(preimage.legacy_.empty());
+            assert_true(preimage.segwit_.empty());
         } else {
-            OT_ASSERT(false == preimage.legacy_.empty());
-            OT_ASSERT(false == preimage.segwit_.empty());
+            assert_false(preimage.legacy_.empty());
+            assert_false(preimage.segwit_.empty());
         }
 
         const auto txid = preimage.legacy_.Bytes();
@@ -237,7 +236,7 @@ auto EncodedTransaction::CalculateIDs(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

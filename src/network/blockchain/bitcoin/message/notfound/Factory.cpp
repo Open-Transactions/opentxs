@@ -37,7 +37,7 @@ auto BitcoinP2PNotfound(
             move_construct<network::blockchain::bitcoin::Inventory>(
                 payload, alloc));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

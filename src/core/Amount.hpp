@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "internal/core/Amount.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -173,9 +172,7 @@ public:
         try {
             amount = amount_.str();
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())("Error serializing amount: ")(
-                e.what())
-                .Flush();
+            LogError()()("Error serializing amount: ")(e.what()).Flush();
             return false;
         }
 
@@ -193,8 +190,7 @@ public:
         try {
             amount = backend.convert_to<std::int64_t>();
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())("Error serializing bitcoin amount: ")(
-                e.what())
+            LogError()()("Error serializing bitcoin amount: ")(e.what())
                 .Flush();
             return false;
         }
@@ -239,9 +235,7 @@ public:
         try {
             return shift_right().convert_to<T>();
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())("Error converting Amount to int: ")(
-                e.what())
-                .Flush();
+            LogError()()("Error converting Amount to int: ")(e.what()).Flush();
             return {};
         }
     }
@@ -252,8 +246,7 @@ public:
         try {
             return amount_.convert_to<T>() / shift_left(1).convert_to<T>();
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())("Error converting Amount to float: ")(
-                e.what())
+            LogError()()("Error converting Amount to float: ")(e.what())
                 .Flush();
             return {};
         }

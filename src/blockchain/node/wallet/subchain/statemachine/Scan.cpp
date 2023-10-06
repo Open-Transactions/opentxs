@@ -22,7 +22,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -107,14 +106,12 @@ auto Scan::Imp::do_reorg(
     if (last_scanned_.has_value()) {
         const auto target =
             parent_.ReorgTarget(position, last_scanned_.value());
-        log_(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(target)
-            .Flush();
+        log_()(name_)(" last scanned reset to ")(target).Flush();
         last_scanned_ = target;
     }
 
     if (filter_tip_.has_value() && (filter_tip_->IsReplacedBy(position))) {
-        log_(OT_PRETTY_CLASS())(name_)(" filter tip reset to ")(position)
-            .Flush();
+        log_()(name_)(" filter tip reset to ")(position).Flush();
         filter_tip_ = position;
     }
 
@@ -129,47 +126,42 @@ auto Scan::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
     last_scanned_ = parent_.db_.SubchainLastScanned(parent_.db_key_);
     filter_tip_ = filters.FilterTip(parent_.filter_type_);
 
-    OT_ASSERT(last_scanned_.has_value());
-    OT_ASSERT(filter_tip_.has_value());
+    assert_true(last_scanned_.has_value());
+    assert_true(filter_tip_.has_value());
 
-    log(OT_PRETTY_CLASS())(name_)(" loaded last scanned value of ")(
-        last_scanned_.value())(" from database")
+    log()(name_)(" loaded last scanned value of ")(last_scanned_.value())(
+        " from database")
         .Flush();
-    log(OT_PRETTY_CLASS())(name_)(" loaded filter tip value of ")(
-        last_scanned_.value())(" from filter oracle")
+    log()(name_)(" loaded filter tip value of ")(last_scanned_.value())(
+        " from filter oracle")
         .Flush();
 
     if (last_scanned_->IsReplacedBy(*filter_tip_)) {
-        log(OT_PRETTY_CLASS())(name_)(" last scanned reset to ")(
-            filter_tip_.value())
-            .Flush();
+        log()(name_)(" last scanned reset to ")(filter_tip_.value()).Flush();
         last_scanned_ = filter_tip_;
     }
 
-    to_process_.SendDeferred(
-        [&] {
-            auto out = MakeWork(Work::update);
-            add_last_reorg(out);
-            auto clean = Vector<ScanStatus>{get_allocator()};
-            clean.emplace_back(ScanState::scan_clean, last_scanned_.value());
-            encode(clean, out);
+    to_process_.SendDeferred([&] {
+        auto out = MakeWork(Work::update);
+        add_last_reorg(out);
+        auto clean = Vector<ScanStatus>{get_allocator()};
+        clean.emplace_back(ScanState::scan_clean, last_scanned_.value());
+        encode(clean, out);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Scan::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_process_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(msg));
 }
 
 auto Scan::Imp::process_do_rescan(Message&& in) noexcept -> void
 {
     last_scanned_.reset();
     parent_.match_cache_.lock()->Reset();
-    to_process_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(in));
 }
 
 auto Scan::Imp::process_filter(
@@ -178,20 +170,19 @@ auto Scan::Imp::process_filter(
     allocator_type monotonic) noexcept -> void
 {
     if (tip < this->tip()) {
-        log_(OT_PRETTY_CLASS())(name_)(" ignoring stale filter tip ")(tip)
-            .Flush();
+        log_()(name_)(" ignoring stale filter tip ")(tip).Flush();
 
         return;
     }
 
-    log_(OT_PRETTY_CLASS())(name_)(" filter tip updated to ")(tip).Flush();
+    log_()(name_)(" filter tip updated to ")(tip).Flush();
     filter_tip_ = std::move(tip);
 
     if (auto last = last_reorg(); last.has_value()) {
         in.AddFrame(last.value());
     }
 
-    to_process_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_process_.SendDeferred(std::move(in));
     do_work(monotonic);
 }
 
@@ -199,7 +190,7 @@ auto Scan::Imp::process_start_scan(Message&&, allocator_type monotonic) noexcept
     -> void
 {
     index_ready_ = true;
-    log_(OT_PRETTY_CLASS())(name_)(
+    log_()(name_)(
         " ready to begin scan now that initial index operation is complete")
         .Flush();
     do_work(monotonic);
@@ -223,7 +214,7 @@ auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
     auto post = ScopeGuard{[&] { Job::work(monotonic); }};
 
     if (false == filter_tip_.has_value()) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log_()(name_)(
             " scanning not possible until a filter tip value is received ")
             .Flush();
 
@@ -231,9 +222,7 @@ auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
     }
 
     if (caught_up()) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            " all available filters have been scanned")
-            .Flush();
+        log_()(name_)(" all available filters have been scanned").Flush();
 
         return false;
     }
@@ -253,7 +242,7 @@ auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
     const auto& threshold = parent_.scan_threshold_;
 
     if (parent_.scan_dirty_ && ((height - rescan) > threshold)) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log_()(name_)(
             " waiting to continue scan until rescan has caught up to block ")(
             height - threshold)(" from current position of ")(rescan)
             .Flush();
@@ -273,37 +262,28 @@ auto Scan::Imp::work(allocator_type monotonic) noexcept -> bool
         dirty,
         monotonic);
     last_scanned_ = std::move(highestTested);
-    log_(OT_PRETTY_CLASS())(name_)(" last scanned updated to ")(current())
-        .Flush();
+    log_()(name_)(" last scanned updated to ")(current()).Flush();
 
     if (auto count = dirty.size(); 0_uz < count) {
-        log_(OT_PRETTY_CLASS())(name_)(" ")(
-            count)(" blocks queued for processing ")
-            .Flush();
-        to_process_.SendDeferred(
-            [&] {
-                auto out = MakeWork(Work::update);
-                add_last_reorg(out);
-                encode(dirty, out);
+        log_()(name_)(" ")(count)(" blocks queued for processing ").Flush();
+        to_process_.SendDeferred([&] {
+            auto out = MakeWork(Work::update);
+            add_last_reorg(out);
+            encode(dirty, out);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     }
 
     if (highestClean.has_value()) {
         clean.emplace_back(ScanState::scan_clean, highestClean.value());
-        to_process_.SendDeferred(
-            [&] {
-                auto out = MakeWork(Work::update);
-                add_last_reorg(out);
-                encode(clean, out);
+        to_process_.SendDeferred([&] {
+            auto out = MakeWork(Work::update);
+            add_last_reorg(out);
+            encode(clean, out);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     }
 
     return (false == caught_up());
@@ -321,7 +301,7 @@ Scan::Scan(const std::shared_ptr<const SubchainStateData>& parent) noexcept
             alloc::PMR<Imp>{asio.Alloc(batchID)}, parent, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Scan::Init() noexcept -> void

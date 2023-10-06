@@ -15,12 +15,12 @@ extern "C" {
 #include <memory>
 
 #include "internal/blockchain/database/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -160,7 +160,7 @@ auto Database::get_original_version(storage::lmdb::Database& db) noexcept
         const auto stored = db.Store(
             database::Config, tsv(database::Key::Version), tsv(db_version_));
 
-        OT_ASSERT(stored.first);
+        assert_true(stored.first);
 
         return db_version_;
     }

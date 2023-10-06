@@ -17,7 +17,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -114,14 +113,14 @@ auto Wallet::Actor::pipeline(
         case Work::rescan: {
             if (running_) {
                 to_accounts_.SendDeferred(
-                    MakeWork(wallet::AccountsJobs::rescan), __FILE__, __LINE__);
+                    MakeWork(wallet::AccountsJobs::rescan));
             }
         } break;
         case Work::shutdown:
         case Work::init:
         case Work::statemachine:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled type").Abort();
+            LogAbort()()(name_)(": unhandled type").Abort();
         }
     }
 }

@@ -22,13 +22,13 @@
 #include "api/network/asio/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Timer.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/asio/Socket.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
@@ -88,7 +88,7 @@ auto Asio::IOContext() const noexcept -> boost::asio::io_context&
         return p->IOContext();
     } else {
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -98,7 +98,7 @@ auto Asio::FetchJson(
     const bool https,
     const ReadView notify) const noexcept -> std::future<boost::json::value>
 {
-    if (test_) { OT_FAIL; }
+    if (test_) { LogAbort()().Abort(); }
 
     if (auto p = weak_.lock(); p) {
 
@@ -146,17 +146,17 @@ auto Asio::Init(std::shared_ptr<const api::Context> context) noexcept -> void
 {
     auto shared = weak_.lock();
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     shared->Init();
 
-    OT_ASSERT(context);
+    assert_false(nullptr == context);
 
     auto alloc = alloc::PMR<asio::Shared>{
         shared->zmq_.Internal().Alloc(shared->batch_id_)};
     auto actor = std::allocate_shared<asio::Actor>(alloc, context, shared);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

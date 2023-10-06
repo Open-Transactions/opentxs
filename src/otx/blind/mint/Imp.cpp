@@ -25,7 +25,6 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -210,8 +209,8 @@ auto Mint::LoadMint(std::string_view extension) -> bool
             szFolder2name,
             szFilename,
             "")) {
-        LogDetail()(OT_PRETTY_CLASS())("File does not exist: ")(
-            szFolder1name)('/')(szFolder2name)('/')(szFilename)
+        LogDetail()()("File does not exist: ")(szFolder1name)('/')(
+            szFolder2name)('/')(szFilename)
             .Flush();
         return false;
     }
@@ -226,8 +225,8 @@ auto Mint::LoadMint(std::string_view extension) -> bool
                // DATA STORE.
 
     if (strFileContents.length() < 2) {
-        LogError()(OT_PRETTY_CLASS())("Error reading file: ")(
-            szFolder1name)('/')(szFolder2name)('/')(szFilename)(".")
+        LogError()()("Error reading file: ")(szFolder1name)('/')(
+            szFolder2name)('/')(szFilename)(".")
             .Flush();
         return false;
     }
@@ -270,7 +269,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     auto strRawFile = String::Factory();
 
     if (!SaveContractRaw(strRawFile)) {
-        LogError()(OT_PRETTY_CLASS())(" Error saving Mintfile (to string): ")(
+        LogError()()(" Error saving Mintfile (to string): ")(
             szFolder1name)('/')(szFolder2name)('/')(szFilename)(".")
             .Flush();
         return false;
@@ -280,8 +279,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     auto ascTemp = Armored::Factory(api_.Crypto(), strRawFile);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
-        LogError()(OT_PRETTY_CLASS())(
-            " Error saving mint (Failed writing armored string): ")(
+        LogError()()(" Error saving mint (Failed writing armored string): ")(
             szFolder1name)('/')(szFolder2name)('/')(szFilename)(".")
             .Flush();
         return false;
@@ -296,8 +294,8 @@ auto Mint::SaveMint(std::string_view extension) -> bool
         szFilename,
         "");  // <=== SAVING TO LOCAL DATA STORE.
     if (!bSaved) {
-        LogError()(OT_PRETTY_CLASS())("Error writing to file: ")(
-            szFolder1name)('/')(szFolder2name)('/')(strFilename)
+        LogError()()("Error writing to file: ")(szFolder1name)('/')(
+            szFolder2name)('/')(strFilename)
             .Flush();
 
         return false;
@@ -313,21 +311,18 @@ auto Mint::VerifyMint(const identity::Nym& theOperator) -> bool
     // Make sure that the supposed Contract ID that was set is actually
     // a hash of the contract file, signatures and all.
     if (!VerifyContractID()) {
-        LogError()(OT_PRETTY_CLASS())(
-            " Error comparing Mint ID to Asset Contract ID.")
-            .Flush();
+        LogError()()(" Error comparing Mint ID to Asset Contract ID.").Flush();
         return false;
     } else if (!VerifySignature(theOperator)) {
-        LogError()(OT_PRETTY_CLASS())("Error verifying signature on mint.")
-            .Flush();
+        LogError()()("Error verifying signature on mint.").Flush();
         return false;
     }
 
-    LogDebug()(OT_PRETTY_CLASS())("We now know that...").Flush();
-    LogDebug()(OT_PRETTY_CLASS())("1. The Asset Contract ID matches the "
-                                  "Mint ID loaded from the Mint file.")
+    LogDebug()()("We now know that...").Flush();
+    LogDebug()()("1. The Asset Contract ID matches the "
+                 "Mint ID loaded from the Mint file.")
         .Flush();
-    LogDebug()(OT_PRETTY_CLASS())("2. The SIGNATURE VERIFIED.").Flush();
+    LogDebug()()("2. The SIGNATURE VERIFIED.").Flush();
     return true;
 }
 
@@ -345,16 +340,15 @@ auto Mint::VerifyContractID() const -> bool
         auto str1 = String::Factory(id_, api_.Crypto()),
              str2 = String::Factory(instrument_definition_id_, api_.Crypto());
 
-        LogError()(OT_PRETTY_CLASS())(
-            " Mint ID does NOT match Instrument Definition. ")(str1.get())(
-            " | ")(str2.get())(".")
+        LogError()()(" Mint ID does NOT match Instrument Definition. ")(
+            str1.get())(" | ")(str2.get())(".")
             .Flush();
         //                "\nRAW FILE:\n--->" << raw_file_ << "<---"
         return false;
     } else {
         auto str1 = String::Factory(id_, api_.Crypto());
-        LogVerbose()(OT_PRETTY_CLASS())(
-            " Mint ID *SUCCESSFUL* match to Asset Contract ID: ")(str1.get())
+        LogVerbose()()(" Mint ID *SUCCESSFUL* match to Asset Contract ID: ")(
+            str1.get())
             .Flush();
         return true;
     }
@@ -370,9 +364,7 @@ auto Mint::GetPrivate(Armored& theArmor, const Amount& lDenomination) const
 
         return true;
     } catch (...) {
-        LogTrace()(OT_PRETTY_CLASS())("Denomination ")(
-            lDenomination)(" not found")
-            .Flush();
+        LogTrace()()("Denomination ")(lDenomination)(" not found").Flush();
 
         return false;
     }
@@ -388,9 +380,7 @@ auto Mint::GetPublic(Armored& theArmor, const Amount& lDenomination) const
 
         return true;
     } catch (...) {
-        LogTrace()(OT_PRETTY_CLASS())("Denomination ")(
-            lDenomination)(" not found")
-            .Flush();
+        LogTrace()()("Denomination ")(lDenomination)(" not found").Flush();
 
         return false;
     }
@@ -539,7 +529,7 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         cash_account_id_ =
             api_.Factory().AccountIDFromBase58(strCashAcctID->Bytes());
 
-        LogDetail()(OT_PRETTY_CLASS())
+        LogDetail()()
             //    "\n===> Loading XML for mint into memory structures..."
             ("Mint version: ")(version_.get())(" Notary ID: ")(
                 strNotaryID.get())(" Instrument Definition ID: ")(
@@ -559,14 +549,14 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto pArmor = Armored::Factory(api_.Crypto());
 
         if (!LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
-            LogError()(OT_PRETTY_CLASS())("Error: mintPrivateInfo field "
-                                          "without value.")
+            LogError()()("Error: mintPrivateInfo field "
+                         "without value.")
                 .Flush();
 
             return (-1);  // error condition
         } else {
-            LogTrace()(OT_PRETTY_CLASS())(
-                " Loading private key for denomination ")(lDenomination)
+            LogTrace()()(" Loading private key for denomination ")(
+                lDenomination)
                 .Flush();
             private_.emplace(lDenomination, std::move(pArmor));
         }
@@ -579,14 +569,13 @@ auto Mint::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         auto pArmor = Armored::Factory(api_.Crypto());
 
         if (!LoadEncodedTextField(xml, pArmor) || !pArmor->Exists()) {
-            LogError()(OT_PRETTY_CLASS())("Error: mintPublicInfo field "
-                                          "without value.")
+            LogError()()("Error: mintPublicInfo field "
+                         "without value.")
                 .Flush();
 
             return (-1);  // error condition
         } else {
-            LogTrace()(OT_PRETTY_CLASS())(
-                " Loading public key for denomination ")(lDenomination)
+            LogTrace()()(" Loading public key for denomination ")(lDenomination)
                 .Flush();
             public_.emplace(lDenomination, std::move(pArmor));
             // Whether client or server, both sides have public. Each public
@@ -674,12 +663,11 @@ void Mint::GenerateNewMint(
 
     if (account) {
         account.get().GetIdentifier(cash_account_id_);
-        LogDetail()(OT_PRETTY_CLASS())(
+        LogDetail()()(
             " Successfully created cash reserve account for new mint.")
             .Flush();
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            " Error creating cash reserve account for new mint.")
+        LogConsole()()(" Error creating cash reserve account for new mint.")
             .Flush();
     }
 

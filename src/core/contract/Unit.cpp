@@ -41,7 +41,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
@@ -178,8 +177,8 @@ auto Unit::AddAccountRecord(
     const Account& theAccount) const -> bool
 {
     if (theAccount.GetInstrumentDefinitionID() != ID()) {
-        LogError()(OT_PRETTY_CLASS())("Error: theAccount doesn't have the same "
-                                      "asset type ID as *this does.")
+        LogError()()("Error: theAccount doesn't have the same "
+                     "asset type ID as *this does.")
             .Flush();
         return false;
     }
@@ -225,7 +224,7 @@ auto Unit::AddAccountRecord(
     // It exists.
     //
     if (nullptr == pMap) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: Failed trying to load or create the account records "
             "file for instrument definition: ")(strInstrumentDefinitionID)(".")
             .Flush();
@@ -252,7 +251,7 @@ auto Unit::AddAccountRecord(
         // to the SAME instrument definition id.)
 
         if (strInstrumentDefinitionID != str2) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: wrong instrument definition found in account records "
                 "file. For instrument definition: ")(
                 strInstrumentDefinitionID)(". For account: ")(strAcctID.get())(
@@ -282,7 +281,7 @@ auto Unit::AddAccountRecord(
             record_file,
             "",
             "")) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Failed trying to StoreObject, while saving updated account "
             "records file for instrument definition: ")(
             strInstrumentDefinitionID)(" to contain account ID: ")(
@@ -387,7 +386,7 @@ auto Unit::EraseAccountRecord(
     // It exists.
     //
     if (nullptr == pMap) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: Failed trying to load or create the account records file "
             "for instrument definition: ")(strInstrumentDefinitionID)(".")
             .Flush();
@@ -420,7 +419,7 @@ auto Unit::EraseAccountRecord(
             strAcctRecordFile,
             "",
             "")) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Failed trying to StoreObject, while saving updated account "
             "records file for instrument definition: ")(
             strInstrumentDefinitionID)(" to erase account ID: ")(
@@ -551,8 +550,7 @@ auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool
     auto serialized = proto::UnitDefinition{};
 
     if (false == Serialize(serialized, includeNym)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize unit definition.")
-            .Flush();
+        LogError()()("Failed to serialize unit definition.").Flush();
         return false;
     }
 
@@ -607,7 +605,7 @@ auto Unit::update_signature(const PasswordPrompt& reason) -> bool
         sigs.emplace_back(new proto::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to create signature.").Flush();
+        LogError()()("Failed to create signature.").Flush();
     }
 
     return success;
@@ -623,7 +621,7 @@ auto Unit::validate() const -> bool
     const auto sigs = signatures();
 
     if (1_uz != sigs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Missing signature.").Flush();
+        LogError()()("Missing signature.").Flush();
 
         return false;
     }
@@ -676,7 +674,7 @@ auto Unit::VisitAccountRecords(
     if (nullptr != pMap) {
         const auto& pNotaryID = visitor.GetNotaryID();
 
-        OT_ASSERT(false == pNotaryID.empty());
+        assert_false(pNotaryID.empty());
 
         auto& theMap = pMap->the_map_;
 
@@ -694,8 +692,7 @@ auto Unit::VisitAccountRecords(
                             // someone copied the wrong file here...)
 
             if (strInstrumentDefinitionID != str_instrument_definition_id) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Error: wrong instrument definition ID (")(
+                LogError()()("Error: wrong instrument definition ID (")(
                     str_instrument_definition_id)(") when expecting: ")(
                     strInstrumentDefinitionID)(".")
                     .Flush();
@@ -706,16 +703,15 @@ auto Unit::VisitAccountRecords(
                 auto account = wallet.Internal().Account(accountID);
 
                 if (false == bool(account)) {
-                    LogError()(OT_PRETTY_CLASS())("Unable to load account ")(
-                        str_acct_id)(".")
+                    LogError()()("Unable to load account ")(str_acct_id)(".")
                         .Flush();
 
                     continue;
                 }
 
                 if (false == visitor.Trigger(account.get(), reason)) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Error: Trigger failed for account ")(str_acct_id)
+                    LogError()()("Error: Trigger failed for account ")(
+                        str_acct_id)
                         .Flush();
                 }
             }

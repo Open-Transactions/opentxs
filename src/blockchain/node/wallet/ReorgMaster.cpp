@@ -16,7 +16,6 @@
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
@@ -71,7 +70,7 @@ auto ReorgMasterPrivate::AcknowledgePrepareReorg(
             "prepare reorg"sv,
             id);
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -137,13 +136,13 @@ auto ReorgMasterPrivate::acknowledge(
             throw std::runtime_error{error.c_str()};
         }
 
-        log_(OT_PRETTY_CLASS())(acks.size())(" of ")(slaves.size())(
-            " have acknowledged ")(action)
+        log_()(acks.size())(" of ")(slaves.size())(" have acknowledged ")(
+            action)
             .Flush();
 
         check_condition(data, reorg, work, action);
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -159,7 +158,7 @@ auto ReorgMasterPrivate::check_condition(
     const auto required = acks.size();
 
     if ((0_uz == count) || (required == count)) {
-        log_(OT_PRETTY_CLASS())("finished ")(action).Flush();
+        log_()("finished ")(action).Flush();
         data.parent_.Push(MakeWork(work));
 
         return true;
@@ -187,7 +186,7 @@ auto ReorgMasterPrivate::CheckShutdown() noexcept -> bool
 
     if (check_shutdown(data)) { return true; }
 
-    log_(OT_PRETTY_CLASS())(": waiting for shutdown acknowledgement from:\n");
+    log_()(": waiting for shutdown acknowledgement from:\n");
 
     for (const auto& [id, slave] : data.shutdown_slaves_) {
         log_("  * ID: ")(id)(": ")(slave->name_)("\n");
@@ -215,7 +214,7 @@ auto ReorgMasterPrivate::ClearReorg() noexcept -> void
 
         data.params_.reset();
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -243,7 +242,7 @@ auto ReorgMasterPrivate::FinishReorg() noexcept -> void
 
         data.state_ = Reorg::State::normal;
 
-        log_(OT_PRETTY_CLASS())("instructing ")(data.reorg_slaves_.size())(
+        log_()("instructing ")(data.reorg_slaves_.size())(
             " slaves to resume normal operation")
             .Flush();
 
@@ -251,7 +250,7 @@ auto ReorgMasterPrivate::FinishReorg() noexcept -> void
             slave->BroadcastFinishReorg();
         }
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -273,7 +272,7 @@ auto ReorgMasterPrivate::GetReorg(
 
         return data.params_.emplace(position, std::move(tx));
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -294,8 +293,8 @@ auto ReorgMasterPrivate::GetSlave(
             id,
             std::move(name)));
 
-    OT_ASSERT(added);
-    OT_ASSERT(it->second);
+    assert_true(added);
+    assert_false(nullptr == it->second);
 
     return it->second;
 }
@@ -365,8 +364,8 @@ auto ReorgMasterPrivate::PrepareReorg(StateSequence id) noexcept -> bool
 
         if (check_prepare_reorg(data)) { return true; }
 
-        log_(OT_PRETTY_CLASS())("preparing ")(data.reorg_slaves_.size())(
-            " slaves for reorg ")(id)
+        log_()("preparing ")(data.reorg_slaves_.size())(" slaves for reorg ")(
+            id)
             .Flush();
 
         for (auto& [_, slave] : data.reorg_slaves_) {
@@ -375,7 +374,7 @@ auto ReorgMasterPrivate::PrepareReorg(StateSequence id) noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -396,8 +395,7 @@ auto ReorgMasterPrivate::PrepareShutdown() noexcept -> bool
         if (check_shutdown(data)) { return true; }
 
         const auto count = data.shutdown_slaves_.size();
-        log_(OT_PRETTY_CLASS())("preparing ")(count)(" slaves for shutdown")
-            .Flush();
+        log_()("preparing ")(count)(" slaves for shutdown").Flush();
 
         for (auto& [id, slave] : data.shutdown_slaves_) {
             slave->BroadcastPrepareShutdown();
@@ -405,21 +403,21 @@ auto ReorgMasterPrivate::PrepareShutdown() noexcept -> bool
 
         return false;
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
 auto ReorgMasterPrivate::Register(
     std::shared_ptr<ReorgSlavePrivate> slave) noexcept -> Reorg::State
 {
-    OT_ASSERT(slave);
+    assert_false(nullptr == slave);
 
     const auto id = slave->id_;
     auto handle = data_.lock();
     auto& data = *handle;
     auto [i, rc] = data.reorg_slaves_.try_emplace(id, std::move(slave));
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     return data.state_;
 }

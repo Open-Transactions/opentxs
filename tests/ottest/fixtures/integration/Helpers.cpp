@@ -14,7 +14,6 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -97,13 +96,13 @@ auto Callbacks::callback(ot::network::zeromq::Message&& incoming) noexcept
             future = {};
             limit = 0;
         } else {
-            ot::LogError()(OT_PRETTY_CLASS())(name_)(" missing callback for ")(
+            ot::LogError()()(name_)(" missing callback for ")(
                 static_cast<int>(type))
                 .Flush();
         }
     } else {
-        ot::LogVerbose()(OT_PRETTY_CLASS())("Skipping update ")(
-            counter)(" to ")(static_cast<int>(type))
+        ot::LogVerbose()()("Skipping update ")(counter)(" to ")(
+            static_cast<int>(type))
             .Flush();
     }
 }
@@ -135,7 +134,7 @@ auto Callbacks::RegisterWidget(
     widget_map_.emplace(id, std::move(data));
     ui_names_.emplace(type, id);
 
-    OT_ASSERT(widget_map_.size() == ui_names_.size());
+    opentxs::assert_true(widget_map_.size() == ui_names_.size());
 
     return output;
 }
@@ -171,7 +170,7 @@ auto Server::Contract() const noexcept -> ot::OTServerContract
 
 auto Server::Reason() const noexcept -> ot::PasswordPrompt
 {
-    OT_ASSERT(nullptr != api_);
+    opentxs::assert_false(nullptr == api_);
 
     return api_->Factory().PasswordPrompt(__func__);
 }
@@ -190,13 +189,13 @@ auto Server::init(const ot::api::session::Notary& api) noexcept -> void
         auto exists{false};
         api.Config().Internal().Check_str(section, key, value, exists);
 
-        OT_ASSERT(exists);
+        opentxs::assert_true(exists);
 
         const_cast<ot::UnallocatedCString&>(password_) = value->Get();
     }
 
-    OT_ASSERT(false == id_.empty());
-    OT_ASSERT(false == password_.empty());
+    opentxs::assert_true(false == id_.empty());
+    opentxs::assert_true(false == password_.empty());
 
     init_ = true;
 }

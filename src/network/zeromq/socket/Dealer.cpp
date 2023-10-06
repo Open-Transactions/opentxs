@@ -11,7 +11,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Bidirectional.tpp"
@@ -73,13 +72,11 @@ void Dealer::process_incoming(
     const Lock& lock,
     opentxs::network::zeromq::Message&& message) noexcept
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
-    LogTrace()(OT_PRETTY_CLASS())(
-        "Incoming messaged received. Triggering callback.")
-        .Flush();
+    LogTrace()()("Incoming messaged received. Triggering callback.").Flush();
     callback_.Process(std::move(message));
-    LogTrace()(OT_PRETTY_CLASS())("Done.").Flush();
+    LogTrace()()("Done.").Flush();
 }
 
 Dealer::~Dealer() SHUTDOWN_SOCKET

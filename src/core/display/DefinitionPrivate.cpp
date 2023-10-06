@@ -14,7 +14,6 @@
 
 #include "core/display/ScalePrivate.hpp"
 #include "internal/core/display/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/display/Scale.hpp"
 #include "opentxs/core/display/Types.hpp"
@@ -118,7 +117,7 @@ auto DefinitionPrivate::Import(
 
         return std::visit(Visitor{in, index}, data_);
     } else {
-        LogError()(OT_PRETTY_CLASS())("scale out of range").Flush();
+        LogError()()("scale out of range").Flush();
 
         return std::nullopt;
     }

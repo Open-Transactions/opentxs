@@ -17,7 +17,6 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -314,9 +313,7 @@ public:
             case zmq: {
             } break;
             default: {
-                LogAbort()(OT_PRETTY_CLASS())("unhandled transport type ")(
-                    print(type_))
-                    .Abort();
+                LogAbort()()("unhandled transport type ")(print(type_)).Abort();
             }
         }
     }
@@ -465,7 +462,7 @@ auto BlockchainAddress(
                    cookie)
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -504,7 +501,7 @@ auto BlockchainAddress(
                    cookie)
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -537,7 +534,7 @@ auto BlockchainAddress(
                    ReadView{})
             .release();
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }

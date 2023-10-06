@@ -23,7 +23,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -49,7 +48,10 @@ KeyPrivate::KeyPrivate(allocator_type alloc) noexcept
 {
 }
 
-auto KeyPrivate::API() const noexcept -> const api::Session& { OT_FAIL; }
+auto KeyPrivate::API() const noexcept -> const api::Session&
+{
+    LogAbort()().Abort();
+}
 
 auto KeyPrivate::ChangePassword(const Secret&, const PasswordPrompt&) noexcept
     -> bool
@@ -364,7 +366,7 @@ auto Key::ChangePassword(
 
         return encrypt_key(data, plain, changed);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -384,7 +386,7 @@ auto Key::Decrypt(
 
         return decrypt(*data_.lock(), ciphertext, std::move(plaintext), reason);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -402,7 +404,7 @@ auto Key::Decrypt(
             std::move(plaintext),
             reason);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -453,7 +455,7 @@ auto Key::derive(
     auto& plain = data.plaintext_key_.emplace(api_.Factory().Secret(0_uz));
 
     if (false == plain.Randomize(size)) {
-        LogError()(OT_PRETTY_CLASS())("failed to generate key").Flush();
+        LogError()()("failed to generate key").Flush();
 
         return false;
     }
@@ -473,7 +475,7 @@ auto Key::Encrypt(
         return Encrypt(
             plaintext, default_algorithm_, ciphertext, reason, attachKey, iv);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -493,7 +495,7 @@ auto Key::Encrypt(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -513,7 +515,7 @@ auto Key::Encrypt(
 
         return proto::write(proto, std::move(ciphertext));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -536,7 +538,7 @@ auto Key::Encrypt(
             iv,
             reason);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -603,7 +605,7 @@ auto Key::encrypt_key(
     auto& encrypted = data.encrypted_key_;
     encrypted = std::make_unique<proto::Ciphertext>();
 
-    OT_ASSERT(encrypted);
+    assert_false(nullptr == encrypted);
 
     encrypted->set_mode(translate(engine_.DefaultMode()));
     auto blankIV = api_.Factory().Secret(0);
@@ -665,7 +667,7 @@ auto Key::encrypted_password(
     auto handle = key.data_.lock_shared();
     const auto& secondary = *handle;
 
-    OT_ASSERT(secondary.plaintext_key_.has_value());
+    assert_true(secondary.plaintext_key_.has_value());
 
     return *secondary.plaintext_key_;
 }
@@ -701,8 +703,7 @@ auto Key::get_password(const PasswordPrompt& reason, Secret& out) const
             out.Assign(bytes.data(), static_cast<std::size_t>(length));
             result = true;
         } else {
-            LogError()(OT_PRETTY_CLASS())("Failed to obtain master password")
-                .Flush();
+            LogError()()("Failed to obtain master password").Flush();
         }
 
         return result;
@@ -717,7 +718,7 @@ auto Key::ID(const PasswordPrompt& reason) const noexcept
         return id(*data_.lock(), reason);
     } catch (const std::exception& e) {
         static const auto blank = identifier::Generic{};
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return blank;
     }
@@ -744,7 +745,7 @@ auto Key::RawKey(Secret& output, const PasswordPrompt& reason) const noexcept
 
         return output.Assign(unlock(*data_.lock(), reason).Bytes());
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -763,7 +764,7 @@ auto Key::Serialize(proto::SymmetricKey& output) const noexcept -> bool
 
         return serialize(*data_.lock_shared(), output);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -832,7 +833,7 @@ auto Key::Unlock(const PasswordPrompt& reason) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

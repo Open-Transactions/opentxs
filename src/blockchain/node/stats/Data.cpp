@@ -8,11 +8,11 @@
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::stats
@@ -30,21 +30,20 @@ Data::Data() noexcept
 auto Data::Init(const api::Session& api, std::string_view endpoint) noexcept
     -> void
 {
-    OT_ASSERT(false == to_actor_.has_value());
+    assert_false(to_actor_.has_value());
 
     using Type = network::zeromq::socket::Type;
     auto& socket = to_actor_.emplace(
         api.Network().ZeroMQ().Internal().RawSocket(Type::Push));
     const auto rc = socket.Bind(endpoint.data());
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 }
 
 auto Data::Trigger() const noexcept -> void
 {
     if (to_actor_.has_value()) {
-        to_actor_->SendDeferred(
-            MakeWork(StatsJobs::statemachine), __FILE__, __LINE__);
+        to_actor_->SendDeferred(MakeWork(StatsJobs::statemachine));
     }
 }
 

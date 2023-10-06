@@ -26,7 +26,6 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
@@ -94,7 +93,7 @@ auto Purse(
     auto pEnvelope = std::make_unique<OTEnvelope>(
         api.Factory().InternalSession().Envelope());
 
-    OT_ASSERT(pEnvelope);
+    assert_false(nullptr == pEnvelope);
 
     auto& envelope = pEnvelope->get();
     auto pSecondaryPassword = api.Factory().Secret(0);
@@ -105,7 +104,7 @@ auto Purse(
     auto pSecondaryKey = std::make_unique<crypto::symmetric::Key>(
         api.Crypto().Symmetric().Key(password));
 
-    OT_ASSERT(pSecondaryKey);
+    assert_false(nullptr == pSecondaryKey);
 
     auto locked = envelope.Seal(nym, secondaryPassword.Bytes(), reason);
 
@@ -173,15 +172,14 @@ auto Purse(
     const auto* rhs = dynamic_cast<const Imp*>(&(request.Internal()));
 
     if (nullptr == rhs) {
-        LogError()("opentxs::factory::")(__func__)(": invalid input purse")
-            .Flush();
+        LogError()()("invalid input purse").Flush();
 
         return {};
     }
 
     auto output = std::make_unique<Imp>(api, *rhs);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     auto& purse = *output;
     auto locked = purse.AddNym(requester, reason);
@@ -202,13 +200,12 @@ auto Purse(
     using Imp = otx::blind::purse::Purse;
     auto output = std::make_unique<Imp>(api, server, unit, type);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     const auto added = output->AddNym(owner, reason);
 
     if (false == added) {
-        LogError()("opentxs::factory::")(__func__)(": Failed to encrypt purse")
-            .Flush();
+        LogError()()("Failed to encrypt purse").Flush();
 
         return {};
     }
@@ -311,9 +308,9 @@ Purse::Purse(
     primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
-    OT_ASSERT(primary_);
-    OT_ASSERT(secondary_);
-    OT_ASSERT(secondary_password_);
+    assert_false(nullptr == primary_);
+    assert_false(nullptr == secondary_);
+    assert_false(nullptr == secondary_password_);
 }
 
 Purse::Purse(
@@ -342,7 +339,7 @@ Purse::Purse(
     primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
-    OT_ASSERT(primary_);
+    assert_false(nullptr == primary_);
 }
 
 Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
@@ -368,7 +365,7 @@ Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
         opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305);
     primary_.reset(new crypto::symmetric::Key(std::move(primary)));
 
-    OT_ASSERT(primary_);
+    assert_false(nullptr == primary_);
 }
 
 Purse::Purse(const api::Session& api, const Purse& owner) noexcept
@@ -393,14 +390,14 @@ Purse::Purse(const api::Session& api, const Purse& owner) noexcept
     primary_.reset(new crypto::symmetric::Key(std::move(primary)));
     unlocked_ = true;
 
-    OT_ASSERT(primary_);
+    assert_false(nullptr == primary_);
 }
 
 auto Purse::AddNym(const identity::Nym& nym, const PasswordPrompt& reason)
     -> bool
 {
     if (false == unlocked_) {
-        LogError()(OT_PRETTY_CLASS())("Purse is locked").Flush();
+        LogError()()("Purse is locked").Flush();
 
         return false;
     }
@@ -409,7 +406,7 @@ auto Purse::AddNym(const identity::Nym& nym, const PasswordPrompt& reason)
     auto& sessionKey = *primary_passwords_.rbegin();
 
     if (false == bool(primary_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
+        LogError()()("Missing primary key").Flush();
 
         return false;
     }
@@ -419,7 +416,7 @@ auto Purse::AddNym(const identity::Nym& nym, const PasswordPrompt& reason)
     if (envelope->Seal(nym, primary_key_password_.Bytes(), reason)) {
         if (false == envelope->Serialize(sessionKey)) { return false; }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add nym").Flush();
+        LogError()()("Failed to add nym").Flush();
         primary_passwords_.pop_back();
 
         return false;
@@ -436,14 +433,14 @@ auto Purse::apply_times(const Token& token) -> void
 
 auto Purse::begin() noexcept -> iterator
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     return {parent_, 0};
 }
 
 auto Purse::cbegin() const noexcept -> const_iterator
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     return {parent_, 0};
 }
@@ -457,7 +454,7 @@ auto Purse::DeserializeTokens(const proto::Purse& in) noexcept -> void
 
 auto Purse::cend() const noexcept -> const_iterator
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     return {parent_, tokens_.size()};
 }
@@ -476,9 +473,7 @@ auto Purse::deserialize_secondary_key(
                     opentxs::crypto::symmetric::Algorithm::ChaCha20Poly1305));
 
             if (false == bool(output)) {
-                LogError()(OT_PRETTY_STATIC(Imp))(
-                    "Invalid serialized secondary key")
-                    .Flush();
+                LogError()()("Invalid serialized secondary key").Flush();
 
                 throw std::runtime_error("Invalid serialized secondary key");
             }
@@ -489,7 +484,7 @@ auto Purse::deserialize_secondary_key(
         } break;
         case blind::PurseType::Error:
         default: {
-            LogError()(OT_PRETTY_STATIC(Imp))("Invalid purse state").Flush();
+            LogError()()("Invalid purse state").Flush();
 
             throw std::runtime_error("invalid purse state");
         }
@@ -510,9 +505,7 @@ auto Purse::deserialize_secondary_password(
                     in.secondarypassword()));
 
             if (false == bool(output)) {
-                LogError()(OT_PRETTY_STATIC(Imp))(
-                    ": Invalid serialized secondary password")
-                    .Flush();
+                LogError()()(": Invalid serialized secondary password").Flush();
 
                 throw std::runtime_error(
                     "Invalid serialized secondary password");
@@ -524,7 +517,7 @@ auto Purse::deserialize_secondary_password(
         } break;
         case blind::PurseType::Error:
         default: {
-            LogError()(OT_PRETTY_STATIC(Imp))("Invalid purse state").Flush();
+            LogError()()("Invalid purse state").Flush();
 
             throw std::runtime_error("invalid purse state");
         }
@@ -535,7 +528,7 @@ auto Purse::deserialize_secondary_password(
 
 auto Purse::end() noexcept -> iterator
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     return {parent_, tokens_.size()};
 }
@@ -567,9 +560,7 @@ auto Purse::GeneratePrototokens(
                 factory::Token(api_, owner, mint, tokenAmount, *this, reason);
 
             if (!token) {
-                LogError()(OT_PRETTY_STATIC(Imp))(
-                    ": Failed to generate prototoken")
-                    .Flush();
+                LogError()()(": Failed to generate prototoken").Flush();
 
                 return {};
             }
@@ -578,7 +569,7 @@ auto Purse::GeneratePrototokens(
 
             tokenAmount = mint.GetLargestDenomination(workingAmount);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }
@@ -617,7 +608,7 @@ auto Purse::PrimaryKey(PasswordPrompt& password) -> crypto::symmetric::Key&
 auto Purse::Pop() -> Token
 {
     if (0 == tokens_.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("Purse is empty").Flush();
+        LogTrace()()("Purse is empty").Flush();
 
         return {};
     }
@@ -636,7 +627,7 @@ auto Purse::Process(
     const opentxs::PasswordPrompt& reason) -> bool
 {
     if (blind::PurseType::Issue != state_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect purse state").Flush();
+        LogError()()("Incorrect purse state").Flush();
 
         return false;
     }
@@ -655,7 +646,7 @@ auto Purse::Process(
             .reset();
         secondary_key_password_ = api_.Factory().Secret(0);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to process token").Flush();
+        LogError()()("Failed to process token").Flush();
     }
 
     return processed;
@@ -665,30 +656,30 @@ auto Purse::Push(Token&& original, const opentxs::PasswordPrompt& reason)
     -> bool
 {
     if (false == bool(original)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid token").Flush();
+        LogError()()("Invalid token").Flush();
 
         return false;
     }
 
     if (false == bool(primary_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
+        LogError()()("Missing primary key").Flush();
 
         return false;
     }
 
     if (false == unlocked_) {
-        LogError()(OT_PRETTY_CLASS())("Purse is locked").Flush();
+        LogError()()("Purse is locked").Flush();
 
         return false;
     }
 
     auto copy = factory::Token(original, *this);
 
-    OT_ASSERT(copy);
+    assert_true(copy);
 
     if (false == copy.Internal().ChangeOwner(
                      original.Internal().Owner(), *this, reason)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encrypt token").Flush();
+        LogError()()("Failed to encrypt token").Flush();
 
         return false;
     }
@@ -814,7 +805,7 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -836,13 +827,13 @@ auto Purse::Unlock(
     const opentxs::PasswordPrompt& reason) const -> bool
 {
     if (primary_passwords_.empty()) {
-        LogError()(OT_PRETTY_CLASS())("No session keys found").Flush();
+        LogError()()("No session keys found").Flush();
 
         return false;
     }
 
     if (false == bool(primary_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
+        LogError()()("Missing primary key").Flush();
 
         return false;
     }
@@ -867,20 +858,20 @@ auto Purse::Unlock(
                     primary_key_password_ = password;
                     break;
                 } else {
-                    LogError()(OT_PRETTY_CLASS())(
+                    LogError()()(
                         "Decrypted password does not unlock the primary key")
                         .Flush();
                 }
             }
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Invalid session key").Flush();
+            LogError()()("Invalid session key").Flush();
 
             continue;
         }
     }
 
     if (false == unlocked_) {
-        LogError()(OT_PRETTY_CLASS())("Nym ")(nym.ID(), api_.Crypto())(
+        LogError()()("Nym ")(nym.ID(), api_.Crypto())(
             " can not decrypt any session key in the purse.")
             .Flush();
     }
@@ -909,7 +900,7 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
         } break;
         case blind::PurseType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid purse state.").Flush();
+            LogError()()("Invalid purse state.").Flush();
 
             return false;
         }
@@ -917,31 +908,25 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
 
     for (const auto& token : tokens_) {
         if (type_ != token.Type()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Token type does not match purse type.")
-                .Flush();
+            LogError()()("Token type does not match purse type.").Flush();
 
             return false;
         }
 
         if (notary_ != token.Notary()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Token notary does not match purse notary.")
-                .Flush();
+            LogError()()("Token notary does not match purse notary.").Flush();
 
             return false;
         }
 
         if (unit_ != token.Unit()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Token unit does not match purse unit.")
-                .Flush();
+            LogError()()("Token unit does not match purse unit.").Flush();
 
             return false;
         }
 
         if (0 == allowedStates.count(token.State())) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect token state").Flush();
+            LogError()()("Incorrect token state").Flush();
 
             return false;
         }
@@ -949,7 +934,7 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
         const auto series = token.Series();
 
         if (std::numeric_limits<std::uint32_t>::max() < series) {
-            LogError()(OT_PRETTY_CLASS())("Invalid series").Flush();
+            LogError()()("Invalid series").Flush();
 
             return false;
         }
@@ -958,25 +943,25 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
             server.GetPrivateMint(unit_, static_cast<std::uint32_t>(series));
 
         if (!mint) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect token series").Flush();
+            LogError()()("Incorrect token series").Flush();
 
             return false;
         }
 
         if (mint.Expired() && (token.State() != blind::TokenState::Expired)) {
-            LogError()(OT_PRETTY_CLASS())("Token is expired").Flush();
+            LogError()()("Token is expired").Flush();
 
             return false;
         }
 
         if (token.ValidFrom() != mint.GetValidFrom()) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect token valid from").Flush();
+            LogError()()("Incorrect token valid from").Flush();
 
             return false;
         }
 
         if (token.ValidTo() != mint.GetValidTo()) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect token valid to").Flush();
+            LogError()()("Incorrect token valid to").Flush();
 
             return false;
         }
@@ -996,7 +981,7 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
             } break;
             case blind::TokenState::Error:
             default: {
-                LogError()(OT_PRETTY_CLASS())("Invalid token state").Flush();
+                LogError()()("Invalid token state").Flush();
 
                 return false;
             }
@@ -1004,21 +989,19 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
     }
 
     if (total_value_ != total) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect purse value").Flush();
+        LogError()()("Incorrect purse value").Flush();
 
         return false;
     }
 
     if (latest_valid_from_ != validFrom) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect purse latest valid from")
-            .Flush();
+        LogError()()("Incorrect purse latest valid from").Flush();
 
         return false;
     }
 
     if (earliest_valid_to_ != validTo) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect purse earliest valid to")
-            .Flush();
+        LogError()()("Incorrect purse earliest valid to").Flush();
 
         return false;
     }

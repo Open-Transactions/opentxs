@@ -13,7 +13,6 @@
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/Widget.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -142,7 +142,7 @@ ContactSection::ContactSection(
         this,
         extract_custom<identity::wot::claim::Section>(custom));
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto ContactSection::check_type(const ContactSectionRowID type) noexcept -> bool
@@ -167,12 +167,12 @@ auto ContactSection::process_section(
     const identity::wot::claim::Section& section) noexcept
     -> UnallocatedSet<ContactSectionRowID>
 {
-    OT_ASSERT(row_id_ == section.Type());
+    assert_true(row_id_ == section.Type());
 
     UnallocatedSet<ContactSectionRowID> active{};
 
     for (const auto& [type, group] : section) {
-        OT_ASSERT(group);
+        assert_false(nullptr == group);
 
         const ContactSectionRowID key{row_id_, type};
 

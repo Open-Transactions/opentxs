@@ -18,7 +18,6 @@
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -140,8 +139,8 @@ HD::HD(
     , plaintext_chain_code_(chainCode)
     , parent_(parent)
 {
-    OT_ASSERT(path_);
-    OT_ASSERT(chain_code_);
+    assert_false(nullptr == path_);
+    assert_false(nullptr == chain_code_);
 }
 
 HD::HD(
@@ -170,7 +169,7 @@ HD::HD(
     , plaintext_chain_code_(chainCode)
     , parent_(parent)
 {
-    OT_ASSERT(path_);
+    assert_false(nullptr == path_);
 }
 
 HD::HD(const HD& rhs, allocator_type alloc) noexcept
@@ -216,7 +215,7 @@ auto HD::chaincode(const Lock& lock, const PasswordPrompt& reason)
 
         return get_chain_code(lock, reason).Bytes();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -284,7 +283,7 @@ auto HD::get_params() const noexcept -> std::tuple<bool, Bip32Depth, Bip32Index>
     auto& [success, depth, child] = output;
 
     if (false == bool(path_)) {
-        LogError()(OT_PRETTY_CLASS())("missing path").Flush();
+        LogError()()("missing path").Flush();
 
         return output;
     }
@@ -293,13 +292,13 @@ auto HD::get_params() const noexcept -> std::tuple<bool, Bip32Depth, Bip32Index>
     auto size = path.child_size();
 
     if (0 > size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid depth (")(size)(")").Flush();
+        LogError()()("Invalid depth (")(size)(")").Flush();
 
         return output;
     }
 
     if (std::numeric_limits<Bip32Depth>::max() < size) {
-        LogError()(OT_PRETTY_CLASS())("Invalid depth (")(size)(")").Flush();
+        LogError()()("Invalid depth (")(size)(")").Flush();
 
         return output;
     }
@@ -351,7 +350,7 @@ auto HD::Path(proto::HDPath& output) const noexcept -> bool
         return true;
     }
 
-    LogError()(OT_PRETTY_CLASS())("HDPath not instantiated.").Flush();
+    LogError()()("HDPath not instantiated.").Flush();
 
     return false;
 }

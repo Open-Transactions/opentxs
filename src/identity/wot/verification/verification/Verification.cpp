@@ -8,10 +8,10 @@
 #include <utility>
 
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot
@@ -39,7 +39,7 @@ namespace opentxs::identity::wot
 Verification::Verification(VerificationPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Verification::Verification(allocator_type alloc) noexcept

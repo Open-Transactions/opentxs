@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/util/Future.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "util/Work.hpp"
 
 namespace ottest
@@ -64,8 +63,8 @@ public:
     {
         if (finished_) { return false; }
 
-        OT_ASSERT(request_.has_value());
-        OT_ASSERT(remote_nym_);
+        opentxs::assert_true(request_.has_value());
+        opentxs::assert_false(nullptr == remote_nym_);
 
         const auto& request = request_.value();
         const auto& nym = *remote_nym_;
@@ -74,7 +73,7 @@ public:
             try {
                 const auto pc = nym.PaymentCodePublic();
 
-                OT_ASSERT(pc.Valid());
+                opentxs::assert_true(pc.Valid());
 
                 const auto handle = api_.Network().Blockchain().GetChain(
                     opentxs::blockchain::Type::UnitTest);
@@ -215,7 +214,7 @@ private:
                 body[4].as<opentxs::contract::peer::RequestType>();
             remote_nym_ = api_.Wallet().Nym(sender);
 
-            OT_ASSERT(remote_nym_);
+            opentxs::assert_false(nullptr == remote_nym_);
 
             request_.emplace(api_.Factory().PeerRequest(body[5]));
         } catch (const std::exception& e) {

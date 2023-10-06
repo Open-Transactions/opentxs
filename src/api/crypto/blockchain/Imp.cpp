@@ -25,7 +25,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -351,7 +350,7 @@ auto Blockchain::Imp::AssignContact(
         api_.Storage().Internal().BlockchainSubaccountAccountType(
             nymID, accountID));
 
-    OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
+    assert_true(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
         const auto& subaccount = this->subaccount(chain, nymID, accountID);
@@ -367,7 +366,7 @@ auto Blockchain::Imp::AssignContact(
                     .append(e.what())};
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -386,7 +385,7 @@ auto Blockchain::Imp::AssignLabel(
         api_.Storage().Internal().BlockchainSubaccountAccountType(
             nymID, accountID));
 
-    OT_ASSERT(opentxs::blockchain::Type::UnknownBlockchain != chain);
+    assert_true(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
         const auto& subaccount = this->subaccount(chain, nymID, accountID);
@@ -400,7 +399,7 @@ auto Blockchain::Imp::AssignLabel(
                 std::to_string(index))};
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -421,8 +420,7 @@ auto Blockchain::Imp::bip44_type(const UnitType in) const noexcept -> Bip44Type
 
         return opentxs::blockchain::params::get(chain).Bip44Code();
     } catch (...) {
-        LogAbort()(OT_PRETTY_CLASS())("BIP-44 type not defined for ")(print(in))
-            .Abort();
+        LogAbort()()("BIP-44 type not defined for ")(print(in)).Abort();
     }
 }
 
@@ -439,7 +437,7 @@ auto Blockchain::Imp::CalculateAddress(
             try {
                 data = PubkeyHash(chain, pubkey);
             } catch (...) {
-                LogError()(OT_PRETTY_CLASS())("Invalid public key.").Flush();
+                LogError()()("Invalid public key.").Flush();
 
                 return {};
             }
@@ -449,7 +447,7 @@ auto Blockchain::Imp::CalculateAddress(
         case Style::P2WSH:
         case Style::P2TR:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported address style (")(
+            LogError()()("Unsupported address style (")(
                 static_cast<std::uint16_t>(format))(")")
                 .Flush();
 
@@ -470,7 +468,7 @@ auto Blockchain::Imp::Confirm(
 
         return get_node(accountID).Internal().Confirm(subchain, index, tx);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -574,12 +572,12 @@ auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
 
             return output;
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogTrace()()(e.what()).Flush();
 
             return blank_;
         }
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -634,12 +632,12 @@ auto Blockchain::Imp::decode_legacy(const std::string_view encoded)
 
             return output;
         } catch (const std::exception& e) {
-            LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogTrace()()(e.what()).Flush();
 
             return blank_;
         }
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -667,7 +665,7 @@ auto Blockchain::Imp::EncodeAddress(
         case Style::P2WSH:
         case Style::P2TR:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported address style (")(
+            LogError()()("Unsupported address style (")(
                 static_cast<std::uint16_t>(style))(")")
                 .Flush();
 
@@ -841,7 +839,7 @@ auto Blockchain::Imp::init_path(
         } break;
         case Standard::Error:
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -887,7 +885,7 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
 
         return LoadOrCreateSubaccount(*nym, remote, chain, reason);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return blank;
     }
@@ -953,16 +951,15 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
             throw std::runtime_error{"failed to create or load subaccount"};
         }
 
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "Loaded or created new payment code subaccount ")(accountID, api)(
-            " for ")(print(chain))(" account ")(account.AccountID(), api)(
-            " owned by ")(nymID, api)(" in reference to remote payment code ")(
-            remote)
+        LogVerbose()()("Loaded or created new payment code subaccount ")(
+            accountID, api)(" for ")(print(chain))(" account ")(
+            account.AccountID(), api)(" owned by ")(nymID, api)(
+            " in reference to remote payment code ")(remote)
             .Flush();
 
         return account.GetPaymentCode().at(accountID);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return blank;
     }
@@ -1007,13 +1004,13 @@ auto Blockchain::Imp::NewHDSubaccount(
     if (false == validate_nym(nymID)) { return blank; }
 
     if (opentxs::blockchain::Type::UnknownBlockchain == derivationChain) {
-        LogError()(OT_PRETTY_CLASS())("Invalid derivationChain").Flush();
+        LogError()()("Invalid derivationChain").Flush();
 
         return blank;
     }
 
     if (opentxs::blockchain::Type::UnknownBlockchain == targetChain) {
-        LogError()(OT_PRETTY_CLASS())("Invalid targetChain").Flush();
+        LogError()()("Invalid targetChain").Flush();
 
         return blank;
     }
@@ -1021,7 +1018,7 @@ auto Blockchain::Imp::NewHDSubaccount(
     auto nym = api_.Wallet().Nym(nymID);
 
     if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym does not exist.").Flush();
+        LogError()()("Nym does not exist.").Flush();
 
         return blank;
     }
@@ -1029,19 +1026,19 @@ auto Blockchain::Imp::NewHDSubaccount(
     auto nymPath = proto::HDPath{};
 
     if (false == nym->Internal().Path(nymPath)) {
-        LogError()(OT_PRETTY_CLASS())("No nym path.").Flush();
+        LogError()()("No nym path.").Flush();
 
         return blank;
     }
 
     if (false == nymPath.has_seed()) {
-        LogError()(OT_PRETTY_CLASS())("Missing seed.").Flush();
+        LogError()()("Missing seed.").Flush();
 
         return blank;
     }
 
     if (2 > nymPath.child().size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid path.").Flush();
+        LogError()()("Invalid path.").Flush();
 
         return blank;
     }
@@ -1059,17 +1056,17 @@ auto Blockchain::Imp::NewHDSubaccount(
         auto& account = account_mutable(targetChain, nymID);
         account.Internal().AddHDNode(accountPath, standard, reason, accountID);
 
-        OT_ASSERT(false == accountID.empty());
+        assert_false(accountID.empty());
 
-        LogVerbose()(OT_PRETTY_CLASS())("Created new HD subaccount ")(
-            accountID, api_.Crypto())(" for ")(print(targetChain))(" account ")(
+        LogVerbose()()("Created new HD subaccount ")(accountID, api_.Crypto())(
+            " for ")(print(targetChain))(" account ")(
             account.AccountID(), api_.Crypto())(" owned by ")(nymID.asBase58(
             api_.Crypto()))(" using path ")(opentxs::crypto::Print(accountPath))
             .Flush();
 
         return accountID;
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return blank;
     }
@@ -1108,11 +1105,11 @@ auto Blockchain::Imp::p2pkh(
     try {
         auto preimage = address_prefix(Style::P2PKH, chain);
 
-        OT_ASSERT(1 == preimage.size());
+        assert_true(1 == preimage.size());
 
         preimage += pubkeyHash;
 
-        OT_ASSERT(21 == preimage.size());
+        assert_true(21 == preimage.size());
 
         auto out = UnallocatedCString{};
         const auto rc = api_.Crypto().Encode().Base58CheckEncode(
@@ -1122,8 +1119,7 @@ auto Blockchain::Imp::p2pkh(
 
         return out;
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
-            .Flush();
+        LogError()()("Unsupported chain (")(print(chain))(")").Flush();
 
         return "";
     }
@@ -1136,11 +1132,11 @@ auto Blockchain::Imp::p2sh(
     try {
         auto preimage = address_prefix(Style::P2SH, chain);
 
-        OT_ASSERT(1 == preimage.size());
+        assert_true(1 == preimage.size());
 
         preimage += pubkeyHash;
 
-        OT_ASSERT(21 == preimage.size());
+        assert_true(21 == preimage.size());
 
         auto out = UnallocatedCString{};
         const auto rc = api_.Crypto().Encode().Base58CheckEncode(
@@ -1150,8 +1146,7 @@ auto Blockchain::Imp::p2sh(
 
         return out;
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
-            .Flush();
+        LogError()()("Unsupported chain (")(print(chain))(")").Flush();
 
         return "";
     }
@@ -1176,8 +1171,7 @@ auto Blockchain::Imp::p2wpkh(
 
         return segwit_addr::encode(hrp, 0, prog);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain (")(print(chain))(")")
-            .Flush();
+        LogError()()("Unsupported chain (")(print(chain))(")").Flush();
 
         return "";
     }
@@ -1284,7 +1278,7 @@ auto Blockchain::Imp::RecipientContact(const Key& key) const noexcept
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return blank;
     }
@@ -1366,7 +1360,7 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return blank;
     }

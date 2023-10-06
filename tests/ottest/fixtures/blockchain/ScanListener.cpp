@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 
@@ -76,14 +75,14 @@ struct ScanListener::Imp {
     {
         const auto body = in.Payload();
 
-        OT_ASSERT(body.size() == 8u);
+        opentxs::assert_true(body.size() == 8u);
 
         const auto chain = body[1].as<Chain>();
         auto nymID = [&] {
             auto out = ot::identifier::Nym{};
             out.Assign(body[2].Bytes());
 
-            OT_ASSERT(false == out.empty());
+            opentxs::assert_true(false == out.empty());
 
             return out;
         }();
@@ -116,7 +115,7 @@ struct ScanListener::Imp {
             const auto rc =
                 out->Start(api_.Endpoints().BlockchainScanProgress().data());
 
-            OT_ASSERT(rc);
+            opentxs::assert_true(rc);
 
             return out;
         }())

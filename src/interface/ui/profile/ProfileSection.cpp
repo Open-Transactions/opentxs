@@ -17,7 +17,6 @@
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -26,6 +25,7 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 template class opentxs::SharedPimpl<opentxs::ui::ProfileSection>;
 
@@ -162,7 +162,7 @@ ProfileSection::ProfileSection(
         this,
         extract_custom<identity::wot::claim::Section>(custom));
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto ProfileSection::AddClaim(
@@ -222,12 +222,12 @@ auto ProfileSection::process_section(
     const identity::wot::claim::Section& section) noexcept
     -> UnallocatedSet<ProfileSectionRowID>
 {
-    OT_ASSERT(row_id_ == section.Type());
+    assert_true(row_id_ == section.Type());
 
     UnallocatedSet<ProfileSectionRowID> active{};
 
     for (const auto& [type, group] : section) {
-        OT_ASSERT(group);
+        assert_false(nullptr == group);
 
         const ProfileSectionRowID key{row_id_, type};
 

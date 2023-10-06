@@ -24,7 +24,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -120,7 +119,7 @@ auto Basket::FinalizeTemplate(
     try {
         contract->first_time_init();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Basket))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -131,9 +130,7 @@ auto Basket::FinalizeTemplate(
 
         if (contract->update_signature(reason)) {
             if (false == contract->Serialize(serialized, true)) {
-                LogError()(OT_PRETTY_STATIC(Basket))(
-                    "Failed to serialize unit definition.")
-                    .Flush();
+                LogError()()("Failed to serialize unit definition.").Flush();
 
                 return false;
             }

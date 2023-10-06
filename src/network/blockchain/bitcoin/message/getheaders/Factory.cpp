@@ -41,7 +41,7 @@ auto BitcoinP2PGetheaders(
             stop,
             move_construct<blockchain::block::Hash>(history, alloc));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

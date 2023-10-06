@@ -8,6 +8,7 @@
 #include <Context.pb.h>
 #include <StorageNymList.pb.h>
 #include <atomic>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -18,7 +19,6 @@
 #include "internal/serialization/protobuf/verify/Context.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -36,7 +36,13 @@ Contexts::Contexts(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 2)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          2)
 {
     if (is_valid(hash)) {
         init(hash);
@@ -65,8 +71,8 @@ auto Contexts::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -82,8 +88,8 @@ auto Contexts::Load(
 auto Contexts::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
     if (!verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure").Flush();
-        OT_FAIL;
+        LogError()()("Lock failure").Flush();
+        LogAbort()().Abort();
     }
 
     auto serialized = serialize();

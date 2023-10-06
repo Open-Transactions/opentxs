@@ -16,7 +16,6 @@
 
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -63,7 +62,8 @@ Raw::Raw(const Context& context, const socket::Type type) noexcept
 auto Raw::Bind(const char* endpoint) noexcept -> bool
 {
     if (0 != ::zmq_bind(Native(), endpoint)) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to bind to (" << endpoint
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to bind to (" << endpoint
                   << "): " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -96,7 +96,8 @@ auto Raw::Close() noexcept -> void
 auto Raw::Connect(const char* endpoint) noexcept -> bool
 {
     if (0 != ::zmq_connect(Native(), endpoint)) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to connect to (" << endpoint
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to connect to (" << endpoint
                   << "): " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -112,8 +113,8 @@ auto Raw::Disconnect(const char* endpoint) noexcept -> bool
     const auto rc = ::zmq_disconnect(Native(), endpoint);
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
     }
 
     connected_endpoints_.erase(endpoint);
@@ -142,7 +143,8 @@ auto Raw::EnableCurveClient(
         ::zmq_setsockopt(Native(), ZMQ_CURVE_SERVER, &server, sizeof(server));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_CURVE_SERVER"
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_CURVE_SERVER"
                   << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -152,7 +154,8 @@ auto Raw::EnableCurveClient(
         Native(), ZMQ_CURVE_SERVERKEY, serverKey.data(), serverKey.size());
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set server key"
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set server key"
                   << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -162,7 +165,8 @@ auto Raw::EnableCurveClient(
         Native(), ZMQ_CURVE_PUBLICKEY, publicKey.data(), publicKey.size());
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set public key"
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set public key"
                   << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -172,7 +176,8 @@ auto Raw::EnableCurveClient(
         Native(), ZMQ_CURVE_SECRETKEY, secretKey.data(), secretKey.size());
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set secret key"
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set secret key"
                   << ": " << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
@@ -198,39 +203,38 @@ auto Raw::record_endpoint(Endpoints& out) noexcept -> void
     out.emplace(buffer.data(), bytes);
 }
 
-auto Raw::Send(Message&& msg, const char* file, int line, bool silent) noexcept
-    -> bool
+auto Raw::Send(
+    Message&& msg,
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    const auto sent = send(std::move(msg), ZMQ_DONTWAIT, file, line, silent);
+    const auto sent = send(std::move(msg), ZMQ_DONTWAIT, loc, silent);
 
-    OT_ASSERT(sent);
+    assert_true(sent);
 
     return sent;
 }
 
 auto Raw::SendDeferred(
     Message&& msg,
-    const char* file,
-    int line,
-    bool silent) noexcept -> bool
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    return send(std::move(msg), 0, file, line, silent);
+    return send(std::move(msg), 0, loc, silent);
 }
 
 auto Raw::SendExternal(
     Message&& msg,
-    const char* file,
-    int line,
-    bool silent) noexcept -> bool
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    return send(std::move(msg), ZMQ_DONTWAIT, file, line, silent);
+    return send(std::move(msg), ZMQ_DONTWAIT, loc, silent);
 }
 
 auto Raw::send(
     Message&& msg,
     const int baseFlags,
-    const char* file,
-    int line,
+    const std::source_location& loc,
     bool silent) noexcept -> bool
 {
     auto sent{true};
@@ -247,9 +251,9 @@ auto Raw::send(
     }
 
     if ((false == sent) && (false == silent)) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Send error from " << file << ": "
-                  << std::to_string(line) << ": " << ::zmq_strerror(zmq_errno())
-                  << '\n'
+        std::cerr << "Send error from " << loc.function_name() << " in "
+                  << loc.file_name() << ": " << std::to_string(loc.line())
+                  << ": " << ::zmq_strerror(zmq_errno()) << '\n'
                   << PrintStackTrace();
     }
 
@@ -271,7 +275,8 @@ auto Raw::SetIncomingHWM(int value) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_RCVHWM, &value, sizeof(value));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_RCVHWM\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_RCVHWM\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
         return false;
@@ -286,7 +291,8 @@ auto Raw::SetLinger(int value) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_LINGER, &value, sizeof(value));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_LINGER\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_LINGER\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
         return false;
@@ -300,7 +306,8 @@ auto Raw::SetMonitor(const char* endpoint, int events) noexcept -> bool
     const auto rc = ::zmq_socket_monitor(Native(), endpoint, events);
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed zmq_socket_monitor\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed zmq_socket_monitor\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
         return false;
@@ -317,7 +324,8 @@ auto Raw::SetMaxMessageSize(std::size_t arg) noexcept -> bool
     static_assert(sizeof(arg) <= sizeof(max));
 
     if (max < static_cast<std::uint64_t>(arg)) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Argument too large\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Argument too large\n";
 
         return false;
     }
@@ -326,7 +334,8 @@ auto Raw::SetMaxMessageSize(std::size_t arg) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_MAXMSGSIZE, &arg, sizeof(arg));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_MAXMSGSIZE\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_MAXMSGSIZE\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
         return false;
@@ -341,7 +350,8 @@ auto Raw::SetOutgoingHWM(int value) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_SNDHWM, &value, sizeof(value));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_SNDHWM\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_SNDHWM\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
         return false;
@@ -353,7 +363,8 @@ auto Raw::SetOutgoingHWM(int value) noexcept -> bool
 auto Raw::SetPrivateKey(ReadView key) noexcept -> bool
 {
     if (CURVE_KEY_BYTES != key.size()) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Invalid private key" << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Invalid private key" << std::endl;
 
         return false;
     }
@@ -363,8 +374,8 @@ auto Raw::SetPrivateKey(ReadView key) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_CURVE_SERVER, &server, sizeof(server));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set ZMQ_CURVE_SERVER"
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set ZMQ_CURVE_SERVER" << std::endl;
 
         return false;
     }
@@ -373,8 +384,8 @@ auto Raw::SetPrivateKey(ReadView key) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_CURVE_SECRETKEY, key.data(), key.size());
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Failed to set private key"
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Failed to set private key" << std::endl;
 
         return false;
     }
@@ -389,7 +400,7 @@ auto Raw::SetRouterHandover(bool value) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_ROUTER_HANDOVER, &data, sizeof(data));
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS())
+        std::cerr << std::source_location::current().function_name() << ": "
                   << "Failed to set ZMQ_ROUTER_HANDOVER\n";
         std::cerr << ::zmq_strerror(zmq_errno()) << '\n';
 
@@ -405,8 +416,8 @@ auto Raw::SetRoutingID(ReadView id) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_ROUTING_ID, id.data(), id.size());
 
     if (0 != set) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
     }
@@ -420,7 +431,8 @@ auto Raw::SetSendTimeout(std::chrono::milliseconds value) noexcept -> bool
     using ZMQArg = int;
 
     if (std::numeric_limits<ZMQArg>::max() < ms) {
-        std::cerr << (OT_PRETTY_CLASS()) << "Argument too large\n";
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << "Argument too large\n";
 
         return false;
     }
@@ -437,8 +449,8 @@ auto Raw::SetSendTimeout(std::chrono::milliseconds value) noexcept -> bool
         ::zmq_setsockopt(Native(), ZMQ_SNDTIMEO, &arg, sizeof(arg));
 
     if (0 != set) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
     }
@@ -452,8 +464,8 @@ auto Raw::SetZAPDomain(ReadView domain) noexcept -> bool
         Native(), ZMQ_ZAP_DOMAIN, domain.data(), domain.size());
 
     if (0 != set) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
     }
@@ -472,8 +484,8 @@ auto Raw::Unbind(const char* endpoint) noexcept -> bool
     const auto rc = ::zmq_unbind(Native(), endpoint);
 
     if (0 != rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
     }
 
     connected_endpoints_.erase(endpoint);
@@ -489,8 +501,8 @@ auto Raw::UnbindAll() noexcept -> bool
         const auto rc = ::zmq_unbind(Native(), endpoint.c_str());
 
         if (0 != rc) {
-            std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                      << std::endl;
+            std::cerr << std::source_location::current().function_name() << ": "
+                      << ::zmq_strerror(zmq_errno()) << std::endl;
             output = false;
         }
     }
@@ -511,8 +523,8 @@ auto Raw::wait(int flags) noexcept -> bool
     const auto rc = ::zmq_poll(std::addressof(poll), 1, timeout.count());
 
     if (0 > rc) {
-        std::cerr << (OT_PRETTY_CLASS()) << ::zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(zmq_errno()) << std::endl;
 
         return false;
     } else {
@@ -531,7 +543,7 @@ auto swap(Raw& lhs, Raw& rhs) noexcept -> void { lhs.swap(rhs); }
 Raw::Raw(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(imp);
+    assert_true(imp);
 }
 
 Raw::Raw(Raw&& rhs) noexcept
@@ -588,28 +600,28 @@ auto Raw::ID() const noexcept -> SocketID { return imp_->ID(); }
 
 auto Raw::Native() noexcept -> void* { return imp_->Native(); }
 
-auto Raw::Send(Message&& msg, const char* file, int line, bool silent) noexcept
-    -> bool
+auto Raw::Send(
+    Message&& msg,
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    return imp_->Send(std::move(msg), file, line, silent);
+    return imp_->Send(std::move(msg), silent, loc);
 }
 
 auto Raw::SendDeferred(
     Message&& msg,
-    const char* file,
-    int line,
-    bool silent) noexcept -> bool
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    return imp_->SendDeferred(std::move(msg), file, line, silent);
+    return imp_->SendDeferred(std::move(msg), silent, loc);
 }
 
 auto Raw::SendExternal(
     Message&& msg,
-    const char* file,
-    int line,
-    bool silent) noexcept -> bool
+    bool silent,
+    const std::source_location& loc) noexcept -> bool
 {
-    return imp_->SendExternal(std::move(msg), file, line, silent);
+    return imp_->SendExternal(std::move(msg), silent, loc);
 }
 
 auto Raw::SetExposedUntrusted() noexcept -> bool

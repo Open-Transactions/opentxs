@@ -29,7 +29,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
@@ -81,8 +80,7 @@ auto BlockchainAccountActivityModel(
     using ReturnType = ui::implementation::BlockchainAccountActivity;
 
     if (AccountType::Blockchain != accountID.AccountType()) {
-        LogAbort()("opentxs::factory::")(__func__)(
-            ": wrong identifier type for ")(accountID.asHex())(": ")(
+        LogAbort()()("wrong identifier type for ")(accountID.asHex())(": ")(
             print(accountID.Subtype()))
             .Abort();
     }
@@ -90,7 +88,7 @@ auto BlockchainAccountActivityModel(
     const auto [chain, owner] =
         api.Crypto().Blockchain().LookupAccount(accountID);
 
-    OT_ASSERT(owner == nymID);
+    assert_true(owner == nymID);
 
     return std::make_unique<ReturnType>(api, chain, nymID, accountID, cb);
 }
@@ -121,7 +119,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
     const auto connected =
         balance_socket_->Start(api_.Endpoints().BlockchainBalance().data());
 
-    OT_ASSERT(connected);
+    assert_true(connected);
 
     init({
         UnallocatedCString{api.Endpoints().BlockchainReorg()},
@@ -236,9 +234,9 @@ auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -247,7 +245,7 @@ auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -286,9 +284,9 @@ auto BlockchainAccountActivity::pipeline(const Message& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -317,15 +315,15 @@ auto BlockchainAccountActivity::process_balance(const Message& in) noexcept
     wait_for_startup();
     const auto body = in.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     const auto confirmed = factory::Amount(body[2]);
     const auto unconfirmed = factory::Amount(body[3]);
     const auto nym = api_.Factory().NymIDFromHash(body[4].Bytes());
 
-    OT_ASSERT(chain_ == chain);
-    OT_ASSERT(primary_id_ == nym);
+    assert_true(chain_ == chain);
+    assert_true(primary_id_ == nym);
 
     const auto oldBalance = [&] {
         eLock lock(shared_lock_);
@@ -356,7 +354,7 @@ auto BlockchainAccountActivity::process_block(const Message& in) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -371,7 +369,7 @@ auto BlockchainAccountActivity::process_contact(const Message& in) noexcept
     wait_for_startup();
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto contactID = api_.Factory()
                                .IdentifierFromProtobuf(body[1].Bytes())
@@ -411,7 +409,7 @@ auto BlockchainAccountActivity::process_reorg(const Message& in) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(5 < body.size());
+    assert_true(5 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -426,7 +424,7 @@ auto BlockchainAccountActivity::process_state(const Message& in) noexcept
     {
         const auto body = in.Payload();
 
-        OT_ASSERT(2 < body.size());
+        assert_true(2 < body.size());
 
         const auto chain = body[1].as<blockchain::Type>();
 
@@ -454,7 +452,7 @@ auto BlockchainAccountActivity::process_sync(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -463,8 +461,8 @@ auto BlockchainAccountActivity::process_sync(const Message& in) noexcept -> void
     const auto height = body[2].as<blockchain::block::Height>();
     const auto target = body[3].as<blockchain::block::Height>();
 
-    OT_ASSERT(height <= std::numeric_limits<int>::max());
-    OT_ASSERT(target <= std::numeric_limits<int>::max());
+    assert_true(height <= std::numeric_limits<int>::max());
+    assert_true(target <= std::numeric_limits<int>::max());
 
     const auto previous = progress_.get_progress();
     const auto current = static_cast<int>(height);
@@ -486,7 +484,7 @@ auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
     wait_for_startup();
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto& api = api_;
     const auto txid = blockchain::block::TransactionHash{body[1].Bytes()};

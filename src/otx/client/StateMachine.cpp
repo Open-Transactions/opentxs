@@ -35,7 +35,6 @@
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -80,7 +79,7 @@
     auto started = op_.a(__VA_ARGS__);                                         \
                                                                                \
     while (false == started) {                                                 \
-        LogDebug()(OT_PRETTY_CLASS())("State machine is not ready").Flush();   \
+        LogDebug()()("State machine is not ready").Flush();                    \
                                                                                \
         if (shutdown().load()) {                                               \
             op_.Shutdown();                                                    \
@@ -113,7 +112,7 @@
     auto started = op_.a(__VA_ARGS__);                                         \
                                                                                \
     while (false == started) {                                                 \
-        LogDebug()(OT_PRETTY_CLASS())("State machine is not ready").Flush();   \
+        LogDebug()()("State machine is not ready").Flush();                    \
         if (shutdown().load()) {                                               \
             op_.Shutdown();                                                    \
                                                                                \
@@ -207,12 +206,12 @@ StateMachine::StateMachine(
     , unknown_servers_()
     , unknown_units_()
 {
-    OT_ASSERT(p_op_);
+    assert_false(nullptr == p_op_);
 }
 
 auto StateMachine::bump_task(const bool bump) const -> bool
 {
-    if (bump) { LogInsane()(OT_PRETTY_CLASS())(++task_count_).Flush(); }
+    if (bump) { LogInsane()()(++task_count_).Flush(); }
 
     return bump;
 }
@@ -262,7 +261,7 @@ void StateMachine::check_nym_revision(const otx::context::Server& context) const
 {
     if (context.StaleNym()) {
         const auto& nymID = context.Signer()->ID();
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+        LogDetail()()("Nym ")(nymID, api_.Crypto())(
             " has is newer than version last registered version on "
             "server ")(context.Notary(), api_.Crypto())(".")
             .Flush();
@@ -274,8 +273,8 @@ auto StateMachine::check_registration(
     const identifier::Nym& nymID,
     const identifier::Notary& serverID) const -> bool
 {
-    OT_ASSERT(false == nymID.empty());
-    OT_ASSERT(false == serverID.empty());
+    assert_false(nymID.empty());
+    assert_false(serverID.empty());
 
     auto context = api_.Wallet().Internal().ServerContext(nymID, serverID);
     RequestNumber request{0};
@@ -283,19 +282,19 @@ auto StateMachine::check_registration(
     if (context) {
         request = context->Request();
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+        LogDetail()()("Nym ")(nymID, api_.Crypto())(
             " has never registered on ")(serverID, api_.Crypto())
             .Flush();
     }
 
     if (0 != request) {
-        LogVerbose()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+        LogVerbose()()("Nym ")(nymID, api_.Crypto())(
             " has registered on server ")(serverID, api_.Crypto())(
             " at least once.")
             .Flush();
         state_ = State::ready;
 
-        OT_ASSERT(context);
+        assert_false(nullptr == context);
 
         return false;
     }
@@ -303,13 +302,13 @@ auto StateMachine::check_registration(
     const auto output = register_nym(next_task_id(), false);
 
     if (output) {
-        LogVerbose()(OT_PRETTY_CLASS())("Nym ")(nymID, api_.Crypto())(
+        LogVerbose()()("Nym ")(nymID, api_.Crypto())(
             " is now registered on server ")(serverID, api_.Crypto())
             .Flush();
         state_ = State::ready;
         context = api_.Wallet().Internal().ServerContext(nymID, serverID);
 
-        OT_ASSERT(context);
+        assert_false(nullptr == context);
 
         return false;
     } else {
@@ -322,12 +321,11 @@ auto StateMachine::check_registration(
 auto StateMachine::check_server_contract(
     const identifier::Notary& serverID) const -> bool
 {
-    OT_ASSERT(false == serverID.empty());
+    assert_false(serverID.empty());
 
     try {
         api_.Wallet().Internal().Server(serverID);
-        LogVerbose()(OT_PRETTY_CLASS())("Server contract ")(
-            serverID, api_.Crypto())(" exists.")
+        LogVerbose()()("Server contract ")(serverID, api_.Crypto())(" exists.")
             .Flush();
         state_ = State::needRegistration;
 
@@ -335,8 +333,8 @@ auto StateMachine::check_server_contract(
     } catch (...) {
     }
 
-    LogDetail()(OT_PRETTY_CLASS())("Server contract for ")(
-        serverID, api_.Crypto())(" is not in the wallet.")
+    LogDetail()()("Server contract for ")(serverID, api_.Crypto())(
+        " is not in the wallet.")
         .Flush();
     missing_servers_.Push(next_task_id(), serverID);
 
@@ -401,23 +399,23 @@ auto StateMachine::deposit_cheque(
 {
     const auto& [unitID, accountID, payment] = task;
 
-    OT_ASSERT(false == accountID.empty());
-    OT_ASSERT(payment);
+    assert_false(accountID.empty());
+    assert_false(nullptr == payment);
 
     if ((false == payment->IsCheque()) && (false == payment->IsVoucher())) {
-        LogError()(OT_PRETTY_CLASS())("Unhandled payment type.").Flush();
+        LogError()()("Unhandled payment type.").Flush();
 
         return finish_task(taskID, false, error_result());
     }
 
     std::shared_ptr<Cheque> cheque{api_.Factory().InternalSession().Cheque()};
 
-    OT_ASSERT(cheque);
+    assert_false(nullptr == cheque);
 
     const auto loaded = cheque->LoadContractFromString(payment->Payment());
 
     if (false == loaded) {
-        LogError()(OT_PRETTY_CLASS())("Invalid cheque.").Flush();
+        LogError()()("Invalid cheque.").Flush();
 
         return finish_task(taskID, false, error_result());
     }
@@ -437,7 +435,7 @@ auto StateMachine::deposit_cheque_wrapper(
     bool output{false};
     const auto& [unitID, accountIDHint, payment] = param;
 
-    OT_ASSERT(payment);
+    assert_false(nullptr == payment);
 
     auto depositServer = identifier::Notary{};
     auto depositUnitID = identifier::UnitDefinition{};
@@ -464,7 +462,7 @@ auto StateMachine::download_mint(
 auto StateMachine::download_nym(const TaskID taskID, const CheckNymTask& id)
     const -> bool
 {
-    OT_ASSERT(false == id.empty());
+    assert_false(id.empty());
 
     otx::context::Server::ExtraArgs args{};
 
@@ -508,7 +506,7 @@ auto StateMachine::download_server(
     const TaskID taskID,
     const DownloadContractTask& contractID) const -> bool
 {
-    OT_ASSERT(false == contractID.empty());
+    assert_false(contractID.empty());
 
     DO_OPERATION(DownloadContract, contractID);
 
@@ -523,7 +521,7 @@ auto StateMachine::download_unit_definition(
     const TaskID taskID,
     const DownloadUnitDefinitionTask& id) const -> bool
 {
-    OT_ASSERT(false == id.empty());
+    assert_false(id.empty());
 
     DO_OPERATION(DownloadContract, id);
 
@@ -544,30 +542,29 @@ auto StateMachine::find_contract(
 {
     if (load_contract<T>(targetID)) {
         if (skipExisting) {
-            LogVerbose()(OT_PRETTY_CLASS())("Contract ")(
-                targetID, api_.Crypto())(" exists in the wallet.")
+            LogVerbose()()("Contract ")(targetID, api_.Crypto())(
+                " exists in the wallet.")
                 .Flush();
             missing.CancelByValue(targetID);
 
             return finish_task(taskID, true, error_result());
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())(
-                "Attempting re-download of contract ")(targetID, api_.Crypto())
+            LogVerbose()()("Attempting re-download of contract ")(
+                targetID, api_.Crypto())
                 .Flush();
         }
     }
 
     if (0 == unknown.count(targetID)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Queueing contract ")(
-            targetID, api_.Crypto())(" for download on server ")(
-            op_.ServerID(), api_.Crypto())
+        LogVerbose()()("Queueing contract ")(targetID, api_.Crypto())(
+            " for download on server ")(op_.ServerID(), api_.Crypto())
             .Flush();
 
         return bump_task(get_task<T>().Push(taskID, targetID));
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "Previously failed to download contract ")(targetID, api_.Crypto())(
-            " from server ")(op_.ServerID(), api_.Crypto())
+        LogVerbose()()("Previously failed to download contract ")(
+            targetID,
+            api_.Crypto())(" from server ")(op_.ServerID(), api_.Crypto())
             .Flush();
 
         finish_task(taskID, false, error_result());
@@ -646,12 +643,10 @@ auto StateMachine::issue_unit_definition(
         auto unitDefinition = api_.Wallet().Internal().UnitDefinition(unitID);
         auto serialized = std::make_shared<proto::UnitDefinition>();
 
-        OT_ASSERT(serialized);
+        assert_false(nullptr == serialized);
 
         if (false == unitDefinition->Serialize(*serialized, true)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to serialize unit definition.")
-                .Flush();
+            LogError()()("Failed to serialize unit definition.").Flush();
 
             return finish_task(taskID, false, error_result());
         }
@@ -660,7 +655,7 @@ auto StateMachine::issue_unit_definition(
         DO_OPERATION(IssueUnitDefinition, serialized, args);
 
         if (success && (UnitType::Error != advertise)) {
-            OT_ASSERT(result.second);
+            assert_false(nullptr == result.second);
 
             const auto& reply = *result.second;
             const auto accountID =
@@ -678,7 +673,7 @@ auto StateMachine::issue_unit_definition(
 
         return finish_task(taskID, success, std::move(result));
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Unit definition not found.").Flush();
+        LogError()()("Unit definition not found.").Flush();
 
         return finish_task(taskID, false, error_result());
     }
@@ -705,7 +700,7 @@ auto StateMachine::main_loop() noexcept -> bool
     UniqueQueue<SendChequeTask> retrySendCheque{};
     auto pContext = api_.Wallet().Internal().ServerContext(nymID, serverID);
 
-    OT_ASSERT(pContext);
+    assert_false(nullptr == pContext);
 
     const auto& context = *pContext;
 
@@ -779,18 +774,16 @@ auto StateMachine::message_nym(const TaskID taskID, const MessageTask& task)
         }
     };
 
-    OT_ASSERT(false == recipient.empty());
+    assert_false(recipient.empty());
 
     DO_OPERATION(SendMessage, recipient, String::Factory(text), updateID);
 
     if (success) {
         if (false == messageID.empty()) {
-            LogVerbose()(OT_PRETTY_CLASS())("Sent message: ")(
-                messageID, api_.Crypto())
-                .Flush();
+            LogVerbose()()("Sent message: ")(messageID, api_.Crypto()).Flush();
             associate_message_id(messageID, taskID);
         } else {
-            LogError()(OT_PRETTY_CLASS())("Invalid message ID").Flush();
+            LogError()()("Invalid message ID").Flush();
         }
     }
 
@@ -802,7 +795,7 @@ auto StateMachine::pay_nym(const TaskID taskID, const PaymentTask& task) const
 {
     const auto& [recipient, payment] = task;
 
-    OT_ASSERT(false == recipient.empty());
+    assert_false(recipient.empty());
 
     DO_OPERATION(ConveyPayment, recipient, payment);
 
@@ -814,7 +807,7 @@ auto StateMachine::pay_nym_cash(const TaskID taskID, const PayCashTask& task)
 {
     const auto& [recipient, workflowID] = task;
 
-    OT_ASSERT(false == recipient.empty());
+    assert_false(recipient.empty());
 
     DO_OPERATION(SendCash, recipient, workflowID);
 
@@ -825,7 +818,7 @@ auto StateMachine::process_inbox(
     const TaskID taskID,
     const ProcessInboxTask& id) const -> bool
 {
-    OT_ASSERT(false == id.empty());
+    assert_false(id.empty());
 
     DO_OPERATION(UpdateAccount, id);
 
@@ -838,7 +831,7 @@ auto StateMachine::publish_server_contract(
 {
     const auto& id = task.first;
 
-    OT_ASSERT(false == id.empty());
+    assert_false(id.empty());
 
     DO_OPERATION(PublishContract, id);
 
@@ -897,7 +890,7 @@ auto StateMachine::register_account(
 {
     const auto& [label, unitID] = task;
 
-    OT_ASSERT(false == unitID.empty());
+    assert_false(unitID.empty());
 
     try {
         api_.Wallet().Internal().UnitDefinition(unitID);
@@ -962,7 +955,7 @@ template <typename M, typename I>
 void StateMachine::resolve_unknown(const I& id, const bool found, M& map) const
 {
     if (found) {
-        LogVerbose()(OT_PRETTY_CLASS())("Contract ")(id, api_.Crypto())(
+        LogVerbose()()("Contract ")(id, api_.Crypto())(
             " successfully downloaded from server ")(
             op_.ServerID(), api_.Crypto())
             .Flush();
@@ -972,7 +965,7 @@ void StateMachine::resolve_unknown(const I& id, const bool found, M& map) const
 
         if (map.end() == it) {
             map.emplace(id, 1);
-            LogVerbose()(OT_PRETTY_CLASS())("Contract ")(id, api_.Crypto())(
+            LogVerbose()()("Contract ")(id, api_.Crypto())(
                 " not found on server ")(op_.ServerID(), api_.Crypto())
                 .Flush();
         } else {
@@ -980,9 +973,8 @@ void StateMachine::resolve_unknown(const I& id, const bool found, M& map) const
 
             if (value < (std::numeric_limits<int>::max() / 2)) { value *= 2; }
 
-            LogVerbose()(OT_PRETTY_CLASS())(
-                "Increasing retry interval for contract ")(id, api_.Crypto())(
-                " to ")(value)
+            LogVerbose()()("Increasing retry interval for contract ")(
+                id, api_.Crypto())(" to ")(value)
                 .Flush();
         }
     }
@@ -1032,7 +1024,7 @@ auto StateMachine::run_task(std::function<bool(const TaskID, const T&)> func)
     new (&param) T(make_blank<T>::value(api_));
 
     while (get_task<T>().Pop(task_id_, param)) {
-        LogInsane()(OT_PRETTY_CLASS())(--task_count_).Flush();
+        LogInsane()()(--task_count_).Flush();
 
         SM_SHUTDOWN();
 
@@ -1089,7 +1081,7 @@ auto StateMachine::StartTask(const TaskID taskID, const T& params) const
     Lock lock(decision_lock_);
 
     if (shutdown().load()) {
-        LogVerbose()(OT_PRETTY_CLASS())("Shutting down").Flush();
+        LogVerbose()()("Shutting down").Flush();
 
         return BackgroundTask{0, Future{}};
     }
@@ -1147,11 +1139,11 @@ auto StateMachine::write_and_send_cheque(
 {
     const auto& [accountID, recipient, value, memo, validFrom, validTo] = task;
 
-    OT_ASSERT(false == accountID.empty());
-    OT_ASSERT(false == recipient.empty());
+    assert_false(accountID.empty());
+    assert_false(recipient.empty());
 
     if (0 >= value) {
-        LogError()(OT_PRETTY_CLASS())("Invalid amount.").Flush();
+        LogError()()("Invalid amount.").Flush();
 
         return task_done(finish_task(taskID, false, error_result()));
     }
@@ -1159,7 +1151,7 @@ auto StateMachine::write_and_send_cheque(
     auto context =
         api_.Wallet().Internal().ServerContext(op_.NymID(), op_.ServerID());
 
-    OT_ASSERT(context);
+    assert_false(nullptr == context);
 
     if (false == context->InternalServer().HaveSufficientNumbers(
                      MessageType::notarizeTransaction)) {
@@ -1177,7 +1169,7 @@ auto StateMachine::write_and_send_cheque(
         recipient));
 
     if (false == bool(cheque)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to write cheque.").Flush();
+        LogError()()("Failed to write cheque.").Flush();
 
         return task_done(finish_task(taskID, false, error_result()));
     }
@@ -1186,13 +1178,13 @@ auto StateMachine::write_and_send_cheque(
         api_.Factory().InternalSession().Payment(String::Factory(*cheque))};
 
     if (false == bool(payment)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate payment.").Flush();
+        LogError()()("Failed to instantiate payment.").Flush();
 
         return task_done(finish_task(taskID, false, error_result()));
     }
 
     if (false == payment->SetTempValues(reason_)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid payment.").Flush();
+        LogError()()("Invalid payment.").Flush();
 
         return task_done(finish_task(taskID, false, error_result()));
     }

@@ -118,8 +118,7 @@ auto BitcoinTransaction(
                 output.Value().Internal().SerializeBitcoin(
                     preallocated(sizeof(txout.value_), &txout.value_));
             } catch (const std::exception& e) {
-                LogError()("opentxs::factory::")(__func__)(": ")(e.what())
-                    .Flush();
+                LogError()()(e.what()).Flush();
 
                 return {};
             }
@@ -153,7 +152,7 @@ auto BitcoinTransaction(
             blockchain::block::Position{},
             std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -177,9 +176,7 @@ auto BitcoinTransaction(
 
         return out;
     } else {
-        LogError()("opentxs::factory::")(__func__)(": failed to parse ")(
-            print(chain))(" transaction")
-            .Flush();
+        LogError()()("failed to parse ")(print(chain))(" transaction").Flush();
 
         return {};
     }
@@ -297,7 +294,7 @@ auto BitcoinTransaction(
                 }
             }());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -436,7 +433,7 @@ auto BitcoinTransaction(
                 }()},
             std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

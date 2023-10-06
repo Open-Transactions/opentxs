@@ -19,7 +19,6 @@
 #include "internal/api/network/Network.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -50,8 +49,8 @@ extern "C" auto internal_password_cb(
     std::int32_t rwflag,
     void* userdata) -> std::int32_t
 {
-    OT_ASSERT(nullptr != userdata);
-    OT_ASSERT(nullptr != external_password_callback_);
+    opentxs::assert_false(nullptr == userdata);
+    opentxs::assert_false(nullptr == external_password_callback_);
 
     const bool askTwice = (1 == rwflag);
     const auto& reason = *static_cast<opentxs::PasswordPrompt*>(userdata);
@@ -60,14 +59,14 @@ extern "C" auto internal_password_cb(
     auto secret = api.Factory().Secret(0);
 
     if (false == api.Internal().GetSecret(lock, secret, reason, askTwice)) {
-        opentxs::LogError()(__func__)(": Callback error").Flush();
+        opentxs::LogError()()("Callback error").Flush();
 
         return 0;
     }
 
     if (static_cast<std::uint64_t>(secret.size()) >
         static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max())) {
-        opentxs::LogError()(__func__)(": Secret too big").Flush();
+        opentxs::LogError()()("Secret too big").Flush();
 
         return 0;
     }
@@ -75,7 +74,7 @@ extern "C" auto internal_password_cb(
     const auto len = std::min(static_cast<std::int32_t>(secret.size()), size);
 
     if (len <= 0) {
-        opentxs::LogError()(__func__)(": Callback error").Flush();
+        opentxs::LogError()()("Callback error").Flush();
 
         return 0;
     }
@@ -131,8 +130,8 @@ Session::Session(
     auto& caller = parent.Internal().GetPasswordCaller();
     external_password_callback_ = &caller;
 
-    OT_ASSERT(nullptr != external_password_callback_);
-    OT_ASSERT(network_);
+    assert_false(nullptr == external_password_callback_);
+    assert_false(nullptr == network_);
 
     if (master_secret_) {
         opentxs::Lock lock(master_key_lock_);
@@ -185,7 +184,7 @@ auto Session::GetSecret(
 
     master_secret_ = factory_.Secret(0);
 
-    OT_ASSERT(master_secret_.has_value());
+    assert_true(master_secret_.has_value());
 
     auto& callback = *external_password_callback_;
     static const auto defaultPassword =
@@ -214,8 +213,7 @@ auto Session::GetSecret(
     }
 
     if (false == unlocked) {
-        opentxs::LogError()(OT_PRETTY_CLASS())("Failed to unlock master key")
-            .Flush();
+        opentxs::LogError()()("Failed to unlock master key").Flush();
 
         return success;
     }
@@ -226,9 +224,7 @@ auto Session::GetSecret(
         prompt);
 
     if (false == decrypted) {
-        opentxs::LogError()(OT_PRETTY_CLASS())(
-            "Failed to decrypt master secret")
-            .Flush();
+        opentxs::LogError()()("Failed to decrypt master secret").Flush();
 
         return success;
     }
@@ -265,7 +261,7 @@ auto Session::make_master_key(
 
     master_secret = factory.Secret(0);
 
-    OT_ASSERT(master_secret.has_value());
+    assert_true(master_secret.has_value());
 
     master_secret.value().Randomize(32);
 
@@ -282,11 +278,11 @@ auto Session::make_master_key(
         reason,
         true);
 
-    OT_ASSERT(saved);
+    assert_true(saved);
 
     saved = storage.Internal().Store(encrypted);
 
-    OT_ASSERT(saved);
+    assert_true(saved);
 
     return output;
 }
@@ -332,7 +328,7 @@ auto Session::ShuttingDown() const noexcept -> bool
 
 auto Session::start(std::shared_ptr<const api::Session> me) noexcept -> void
 {
-    OT_ASSERT(me);
+    assert_false(nullptr == me);
 
     init_promise_.set_value();
     storage_->Internal().Start(me);
@@ -347,7 +343,7 @@ auto Session::Stop() noexcept -> std::future<void>
 
 auto Session::Storage() const noexcept -> const api::session::Storage&
 {
-    OT_ASSERT(storage_);
+    assert_false(nullptr == storage_);
 
     return *storage_;
 }
@@ -392,7 +388,7 @@ auto Session::Storage() const noexcept -> const api::session::Storage&
 
 auto Session::Wallet() const noexcept -> const api::session::Wallet&
 {
-    OT_ASSERT(wallet_);
+    assert_false(nullptr == wallet_);
 
     return *wallet_;
 }

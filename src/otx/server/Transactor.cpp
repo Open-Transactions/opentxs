@@ -11,7 +11,6 @@
 #include "internal/otx/AccountList.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/consensus/Client.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -55,7 +54,7 @@ auto Transactor::issueNextTransactionNumber(
 
     // Next, we save it to file.
     if (!server_.GetMainFile().SaveMainFile()) {
-        LogError()(OT_PRETTY_CLASS())("Error saving main server file.").Flush();
+        LogError()()("Error saving main server file.").Flush();
         transaction_number_--;
         return false;
     }
@@ -81,9 +80,7 @@ auto Transactor::issueNextTransactionNumberToNym(
     // is also recorded in his Nym file.)  That way the server always knows
     // which numbers are valid for each Nym.
     if (!context.IssueNumber(transaction_number_)) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Error adding transaction number to Nym file.")
-            .Flush();
+        LogError()()(": Error adding transaction number to Nym file.").Flush();
         transaction_number_--;
         // Save it back how it was, since we're not issuing this number after
         // all.
@@ -110,7 +107,7 @@ auto Transactor::addBasketAccountID(
 
     if (lookupBasketAccountID(BASKET_ID, theBasketAcctID)) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 ": User attempted to add Basket that already exists.")
                 .Flush();
         }
@@ -235,14 +232,13 @@ auto Transactor::getVoucherAccount(
         const auto strInstrumentDefinitionID =
             String::Factory(INSTRUMENT_DEFINITION_ID, server_.API().Crypto());
         {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Successfully created voucher account ID: ")(strAcctID.get())(
-                " Instrument Definition ID: ")(strInstrumentDefinitionID.get())(
-                ".")
+            LogConsole()()("Successfully created voucher account ID: ")(
+                strAcctID.get())(" Instrument Definition ID: ")(
+                strInstrumentDefinitionID.get())(".")
                 .Flush();
         }
         if (!server_.GetMainFile().SaveMainFile()) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 ": Error saving main server file containing new account ID!!")
                 .Flush();
         }

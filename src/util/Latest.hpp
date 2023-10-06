@@ -7,9 +7,9 @@
 
 #include <mutex>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -55,7 +55,7 @@ public:
         , lock_()
         , versions_({value})
     {
-        OT_ASSERT(0 < versions_.size());
+        assert_false(versions_.empty());
     }
 
 private:

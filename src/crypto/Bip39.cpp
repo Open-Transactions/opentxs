@@ -22,7 +22,6 @@
 
 #include "2_Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -95,9 +94,7 @@ auto Bip39::entropy_to_words(
         case 32:
             break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid entropy size: ")(
-                bytes.size())
-                .Flush();
+            LogError()()("Invalid entropy size: ")(bytes.size()).Flush();
 
             return false;
         }
@@ -110,17 +107,13 @@ auto Bip39::entropy_to_words(
     const auto wordCount = std::size_t{entropyPlusCheckBits / BitsPerWord};
 
     if (0 != (wordCount % ValidMnemonicWordMultiple)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "(0 != (wordCount % ValidMnemonicWordMultiple))")
-            .Flush();
+        LogError()()("(0 != (wordCount % ValidMnemonicWordMultiple))").Flush();
 
         return false;
     }
 
     if (0 != (entropyPlusCheckBits % BitsPerWord)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "(0 != (entropyPlusCheckBits % BitsPerWord))")
-            .Flush();
+        LogError()()("(0 != (entropyPlusCheckBits % BitsPerWord))").Flush();
 
         return false;
     }
@@ -132,8 +125,7 @@ auto Bip39::entropy_to_words(
                      opentxs::crypto::HashType::Sha256,
                      bytes,
                      digestOutput.WriteInto())) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Digest(opentxs::crypto::HashType::Sha256...) failed.")
+        LogError()()("Digest(opentxs::crypto::HashType::Sha256...) failed.")
             .Flush();
 
         return false;
@@ -159,8 +151,7 @@ auto Bip39::entropy_to_words(
                 reinterpret_cast<std::uint8_t&>(indexed_byte), byteIndex);
 
             if (!bExtracted) {
-                LogError()(OT_PRETTY_CLASS())("(!bExtracted) -- returning")
-                    .Flush();
+                LogError()()("(!bExtracted) -- returning").Flush();
 
                 return false;
             }
@@ -171,22 +162,21 @@ auto Bip39::entropy_to_words(
             }
         }
 
-        OT_ASSERT(indexDict < DictionarySize);
+        assert_true(indexDict < DictionarySize);
 
         try {
             const auto& dictionary = words_.at(lang);
             const auto& theString = dictionary.at(indexDict);
             mnemonicWords.emplace_back(theString);
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Unsupported language").Flush();
+            LogError()()("Unsupported language").Flush();
 
             return false;
         }
     }
 
     if (mnemonicWords.size() != ((bitIndex + 1) / BitsPerWord)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "(mnemonicWords.size() != ((bitIndex + 1) / BitsPerWord))")
+        LogError()()("(mnemonicWords.size() != ((bitIndex + 1) / BitsPerWord))")
             .Flush();
 
         return false;
@@ -348,8 +338,7 @@ auto Bip39::words_to_root_pkt(
     const auto indices = tokenize(lang, words.Bytes());
 
     if (const auto size{indices.size()}; 15u != size) {
-        LogError()(OT_PRETTY_CLASS())("incorrect number of words: ")(size)
-            .Flush();
+        LogError()()("incorrect number of words: ")(size).Flush();
 
         return false;
     }
@@ -367,7 +356,7 @@ auto Bip39::words_to_root_pkt(
         auto allocM = alloc::PMR<BigInt>{alloc::Secure::get()};
         auto pSeed = std::allocate_shared<BigInt>(allocM);
 
-        OT_ASSERT(pSeed);
+        assert_false(nullptr == pSeed);
 
         auto& seed = *pSeed;
         auto out = Vector{allocV};
@@ -385,12 +374,12 @@ auto Bip39::words_to_root_pkt(
         return ReadView{reinterpret_cast<const char*>(in.data()), in.size()};
     };
 
-    OT_ASSERT(21 == ent.size());
+    assert_true(21 == ent.size());
 
     const auto version = (ent[0] >> 1) & 0x0f;
 
     if (0 != version) {
-        LogError()(OT_PRETTY_CLASS())("unsupported version: ")(version).Flush();
+        LogError()()("unsupported version: ")(version).Flush();
 
         return false;
     }
@@ -419,7 +408,7 @@ auto Bip39::words_to_root_pkt(
                 throw std::runtime_error{"checksum failure"};
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }
@@ -427,9 +416,7 @@ auto Bip39::words_to_root_pkt(
 
     if (encrypted) {
         if (0 == passphrase.size()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "passphrase required but not provided")
-                .Flush();
+            LogError()()("passphrase required but not provided").Flush();
 
             return false;
         }
@@ -449,12 +436,12 @@ auto Bip39::words_to_root_pkt(
             const auto reason = api.Factory().PasswordPrompt(__func__);
             const auto rc = sKey.Internal().RawKey(output, reason);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return output;
         }();
 
-        OT_ASSERT(keyBytes == key.size());
+        assert_true(keyBytes == key.size());
 
         auto v = key.Bytes();
         const auto* k{v.data()};
@@ -492,7 +479,7 @@ auto Bip39::WordsToSeed(
         case SeedStyle::BIP32:
         case SeedStyle::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("unsupported type").Flush();
+            LogError()()("unsupported type").Flush();
 
             return false;
         }

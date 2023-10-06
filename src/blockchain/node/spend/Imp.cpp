@@ -34,7 +34,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "matterfi/PaymentCode.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -153,8 +152,7 @@ auto SpendPrivate::account(const PaymentCode& recipient) const noexcept(false)
     -> const crypto::PaymentCode&
 {
     if (nym().PaymentCodePublic() == recipient) {
-        LogAbort()(OT_PRETTY_CLASS())(
-            "attempted to create loopback payment code account")
+        LogAbort()()("attempted to create loopback payment code account")
             .Abort();
     }
 
@@ -186,7 +184,7 @@ auto SpendPrivate::AddNotification(
                 account(recipient).InternalPaymentCode().AddNotification(txid);
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "unable to record outgoing notification transaction for ")(
                 recipient.asBase58())(": ")(e.what())
                 .Flush();
@@ -262,9 +260,7 @@ auto SpendPrivate::Check() noexcept -> std::optional<SendResult>
             return check_funding_sweep();
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("invalid funding policy: ")(
-                print(policy_))
-                .Flush();
+            LogError()()("invalid funding policy: ")(print(policy_)).Flush();
 
             return SendResult::UnspecifiedError;
         }
@@ -275,7 +271,7 @@ auto SpendPrivate::check_funding_default() const noexcept
     -> std::optional<SendResult>
 {
     if (address_recipients_.empty() && pc_recipients_.empty()) {
-        LogError()(OT_PRETTY_CLASS())("no recipients specified").Flush();
+        LogError()()("no recipients specified").Flush();
 
         return SendResult::MissingRecipients;
     } else {
@@ -297,7 +293,7 @@ auto SpendPrivate::check_funding_sweep() noexcept -> std::optional<SendResult>
 
         return std::nullopt;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return SendResult::InvalidSweep;
     }
@@ -336,7 +332,7 @@ auto SpendPrivate::check_sender() const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -465,21 +461,21 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
         const auto self = notifications_.size();
         matterfi::paymentcode_preemptive_notifications(
             log, api_, spender_, chain_, notifications_, alloc);
-        log(OT_PRETTY_CLASS())("added ")(self - before)(
-            " self notifications for ")(pc_recipients_.size())(" recipients")
+        log()("added ")(self - before)(" self notifications for ")(
+            pc_recipients_.size())(" recipients")
             .Flush();
-        log(OT_PRETTY_CLASS())("added ")(notifications_.size() - self)(
+        log()("added ")(notifications_.size() - self)(
             " preemptive notifications")
             .Flush();
     } else {
-        log(OT_PRETTY_CLASS())("skipping enhanced notifications").Flush();
+        log()("skipping enhanced notifications").Flush();
     }
 
     const auto self = nym().PaymentCodePublic();
     const auto check = [&, this](const auto& recipient) {
         if (self != recipient) {
             const auto& account = this->account(recipient);
-            log(OT_PRETTY_CLASS())("verifying payment code subaccount ")(
+            log()("verifying payment code subaccount ")(
                 account.ID(), api_.Crypto())
                 .Flush();
         }
@@ -552,7 +548,7 @@ auto SpendPrivate::Notify(std::span<const PaymentCode> recipients) noexcept
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -636,7 +632,7 @@ auto SpendPrivate::SendToAddress(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -676,7 +672,7 @@ auto SpendPrivate::SendToPaymentCode(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -718,7 +714,7 @@ auto SpendPrivate::Serialize(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -768,8 +764,7 @@ auto SpendPrivate::serialize_address(
         case Unknown:
         case P2TR:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("invalid type: ")(print(type))
-                .Abort();
+            LogAbort()()("invalid type: ")(print(type)).Abort();
         }
     }
 }
@@ -892,7 +887,7 @@ auto SpendPrivate::SetSweepFromKey(const crypto::Key& key) noexcept -> bool
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("key is not owned by the spending nym ")(
+        LogError()()("key is not owned by the spending nym ")(
             spender_, api_.Crypto())
             .Flush();
 
@@ -914,7 +909,7 @@ auto SpendPrivate::SetSweepFromSubaccount(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("subaccount ")(aubaccount, api_.Crypto())(
+        LogError()()("subaccount ")(aubaccount, api_.Crypto())(
             " is not owned by the spending nym ")(spender_, api_.Crypto())
             .Flush();
 
@@ -931,7 +926,7 @@ auto SpendPrivate::SetSweepToAddress(std::string_view address) noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

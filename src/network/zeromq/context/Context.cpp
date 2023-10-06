@@ -31,7 +31,6 @@
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/zeromq/Actor.hpp"
 #include "network/zeromq/PairEventListener.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -322,9 +321,9 @@ auto Context::PushToEndpoint(std::string_view endpoint, Message&& message)
         auto handle = guarded.lock();
         auto& socket = *handle;
 
-        return socket.SendDeferred(std::move(message), __FILE__, __LINE__);
+        return socket.SendDeferred(std::move(message));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -388,7 +387,7 @@ auto Context::SpawnActor(
         batchID,
         extraCount);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 
@@ -425,7 +424,7 @@ auto Context::SpawnActor(
         batchID,
         extraCount);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 

@@ -63,7 +63,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Future.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/bitcoin/Inventory.hpp"
@@ -123,9 +122,9 @@ auto BlockchainPeerBitcoin(
     std::string_view fromParent,
     std::optional<network::asio::Socket> socket) -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(network);
-    OT_ASSERT(address.IsValid());
+    assert_false(nullptr == api);
+    assert_false(nullptr == network);
+    assert_true(address.IsValid());
 
     using Network = opentxs::network::blockchain::Transport;
     using ReturnType = opentxs::network::blockchain::bitcoin::Peer;
@@ -140,7 +139,7 @@ auto BlockchainPeerBitcoin(
         case Network::eep:
         case Network::cjdns:
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 
@@ -214,7 +213,7 @@ Peer::Peer(
                 return false;
             }
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     }())
@@ -376,7 +375,7 @@ auto Peer::get_local_services(
         } break;
         default: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 
@@ -393,8 +392,7 @@ auto Peer::ignore_message(message::Command type) const noexcept -> bool
         case init:
         case connect:
         case shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(
-                name_)(": processing message in invalid state")
+            LogAbort()()(name_)(": processing message in invalid state")
                 .Abort();
         }
         case handshake: {
@@ -404,7 +402,7 @@ auto Peer::ignore_message(message::Command type) const noexcept -> bool
                 case version: {
                 } break;
                 default: {
-                    log_(OT_PRETTY_CLASS())(name_)(": ignoring ")(print(type))(
+                    log_()(name_)(": ignoring ")(print(type))(
                         " during handshake")
                         .Flush();
 
@@ -415,8 +413,7 @@ auto Peer::ignore_message(message::Command type) const noexcept -> bool
         case verify:
         case run:
         default: {
-            log_(OT_PRETTY_CLASS())(name_)(": processing ")(print(type))
-                .Flush();
+            log_()(name_)(": processing ")(print(type)).Flush();
         }
     }
 
@@ -454,25 +451,22 @@ auto Peer::process_addresses(
         return peers;
     }());
     add_known_address(data);
-    to_peer_manager_.SendDeferred(
-        [&] {
-            using enum opentxs::blockchain::node::PeerManagerJobs;
-            auto out = MakeWork(gossip_address);
+    to_peer_manager_.SendDeferred([&] {
+        using enum opentxs::blockchain::node::PeerManagerJobs;
+        auto out = MakeWork(gossip_address);
 
-            for (const auto& address : data) {
-                const auto proto = [&] {
-                    auto p = proto::BlockchainPeerAddress{};
-                    address.Internal().Serialize(p);
+        for (const auto& address : data) {
+            const auto proto = [&] {
+                auto p = proto::BlockchainPeerAddress{};
+                address.Internal().Serialize(p);
 
-                    return p;
-                }();
-                proto::write(proto, out.AppendBytes());
-            }
+                return p;
+            }();
+            proto::write(proto, out.AppendBytes());
+        }
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Peer::process_block_hash(
@@ -488,16 +482,13 @@ auto Peer::process_block_hash(
 
         return true;
     } else {
-        to_header_oracle_.SendDeferred(
-            [&] {
-                using enum opentxs::blockchain::node::headeroracle::Job;
-                auto out = MakeWork(submit_block_hash);
-                out.AddFrame(block);
+        to_header_oracle_.SendDeferred([&] {
+            using enum opentxs::blockchain::node::headeroracle::Job;
+            auto out = MakeWork(submit_block_hash);
+            out.AddFrame(block);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     }
 
     return false;
@@ -525,7 +516,7 @@ auto Peer::process_broadcasttx(Message&& msg, allocator_type monotonic) noexcept
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     transmit_protocol_tx(body[1].Bytes(), monotonic);
 }
@@ -544,8 +535,7 @@ auto Peer::process_protocol(
             protocol_,
             std::move(message),
             monotonic);
-        log(OT_PRETTY_CLASS())(name_)(": processing ")(command.Describe())
-            .Flush();
+        log()(name_)(": processing ")(command.Describe()).Flush();
 
         if (is_implemented(command.Command()) && (false == command.IsValid())) {
             const auto error = CString{monotonic}
@@ -706,8 +696,6 @@ auto Peer::process_protocol(
 
             return work;
         }(),
-        __FILE__,
-        __LINE__,
         true);
 }
 
@@ -738,8 +726,7 @@ auto Peer::process_protocol_verify(
     message::internal::Cfheaders& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(
-        ": Received checkpoint cfheader message from ")(name_)
+    log_()(name_)(": Received checkpoint cfheader message from ")(name_)
         .Flush();
     auto postcondition = ScopeGuard{[this, monotonic] {
         if (false == verification_.got_cfheader_) {
@@ -753,8 +740,7 @@ auto Peer::process_protocol_verify(
     auto data = message.get();
 
     if (const auto count = data.size(); 1_uz != count) {
-        log_(OT_PRETTY_CLASS())(name_)(": unexpected cfheader count: ")(count)
-            .Flush();
+        log_()(name_)(": unexpected cfheader count: ")(count).Flush();
 
         return;
     }
@@ -766,7 +752,7 @@ auto Peer::process_protocol_verify(
             api_, data[0].Bytes(), message.Previous().Bytes());
 
     if (filterHash != receivedCfheader) {
-        log_(OT_PRETTY_CLASS())(name_)(": unexpected cfheader: ")
+        log_()(name_)(": unexpected cfheader: ")
             .asHex(receivedCfheader)(". Expected: ")
             .asHex(filterHash)
             .Flush();
@@ -774,9 +760,7 @@ auto Peer::process_protocol_verify(
         return;
     }
 
-    log_(OT_PRETTY_CLASS())(name_)(": Cfheader checkpoint validated for ")(
-        name_)
-        .Flush();
+    log_()(name_)(": Cfheader checkpoint validated for ")(name_).Flush();
     verification_.got_cfheader_ = true;
     set_cfilter_capability(true);
     check_verification(monotonic);
@@ -862,9 +846,7 @@ auto Peer::process_protocol(
     const auto stopHeader = header_oracle_.LoadHeader(stopHash);
 
     if (false == stopHeader.IsValid()) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            ": skipping request with unknown stop header")
-            .Flush();
+        log_()(name_)(": skipping request with unknown stop header").Flush();
 
         return;
     }
@@ -873,8 +855,7 @@ auto Peer::process_protocol(
     const auto stopHeight{stopHeader.Height()};
 
     if (startHeight > stopHeight) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            ": skipping request with malformed start height (")(
+        log_()(name_)(": skipping request with malformed start height (")(
             startHeight)(") vs stop (")(stopHeight)(")")
             .Flush();
 
@@ -882,8 +863,8 @@ auto Peer::process_protocol(
     }
 
     if (0 > startHeight) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            ": skipping request with negative start height (")(startHeight)(")")
+        log_()(name_)(": skipping request with negative start height (")(
+            startHeight)(")")
             .Flush();
 
         return;
@@ -894,16 +875,14 @@ auto Peer::process_protocol(
         static_cast<std::size_t>((stopHeight - startHeight) + 1u);
 
     if (count > limit) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            ": skipping request with excessive filter requests (")(
+        log_()(name_)(": skipping request with excessive filter requests (")(
             count)(") vs allowed (")(limit)(")")
             .Flush();
 
         return;
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": requests ")(
-            count)(" filters from height ")(startHeight)(" to ")(
-            stopHeight)(" (")
+        log_()(name_)(": requests ")(count)(" filters from height ")(
+            startHeight)(" to ")(stopHeight)(" (")
             .asHex(stopHeader.Hash())(")")
             .Flush();
     }
@@ -915,12 +894,12 @@ auto Peer::process_protocol(
         out.reserve(count);
         out.clear();
 
-        OT_ASSERT(0u == out.size());
+        assert_true(0u == out.size());
 
         const auto& filters = network_.FilterOracle();
 
         for (const auto& hash : hashes) {
-            log_(OT_PRETTY_CLASS())(name_)(": loading cfilter for block ")
+            log_()(name_)(": loading cfilter for block ")
                 .asHex(stopHeader.Hash())
                 .Flush();
             const auto& cfilter = out.emplace_back(filters.LoadFilter(
@@ -933,15 +912,14 @@ auto Peer::process_protocol(
     }();
 
     if (data.size() != count) {
-        LogError()(OT_PRETTY_CLASS())(
-            name_)(": failed to load all filters, requested (")(
+        LogError()()(name_)(": failed to load all filters, requested (")(
             count)("), loaded (")(data.size())(")")
             .Flush();
 
         return;
     }
 
-    OT_ASSERT(data.size() == hashes.size());
+    assert_true(data.size() == hashes.size());
 
     auto h{hashes.begin()};
 
@@ -964,14 +942,13 @@ auto Peer::process_protocol(
             case MsgWitnessTx:
             case MsgTx: {
                 const auto txid = Txid{inv.hash_.Bytes()};
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": peer has requested transaction ")
+                log()(name_)(": peer has requested transaction ")
                     .asHex(txid)
                     .Flush();
                 auto tx = mempool_.Query(txid, monotonic);
 
                 if (tx.IsValid()) {
-                    log(OT_PRETTY_CLASS())(name_)(": sending transaction ")
+                    log()(name_)(": sending transaction ")
                         .asHex(txid)(" to peer")
                         .Flush();
                     add_known_tx(txid);
@@ -983,7 +960,7 @@ auto Peer::process_protocol(
                     }();
                     transmit_protocol_tx(reader(bytes), monotonic);
                 } else {
-                    log(OT_PRETTY_CLASS())(name_)(": transaction ")
+                    log()(name_)(": transaction ")
                         .asHex(txid)(" not found in mempool")
                         .Flush();
                     notFound.emplace_back(inv);
@@ -993,18 +970,16 @@ auto Peer::process_protocol(
             case MsgBlock: {
                 const auto id =
                     opentxs::blockchain::block::Hash{inv.hash_.Bytes()};
-                log(OT_PRETTY_CLASS())(name_)(": peer has requested block ")
-                    .asHex(id)
-                    .Flush();
+                log()(name_)(": peer has requested block ").asHex(id).Flush();
                 auto future = block_oracle_.Load(id);
 
                 if (IsReady(future)) {
-                    log(OT_PRETTY_CLASS())(name_)(": sending block ")
+                    log()(name_)(": sending block ")
                         .asHex(id)(" to peer")
                         .Flush();
                     const auto block = future.get();
 
-                    OT_ASSERT(block.IsValid());
+                    assert_true(block.IsValid());
 
                     add_known_block(id);
                     transmit_protocol_block(
@@ -1017,7 +992,7 @@ auto Peer::process_protocol(
                             .Bytes(),
                         monotonic);
                 } else {
-                    log(OT_PRETTY_CLASS())(name_)(": block ")
+                    log()(name_)(": block ")
                         .asHex(id)(" not found in database")
                         .Flush();
                     notFound.emplace_back(inv);
@@ -1101,8 +1076,7 @@ auto Peer::process_protocol_verify(
     message::internal::Headers& message,
     allocator_type monotonic) noexcept(false) -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(
-        ": Received checkpoint block header message from ")(name_)
+    log_()(name_)(": Received checkpoint block header message from ")(name_)
         .Flush();
     auto postcondition = ScopeGuard{[this, monotonic] {
         if (false == verification_.got_block_header_) {
@@ -1117,8 +1091,7 @@ auto Peer::process_protocol_verify(
     const auto headers = message.get();
 
     if (const auto count = headers.size(); 1_uz != count) {
-        log_(OT_PRETTY_CLASS())(name_)(": unexpected block header count: ")(
-            count);
+        log_()(name_)(": unexpected block header count: ")(count);
 
         for (const auto& hash : headers) { log_("\n * ").asHex(hash.Hash()); }
 
@@ -1132,7 +1105,7 @@ auto Peer::process_protocol_verify(
     const auto& receivedBlockHash = headers.front().Hash();
 
     if (checkpointHash != receivedBlockHash) {
-        log_(OT_PRETTY_CLASS())(name_)(": unexpected block header hash: ")
+        log_()(name_)(": unexpected block header hash: ")
             .asHex(receivedBlockHash)(". Expected: ")
             .asHex(checkpointHash)
             .Flush();
@@ -1140,9 +1113,7 @@ auto Peer::process_protocol_verify(
         return;
     }
 
-    log_(OT_PRETTY_CLASS())(name_)(": Block header checkpoint validated for ")(
-        name_)
-        .Flush();
+    log_()(name_)(": Block header checkpoint validated for ")(name_).Flush();
     verification_.got_block_header_ = true;
     set_block_header_capability(true);
     check_verification(monotonic);
@@ -1163,7 +1134,7 @@ auto Peer::process_protocol_run(
         if (internal.AddHeaders(headers)) {
             const auto header = header_oracle_.LoadHeader(newestID);
 
-            OT_ASSERT(header.IsValid());
+            assert_true(header.IsValid());
 
             update_remote_position(header.Position());
         }
@@ -1188,8 +1159,7 @@ auto Peer::process_protocol(
 
     for (auto& inv : data) {
         const auto& hash = inv.hash_;
-        log(OT_PRETTY_CLASS())(name_)(": received ")(inv.DisplayType())(
-            " hash ")
+        log()(name_)(": received ")(inv.DisplayType())(" hash ")
             .asHex(hash)
             .Flush();
         using enum Inventory::Type;
@@ -1290,15 +1260,12 @@ auto Peer::process_protocol(
     if (auto tx = message.Transaction(get_allocator()); tx.IsValid()) {
         {
             const auto& id = tx.ID();
-            log(OT_PRETTY_CLASS())(name_)(": received transaction ")
-                .asHex(id)
-                .Flush();
+            log()(name_)(": received transaction ").asHex(id).Flush();
             add_known_tx(id);
         }
         mempool_.Submit(std::move(tx));
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            name_)(": unable to instantiate received transaction")
+        LogError()()(name_)(": unable to instantiate received transaction")
             .Flush();
     }
 }
@@ -1337,16 +1304,13 @@ auto Peer::process_protocol(
         disconnect(error, monotonic);
     }
 
-    to_header_oracle_.SendDeferred(
-        [&] {
-            using enum opentxs::blockchain::node::headeroracle::Job;
-            auto out = MakeWork(update_remote_height);
-            out.AddFrame(message.Height());
+    to_header_oracle_.SendDeferred([&] {
+        using enum opentxs::blockchain::node::headeroracle::Job;
+        auto out = MakeWork(update_remote_height);
+        out.AddFrame(message.Height());
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
     protocol_ = std::min(protocol_, message.ProtocolVersion());
     update_address(message.RemoteServices(monotonic));
     using enum opentxs::blockchain::Type;
@@ -1386,8 +1350,8 @@ auto Peer::process_transaction_hashes(
     }();
     const auto mempool = mempool_.Submit(hashes, monotonic);
 
-    OT_ASSERT(hashes.size() == invs.size());
-    OT_ASSERT(hashes.size() == mempool.size());
+    assert_true(hashes.size() == invs.size());
+    assert_true(hashes.size() == mempool.size());
 
     auto unseen = [&] {
         auto out = Vector<Inventory>{monotonic};
@@ -1401,14 +1365,12 @@ auto Peer::process_transaction_hashes(
             add_known_tx(txid);
 
             if (download) {
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": downloading unseen transaction ")
+                log()(name_)(": downloading unseen transaction ")
                     .asHex(txid)
                     .Flush();
                 out.emplace_back(inv);
             } else {
-                log(OT_PRETTY_CLASS())(name_)(
-                    ": mempool already contains transaction ")
+                log()(name_)(": mempool already contains transaction ")
                     .asHex(txid)
                     .Flush();
             }
@@ -1483,11 +1445,9 @@ auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
         auto out = 0;
 
         if (Dir::incoming == dir_) {
-            log(OT_PRETTY_CLASS())(name_)(
-                " is not required to validate checkpoints")
-                .Flush();
+            log()(name_)(" is not required to validate checkpoints").Flush();
         } else {
-            log(OT_PRETTY_CLASS())(name_)(" must validate block header ");
+            log()(name_)(" must validate block header ");
             ++out;
 
             if (peer_cfilter_) {
@@ -1513,7 +1473,7 @@ auto Peer::transition_state_verify(allocator_type monotonic) noexcept -> void
             request_checkpoint_cfheader(monotonic);
         } break;
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -1531,7 +1491,7 @@ auto Peer::transmit_addresses(
         std::make_move_iterator(addresses.end()),
         std::back_inserter(out),
         [this](const auto& addr) { return can_gossip(addr); });
-    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(addresses.size())(
+    log()(name_)(": ")(out.size())(" of ")(addresses.size())(
         " received addresses are eligible for gossip")
         .Flush();
 
@@ -1552,7 +1512,7 @@ auto Peer::transmit_addresses(
         out.swap(selection);
     }
 
-    OT_ASSERT(out.size() <= limit);
+    assert_true(out.size() <= limit);
 
     add_known_address(out);
 
@@ -1827,9 +1787,7 @@ auto Peer::transmit_request_blocks(
             data,
             std::back_inserter(out),
             [this](const auto& hash) -> Inventory {
-                log_(OT_PRETTY_CLASS())("requesting block ")
-                    .asHex(hash)
-                    .Flush();
+                log_()("requesting block ").asHex(hash).Flush();
 
                 return {inv_block_, hash};
             }

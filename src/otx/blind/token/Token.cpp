@@ -13,7 +13,6 @@
 
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -40,8 +39,8 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()("opentxs::factory::")(__func__)(
-                ": unknown or unsupported token type: ")(opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(
+                opentxs::print(type))
                 .Flush();
 
             return {};
@@ -63,8 +62,8 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()("opentxs::factory::")(__func__)(
-                ": unknown or unsupported token type: ")(opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(
+                opentxs::print(type))
                 .Flush();
 
             return {};
@@ -89,8 +88,8 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()("opentxs::factory::")(__func__)(
-                ": unknown or unsupported token type: ")(opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(
+                opentxs::print(type))
                 .Flush();
 
             return {};
@@ -130,7 +129,7 @@ auto swap(Token& lhs, Token& rhs) noexcept -> void { lhs.swap(rhs); }
 Token::Token(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Token::Token() noexcept

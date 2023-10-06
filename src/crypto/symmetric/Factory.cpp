@@ -49,7 +49,7 @@ auto SymmetricKey(
 
         return out;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -72,7 +72,7 @@ auto SymmetricKey(
 
         return pmr::construct<ReturnType>(alloc, api, engine, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -111,7 +111,7 @@ auto SymmetricKey(
             0u,
             type);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -145,7 +145,7 @@ auto SymmetricKey(
             (0u == parallel) ? ReturnType::default_threads_ : parallel,
             type);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -172,7 +172,7 @@ auto SymmetricKey(
 
         return out;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }

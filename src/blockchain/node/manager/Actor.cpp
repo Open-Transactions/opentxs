@@ -31,7 +31,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -195,19 +194,16 @@ auto Actor::Init(std::shared_ptr<Actor> me) noexcept -> void
 
 auto Actor::notify_sync_client() const noexcept -> void
 {
-    to_dht_.SendDeferred(
-        [this] {
-            const auto& filters = shared_.FilterOracle();
-            const auto tip = filters.FilterTip(filters.DefaultType());
-            using Job = network::blockchain::DHTJob;
-            auto msg = MakeWork(Job::job_processed);
-            msg.AddFrame(tip.height_);
-            msg.AddFrame(tip.hash_);
+    to_dht_.SendDeferred([this] {
+        const auto& filters = shared_.FilterOracle();
+        const auto tip = filters.FilterTip(filters.DefaultType());
+        using Job = network::blockchain::DHTJob;
+        auto msg = MakeWork(Job::job_processed);
+        msg.AddFrame(tip.height_);
+        msg.AddFrame(tip.hash_);
 
-            return msg;
-        }(),
-        __FILE__,
-        __LINE__);
+        return msg;
+    }());
 }
 
 auto Actor::pipeline(
@@ -246,7 +242,7 @@ auto Actor::process_filter_update(Message&& in, allocator_type) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto height = body[2].as<block::Height>();
     const auto target = shared_.HeaderOracle().Internal().Target();
@@ -265,18 +261,15 @@ auto Actor::process_filter_update(Message&& in, allocator_type) noexcept -> void
         }
     }
 
-    to_blockchain_api_.SendDeferred(
-        [&] {
-            auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::BlockchainSyncProgress, true);
-            work.AddFrame(shared_.Chain());
-            work.AddFrame(height);
-            work.AddFrame(target);
+    to_blockchain_api_.SendDeferred([&] {
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::BlockchainSyncProgress, true);
+        work.AddFrame(shared_.Chain());
+        work.AddFrame(height);
+        work.AddFrame(target);
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Actor::process_heartbeat(Message&& in, allocator_type monotonic) noexcept
@@ -290,8 +283,7 @@ auto Actor::process_heartbeat(Message&& in, allocator_type monotonic) noexcept
 
 auto Actor::process_start_wallet(Message&& in, allocator_type) noexcept -> void
 {
-    to_wallet_.SendDeferred(
-        MakeWork(wallet::WalletJobs::start_wallet), __FILE__, __LINE__);
+    to_wallet_.SendDeferred(MakeWork(wallet::WalletJobs::start_wallet));
 }
 
 auto Actor::process_sync_data(Message&& in, allocator_type monotonic) noexcept
@@ -332,8 +324,7 @@ auto Actor::reset_heartbeat() noexcept -> void
     heartbeat_.Wait([this](const auto& ec) {
         if (ec) {
             if (unexpected_asio_error(ec)) {
-                LogError()(OT_PRETTY_CLASS())("received asio error (")(
-                    ec.value())(") :")(ec)
+                LogError()()("received asio error (")(ec.value())(") :")(ec)
                     .Flush();
             }
         } else {

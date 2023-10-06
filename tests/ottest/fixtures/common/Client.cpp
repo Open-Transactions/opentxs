@@ -6,11 +6,11 @@
 #include "ottest/fixtures/common/Client.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
+#include <memory>
 #include <utility>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest
@@ -33,13 +33,13 @@ auto Client_fixture::CreateNym(
         name,
         api.Crypto().Seed().Passphrase(seed, reason));
 
-    OT_ASSERT(added);
+    opentxs::assert_true(added);
 
     auto& user = it->second;
     user.init(api, ot::identity::Type::individual, index);
     auto& nym = user.nym_;
 
-    OT_ASSERT(nym);
+    opentxs::assert_false(nullptr == nym);
 
     return user;
 }

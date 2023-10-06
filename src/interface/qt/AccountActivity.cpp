@@ -22,7 +22,6 @@
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -34,6 +33,7 @@
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 #include "opentxs/interface/qt/DisplayScale.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/Polarity.hpp"
 
 namespace opentxs::factory
@@ -335,7 +335,7 @@ auto AccountActivity::init_qt() noexcept -> void
 {
     qt_ = std::make_unique<QT>(*this).release();
 
-    OT_ASSERT(qt_);
+    assert_true(qt_);
 }
 
 auto AccountActivity::SendMonitor() const noexcept

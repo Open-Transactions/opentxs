@@ -20,7 +20,6 @@
 #include "internal/otx/smartcontract/OTAgent.hpp"
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -84,11 +83,11 @@ OTParty::OTParty(
             strNymID,
             strRoleID,
             strGroupName);
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
 
         if (!AddAgent(*pAgent)) {
-            LogError()(OT_PRETTY_CLASS())("*** Failed *** while adding default "
-                                          "agent in CONSTRUCTOR! 2.")
+            LogError()()("*** Failed *** while adding default "
+                         "agent in CONSTRUCTOR! 2.")
                 .Flush();
             delete pAgent;
             pAgent = nullptr;
@@ -119,7 +118,7 @@ OTParty::OTParty(
     , owner_agreement_(nullptr)
 {
     //  party_name_ = new UnallocatedCString(str_PartyName);
-    OT_ASSERT(nullptr != party_name_);
+    assert_false(nullptr == party_name_);
 
     // theNym is owner, therefore save his ID information, and create the agent
     // for this Nym automatically (that's why it was passed in.)
@@ -135,12 +134,11 @@ OTParty::OTParty(
         theNym);  // (The third arg,
                   // bRepresentsSelf,
                   // defaults here to true.)
-    OT_ASSERT(nullptr != pAgent);
+    assert_false(nullptr == pAgent);
 
     if (!AddAgent(*pAgent)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "*** Failed *** while adding default agent "
-            "in CONSTRUCTOR!")
+        LogError()()("*** Failed *** while adding default agent "
+                     "in CONSTRUCTOR!")
             .Flush();
         delete pAgent;
         pAgent = nullptr;
@@ -152,9 +150,9 @@ OTParty::OTParty(
     // let's also create a default partyaccount for it.
     //
     if (nullptr != pAccount) {
-        OT_ASSERT(nullptr != pstr_account_name);  // If passing an account, then
-                                                  // you MUST pass an account
-                                                  // name also.
+        assert_false(nullptr == pstr_account_name);  // If passing an account,
+                                                     // then you MUST pass an
+                                                     // account name also.
 
         bool bAdded = AddAccount(
             String::Factory(str_agent_name.c_str()),
@@ -163,8 +161,8 @@ OTParty::OTParty(
             lClosingTransNo);
 
         if (!bAdded) {
-            LogError()(OT_PRETTY_CLASS())("*** Failed *** while adding default "
-                                          "account in CONSTRUCTOR!")
+            LogError()()("*** Failed *** while adding default "
+                         "account in CONSTRUCTOR!")
                 .Flush();
         }
     }
@@ -177,8 +175,8 @@ auto OTParty::HasTransactionNum(const std::int64_t& lInput) const -> bool
 
     for (const auto& it : party_accounts_) {
         const OTPartyAccount* pAcct = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
+        assert_false(
+            nullptr == pAcct,
             "Unexpected nullptr partyaccount pointer in party map.");
 
         if (lInput == pAcct->GetClosingTransNo()) { return true; }
@@ -193,8 +191,8 @@ void OTParty::GetAllTransactionNumbers(NumList& numlistOutput) const
 
     for (const auto& it : party_accounts_) {
         const OTPartyAccount* pAcct = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
+        assert_false(
+            nullptr == pAcct,
             "Unexpected nullptr partyaccount pointer in party map.");
 
         const std::int64_t lTemp = pAcct->GetClosingTransNo();
@@ -211,8 +209,8 @@ auto OTParty::GetAccountCount(UnallocatedCString str_agent_name) const
 
     for (const auto& it : party_accounts_) {
         const OTPartyAccount* pAcct = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
+        assert_false(
+            nullptr == pAcct,
             "Unexpected nullptr partyaccount pointer in party map.");
 
         const String& strAgentName = pAcct->GetAgentName();
@@ -228,7 +226,7 @@ auto OTParty::AddAgent(OTAgent& theAgent) -> bool
     const UnallocatedCString str_agent_name = theAgent.GetName().Get();
 
     if (!OTScriptable::ValidateName(str_agent_name)) {
-        LogError()(OT_PRETTY_CLASS())("Failed validating Agent name.").Flush();
+        LogError()()("Failed validating Agent name.").Flush();
         return false;
     }
 
@@ -251,8 +249,8 @@ auto OTParty::AddAgent(OTAgent& theAgent) -> bool
 
         return true;
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed -- Agent was already there named ")(str_agent_name)(".")
+        LogConsole()()("Failed -- Agent was already there named ")(
+            str_agent_name)(".")
             .Flush();
     }
 
@@ -274,7 +272,7 @@ auto OTParty::AddAccount(
         strAcctID,
         strInstrumentDefinitionID,
         lClosingTransNo);
-    OT_ASSERT(nullptr != pPartyAccount);
+    assert_false(nullptr == pPartyAccount);
 
     if (!AddAccount(*pPartyAccount)) {
         delete pPartyAccount;
@@ -297,7 +295,7 @@ auto OTParty::AddAccount(
         strAgentName,
         theAccount,
         lClosingTransNo);
-    OT_ASSERT(nullptr != pPartyAccount);
+    assert_false(nullptr == pPartyAccount);
 
     if (!AddAccount(*pPartyAccount)) {
         delete pPartyAccount;
@@ -311,7 +309,7 @@ auto OTParty::RemoveAccount(const UnallocatedCString str_Name) -> bool
 {
     for (auto it = party_accounts_.begin(); it != party_accounts_.end(); ++it) {
         OTPartyAccount* pAcct = it->second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         const UnallocatedCString str_acct_name = pAcct->GetName().Get();
 
@@ -331,8 +329,7 @@ auto OTParty::AddAccount(OTPartyAccount& thePartyAcct) -> bool
     const UnallocatedCString str_acct_name = thePartyAcct.GetName().Get();
 
     if (!OTScriptable::ValidateName(str_acct_name)) {
-        LogError()(OT_PRETTY_CLASS())("Failed validating Account name.")
-            .Flush();
+        LogError()()("Failed validating Account name.").Flush();
         return false;
     }
 
@@ -362,9 +359,8 @@ auto OTParty::AddAccount(OTPartyAccount& thePartyAcct) -> bool
 
         return true;
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed -- Account was already on party "
-            "named ")(str_acct_name)(".")
+        LogConsole()()("Failed -- Account was already on party "
+                       "named ")(str_acct_name)(".")
             .Flush();
     }
 
@@ -378,14 +374,14 @@ auto OTParty::GetClosingTransNo(UnallocatedCString str_for_acct_name) const
 
     if (party_accounts_.end() == it)  // If it wasn't already there...
     {
-        LogConsole()(OT_PRETTY_CLASS())("Failed -- Account wasn't found: ")(
+        LogConsole()()("Failed -- Account wasn't found: ")(
             str_for_acct_name)(".")
             .Flush();
         return 0;
     }
 
     OTPartyAccount* pPartyAccount = it->second;
-    OT_ASSERT(nullptr != pPartyAccount);
+    assert_false(nullptr == pPartyAccount);
 
     return pPartyAccount->GetClosingTransNo();
 }
@@ -395,7 +391,7 @@ void OTParty::CleanupAgents()
 
     while (!agents_.empty()) {
         OTAgent* pTemp = agents_.begin()->second;
-        OT_ASSERT(nullptr != pTemp);
+        assert_false(nullptr == pTemp);
         delete pTemp;
         pTemp = nullptr;
         agents_.erase(agents_.begin());
@@ -407,7 +403,7 @@ void OTParty::CleanupAccounts()
 
     while (!party_accounts_.empty()) {
         OTPartyAccount* pTemp = party_accounts_.begin()->second;
-        OT_ASSERT(nullptr != pTemp);
+        assert_false(nullptr == pTemp);
         delete pTemp;
         pTemp = nullptr;
         party_accounts_.erase(party_accounts_.begin());
@@ -418,8 +414,8 @@ void OTParty::ClearTemporaryPointers()
 {
     for (auto& it : agents_) {
         OTAgent* pAgent = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAgent,
+        assert_false(
+            nullptr == pAgent,
             "Unexpected nullptr agent pointer in party map.");
     }
 }
@@ -448,13 +444,12 @@ auto OTParty::SetPartyName(const UnallocatedCString& str_party_name_input)
     -> bool
 {
     if (!OTScriptable::ValidateName(str_party_name_input)) {
-        LogError()(OT_PRETTY_CLASS())("Failed: Invalid name was passed in.")
-            .Flush();
+        LogError()()("Failed: Invalid name was passed in.").Flush();
         return false;
     }
 
     if (nullptr == party_name_) {
-        OT_ASSERT(nullptr != (party_name_ = new UnallocatedCString));
+        assert_false(nullptr == (party_name_ = new UnallocatedCString));
     }
 
     *party_name_ = str_party_name_input;
@@ -539,7 +534,7 @@ auto OTParty::HasActiveAgent() const -> bool
     //
     for (const auto& it : agents_) {
         OTAgent* pAgent = it.second;
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
 
         if (pAgent->IsAnIndividual()) { return true; }
     }
@@ -558,13 +553,12 @@ auto OTParty::GetAgent(const UnallocatedCString& str_agent_name) const
         if (agents_.end() != it)  // If we found something...
         {
             OTAgent* pAgent = it->second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
 
             return pAgent;
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed: str_agent_name is invalid...")
-            .Flush();
+        LogError()()("Failed: str_agent_name is invalid...").Flush();
     }
 
     return nullptr;
@@ -576,14 +570,13 @@ auto OTParty::GetAgentByIndex(std::int32_t nIndex) const -> OTAgent*
 {
     if (!((nIndex >= 0) &&
           (nIndex < static_cast<std::int64_t>(agents_.size())))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
         for (const auto& it : agents_) {
             OTAgent* pAgent = it.second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
 
             ++nLoopIndex;  // 0 on first iteration.
 
@@ -607,13 +600,12 @@ auto OTParty::GetAccount(const UnallocatedCString& str_acct_name) const
         if (party_accounts_.end() != it)  // If we found something...
         {
             OTPartyAccount* pAcct = it->second;
-            OT_ASSERT(nullptr != pAcct);
+            assert_false(nullptr == pAcct);
 
             return pAcct;
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed: str_acct_name is invalid.")
-            .Flush();
+        LogError()()("Failed: str_acct_name is invalid.").Flush();
     }
 
     return nullptr;
@@ -625,14 +617,13 @@ auto OTParty::GetAccountByIndex(std::int32_t nIndex) -> OTPartyAccount*
 {
     if (!((nIndex >= 0) &&
           (nIndex < static_cast<std::int64_t>(party_accounts_.size())))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
         for (auto& it : party_accounts_) {
             OTPartyAccount* pAcct = it.second;
-            OT_ASSERT(nullptr != pAcct);
+            assert_false(nullptr == pAcct);
 
             ++nLoopIndex;  // 0 on first iteration.
 
@@ -651,15 +642,14 @@ auto OTParty::GetAccountByAgent(const UnallocatedCString& str_agent_name)
     if (OTScriptable::ValidateName(str_agent_name)) {
         for (auto& it : party_accounts_) {
             OTPartyAccount* pAcct = it.second;
-            OT_ASSERT(nullptr != pAcct);
+            assert_false(nullptr == pAcct);
 
             if (pAcct->GetAgentName().Compare(str_agent_name.c_str())) {
                 return pAcct;
             }
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed: str_agent_name is invalid.")
-            .Flush();
+        LogError()()("Failed: str_agent_name is invalid.").Flush();
     }
 
     return nullptr;
@@ -673,7 +663,7 @@ auto OTParty::GetAccountByID(const identifier::Account& theAcctID) const
 {
     for (const auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         if (pAcct->IsAccountByID(theAcctID)) { return pAcct; }
     }
@@ -691,7 +681,7 @@ auto OTParty::HasAccountByID(
 {
     for (const auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         if (pAcct->IsAccountByID(theAcctID)) {
             if (nullptr != ppPartyAccount) { *ppPartyAccount = pAcct; }
@@ -711,7 +701,7 @@ auto OTParty::HasAccount(
 {
     for (const auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         if (pAcct->IsAccount(theAccount)) {
             if (nullptr != ppPartyAccount) { *ppPartyAccount = pAcct; }
@@ -732,7 +722,7 @@ auto OTParty::HasAgent(const identity::Nym& theNym, OTAgent** ppAgent) const
 {
     for (const auto& it : agents_) {
         OTAgent* pAgent = it.second;
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
 
         if (pAgent->IsValidSigner(theNym)) {
             if (nullptr != ppAgent) { *ppAgent = pAgent; }
@@ -750,7 +740,7 @@ auto OTParty::HasAgentByNymID(
 {
     for (const auto& it : agents_) {
         OTAgent* pAgent = it.second;
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
 
         if (pAgent->IsValidSignerID(theNymID)) {
             if (nullptr != ppAgent) { *ppAgent = pAgent; }
@@ -776,7 +766,7 @@ auto OTParty::HasAuthorizingAgent(
         if (agents_.end() != it)  // If we found something...
         {
             OTAgent* pAgent = it->second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
 
             if (pAgent->IsValidSigner(theNym)) {
                 // Optionally can pass in a pointer-to-pointer-to-Agent, in
@@ -786,8 +776,8 @@ auto OTParty::HasAuthorizingAgent(
                 return true;
             }
         } else {  // found nothing.
-            LogError()(OT_PRETTY_CLASS())("Named agent wasn't found "
-                                          "on list.")
+            LogError()()("Named agent wasn't found "
+                         "on list.")
                 .Flush();
         }
     }
@@ -810,7 +800,7 @@ auto OTParty::HasAuthorizingAgentByNymID(
         if (agents_.end() != it)  // If we found something...
         {
             OTAgent* pAgent = it->second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
 
             if (pAgent->IsValidSignerID(theNymID))  // if theNym is valid signer
                                                     // for pAgent.
@@ -822,8 +812,8 @@ auto OTParty::HasAuthorizingAgentByNymID(
                 return true;
             }
         } else {  // found nothing.
-            LogError()(OT_PRETTY_CLASS())("Named agent wasn't "
-                                          "found on list.")
+            LogError()()("Named agent wasn't "
+                         "found on list.")
                 .Flush();
         }
     }
@@ -850,18 +840,17 @@ auto OTParty::LoadAuthorizingAgentNym(
         if (agents_.end() != it)  // If we found something...
         {
             OTAgent* pAgent = it->second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
 
             Nym_p pNym = nullptr;
 
             if (!pAgent->IsAnIndividual()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "This agent is not "
-                    "an individual--there's no Nym to load.")
+                LogError()()("This agent is not "
+                             "an individual--there's no Nym to load.")
                     .Flush();
             } else if (nullptr == (pNym = pAgent->LoadNym())) {
-                LogError()(OT_PRETTY_CLASS())("Failed loading "
-                                              "Nym.")
+                LogError()()("Failed loading "
+                             "Nym.")
                     .Flush();
             } else {
                 if (nullptr != ppAgent) {  // Pass the agent back, too, if it
@@ -872,8 +861,8 @@ auto OTParty::LoadAuthorizingAgentNym(
                 return pNym;  // Success
             }
         } else {  // found nothing.
-            LogError()(OT_PRETTY_CLASS())("Named agent wasn't "
-                                          "found on list.")
+            LogError()()("Named agent wasn't "
+                         "found on list.")
                 .Flush();
         }
     }
@@ -892,8 +881,8 @@ auto OTParty::VerifyOwnershipOfAccount(const Account& theAccount) const -> bool
                                 // ID. Otherwise this is false.
 
         if (!bNymID || (str_nym_id.size() <= 0)) {
-            LogError()(OT_PRETTY_CLASS())("Although party is a "
-                                          "Nym, unable to retrieve NymID!")
+            LogError()()("Although party is a "
+                         "Nym, unable to retrieve NymID!")
                 .Flush();
             return false;
         }
@@ -902,12 +891,12 @@ auto OTParty::VerifyOwnershipOfAccount(const Account& theAccount) const -> bool
 
         return theAccount.VerifyOwnerByID(thePartyNymID);
     } else if (IsEntity()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: Entities have not been implemented yet, but somehow this "
             "party is an entity.")
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Error: Unknown party type.").Flush();
+        LogError()()("Error: Unknown party type.").Flush();
     }
 
     return false;
@@ -928,14 +917,12 @@ auto OTParty::DropFinalReceiptToInboxes(
     OTSmartContract* pSmartContract = nullptr;
 
     if (nullptr == owner_agreement_) {
-        LogError()(OT_PRETTY_CLASS())("Missing pointer to owner agreement.")
-            .Flush();
+        LogError()()("Missing pointer to owner agreement.").Flush();
         return false;
     } else if (
         nullptr ==
         (pSmartContract = dynamic_cast<OTSmartContract*>(owner_agreement_))) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Can only drop finalReceipts for smart contracts.")
+        LogError()()("Can only drop finalReceipts for smart contracts.")
             .Flush();
         return false;
     }
@@ -944,8 +931,8 @@ auto OTParty::DropFinalReceiptToInboxes(
 
     for (auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
+        assert_false(
+            nullptr == pAcct,
             "Unexpected nullptr partyaccount pointer in party map.");
 
         if (false == pAcct->DropFinalReceiptToInbox(
@@ -956,8 +943,7 @@ auto OTParty::DropFinalReceiptToInboxes(
                          reason,
                          pstrNote,
                          pstrAttachment)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed dropping final Receipt to agent's Inbox.")
+            LogError()()("Failed dropping final Receipt to agent's Inbox.")
                 .Flush();
             bSuccess = false;  // Notice: no break. We still try to notify them
                                // all, even if one fails.
@@ -982,15 +968,15 @@ auto OTParty::DropFinalReceiptToNymboxes(
     OTSmartContract* pSmartContract = nullptr;
 
     if (nullptr == owner_agreement_) {
-        LogError()(OT_PRETTY_CLASS())("Missing pointer to "
-                                      "owner agreement.")
+        LogError()()("Missing pointer to "
+                     "owner agreement.")
             .Flush();
         return false;
     } else if (
         nullptr ==
         (pSmartContract = dynamic_cast<OTSmartContract*>(owner_agreement_))) {
-        LogError()(OT_PRETTY_CLASS())("Can only drop "
-                                      "finalReceipts for smart contracts.")
+        LogError()()("Can only drop "
+                     "finalReceipts for smart contracts.")
             .Flush();
         return false;
     }
@@ -999,8 +985,8 @@ auto OTParty::DropFinalReceiptToNymboxes(
 
     for (auto& it : agents_) {
         OTAgent* pAgent = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAgent,
+        assert_false(
+            nullptr == pAgent,
             "Unexpected nullptr agent pointer in party map.");
 
         if (false == pAgent->DropFinalReceiptToNymbox(
@@ -1010,8 +996,8 @@ auto OTParty::DropFinalReceiptToNymboxes(
                          reason,
                          pstrNote,
                          pstrAttachment)) {
-            LogError()(OT_PRETTY_CLASS())("Failed dropping "
-                                          "final Receipt to agent's Nymbox.")
+            LogError()()("Failed dropping "
+                         "final Receipt to agent's Nymbox.")
                 .Flush();
         } else {
             bSuccess = true;
@@ -1037,8 +1023,7 @@ auto OTParty::SendNoticeToParty(
         false;  // Success is defined as "at least one agent was notified"
 
     if (nullptr == owner_agreement_) {
-        LogError()(OT_PRETTY_CLASS())("Missing pointer to owner agreement.")
-            .Flush();
+        LogError()()("Missing pointer to owner agreement.").Flush();
         return false;
     }
 
@@ -1047,8 +1032,8 @@ auto OTParty::SendNoticeToParty(
     if (lOpeningTransNo > 0) {
         for (auto& it : agents_) {
             OTAgent* pAgent = it.second;
-            OT_ASSERT_MSG(
-                nullptr != pAgent,
+            assert_false(
+                nullptr == pAgent,
                 "Unexpected nullptr agent pointer in party map.");
 
             if (false == pAgent->DropServerNoticeToNymbox(
@@ -1063,8 +1048,7 @@ auto OTParty::SendNoticeToParty(
                              pstrNote,
                              pstrAttachment,
                              pActualNym)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed dropping server notice to agent's Nymbox.")
+                LogError()()("Failed dropping server notice to agent's Nymbox.")
                     .Flush();
             } else {
                 bSuccess = true;
@@ -1085,15 +1069,15 @@ auto OTParty::LoadAndVerifyAssetAccounts(
     for (auto& it_acct : party_accounts_) {
         const UnallocatedCString str_acct_name = it_acct.first;
         OTPartyAccount* pPartyAcct = it_acct.second;
-        OT_ASSERT(pPartyAcct != nullptr);
+        assert_true(pPartyAcct != nullptr);
 
         bool bHadToLoadtheAcctMyself = true;
         SharedAccount account;
         const String& strAcctID = pPartyAcct->GetAcctID();
 
         if (!strAcctID.Exists()) {
-            LogConsole()(OT_PRETTY_CLASS())("Bad: Acct ID is "
-                                            "blank for account: ")(
+            LogConsole()()("Bad: Acct ID is "
+                           "blank for account: ")(
                 str_acct_name)(", on party: ")(GetPartyName())(".")
                 .Flush();
             return false;
@@ -1110,9 +1094,9 @@ auto OTParty::LoadAndVerifyAssetAccounts(
                                                    // sure there's no duplicate
                                                    // acct IDs. (Not allowed.)
         } else {
-            LogConsole()(OT_PRETTY_CLASS())("Failure: Found a "
-                                            "duplicate Acct ID (")(
-                strAcctID)("), on acct: ")(str_acct_name)(".")
+            LogConsole()()("Failure: Found a "
+                           "duplicate Acct ID (")(strAcctID)("), on acct: ")(
+                str_acct_name)(".")
                 .Flush();
             return false;
         }
@@ -1123,24 +1107,28 @@ auto OTParty::LoadAndVerifyAssetAccounts(
         if (map_Accts_Already_Loaded.end() != it) {
             account = it->second;
 
-            OT_ASSERT(account);
+            assert_true(account);
 
             // Now we KNOW the Account is "already loaded" and we KNOW the
             // partyaccount has a POINTER to that Acct:
             //
             const bool bIsPartyAcct = pPartyAcct->IsAccount(account.get());
-            OT_ASSERT_MSG(
+            assert_true(
                 bIsPartyAcct,
-                "OTParty::LoadAndVerifyAssetAccounts: Failed call: "
-                "pPartyAcct->IsAccount(*account); \n");  // assert because the
-                                                         // Acct was already
-                                                         // mapped by ID, so it
-                                                         // should already have
-                                                         // been validated.
+                "Failed call:  pPartyAcct->IsAccount(*account);");  // assert
+                                                                    // because
+                                                                    // the Acct
+                                                                    // was
+                                                                    // already
+                                                                    // mapped by
+                                                                    // ID, so it
+                                                                    // should
+                                                                    // already
+                                                                    // have been
+                                                                    // validated.
             if (!bIsPartyAcct) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed call: "
-                    "pPartyAcct->IsAccount(*account).")
+                LogError()()("Failed call: "
+                             "pPartyAcct->IsAccount(*account).")
                     .Flush();
             }
 
@@ -1154,8 +1142,8 @@ auto OTParty::LoadAndVerifyAssetAccounts(
         //
         if (bHadToLoadtheAcctMyself == true) {
             if ((account = pPartyAcct->LoadAccount())) {
-                LogConsole()(OT_PRETTY_CLASS())("Failed loading "
-                                                "Account with name: ")(
+                LogConsole()()("Failed loading "
+                               "Account with name: ")(
                     str_acct_name)(" and ID: ")(strAcctID)(".")
                     .Flush();
                 return false;
@@ -1180,7 +1168,7 @@ auto OTParty::VerifyAccountsWithTheirAgents(
     const PasswordPrompt& reason,
     bool bBurnTransNo) -> bool
 {
-    OT_ASSERT(nullptr != owner_agreement_);
+    assert_false(nullptr == owner_agreement_);
 
     bool bAllSuccessful = true;
 
@@ -1191,8 +1179,8 @@ auto OTParty::VerifyAccountsWithTheirAgents(
     for (auto& it : party_accounts_) {
         const UnallocatedCString str_acct_name = it.first;
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
+        assert_false(
+            nullptr == pAcct,
             "Unexpected nullptr partyaccount pointer in party map.");
 
         const bool bVerified = owner_agreement_->VerifyPartyAcctAuthorization(
@@ -1216,7 +1204,7 @@ auto OTParty::VerifyAccountsWithTheirAgents(
                                      // first failure, but let them all go
                                      // through. (This is in order to keep the
                                      // output consistent.)
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Ownership, agency, or potentially "
                 "closing transaction # failed to verify on account: ")(
                 str_acct_name)(".")
@@ -1234,16 +1222,14 @@ auto OTParty::SignContract(Contract& theInput, const PasswordPrompt& reason)
     const -> bool
 {
     if (GetAuthorizingAgentName().size() <= 0) {
-        LogError()(OT_PRETTY_CLASS())("Error: Authorizing agent name is blank.")
-            .Flush();
+        LogError()()("Error: Authorizing agent name is blank.").Flush();
         return false;
     }
 
     OTAgent* pAgent = GetAgent(GetAuthorizingAgentName());
 
     if (nullptr == pAgent) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error: Unable to find Authorizing agent (")(
+        LogError()()("Error: Unable to find Authorizing agent (")(
             GetAuthorizingAgentName())(") for party: ")(GetPartyName())(".")
             .Flush();
         return false;
@@ -1262,19 +1248,17 @@ void OTParty::HarvestClosingNumbers(
     for (auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
 
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
-            "OTParty::HarvestClosingNumbers: "
-            "Unexpected nullptr partyaccount pointer in "
-            "party map.");
+        assert_false(
+            nullptr == pAcct,
+            "Unexpected nullptr partyaccount pointer in party map.");
 
         if (pAcct->GetClosingTransNo() <= 0) { continue; }
 
         const UnallocatedCString str_agent_name(pAcct->GetAgentName().Get());
 
         if (str_agent_name.size() <= 0) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Missing agent name on party account: ")(pAcct->GetName())(".")
+            LogError()()("Missing agent name on party account: ")(
+                pAcct->GetName())(".")
                 .Flush();
 
             continue;
@@ -1283,7 +1267,7 @@ void OTParty::HarvestClosingNumbers(
         OTAgent* pAgent = GetAgent(str_agent_name);
 
         if (nullptr == pAgent) {
-            LogError()(OT_PRETTY_CLASS())("Couldn't find agent (")(
+            LogError()()("Couldn't find agent (")(
                 str_agent_name)(") for asset account: ")(pAcct->GetName())(".")
                 .Flush();
         } else {
@@ -1303,11 +1287,9 @@ void OTParty::recover_closing_numbers(
     for (const auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
 
-        OT_ASSERT_MSG(
-            nullptr != pAcct,
-            "OTParty::HarvestClosingNumbers: "
-            "Unexpected nullptr partyaccount pointer in "
-            "partyaccount map.");
+        assert_false(
+            nullptr == pAcct,
+            "Unexpected nullptr partyaccount pointer in partyaccount map.");
 
         if (pAcct->GetClosingTransNo() <= 0) { continue; }
 
@@ -1334,7 +1316,7 @@ void OTParty::HarvestClosingNumbers(otx::context::Server& context)
 
     if (HasAgent(*context.Signer(), &pAgent)) {
 
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
 
         recover_closing_numbers(*pAgent, context);
     }
@@ -1349,7 +1331,7 @@ void OTParty::HarvestOpeningNumber(otx::context::Server& context)
     OTAgent* pAgent = nullptr;
 
     if (HasAuthorizingAgent(*context.Signer(), &pAgent)) {
-        OT_ASSERT(nullptr != pAgent);
+        assert_false(nullptr == pAgent);
         recover_opening_number(*pAgent, context);
     }
     // else no error, since many nyms could get passed in here (in a loop)
@@ -1360,15 +1342,14 @@ void OTParty::recover_opening_number(
     otx::context::Server& context) const
 {
     if (!(GetAuthorizingAgentName().compare(theAgent.GetName().Get()) == 0)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Agent name doesn't match: ")(
+        LogError()()("Error: Agent name doesn't match: ")(
             GetAuthorizingAgentName())(" / ")(theAgent.GetName())(".")
             .Flush();
     } else if (GetOpeningTransNo() > 0) {
         theAgent.RecoverTransactionNumber(GetOpeningTransNo(), context);
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Nothing to harvest, it was already 0 for party: ")(GetPartyName())(
-            ".")
+        LogConsole()()("Nothing to harvest, it was already 0 for party: ")(
+            GetPartyName())(".")
             .Flush();
     }
 }
@@ -1385,23 +1366,20 @@ void OTParty::CloseoutOpeningNumber(
     const PasswordPrompt& reason)
 {
     if (GetAuthorizingAgentName().size() <= 0) {
-        LogError()(OT_PRETTY_CLASS())("Error: Authorizing agent name is blank.")
-            .Flush();
+        LogError()()("Error: Authorizing agent name is blank.").Flush();
         return;
     }
 
     OTAgent* pAgent = GetAgent(GetAuthorizingAgentName());
 
     if (nullptr == pAgent) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error: Unable to find Authorizing agent (")(
+        LogError()()("Error: Unable to find Authorizing agent (")(
             GetAuthorizingAgentName())(") for party: ")(GetPartyName())(".")
             .Flush();
     } else if (GetOpeningTransNo() > 0) {
         pAgent->RemoveIssuedNumber(GetOpeningTransNo(), strNotaryID, reason);
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Nothing to closeout, it was already 0 for party: ")(
+        LogConsole()()("Nothing to closeout, it was already 0 for party: ")(
             GetPartyName())(".")
             .Flush();
     }
@@ -1425,7 +1403,7 @@ auto OTParty::ReserveTransNumsForConfirm(otx::context::Server& context) -> bool
     // FOR THIS PARTY.
 
     if (GetAuthorizingAgentName().size() <= 0) {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Failure: Authorizing "
             "agent's name is empty on this party: ")(GetPartyName())(".")
             .Flush();
@@ -1435,16 +1413,16 @@ auto OTParty::ReserveTransNumsForConfirm(otx::context::Server& context) -> bool
     OTAgent* pMainAgent = GetAgent(GetAuthorizingAgentName());
 
     if (nullptr == pMainAgent) {
-        LogConsole()(OT_PRETTY_CLASS())("Failure: Authorizing "
-                                        "agent (")(GetPartyName())(
+        LogConsole()()("Failure: Authorizing "
+                       "agent (")(GetPartyName())(
             ") not found on this party: ")(GetAuthorizingAgentName())(".")
             .Flush();
         return false;
     }
 
     if (!pMainAgent->ReserveOpeningTransNum(context)) {
-        LogConsole()(OT_PRETTY_CLASS())("Failure: Authorizing "
-                                        "agent (")(GetAuthorizingAgentName())(
+        LogConsole()()("Failure: Authorizing "
+                       "agent (")(GetAuthorizingAgentName())(
             ") didn't have an opening transaction #, on party: ")(
             GetPartyName())(".")
             .Flush();
@@ -1460,13 +1438,12 @@ auto OTParty::ReserveTransNumsForConfirm(otx::context::Server& context) -> bool
     //
     for (auto& it : party_accounts_) {
         OTPartyAccount* pPartyAccount = it.second;
-        OT_ASSERT(nullptr != pPartyAccount);
+        assert_false(nullptr == pPartyAccount);
 
         if (!pPartyAccount->GetAgentName().Exists()) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failure: Authorized "
-                "agent name is blank for account: ")(pPartyAccount->GetName())(
-                ".")
+            LogConsole()()("Failure: Authorized "
+                           "agent name is blank for account: ")(
+                pPartyAccount->GetName())(".")
                 .Flush();
             // We have to put them back before returning, since this function
             // has failed.
@@ -1478,9 +1455,8 @@ auto OTParty::ReserveTransNumsForConfirm(otx::context::Server& context) -> bool
         OTAgent* pAgent = GetAgent(pPartyAccount->GetAgentName().Get());
 
         if (nullptr == pAgent) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failure: Unable to "
-                "locate Authorized agent for account: ")(
+            LogConsole()()("Failure: Unable to "
+                           "locate Authorized agent for account: ")(
                 pPartyAccount->GetName())(".")
                 .Flush();
             // We have to put them back before returning, since this function
@@ -1492,9 +1468,8 @@ auto OTParty::ReserveTransNumsForConfirm(otx::context::Server& context) -> bool
         // Below this point, pAgent is good.
 
         if (!pAgent->ReserveClosingTransNum(context, *pPartyAccount)) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failure: "
-                "Authorizing agent (")(GetAuthorizingAgentName())(
+            LogConsole()()("Failure: "
+                           "Authorizing agent (")(GetAuthorizingAgentName())(
                 ") didn't have a closing transaction #, on party: ")(
                 GetPartyName())(".")
                 .Flush();
@@ -1551,14 +1526,14 @@ void OTParty::Serialize(
     if (!bCalculatingID) {
         for (const auto& it : agents_) {
             OTAgent* pAgent = it.second;
-            OT_ASSERT(nullptr != pAgent);
+            assert_false(nullptr == pAgent);
             pAgent->Serialize(*pTag);
         }
     }
 
     for (const auto& it : party_accounts_) {
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
         pAcct->Serialize(*pTag, bCalculatingID, bSpecifyInstrumentDefinitionID);
     }
 
@@ -1578,7 +1553,7 @@ void OTParty::RegisterAccountsForExecution(OTScript& theScript)
     for (auto& it : party_accounts_) {
         const UnallocatedCString str_acct_name = it.first;
         OTPartyAccount* pAccount = it.second;
-        OT_ASSERT((nullptr != pAccount) && (str_acct_name.size() > 0));
+        assert_true((nullptr != pAccount) && (str_acct_name.size() > 0));
 
         pAccount->RegisterForExecution(theScript);
     }
@@ -1590,8 +1565,8 @@ auto OTParty::Compare(const OTParty& rhs) const -> bool
     const UnallocatedCString str_party_name(rhs.GetPartyName());
 
     if (!(str_party_name.compare(GetPartyName()) == 0)) {
-        LogConsole()(OT_PRETTY_CLASS())("Names don't match. ")(GetPartyName())(
-            " / ")(str_party_name)(".")
+        LogConsole()()("Names don't match. ")(GetPartyName())(" / ")(
+            str_party_name)(".")
             .Flush();
         return false;
     }
@@ -1610,18 +1585,17 @@ auto OTParty::Compare(const OTParty& rhs) const -> bool
 
     if ((GetOpeningTransNo() > 0) && (rhs.GetOpeningTransNo() > 0) &&
         (GetOpeningTransNo() != rhs.GetOpeningTransNo())) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Opening transaction numbers don't match "
-            "for party ")(GetPartyName())(". (")(GetOpeningTransNo())(" / ")(
-            rhs.GetOpeningTransNo())(").")
+        LogConsole()()("Opening transaction numbers don't match "
+                       "for party ")(GetPartyName())(". (")(
+            GetOpeningTransNo())(" / ")(rhs.GetOpeningTransNo())(").")
             .Flush();
         return false;
     }
 
     if ((GetPartyID().size() > 0) && (rhs.GetPartyID().size() > 0) &&
         !(GetPartyID().compare(rhs.GetPartyID()) == 0)) {
-        LogConsole()(OT_PRETTY_CLASS())("Party IDs don't match for party ")(
-            GetPartyName())(". (")(GetPartyID())(" / ")(rhs.GetPartyID())(").")
+        LogConsole()()("Party IDs don't match for party ")(GetPartyName())(
+            ". (")(GetPartyID())(" / ")(rhs.GetPartyID())(").")
             .Flush();
         return false;
     }
@@ -1630,7 +1604,7 @@ auto OTParty::Compare(const OTParty& rhs) const -> bool
         (rhs.GetAuthorizingAgentName().size() > 0) &&
         !(GetAuthorizingAgentName().compare(rhs.GetAuthorizingAgentName()) ==
           0)) {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Authorizing agent names don't match for "
             "party ")(GetPartyName())(". (")(GetAuthorizingAgentName())(" / ")(
             rhs.GetAuthorizingAgentName())(").")
@@ -1643,8 +1617,8 @@ auto OTParty::Compare(const OTParty& rhs) const -> bool
     //    mapOfAgents            agents_; // These are owned.
 
     if (GetAccountCount() != rhs.GetAccountCount()) {
-        LogConsole()(OT_PRETTY_CLASS())("Mismatched number of accounts when "
-                                        "comparing party ")(GetPartyName())(".")
+        LogConsole()()("Mismatched number of accounts when "
+                       "comparing party ")(GetPartyName())(".")
             .Flush();
         return false;
     }
@@ -1652,19 +1626,19 @@ auto OTParty::Compare(const OTParty& rhs) const -> bool
     for (const auto& it : party_accounts_) {
         const UnallocatedCString str_acct_name = it.first;
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         OTPartyAccount* p2 = rhs.GetAccount(str_acct_name);
 
         if (nullptr == p2) {
-            LogConsole()(OT_PRETTY_CLASS())("Unable to find Account ")(
+            LogConsole()()("Unable to find Account ")(
                 str_acct_name)(" on rhs, when comparing party ")(
                 GetPartyName())(".")
                 .Flush();
             return false;
         }
         if (!pAcct->Compare(*p2)) {
-            LogConsole()(OT_PRETTY_CLASS())("Accounts (")(
+            LogConsole()()("Accounts (")(
                 str_acct_name)(") don't match when comparing party ")(
                 GetPartyName())(".")
                 .Flush();
@@ -1687,7 +1661,7 @@ auto OTParty::CopyAcctsToConfirmingParty(OTParty& theParty) const -> bool
     for (const auto& it : party_accounts_) {
         const UnallocatedCString str_acct_name = it.first;
         OTPartyAccount* pAcct = it.second;
-        OT_ASSERT(nullptr != pAcct);
+        assert_false(nullptr == pAcct);
 
         if (false == theParty.AddAccount(
                          pAcct->GetAgentName(),
@@ -1695,7 +1669,7 @@ auto OTParty::CopyAcctsToConfirmingParty(OTParty& theParty) const -> bool
                          pAcct->GetAcctID(),
                          pAcct->GetInstrumentDefinitionID(),
                          pAcct->GetClosingTransNo())) {
-            LogConsole()(OT_PRETTY_CLASS())("Unable to add Account ")(
+            LogConsole()()("Unable to add Account ")(
                 str_acct_name)(", when copying from *this party ")(
                 GetPartyName())(".")
                 .Flush();

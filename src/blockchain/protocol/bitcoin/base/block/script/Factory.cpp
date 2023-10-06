@@ -16,7 +16,6 @@
 #include "blockchain/protocol/bitcoin/base/block/script/Imp.hpp"
 #include "blockchain/protocol/bitcoin/base/block/script/ScriptPrivate.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -123,8 +122,8 @@ auto BitcoinScript(
                 {
                     const auto& sizeBytes = push.value();
 
-                    OT_ASSERT(0 < sizeBytes);
-                    OT_ASSERT(5 > sizeBytes);
+                    assert_true(0 < sizeBytes);
+                    assert_true(5 > sizeBytes);
 
                     const auto remaining = target - read;
                     const auto effectiveSize =
@@ -176,7 +175,7 @@ auto BitcoinScript(
             alloc.result_, chain, role, std::move(elements), bytes.size());
     } catch (const std::exception& e) {
         const auto& logger = mute ? LogTrace() : LogVerbose();
-        logger("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        logger()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -209,7 +208,7 @@ auto BitcoinScript(
         return pmr::construct<ReturnType>(
             alloc.result_, chain, role, std::move(elements), std::nullopt);
     } catch (const std::exception& e) {
-        LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -252,13 +251,13 @@ auto BitcoinScriptP2MS(
     using enum blockchain::protocol::bitcoin::base::block::script::OP;
 
     if ((0u == M) || (16u < M)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid M").Flush();
+        LogError()()("Invalid M").Flush();
 
         return {};
     }
 
     if ((0u == N) || (16u < N)) {
-        LogError()("opentxs::factory::")(__func__)(": Invalid N").Flush();
+        LogError()()("Invalid N").Flush();
 
         return {};
     }
@@ -271,7 +270,7 @@ auto BitcoinScriptP2MS(
 
     for (const auto& pKey : keys) {
         if (nullptr == pKey) {
-            LogError()("opentxs::factory::")(__func__)(": Invalid key").Flush();
+            LogError()()("Invalid key").Flush();
 
             return {};
         }
@@ -321,9 +320,7 @@ auto BitcoinScriptP2PKH(
     auto hash = Space{};
 
     if (false == b::PubkeyHash(crypto, chain, key.PublicKey(), writer(hash))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to calculate pubkey hash")
-            .Flush();
+        LogError()()("Failed to calculate pubkey hash").Flush();
 
         return {};
     }
@@ -356,17 +353,13 @@ auto BitcoinScriptP2SH(
     auto hash = Space{};
 
     if (false == script.Serialize(writer(bytes))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to serialize script")
-            .Flush();
+        LogError()()("Failed to serialize script").Flush();
 
         return {};
     }
 
     if (false == b::ScriptHash(crypto, chain, reader(bytes), writer(hash))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to calculate script hash")
-            .Flush();
+        LogError()()("Failed to calculate script hash").Flush();
 
         return {};
     }
@@ -396,9 +389,7 @@ auto BitcoinScriptP2WPKH(
     auto hash = Space{};
 
     if (false == b::PubkeyHash(crypto, chain, key.PublicKey(), writer(hash))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to calculate pubkey hash")
-            .Flush();
+        LogError()()("Failed to calculate pubkey hash").Flush();
 
         return {};
     }
@@ -428,18 +419,14 @@ auto BitcoinScriptP2WSH(
     auto hash = Space{};
 
     if (false == script.Serialize(writer(bytes))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to serialize script")
-            .Flush();
+        LogError()()("Failed to serialize script").Flush();
 
         return {};
     }
 
     if (false ==
         b::ScriptHashSegwit(crypto, chain, reader(bytes), writer(hash))) {
-        LogError()("opentxs::factory::")(__func__)(
-            ": Failed to calculate script hash")
-            .Flush();
+        LogError()()("Failed to calculate script hash").Flush();
 
         return {};
     }

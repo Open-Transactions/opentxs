@@ -17,7 +17,6 @@
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -101,8 +100,8 @@ auto BlockOracle::Start(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
@@ -110,12 +109,12 @@ auto BlockOracle::Start(
     shared_ = std::allocate_shared<BlockOracle::Shared>(
         alloc::PMR<BlockOracle::Shared>{alloc}, *api, *node);
 
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 
     auto actor = std::allocate_shared<BlockOracle::Actor>(
         alloc::PMR<BlockOracle::Actor>{alloc}, api, node, shared_, batchID);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

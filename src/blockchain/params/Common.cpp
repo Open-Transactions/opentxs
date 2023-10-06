@@ -63,7 +63,7 @@ auto WriteCheckpoint(
             chain,
             data.DefaultCfilterType());
     } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
+        LogError()()("")(e.what()).Flush();
 
         return false;
     }
@@ -144,7 +144,7 @@ auto WriteCheckpoint(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
+        LogError()()("")(e.what()).Flush();
 
         return false;
     }

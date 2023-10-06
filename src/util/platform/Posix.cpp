@@ -28,7 +28,6 @@ extern "C" {
 #include <utility>
 
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -63,8 +62,7 @@ auto Signals::handle() -> void
 
             if (shouldBreak) { break; }
         } else {
-            LogError()(OT_PRETTY_CLASS())("ERROR: Invalid signal received.")
-                .Flush();
+            LogError()()("ERROR: Invalid signal received.").Flush();
         }
     }
 }
@@ -92,8 +90,7 @@ auto String::tokenize_basic(
             k = i;
             while (txt[i] != quote && txt[i] != 0) { i++; }
             if (txt[i] != quote) {
-                LogError()(OT_PRETTY_CLASS())("Unmatched quotes in: ")(txt)(".")
-                    .Flush();
+                LogError()()("Unmatched quotes in: ")(txt)(".").Flush();
                 return false;
             }
             k2 = i;
@@ -113,8 +110,7 @@ auto String::tokenize_basic(
             v = i;
             while (txt[i] != quote && txt[i] != 0) { i++; }
             if (txt[i] != quote) {
-                LogError()(OT_PRETTY_CLASS())("Unmatched quotes in: ")(txt)(".")
-                    .Flush();
+                LogError()()("Unmatched quotes in: ")(txt)(".").Flush();
                 return false;
             }
             v2 = i;
@@ -126,8 +122,7 @@ auto String::tokenize_basic(
         const UnallocatedCString value = buf.substr(v, v2 - v);
 
         if (key.length() != 0 && value.length() != 0) {
-            LogVerbose()(OT_PRETTY_CLASS())("Parsed: ")(key)(" = ")(value)
-                .Flush();
+            LogVerbose()()("Parsed: ")(key)(" = ")(value).Flush();
             mapOutput.insert(
                 std::pair<UnallocatedCString, UnallocatedCString>(key, value));
         }
@@ -152,9 +147,8 @@ auto String::tokenize_enhanced(
 
     if (wordexp(Get(), &exp_result, 0))  // non-zero == failure.
     {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error calling wordexp() "
-            "(to expand user-defined script args). Data: ")(
+        LogError()()("Error calling wordexp() "
+                     "(to expand user-defined script args). Data: ")(
             static_cast<const opentxs::String&>(*this))(".")
             .Flush();
         //        wordfree(&exp_result);
@@ -177,8 +171,7 @@ auto String::tokenize_enhanced(
             const UnallocatedCString str_key = exp_result.we_wordv[i];
             const UnallocatedCString str_val = exp_result.we_wordv[i + 1];
 
-            LogVerbose()(OT_PRETTY_CLASS())("Parsed: ")(str_key)(" = ")(str_val)
-                .Flush();
+            LogVerbose()()("Parsed: ")(str_key)(" = ")(str_val).Flush();
             mapOutput.insert(std::pair<UnallocatedCString, UnallocatedCString>(
                 str_key, str_val));
         }
@@ -309,8 +302,8 @@ auto Write(
         }
     }();
 
-    OT_ASSERT(file.is_open());
-    OT_ASSERT(cb);
+    assert_true(file.is_open());
+    assert_false(nullptr == cb);
 
     auto* out = std::next(file.data(), offset);
 

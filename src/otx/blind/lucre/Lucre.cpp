@@ -17,7 +17,7 @@ extern "C" {
 
 #include <cstdio>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::otx::blind
 {
@@ -28,7 +28,7 @@ public:
     {
         bio_ = ::BIO_new_file("openssl.dump", "w");
 
-        OT_ASSERT(nullptr != bio_);
+        assert_false(nullptr == bio_);
 
         SetDumper(bio_);
     }

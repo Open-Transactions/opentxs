@@ -9,7 +9,6 @@
 #include <exception>
 #include <iostream>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
@@ -34,7 +33,7 @@ auto print(BlockchainProfile in) noexcept -> std::string_view
             static_cast<std::uint8_t>(in))
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -123,7 +122,7 @@ auto print(
                 os << "null";
             } break;
             default: {
-                LogAbort()(__func__)(": unknown json value type").Abort();
+                LogAbort()()("unknown json value type").Abort();
             }
         }
 
@@ -131,7 +130,7 @@ auto print(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(__func__)(": ")(e.what()).Flush();
+        LogError()()("")(e.what()).Flush();
 
         return false;
     }

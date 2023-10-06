@@ -9,8 +9,8 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -57,7 +57,7 @@ auto SeedListItem::reindex(
     const auto& name = key;
     const auto type = extract_custom<decltype(type_)>(custom, 0);
 
-    OT_ASSERT(type_ == type);
+    assert_true(type_ == type);
 
     auto lock = Lock{lock_};
     auto changed{false};

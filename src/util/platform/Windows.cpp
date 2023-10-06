@@ -32,7 +32,6 @@ extern "C" {
 #include <memory>
 #include <xstring>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -69,7 +68,7 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
     const auto rc = SetThreadPriority(handle, value);
 
     if (false == rc) {
-        LogError()(__func__)(": failed to set thread priority to ")(
+        LogError()()("failed to set thread priority to ")(
             opentxs::print(priority))
             .Flush();
     }
@@ -108,8 +107,7 @@ auto String::tokenize_basic(
             k = i;
             while (txt[i] != quote && txt[i] != 0) i++;
             if (txt[i] != quote) {
-                LogError()(OT_PRETTY_CLASS())("Unmatched quotes in: ")(txt)(".")
-                    .Flush();
+                LogError()()("Unmatched quotes in: ")(txt)(".").Flush();
                 return false;
             }
             k2 = i;
@@ -129,8 +127,7 @@ auto String::tokenize_basic(
             v = i;
             while (txt[i] != quote && txt[i] != 0) i++;
             if (txt[i] != quote) {
-                LogError()(OT_PRETTY_CLASS())("Unmatched quotes in: ")(txt)(".")
-                    .Flush();
+                LogError()()("Unmatched quotes in: ")(txt)(".").Flush();
                 return false;
             }
             v2 = i;
@@ -142,8 +139,7 @@ auto String::tokenize_basic(
         const UnallocatedCString value = buf.substr(v, v2 - v);
 
         if (key.length() != 0 && value.length() != 0) {
-            LogVerbose()(OT_PRETTY_CLASS())("Parsed: ")(key)(" = ")(value)
-                .Flush();
+            LogVerbose()()("Parsed: ")(key)(" = ")(value).Flush();
             mapOutput.insert(
                 std::pair<UnallocatedCString, UnallocatedCString>(key, value));
         }
@@ -253,7 +249,7 @@ auto Write(const SourceData& in, const Location& location, FileMap&) noexcept(
     const auto& [cb, size] = in;
     const auto& [_, range] = location;
 
-    OT_ASSERT(range.size() == size);
+    assert_true(range.size() == size);
 
     if (false == std::invoke(cb, preallocated(size, range.data()))) {
         throw std::runtime_error{"write failed"};

@@ -20,7 +20,6 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -79,8 +78,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
                 BASKET_ACCOUNT_ID, BASKET_CONTRACT_ID);
 
         if (!bContractID) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: Missing Contract ID for basket ID ")(
+            LogError()()("Error: Missing Contract ID for basket ID ")(
                 strBasketID->Get())(".")
                 .Flush();
             break;
@@ -119,8 +117,7 @@ auto MainFile::SaveMainFile() -> bool
     auto strMainFile = String::Factory();
 
     if (!SaveMainFileToString(strMainFile)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error saving to string. (Giving up on save attempt).")
+        LogError()()("Error saving to string. (Giving up on save attempt).")
             .Flush();
         return false;
     }
@@ -133,8 +130,7 @@ auto MainFile::SaveMainFile() -> bool
         ascTemp->WriteArmoredString(strFinal, "NOTARY"))  // todo
                                                           // hardcoding.
     {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error saving notary (Failed writing armored string).")
+        LogError()()("Error saving notary (Failed writing armored string).")
             .Flush();
         return false;
     }
@@ -151,7 +147,7 @@ auto MainFile::SaveMainFile() -> bool
         "");
 
     if (!bSaved) {
-        LogError()(OT_PRETTY_CLASS())("Error saving main file: ")(
+        LogError()()("Error saving main file: ")(
             server_.WalletFilename().Get())(".")
             .Flush();
     }
@@ -171,9 +167,7 @@ auto MainFile::CreateMainFile(
             strNotaryID,
             "",
             "")) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed trying to store the server contract.")
-            .Flush();
+        LogError()()("Failed trying to store the server contract.").Flush();
         return false;
     }
 
@@ -201,8 +195,7 @@ auto MainFile::CreateMainFile(
             "",
             ""))  // todo hardcoding.
     {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed trying to store the new notaryServer.xml file.")
+        LogError()()("Failed trying to store the new notaryServer.xml file.")
             .Flush();
         return false;
     }
@@ -214,9 +207,9 @@ auto MainFile::CreateMainFile(
     auto loaded = server_.LoadServerNym(
         server_.API().Factory().NymIDFromBase58(strNymID));
     if (false == loaded) {
-        LogConsole()(OT_PRETTY_CLASS())("Error loading server nym.").Flush();
+        LogConsole()()("Error loading server nym.").Flush();
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
+        LogVerbose()()(
             "OKAY, we have apparently created the new server. Let's try to "
             "load up your new server contract...")
             .Flush();
@@ -235,8 +228,8 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
             server_.WalletFilename().Get(),
             "",
             "")) {
-        LogError()(OT_PRETTY_CLASS())("Error finding file: ")(
-            server_.WalletFilename().Get())(".")
+        LogError()()("Error finding file: ")(server_.WalletFilename().Get())(
+            ".")
             .Flush();
         return false;
     }
@@ -250,7 +243,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                // DATA STORE.
 
     if (!strFileContents->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to read main file: ")(
+        LogError()()("Unable to read main file: ")(
             server_.WalletFilename().Get())(".")
             .Flush();
         return false;
@@ -264,9 +257,8 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
         auto xmlFileContents = StringXML::Factory(strFileContents);
 
         if (false == xmlFileContents->DecodeIfArmored(server_.API().Crypto())) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Notary server file apparently was encoded and "
-                "then failed decoding. Filename: ")(
+            LogError()()("Notary server file apparently was encoded and "
+                         "then failed decoding. Filename: ")(
                 server_.WalletFilename().Get())(
                 ". "
                 "Contents:"
@@ -327,8 +319,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                         if ((-1) == server_.GetTransactor()
                                         .voucher_accounts_.ReadFromXMLNode(
                                             xml, strAcctType, strAcctCount)) {
-                            LogError()(OT_PRETTY_CLASS())(
-                                "Error loading voucher accountList.")
+                            LogError()()("Error loading voucher accountList.")
                                 .Flush();
                         }
                     } else if (strNodeName->Compare("basketInfo")) {
@@ -352,24 +343,22 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
                                 BASKET_ID,
                                 BASKET_ACCT_ID,
                                 BASKET_CONTRACT_ID)) {
-                            LogConsole()(OT_PRETTY_CLASS())(
-                                "Loading basket currency info... "
-                                "Basket ID: ")(strBasketID.get())(
+                            LogConsole()()("Loading basket currency info... "
+                                           "Basket ID: ")(strBasketID.get())(
                                 " Basket Acct ID: ")(strBasketAcctID.get())(
                                 " Basket Contract ID: ")(
                                 strBasketContractID.get())(".")
                                 .Flush();
                         } else {
-                            LogError()(OT_PRETTY_CLASS())(
-                                "Error adding basket currency info."
-                                " Basket ID: ")(strBasketID->Get())(
+                            LogError()()("Error adding basket currency info."
+                                         " Basket ID: ")(strBasketID->Get())(
                                 ". Basket Acct ID: ")(strBasketAcctID->Get())(
                                 ".")
                                 .Flush();
                         }
                     } else {
                         // unknown element type
-                        LogError()(OT_PRETTY_CLASS())("Unknown element type: ")(
+                        LogError()()("Unknown element type: ")(
                             xml->getNodeName())(".")
                             .Flush();
                     }
@@ -381,8 +370,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
     }
 
     if (server_.ServerNymID().empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to determine server nym id.")
-            .Flush();
+        LogError()()("Failed to determine server nym id.").Flush();
         bFailure = true;
     }
 
@@ -391,7 +379,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
             server_.API().Factory().NymIDFromBase58(server_.ServerNymID()));
 
         if (false == loaded) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load server nym.").Flush();
+            LogError()()("Failed to load server nym.").Flush();
             bFailure = true;
         }
     }
@@ -400,7 +388,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
         const auto loaded = LoadServerUserAndContract();
 
         if (false == loaded) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load nym.").Flush();
+            LogError()()("Failed to load nym.").Flush();
             bFailure = true;
         }
     }
@@ -417,17 +405,17 @@ auto MainFile::LoadServerUserAndContract() -> bool
     bool bSuccess = false;
     auto& serverNym = server_.nym_server_;
 
-    OT_ASSERT(!version_.empty());
-    OT_ASSERT(!server_.GetServerID().empty());
-    OT_ASSERT(!server_.ServerNymID().empty());
+    assert_false(version_.empty());
+    assert_false(server_.GetServerID().empty());
+    assert_false(server_.ServerNymID().empty());
 
     serverNym = server_.API().Wallet().Nym(
         server_.API().Factory().NymIDFromBase58(server_.ServerNymID()));
 
     if (serverNym->HasCapability(identity::NymCapability::SIGN_MESSAGE)) {
-        LogTrace()(OT_PRETTY_CLASS())("Server nym is viable.").Flush();
+        LogTrace()()("Server nym is viable.").Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Server nym lacks private keys.").Flush();
+        LogError()()("Server nym lacks private keys.").Flush();
 
         return false;
     }
@@ -445,22 +433,19 @@ auto MainFile::LoadServerUserAndContract() -> bool
     server_.Cron().SetServerNym(serverNym);
 
     if (!server_.Cron().LoadCron()) {
-        LogDetail()(OT_PRETTY_CLASS())(
-            "Failed loading Cron file. (Did you just create this "
-            "server?).")
+        LogDetail()()("Failed loading Cron file. (Did you just create this "
+                      "server?).")
             .Flush();
     }
 
-    LogDetail()(OT_PRETTY_CLASS())("Loading the server contract...").Flush();
+    LogDetail()()("Loading the server contract...").Flush();
 
     try {
         server_.API().Wallet().Internal().Server(NOTARY_ID);
         bSuccess = true;
-        LogDetail()(OT_PRETTY_CLASS())("** Main Server Contract Verified **")
-            .Flush();
+        LogDetail()()("** Main Server Contract Verified **").Flush();
     } catch (...) {
-        LogConsole()(OT_PRETTY_CLASS())("Failed reading Main Server Contract: ")
-            .Flush();
+        LogConsole()()("Failed reading Main Server Contract: ").Flush();
     }
 
     return bSuccess;

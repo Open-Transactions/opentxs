@@ -7,7 +7,7 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/lmdb/TransactionPrivate.hpp"
 
 namespace opentxs::storage::lmdb
@@ -15,7 +15,7 @@ namespace opentxs::storage::lmdb
 Transaction::Transaction(std::unique_ptr<TransactionPrivate> imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Transaction::Transaction() noexcept

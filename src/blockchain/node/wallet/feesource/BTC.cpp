@@ -14,7 +14,6 @@
 #include "blockchain/node/wallet/feesource/FeeSource.hpp"
 #include "internal/blockchain/node/wallet/FeeSource.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -50,8 +49,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -61,13 +59,11 @@ private:
         try {
             const auto& rate =
                 data.at("estimates").at("30").at("sat_per_vbyte").as_double();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_double(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -95,8 +91,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -105,13 +100,11 @@ private:
     {
         try {
             const auto& rate = data.at("feePerKb").as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -139,8 +132,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -149,13 +141,11 @@ private:
     {
         try {
             const auto& rate = data.at("2").as_double();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_double(rate, 100000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -183,8 +173,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -193,13 +182,11 @@ private:
     {
         try {
             const auto& rate = data.at("regular").as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -227,8 +214,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -239,13 +225,11 @@ private:
             const auto& rate = data.at("data")
                                    .at("suggested_transaction_fee_per_byte_sat")
                                    .as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -273,8 +257,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -283,13 +266,11 @@ private:
     {
         try {
             const auto& rate = data.at("medium_fee_per_kb").as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -317,8 +298,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -327,13 +307,11 @@ private:
     {
         try {
             const auto& rate = data.at("2").as_double();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_double(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -361,8 +339,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -372,13 +349,11 @@ private:
         try {
             const auto& rate =
                 data.at("fees_recommended").at("one_block_fee").as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -406,8 +381,7 @@ public:
               std::move(batch),
               std::move(alloc))
     {
-        LogTrace()(OT_PRETTY_CLASS())("My notification endpoint is ")(asio_)
-            .Flush();
+        LogTrace()()("My notification endpoint is ")(asio_).Flush();
     }
 
 private:
@@ -416,13 +390,11 @@ private:
     {
         try {
             const auto& rate = data.at("hourFee").as_int64();
-            LogTrace()(OT_PRETTY_CLASS())("Received fee estimate from API: ")(
-                rate)
-                .Flush();
+            LogTrace()()("Received fee estimate from API: ")(rate).Flush();
 
             return process_int(rate, 1000);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return std::nullopt;
         }
@@ -436,8 +408,8 @@ auto BTCFeeSources(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     using Source = blockchain::node::wallet::FeeSource;
     const auto& asio = api->Network().ZeroMQ().Internal();

@@ -14,7 +14,6 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -73,7 +72,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
         for (const auto& [hash, data] : headers) {
             const auto& [header, save] = data;
 
-            OT_ASSERT(header.IsValid());
+            assert_true(header.IsValid());
 
             if (false == save) { continue; }
 
@@ -110,9 +109,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
                 lmdb_.Store(table_, hash.Bytes(), bytes.Bytes(), tx);
 
             if (result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("saved block header ")
-                    .asHex(hash)
-                    .Flush();
+                LogTrace()()("saved block header ").asHex(hash).Flush();
             } else {
                 throw std::runtime_error{
                     "Failed to store block header in database"};
@@ -126,7 +123,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
             throw std::runtime_error{"database update error"};
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

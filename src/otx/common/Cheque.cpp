@@ -16,7 +16,6 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -203,9 +202,8 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             const auto unittype =
                 api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                     INSTRUMENT_DEFINITION_ID);
-            LogVerbose()(OT_PRETTY_CLASS())("Cheque Amount: ")(
-                amount_, unittype)(". Transaction Number: ")(
-                transaction_num_)(" Valid From: ")(
+            LogVerbose()()("Cheque Amount: ")(amount_, unittype)(
+                ". Transaction Number: ")(transaction_num_)(" Valid From: ")(
                 str_valid_from)(" Valid To: ")(
                 str_valid_to)(" InstrumentDefinitionID: ")(
                 strInstrumentDefinitionID.get())(" NotaryID: ")(
@@ -221,8 +219,7 @@ auto Cheque::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         nReturnVal = 1;
     } else if (!strcmp("memo", xml->getNodeName())) {
         if (!LoadEncodedTextField(api_.Crypto(), xml, memo_)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Memo field without value.")
-                .Flush();
+            LogError()()("Error: Memo field without value.").Flush();
             return (-1);  // error condition
         }
 

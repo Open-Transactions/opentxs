@@ -5,7 +5,7 @@
 
 #include "blockchain/database/wallet/Modification.hpp"  // IWYU pragma: associated
 
-#include <string_view>
+#include <chrono>
 #include <utility>
 
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep

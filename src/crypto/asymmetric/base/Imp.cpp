@@ -28,7 +28,6 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -117,11 +116,11 @@ Key::Key(
     , metadata_(std::make_unique<OTSignatureMetadata>(api_))
     , has_private_(hasPrivate)
 {
-    OT_ASSERT(0 < version);
-    OT_ASSERT(nullptr != metadata_);
+    assert_true(0 < version);
+    assert_false(nullptr == metadata_);
 
     if (has_private_) {
-        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_.size()));
+        assert_true(encrypted_key_ || (0 < plaintext_key_.size()));
     }
 }
 
@@ -230,11 +229,11 @@ Key::Key(
     , metadata_(std::make_unique<OTSignatureMetadata>(api_))
     , has_private_(false == plaintext_key_.empty())
 {
-    OT_ASSERT(0 < version_);
-    OT_ASSERT(nullptr != metadata_);
+    assert_true(0 < version_);
+    assert_false(nullptr == metadata_);
 
     if (has_private_) {
-        OT_ASSERT(encrypted_key_ || (0 < plaintext_key_.size()));
+        assert_true(encrypted_key_ || (0 < plaintext_key_.size()));
     }
 }
 
@@ -246,7 +245,7 @@ auto Key::asPublic(allocator_type alloc) const noexcept -> asymmetric::Key
 
         return out;
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to erase private data").Flush();
+        LogError()()("failed to erase private data").Flush();
 
         return {};
     }
@@ -264,7 +263,7 @@ auto Key::CalculateHash(
         output.WriteInto());
 
     if (false == hashed) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate hash").Flush();
+        LogError()()("Failed to calculate hash").Flush();
 
         return ByteArray{};
     }
@@ -275,7 +274,7 @@ auto Key::CalculateHash(
 auto Key::CalculateID(identifier::Generic& output) const noexcept -> bool
 {
     if (false == HasPublic()) {
-        LogError()(OT_PRETTY_CLASS())("Missing public key").Flush();
+        LogError()()("Missing public key").Flush();
 
         return false;
     }
@@ -295,7 +294,7 @@ auto Key::CalculateTag(
     auto lock = Lock{lock_};
 
     if (false == has_private_) {
-        LogError()(OT_PRETTY_CLASS())("Not a private key.").Flush();
+        LogError()()("Not a private key.").Flush();
 
         return false;
     }
@@ -309,22 +308,20 @@ auto Key::CalculateTag(
                 .GetPublicKey();
 
         if (false == get_tag(lock, key, nym.GetMasterCredID(), reason, tag)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to calculate tag.").Flush();
+            LogError()()("Failed to calculate tag.").Flush();
 
             return false;
         }
 
         if (false == get_password(lock, key, reason, password)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to calculate session password.")
-                .Flush();
+            LogError()()("Failed to calculate session password.").Flush();
 
             return false;
         }
 
         return true;
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Invalid credential").Flush();
+        LogError()()("Invalid credential").Flush();
 
         return false;
     }
@@ -339,7 +336,7 @@ auto Key::CalculateTag(
     auto lock = Lock{lock_};
 
     if (false == has_private_) {
-        LogError()(OT_PRETTY_CLASS())("Not a private key.").Flush();
+        LogError()()("Not a private key.").Flush();
 
         return false;
     }
@@ -355,7 +352,7 @@ auto Key::CalculateSessionPassword(
     auto lock = Lock{lock_};
 
     if (false == has_private_) {
-        LogError()(OT_PRETTY_CLASS())("Not a private key.").Flush();
+        LogError()()("Not a private key.").Flush();
 
         return false;
     }
@@ -383,7 +380,7 @@ auto Key::create_key(
         std::move(params));
     auto pOutput = std::make_unique<proto::Ciphertext>();
 
-    OT_ASSERT(pOutput);
+    assert_false(nullptr == pOutput);
 
     auto& output = *pOutput;
 
@@ -403,7 +400,7 @@ auto Key::encrypt_key(
     auto output = std::make_unique<proto::Ciphertext>();
 
     if (false == bool(output)) {
-        LogError()(OT_PRETTY_STATIC(Key))("Failed to construct output").Flush();
+        LogError()()("Failed to construct output").Flush();
 
         return {};
     }
@@ -430,7 +427,7 @@ auto Key::encrypt_key(
         sessionKey.Internal().Encrypt(plaintext, out, reason, attach);
 
     if (false == encrypted) {
-        LogError()(OT_PRETTY_STATIC(Key))("Failed to encrypt key").Flush();
+        LogError()()("Failed to encrypt key").Flush();
 
         return false;
     }
@@ -532,8 +529,7 @@ auto Key::get_tag(
                      private_key(lock, reason),
                      SecretStyle::Default,
                      password)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Failed to calculate shared secret")
-            .Flush();
+        LogVerbose()()("Failed to calculate shared secret").Flush();
 
         return false;
     }
@@ -543,12 +539,12 @@ auto Key::get_tag(
                      password.Bytes(),
                      credential.Bytes(),
                      hashed.WriteInto(Secret::Mode::Mem))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to hash shared secret").Flush();
+        LogError()()("Failed to hash shared secret").Flush();
 
         return false;
     }
 
-    OT_ASSERT(hashed.size() >= sizeof(tag));
+    assert_true(hashed.size() >= sizeof(tag));
 
     return nullptr != std::memcpy(&tag, hashed.data(), sizeof(tag));
 }
@@ -652,14 +648,14 @@ auto Key::operator==(const proto::AsymmetricKey& rhs) const noexcept -> bool
 
 auto Key::Path() const noexcept -> const UnallocatedCString
 {
-    LogError()(OT_PRETTY_CLASS())("Incorrect key type.").Flush();
+    LogError()()("Incorrect key type.").Flush();
 
     return "";
 }
 
 auto Key::Path(proto::HDPath&) const noexcept -> bool
 {
-    LogError()(OT_PRETTY_CLASS())("Incorrect key type.").Flush();
+    LogError()()("Incorrect key type.").Flush();
 
     return false;
 }
@@ -683,7 +679,7 @@ auto Key::private_key(const Lock& lock, const PasswordPrompt& reason)
 
         return get_private_key(lock, reason).Bytes();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -747,7 +743,7 @@ auto Key::Sign(
     try {
         signature = new_signature(credential, role, type);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature role.").Flush();
+        LogError()()("Invalid signature role.").Flush();
 
         return false;
     }
@@ -767,7 +763,7 @@ auto Key::Sign(
     auto lock = Lock{lock_};
 
     if (false == has_private_) {
-        LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
+        LogError()()("Missing private key").Flush();
 
         return false;
     }
@@ -775,9 +771,7 @@ auto Key::Sign(
     bool success = provider_.Sign(
         preimage, private_key(lock, reason), hash, std::move(output));
 
-    if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to sign preimage").Flush();
-    }
+    if (false == success) { LogError()()("Failed to sign preimage").Flush(); }
 
     return success;
 }
@@ -852,7 +846,7 @@ auto Key::TransportKey(
 auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
 {
     if (false == HasPublic()) {
-        LogError()(OT_PRETTY_CLASS())("Missing public key").Flush();
+        LogError()()("Missing public key").Flush();
 
         return false;
     }
@@ -861,9 +855,7 @@ auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
     const auto output = provider_.Verify(
         plaintext, PublicKey(), proto.signature(), translate(proto.hashtype()));
 
-    if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature").Flush();
-    }
+    if (false == output) { LogError()()("Invalid signature").Flush(); }
 
     return output;
 }
@@ -872,7 +864,7 @@ auto Key::Verify(const Data& plaintext, const proto::Signature& sig)
     const noexcept -> bool
 {
     if (false == HasPublic()) {
-        LogError()(OT_PRETTY_CLASS())("Missing public key").Flush();
+        LogError()()("Missing public key").Flush();
 
         return false;
     }
@@ -883,9 +875,7 @@ auto Key::Verify(const Data& plaintext, const proto::Signature& sig)
         sig.signature(),
         translate(sig.hashtype()));
 
-    if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature").Flush();
-    }
+    if (false == output) { LogError()()("Invalid signature").Flush(); }
 
     return output;
 }

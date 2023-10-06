@@ -13,7 +13,6 @@
 #include "internal/core/Armored.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/util/Container.hpp"
@@ -95,7 +94,7 @@ auto DearmorAndTrim(
 {
 
     if (!strInput.Exists()) {
-        LogError()(__func__)(": Input string is empty.").Flush();
+        LogError()()("Input string is empty.").Flush();
         return false;
     }
 
@@ -105,9 +104,8 @@ auto DearmorAndTrim(
         strOutput.DecodeIfArmored(crypto, false))  // bEscapedIsAllowed=true
                                                    // by default.
     {
-        LogInsane()(__func__)(
-            ": Input string apparently was encoded and then failed decoding. "
-            "Contents: \n")(strInput)
+        LogInsane()()("Input string apparently was encoded and then failed "
+                      "decoding. Contents: \n")(strInput)
             .Flush();
 
         return false;
@@ -142,8 +140,7 @@ auto DearmorAndTrim(
 auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
     -> bool
 {
-    OT_ASSERT_MSG(
-        nullptr != xml, "LoadEncodedTextField -- assert: nullptr != xml");
+    assert_false(nullptr == xml, "nullptr != xml");
 
     // const char* szFunc = "LoadEncodedTextField";
 
@@ -151,18 +148,16 @@ auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
     // let's skip ahead...
     //
     if (irr::io::EXN_TEXT != xml->getNodeType()) {
-        LogTrace()(__func__)(": Skipping non-text field...").Flush();
+        LogTrace()()("Skipping non-text field...").Flush();
 
         // move to the next node which SHOULD be the expected text field.
         if (!SkipToTextField(xml)) {
-            LogDetail()(__func__)(
-                ": Failure: Unable to find expected text field.")
+            LogDetail()()("Failure: Unable to find expected text field.")
                 .Flush();
             return false;
         }
 
-        LogTrace()(__func__)(
-            ": Finished skipping non-text field. (Successfully.)")
+        LogTrace()()("Finished skipping non-text field. (Successfully.)")
             .Flush();
     }
 
@@ -194,9 +189,8 @@ auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
             // The below call won't advance any further if it's ALREADY on the
             // closing tag (e.g. from the above xml->read() call.)
             if (!SkipAfterLoadingField(xml)) {
-                LogDetail()(__func__)(
-                    ": Bad data? Expected EXN_ELEMENT_END here, but "
-                    "didn't get it. Returning false.")
+                LogDetail()()("Bad data? Expected EXN_ELEMENT_END here, but "
+                              "didn't get it. Returning false.")
                     .Flush();
                 return false;
             }
@@ -204,9 +198,7 @@ auto LoadEncodedTextField(irr::io::IrrXMLReader*& xml, Armored& ascOutput)
             return true;
         }
     } else {
-        LogDetail()(__func__)(
-            ": Failure: Unable to find expected text field 2.")
-            .Flush();
+        LogDetail()()("Failure: Unable to find expected text field 2.").Flush();
     }
 
     return false;
@@ -232,7 +224,7 @@ auto LoadEncodedTextFieldByName(
     const char* szName,
     String::Map* pmapExtraVars) -> bool
 {
-    OT_ASSERT(nullptr != szName);
+    assert_false(nullptr == szName);
 
     // If we're not ALREADY on an element, maybe there is some whitespace, so
     // let's skip ahead...
@@ -242,8 +234,8 @@ auto LoadEncodedTextFieldByName(
         strcmp(szName, xml->getNodeName()) != 0) {
         // move to the next node which SHOULD be the expected name.
         if (!SkipToElement(xml)) {
-            LogDetail()(__func__)(
-                ": Failure: Unable to find expected element: ")(szName)(".")
+            LogDetail()()("Failure: Unable to find expected element: ")(
+                szName)(".")
                 .Flush();
             return false;
         }
@@ -252,14 +244,13 @@ auto LoadEncodedTextFieldByName(
     if (irr::io::EXN_ELEMENT != xml->getNodeType())  // SHOULD always be
                                                      // ELEMENT...
     {
-        LogError()(__func__)(": Error: Expected ")(
-            szName)(" element with text field.")
+        LogError()()("Error: Expected ")(szName)(" element with text field.")
             .Flush();
         return false;  // error condition
     }
 
     if (strcmp(szName, xml->getNodeName()) != 0) {
-        LogError()(__func__)(": Error: missing ")(szName)(" element.").Flush();
+        LogError()()("Error: missing ")(szName)(" element.").Flush();
         return false;  // error condition
     }
 
@@ -280,7 +271,7 @@ auto LoadEncodedTextFieldByName(
     // values set on mapExtraVars (for caller.)
 
     if (false == LoadEncodedTextField(xml, ascOutput)) {
-        LogError()(__func__)(": Error loading ")(szName)(" field.").Flush();
+        LogError()()("Error loading ")(szName)(" field.").Flush();
         return false;
     }
 
@@ -294,7 +285,7 @@ auto LoadEncodedTextFieldByName(
     const char* szName,
     String::Map* pmapExtraVars) -> bool
 {
-    OT_ASSERT(nullptr != szName);
+    assert_false(nullptr == szName);
 
     auto ascOutput = Armored::Factory(crypto);
 
@@ -308,8 +299,7 @@ auto LoadEncodedTextFieldByName(
 
 auto SkipAfterLoadingField(irr::io::IrrXMLReader*& xml) -> bool
 {
-    OT_ASSERT_MSG(
-        nullptr != xml, "SkipAfterLoadingField -- assert: nullptr != xml");
+    assert_false(nullptr == xml, "nullptr != xml");
 
     if (irr::io::EXN_ELEMENT_END !=
         xml->getNodeType())  // If we're not ALREADY on the ending element, then
@@ -318,32 +308,31 @@ auto SkipAfterLoadingField(irr::io::IrrXMLReader*& xml) -> bool
 
         while (xml->read()) {
             if (xml->getNodeType() == irr::io::EXN_NONE) {
-                LogDetail()(__func__)(": EXN_NONE  (Skipping).").Flush();
+                LogDetail()()("EXN_NONE  (Skipping).").Flush();
                 continue;
             }  // SKIP
             else if (xml->getNodeType() == irr::io::EXN_COMMENT) {
-                LogDetail()(__func__)(": EXN_COMMENT  (Skipping).").Flush();
+                LogDetail()()("EXN_COMMENT  (Skipping).").Flush();
                 continue;
             }  // SKIP
             else if (xml->getNodeType() == irr::io::EXN_ELEMENT_END) {
-                LogInsane()(__func__)(": EXN_ELEMENT_END  (success)").Flush();
+                LogInsane()()("EXN_ELEMENT_END  (success)").Flush();
                 break;
             }  // Success...
             else if (xml->getNodeType() == irr::io::EXN_CDATA) {
-                LogDetail()(__func__)(": EXN_CDATA  (Unexpected!).").Flush();
+                LogDetail()()("EXN_CDATA  (Unexpected!).").Flush();
                 return false;
             }  // Failure / Error
             else if (xml->getNodeType() == irr::io::EXN_ELEMENT) {
-                LogDetail()(__func__)(": EXN_ELEMENT  (Unexpected!).").Flush();
+                LogDetail()()("EXN_ELEMENT  (Unexpected!).").Flush();
                 return false;
             }  // Failure / Error
             else if (xml->getNodeType() == irr::io::EXN_TEXT) {
-                LogError()(__func__)(": EXN_TEXT (Unexpected)!").Flush();
+                LogError()()("EXN_TEXT (Unexpected)!").Flush();
                 return false;
             }  // Failure / Error
             else {
-                LogError()(__func__)(
-                    ": SHOULD NEVER HAPPEN (Unknown element type)!")
+                LogError()()("SHOULD NEVER HAPPEN (Unknown element type)!")
                     .Flush();
                 return false;
             }  // Failure / Error
@@ -358,44 +347,41 @@ auto SkipAfterLoadingField(irr::io::IrrXMLReader*& xml) -> bool
 
 auto SkipToElement(irr::io::IrrXMLReader*& xml) -> bool
 {
-    OT_ASSERT_MSG(nullptr != xml, "SkipToElement -- assert: nullptr != xml");
+    assert_false(nullptr == xml, "nullptr != xml");
 
     while (xml->read() && (xml->getNodeType() != irr::io::EXN_ELEMENT)) {
         //      otOut << szFunc << ": Looping to skip non-elements: currently
         // on: " << xml->getNodeName() << " \n";
 
         if (xml->getNodeType() == irr::io::EXN_NONE) {
-            LogConsole()(__func__)(": EXN_NONE  (Skipping).").Flush();
+            LogConsole()()("EXN_NONE  (Skipping).").Flush();
             continue;
         }  // SKIP
         else if (xml->getNodeType() == irr::io::EXN_COMMENT) {
-            LogConsole()(__func__)(": EXN_COMMENT  (Skipping).").Flush();
+            LogConsole()()("EXN_COMMENT  (Skipping).").Flush();
             continue;
         }  // SKIP
         else if (xml->getNodeType() == irr::io::EXN_ELEMENT_END)
         //        { otOut << "*** SkipToElement: EXN_ELEMENT_END
         // (ERROR)\n";  return false; }
         {
-            LogDetail()(__func__)(": *** ")(": EXN_ELEMENT_END  (skipping ")(
+            LogDetail()()("*** ")(": EXN_ELEMENT_END  (skipping ")(
                 xml->getNodeName())(")")
                 .Flush();
             continue;
         } else if (xml->getNodeType() == irr::io::EXN_CDATA) {
-            LogDetail()(__func__)(": EXN_CDATA (ERROR -- unexpected CData).")
-                .Flush();
+            LogDetail()()("EXN_CDATA (ERROR -- unexpected CData).").Flush();
             return false;
         } else if (xml->getNodeType() == irr::io::EXN_TEXT) {
-            LogError()(__func__)(": EXN_TEXT.").Flush();
+            LogError()()("EXN_TEXT.").Flush();
             return false;
         } else if (xml->getNodeType() == irr::io::EXN_ELEMENT) {
-            LogDetail()(__func__)(": EXN_ELEMENT.").Flush();
+            LogDetail()()("EXN_ELEMENT.").Flush();
             break;
         }  // (Should never happen due to while() second condition.) Still
            // returns true.
         else {
-            LogError()(__func__)(
-                ": SHOULD NEVER HAPPEN (Unknown element type)!")
-                .Flush();
+            LogError()()("SHOULD NEVER HAPPEN (Unknown element type)!").Flush();
             return false;
         }  // Failure / Error
     }
@@ -405,15 +391,15 @@ auto SkipToElement(irr::io::IrrXMLReader*& xml) -> bool
 
 auto SkipToTextField(irr::io::IrrXMLReader*& xml) -> bool
 {
-    OT_ASSERT_MSG(nullptr != xml, "SkipToTextField -- assert: nullptr != xml");
+    assert_false(nullptr == xml, "nullptr != xml");
 
     while (xml->read() && (xml->getNodeType() != irr::io::EXN_TEXT)) {
         if (xml->getNodeType() == irr::io::EXN_NONE) {
-            LogDetail()(__func__)(": EXN_NONE  (Skipping).").Flush();
+            LogDetail()()("EXN_NONE  (Skipping).").Flush();
             continue;
         }  // SKIP
         else if (xml->getNodeType() == irr::io::EXN_COMMENT) {
-            LogDetail()(__func__)(": EXN_COMMENT  (Skipping).").Flush();
+            LogDetail()()("EXN_COMMENT  (Skipping).").Flush();
             continue;
         }  // SKIP
         else if (xml->getNodeType() == irr::io::EXN_ELEMENT_END)
@@ -421,24 +407,21 @@ auto SkipToTextField(irr::io::IrrXMLReader*& xml) -> bool
         // EXN_ELEMENT_END  (skipping)\n";  continue; }     // SKIP
         // (debugging...)
         {
-            LogDetail()(__func__)(": EXN_ELEMENT_END  (ERROR).").Flush();
+            LogDetail()()("EXN_ELEMENT_END  (ERROR).").Flush();
             return false;
         } else if (xml->getNodeType() == irr::io::EXN_CDATA) {
-            LogDetail()(__func__)(": EXN_CDATA (ERROR -- unexpected CData).")
-                .Flush();
+            LogDetail()()("EXN_CDATA (ERROR -- unexpected CData).").Flush();
             return false;
         } else if (xml->getNodeType() == irr::io::EXN_ELEMENT) {
-            LogDetail()(__func__)(": EXN_ELEMENT.").Flush();
+            LogDetail()()("EXN_ELEMENT.").Flush();
             return false;
         } else if (xml->getNodeType() == irr::io::EXN_TEXT) {
-            LogError()(__func__)(": EXN_TEXT.").Flush();
+            LogError()()("EXN_TEXT.").Flush();
             break;
         }  // (Should never happen due to while() second condition.) Still
            // returns true.
         else {
-            LogError()(__func__)(
-                ": SHOULD NEVER HAPPEN (Unknown element type)!")
-                .Flush();
+            LogError()()("SHOULD NEVER HAPPEN (Unknown element type)!").Flush();
             return false;
         }  // Failure / Error
     }

@@ -40,7 +40,7 @@ auto BitcoinP2PAddr2(
                 return vec;
             }());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

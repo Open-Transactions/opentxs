@@ -13,7 +13,6 @@
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/Issuer.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -71,7 +70,7 @@ AccountSummary::AccountSummary(
     setup_listeners(api, listeners_);
     startup_ = std::make_unique<std::thread>(&AccountSummary::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto AccountSummary::construct_row(
@@ -126,7 +125,7 @@ void AccountSummary::process_connection(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto id = api_.Factory().NotaryIDFromHash(body[1].Bytes());
     process_server(id);
@@ -144,13 +143,13 @@ void AccountSummary::process_issuer(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     const auto issuerID = api_.Factory().NymIDFromHash(body[2].Bytes());
 
-    OT_ASSERT(false == nymID.empty());
-    OT_ASSERT(false == issuerID.empty());
+    assert_false(nymID.empty());
+    assert_false(issuerID.empty());
 
     if (nymID != primary_id_) { return; }
 
@@ -162,7 +161,7 @@ void AccountSummary::process_nym(const Message& message) noexcept
     wait_for_startup();
     auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     sLock lock(shared_lock_);
@@ -181,11 +180,11 @@ void AccountSummary::process_server(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto serverID = api_.Factory().NotaryIDFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == serverID.empty());
+    assert_false(serverID.empty());
 
     process_server(serverID);
 }
@@ -206,8 +205,7 @@ void AccountSummary::process_server(const identifier::Notary& serverID) noexcept
 void AccountSummary::startup() noexcept
 {
     const auto issuers = api_.Wallet().IssuerList(primary_id_);
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(issuers.size())(" issuers.")
-        .Flush();
+    LogDetail()()("Loading ")(issuers.size())(" issuers.").Flush();
 
     for (const auto& id : issuers) { process_issuer(id); }
 

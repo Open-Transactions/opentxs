@@ -17,7 +17,6 @@
 #include <variant>
 
 #include "BoostIostreams.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/Types.hpp"
@@ -69,7 +68,7 @@ auto Common::EmptyBucket(Bucket bucket) const noexcept -> bool
 
         return empty_bucket(*data_.lock(), bucket);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -128,7 +127,7 @@ auto Common::Load(
         try {
             if (fs::exists(file)) { return read_file(file, std::move(value)); }
         } catch (const std::exception& e) {
-            logger(OT_PRETTY_CLASS())(e.what()).Flush();
+            logger()(e.what()).Flush();
         }
     }
 
@@ -185,7 +184,7 @@ auto Common::read_file(const fs::path& filename, Writer&& value) const noexcept
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -222,7 +221,7 @@ auto Common::sync(const fs::path& path) noexcept -> bool
 
         return sync(fd);
     } else {
-        LogError()(OT_PRETTY_STATIC(Common))("Failed to open ")(path).Flush();
+        LogError()()("Failed to open ")(path).Flush();
 
         return false;
     }
@@ -253,7 +252,7 @@ auto Common::write_file(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

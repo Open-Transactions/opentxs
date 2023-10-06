@@ -7,13 +7,13 @@
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -72,7 +72,10 @@ public:
     {
         return {};
     }
-    auto API() const noexcept -> const api::Crypto& final { OT_FAIL; }
+    auto API() const noexcept -> const api::Crypto& final
+    {
+        LogAbort()().Abort();
+    }
     auto ActivityDescription(
         const identifier::Nym&,
         const Chain,
@@ -122,7 +125,7 @@ public:
     }
     auto Contacts() const noexcept -> const api::session::Contacts& final
     {
-        OT_FAIL;  // TODO return a blank object
+        LogAbort()().Abort();  // TODO return a blank object
     }
     auto DecodeAddress(std::string_view) const noexcept -> DecodedAddress final
     {

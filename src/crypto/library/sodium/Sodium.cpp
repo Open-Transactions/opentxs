@@ -22,7 +22,6 @@ extern "C" {
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -56,7 +55,7 @@ Sodium::Sodium(const api::Crypto& crypto) noexcept
 {
     const auto result = ::sodium_init();
 
-    OT_ASSERT(-1 != result);
+    assert_true(-1 != result);
 }
 
 auto Sodium::blank_private() noexcept -> ReadView
@@ -78,13 +77,13 @@ auto Sodium::Decrypt(
     const auto& mode = ciphertext.mode();
 
     if (KeySize(translate(mode)) != keySize) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect key size.").Flush();
+        LogError()()("Incorrect key size.").Flush();
 
         return false;
     }
 
     if (IvSize(translate(mode)) != nonce.size()) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect nonce size.").Flush();
+        LogError()()("Incorrect nonce size.").Flush();
 
         return false;
     }
@@ -105,9 +104,7 @@ auto Sodium::Decrypt(
         }
         case proto::SMODE_ERROR:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported encryption mode (")(
-                mode)(").")
-                .Flush();
+            LogError()()("Unsupported encryption mode (")(mode)(").").Flush();
         }
     }
 
@@ -163,7 +160,7 @@ auto Sodium::Derive(
             throw std::runtime_error{error};
         }
 
-        OT_ASSERT(nullptr != salt);
+        assert_false(nullptr == salt);
 
         if (outputSize < crypto_pwhash_BYTES_MIN) {
             throw std::runtime_error{"output too small"};
@@ -287,7 +284,7 @@ auto Sodium::Derive(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -348,7 +345,7 @@ auto Sodium::Digest(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -361,8 +358,8 @@ auto Sodium::Encrypt(
     const std::size_t keySize,
     proto::Ciphertext& ciphertext) const -> bool
 {
-    OT_ASSERT(nullptr != input);
-    OT_ASSERT(nullptr != key);
+    assert_false(nullptr == input);
+    assert_false(nullptr == key);
 
     const auto& mode = translate(ciphertext.mode());
     const auto& nonce = ciphertext.iv();
@@ -372,19 +369,19 @@ auto Sodium::Encrypt(
     bool result = false;
 
     if (mode == opentxs::crypto::symmetric::Algorithm::Error) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect mode.").Flush();
+        LogError()()("Incorrect mode.").Flush();
 
         return result;
     }
 
     if (KeySize(mode) != keySize) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect key size.").Flush();
+        LogError()()("Incorrect key size.").Flush();
 
         return result;
     }
 
     if (IvSize(mode) != nonce.size()) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect nonce size.").Flush();
+        LogError()()("Incorrect nonce size.").Flush();
 
         return result;
     }
@@ -393,8 +390,8 @@ auto Sodium::Encrypt(
     tag.resize(TagSize(mode), 0x0);
     output.resize(inputSize, 0x0);
 
-    OT_ASSERT(false == nonce.empty());
-    OT_ASSERT(false == tag.empty());
+    assert_false(nonce.empty());
+    assert_false(tag.empty());
 
     using Type = opentxs::crypto::symmetric::Algorithm;
 
@@ -415,8 +412,7 @@ auto Sodium::Encrypt(
         }
         case Type::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported encryption mode (")(
-                value(mode))(").")
+            LogError()()("Unsupported encryption mode (")(value(mode))(").")
                 .Flush();
         }
     }
@@ -434,20 +430,20 @@ auto Sodium::Generate(
     Writer&& writer) const noexcept -> bool
 {
     if (bytes < crypto_pwhash_scryptsalsa208sha256_BYTES_MIN) {
-        LogError()(OT_PRETTY_CLASS())("Too few bytes requested: ")(
-            bytes)(" vs "
-                   "minimum:"
-                   " ")(crypto_pwhash_scryptsalsa208sha256_BYTES_MIN)
+        LogError()()("Too few bytes requested: ")(bytes)(" vs "
+                                                         "minimum:"
+                                                         " ")(
+            crypto_pwhash_scryptsalsa208sha256_BYTES_MIN)
             .Flush();
 
         return false;
     }
 
     if (bytes > crypto_pwhash_scryptsalsa208sha256_BYTES_MAX) {
-        LogError()(OT_PRETTY_CLASS())("Too many bytes requested: ")(
-            bytes)(" vs "
-                   "maximum:"
-                   " ")(crypto_pwhash_scryptsalsa208sha256_BYTES_MAX)
+        LogError()()("Too many bytes requested: ")(bytes)(" vs "
+                                                          "maximum:"
+                                                          " ")(
+            crypto_pwhash_scryptsalsa208sha256_BYTES_MAX)
             .Flush();
 
         return false;
@@ -456,9 +452,7 @@ auto Sodium::Generate(
     auto output = writer.Reserve(bytes);
 
     if (false == output.IsValid(bytes)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocated requested ")(
-            bytes)(" bytes")
-            .Flush();
+        LogError()()("Failed to allocated requested ")(bytes)(" bytes").Flush();
 
         return false;
     }
@@ -602,7 +596,7 @@ auto Sodium::HMAC(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -619,8 +613,7 @@ auto Sodium::IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
         }
         case Type::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported encryption mode (")(
-                value(mode))(").")
+            LogError()()("Unsupported encryption mode (")(value(mode))(").")
                 .Flush();
         }
     }
@@ -638,8 +631,7 @@ auto Sodium::KeySize(const opentxs::crypto::symmetric::Algorithm mode) const
         }
         case Type::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported encryption mode (")(
-                value(mode))(").")
+            LogError()()("Unsupported encryption mode (")(value(mode))(").")
                 .Flush();
         }
     }
@@ -666,9 +658,7 @@ auto Sodium::SaltSize(const crypto::symmetric::Source type) const -> std::size_t
         case crypto::symmetric::Source::Raw:
         case crypto::symmetric::Source::ECDH:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported key type (")(
-                value(type))(").")
-                .Flush();
+            LogError()()("Unsupported key type (")(value(type))(").").Flush();
         }
     }
 
@@ -692,7 +682,7 @@ auto Sodium::sha1(const ReadView data, WriteBuffer& output) const -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -709,8 +699,7 @@ auto Sodium::TagSize(const opentxs::crypto::symmetric::Algorithm mode) const
         }
         case Type::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported encryption mode (")(
-                value(mode))(").")
+            LogError()()("Unsupported encryption mode (")(value(mode))(").")
                 .Flush();
         }
     }

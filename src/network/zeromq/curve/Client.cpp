@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/core/Data.hpp"
@@ -35,8 +34,7 @@ auto curve::Client::RandomKeypair() noexcept
         privKey.assign(secretKey.data(), secretKey.size());
         pubKey.assign(publicKey.data(), publicKey.size());
     } else {
-        LogError()(OT_PRETTY_STATIC(Client))("Failed to generate keypair.")
-            .Flush();
+        LogError()()("Failed to generate keypair.").Flush();
     }
 
     return output;
@@ -56,8 +54,7 @@ auto Client::SetKeysZ85(
     const UnallocatedCString& clientPublic) const noexcept -> bool
 {
     if (CURVE_KEY_Z85_BYTES > serverPublic.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid server key size (")(
-            serverPublic.size())(").")
+        LogError()()("Invalid server key size (")(serverPublic.size())(").")
             .Flush();
 
         return false;
@@ -67,7 +64,7 @@ auto Client::SetKeysZ85(
     ::zmq_z85_decode(key.data(), serverPublic.data());
 
     if (false == set_remote_key(key.data(), key.size())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set server key.").Flush();
+        LogError()()("Failed to set server key.").Flush();
 
         return false;
     }
@@ -92,7 +89,7 @@ auto Client::set_public_key(const contract::Server& contract) const noexcept
     const auto& key = contract.TransportKey();
 
     if (CURVE_KEY_BYTES != key.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid server key.").Flush();
+        LogError()()("Invalid server key.").Flush();
 
         return false;
     }
@@ -109,12 +106,12 @@ auto Client::set_public_key(const Data& key) const noexcept -> bool
 
 auto Client::set_local_keys() const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     const auto [secretKey, publicKey] = RandomKeypair();
 
     if (secretKey.empty() || publicKey.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to generate keypair.").Flush();
+        LogError()()("Failed to generate keypair.").Flush();
 
         return false;
     }
@@ -126,11 +123,10 @@ auto Client::set_local_keys(
     const UnallocatedCString& privateKey,
     const UnallocatedCString& publicKey) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     if (CURVE_KEY_Z85_BYTES > privateKey.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid private key size (")(
-            privateKey.size())(").")
+        LogError()()("Invalid private key size (")(privateKey.size())(").")
             .Flush();
 
         return false;
@@ -140,8 +136,7 @@ auto Client::set_local_keys(
     ::zmq_z85_decode(privateDecoded.data(), privateKey.data());
 
     if (CURVE_KEY_Z85_BYTES > publicKey.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid public key size (")(
-            publicKey.size())(").")
+        LogError()()("Invalid public key size (")(publicKey.size())(").")
             .Flush();
 
         return false;
@@ -163,14 +158,14 @@ auto Client::set_local_keys(
     const void* publicKey,
     const std::size_t publicKeySize) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
         auto set = zmq_setsockopt(
             parent_, ZMQ_CURVE_SECRETKEY, privateKey, privateKeySize);
 
         if (0 != set) {
-            LogError()(OT_PRETTY_CLASS())("Failed to set private key.").Flush();
+            LogError()()("Failed to set private key.").Flush();
 
             return false;
         }
@@ -179,7 +174,7 @@ auto Client::set_local_keys(
             parent_, ZMQ_CURVE_PUBLICKEY, publicKey, publicKeySize);
 
         if (0 != set) {
-            LogError()(OT_PRETTY_CLASS())("Failed to set public key.").Flush();
+            LogError()()("Failed to set public key.").Flush();
 
             return false;
         }
@@ -193,14 +188,14 @@ auto Client::set_local_keys(
 auto Client::set_remote_key(const void* key, const std::size_t size)
     const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
         const auto set =
             zmq_setsockopt(parent_, ZMQ_CURVE_SERVERKEY, key, size);
 
         if (0 != set) {
-            LogError()(OT_PRETTY_CLASS())("Failed to set server key.").Flush();
+            LogError()()("Failed to set server key.").Flush();
 
             return false;
         }

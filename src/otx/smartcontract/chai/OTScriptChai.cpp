@@ -21,7 +21,6 @@
 #include "internal/otx/smartcontract/OTScript.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -47,7 +46,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
 {
     using namespace chaiscript;
 
-    OT_ASSERT(nullptr != chai_);
+    assert_false(nullptr == chai_);
 
     if (script_.size() > 0) {
 
@@ -72,7 +71,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
 
         for (auto& it : parties_) {
             OTParty* pParty = it.second;
-            OT_ASSERT(nullptr != pParty);
+            assert_false(nullptr == pParty);
 
             UnallocatedCString party_name = pParty->GetPartyName();
 
@@ -110,7 +109,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
 
         for (auto& it : accounts_) {
             OTPartyAccount* pAcct = it.second;
-            OT_ASSERT(nullptr != pAcct);
+            assert_false(nullptr == pAcct);
 
             UnallocatedCString acct_name = pAcct->GetName().Get();
 
@@ -149,7 +148,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
         for (auto& it : variables_) {
             const UnallocatedCString var_name = it.first;
             OTVariable* pVar = it.second;
-            OT_ASSERT((nullptr != pVar) && (var_name.size() > 0));
+            assert_true((nullptr != pVar) && (var_name.size() > 0));
 
             switch (pVar->GetType()) {
                 case OTVariable::Var_Integer: {
@@ -214,9 +213,8 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
                 } break;
                 case OTVariable::Var_Error_Type:
                 default:
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Failure: Unknown "
-                        "variable type for variable: ")(var_name)(".")
+                    LogError()()("Failure: Unknown "
+                                 "variable type for variable: ")(var_name)(".")
                         .Flush();
                     return false;
             }
@@ -263,9 +261,9 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
                     } break;
                     case OTVariable::Var_Error_Type:
                     default:
-                        LogError()(OT_PRETTY_CLASS())("Unknown return "
-                                                      "type passed in, "
-                                                      "unable to service it.")
+                        LogError()()("Unknown return "
+                                     "type passed in, "
+                                     "unable to service it.")
                             .Flush();
                         return false;
                 }  // switch
@@ -273,10 +271,9 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
         }          // try
         catch (const chaiscript::exception::eval_error& ee) {
             // Error in script parsing / execution
-            LogError()(OT_PRETTY_CLASS())(
-                "Caught "
-                "chaiscript::exception::eval_error: ")(ee.reason)(". File: ")(
-                ee.filename)(". Start position, line: ")(
+            LogError()()("Caught "
+                         "chaiscript::exception::eval_error: ")(ee.reason)(
+                ". File: ")(ee.filename)(". Start position, line: ")(
                 ee.start_position.line)(". Column: ")(ee.start_position.column)(
                 ".")
                 .Flush();
@@ -324,17 +321,16 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
             return false;
         } catch (const chaiscript::exception::bad_boxed_cast& e) {
             // Error unboxing return value
-            LogError()(OT_PRETTY_CLASS())(
-                "Caught "
-                "chaiscript::exception::bad_boxed_cast : ")(
+            LogError()()("Caught "
+                         "chaiscript::exception::bad_boxed_cast : ")(
                 (e.what() != nullptr) ? e.what()
                                       : "e.what() returned null, sorry.")
                 .Flush();
             return false;
         } catch (const std::exception& e) {
             // Error explicitly thrown from script
-            LogError()(OT_PRETTY_CLASS())("Caught std::exception "
-                                          "exception: ")(
+            LogError()()("Caught std::exception "
+                         "exception: ")(
                 (e.what() != nullptr) ? e.what()
                                       : "e.what() returned null, sorry.")
                 .Flush();
@@ -343,7 +339,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
         //      catch (chaiscript::Boxed_Value bv)
         catch (...) {
             //          std::int32_t i = chaiscript::boxed_cast<int32_t>(bv);
-            LogError()(OT_PRETTY_CLASS())("Caught exception.").Flush();
+            LogError()()("Caught exception.").Flush();
             return false;
         }
     }
@@ -356,7 +352,7 @@ auto OTScriptChai::RegisterNativeScriptableCalls(OTScriptable& parent) noexcept
 {
     using namespace chaiscript;
 
-    OT_ASSERT(nullptr != chai_);
+    assert_false(nullptr == chai_);
 
     chai_->add(fun(&OTScriptable::GetTime), "get_time");
     chai_->add(
@@ -372,7 +368,7 @@ auto OTScriptChai::RegisterNativeSmartContractCalls(
 
     using namespace chaiscript;
 
-    OT_ASSERT(nullptr != chai_);
+    assert_false(nullptr == chai_);
 
     // OT NATIVE FUNCTIONS
     // (These functions can be called from INSIDE the scripted clauses.)

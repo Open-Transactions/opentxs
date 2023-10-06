@@ -9,17 +9,18 @@
 #include <cerrno>
 #include <cstddef>
 #include <iostream>
+#include <source_location>
 #include <span>
 #include <utility>
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation
 {
@@ -41,11 +42,11 @@ Socket::Socket(
     , type_(type)
 {
     if (nullptr == socket_) {
-        std::cerr << (OT_PRETTY_CLASS()) << zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
     }
 
-    OT_ASSERT(nullptr != socket_);
+    assert_false(nullptr == socket_);
 }
 
 Socket::operator void*() const noexcept { return socket_; }
@@ -65,8 +66,8 @@ auto Socket::apply_socket(SocketCallback&& cb) const noexcept -> bool
 
 auto Socket::apply_timeouts(const Lock& lock) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != socket_);
-    OT_ASSERT(verify_lock(lock));
+    assert_false(nullptr == socket_);
+    assert_true(verify_lock(lock));
 
     auto set = zmq_setsockopt(socket_, ZMQ_LINGER, &linger_, sizeof(linger_));
 
@@ -112,8 +113,8 @@ auto Socket::bind(const Lock& lock, const std::string_view endpoint)
         add_endpoint(endpoint);
     } else {
         socket_ = nullptr;
-        std::cerr << (OT_PRETTY_CLASS()) << zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
     }
 
     return output;
@@ -131,8 +132,8 @@ auto Socket::connect(const Lock& lock, const std::string_view endpoint)
         add_endpoint(endpoint);
     } else {
         socket_ = nullptr;
-        std::cerr << (OT_PRETTY_CLASS()) << zmq_strerror(zmq_errno())
-                  << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << zmq_strerror(zmq_errno()) << std::endl;
     }
 
     return output;
@@ -165,12 +166,10 @@ auto Socket::receive_message(
             auto zerr = zmq_errno();
             if (EAGAIN == zerr) {
                 std::cerr
-                    << (OT_PRETTY_STATIC(Socket))
                     << "zmq_msg_recv returns EAGAIN. This should never happen."
                     << std::endl;
             } else {
-                std::cerr << (OT_PRETTY_STATIC(Socket))
-                          << ": Receive error: " << zmq_strerror(zerr)
+                std::cerr << ": Receive error: " << zmq_strerror(zerr)
                           << std::endl;
             }
 
@@ -185,14 +184,13 @@ auto Socket::receive_message(
             (-1 != zmq_getsockopt(socket, ZMQ_RCVMORE, &option, &optionBytes));
 
         if (false == haveOption) {
-            std::cerr << (OT_PRETTY_STATIC(Socket))
-                      << "Failed to check socket options error:\n"
+            std::cerr << "Failed to check socket options error:\n"
                       << zmq_strerror(zmq_errno()) << std::endl;
 
             return false;
         }
 
-        OT_ASSERT(optionBytes == sizeof(option));
+        assert_true(optionBytes == sizeof(option));
 
         if (1 != option) { receiving = false; }
     }
@@ -219,8 +217,7 @@ auto Socket::send_message(
     }
 
     if (false == sent) {
-        std::cerr << (OT_PRETTY_STATIC(Socket))
-                  << "Send error: " << zmq_strerror(zmq_errno()) << '\n';
+        std::cerr << "Send error: " << zmq_strerror(zmq_errno()) << '\n';
     }
 
     return sent;
@@ -241,7 +238,7 @@ auto Socket::receive_message(const Lock& lock, Message& message) const noexcept
 auto Socket::set_socks_proxy(const UnallocatedCString& proxy) const noexcept
     -> bool
 {
-    OT_ASSERT(nullptr != socket_);
+    assert_false(nullptr == socket_);
 
     SocketCallback cb{[&](const Lock&) -> bool {
         const auto set = zmq_setsockopt(
@@ -258,7 +255,7 @@ auto Socket::SetTimeouts(
     const std::chrono::milliseconds& send,
     const std::chrono::milliseconds& receive) const noexcept -> bool
 {
-    OT_ASSERT(nullptr != socket_);
+    assert_false(nullptr == socket_);
 
     linger_.store(static_cast<int>(linger.count()));
     send_timeout_.store(static_cast<int>(send.count()));

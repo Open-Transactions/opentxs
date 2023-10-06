@@ -8,9 +8,9 @@
 #include <functional>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::pmr
 {
@@ -90,7 +90,7 @@ auto clone_as(const In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
 {
     auto* out = alloc.allocate(1_uz);
 
-    OT_ASSERT(nullptr != out);
+    assert_false(nullptr == out);
 
     alloc.construct(out, *me, std::forward<Args&&>(args)...);
 
@@ -103,7 +103,7 @@ auto clone_as_mutable(In* me, alloc::PMR<In> alloc, Args&&... args) noexcept
 {
     auto* out = alloc.allocate(1_uz);
 
-    OT_ASSERT(nullptr != out);
+    assert_false(nullptr == out);
 
     alloc.construct(out, *me, std::forward<Args&&>(args)...);
 
@@ -121,7 +121,7 @@ auto construct(alloc::PMR<T> alloc, Args&&... args) noexcept(false) -> T*
 {
     auto* out = alloc.allocate(1_uz);
 
-    OT_ASSERT(nullptr != out);
+    assert_false(nullptr == out);
 
     try {
         alloc.construct(out, std::forward<Args&&>(args)...);
@@ -141,7 +141,7 @@ auto copy_assign_base(
     Args&&... args) noexcept -> T&
 {
     if (lhs != rhs) {
-        OT_ASSERT(nullptr != rhs);
+        assert_false(nullptr == rhs);
 
         if (nullptr == lhs) {
             // NOTE moved-from state
@@ -233,7 +233,7 @@ auto move_construct(
     AllocatorType alloc,
     Args&&... args) noexcept -> void
 {
-    OT_ASSERT(nullptr != rhs);
+    assert_false(nullptr == rhs);
 
     if (rhs->get_allocator() == alloc) {
         using std::swap;
@@ -246,10 +246,10 @@ auto move_construct(
 template <typename T>
 auto swap(T*& lhs, T*& rhs) noexcept -> void
 {
-    OT_ASSERT(nullptr != rhs);
+    assert_false(nullptr == rhs);
 
     if (nullptr != lhs) {
-        OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
+        assert_true(lhs->get_allocator() == rhs->get_allocator());
     }
 
     std::swap(lhs, rhs);
@@ -258,10 +258,10 @@ auto swap(T*& lhs, T*& rhs) noexcept -> void
 template <typename T, typename Swapper>
 auto swap(T*& lhs, T*& rhs, Swapper swapper) noexcept -> void
 {
-    OT_ASSERT(nullptr != rhs);
+    assert_false(nullptr == rhs);
 
     if (nullptr != lhs) {
-        OT_ASSERT(lhs->get_allocator() == rhs->get_allocator());
+        assert_true(lhs->get_allocator() == rhs->get_allocator());
     }
 
     std::invoke(swapper, lhs, rhs);

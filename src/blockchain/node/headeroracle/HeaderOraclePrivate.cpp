@@ -13,7 +13,6 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -42,7 +41,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
         const auto rc = out.Connect(endpoints.manager_pull_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -51,7 +50,7 @@ HeaderOraclePrivate::HeaderOraclePrivate(
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
         const auto rc = out.Connect(endpoints.header_oracle_pull_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -93,9 +92,7 @@ auto HeaderOraclePrivate::Genesis(blockchain::Type chain) noexcept
 
         return map.at(chain);
     } catch (...) {
-        LogAbort()(OT_PRETTY_STATIC(HeaderOraclePrivate))("invalid chain ")(
-            print(chain))
-            .Abort();
+        LogAbort()()("invalid chain ")(print(chain)).Abort();
     }
 }
 
@@ -135,7 +132,7 @@ auto HeaderOraclePrivate::PruneKnownHashes() noexcept -> void
 
                 if (set.empty()) { map.erase(m); }
             } else {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
 
             i = index.erase(i);

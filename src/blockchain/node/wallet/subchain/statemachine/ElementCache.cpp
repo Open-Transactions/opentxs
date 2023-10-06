@@ -12,7 +12,6 @@
 #include <iterator>
 #include <ranges>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
@@ -28,7 +27,7 @@ ElementCache::ElementCache(
     , data_(alloc)
     , elements_(alloc)
 {
-    log_(OT_PRETTY_CLASS())("caching ")(data.size())(" patterns").Flush();
+    log_()("caching ")(data.size())(" patterns").Flush();
     Add(convert(std::move(data), alloc));
     std::ranges::transform(
         txos,
@@ -36,7 +35,7 @@ ElementCache::ElementCache(
         [](auto& utxo) {
             return std::make_pair(utxo.first, std::move(utxo.second));
         });
-    log_(OT_PRETTY_CLASS())("cache contains:").Flush();
+    log_()("cache contains:").Flush();
     log_("  * ")(elements_.elements_20_.size())(" 20 byte elements").Flush();
     log_("  * ")(elements_.elements_32_.size())(" 32 byte elements").Flush();
     log_("  * ")(elements_.elements_33_.size())(" 33 byte elements").Flush();
@@ -157,7 +156,7 @@ auto ElementCache::index(
             std::memcpy(data.second.data(), element.data(), 64);
         } break;
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }

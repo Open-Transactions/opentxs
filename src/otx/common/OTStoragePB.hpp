@@ -118,14 +118,16 @@ public:
             OTPacker::Create(PACK_PROTOCOL_BUFFERS));
         const auto* pIntermediate = dynamic_cast<const OTDB::Storable*>(this);
 
-        if (!pPacker) { OT_FAIL; }
+        if (!pPacker) { LogAbort()().Abort(); }
 
         std::unique_ptr<PackedBuffer> pBuffer(
             pPacker->Pack(*(const_cast<OTDB::Storable*>(pIntermediate))));
 
-        if (!pBuffer) { OT_FAIL; }
+        if (!pBuffer) { LogAbort()().Abort(); }
 
-        if (!pPacker->Unpack(*pBuffer, theNewStorable)) { OT_FAIL; }
+        if (!pPacker->Unpack(*pBuffer, theNewStorable)) {
+            LogAbort()().Abort();
+        }
     }
 
     auto getPBMessage() -> ::google::protobuf::MessageLite* override;
@@ -139,7 +141,7 @@ public:
     {
         Storable* pNewStorable =
             Storable::Create(theObjectType, PACK_PROTOCOL_BUFFERS);
-        if (nullptr == pNewStorable) { OT_FAIL; }
+        if (nullptr == pNewStorable) { LogAbort()().Abort(); }
         CopyToObject(
             *(dynamic_cast<
                 ProtobufSubclass<theBaseType, theInternalType, theObjectType>*>(

@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "internal/blockchain/node/Job.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
@@ -32,14 +31,14 @@ BlockBatch::Imp::Imp(
     , submitted_(0)
 {
     if (hashes_.empty()) {
-        OT_ASSERT(-1 == id_);
-        OT_ASSERT(false == finish_.operator bool());
-        OT_ASSERT(false == callback_.operator bool());
+        assert_true(-1 == id_);
+        assert_false(finish_.operator bool());
+        assert_false(callback_.operator bool());
     }
 
     if (-1 != id_) {
-        OT_ASSERT(finish_);
-        OT_ASSERT(callback_);
+        assert_false(nullptr == finish_);
+        assert_false(nullptr == callback_);
     }
 }
 
@@ -80,8 +79,8 @@ auto BlockBatch::Imp::Submit(const std::string_view block) noexcept -> bool
 
     ++submitted_;
     last_ = sClock::now();
-    log_(OT_PRETTY_CLASS())(submitted_)(" of ")(hashes_.size())(
-        " hashes submitted for job ")(id_)
+    log_()(submitted_)(" of ")(hashes_.size())(" hashes submitted for job ")(
+        id_)
         .Flush();
 
     return 0_uz == Remaining();
@@ -98,7 +97,7 @@ namespace opentxs::blockchain::node::internal
 BlockBatch::BlockBatch(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 BlockBatch::BlockBatch(allocator_type alloc) noexcept

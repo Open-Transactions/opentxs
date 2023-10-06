@@ -15,7 +15,6 @@
 #include "internal/otx/smartcontract/OTAgent.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTScript.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -108,11 +107,11 @@ auto OTPartyAccount::get_account() const -> SharedAccount
 //
 auto OTPartyAccount::GetAuthorizedAgent() -> OTAgent*
 {
-    OT_ASSERT(nullptr != for_party_);
+    assert_false(nullptr == for_party_);
 
     if (!agent_name_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Error: Authorized agent "
-                                      "name (for this account) is blank!")
+        LogError()()("Error: Authorized agent "
+                     "name (for this account) is blank!")
             .Flush();
         return nullptr;
     }
@@ -141,8 +140,8 @@ auto OTPartyAccount::IsAccountByID(const identifier::Account& theAcctID) const
     const auto theMemberAcctID =
         api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAcctID == theMemberAcctID)) {
-        LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            acct_id_.get())(" / ")(theAcctID, api_.Crypto())
+        LogTrace()()("Account IDs don't match: ")(acct_id_.get())(" / ")(
+            theAcctID, api_.Crypto())
             .Flush();
 
         return false;
@@ -156,13 +155,13 @@ auto OTPartyAccount::IsAccountByID(const identifier::Account& theAcctID) const
 auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
 {
     if (!acct_id_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Error: Empty acct_id_.").Flush();
+        LogError()()("Error: Empty acct_id_.").Flush();
         return false;
     }
 
     bool bCheckAssetId = true;
     if (!instrument_definition_id_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "FYI, Asset ID is blank in this smart contract, for this account.")
             .Flush();
         bCheckAssetId = false;
@@ -171,8 +170,8 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
     const auto theAcctID =
         api_.Factory().IdentifierFromBase58(acct_id_->Bytes());
     if (!(theAccount.GetRealAccountID() == theAcctID)) {
-        LogTrace()(OT_PRETTY_CLASS())("Account IDs don't match: ")(
-            acct_id_.get())(" / ")(theAccount.GetRealAccountID(), api_.Crypto())
+        LogTrace()()("Account IDs don't match: ")(acct_id_.get())(" / ")(
+            theAccount.GetRealAccountID(), api_.Crypto())
             .Flush();
 
         return false;
@@ -186,7 +185,7 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
             auto strRHS = String::Factory(
                 theAccount.GetInstrumentDefinitionID(), api_.Crypto());
             {
-                LogConsole()(OT_PRETTY_CLASS())(
+                LogConsole()()(
                     "Instrument Definition IDs don't "
                     "match ( ")(instrument_definition_id_.get())(" / ")(
                     strRHS.get())(" ) for Acct ID: ")(acct_id_.get())(".")
@@ -204,24 +203,23 @@ auto OTPartyAccount::IsAccount(const Account& theAccount) -> bool
 auto OTPartyAccount::VerifyOwnership() const -> bool
 {
     if (nullptr == for_party_) {
-        LogError()(OT_PRETTY_CLASS())("Error: nullptr pointer to owner party.")
-            .Flush();
+        LogError()()("Error: nullptr pointer to owner party.").Flush();
         return false;
     }
 
     auto account = get_account();
 
     if (false == bool(account)) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: nullptr pointer to account. (This function expects account "
             "to already be loaded).")
             .Flush();
         return false;
-    }  // todo maybe turn the above into OT_ASSERT()s.
+    }
 
     if (!for_party_->VerifyOwnershipOfAccount(account.get())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Party doesn't verify as the ACTUAL owner of account: ")(
                 name_.get())(".")
                 .Flush();
@@ -239,19 +237,18 @@ auto OTPartyAccount::VerifyAgency() -> bool
     auto account = get_account();
 
     if (false == bool(account)) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: nullptr pointer to account. (This function expects account "
             "to already be loaded).")
             .Flush();
         return false;
-    }  // todo maybe turn the above into OT_ASSERT()s.
+    }
 
     OTAgent* pAgent = GetAuthorizedAgent();
 
     if (nullptr == pAgent) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Unable to find authorized agent (")(GetAgentName())(
+            LogConsole()()("Unable to find authorized agent (")(GetAgentName())(
                 ") for this account: ")(GetName())(".")
                 .Flush();
         }
@@ -260,7 +257,7 @@ auto OTPartyAccount::VerifyAgency() -> bool
 
     if (!pAgent->VerifyAgencyOfAccount(account.get())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Agent ")(GetAgentName())(
+            LogConsole()()("Agent ")(GetAgentName())(
                 " doesn't verify as ACTUALLY having rights over account ")(
                 GetName())(" with ID: ")(GetAcctID())(".")
                 .Flush();
@@ -281,14 +278,13 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
     OTString pstrAttachment) -> bool
 {
     if (nullptr == for_party_) {
-        LogError()(OT_PRETTY_CLASS())("nullptr for_party_.").Flush();
+        LogError()()("nullptr for_party_.").Flush();
         return false;
     } else if (!acct_id_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Empty Acct ID.").Flush();
+        LogError()()("Empty Acct ID.").Flush();
         return false;
     } else if (!agent_name_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("No agent named for this account.")
-            .Flush();
+        LogError()()("No agent named for this account.").Flush();
         return false;
     }
 
@@ -300,8 +296,7 @@ auto OTPartyAccount::DropFinalReceiptToInbox(
     OTAgent* pAgent = for_party_->GetAgent(str_agent_name);
 
     if (nullptr == pAgent) {
-        LogError()(OT_PRETTY_CLASS())("Named agent wasn't found on party.")
-            .Flush();
+        LogError()()("Named agent wasn't found on party.").Flush();
     } else {
         const auto theAccountID =
             api_.Factory().AccountIDFromBase58(acct_id_->Bytes());
@@ -329,8 +324,8 @@ auto OTPartyAccount::LoadAccount() -> SharedAccount
 {
     if (!acct_id_->Exists()) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Bad: Acct ID is blank for account: ")(name_.get())(".")
+            LogConsole()()("Bad: Acct ID is blank for account: ")(name_.get())(
+                ".")
                 .Flush();
         }
 
@@ -342,8 +337,8 @@ auto OTPartyAccount::LoadAccount() -> SharedAccount
 
     if (false == bool(account)) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Failed trying to load account: ")(
-                name_.get())(", with AcctID: ")(acct_id_.get())(".")
+            LogConsole()()("Failed trying to load account: ")(name_.get())(
+                ", with AcctID: ")(acct_id_.get())(".")
                 .Flush();
         }
 
@@ -393,8 +388,8 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
 {
     if (!(GetName().Compare(rhs.GetName()))) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Names don't match: ")(GetName())(
-                " / ")(rhs.GetName())(".")
+            LogConsole()()("Names don't match: ")(GetName())(" / ")(
+                rhs.GetName())(".")
                 .Flush();
         }
         return false;
@@ -403,8 +398,8 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
     if ((GetClosingTransNo() > 0) && (rhs.GetClosingTransNo() > 0) &&
         (GetClosingTransNo() != rhs.GetClosingTransNo())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Closing transaction numbers don't match: ")(GetName())(".")
+            LogConsole()()("Closing transaction numbers don't match: ")(
+                GetName())(".")
                 .Flush();
         }
         return false;
@@ -413,13 +408,12 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
     if ((GetAcctID().Exists()) && (rhs.GetAcctID().Exists()) &&
         (!GetAcctID().Compare(rhs.GetAcctID()))) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Asset account numbers don't match for party account ")(
                 GetName())(".")
                 .Flush();
 
-            LogConsole()(OT_PRETTY_CLASS())("( ")(GetAcctID())("  /  ")(
-                rhs.GetAcctID())(").")
+            LogConsole()()("( ")(GetAcctID())("  /  ")(rhs.GetAcctID())(").")
                 .Flush();
         }
         return false;
@@ -428,12 +422,12 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
     if ((GetAgentName().Exists()) && (rhs.GetAgentName().Exists()) &&
         (!GetAgentName().Compare(rhs.GetAgentName()))) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Agent Names don't match for party "
-                                            "account ")(GetName())(".")
+            LogConsole()()("Agent Names don't match for party "
+                           "account ")(GetName())(".")
                 .Flush();
 
-            LogConsole()(OT_PRETTY_CLASS())("( ")(GetAgentName())("  /  ")(
-                rhs.GetAgentName())(").")
+            LogConsole()()("( ")(GetAgentName())("  /  ")(rhs.GetAgentName())(
+                ").")
                 .Flush();
         }
         return false;
@@ -443,7 +437,7 @@ auto OTPartyAccount::Compare(const OTPartyAccount& rhs) const -> bool
          rhs.GetInstrumentDefinitionID().Exists()) &&
         !GetInstrumentDefinitionID().Compare(rhs.GetInstrumentDefinitionID())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Instrument Definition IDs don't exist, or don't match (")(
                 GetInstrumentDefinitionID())(" / ")(
                 rhs.GetInstrumentDefinitionID())(") for party's account: ")(

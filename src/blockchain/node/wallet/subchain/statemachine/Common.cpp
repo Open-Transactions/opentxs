@@ -9,12 +9,12 @@
 #include <iterator>
 #include <span>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -28,17 +28,17 @@ auto decode(
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     for (auto f = std::next(body.begin(), 2), end = body.end(); f != end; ++f) {
         const auto bytes = f->size();
         static constexpr auto fixed = sizeof(ScanState) + sizeof(block::Height);
         static_assert(9 == fixed);
 
-        OT_ASSERT(fixed < bytes);
+        assert_true(fixed < bytes);
         // NOTE this assert assumes 32 byte hash, which might not be true
         // someday but is true in all cases now.
-        OT_ASSERT(41 == bytes);
+        assert_true(41 == bytes);
 
         const auto* i = static_cast<const std::byte*>(f->data());
         const auto type =
@@ -55,7 +55,7 @@ auto decode(
             auto out = block::Hash{};
             const auto rc = out.Assign(i, bytes - fixed);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }();
@@ -84,7 +84,7 @@ auto encode(const ScanStatus& in, network::zeromq::Message& out) noexcept
     const auto size = fixed + hash.size();  // TODO constexpr
     auto bytes = out.AppendBytes().Reserve(size);
 
-    OT_ASSERT(bytes.IsValid(size));
+    assert_true(bytes.IsValid(size));
 
     auto* i = bytes.as<std::byte>();
     // TODO use endian buffers
@@ -102,17 +102,17 @@ auto extract_dirty(
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     for (auto f = std::next(body.begin(), 2), end = body.end(); f != end; ++f) {
         const auto bytes = f->size();
         static constexpr auto fixed = sizeof(ScanState) + sizeof(block::Height);
         static_assert(9 == fixed);
 
-        OT_ASSERT(fixed < f->size());
+        assert_true(fixed < f->size());
         // NOTE this assert assumes 32 byte hash, which might not be true
         // someday but is true in all cases now.
-        OT_ASSERT(41 == bytes);
+        assert_true(41 == bytes);
 
         const auto* i = static_cast<const std::byte*>(f->data());
         const auto type =
@@ -132,7 +132,7 @@ auto extract_dirty(
             auto out = block::Hash{};
             const auto rc = out.Assign(i, bytes - fixed);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }();

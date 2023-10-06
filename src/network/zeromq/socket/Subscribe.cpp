@@ -13,7 +13,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
 #include "network/zeromq/socket/Socket.hpp"
@@ -71,24 +70,23 @@ void Subscribe::init() noexcept
     const auto set = zmq_setsockopt(socket_, ZMQ_SUBSCRIBE, "", 0);
     Receiver::init();
 
-    OT_ASSERT(0 == set);
+    assert_true(0 == set);
 }
 
 void Subscribe::process_incoming(const Lock& lock, Message&& message) noexcept
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     try {
         callback_.Process(std::move(message));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())("Callback exception: ")(e.what()).Flush();
+        LogError()()("Callback exception: ")(e.what()).Flush();
 
         for (const auto& endpoint : endpoints_) {
-            LogError()(OT_PRETTY_CLASS())("connected endpoint: ")(endpoint)
-                .Flush();
+            LogError()()("connected endpoint: ")(endpoint).Flush();
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Callback exception").Flush();
+        LogError()()("Callback exception").Flush();
     }
 }
 

@@ -23,7 +23,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -106,12 +105,12 @@ Listener::Actor::Actor(
             auto& socket = pipeline_.Internal().ExtraSocket(++index);
             auto rc = socket.SetRoutingID(routing_id_);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             rc = socket.Connect(
                 api_.Endpoints().Internal().OTDHTBlockchain(chain).data());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             out.emplace(chain, socket);
         }
@@ -196,8 +195,6 @@ auto Listener::Actor::check_registration() noexcept -> void
 
                 return out;
             }(),
-            __FILE__,
-            __LINE__,
             true);
     }
 
@@ -248,22 +245,19 @@ auto Listener::Actor::forward_to_chain(
     const auto& log = log_;
 
     if (false == active_chains_.contains(chain)) {
-        log(OT_PRETTY_CLASS())(name_)(": ")(print(chain))(" is not active")
-            .Flush();
+        log()(name_)(": ")(print(chain))(" is not active").Flush();
 
         return;
     }
 
     if (false == registered_chains_.contains(chain)) {
-        log(OT_PRETTY_CLASS())(name_)(": adding message to queue until ")(
-            print(chain))(" completes registration")
+        log()(name_)(": adding message to queue until ")(print(chain))(
+            " completes registration")
             .Flush();
         queue_[chain].emplace_back(std::move(msg));
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": forwarding message to ")(print(chain))
-            .Flush();
-        blockchain_.at(chain).SendDeferred(
-            std::move(msg), __FILE__, __LINE__, true);
+        log()(name_)(": forwarding message to ")(print(chain)).Flush();
+        blockchain_.at(chain).SendDeferred(std::move(msg), true);
     }
 }
 
@@ -300,12 +294,11 @@ auto Listener::Actor::pipeline_external(const Work work, Message&& msg) noexcept
         case Work::registration:
         case Work::init:
         case Work::statemachine: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogError()()(name_)(": unhandled message type ")(print(work))
                 .Flush();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogError()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Flush();
         }
@@ -339,12 +332,11 @@ auto Listener::Actor::pipeline_internal(const Work work, Message&& msg) noexcept
         case Work::pushtx:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -355,9 +347,7 @@ auto Listener::Actor::process_chain_state(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (2 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (2 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<opentxs::blockchain::Type>();
     const auto enabled = body[2].as<bool>();
@@ -401,7 +391,7 @@ auto Listener::Actor::process_external(Message&& msg) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -418,19 +408,17 @@ auto Listener::Actor::process_registration(Message&& msg) noexcept -> void
     const auto& log = log_;
     const auto body = msg.Payload();
 
-    if (1 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (1 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto chain = body[1].as<opentxs::blockchain::Type>();
-    log(OT_PRETTY_CLASS())(name_)(": received registration message from ")(
-        print(chain))(" worker")
+    log()(name_)(": received registration message from ")(print(chain))(
+        " worker")
         .Flush();
     registered_chains_.emplace(chain);
 
     if (auto i = queue_.find(chain); queue_.end() != i) {
-        log(OT_PRETTY_CLASS())(name_)(": flushing ")(queue_.size())(
-            " queued messages for ")(print(chain))(" worker")
+        log()(name_)(": flushing ")(queue_.size())(" queued messages for ")(
+            print(chain))(" worker")
             .Flush();
         auto post = ScopeGuard{[&] { queue_.erase(i); }};
 
@@ -442,40 +430,37 @@ auto Listener::Actor::process_registration(Message&& msg) noexcept -> void
 
 auto Listener::Actor::process_response(Message&& msg) noexcept -> void
 {
-    external_router_.SendExternal(std::move(msg), __FILE__, __LINE__);
+    external_router_.SendExternal(std::move(msg));
 }
 
 auto Listener::Actor::process_sync(
     Message&& msg,
     const otdht::Base& base) noexcept -> void
 {
-    external_router_.SendDeferred(
-        [&] {
-            auto out = zeromq::reply_to_message(msg);
-            const auto ack = factory::BlockchainSyncAcknowledgement(
-                [&] {
-                    auto state = otdht::StateData{get_allocator()};
-                    const auto handle = data_.lock_shared();
-                    const auto& data = *handle;
-                    const auto& map = data.state_;
-                    state.reserve(map.size());
-                    state.clear();
+    external_router_.SendDeferred([&] {
+        auto out = zeromq::reply_to_message(msg);
+        const auto ack = factory::BlockchainSyncAcknowledgement(
+            [&] {
+                auto state = otdht::StateData{get_allocator()};
+                const auto handle = data_.lock_shared();
+                const auto& data = *handle;
+                const auto& map = data.state_;
+                state.reserve(map.size());
+                state.clear();
 
-                    for (const auto& [chain, position] : map) {
-                        state.emplace_back(chain, position);
-                    }
+                for (const auto& [chain, position] : map) {
+                    state.emplace_back(chain, position);
+                }
 
-                    return state;
-                }(),
-                publish_public_endpoint_);
-            const auto rc = ack.Serialize(out);
+                return state;
+            }(),
+            publish_public_endpoint_);
+        const auto rc = ack.Serialize(out);
 
-            OT_ASSERT(rc);
+        assert_true(rc);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 
     switch (base.Type()) {
         case MessageType::sync_request: {
@@ -495,9 +480,7 @@ auto Listener::Actor::process_sync(
         case MessageType::contract:
         case MessageType::pushtx:
         case MessageType::pushtx_reply: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid type ")(
-                print(base.Type()))
-                .Abort();
+            LogAbort()()(name_)(": invalid type ")(print(base.Type())).Abort();
         }
         case MessageType::query:
         default: {
@@ -511,7 +494,7 @@ auto Listener::Actor::process_sync_push(Message&& msg) noexcept -> void
     {
         const auto base = api_.Factory().BlockchainSyncMessage(msg);
 
-        OT_ASSERT(base);
+        assert_false(nullptr == base);
 
         const auto& data = base->asData();
         const auto& state = data.State();
@@ -524,16 +507,16 @@ auto Listener::Actor::process_sync_push(Message&& msg) noexcept -> void
             const auto [_, added] =
                 map.try_emplace(state.Chain(), state.Position());
 
-            OT_ASSERT(added);
+            assert_true(added);
         }
     }
 
-    external_pub_.SendExternal(std::move(msg), __FILE__, __LINE__);
+    external_pub_.SendExternal(std::move(msg));
 }
 
 auto Listener::Actor::process_sync_reply(Message&& msg) noexcept -> void
 {
-    external_router_.SendExternal(std::move(msg), __FILE__, __LINE__);
+    external_router_.SendExternal(std::move(msg));
 }
 
 auto Listener::Actor::reset_registration_timer(

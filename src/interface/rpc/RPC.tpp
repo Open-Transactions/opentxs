@@ -15,7 +15,6 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
@@ -37,7 +36,7 @@ void RPC::evaluate_register_account(
     } else if (otx::LastReplyStatus::MessageFailed == status) {
         add_output_status(output, proto::RPCRESPONSE_REGISTER_ACCOUNT_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        OT_ASSERT(pReply);
+        assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
         add_output_identifier(reply.acct_id_->Get(), output);

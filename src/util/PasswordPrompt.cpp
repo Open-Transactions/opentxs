@@ -7,8 +7,8 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/PasswordPromptPrivate.hpp"
 
 namespace opentxs
@@ -16,7 +16,7 @@ namespace opentxs
 PasswordPrompt::PasswordPrompt(PasswordPromptPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 PasswordPrompt::PasswordPrompt(PasswordPrompt&& rhs) noexcept

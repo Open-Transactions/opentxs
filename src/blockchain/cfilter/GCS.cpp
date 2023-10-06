@@ -9,11 +9,11 @@
 #include <utility>
 
 #include "blockchain/cfilter/GCSPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::cfilter
@@ -21,7 +21,7 @@ namespace opentxs::blockchain::cfilter
 GCS::GCS(GCSPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 GCS::GCS(allocator_type alloc) noexcept

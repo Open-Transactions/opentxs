@@ -29,7 +29,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -495,7 +494,7 @@ Seed::Imp::Imp(
             throw std::runtime_error{"Failed to decrypt entropy"};
         }
     } else {
-        OT_ASSERT(proto.has_words());
+        assert_true(proto.has_words());
 
         auto& entropy = const_cast<Secret&>(entropy_);
 
@@ -567,8 +566,7 @@ auto Seed::Imp::IncrementIndex(const Bip32Index index) noexcept -> bool
     auto handle = data_.lock();
 
     if (handle->index_ > index) {
-        LogError()(OT_PRETTY_CLASS())("Index values must always increase.")
-            .Flush();
+        LogError()()("Index values must always increase.").Flush();
 
         return false;
     }
@@ -602,11 +600,11 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
     *proto.mutable_raw() = encrypted_entropy_;
 
     if (false == proto::Validate(proto, VERBOSE)) {
-        LogAbort()(OT_PRETTY_CLASS())("Invalid serialized seed").Abort();
+        LogAbort()()("Invalid serialized seed").Abort();
     }
 
     if (false == storage_->Internal().Store(id_, proto)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to store seed.").Flush();
+        LogError()()("Failed to store seed.").Flush();
 
         return false;
     }
@@ -620,7 +618,7 @@ namespace opentxs::crypto
 Seed::Seed(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Seed::Seed(const Seed& rhs) noexcept

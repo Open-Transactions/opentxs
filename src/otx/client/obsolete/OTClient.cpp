@@ -13,7 +13,6 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -67,9 +66,8 @@ auto OTClient::ProcessUserCommand(
 
     if (nullptr != pAccount) {
         if (pAccount->GetPurportedNotaryID() != context.Notary()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "pAccount->GetPurportedNotaryID() doesn't match "
-                "NOTARY_ID. (Try adding: --server NOTARY_ID).")
+            LogError()()("pAccount->GetPurportedNotaryID() doesn't match "
+                         "NOTARY_ID. (Try adding: --server NOTARY_ID).")
                 .Flush();
 
             return -1;
@@ -144,8 +142,7 @@ auto OTClient::ProcessUserCommand(
             NYMBOX_HASH.GetString(api_.Crypto(), theMessage.nymbox_hash_);
 
             if (!String::Factory(NYMBOX_HASH, api_.Crypto())->Exists()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed getting NymboxHash from Nym for server: ")(
+                LogError()()("Failed getting NymboxHash from Nym for server: ")(
                     context.Notary(), api_.Crypto())(".")
                     .Flush();
             }
@@ -179,8 +176,7 @@ auto OTClient::ProcessUserCommand(
             NYMBOX_HASH.GetString(api_.Crypto(), theMessage.nymbox_hash_);
 
             if (NYMBOX_HASH.empty()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed getting NymboxHash from Nym for server: ")(
+                LogError()()("Failed getting NymboxHash from Nym for server: ")(
                     context.Notary(), api_.Crypto())(".")
                     .Flush();
             }
@@ -195,7 +191,7 @@ auto OTClient::ProcessUserCommand(
             lReturnValue = lRequestNumber;
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS()).Flush();
+            LogConsole()().Flush();
         }
     }
 

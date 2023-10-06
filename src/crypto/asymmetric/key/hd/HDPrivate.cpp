@@ -6,7 +6,6 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"  // IWYU pragma: associated
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
@@ -31,7 +30,7 @@ auto HD::CalculateFingerprint(
     auto digest = ByteArray{};
 
     if (33 != key.size()) {
-        LogError()(OT_PRETTY_STATIC(HD))("Invalid public key").Flush();
+        LogError()()("Invalid public key").Flush();
 
         return output;
     }
@@ -40,14 +39,13 @@ auto HD::CalculateFingerprint(
         hash.Digest(crypto::HashType::Bitcoin, key, digest.WriteInto());
 
     if (false == hashed) {
-        LogError()(OT_PRETTY_STATIC(HD))("Failed to calculate public key hash")
-            .Flush();
+        LogError()()("Failed to calculate public key hash").Flush();
 
         return output;
     }
 
     if (false == digest.Extract(output)) {
-        LogError()(OT_PRETTY_STATIC(HD))("Failed to set output").Flush();
+        LogError()()("Failed to set output").Flush();
 
         return {};
     }

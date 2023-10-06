@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <source_location>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -24,7 +25,6 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "network/zeromq/context/Thread.hpp"
@@ -149,7 +149,8 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
                     callback(null);
                 } catch (const std::exception& e) {
-                    std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+                    std::cerr << std::source_location::current().function_name()
+                              << ": " << e.what() << std::endl;
                 }
             }
 
@@ -171,7 +172,8 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
                     callback(*socket);
                 } catch (const std::exception& e) {
-                    std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+                    std::cerr << std::source_location::current().function_name()
+                              << ": " << e.what() << std::endl;
                 }
             }
 
@@ -301,22 +303,20 @@ auto Pool::Modify(SocketID id, ModifyCallback cb) noexcept -> void
             map[id].emplace_back(std::move(cb));
         }
         auto& notify = socket(batchID);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::change_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::change_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (false == rc) {
 
             throw std::runtime_error{"failed to queue socket modification"};
         }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
     }
 }
 
@@ -339,8 +339,7 @@ auto Pool::Shutdown() noexcept -> void
 
         for (auto& [id, data] : notify_) {
             auto& socket = data.second;
-            socket.lock()->Send(
-                MakeWork(Operation::shutdown), __FILE__, __LINE__);
+            socket.lock()->Send(MakeWork(Operation::shutdown));
         }
     }
 }
@@ -370,15 +369,12 @@ auto Pool::Start(BatchID id, StartArgs&& sockets) noexcept
 
         auto& thread = get(id);
         auto& notify = socket(id);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::add_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::add_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (rc) {
 
@@ -387,7 +383,8 @@ auto Pool::Start(BatchID id, StartArgs&& sockets) noexcept
             throw std::runtime_error{"failed to add batch to thread"};
         }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
 
         return nullptr;
     }
@@ -421,19 +418,17 @@ auto Pool::Stop(BatchID id) noexcept -> void
         }
 
         auto& notify = socket(id);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::remove_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::remove_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (false == rc) { throw std::runtime_error{"failed stop batch"}; }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
     }
 }
 

@@ -23,7 +23,6 @@
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -124,8 +123,7 @@ auto NotificationStateData::handle_block_matches(
     allocator_type) const noexcept -> void
 {
     const auto& [utxo, general] = confirmed;
-    log(OT_PRETTY_CLASS())(general.size())(" confirmed matches for ")(
-        pc_)(" on ")(print(chain_))
+    log()(general.size())(" confirmed matches for ")(pc_)(" on ")(print(chain_))
         .Flush();
     auto post = ScopeGuard{[&] {
         cache_.modify([&](auto& vector) { vector.emplace_back(position); });
@@ -139,7 +137,7 @@ auto NotificationStateData::handle_block_matches(
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
         const auto& [version, subchainID] = elementID;
-        LogConsole()(OT_PRETTY_CLASS())(print(chain_))(" transaction ")
+        LogConsole()()(print(chain_))(" transaction ")
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_)
             .Flush();
@@ -164,7 +162,7 @@ auto NotificationStateData::handle_mempool_match(
     for (const auto& match : general) {
         const auto& [txid, elementID] = match;
         const auto& [version, subchainID] = elementID;
-        log(OT_PRETTY_CLASS())(print(chain_))(" mempool transaction ")
+        log()(print(chain_))(" mempool transaction ")
             .asHex(txid)(" contains a version ")(version)(" notification for ")(
                 pc_)
             .Flush();
@@ -192,7 +190,7 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
     for (const auto& id : contacts) {
         const auto contact = api.Contact(id);
 
-        OT_ASSERT(contact);
+        assert_false(nullptr == contact);
 
         for (const auto& remote : contact->PaymentCodes(monotonic)) {
             const auto prompt = [&] {
@@ -218,7 +216,7 @@ auto NotificationStateData::init_keys(
 {
     const auto& key = pc.Key();
 
-    OT_ASSERT(key.IsValid());
+    assert_true(key.IsValid());
 
     if (key.HasPrivate()) { return; }
 
@@ -226,7 +224,7 @@ auto NotificationStateData::init_keys(
     const auto upgraded =
         pc.Internal().AddPrivateKeys(seed, *path_.child().rbegin(), reason);
 
-    OT_ASSERT(upgraded);
+    assert_true(upgraded);
 }
 
 auto NotificationStateData::process(
@@ -249,7 +247,7 @@ auto NotificationStateData::process(
                 for (auto i = 0_uz; i < 3_uz; ++i) {
                     const auto view = script.MultisigPubkey(i);
 
-                    OT_ASSERT(view.has_value());
+                    assert_true(view.has_value());
 
                     const auto& value = view.value();
                     const auto* start =
@@ -272,8 +270,8 @@ auto NotificationStateData::process(
 
             if (0u == sender.Version()) { continue; }
 
-            log(OT_PRETTY_CLASS())("decoded incoming notification from ")(
-                sender)(" on ")(print(chain_))(" for ")(pc_)
+            log()("decoded incoming notification from ")(sender)(" on ")(
+                print(chain_))(" for ")(pc_)
                 .Flush();
             process(tx.ID(), sender, confirmed, reason);
         }
@@ -297,8 +295,8 @@ auto NotificationStateData::process(
         account.InternalPaymentCode().AddIncomingNotification(tx);
     }
 
-    log(OT_PRETTY_CLASS())("Created or verified account ")(
-        account.ID(), api_.Crypto())(" for ")(remote)
+    log()("Created or verified account ")(account.ID(), api_.Crypto())(" for ")(
+        remote)
         .Flush();
 }
 

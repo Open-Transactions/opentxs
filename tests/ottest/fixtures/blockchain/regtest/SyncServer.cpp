@@ -7,7 +7,6 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/SyncRequestor.hpp"
 #include "ottest/fixtures/blockchain/SyncSubscriber.hpp"
@@ -40,7 +39,7 @@ Regtest_fixture_sync_server::Regtest_fixture_sync_server()
         auto& alex = const_cast<User&>(alex_);
         alex.init(miner_);
 
-        OT_ASSERT(
+        opentxs::assert_true(
             alex.payment_code_ == GetPaymentCodeVector3().alice_.payment_code_);
 
         init_sync_server_ = true;

@@ -23,7 +23,6 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -62,8 +61,7 @@ auto CustodialAccountActivityModel(
     using ReturnType = ui::implementation::CustodialAccountActivity;
 
     if (AccountType::Custodial != accountID.AccountType()) {
-        LogAbort()("opentxs::factory::")(__func__)(
-            ": wrong identifier type for ")(accountID.asHex())(": ")(
+        LogAbort()()("wrong identifier type for ")(accountID.asHex())(": ")(
             print(accountID.Subtype()))
             .Abort();
     }
@@ -92,8 +90,8 @@ CustodialAccountActivity::CustodialAccountActivity(
 
     // If an Account exists, then the unit definition and notary contracts must
     // exist already.
-    OT_ASSERT(0 < Contract().Version());
-    OT_ASSERT(0 < Notary().Version());
+    assert_true(0 < Contract().Version());
+    assert_true(0 < Notary().Version());
 }
 
 auto CustodialAccountActivity::ContractID() const noexcept -> UnallocatedCString
@@ -165,12 +163,12 @@ auto CustodialAccountActivity::extract_event(
     }
 
     if (false == found) {
-        LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))("Workflow ")(
-            workflow.id())(", type ")(workflow.type())(", state ")(
-            workflow.state())(" does not contain an event of type ")(eventType)
+        LogError()()("Workflow ")(workflow.id())(", type ")(workflow.type())(
+            ", state ")(workflow.state())(
+            " does not contain an event of type ")(eventType)
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return output;
@@ -220,8 +218,8 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Acknowledged:
                 case otx::client::PaymentWorkflowState::Rejected:
                 default: {
-                    LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                        "Invalid workflow state (")(workflow.state())(")")
+                    LogError()()("Invalid workflow state (")(workflow.state())(
+                        ")")
                         .Flush();
                 }
             }
@@ -245,8 +243,8 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Acknowledged:
                 case otx::client::PaymentWorkflowState::Rejected:
                 default: {
-                    LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                        "Invalid workflow state (")(workflow.state())(")")
+                    LogError()()("Invalid workflow state (")(workflow.state())(
+                        ")")
                         .Flush();
                 }
             }
@@ -280,8 +278,8 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Expired:
                 case otx::client::PaymentWorkflowState::Rejected:
                 default: {
-                    LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                        "Invalid workflow state (")(workflow.state())(")")
+                    LogError()()("Invalid workflow state (")(workflow.state())(
+                        ")")
                         .Flush();
                 }
             }
@@ -314,8 +312,8 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Acknowledged:
                 case otx::client::PaymentWorkflowState::Rejected:
                 default: {
-                    LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                        "Invalid workflow state (")(workflow.state())(")")
+                    LogError()()("Invalid workflow state (")(workflow.state())(
+                        ")")
                         .Flush();
                 }
             }
@@ -349,8 +347,8 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Expired:
                 case otx::client::PaymentWorkflowState::Rejected:
                 default: {
-                    LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                        "Invalid workflow state (")(workflow.state())(")")
+                    LogError()()("Invalid workflow state (")(workflow.state())(
+                        ")")
                         .Flush();
                 }
             }
@@ -361,8 +359,7 @@ auto CustodialAccountActivity::extract_rows(
         case otx::client::PaymentWorkflowType::OutgoingCash:
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
-            LogError()(OT_PRETTY_STATIC(CustodialAccountActivity))(
-                "Unsupported workflow type (")(workflow.type())(")")
+            LogError()()("Unsupported workflow type (")(workflow.type())(")")
                 .Flush();
         }
     }
@@ -406,9 +403,9 @@ auto CustodialAccountActivity::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -417,7 +414,7 @@ auto CustodialAccountActivity::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -450,9 +447,9 @@ auto CustodialAccountActivity::pipeline(const Message& in) noexcept -> void
             }
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -463,7 +460,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
@@ -481,7 +478,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
     const auto alias = [&] {
         auto account = api_.Wallet().Internal().Account(account_id_);
 
-        OT_ASSERT(account);
+        assert_true(account);
 
         return account.get().Alias();
     }();
@@ -561,11 +558,11 @@ auto CustodialAccountActivity::process_workflow(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
-    OT_ASSERT(false == accountID.empty());
+    assert_false(accountID.empty());
 
     if (account_id_ == accountID) { startup(); }
 }
@@ -586,7 +583,7 @@ auto CustodialAccountActivity::startup() noexcept -> void
     const auto alias = [&] {
         auto account = api_.Wallet().Internal().Account(account_id_);
 
-        OT_ASSERT(account);
+        assert_true(account);
 
         return account.get().Alias();
     }();

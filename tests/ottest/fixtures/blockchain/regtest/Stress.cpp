@@ -12,7 +12,6 @@
 #include <memory>
 #include <string_view>
 
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -44,7 +43,7 @@ auto Regtest_stress::GetAddresses() noexcept
                           .at(0);
     const auto indices = bob.Reserve(Subchain::External, tx_per_block_, reason);
 
-    OT_ASSERT(indices.size() == tx_per_block_);
+    opentxs::assert_true(indices.size() == tx_per_block_);
 
     for (const auto index : indices) {
         const auto& element = bob.BalanceElement(Subchain::External, index);
@@ -52,7 +51,7 @@ auto Regtest_stress::GetAddresses() noexcept
         const auto& address =
             output.emplace_back(element.Address(Style::P2PKH));
 
-        OT_ASSERT(false == address.empty());
+        opentxs::assert_true(false == address.empty());
     }
 
     return output;
@@ -92,8 +91,8 @@ Regtest_stress::Regtest_stress()
             alex_p_ = client_1_.Wallet().Nym(
                 {client_1_.Factory(), seedID, 0}, reason, "Alex");
 
-            OT_ASSERT(alex_p_);
-            OT_ASSERT(
+            opentxs::assert_false(nullptr == alex_p_);
+            opentxs::assert_true(
                 alex_p_->PaymentCodePublic().asBase58() ==
                 vector.payment_code_);
 
@@ -104,7 +103,7 @@ Regtest_stress::Regtest_stress()
                 reason);
         }
 
-        OT_ASSERT(alex_p_);
+        opentxs::assert_false(nullptr == alex_p_);
 
         return *alex_p_;
     }())
@@ -128,7 +127,7 @@ Regtest_stress::Regtest_stress()
             bob_p_ = client_2_.Wallet().Nym(
                 {client_2_.Factory(), seedID, 0}, reason, "Alex");
 
-            OT_ASSERT(bob_p_);
+            opentxs::assert_false(nullptr == bob_p_);
 
             client_2_.Crypto().Blockchain().NewHDSubaccount(
                 bob_p_->ID(),
@@ -137,7 +136,7 @@ Regtest_stress::Regtest_stress()
                 reason);
         }
 
-        OT_ASSERT(bob_p_);
+        opentxs::assert_false(nullptr == bob_p_);
 
         return *bob_p_;
     }())
@@ -181,7 +180,7 @@ Regtest_stress::Regtest_stress()
             const auto indices =
                 alex_account_.Reserve(Subchain::External, target, reason);
 
-            OT_ASSERT(indices.size() == target);
+            opentxs::assert_true(indices.size() == target);
 
             for (const auto index : indices) {
                 const auto& element =
@@ -206,7 +205,7 @@ Regtest_stress::Regtest_stress()
             listener_alex_p_ = std::make_unique<ScanListener>(client_1_);
         }
 
-        OT_ASSERT(listener_alex_p_);
+        opentxs::assert_false(nullptr == listener_alex_p_);
 
         return *listener_alex_p_;
     }())
@@ -215,7 +214,7 @@ Regtest_stress::Regtest_stress()
             listener_bob_p_ = std::make_unique<ScanListener>(client_2_);
         }
 
-        OT_ASSERT(listener_bob_p_);
+        opentxs::assert_false(nullptr == listener_bob_p_);
 
         return *listener_bob_p_;
     }())

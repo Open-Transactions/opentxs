@@ -35,7 +35,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -366,7 +365,7 @@ auto Input::ConfirmMatches(
         using enum crypto::Subchain;
 
         if (Outgoing == subchain) {
-            LogAbort()(OT_PRETTY_CLASS())(
+            LogAbort()()(
                 "critical database error: outputs owed by a payment code "
                 "recipient were recorded as spendable by the sender")
                 .Abort();
@@ -376,8 +375,7 @@ auto Input::ConfirmMatches(
         auto key = crypto::Key{{subaccount, alloc}, subchain, index};
 
         if (outpoint == previous_) {
-            log(OT_PRETTY_CLASS())("found spend of previous output ")(previous_)
-                .Flush();
+            log()("found spend of previous output ")(previous_).Flush();
             cache.add(std::move(key));
 
             return true;
@@ -466,7 +464,7 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
 
     switch (style) {
         case cfilter::Type::ES: {
-            LogTrace()(OT_PRETTY_CLASS())("processing input script").Flush();
+            LogTrace()()("processing input script").Flush();
             script_.Internal().ExtractElements(style, out);
 
             if (false == witness_.empty()) {
@@ -492,8 +490,7 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
                     if (sub.IsValid()) {
                         sub.Internal().ExtractElements(style, out);
                     } else if (Redeem::MaybeP2WSH != type) {
-                        LogError()(OT_PRETTY_CLASS())("Invalid redeem script")
-                            .Flush();
+                        LogError()()("Invalid redeem script").Flush();
                     }
                 }
             }
@@ -501,15 +498,14 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
             [[fallthrough]];
         }
         case cfilter::Type::Basic_BCHVariant: {
-            LogTrace()(OT_PRETTY_CLASS())("processing consumed outpoint")
-                .Flush();
+            LogTrace()()("processing consumed outpoint").Flush();
             const auto* it = reinterpret_cast<const std::byte*>(&previous_);
             out.emplace_back(it, it + sizeof(previous_));
         } break;
         case cfilter::Type::Basic_BIP158:
         case cfilter::Type::UnknownCfilter:
         default: {
-            LogTrace()(OT_PRETTY_CLASS())("skipping input").Flush();
+            LogTrace()()("skipping input").Flush();
         }
     }
 }
@@ -544,7 +540,7 @@ auto Input::FindMatches(
         const auto& [index, subchainID] = element;
         const auto& [subchain, account] = subchainID;
         cache_.lock()->add({account, subchain, index});
-        log(OT_PRETTY_CLASS())("input ")(position)(" of transaction ")
+        log()("input ")(position)(" of transaction ")
             .asHex(txid)(" spends ")(Outpoint{reader(outpoint)})
             .Flush();
     }
@@ -773,7 +769,7 @@ auto Input::ReplaceScript() noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -809,7 +805,7 @@ auto Input::serialize(Writer&& destination, const bool normalized)
 
         return size;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }

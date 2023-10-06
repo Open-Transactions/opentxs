@@ -19,7 +19,6 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -102,8 +101,8 @@ auto AccountList::load_blockchain_account(identifier::Account&& id) noexcept
 {
     const auto [chain, owner] = api_.Crypto().Blockchain().LookupAccount(id);
 
-    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
-    OT_ASSERT(owner == primary_id_);
+    assert_true(blockchain::Type::UnknownBlockchain != chain);
+    assert_true(owner == primary_id_);
 
     load_blockchain_account(std::move(id), chain);
 }
@@ -130,9 +129,7 @@ auto AccountList::load_blockchain_account(
     blockchain::Type chain,
     Amount&& balance) noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(
-        id, api_.Crypto())
-        .Flush();
+    LogInsane()()("processing blockchain account ")(id, api_.Crypto()).Flush();
 
     if (api_.Crypto().Blockchain().SubaccountList(primary_id_, chain).empty()) {
         return;
@@ -214,9 +211,7 @@ auto AccountList::load_custodial_account(
     Amount&& balance,
     UnallocatedCString&& name) noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(
-        id, api_.Crypto())
-        .Flush();
+    LogInsane()()("processing custodial account ")(id, api_.Crypto()).Flush();
     const auto& api = api_;
     auto notaryID = api.Storage().Internal().AccountServer(id);
     const auto index = AccountListSortKey{
@@ -247,9 +242,9 @@ auto AccountList::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -258,7 +253,7 @@ auto AccountList::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -290,9 +285,9 @@ auto AccountList::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -315,20 +310,19 @@ auto AccountList::process_blockchain(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (nymID != primary_id_) {
-        LogInsane()(OT_PRETTY_CLASS())("Update does not apply to this widget")
-            .Flush();
+        LogInsane()()("Update does not apply to this widget").Flush();
 
         return;
     }
 
     const auto chain = body[1].as<blockchain::Type>();
 
-    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
+    assert_true(blockchain::Type::UnknownBlockchain != chain);
 
     load_blockchain_account(chain);
 }
@@ -337,7 +331,7 @@ auto AccountList::process_blockchain_balance(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     const auto& accountID =
@@ -350,7 +344,7 @@ auto AccountList::process_custodial(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto& api = api_;
     auto id = api.Factory().AccountIDFromZMQ(body[1]);

@@ -15,11 +15,11 @@
 #include "internal/interface/ui/Widget.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,12 +43,12 @@ auto extract_custom_ptr(
     CustomData& custom,
     const std::size_t index = 0) noexcept -> std::unique_ptr<T>
 {
-    OT_ASSERT((index + 1) <= custom.size());
+    assert_true((index + 1) <= custom.size());
 
     auto& ptr = custom.at(index);
     auto output = std::unique_ptr<T>{static_cast<T*>(ptr)};
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     ptr = nullptr;
 
@@ -107,7 +107,7 @@ public:
         {
             auto real = dynamic_cast<T*>(object);
 
-            OT_ASSERT(nullptr != real);
+            assert_false(nullptr == real);
 
             (real->*callback_)(message);
         }

@@ -20,7 +20,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -146,7 +145,7 @@ OTAPI_Func::OTAPI_Func(
     , info_type_(contract::peer::ConnectionInfoType::Error)
     , unit_definition_()
 {
-    OT_ASSERT(CheckLock(api_lock_, apiLock));
+    assert_true(CheckLock(api_lock_, apiLock));
 }
 
 OTAPI_Func::OTAPI_Func(
@@ -163,7 +162,7 @@ OTAPI_Func::OTAPI_Func(
     } else if (theType == GET_MARKET_LIST) {
         trans_nums_needed_ = 0;
     } else if (theType != GET_NYM_MARKET_OFFERS) {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -184,10 +183,10 @@ OTAPI_Func::OTAPI_Func(
             label_ = label;
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func().")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -210,10 +209,10 @@ OTAPI_Func::OTAPI_Func(
             account_id_ = nym_to_account(nymID2);
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func().")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -239,10 +238,10 @@ OTAPI_Func::OTAPI_Func(
             payment_plan_.reset(paymentPlan.release());
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func().")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -274,17 +273,16 @@ OTAPI_Func::OTAPI_Func(
             try {
                 transaction_number_ = int64val.Internal().ExtractInt64();
             } catch (const std::exception& e) {
-                LogConsole()(OT_PRETTY_CLASS())(
-                    "Error setting transaction number. ")(e.what())
+                LogConsole()()("Error setting transaction number. ")(e.what())
                     .Flush();
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func().")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -304,13 +302,9 @@ OTAPI_Func::OTAPI_Func(
     UnallocatedCString strError = "Warning: Empty UnallocatedCString passed to "
                                   "OTAPI_Func.OTAPI_Func() as: ";
 
-    if (!VerifyStringVal(clause)) {
-        LogError()(OT_PRETTY_CLASS())("clause.").Flush();
-    }
+    if (!VerifyStringVal(clause)) { LogError()()("clause.").Flush(); }
 
-    if (!VerifyStringVal(parameter)) {
-        LogError()(OT_PRETTY_CLASS())("parameter.").Flush();
-    }
+    if (!VerifyStringVal(parameter)) { LogError()()("parameter.").Flush(); }
 
     trans_nums_needed_ = 1;
 
@@ -319,11 +313,10 @@ OTAPI_Func::OTAPI_Func(
         clause_ = clause;
         parameter_ = parameter;
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
-            "ERROR!!!!!!")
+        LogConsole()()("ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
+                       "ERROR!!!!!!")
             .Flush();
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -342,9 +335,7 @@ OTAPI_Func::OTAPI_Func(
     UnallocatedCString strError = "Warning: Empty UnallocatedCString passed to "
                                   "OTAPI_Func.OTAPI_Func() as: ";
 
-    if (!VerifyStringVal(agentName)) {
-        LogError()(OT_PRETTY_CLASS())("agentName.").Flush();
-    }
+    if (!VerifyStringVal(agentName)) { LogError()()("agentName.").Flush(); }
 
     trans_nums_needed_ = 1;
 
@@ -362,11 +353,10 @@ OTAPI_Func::OTAPI_Func(
 
         if (nNumsNeeded > 0) { trans_nums_needed_ = nNumsNeeded; }
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
-            "ERROR!!!!!!")
+        LogConsole()()("ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
+                       "ERROR!!!!!!")
             .Flush();
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -397,11 +387,11 @@ OTAPI_Func::OTAPI_Func(
             recipient_id_ = nymID2;
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func(). "
                 "ERROR!!!!!!")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -428,7 +418,7 @@ OTAPI_Func::OTAPI_Func(
         basket_id_ = basketID;
         account_id_ = accountID;
     } else {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -467,10 +457,10 @@ OTAPI_Func::OTAPI_Func(
             activation_price_ = activationPrice;
         } break;
         default: {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "ERROR! WRONG TYPE passed to OTAPI_Func.OTAPI_Func().")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -484,7 +474,7 @@ auto OTAPI_Func::nym_to_account(const identifier::Nym& id) const noexcept
 
 auto OTAPI_Func::Run(const std::size_t) -> UnallocatedCString
 {
-    LogConsole()(OT_PRETTY_CLASS())("Not implemented").Flush();
+    LogConsole()()("Not implemented").Flush();
 
     return {};
 }
@@ -510,7 +500,7 @@ void OTAPI_Func::run()
        DELETE_ASSET_ACCT: { last_attempt_ =
                     api_.InternalClient().OTAPI().deleteAssetAccount(context_,
        account_id_); } break; case ACTIVATE_SMART_CONTRACT: {
-                OT_ASSERT(contract_);
+                assert_true(contract_);
 
                 last_attempt_ =
        api_.InternalClient().OTAPI().activateSmartContract( context_,
@@ -541,7 +531,7 @@ void OTAPI_Func::run()
                     context_, account_id_, transaction_number_);
             } break;
             case DEPOSIT_PAYMENT_PLAN: {
-                OT_ASSERT(payment_plan_);
+                assert_true(payment_plan_);
 
                 last_attempt_ =
        api_.InternalClient().OTAPI().depositPaymentPlan( context_,
@@ -587,7 +577,7 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
                 if (!STOP_SIGN.empty() &&
                     ((ACTIVATION_PRICE == 0) ||
                      ((cStopSign != '<') && (cStopSign != '>')))) {
-                    LogError()(OT_PRETTY_CLASS())(
+                    LogError()()(
 "If STOP_SIGN is provided, it must be < "
                         "or >, and in that case ACTIVATION_PRICE "
                         "must be non-zero.")
@@ -608,7 +598,7 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
 
                 if (str_asset_notary_id.empty() ||
        str_currency_notary_id.empty() || str_asset_nym_id.empty() ||
-       str_currency_nym_id.empty()) { LogError()(OT_PRETTY_CLASS())(
+       str_currency_nym_id.empty()) { LogError()()(
 "Failed determining server or nym ID for "
                         "either asset or currency account.")
                         .Flush();
@@ -633,10 +623,10 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
                 last_attempt_ =
                     api_.InternalClient().OTAPI().usageCredits(context_,
        target_id_, adjustment_); } break; default: {
-                LogError()(OT_PRETTY_CLASS())("Error: unhandled function
+                LogError()()("Error: unhandled function
        " "type: ")(type_)(".") .Flush();
 
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     */

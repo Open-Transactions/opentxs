@@ -17,7 +17,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
@@ -111,12 +110,12 @@ auto Actor::pipeline_external(const Work work, Message&& msg) noexcept -> void
         case value(WorkType::Shutdown):
         case OT_ZMQ_INIT_SIGNAL:
         case OT_ZMQ_STATE_MACHINE_SIGNAL: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 opentxs::print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -130,32 +129,29 @@ auto Actor::pipeline_internal(const Work work, Message&& msg) noexcept -> void
         case value(WorkType::AsioRegister):
         case OT_ZMQ_INIT_SIGNAL:
         case OT_ZMQ_STATE_MACHINE_SIGNAL: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 opentxs::print(work))
                 .Abort();
         }
         case value(WorkType::AsioResolve):
         default: {
-            router_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+            router_.SendDeferred(std::move(msg));
         }
     }
 }
 
 auto Actor::process_registration(Message&& in) noexcept -> void
 {
-    router_.SendDeferred(
-        [&] {
-            auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                in, WorkType::AsioRegister);
-            auto envelope = std::move(in).Envelope();
+    router_.SendDeferred([&] {
+        auto work = opentxs::network::zeromq::tagged_reply_to_message(
+            in, WorkType::AsioRegister);
+        auto envelope = std::move(in).Envelope();
 
-            OT_ASSERT(envelope.IsValid());
-            work.MoveFrames(envelope.get());
+        assert_true(envelope.IsValid());
+        work.MoveFrames(envelope.get());
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Actor::process_resolve(Message&& in) noexcept -> void
@@ -165,8 +161,8 @@ auto Actor::process_resolve(Message&& in) noexcept -> void
     const auto body = in.Payload();
     auto envelope = std::move(in).Envelope();
 
-    OT_ASSERT(envelope.IsValid());
-    OT_ASSERT(2_uz < body.size());
+    assert_true(envelope.IsValid());
+    assert_true(2_uz < body.size());
 
     shared_.Resolve(
         shared_p_, envelope, body[1].Bytes(), body[2].as<std::uint16_t>());

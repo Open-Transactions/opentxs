@@ -25,7 +25,6 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -116,8 +115,7 @@ auto OTCronItem::LoadCronReceipt(
     const char* szFoldername = api.Internal().Legacy().Cron();
     if (!OTDB::Exists(
             api, api.DataFolder().string(), szFoldername, filename, "", "")) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("File does not exist: ")(
-            szFoldername)('/')(filename)(".")
+        LogError()()("File does not exist: ")(szFoldername)('/')(filename)(".")
             .Flush();
         return nullptr;
     }
@@ -135,8 +133,7 @@ auto OTCronItem::LoadCronReceipt(
                // STORE.
 
     if (strFileContents->GetLength() < 2) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("Error reading file: ")(
-            szFoldername)('/')(filename)(".")
+        LogError()()("Error reading file: ")(szFoldername)('/')(filename)(".")
             .Flush();
         return nullptr;
     } else {
@@ -169,8 +166,8 @@ auto OTCronItem::LoadActiveCronReceipt(
             strNotaryID->Get(),
             filename,
             "")) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("File does not exist: ")(
-            szFoldername)('/')(strNotaryID.get())('/')(filename)(".")
+        LogError()()("File does not exist: ")(szFoldername)('/')(
+            strNotaryID.get())('/')(filename)(".")
             .Flush();
         return nullptr;
     }
@@ -185,8 +182,8 @@ auto OTCronItem::LoadActiveCronReceipt(
                // DATA STORE.
 
     if (strFileContents->GetLength() < 2) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("Error reading file: ")(
-            szFoldername)('/')(strNotaryID.get())('/')(filename)(".")
+        LogError()()("Error reading file: ")(szFoldername)('/')(
+            strNotaryID.get())('/')(filename)(".")
             .Flush();
         return nullptr;
     } else {
@@ -230,7 +227,7 @@ auto OTCronItem::GetActiveCronTransNums(
                              api.Crypto(), false))  // bEscapedIsAllowed=true
                                                     // by default.
             {
-                LogError()(OT_PRETTY_STATIC(OTCronItem))(
+                LogError()()(
                     "List of recurring transactions; string apparently was "
                     "encoded and then failed decoding. Contents: ")(
                     strNumlist.get())(".")
@@ -291,7 +288,7 @@ auto OTCronItem::EraseActiveCronReceipt(
                              api.Crypto(), false))  // bEscapedIsAllowed=true
                                                     // by default.
             {
-                LogError()(OT_PRETTY_STATIC(OTCronItem))(
+                LogError()()(
                     "List of recurring transactions; string apparently was "
                     "encoded and then failed decoding. Contents: ")(
                     strNumlist.get())(".")
@@ -313,8 +310,7 @@ auto OTCronItem::EraseActiveCronReceipt(
                     strNotaryID->Get(),
                     list_filename,
                     "")) {
-                LogConsole()(OT_PRETTY_STATIC(OTCronItem))(
-                    "FYI, failure erasing recurring IDs file: ")(
+                LogConsole()()("FYI, failure erasing recurring IDs file: ")(
                     szFoldername)('/')(strNotaryID.get())('/')(
                     list_filename)(".")
                     .Flush();
@@ -328,7 +324,7 @@ auto OTCronItem::EraseActiveCronReceipt(
             if (false == ascTemp->WriteArmoredString(
                              strFinal, "ACTIVE CRON ITEMS"))  // todo hardcoding
             {
-                LogError()(OT_PRETTY_STATIC(OTCronItem))(
+                LogError()()(
                     "Error re-saving recurring IDs (failed writing armored "
                     "string): ")(szFoldername)('/')(strNotaryID.get())('/')(
                     list_filename)(".")
@@ -345,9 +341,9 @@ auto OTCronItem::EraseActiveCronReceipt(
                     "");
 
                 if (!bSaved) {
-                    LogError()(OT_PRETTY_STATIC(OTCronItem))(
-                        "Error re-saving recurring IDs: ")(szFoldername)('/')(
-                        strNotaryID.get())('/')(list_filename)(".")
+                    LogError()()("Error re-saving recurring IDs: ")(
+                        szFoldername)('/')(strNotaryID.get())('/')(
+                        list_filename)(".")
                         .Flush();
                     return false;
                 }
@@ -360,16 +356,16 @@ auto OTCronItem::EraseActiveCronReceipt(
     //
     if (!OTDB::Exists(
             api, dataFolder, szFoldername, strNotaryID->Get(), filename, "")) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("File does not exist: ")(
-            szFoldername)('/')(strNotaryID.get())('/')(filename.c_str())(".")
+        LogError()()("File does not exist: ")(szFoldername)('/')(
+            strNotaryID.get())('/')(filename.c_str())(".")
             .Flush();
         return false;
     }
 
     if (!OTDB::EraseValueByKey(
             api, dataFolder, szFoldername, strNotaryID->Get(), filename, "")) {
-        LogError()(OT_PRETTY_STATIC(OTCronItem))("Error erasing file: ")(
-            szFoldername)('/')(strNotaryID.get())('/')(filename.c_str())(".")
+        LogError()()("Error erasing file: ")(szFoldername)('/')(
+            strNotaryID.get())('/')(filename.c_str())(".")
             .Flush();
         return false;
     }
@@ -396,10 +392,9 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
             strNotaryID->Get(),
             filename,
             "")) {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "Cron Record already exists for transaction ")(GetTransactionNum())(
-            " ")(szFoldername)('/')(strNotaryID.get())('/')(
-            filename)(", overwriting.")
+        LogVerbose()()("Cron Record already exists for transaction ")(
+            GetTransactionNum())(" ")(szFoldername)('/')(strNotaryID.get())(
+            '/')(filename)(", overwriting.")
             .Flush();
         // NOTE: We could just return here. But what if the record we have is
         // corrupted somehow?
@@ -435,7 +430,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
                                  false))  // bEscapedIsAllowed=true
                                           // by default.
                 {
-                    LogError()(OT_PRETTY_CLASS())(
+                    LogError()()(
                         "Input string apparently was encoded and then failed "
                         "decoding. Contents: ")(strNumlist.get())(".")
                         .Flush();
@@ -456,7 +451,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
             if (false == ascTemp->WriteArmoredString(
                              strFinal, "ACTIVE CRON ITEMS"))  // todo hardcoding
             {
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "Error saving recurring IDs (failed writing armored "
                     "string): ")(szFoldername)('/')(strNotaryID.get())('/')(
                     list_filename)(".")
@@ -474,9 +469,8 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
                 "");
 
             if (!bSaved) {
-                LogError()(OT_PRETTY_CLASS())("Error saving recurring IDs: ")(
-                    szFoldername)('/')(strNotaryID.get())('/')(
-                    list_filename)(".")
+                LogError()()("Error saving recurring IDs: ")(szFoldername)('/')(
+                    strNotaryID.get())('/')(list_filename)(".")
                     .Flush();
                 return false;
             }
@@ -487,8 +481,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
     auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error saving file (failed writing armored string): ")(
+        LogError()()("Error saving file (failed writing armored string): ")(
             szFoldername)('/')(strNotaryID.get())('/')(filename)("")
             .Flush();
         return false;
@@ -504,7 +497,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
         "");
 
     if (!bSaved) {
-        LogError()(OT_PRETTY_CLASS())("Error saving file: ")(szFoldername)('/')(
+        LogError()()("Error saving file: ")(szFoldername)('/')(
             strNotaryID.get())('/')(filename)(".")
             .Flush();
         return false;
@@ -533,9 +526,8 @@ auto OTCronItem::SaveCronReceipt() -> bool
 
     if (OTDB::Exists(
             api_, api_.DataFolder().string(), szFoldername, filename, "", "")) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Cron Record already exists for transaction ")(GetTransactionNum())(
-            " ")(szFoldername)('/')(
+        LogError()()("Cron Record already exists for transaction ")(
+            GetTransactionNum())(" ")(szFoldername)('/')(
             filename)(", yet inexplicably attempted to record it again.")
             .Flush();
         return false;
@@ -545,8 +537,7 @@ auto OTCronItem::SaveCronReceipt() -> bool
     auto ascTemp = Armored::Factory(api_.Crypto(), raw_file_);
 
     if (false == ascTemp->WriteArmoredString(strFinal, contract_type_->Get())) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error saving file (failed writing armored string): ")(
+        LogError()()("Error saving file (failed writing armored string): ")(
             szFoldername)('/')(filename)(".")
             .Flush();
         return false;
@@ -562,8 +553,7 @@ auto OTCronItem::SaveCronReceipt() -> bool
         "");
 
     if (!bSaved) {
-        LogError()(OT_PRETTY_CLASS())("Error saving file: ")(szFoldername)('/')(
-            filename)(".")
+        LogError()()("Error saving file: ")(szFoldername)('/')(filename)(".")
             .Flush();
         return false;
     }
@@ -599,7 +589,7 @@ auto OTCronItem::SetDateRange(const Time VALID_FROM, const Time VALID_TO)
         if (VALID_TO < VALID_FROM)  // If Valid-To date is EARLIER than
                                     // Valid-From date...
         {
-            LogError()(OT_PRETTY_CLASS())("VALID_TO (")(
+            LogError()()("VALID_TO (")(
                 VALID_TO)(") is earlier than VALID_FROM (")(VALID_FROM)(").")
                 .Flush();
             return false;
@@ -610,8 +600,7 @@ auto OTCronItem::SetDateRange(const Time VALID_FROM, const Time VALID_TO)
                                // higher than Valid-From.
     } else                     // VALID_TO is a NEGATIVE number... Error.
     {
-        LogError()(OT_PRETTY_CLASS())("Negative value for valid_to: ")(VALID_TO)
-            .Flush();
+        LogError()()("Negative value for valid_to: ")(VALID_TO).Flush();
 
         return false;
     }
@@ -631,11 +620,10 @@ auto OTCronItem::GetClosingTransactionNoAt(std::uint32_t nIndex) const
     -> std::int64_t
 {
     if (closing_numbers_.size() <= nIndex) {
-        LogError()(OT_PRETTY_CLASS())(
-            "nIndex"
-            " is equal or larger than closing_numbers_.size()!")
+        LogError()()("nIndex"
+                     " is equal or larger than closing_numbers_.size()!")
             .Flush();
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return closing_numbers_.at(nIndex);
@@ -658,7 +646,7 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
     // actually has said number (or a related closing number) signed out to
     // him on his last receipt...
     if (!context.Signer()->CompareID(GetSenderNymID())) {
-        LogInsane()(OT_PRETTY_CLASS())(
+        LogInsane()()(
             "theNym is not the originator of this CronItem. (He could be "
             "a "
             "recipient though, so this is normal.)")
@@ -669,7 +657,7 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
     // By this point, that means theNym is DEFINITELY the originator
     // (sender)...
     else if (GetCountClosingNumbers() < 1) {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Weird: Sender tried to remove a cron item; expected at "
             "least "
             "1 closing number to be available"
@@ -680,8 +668,8 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
     }
 
     if (!context.VerifyIssuedNumber(GetClosingNum())) {
-        LogConsole()(OT_PRETTY_CLASS())("Closing number didn't "
-                                        "verify (for removal from cron).")
+        LogConsole()()("Closing number didn't "
+                       "verify (for removal from cron).")
             .Flush();
 
         return false;
@@ -721,12 +709,10 @@ auto OTCronItem::CanRemoveItemFromCron(const otx::context::Client& context)
 //
 auto OTCronItem::ProcessCron(const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(nullptr != cron_);
+    assert_false(nullptr == cron_);
 
     if (IsFlaggedForRemoval()) {
-        LogDebug()(OT_PRETTY_CLASS())("Flagged for removal: ")(
-            contract_type_.get())
-            .Flush();
+        LogDebug()()("Flagged for removal: ")(contract_type_.get()).Flush();
         return false;
     }
 
@@ -735,7 +721,7 @@ auto OTCronItem::ProcessCron(const PasswordPrompt& reason) -> bool
     // Cron even if it is NOT YET valid. But once it actually expires, this
     // will remove it.
     if (IsExpired()) {
-        LogDebug()(OT_PRETTY_CLASS())("Expired ")(contract_type_.get()).Flush();
+        LogDebug()()("Expired ")(contract_type_.get()).Flush();
         return false;
     }
 
@@ -777,16 +763,16 @@ void OTCronItem::HookRemovalFromCron(
     const PasswordPrompt& reason)
 {
     auto pServerNym = server_nym_;
-    OT_ASSERT(nullptr != pServerNym);
+    assert_false(nullptr == pServerNym);
 
     // Generate new transaction number for these new inbox receipts.
     const std::int64_t lNewTransactionNumber = newTransactionNo;
 
-    //    OT_ASSERT(lNewTransactionNumber > 0); // this can be my reminder.
+    //    assert_true(lNewTransactionNumber > 0); // this can be my reminder.
     if (0 == lNewTransactionNumber) {
-        LogError()(OT_PRETTY_CLASS())("** ERROR! Final receipt not "
-                                      "added to inbox since no "
-                                      "transaction numbers were available!")
+        LogError()()("** ERROR! Final receipt not "
+                     "added to inbox since no "
+                     "transaction numbers were available!")
             .Flush();
     } else {
         // Everytime a payment processes, or a trade, then a receipt is put
@@ -822,7 +808,7 @@ void OTCronItem::HookRemovalFromCron(
         // user's signature.
         // (Updated versions, as processing occurs, are signed by the
         // server.)
-        OT_ASSERT(false != bool(pOrigCronItem));
+        assert_true(false != bool(pOrigCronItem));
 
         // Note: elsewhere, we verify the Nym's signature. But in this
         // place, we verify the SERVER's signature. (The server signed the
@@ -832,10 +818,10 @@ void OTCronItem::HookRemovalFromCron(
         {
             bool bValidSignture = pOrigCronItem->VerifySignature(*pServerNym);
             if (!bValidSignture) {
-                LogError()(OT_PRETTY_CLASS())("Failure verifying signature of "
-                                              "server on Cron Item!")
+                LogError()()("Failure verifying signature of "
+                             "server on Cron Item!")
                     .Flush();
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
 
@@ -904,7 +890,7 @@ void OTCronItem::HookRemovalFromCron(
                 pRemover,
                 reason);
         } else {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "MAJOR ERROR in OTCronItem::HookRemovalFromCron!! Failed "
                 "loading Originator Nym for Cron Item.")
                 .Flush();
@@ -929,7 +915,7 @@ void OTCronItem::onFinalReceipt(
     Nym_p pRemover,
     const PasswordPrompt& reason)
 {
-    OT_ASSERT(nullptr != server_nym_);
+    assert_false(nullptr == server_nym_);
 
     auto context = api_.Wallet().Internal().mutable_ClientContext(
         theOriginator->ID(), reason);
@@ -982,14 +968,12 @@ void OTCronItem::onFinalReceipt(
                 reason,
                 String::Factory(),  // note
                 pstrAttachment)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failure dropping finalReceipt to Nymbox.")
-                .Flush();
+            LogError()()("Failure dropping finalReceipt to Nymbox.").Flush();
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed doing "
-                                      "VerifyIssuedNum(theOrigCronItem."
-                                      "GetTransactionNum()).")
+        LogError()()("Failed doing "
+                     "VerifyIssuedNum(theOrigCronItem."
+                     "GetTransactionNum()).")
             .Flush();
     }
 
@@ -1009,9 +993,7 @@ void OTCronItem::onFinalReceipt(
                 pstrAttachment)) {  // pActualAcct = nullptr by default.
                                     // (This call will load it up in order
                                     // to update the inbox hash.)
-            LogError()(OT_PRETTY_CLASS())(
-                "Failure dropping receipt into inbox.")
-                .Flush();
+            LogError()()("Failure dropping receipt into inbox.").Flush();
         }
 
         // In this case, I'm passing nullptr for pstrNote, since there is no
@@ -1024,7 +1006,7 @@ void OTCronItem::onFinalReceipt(
         //      theOriginator.RemoveIssuedNum(strNotaryID, lClosingNumber,
         // true); //bSave=false
     } else {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Failed verifying "
             "lClosingNumber=theOrigCronItem.GetClosingTransactionNoAt(0)>"
             "0 && "
@@ -1053,14 +1035,14 @@ auto OTCronItem::DropFinalReceiptToInbox(
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
-    OT_ASSERT(nullptr != server_nym_);
+    assert_false(nullptr == server_nym_);
 
     const identity::Nym& pServerNym = *server_nym_;
     // Load the inbox in case it already exists.
     auto theInbox{api_.Factory().InternalSession().Ledger(
         NYM_ID, ACCOUNT_ID, GetNotaryID())};
 
-    OT_ASSERT(false != bool(theInbox));
+    assert_true(false != bool(theInbox));
 
     // Inbox will receive notification of something ALREADY DONE.
     bool bSuccessLoading = theInbox->LoadInbox();
@@ -1070,7 +1052,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
     if (true == bSuccessLoading) {
         bSuccessLoading = theInbox->VerifyAccount(pServerNym);
     } else {
-        LogError()(OT_PRETTY_CLASS())("ERROR loading inbox ledger.").Flush();
+        LogError()()("ERROR loading inbox ledger.").Flush();
     }
     //      otErr << szFunc << ": ERROR loading inbox ledger.\n";
     //  else
@@ -1078,9 +1060,8 @@ auto OTCronItem::DropFinalReceiptToInbox(
     //      GetNotaryID(), OTLedger::inbox, true); // bGenerateFile=true
 
     if (!bSuccessLoading) {
-        LogError()(OT_PRETTY_CLASS())(
-            "ERROR loading or generating an inbox. (FAILED "
-            "WRITING RECEIPT!!).")
+        LogError()()("ERROR loading or generating an inbox. (FAILED "
+                     "WRITING RECEIPT!!).")
             .Flush();
         return false;
     } else {
@@ -1096,14 +1077,14 @@ auto OTCronItem::DropFinalReceiptToInbox(
         // That receipt has an "in reference to" field containing the
         // original cron item.
 
-        OT_ASSERT(false != bool(pTrans1));
+        assert_true(false != bool(pTrans1));
 
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api_.Factory().InternalSession().Item(
             *pTrans1, itemType::finalReceipt, identifier::Account{})};
 
-        OT_ASSERT(false != bool(pItem1));
+        assert_true(false != bool(pItem1));
 
         pItem1->SetStatus(Item::acknowledgement);
 
@@ -1183,7 +1164,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
 
         // Save inbox to storage. (File, DB, wherever it goes.)
         if (account) {
-            OT_ASSERT(ACCOUNT_ID == account.get().GetPurportedAccountID());
+            assert_true(ACCOUNT_ID == account.get().GetPurportedAccountID());
 
             if (account.get().SaveInbox(*theInbox)) {
                 account.Release();  // inbox hash has changed here, so we
@@ -1191,7 +1172,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
                                     // change.
             } else {
                 account.Abort();
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "Failed: account.get().VerifyAccount(*pServerNym).")
                     .Flush();
             }
@@ -1232,14 +1213,14 @@ auto OTCronItem::DropFinalReceiptToNymbox(
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
-    OT_ASSERT(nullptr != server_nym_);
+    assert_false(nullptr == server_nym_);
 
     Nym_p pServerNym(server_nym_);
 
     auto theLedger{
         api_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, GetNotaryID())};
 
-    OT_ASSERT(false != bool(theLedger));
+    assert_true(false != bool(theLedger));
 
     // Inbox will receive notification of something ALREADY DONE.
     bool bSuccessLoading = theLedger->LoadNymbox();
@@ -1249,16 +1230,15 @@ auto OTCronItem::DropFinalReceiptToNymbox(
     if (true == bSuccessLoading) {
         bSuccessLoading = theLedger->VerifyAccount(*pServerNym);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Unable to load Nymbox.").Flush();
+        LogError()()("Unable to load Nymbox.").Flush();
     }
     //    else
     //        bSuccessLoading        = theLedger->GenerateLedger(NYM_ID,
     // GetNotaryID(), OTLedger::nymbox, true); // bGenerateFile=true
 
     if (!bSuccessLoading) {
-        LogError()(OT_PRETTY_CLASS())(
-            "ERROR loading or generating a nymbox. (FAILED "
-            "WRITING RECEIPT!!).")
+        LogError()()("ERROR loading or generating a nymbox. (FAILED "
+                     "WRITING RECEIPT!!).")
             .Flush();
         return false;
     }
@@ -1281,7 +1261,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
         auto pItem1{api_.Factory().InternalSession().Item(
             *pTransaction, itemType::finalReceipt, identifier::Account{})};
 
-        OT_ASSERT(false != bool(pItem1));
+        assert_true(false != bool(pItem1));
 
         pItem1->SetStatus(Item::acknowledgement);
 
@@ -1386,8 +1366,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed trying to create finalReceipt.")
-            .Flush();
+        LogError()()("Failed trying to create finalReceipt.").Flush();
     }
 
     return false;  // unreachable.
@@ -1499,7 +1478,7 @@ auto OTCronItem::CancelBeforeActivation(
     const identity::Nym& theCancelerNym,
     const PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(!canceler_nym_id_.empty());
+    assert_false(canceler_nym_id_.empty());
 
     if (IsCanceled()) { return false; }
 
@@ -1574,9 +1553,8 @@ auto OTCronItem::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
             AddClosingTransactionNo(lClosingNumber);
         } else {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error in OTCronItem::ProcessXMLNode: "
-                "closingTransactionNumber field without value.")
+            LogError()()("Error in OTCronItem::ProcessXMLNode: "
+                         "closingTransactionNumber field without value.")
                 .Flush();
             return (-1);  // error condition
         }

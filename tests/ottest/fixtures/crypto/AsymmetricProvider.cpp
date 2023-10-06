@@ -11,7 +11,6 @@
 #include <string_view>
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "util/HDIndex.hpp"
 
@@ -83,7 +82,7 @@ Signatures::Signatures()
     , rsa_sign_1_(get_key(api_, ot::crypto::EcdsaCurve::invalid, Role::Sign))
     , rsa_sign_2_(get_key(api_, ot::crypto::EcdsaCurve::invalid, Role::Sign))
 {
-    OT_ASSERT(plaintext_1_ != plaintext_2_);
+    opentxs::assert_true(plaintext_1_ != plaintext_2_);
 }
 
 auto Signatures::get_hd_key(

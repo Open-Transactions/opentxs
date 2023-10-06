@@ -12,7 +12,6 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -83,16 +82,14 @@ struct Proposal::Imp {
             };
 
             if (lmdb_.StoreOrUpdate(table_, id.Bytes(), cb).first) {
-                LogVerbose()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
-                    " added ")
-                    .Flush();
+                LogVerbose()()("proposal ")(id, crypto_)(" added ").Flush();
 
                 return true;
             } else {
                 throw std::runtime_error{"failed to store proposal"};
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }
@@ -159,21 +156,16 @@ private:
 
             return true;
         } else if (lmdb_.Delete(table_, id.Bytes(), tx)) {
-            LogError()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
-                " cancelled")
-                .Flush();
+            LogError()()("proposal ")(id, crypto_)(" cancelled").Flush();
             data.cancelled_.emplace(id);
 
             return true;
         } else if (lmdb_.Exists(table_, id.Bytes())) {
-            LogError()(OT_PRETTY_CLASS())("failed to cancel proposal ")(
-                id, crypto_)
-                .Flush();
+            LogError()()("failed to cancel proposal ")(id, crypto_).Flush();
 
             return false;
         } else {
-            LogError()(OT_PRETTY_CLASS())("proposal ")(id, crypto_)(
-                " already cancelled ")
+            LogError()()("proposal ")(id, crypto_)(" already cancelled ")
                 .Flush();
             data.cancelled_.emplace(id);
 
@@ -198,7 +190,7 @@ Proposal::Proposal(
     const storage::lmdb::Database& lmdb) noexcept
     : imp_(std::make_unique<Imp>(crypto, lmdb))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Proposal::AddProposal(

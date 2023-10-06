@@ -17,7 +17,6 @@
 
 #include "internal/core/Amount.hpp"
 #include "internal/util/Literals.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -33,8 +32,8 @@ ScalePrivate::Calculated::Calculated(std::span<const Ratio> ratios) noexcept
     // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
     , absolute_max_(20 + bmp::log10(incoming_))
 {
-    OT_ASSERT(0 <= absolute_max_);
-    OT_ASSERT(absolute_max_ <= std::numeric_limits<std::uint8_t>::max());
+    assert_true(0 <= absolute_max_);
+    assert_true(absolute_max_ <= std::numeric_limits<std::uint8_t>::max());
 }
 
 auto ScalePrivate::Calculated::calculate_incoming_ratio(
@@ -76,7 +75,7 @@ ScalePrivate::Runtime::Runtime(
     , default_max_(defaultMaxDecimals)
     , ratios_(std::move(ratios))
 {
-    OT_ASSERT(default_max_.value_or(0) >= default_min_.value_or(0));
+    assert_true(default_max_.value_or(0) >= default_min_.value_or(0));
 }
 
 ScalePrivate::Runtime::Runtime(const Runtime&) noexcept = default;
@@ -277,7 +276,7 @@ auto ScalePrivate::Import(const std::string_view formatted) const noexcept
 
         return opentxs::internal::FloatToAmount(scaled);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }

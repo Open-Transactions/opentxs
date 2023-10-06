@@ -15,7 +15,6 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -74,7 +73,7 @@ auto Wallet::FeeEstimate() const noexcept -> std::optional<Amount>
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->FeeEstimate();
 }
@@ -83,7 +82,7 @@ auto Wallet::GetBalance() const noexcept -> Balance
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetBalance();
 }
@@ -92,7 +91,7 @@ auto Wallet::GetBalance(const crypto::Key& key) const noexcept -> Balance
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetBalance(key);
 }
@@ -101,7 +100,7 @@ auto Wallet::GetBalance(const identifier::Nym& owner) const noexcept -> Balance
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetBalance(owner);
 }
@@ -112,7 +111,7 @@ auto Wallet::GetBalance(
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetBalance(owner, subaccount);
 }
@@ -122,7 +121,7 @@ auto Wallet::GetOutputs(TxoState type, alloc::Default alloc) const noexcept
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(std::move(type), std::move(alloc));
 }
@@ -131,7 +130,7 @@ auto Wallet::GetOutputs(alloc::Default alloc) const noexcept -> Vector<UTXO>
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(std::move(alloc));
 }
@@ -143,7 +142,7 @@ auto Wallet::GetOutputs(
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(key, std::move(type), std::move(alloc));
 }
@@ -155,7 +154,7 @@ auto Wallet::GetOutputs(
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(owner, std::move(type), std::move(alloc));
 }
@@ -165,7 +164,7 @@ auto Wallet::GetOutputs(const identifier::Nym& owner, alloc::Default alloc)
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(owner, std::move(alloc));
 }
@@ -178,7 +177,7 @@ auto Wallet::GetOutputs(
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(
         owner, subaccount, std::move(type), std::move(alloc));
@@ -191,7 +190,7 @@ auto Wallet::GetOutputs(
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetOutputs(owner, subaccount, std::move(alloc));
 }
@@ -201,7 +200,7 @@ auto Wallet::GetTags(const block::Outpoint& output) const noexcept
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->GetTags(output);
 }
@@ -210,7 +209,7 @@ auto Wallet::Height() const noexcept -> block::Height
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->Height();
 }
@@ -219,7 +218,7 @@ auto Wallet::StartRescan() const noexcept -> bool
 {
     auto shared{shared_};
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     return shared->StartRescan();
 }
@@ -228,8 +227,8 @@ auto Wallet::Init(
     std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     if (node->Internal().GetConfig().disable_wallet_) {
         shared_ = std::make_shared<Shared>();
@@ -244,12 +243,12 @@ auto Wallet::Init(
             shared_,
             batchID);
 
-        OT_ASSERT(actor);
+        assert_false(nullptr == actor);
 
         actor->Init(actor);
     }
 
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 }
 
 Wallet::~Wallet() = default;

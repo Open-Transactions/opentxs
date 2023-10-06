@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -78,14 +77,11 @@ Message::Message(
                           bip155.ToAddress(api, chain, version));
 
                       if (false == address.IsValid()) {
-                          LogError()(OT_PRETTY_CLASS())(
-                              "error decoding address")
-                              .Flush();
+                          LogError()()("error decoding address").Flush();
                           out.pop_back();
                       }
                   } else {
-                      LogError()(OT_PRETTY_CLASS())("ignoring invalid addr")
-                          .Flush();
+                      LogError()()("ignoring invalid addr").Flush();
                   }
               }
 

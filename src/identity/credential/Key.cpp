@@ -26,7 +26,6 @@
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -132,9 +131,7 @@ auto Key::addKeyCredentialtoSerializedCredential(
         new proto::KeyCredential);
 
     if (!keyCredential) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to allocate keyCredential protobuf.")
-            .Flush();
+        LogError()()("Failed to allocate keyCredential protobuf.").Flush();
 
         return false;
     }
@@ -253,7 +250,7 @@ auto Key::GetKeypair(
         }
     }
 
-    OT_ASSERT(nullptr != output);
+    assert_false(nullptr == output);
 
     if (crypto::asymmetric::Algorithm::Null != type) {
         if (type != output->GetPublicKey().Type()) {
@@ -321,10 +318,9 @@ auto Key::GetPublicKeysBySignature(
                         listOutput, theSignature);
                     break;  // bInclusive=false by default
                 default:
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Unexpected keytype value in signature "
-                        "metadata: ")(theSignature.getMetaData().GetKeyType())(
-                        " (Failure)!")
+                    LogError()()("Unexpected keytype value in signature "
+                                 "metadata: ")(
+                        theSignature.getMetaData().GetKeyType())(" (Failure)!")
                         .Flush();
                     return 0;
             }
@@ -346,9 +342,8 @@ auto Key::GetPublicKeysBySignature(
                 listOutput, theSignature, true);
             break;  // bInclusive=true
         default:
-            LogError()(OT_PRETTY_CLASS())(
-                "Unexpected value for cKeyType (should be 0, A, E, or "
-                "S): ")(cKeyType)(".")
+            LogError()()("Unexpected value for cKeyType (should be 0, A, E, or "
+                         "S): ")(cKeyType)(".")
                 .Flush();
             return 0;
     }
@@ -451,7 +446,7 @@ auto Key::SelfSign(
             opentxs::crypto::asymmetric::Role::Sign,
             crypto::HashType::Error);
 
-        OT_ASSERT(havePublicSig);
+        assert_true(havePublicSig);
 
         if (havePublicSig) {
             publicSignature->CopyFrom(signature);
@@ -471,7 +466,7 @@ auto Key::SelfSign(
         opentxs::crypto::asymmetric::Role::Sign,
         crypto::HashType::Error);
 
-    OT_ASSERT(havePrivateSig);
+    assert_true(havePrivateSig);
 
     if (havePrivateSig) {
         privateSignature->CopyFrom(signature);
@@ -579,20 +574,20 @@ auto Key::Verify(
         case crypto::asymmetric::Role::Error:
         case crypto::asymmetric::Role::Encrypt:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Can not verify signatures with the "
-                                          "specified key.")
+            LogError()()("Can not verify signatures with the "
+                         "specified key.")
                 .Flush();
             return false;
         }
     }
 
-    OT_ASSERT(nullptr != keyToUse);
+    assert_false(nullptr == keyToUse);
 
     try {
 
         return keyToUse->GetPublicKey().Internal().Verify(plaintext, sig);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to verify signature.").Flush();
+        LogError()()("Failed to verify signature.").Flush();
 
         return false;
     }
@@ -617,9 +612,8 @@ auto Key::verify_internally() const -> bool
 
     // All KeyCredentials must sign themselves
     if (!VerifySignedBySelf()) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed verifying key credential: it's not "
-            "signed by itself (its own signing key).")
+        LogConsole()()("Failed verifying key credential: it's not "
+                       "signed by itself (its own signing key).")
             .Flush();
         return false;
     }
@@ -634,7 +628,7 @@ auto Key::VerifySig(
     std::shared_ptr<Base::SerializedType> serialized;
 
     if ((crypto::asymmetric::Mode::Private != mode_) && asPrivate) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Can not serialize a public credential as a private credential.")
             .Flush();
         return false;
@@ -659,8 +653,7 @@ auto Key::VerifySignedBySelf() const -> bool
     auto publicSig = SelfSignature(PUBLIC_VERSION);
 
     if (!publicSig) {
-        LogError()(OT_PRETTY_CLASS())("Could not find public self signature.")
-            .Flush();
+        LogError()()("Could not find public self signature.").Flush();
 
         return false;
     }
@@ -668,8 +661,7 @@ auto Key::VerifySignedBySelf() const -> bool
     bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
 
     if (!goodPublic) {
-        LogError()(OT_PRETTY_CLASS())("Could not verify public self signature.")
-            .Flush();
+        LogError()()("Could not verify public self signature.").Flush();
 
         return false;
     }
@@ -678,9 +670,7 @@ auto Key::VerifySignedBySelf() const -> bool
         auto privateSig = SelfSignature(PRIVATE_VERSION);
 
         if (!privateSig) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Could not find private self signature.")
-                .Flush();
+            LogError()()("Could not find private self signature.").Flush();
 
             return false;
         }
@@ -688,9 +678,7 @@ auto Key::VerifySignedBySelf() const -> bool
         bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
 
         if (!goodPrivate) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Could not verify private self signature.")
-                .Flush();
+            LogError()()("Could not verify private self signature.").Flush();
 
             return false;
         }

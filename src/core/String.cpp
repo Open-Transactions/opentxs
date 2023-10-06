@@ -22,7 +22,6 @@ extern "C" {
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NymFile.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -118,11 +117,9 @@ auto String::replace_chars(
 
 auto String::safe_strlen(const char* s, std::size_t max) -> std::size_t
 {
-    OT_ASSERT_MSG(
+    assert_true(
         max <= MAX_STRING_LENGTH,
-        "OT_String::safe_strlen: ASSERT: "
-        "max length passed in is longer "
-        "than allowed.\n");
+        "max length passed in is longer than allowed.");
 
     return strnlen(s, max);
 }
@@ -481,10 +478,9 @@ auto String::DecodeIfArmored(const api::Crypto& crypto, bool bEscapedIsAllowed)
         bArmoredAndALSOescaped = true;
 
         if (!bEscapedIsAllowed) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Armored and escaped value passed in, "
-                "but escaped are forbidden here. "
-                "(Returning).")
+            LogError()()("Armored and escaped value passed in, "
+                         "but escaped are forbidden here. "
+                         "(Returning).")
                 .Flush();
             return false;
         }
@@ -513,9 +509,9 @@ auto String::DecodeIfArmored(const api::Crypto& crypto, bool bEscapedIsAllowed)
         // We're doing this: "-----BEGIN OT ARMORED" (Should worked for
         // escaped as well, here.)
         {
-            LogError()(OT_PRETTY_CLASS())("Error loading string contents from "
-                                          "ascii-armored encoding. "
-                                          "Contents: ")(Get())(".")
+            LogError()()("Error loading string contents from "
+                         "ascii-armored encoding. "
+                         "Contents: ")(Get())(".")
                 .Flush();
             return false;
         } else  // success loading the actual contents out of the ascii-armored
@@ -585,7 +581,7 @@ void String::LowLevelSet(
     const char* new_string,
     std::uint32_t nEnforcedMaxLength)
 {
-    OT_ASSERT(internal_.empty());  // otherwise memory leak.
+    assert_true(internal_.empty());  // otherwise memory leak.
 
     if (nullptr != new_string) {
         std::uint32_t nLength =
@@ -602,12 +598,11 @@ void String::LowLevelSet(
         // don't bother allocating memory for a 0 length string.
         if (0 == nLength) { return; }
 
-        OT_ASSERT_MSG(
+        assert_true(
             nLength < (MAX_STRING_LENGTH - 10),
-            "ASSERT: OTString::LowLevelSet: Exceeded "
-            "MAX_STRING_LENGTH! (String would not have fully fit "
-            "anyway--it would have been truncated here, potentially "
-            "causing data corruption.)");  // 10 being a buffer.
+            "Exceeded MAX_STRING_LENGTH! (String would not have fully fit "
+            "anyway--it would have been truncated here, potentially causing "
+            "data corruption.)");  // 10 being a buffer.
 
         internal_ = make_string(new_string, nLength);
 
@@ -621,19 +616,18 @@ void String::LowLevelSet(
 
 void String::LowLevelSetStr(const String& strBuf)
 {
-    OT_ASSERT(internal_.empty());  // otherwise memory leak.
+    assert_true(internal_.empty());  // otherwise memory leak.
 
     if (strBuf.Exists()) {
         length_ = (MAX_STRING_LENGTH > strBuf.length_)
                       ? strBuf.length_
                       : (MAX_STRING_LENGTH - 1);
 
-        OT_ASSERT_MSG(
+        assert_true(
             length_ < (MAX_STRING_LENGTH - 10),
-            "ASSERT: OTString::LowLevelSetStr: Exceeded "
-            "MAX_STRING_LENGTH! (String would not have fully fit "
-            "anyway--it would have been truncated here, potentially "
-            "causing data corruption.)");  // 10 being a buffer.
+            "Exceeded MAX_STRING_LENGTH! (String would not have fully fit "
+            "anyway--it would have been truncated here, potentially causing "
+            "data corruption.)");  // 10 being a buffer.
 
         internal_ = make_string(strBuf.internal_.data(), length_);
     }

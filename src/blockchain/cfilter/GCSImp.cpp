@@ -22,7 +22,6 @@
 #include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -332,7 +331,7 @@ auto GCS::Encode(Writer&& cb) const noexcept -> bool
     const auto max = std::numeric_limits<std::size_t>::max() - bytes.size();
 
     if (max < compressed_.size()) {
-        LogError()(OT_PRETTY_CLASS())("filter is too large to encode").Flush();
+        LogError()()("filter is too large to encode").Flush();
 
         return false;
     }
@@ -341,8 +340,7 @@ auto GCS::Encode(Writer&& cb) const noexcept -> bool
     auto out = cb.Reserve(target);
 
     if (false == out.IsValid(target)) {
-        LogError()(OT_PRETTY_CLASS())("failed to allocate space for output")
-            .Flush();
+        LogError()()("failed to allocate space for output").Flush();
 
         return false;
     }
@@ -529,7 +527,7 @@ auto GCS::Test(const ReadView target, allocator_type monotonic) const noexcept
     }();
     const auto set = hashed_set_construct(input, monotonic);
 
-    OT_ASSERT(1 == set.size());
+    assert_true(1 == set.size());
 
     const auto& hash = set.front();
 

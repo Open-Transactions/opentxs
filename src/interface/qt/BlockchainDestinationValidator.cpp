@@ -10,7 +10,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui
 {
@@ -68,7 +68,7 @@ struct BlockchainDestinationValidator final : public Super {
             return QValidator::State::Intermediate;
         }
 
-        OT_ASSERT(0 < chains.size());
+        assert_true(0 < chains.size());
 
         const auto type = *chains.begin();
         const auto chain = print(type);

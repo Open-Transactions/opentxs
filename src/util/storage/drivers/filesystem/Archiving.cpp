@@ -15,7 +15,6 @@
 
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -42,7 +41,7 @@ auto StorageFSArchive(
 
         return std::make_unique<ReturnType>(crypto, config, folder, key);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -87,15 +86,12 @@ auto Archiving::calculate_path(
 
     if (8_uz < key.size()) {
         if (false == sync(level2)) {
-            LogError()(OT_PRETTY_CLASS())("Unable to sync directory ")(
-                level2)(".")
-                .Flush();
+            LogError()()("Unable to sync directory ")(level2)(".").Flush();
         }
     }
 
     if (false == sync(level1)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to sync directory ")(level1)
-            .Flush();
+        LogError()()("Unable to sync directory ")(level1).Flush();
     }
 
     return fs::path{directory} / key;

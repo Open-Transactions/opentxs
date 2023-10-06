@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/storage/file/Index.hpp"  // IWYU pragma: keep
@@ -38,7 +37,7 @@ Mapped::Mapped(
           positionTable,
           positionKey))
 {
-    OT_ASSERT(mapped_private_);
+    assert_true(mapped_private_);
 }
 
 auto Mapped::Erase(const Index& index, lmdb::Transaction& tx) noexcept -> bool
@@ -113,7 +112,7 @@ auto Mapped::Write(
 {
     const auto count = data.size();
 
-    OT_ASSERT(files.size() == count);
+    assert_true(files.size() == count);
 
     auto maps = FileMap{monotonic};
 
@@ -124,7 +123,7 @@ auto Mapped::Write(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Mapped))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

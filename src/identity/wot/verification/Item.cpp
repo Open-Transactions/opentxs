@@ -57,8 +57,7 @@ auto Factory::VerificationItem(
             version,
             superscedes);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification item: ")(e.what())
+        LogError()()("Failed to construct verification item: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -77,8 +76,7 @@ auto Factory::VerificationItem(
 
         return new ReturnType(parent, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification item: ")(e.what())
+        LogError()()("Failed to construct verification item: ")(e.what())
             .Flush();
 
         return nullptr;

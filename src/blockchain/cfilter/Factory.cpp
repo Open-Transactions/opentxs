@@ -72,7 +72,7 @@ auto GCS(
             std::move(hashed),
             std::move(compressed));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -97,7 +97,7 @@ auto GCS(
             in.key(),
             in.filter());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -119,7 +119,7 @@ auto GCS(
 
         return GCS(api, proto, alloc);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -142,7 +142,7 @@ auto GCS(
         return pmr::construct<ReturnType>(
             alloc, api, bits, fpRate, filterElementCount, key, filter);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -172,7 +172,7 @@ auto GCS(
             key,
             encoded);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -220,7 +220,7 @@ auto GCS(
             std::move(hashed),
             gcs::GolombEncode(params.first, hashed, alloc));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }

@@ -73,7 +73,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"
 #include "internal/serialization/protobuf/verify/Envelope.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -155,8 +154,8 @@ Factory::Factory(const api::Session& api, const api::Factory& parent)
     , p_symmetric_(factory::Symmetric(api_))
     , symmetric_(*p_symmetric_)
 {
-    OT_ASSERT(p_asymmetric_);
-    OT_ASSERT(p_symmetric_);
+    assert_false(nullptr == p_asymmetric_);
+    assert_false(nullptr == p_symmetric_);
 }
 
 auto Factory::AsymmetricKey(
@@ -220,8 +219,7 @@ auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized) const
 
         return opentxs::crypto::asymmetric::Key{std::move(output)};
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate asymmetric key")
-            .Flush();
+        LogError()()("Failed to instantiate asymmetric key").Flush();
 
         return {};
     }
@@ -590,7 +588,7 @@ auto Factory::BlockHeader(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
+        LogError()()(e.what())().Flush();
 
         return {alloc};
     }
@@ -642,7 +640,7 @@ auto Factory::BlockHeaderFromNative(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what())().Flush();
+        LogError()()(e.what())().Flush();
 
         return {alloc};
     }
@@ -653,7 +651,7 @@ auto Factory::Cheque(const OTTransaction& receipt) const
 {
     std::unique_ptr<opentxs::Cheque> output{new opentxs::Cheque{api_}};
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     auto serializedItem = String::Factory();
     receipt.GetReferenceString(serializedItem);
@@ -662,15 +660,13 @@ auto Factory::Cheque(const OTTransaction& receipt) const
         receipt.GetRealNotaryID(),
         receipt.GetReferenceToNum())};
 
-    OT_ASSERT(false != bool(item));
+    assert_true(false != bool(item));
 
     auto serializedCheque = String::Factory();
     item->GetAttachment(serializedCheque);
     const auto loaded = output->LoadContractFromString(serializedCheque);
 
-    if (false == loaded) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load cheque.").Flush();
-    }
+    if (false == loaded) { LogError()()("Failed to load cheque.").Flush(); }
 
     return output;
 }
@@ -817,7 +813,7 @@ auto Factory::Contract(const opentxs::String& strInput) const
                                                           // chars long.
         {
             pContract.reset(new OTSmartContract(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         }
 
         if (strFirstLine->Contains(
@@ -825,48 +821,46 @@ auto Factory::Contract(const opentxs::String& strInput) const
                                                          // chars long.
         {
             pContract.reset(new OTPaymentPlan(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains(
                        "-----BEGIN SIGNED TRADE-----"))  // this string is 28
                                                          // chars long.
         {
             pContract.reset(new OTTrade(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED OFFER-----")) {
             pContract.reset(new OTOffer(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED INVOICE-----")) {
             pContract.reset(new opentxs::Cheque(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED VOUCHER-----")) {
             pContract.reset(new opentxs::Cheque(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED CHEQUE-----")) {
             pContract.reset(new opentxs::Cheque(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED MESSAGE-----")) {
             pContract.reset(new opentxs::Message(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED MINT-----")) {
             auto mint = Mint();
             pContract.reset(mint.Release());
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains("-----BEGIN SIGNED FILE-----")) {
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         }
 
         // The string didn't match any of the options in the factory.
         //
         if (!pContract) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Object type not yet supported by class "
-                "factory: ")(strFirstLine.get())
+            LogConsole()()("Object type not yet supported by class "
+                           "factory: ")(strFirstLine.get())
                 .Flush();
             // Does the contract successfully load from the string passed in?
         } else if (!pContract->LoadContractFromString(strContract)) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failed loading contract from string (first "
-                "line): ")(strFirstLine.get())
+            LogConsole()()("Failed loading contract from string (first "
+                           "line): ")(strFirstLine.get())
                 .Flush();
         } else {
             return pContract;
@@ -883,18 +877,15 @@ auto Factory::CronItem(const String& strCronItem) const
     std::array<char, 45> buf{};
 
     if (!strCronItem.Exists()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Empty string was passed in (returning nullptr).")
-            .Flush();
+        LogError()()("Empty string was passed in (returning nullptr).").Flush();
         return nullptr;
     }
 
     auto strContract = String::Factory(strCronItem.Get());
 
     if (!strContract->DecodeIfArmored(api_.Crypto(), false)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Input string apparently was encoded and "
-            "then failed decoding. Contents: ")(strCronItem)(".")
+        LogError()()("Input string apparently was encoded and "
+                     "then failed decoding. Contents: ")(strCronItem)(".")
             .Flush();
         return nullptr;
     }
@@ -1105,11 +1096,11 @@ auto Factory::Item(const String& serialized) const
         const auto loaded = output->LoadContractFromString(serialized);
 
         if (false == loaded) {
-            LogError()(OT_PRETTY_CLASS())("Unable to deserialize.").Flush();
+            LogError()()("Unable to deserialize.").Flush();
             output.reset();
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Unable to instantiate.").Flush();
+        LogError()()("Unable to instantiate.").Flush();
     }
 
     return output;
@@ -1162,8 +1153,8 @@ auto Factory::Item(
     std::int64_t lTransactionNumber) const -> std::unique_ptr<opentxs::Item>
 {
     if (!strItem.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strItem is empty. (Expected an "
-                                      "item).")
+        LogError()()("strItem is empty. (Expected an "
+                     "item).")
             .Flush();
         return nullptr;
     }
@@ -1230,7 +1221,7 @@ auto Factory::Keypair(
     auto privateKey = asymmetric_.NewKey(params, role, version, reason);
 
     if (false == privateKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
+        LogError()()("Failed to derive private key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1238,7 +1229,7 @@ auto Factory::Keypair(
     auto publicKey = privateKey.asPublic();
 
     if (false == publicKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive public key").Flush();
+        LogError()()("Failed to derive public key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1258,8 +1249,7 @@ auto Factory::Keypair(
     auto pPrivateKey = asymmetric_.Internal().InstantiateKey(serializedPrivkey);
 
     if (false == pPrivateKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate private key")
-            .Flush();
+        LogError()()("Failed to instantiate private key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1267,8 +1257,7 @@ auto Factory::Keypair(
     auto pPublicKey = asymmetric_.Internal().InstantiateKey(serializedPubkey);
 
     if (false == pPublicKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate public key")
-            .Flush();
+        LogError()()("Failed to instantiate public key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1290,8 +1279,7 @@ auto Factory::Keypair(const proto::AsymmetricKey& serializedPubkey) const
     auto pPublicKey = asymmetric_.Internal().InstantiateKey(serializedPubkey);
 
     if (false == pPublicKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate public key")
-            .Flush();
+        LogError()()("Failed to instantiate public key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1330,7 +1318,7 @@ auto Factory::Keypair(
         } break;
         case opentxs::crypto::asymmetric::Role::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid key role").Flush();
+            LogError()()("Invalid key role").Flush();
 
             return OTKeypair{factory::Keypair()};
         }
@@ -1346,7 +1334,7 @@ auto Factory::Keypair(
         api_.Crypto().Seed().GetHDKey(fingerprint, curve, path, role, reason);
 
     if (false == privateKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive private key").Flush();
+        LogError()()("Failed to derive private key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1354,7 +1342,7 @@ auto Factory::Keypair(
     auto publicKey = privateKey.asPublic();
 
     if (false == publicKey.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to derive public key").Flush();
+        LogError()()("Failed to derive public key").Flush();
 
         return OTKeypair{factory::Keypair()};
     }
@@ -1485,8 +1473,7 @@ auto Factory::Mint(const otx::blind::CashType type) const noexcept
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("unsupported cash type: ")(
-                opentxs::print(type))
+            LogError()()("unsupported cash type: ")(opentxs::print(type))
                 .Flush();
 
             return otx::blind::Mint{api_};
@@ -1511,8 +1498,7 @@ auto Factory::Mint(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("unsupported cash type: ")(
-                opentxs::print(type))
+            LogError()()("unsupported cash type: ")(opentxs::print(type))
                 .Flush();
 
             return otx::blind::Mint{api_};
@@ -1540,8 +1526,7 @@ auto Factory::Mint(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("unsupported cash type: ")(
-                opentxs::print(type))
+            LogError()()("unsupported cash type: ")(opentxs::print(type))
                 .Flush();
 
             return otx::blind::Mint{api_};
@@ -1785,9 +1770,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const UnallocatedCString& message) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1798,9 +1781,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const bool isPayment) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1810,9 +1791,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] otx::blind::Purse&& purse) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1823,9 +1802,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const VersionNumber version) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1835,9 +1812,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const VersionNumber version) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1847,9 +1822,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const proto::PeerObject& serialized) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -1860,9 +1833,7 @@ auto Factory::PeerObject(
     [[maybe_unused]] const opentxs::PasswordPrompt& reason) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Peer objects are only supported in client sessions")
-        .Flush();
+    LogError()()("Peer objects are only supported in client sessions").Flush();
 
     return {};
 }
@@ -2040,8 +2011,7 @@ auto Factory::Scriptable(const String& strInput) const
     std::array<char, 45> buf{};
 
     if (!strInput.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failure: Input string is empty.")
-            .Flush();
+        LogError()()("Failure: Input string is empty.").Flush();
         return nullptr;
     }
 
@@ -2051,7 +2021,7 @@ auto Factory::Scriptable(const String& strInput) const
             api_.Crypto(), false))  // bEscapedIsAllowed=true
                                     // by default.
     {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Input string apparently was encoded and then failed decoding. "
             "Contents: ")(strInput)
             .Flush();
@@ -2088,7 +2058,7 @@ auto Factory::Scriptable(const String& strInput) const
                                                              // 36 chars long.
     {
         pItem.reset(new OTSmartContract(api_));
-        OT_ASSERT(false != bool(pItem));
+        assert_true(false != bool(pItem));
     }
 
     // The string didn't match any of the options in the factory.
@@ -2341,7 +2311,7 @@ auto Factory::Transaction(const String& strInput) const
                                                         // chars long.
         {
             pContract.reset(new OTTransaction(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains(
                        "-----BEGIN SIGNED TRANSACTION ITEM-----"))  // this
                                                                     // string is
@@ -2349,18 +2319,18 @@ auto Factory::Transaction(const String& strInput) const
                                                                     // long.
         {
             pContract.reset(new opentxs::Item(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains(
                        "-----BEGIN SIGNED LEDGER-----"))  // this string is 29
                                                           // chars long.
         {
             pContract.reset(new opentxs::Ledger(api_));
-            OT_ASSERT(false != bool(pContract));
+            assert_true(false != bool(pContract));
         } else if (strFirstLine->Contains(
                        "-----BEGIN SIGNED ACCOUNT-----"))  // this string is 30
                                                            // chars long.
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
         // The string didn't match any of the options in the factory.
@@ -2369,9 +2339,8 @@ auto Factory::Transaction(const String& strInput) const
         //        const char* szFunc = "OTTransactionType::TransactionFactory";
         // The string didn't match any of the options in the factory.
         if (nullptr == pContract) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Object type not yet supported by class "
-                "factory: ")(strFirstLine.get())
+            LogConsole()()("Object type not yet supported by class "
+                           "factory: ")(strFirstLine.get())
                 .Flush();
             return nullptr;
         }
@@ -2398,9 +2367,8 @@ auto Factory::Transaction(const String& strInput) const
 
             return pContract;
         } else {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failed loading contract from string (first "
-                "line): ")(strFirstLine.get())
+            LogConsole()()("Failed loading contract from string (first "
+                           "line): ")(strFirstLine.get())
                 .Flush();
         }
     }
@@ -2529,7 +2497,7 @@ auto Factory::Transaction(
         theNotaryID,
         lTransactionNum,
         theOriginType));
-    OT_ASSERT(false != bool(transaction));
+    assert_true(false != bool(transaction));
 
     transaction->type_ = theType;
 

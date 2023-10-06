@@ -7,12 +7,12 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::otx::blind
@@ -75,7 +75,7 @@ namespace opentxs::otx::blind
 Purse::Purse(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 
     imp_->parent_ = this;
 }
@@ -83,13 +83,13 @@ Purse::Purse(Imp* imp) noexcept
 Purse::Purse() noexcept
     : Purse(std::make_unique<Imp>().release())
 {
-    OT_ASSERT(this == imp_->parent_);
+    assert_true(this == imp_->parent_);
 }
 
 Purse::Purse(const Purse& rhs) noexcept
     : Purse(rhs.imp_->clone())
 {
-    OT_ASSERT(this == imp_->parent_);
+    assert_true(this == imp_->parent_);
 }
 
 Purse::Purse(Purse&& rhs) noexcept
@@ -97,8 +97,8 @@ Purse::Purse(Purse&& rhs) noexcept
 {
     swap(rhs);
 
-    OT_ASSERT(this == imp_->parent_);
-    OT_ASSERT(nullptr != rhs.imp_->parent_);
+    assert_true(this == imp_->parent_);
+    assert_false(nullptr == rhs.imp_->parent_);
 }
 
 Purse::operator bool() const noexcept { return imp_->IsValid(); }
@@ -186,8 +186,8 @@ auto Purse::swap(Purse& rhs) noexcept -> void
     std::swap(imp_, rhs.imp_);
     std::swap(imp_->parent_, rhs.imp_->parent_);
 
-    OT_ASSERT(this == imp_->parent_);
-    OT_ASSERT(nullptr != rhs.imp_->parent_);
+    assert_true(this == imp_->parent_);
+    assert_false(nullptr == rhs.imp_->parent_);
 }
 
 auto Purse::Type() const -> blind::CashType { return imp_->Type(); }

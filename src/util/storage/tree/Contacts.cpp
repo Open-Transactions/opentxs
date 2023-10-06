@@ -14,6 +14,7 @@
 #include <StorageIDList.pb.h>
 #include <atomic>
 #include <cstdlib>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 
@@ -23,7 +24,6 @@
 #include "internal/serialization/protobuf/verify/Contact.hpp"
 #include "internal/serialization/protobuf/verify/StorageContacts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -43,7 +43,13 @@ Contacts::Contacts(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), CurrentVersion)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          CurrentVersion)
     , merge_()
     , merged_()
     , nym_contact_index_()
@@ -68,7 +74,7 @@ auto Contacts::Delete(const identifier::Generic& id) -> bool
 void Contacts::extract_nyms(const Lock& lock, const proto::Contact& data) const
 {
     if (false == verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
+        LogError()()("Lock failure.").Flush();
 
         abort();
     }
@@ -131,8 +137,8 @@ auto Contacts::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -186,7 +192,7 @@ auto Contacts::NymOwner(const identifier::Nym& nym) const -> identifier::Generic
 void Contacts::reconcile_maps(const Lock& lock, const proto::Contact& data)
 {
     if (false == verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
+        LogError()()("Lock failure.").Flush();
 
         abort();
     }
@@ -229,7 +235,7 @@ void Contacts::reverse_merged()
 auto Contacts::save(const Lock& lock) const -> bool
 {
     if (false == verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
+        LogError()()("Lock failure.").Flush();
 
         abort();
     }
@@ -318,8 +324,8 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
     auto& hash = std::get<0>(metadata);
 
     if (existingKey) {
-        const bool revisionCheck = check_revision<proto::Contact>(
-            (OT_PRETTY_CLASS()), incomingRevision, metadata);
+        const bool revisionCheck =
+            check_revision<proto::Contact>(incomingRevision, metadata);
 
         if (false == revisionCheck) {
             // We're trying to save a contact with a lower revision than has

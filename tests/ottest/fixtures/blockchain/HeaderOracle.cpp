@@ -14,7 +14,6 @@
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -34,7 +33,7 @@ HeaderOracle_base::HeaderOracle_base(const b::Type type)
         api_.Network().Blockchain().Start(type);
         auto handle = api_.Network().Blockchain().GetChain(type);
 
-        OT_ASSERT(handle.IsValid());
+        opentxs::assert_true(handle.IsValid());
 
         return handle;
     }())

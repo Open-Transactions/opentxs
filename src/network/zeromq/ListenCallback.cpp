@@ -9,10 +9,10 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Log.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ListenCallback>;
 
@@ -40,7 +40,7 @@ ListenCallback::ListenCallback(zeromq::ListenCallback::ReceiveCallback callback)
     auto handle = callback_.lock();
     const auto& cb = *handle;
 
-    OT_ASSERT(cb);
+    assert_false(nullptr == cb);
 }
 
 auto ListenCallback::clone() const -> ListenCallback*

@@ -14,7 +14,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -134,8 +134,8 @@ auto BlockchainBalanceItem::reindex(
     const auto text = extract_custom<UnallocatedCString>(custom, 4);
     const auto conf = extract_custom<int>(custom, 6);
 
-    OT_ASSERT(chain_ == chain);
-    OT_ASSERT(txid_ == txid);
+    assert_true(chain_ == chain);
+    assert_true(txid_ == txid);
 
     eLock lock{shared_lock_};
     const auto oldAmount = amount_;

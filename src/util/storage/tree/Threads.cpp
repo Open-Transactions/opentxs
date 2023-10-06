@@ -11,9 +11,9 @@
 #include <atomic>
 #include <cstdlib>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <memory>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -24,7 +24,6 @@
 #include "internal/serialization/protobuf/verify/StorageBlockchainTransactions.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -48,7 +47,13 @@ Threads::Threads(
     const Hash& hash,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 3)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          3)
     , threads_()
     , mail_inbox_(mailInbox)
     , mail_outbox_(mailOutbox)
@@ -67,14 +72,14 @@ auto Threads::AddIndex(
 {
     Lock lock(blockchain_.lock_);
 
-    OT_ASSERT(false == txid.empty());
+    assert_false(txid.empty());
 
     auto& vector = blockchain_.map_[txid];
 
     if (thread.empty()) {
         if (0 < vector.size()) { vector.clear(); }
 
-        OT_ASSERT(0 == vector.size());
+        assert_true(0 == vector.size());
     } else {
         for (auto i = vector.begin(); i != vector.end();) {
             if ((*i).empty()) {
@@ -125,7 +130,7 @@ auto Threads::create(
     const UnallocatedSet<identifier::Generic>& participants)
     -> identifier::Generic
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     std::unique_ptr<tree::Thread> newThread(new tree::Thread(
         crypto_,
@@ -136,10 +141,7 @@ auto Threads::create(
         mail_inbox_,
         mail_outbox_));
 
-    if (!newThread) {
-        std::cerr << __func__ << ": Failed to instantiate thread." << std::endl;
-        abort();
-    }
+    if (!newThread) { LogAbort()()("failed to instantiate thread").Abort(); }
 
     const auto index = item_map_[id];
     const auto hash = std::get<0>(index);
@@ -152,7 +154,7 @@ auto Threads::create(
         node.swap(newThread);
         save(lock);
     } else {
-        LogError()(OT_PRETTY_CLASS())("Thread already exists.").Flush();
+        LogError()()("Thread already exists.").Flush();
     }
 
     return id;
@@ -189,14 +191,12 @@ auto Threads::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
 
         for (const auto& id : index->localnymid()) {
             const auto hash = read(id);
-            log(OT_PRETTY_CLASS())(name_)(
-                ": adding blockchain transaction index hash ")(hash)
+            log()(name_)(": adding blockchain transaction index hash ")(hash)
                 .Flush();
             out.emplace_back(hash);
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to load root object file ")(root_)
-            .Flush();
+        LogError()()("failed to load root object file ")(root_).Flush();
 
         return false;
     }
@@ -273,8 +273,8 @@ auto Threads::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -290,7 +290,7 @@ auto Threads::List(const bool unreadOnly) const -> ObjectList
         const auto& alias = std::get<1>(it.second);
         auto* thread = Threads::thread(threadID, lock);
 
-        OT_ASSERT(nullptr != thread);
+        assert_false(nullptr == thread);
 
         if (0 < thread->UnreadCount()) {
             output.emplace_back(threadID.asBase58(crypto_), alias);
@@ -322,10 +322,7 @@ auto Threads::thread(
     const identifier::Generic& id,
     const std::unique_lock<std::mutex>& lock) const -> tree::Thread*
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     const auto& index = item_map_[id];
     const auto hash = std::get<0>(index);
@@ -343,11 +340,7 @@ auto Threads::thread(
             mail_inbox_,
             mail_outbox_));
 
-        if (!node) {
-            std::cerr << __func__ << ": Failed to instantiate thread."
-                      << std::endl;
-            abort();
-        }
+        if (!node) { LogAbort()()("failed to instantiate thread").Abort(); }
     }
 
     return node.get();
@@ -367,8 +360,7 @@ auto Threads::Rename(
     auto it = item_map_.find(existingID);
 
     if (item_map_.end() == it) {
-        LogError()(OT_PRETTY_CLASS())("Thread ")(existingID, crypto_)(
-            " does not exist.")
+        LogError()()("Thread ")(existingID, crypto_)(" does not exist.")
             .Flush();
 
         return false;
@@ -380,17 +372,16 @@ auto Threads::Rename(
 
     auto threadItem = threads_.find(existingID);
 
-    OT_ASSERT(threads_.end() != threadItem);
+    assert_true(threads_.end() != threadItem);
 
     auto& oldThread = threadItem->second;
 
-    OT_ASSERT(oldThread);
+    assert_false(nullptr == oldThread);
 
     std::unique_ptr<tree::Thread> newThread{nullptr};
 
     if (false == oldThread->Rename(newID)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to rename thread ")(
-            existingID, crypto_)(".")
+        LogError()()("Failed to rename thread ")(existingID, crypto_)(".")
             .Flush();
 
         return false;
@@ -422,10 +413,7 @@ auto Threads::RemoveIndex(
 
 auto Threads::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     auto serialized = serialize();
 
@@ -439,15 +427,9 @@ void Threads::save(
     const std::unique_lock<std::mutex>& lock,
     const identifier::Generic& id)
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
-    if (nullptr == nym) {
-        std::cerr << __func__ << ": Null target" << std::endl;
-        abort();
-    }
+    if (nullptr == nym) { LogAbort()()("null target").Abort(); }
 
     auto& index = item_map_[id];
     auto& hash = std::get<0>(index);
@@ -455,10 +437,7 @@ void Threads::save(
     hash = nym->Root();
     alias = nym->Alias();
 
-    if (!save(lock)) {
-        std::cerr << __func__ << ": Save error" << std::endl;
-        abort();
-    }
+    if (!save(lock)) { LogAbort()()("save error").Abort(); }
 }
 
 auto Threads::serialize() const -> proto::StorageNymList
@@ -485,21 +464,22 @@ auto Threads::serialize() const -> proto::StorageNymList
         index.set_version(1);
         index.set_txid(UnallocatedCString{txid.Bytes()});
         std::ranges::for_each(data, [&](const auto& id) {
-            OT_ASSERT(false == id.empty());
+            assert_false(id.empty());
 
             index.add_thread(UnallocatedCString{id.Bytes()});
         });
 
-        OT_ASSERT(static_cast<std::size_t>(index.thread_size()) == data.size());
+        assert_true(
+            static_cast<std::size_t>(index.thread_size()) == data.size());
 
         auto success = proto::Validate(index, VERBOSE);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         auto hash = Hash{};
         success = StoreProto(index, hash);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         write(hash, *output.add_localnymid());
     }

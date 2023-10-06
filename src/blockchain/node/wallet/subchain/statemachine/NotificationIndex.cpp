@@ -13,7 +13,6 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -62,16 +61,14 @@ auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
     const auto version = code_.Version();
 
     if (current.value_or(0) < version) {
-        log_(OT_PRETTY_CLASS())("Payment code ")(
+        log_()("Payment code ")(
             pc_display_)(" notification elements not yet indexed for version ")(
             version)
             .Flush();
 
         return static_cast<Bip32Index>(version);
     } else {
-        log_(OT_PRETTY_CLASS())("Payment code ")(
-            pc_display_)(" already indexed")
-            .Flush();
+        log_()("Payment code ")(pc_display_)(" already indexed").Flush();
 
         return std::nullopt;
     }
@@ -109,6 +106,6 @@ auto NotificationIndex::process(
         }
     }
 
-    log_(OT_PRETTY_CLASS())("Payment code ")(pc_display_)(" indexed").Flush();
+    log_()("Payment code ")(pc_display_)(" indexed").Flush();
 }
 }  // namespace opentxs::blockchain::node::wallet

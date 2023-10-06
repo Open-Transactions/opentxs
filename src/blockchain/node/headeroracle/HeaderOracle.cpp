@@ -18,7 +18,6 @@
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -87,7 +86,7 @@ namespace opentxs::blockchain::node::internal
 HeaderOracle::HeaderOracle(std::shared_ptr<Shared> shared) noexcept
     : shared_(std::move(shared))
 {
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 
     shared_->parent_.store(this);
 }
@@ -294,9 +293,9 @@ auto HeaderOracle::Start(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
-    OT_ASSERT(shared_);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
+    assert_false(nullptr == shared_);
 
     auto actor = std::allocate_shared<HeaderOracle::Actor>(
         alloc::PMR<HeaderOracle::Actor>{shared_->get_allocator()},
@@ -305,7 +304,7 @@ auto HeaderOracle::Start(
         shared_,
         shared_->batch_);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

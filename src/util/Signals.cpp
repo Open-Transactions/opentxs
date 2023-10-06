@@ -9,7 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -50,8 +49,7 @@ auto Signals::process(const int signal) -> bool
     auto handler = handler_.find(signal);
 
     if (handler_.end() == handler) {
-        LogError()(OT_PRETTY_CLASS())("Unhandled signal ")(
-            std::to_string(signal))(" received.")
+        LogError()()("Unhandled signal ")(std::to_string(signal))(" received.")
             .Flush();
 
         return false;

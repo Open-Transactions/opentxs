@@ -15,7 +15,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Cheque.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -112,7 +111,7 @@ auto ChequeBalanceItem::startup(
             api::session::Workflow::InstantiateCheque(api_, workflow).second;
     }
 
-    OT_ASSERT(cheque_);
+    assert_false(nullptr == cheque_);
 
     lock.unlock();
     auto name = UnallocatedCString{};
@@ -141,8 +140,7 @@ auto ChequeBalanceItem::startup(
                 case proto::PAYMENTEVENTTYPE_EXPIRE:
                 case proto::PAYMENTEVENTTYPE_REJECT:
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Invalid event state (")(
-                        event.type())(")")
+                    LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
                 }
             }
@@ -170,8 +168,7 @@ auto ChequeBalanceItem::startup(
                 case proto::PAYMENTEVENTTYPE_EXPIRE:
                 case proto::PAYMENTEVENTTYPE_REJECT:
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Invalid event state (")(
-                        event.type())(")")
+                    LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
                 }
             }
@@ -195,7 +192,7 @@ auto ChequeBalanceItem::startup(
         case otx::client::StorageBox::RESERVED_1:
         case otx::client::StorageBox::PENDING_SEND:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid item type (")(
+            LogError()()("Invalid item type (")(
                 static_cast<std::uint8_t>(type_))(")")
                 .Flush();
         }

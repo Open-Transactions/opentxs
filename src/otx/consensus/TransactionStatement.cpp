@@ -13,7 +13,6 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -71,7 +70,7 @@ TransactionStatement::TransactionStatement(
                         LoadEncodedTextField(api_.Crypto(), raw, list);
 
                     if (notary_.empty() || !loaded) {
-                        LogError()(OT_PRETTY_CLASS())(
+                        LogError()()(
                             "Error: transactionNums field without value.")
                             .Flush();
                         break;
@@ -86,7 +85,7 @@ TransactionStatement::TransactionStatement(
                     while (numlist.Peek(number)) {
                         numlist.Pop();
 
-                        LogDebug()(OT_PRETTY_CLASS())("Transaction Number ")(
+                        LogDebug()()("Transaction Number ")(
                             number)(" ready-to-use for NotaryID: ")(notary_)
                             .Flush();
                         available_.insert(number);
@@ -98,8 +97,7 @@ TransactionStatement::TransactionStatement(
                         LoadEncodedTextField(api_.Crypto(), raw, list);
 
                     if (notary_.empty() || !loaded) {
-                        LogError()(OT_PRETTY_CLASS())(
-                            "Error: issuedNums field without value.")
+                        LogError()()("Error: issuedNums field without value.")
                             .Flush();
                         break;
                     }
@@ -113,23 +111,20 @@ TransactionStatement::TransactionStatement(
                     while (numlist.Peek(number)) {
                         numlist.Pop();
 
-                        LogDebug()(OT_PRETTY_CLASS())(
-                            "Currently liable for issued trans# ")(
+                        LogDebug()()("Currently liable for issued trans# ")(
                             number)(" at NotaryID: ")(notary_)
                             .Flush();
                         issued_.insert(number);
                     }
                 } else {
-                    LogError()(OT_PRETTY_CLASS())("Unknown element type in: ")(
-                        nodeName.get())(".")
+                    LogError()()("Unknown element type in: ")(nodeName.get())(
+                        ".")
                         .Flush();
                 }
             } break;
             case irr::io::EXN_UNKNOWN:
             default: {
-                LogInsane()(OT_PRETTY_CLASS())("Unknown XML type in ")(
-                    nodeName.get())
-                    .Flush();
+                LogInsane()()("Unknown XML type in ")(nodeName.get()).Flush();
             }
         }
     }

@@ -24,7 +24,6 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Activity.hpp"
@@ -221,7 +220,7 @@ auto ContactActivity::construct_row(
         case otx::client::StorageBox::INTERNALTRANSFER:
         case otx::client::StorageBox::UNKNOWN:
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -260,8 +259,7 @@ auto ContactActivity::load_contacts(const proto::StorageThread& thread) noexcept
 auto ContactActivity::load_thread(const proto::StorageThread& thread) noexcept
     -> void
 {
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(thread.item().size())(" items.")
-        .Flush();
+    LogDetail()()("Loading ")(thread.item().size())(" items.").Flush();
 
     for (const auto& item : thread.item()) {
         try {
@@ -297,8 +295,7 @@ auto ContactActivity::Pay(
         api_.Storage().Internal().AccountContract(sourceAccount);
 
     if (unitID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account: (")(
-            sourceAccount, api_.Crypto())(")")
+        LogError()()("Invalid account: (")(sourceAccount, api_.Crypto())(")")
             .Flush();
 
         return false;
@@ -318,14 +315,12 @@ auto ContactActivity::Pay(
                 throw std::runtime_error{""};
             }
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Error parsing amount (")(amount)(")")
-                .Flush();
+            LogError()()("Error parsing amount (")(amount)(")").Flush();
 
             return false;
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Missing unit definition (")(
-            unitID, api_.Crypto())(")")
+        LogError()()("Missing unit definition (")(unitID, api_.Crypto())(")")
             .Flush();
 
         return false;
@@ -343,8 +338,8 @@ auto ContactActivity::Pay(
     if (0 >= amount) {
         const auto contract = api_.Wallet().Internal().UnitDefinition(
             api_.Storage().Internal().AccountContract(sourceAccount));
-        LogError()(OT_PRETTY_CLASS())("Invalid amount: (")(
-            amount, contract->UnitOfAccount())(")")
+        LogError()()("Invalid amount: (")(amount, contract->UnitOfAccount())(
+            ")")
             .Flush();
 
         return false;
@@ -359,8 +354,8 @@ auto ContactActivity::Pay(
         case otx::client::PaymentType::Transfer:
         case otx::client::PaymentType::Blinded:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported payment type: (")(
-                static_cast<int>(type))(")")
+            LogError()()("Unsupported payment type: (")(static_cast<int>(type))(
+                ")")
                 .Flush();
 
             return false;
@@ -390,9 +385,9 @@ auto ContactActivity::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -401,7 +396,7 @@ auto ContactActivity::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -439,9 +434,9 @@ auto ContactActivity::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -450,13 +445,13 @@ auto ContactActivity::process_contact(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto contactID =
         api_.Factory().IdentifierFromProtobuf(body[1].Bytes());
     auto changed{false};
 
-    OT_ASSERT(false == contactID.empty());
+    assert_false(contactID.empty());
 
     if (self_contact_ == contactID) {
         auto name = api_.Contacts().ContactName(self_contact_);
@@ -560,7 +555,7 @@ auto ContactActivity::process_item(
     sender = from(outgoing);
     add_item(id, key, custom);
 
-    OT_ASSERT(verify_empty(custom));
+    assert_true(verify_empty(custom));
 
     return id;
 }
@@ -570,7 +565,7 @@ auto ContactActivity::process_messagability(const Message& message) noexcept
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto nym = api_.Factory().NymIDFromHash(body[1].Bytes());
 
@@ -590,7 +585,7 @@ auto ContactActivity::process_message_loaded(const Message& message) noexcept
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto id = ContactActivityRowID{
         api_.Factory().IdentifierFromHash(body[2].Bytes()),
@@ -615,14 +610,14 @@ auto ContactActivity::process_message_loaded(const Message& message) noexcept
     };
     add_item(id, key, custom);
 
-    OT_ASSERT(verify_empty(custom));
+    assert_true(verify_empty(custom));
 }
 
 auto ContactActivity::process_otx(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto id = body[1].as<api::session::OTX::TaskID>();
     auto done = [&] {
@@ -638,9 +633,7 @@ auto ContactActivity::process_otx(const Message& in) noexcept -> void
         const auto [status, reply] = future.get();
 
         if (otx::LastReplyStatus::MessageSuccess == status) {
-            LogDebug()(OT_PRETTY_CLASS())("Task ")(
-                taskID)(" completed successfully")
-                .Flush();
+            LogDebug()()("Task ")(taskID)(" completed successfully").Flush();
         } else {
             // TODO consider taking some action in response to failed sends.
         }
@@ -661,11 +654,11 @@ auto ContactActivity::process_thread(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto threadID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == threadID.empty());
+    assert_false(threadID.empty());
 
     if (thread_id_ != threadID) { return; }
 
@@ -713,8 +706,7 @@ auto ContactActivity::send_cheque(
     if (false == validate_account(sourceAccount)) { return false; }
 
     if (1 < contacts_.size()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Sending to multiple recipient not yet supported.")
+        LogError()()("Sending to multiple recipient not yet supported.")
             .Flush();
 
         return false;
@@ -729,8 +721,7 @@ auto ContactActivity::send_cheque(
             display::GetDefinition(contract->UnitOfAccount());
         displayAmount = definition.Format(amount);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load unit definition contract")
-            .Flush();
+        LogError()()("Failed to load unit definition contract").Flush();
 
         return false;
     }
@@ -742,8 +733,7 @@ auto ContactActivity::send_cheque(
     const auto taskID = std::get<0>(otx);
 
     if (0 == taskID) {
-        LogError()(OT_PRETTY_CLASS())("Failed to queue payment for sending.")
-            .Flush();
+        LogError()()("Failed to queue payment for sending.").Flush();
 
         return false;
     }
@@ -769,7 +759,7 @@ auto ContactActivity::send_cheque(
         draft_tasks_.try_emplace(taskID, std::move(task));
     }
 
-    OT_ASSERT(verify_empty(custom));
+    assert_true(verify_empty(custom));
 
     return true;
 }
@@ -781,7 +771,7 @@ auto ContactActivity::SendDraft() const noexcept -> bool
         auto lock = rLock{recursive_lock_};
 
         if (draft_.empty()) {
-            LogDetail()(OT_PRETTY_CLASS())("No draft message to send.").Flush();
+            LogDetail()()("No draft message to send.").Flush();
 
             return false;
         }
@@ -793,9 +783,7 @@ auto ContactActivity::SendDraft() const noexcept -> bool
         const auto taskID = std::get<0>(otx);
 
         if (0 == taskID) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to queue message for sending.")
-                .Flush();
+            LogError()()("Failed to queue message for sending.").Flush();
 
             return false;
         }
@@ -817,7 +805,7 @@ auto ContactActivity::SendDraft() const noexcept -> bool
         draft_tasks_.try_emplace(taskID, std::move(task));
         draft_.clear();
 
-        OT_ASSERT(verify_empty(custom));
+        assert_true(verify_empty(custom));
     }
 
     return true;
@@ -852,7 +840,7 @@ auto ContactActivity::SendFaucetRequest(const UnitType currency) const noexcept
 
         return 0 != task;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -994,11 +982,11 @@ auto ContactActivity::update_payment_codes() noexcept -> bool
 {
     auto map = UnallocatedMap<UnitType, UnallocatedCString>{};
 
-    if (1 != contacts_.size()) { OT_FAIL; }
+    if (1 != contacts_.size()) { LogAbort()().Abort(); }
 
     const auto contact = api_.Contacts().Contact(*contacts_.cbegin());
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     for (const auto chain : blockchain::defined_chains()) {
         auto type = blockchain_to_unit(chain);
@@ -1026,15 +1014,14 @@ auto ContactActivity::validate_account(
     const auto owner = api_.Storage().Internal().AccountOwner(sourceAccount);
 
     if (owner.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account id: (")(
-            sourceAccount, api_.Crypto())(")")
+        LogError()()("Invalid account id: (")(sourceAccount, api_.Crypto())(")")
             .Flush();
 
         return false;
     }
 
     if (primary_id_ != owner) {
-        LogError()(OT_PRETTY_CLASS())("Account ")(sourceAccount, api_.Crypto())(
+        LogError()()("Account ")(sourceAccount, api_.Crypto())(
             " is not owned by nym ")(primary_id_, api_.Crypto())
             .Flush();
 

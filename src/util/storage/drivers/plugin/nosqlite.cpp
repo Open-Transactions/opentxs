@@ -5,12 +5,12 @@
 
 #include "util/storage/drivers/plugin/Plugin.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
 auto Plugin::init_sqlite(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogError()(OT_PRETTY_CLASS())("Sqlite3 driver not compiled in.").Flush();
+    LogError()()("Sqlite3 driver not compiled in.").Flush();
 }
 }  // namespace opentxs::storage::driver::implementation

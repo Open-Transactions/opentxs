@@ -15,7 +15,6 @@
 
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/util/Container.hpp"
@@ -52,8 +51,7 @@ auto Periodic::make_callback(TaskID id) const noexcept -> Timer::Handler
     return [this, id](auto& ec) {
         if (ec) {
             if (unexpected_asio_error(ec)) {
-                LogError()(OT_PRETTY_CLASS())("received asio error (")(
-                    ec.value())(") :")(ec)
+                LogError()()("received asio error (")(ec.value())(") :")(ec)
                     .Flush();
             }
         } else {
@@ -101,7 +99,7 @@ auto Periodic::run(TaskID id) const noexcept -> void
     try {
         std::invoke(task);
     } catch (std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     timer.SetRelative(period);
@@ -118,7 +116,7 @@ auto Periodic::Schedule(
     auto [i, added] =
         data.try_emplace(next_id(), asio_.Internal().GetTimer(), job, interval);
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     const auto& id = i->first;
     auto& [timer, task, period] = i->second;

@@ -15,7 +15,6 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -48,8 +47,8 @@ auto PaymentTasks::cleanup() -> bool
         auto status = future.wait_for(10ns);
 
         if (std::future_status::ready == status) {
-            LogInsane()(OT_PRETTY_CLASS())("Task for ")(
-                i->first, parent_.api().Crypto())(" is done")
+            LogInsane()()("Task for ")(i->first, parent_.api().Crypto())(
+                " is done")
                 .Flush();
             finished.emplace_back(i);
         }
@@ -94,14 +93,14 @@ auto PaymentTasks::get_payment_id(const OTPayment& payment) const
         case OTPayment::CHEQUE: {
             auto pCheque = parent_.api().Factory().InternalSession().Cheque();
 
-            OT_ASSERT(pCheque);
+            assert_false(nullptr == pCheque);
 
             auto& cheque = *pCheque;
             const auto loaded =
                 cheque.LoadContractFromString(payment.Payment());
 
             if (false == loaded) {
-                LogError()(OT_PRETTY_CLASS())("Invalid cheque.").Flush();
+                LogError()()("Invalid cheque.").Flush();
 
                 return output;
             }
@@ -111,7 +110,7 @@ auto PaymentTasks::get_payment_id(const OTPayment& payment) const
             return output;
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unknown payment type ")(
+            LogError()()("Unknown payment type ")(
                 OTPayment::GetTypeString(payment.GetType()))
                 .Flush();
 
@@ -126,7 +125,7 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
     const auto& pPayment = std::get<2>(task);
 
     if (false == bool(pPayment)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid payment").Flush();
+        LogError()()("Invalid payment").Flush();
 
         return error_task();
     }
@@ -148,14 +147,13 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
         std::forward_as_tuple(parent_, taskID, task, *this));
 
     if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to start queue for payment ")(
+        LogError()()("Failed to start queue for payment ")(
             id, parent_.api().Crypto())
             .Flush();
 
         return error_task();
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("Started deposit task for ")(
-            id, parent_.api().Crypto())
+        LogTrace()()("Started deposit task for ")(id, parent_.api().Crypto())
             .Flush();
         it->second.Trigger();
     }

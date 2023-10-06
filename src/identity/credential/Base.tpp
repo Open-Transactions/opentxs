@@ -223,9 +223,7 @@ auto Factory::Credential(
         api, parent, source, master, version, nymParameters, reason)};
 
     if (!output) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ":Failed to construct credential.")
-            .Flush();
+        LogError()()("Failed to construct credential.").Flush();
 
         return nullptr;
     }
@@ -247,9 +245,7 @@ auto Factory::Credential(
 {
     // This check allows all constructors to assume inputs are well-formed
     if (!proto::Validate(serialized, VERBOSE, mode, role)) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Invalid serialized credential.")
-            .Flush();
+        LogError()()("Invalid serialized credential.").Flush();
 
         return nullptr;
     }

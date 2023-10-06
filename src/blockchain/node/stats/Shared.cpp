@@ -9,7 +9,6 @@
 
 #include "blockchain/node/stats/Actor.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -19,6 +18,7 @@
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::stats
 {
@@ -133,8 +133,8 @@ auto Shared::Start(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<Shared> me) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(me);
+    assert_false(nullptr == api);
+    assert_false(nullptr == me);
 
     data_.lock()->Init(*api, endpoint_);
     const auto& zmq = api->Network().ZeroMQ().Internal();
@@ -143,7 +143,7 @@ auto Shared::Start(
     auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc}, std::move(api), std::move(me), batchID);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

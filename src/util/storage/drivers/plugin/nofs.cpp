@@ -5,18 +5,18 @@
 
 #include "util/storage/drivers/plugin/Plugin.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
 auto Plugin::init_fs(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogError()(OT_PRETTY_CLASS())("Filesystem driver not compiled in.").Flush();
+    LogError()()("Filesystem driver not compiled in.").Flush();
 }
 
 auto Plugin::init_fs_backup(const std::filesystem::path& dir) -> void
 {
-    LogError()(OT_PRETTY_CLASS())("Filesystem driver not compiled in.").Flush();
+    LogError()()("Filesystem driver not compiled in.").Flush();
 }
 }  // namespace opentxs::storage::driver::implementation

@@ -24,7 +24,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -54,16 +53,16 @@ auto Request::Factory(
     const RequestNumber number,
     const PasswordPrompt& reason) -> Request
 {
-    OT_ASSERT(signer);
+    assert_false(nullptr == signer);
 
     auto output{std::make_unique<Request::Imp>(
         api, signer, signer->ID(), server, type, number)};
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     output->update_signature(reason);
 
-    OT_ASSERT(false == output->ID().empty());
+    assert_false(output->ID().empty());
 
     return Request{output.release()};
 }
@@ -147,7 +146,7 @@ auto Request::swap(Request& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
 Request::Request(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Request::Request(const Request& rhs) noexcept
@@ -352,7 +351,7 @@ auto Request::Imp::update_signature(const PasswordPrompt& reason) -> bool
         sigs.emplace_back(new proto::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to create signature.").Flush();
+        LogError()()("Failed to create signature.").Flush();
     }
 
     return success;
@@ -365,7 +364,7 @@ auto Request::Imp::validate() const -> bool
     if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (false == validNym) {
-        LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
+        LogError()()("Invalid nym.").Flush();
 
         return false;
     }
@@ -373,7 +372,7 @@ auto Request::Imp::validate() const -> bool
     const bool validSyntax = proto::Validate(full_version(), VERBOSE);
 
     if (false == validSyntax) {
-        LogError()(OT_PRETTY_CLASS())("Invalid syntax.").Flush();
+        LogError()()("Invalid syntax.").Flush();
 
         return false;
     }
@@ -381,7 +380,7 @@ auto Request::Imp::validate() const -> bool
     const auto sigs = signatures();
 
     if (1_uz != sigs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number signatures.").Flush();
+        LogError()()("Wrong number signatures.").Flush();
 
         return false;
     }
@@ -392,7 +391,7 @@ auto Request::Imp::validate() const -> bool
     if (signature) { validSig = verify_signature(*signature); }
 
     if (false == validSig) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature.").Flush();
+        LogError()()("Invalid signature.").Flush();
 
         return false;
     }

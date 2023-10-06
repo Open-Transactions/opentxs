@@ -14,8 +14,8 @@
 #include <utility>
 
 #include "internal/core/contract/peer/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::contract::peer::request::storesecret
 {
@@ -54,7 +54,7 @@ Implementation::Implementation(
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 Implementation::Implementation(
@@ -81,14 +81,14 @@ Implementation::Implementation(
             }
         }
 
-        OT_ASSERT(out.size() <= max_values_);
+        assert_true(out.size() <= max_values_);
 
         return out;
     }())
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 Implementation::Implementation(
@@ -102,7 +102,7 @@ Implementation::Implementation(
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 auto Implementation::id_form() const noexcept -> serialized_type

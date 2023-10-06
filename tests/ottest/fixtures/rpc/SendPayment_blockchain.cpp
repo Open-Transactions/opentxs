@@ -44,7 +44,7 @@ RPC_BC::RPC_BC()
 
             alex_p_ = client_1_.Wallet().Nym(reason, "Alex");
 
-            OT_ASSERT(alex_p_);
+            opentxs::assert_false(nullptr == alex_p_);
 
             client_1_.Crypto().Blockchain().NewHDSubaccount(
                 alex_p_->ID(),
@@ -53,7 +53,7 @@ RPC_BC::RPC_BC()
                 reason);
         }
 
-        OT_ASSERT(alex_p_);
+        opentxs::assert_false(nullptr == alex_p_);
 
         return *alex_p_;
     }())
@@ -77,7 +77,7 @@ RPC_BC::RPC_BC()
                 account_.BalanceElement(Subchain::External, index.value_or(0));
             const auto& key = element.Key();
 
-            OT_ASSERT(key.IsValid());
+            opentxs::assert_true(key.IsValid());
 
             output.emplace_back(
                 baseAmount,
@@ -97,7 +97,7 @@ RPC_BC::RPC_BC()
             listener_p_ = std::make_unique<ScanListener>(client_1_);
         }
 
-        OT_ASSERT(listener_p_);
+        opentxs::assert_false(nullptr == listener_p_);
 
         return *listener_p_;
     }())

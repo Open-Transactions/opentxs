@@ -16,7 +16,6 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -73,7 +72,7 @@ UnitList::UnitList(
     setup_listeners(api, listeners_);
     startup_ = std::make_unique<std::thread>(&UnitList::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto UnitList::construct_row(
@@ -89,11 +88,11 @@ auto UnitList::process_account(const Message& message) noexcept -> void
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto accountID = api_.Factory().AccountIDFromZMQ(body[1]);
 
-    OT_ASSERT(false == accountID.empty());
+    assert_false(accountID.empty());
 
     process_account(accountID);
 }
@@ -109,14 +108,14 @@ auto UnitList::process_blockchain_balance(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto& chainFrame = body[1];
 
     try {
         process_unit(blockchain_to_unit(chainFrame.as<blockchain::Type>()));
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Invalid chain").Flush();
+        LogError()()("Invalid chain").Flush();
 
         return;
     }
@@ -140,15 +139,14 @@ auto UnitList::setup_listeners(
     const auto connected =
         blockchain_balance_->Start(api.Endpoints().BlockchainBalance().data());
 
-    OT_ASSERT(connected);
+    assert_true(connected);
 }
 
 auto UnitList::startup() noexcept -> void
 {
     const auto accounts =
         api_.Storage().Internal().AccountsByOwner(primary_id_);
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(accounts.size())(" accounts.")
-        .Flush();
+    LogDetail()()("Loading ")(accounts.size())(" accounts.").Flush();
 
     for (const auto& id : accounts) { process_account(id); }
 

@@ -11,7 +11,6 @@
 
 #include "internal/core/Core.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -19,6 +18,7 @@
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::session::imp
 {
@@ -73,7 +73,7 @@ auto UI::Imp::account_activity(
                          api_, nymID, accountID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -107,7 +107,7 @@ auto UI::Imp::account_list(
                          opentxs::factory::AccountListModel(api_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -140,7 +140,7 @@ auto UI::Imp::account_summary(
                         api_, nymID, currency, cb)))
                 .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -181,7 +181,7 @@ auto UI::Imp::activity_summary(
                              api_, running_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -212,7 +212,7 @@ auto UI::Imp::account_tree(
                          opentxs::factory::AccountTreeModel(api_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -248,7 +248,7 @@ auto UI::Imp::blockchain_account_status(
                              api_, nymID, chain, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -295,7 +295,7 @@ auto UI::Imp::blockchain_selection(
                              api_, key, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -319,7 +319,7 @@ auto UI::Imp::blockchain_statistics(const Lock& lock, const SimpleCallback cb)
             opentxs::factory::BlockchainStatisticsModel(api_, cb);
     }
 
-    OT_ASSERT(blockchain_statistics_);
+    assert_false(nullptr == blockchain_statistics_);
 
     return blockchain_statistics_;
 }
@@ -361,7 +361,7 @@ auto UI::Imp::contact(
                          opentxs::factory::ContactModel(api_, contactID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -395,7 +395,7 @@ auto UI::Imp::contact_activity(
                              api_, nymID, threadID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -429,7 +429,7 @@ auto UI::Imp::contact_list(
                          opentxs::factory::ContactListModel(api_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -497,7 +497,7 @@ auto UI::Imp::nym_list(const Lock& lock, const SimpleCallback& cb)
     if (!nym_list_) {
         nym_list_ = opentxs::factory::NymListModel(api_, cb);
 
-        OT_ASSERT(nym_list_);
+        assert_false(nullptr == nym_list_);
     }
 
     return *nym_list_;
@@ -552,7 +552,7 @@ auto UI::Imp::profile(
                          opentxs::factory::ProfileModel(api_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;
@@ -587,7 +587,7 @@ auto UI::Imp::seed_list(const Lock& lock, const SimpleCallback& cb)
     if (!seed_list_) {
         seed_list_ = opentxs::factory::SeedListModel(api_, cb);
 
-        OT_ASSERT(seed_list_);
+        assert_false(nullptr == seed_list_);
     }
 
     return *seed_list_;
@@ -607,7 +607,7 @@ auto UI::Imp::seed_tree(const Lock& lock, const SimpleCallback& cb)
     if (!seed_tree_) {
         seed_tree_ = opentxs::factory::SeedTreeModel(api_, cb);
 
-        OT_ASSERT(seed_tree_);
+        assert_false(nullptr == seed_tree_);
     }
 
     return *seed_tree_;
@@ -692,7 +692,7 @@ auto UI::Imp::unit_list(
                          opentxs::factory::UnitListModel(api_, nymID, cb)))
                  .first;
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
     }
 
     return it->second;

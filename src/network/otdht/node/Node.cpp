@@ -12,7 +12,6 @@
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
 #include "network/otdht/node/Shared.hpp"
@@ -75,7 +74,7 @@ Node::Node(
             secretKey);
     }())
 {
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 }
 
 auto Node::get_allocator() const noexcept -> allocator_type
@@ -91,7 +90,7 @@ auto Node::Init(std::shared_ptr<const api::Session> api) noexcept -> void
         shared_,
         shared_->batch_id_);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

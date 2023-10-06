@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -102,9 +101,7 @@ auto SeedList::pipeline(Message&& in) noexcept -> void
 
     const auto body = in.Payload();
 
-    if (1 > body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())("Invalid message").Abort();
-    }
+    if (1 > body.size()) { LogAbort()()("Invalid message").Abort(); }
 
     const auto work = [&] {
         try {
@@ -112,7 +109,7 @@ auto SeedList::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -138,7 +135,7 @@ auto SeedList::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("Unhandled type").Abort();
+            LogAbort()()("Unhandled type").Abort();
         }
     }
 }
@@ -147,7 +144,7 @@ auto SeedList::process_seed(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto id = api_.Factory().SeedIDFromHash(body[1].Bytes());
     process_seed(id);
@@ -169,7 +166,7 @@ auto SeedList::process_seed(const crypto::SeedID& id) noexcept -> void
         load_seed(id, index, type);
         add_item(id, index, custom);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return;
     }

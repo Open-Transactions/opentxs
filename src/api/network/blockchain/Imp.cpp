@@ -20,7 +20,6 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -51,7 +50,7 @@ BlockchainImp::BlockchainImp(
         auto out = zmq.Internal().PublishSocket();
         auto rc = out->Start(endpoints.BlockchainStateChange().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -89,7 +88,7 @@ auto BlockchainImp::disable(const Lock& lock, const Chain type) const noexcept
     -> bool
 {
     if (false == opentxs::blockchain::is_supported(type)) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
+        LogError()()("Unsupported chain").Flush();
 
         return false;
     }
@@ -98,7 +97,7 @@ auto BlockchainImp::disable(const Lock& lock, const Chain type) const noexcept
 
     if (db_.get().Disable(type)) { return true; }
 
-    LogError()(OT_PRETTY_CLASS())("Database update failure").Flush();
+    LogError()()("Database update failure").Flush();
 
     return false;
 }
@@ -117,13 +116,13 @@ auto BlockchainImp::enable(
     const std::string_view seednode) const noexcept -> bool
 {
     if (false == opentxs::blockchain::is_supported(type)) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
+        LogError()()("Unsupported chain").Flush();
 
         return false;
     }
 
     if (false == db_.get().Enable(type, seednode)) {
-        LogError()(OT_PRETTY_CLASS())("Database error").Flush();
+        LogError()()("Database error").Flush();
 
         return false;
     }
@@ -170,7 +169,7 @@ auto BlockchainImp::Init(
     const std::filesystem::path& dataFolder,
     const Options& options) noexcept -> void
 {
-    OT_ASSERT(api);
+    assert_false(nullptr == api);
 
     crypto_ = &crypto;
     base_config_.set_value([&] {
@@ -192,7 +191,7 @@ auto BlockchainImp::Init(
                 }
             } break;
             default: {
-                LogAbort()(OT_PRETTY_CLASS())("invalid profile").Abort();
+                LogAbort()()("invalid profile").Abort();
             }
         }
 
@@ -206,7 +205,7 @@ auto BlockchainImp::Init(
         auto actor = std::allocate_shared<blockchain::Actor>(
             alloc::PMR<blockchain::Actor>{alloc}, api, batchID);
 
-        OT_ASSERT(actor);
+        assert_false(nullptr == actor);
 
         actor->Init(actor);
     }
@@ -286,14 +285,14 @@ auto BlockchainImp::start(
 {
     if (Chain::UnitTest != type) {
         if (false == opentxs::blockchain::is_supported(type)) {
-            LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
+            LogError()()("Unsupported chain").Flush();
 
             return false;
         }
     }
 
     if (0 != networks_.count(type)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Chain already running").Flush();
+        LogVerbose()()("Chain already running").Flush();
 
         return true;
     } else {
@@ -313,7 +312,7 @@ auto BlockchainImp::start(
 
                 auto [it, added] = config_.emplace(type, base_config_);
 
-                OT_ASSERT(added);
+                assert_true(added);
 
                 if (false == api_.GetOptions().TestMode()) {
                     switch (type) {
@@ -356,7 +355,7 @@ auto BlockchainImp::start(
 
 auto BlockchainImp::Stats() const noexcept -> opentxs::blockchain::node::Stats
 {
-    OT_ASSERT(stats_);
+    assert_false(nullptr == stats_);
 
     using StatsImp = opentxs::blockchain::node::Stats::Imp;
 
@@ -377,11 +376,11 @@ auto BlockchainImp::stop(const Lock& lock, const Chain type) const noexcept
 
     if (networks_.end() == it) { return true; }
 
-    OT_ASSERT(it->second);
+    assert_false(nullptr == it->second);
 
     it->second->Internal().Shutdown();
     networks_.erase(it);
-    LogVerbose()(OT_PRETTY_CLASS())("stopped chain ")(print(type)).Flush();
+    LogVerbose()()("stopped chain ")(print(type)).Flush();
     publish_chain_state(type, false);
 
     return true;

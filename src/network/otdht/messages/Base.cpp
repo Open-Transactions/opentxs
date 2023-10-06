@@ -18,7 +18,6 @@
 
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"  // IWYU pragma: keep
@@ -113,7 +112,7 @@ Base::Imp::Imp() noexcept
 Base::Base(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Base::Base() noexcept
@@ -237,7 +236,7 @@ auto Base::Imp::serialize(zeromq::Message& out) const noexcept -> bool
 auto Base::Imp::serialize_type(zeromq::Message& out) const noexcept -> bool
 {
     if (MessageType::error == type_) {
-        LogError()(OT_PRETTY_CLASS())("Invalid type").Flush();
+        LogError()()("Invalid type").Flush();
 
         return false;
     }
@@ -249,7 +248,7 @@ auto Base::Imp::serialize_type(zeromq::Message& out) const noexcept -> bool
     } else if (0_uz != frames.back().size()) {
         // NOTE supplied message should either be empty or else have header
         // frames followed by an empty delimiter frame.
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
         return false;
     }

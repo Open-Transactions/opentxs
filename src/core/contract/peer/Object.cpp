@@ -27,7 +27,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerObject.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -128,7 +127,7 @@ Object::Object(
         } break;
         case contract::peer::ObjectType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Incorrect type.").Flush();
+            LogError()()("Incorrect type.").Flush();
         }
     }
 }
@@ -226,7 +225,7 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
     auto publicNym = [&](Nym_p nym) -> proto::Nym {
         auto data = proto::Nym{};
         if (false == nym->Internal().Serialize(data)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to serialize nym.").Flush();
+            LogError()()("Failed to serialize nym.").Flush();
         }
         return data;
     };
@@ -300,7 +299,7 @@ auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
         } break;
         case contract::peer::ObjectType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unknown type.").Flush();
+            LogError()()("Unknown type.").Flush();
             return false;
         }
     }
@@ -334,7 +333,7 @@ auto Object::Validate() const noexcept -> bool
         } break;
         case contract::peer::ObjectType::Error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unknown type.").Flush();
+            LogError()()("Unknown type.").Flush();
         }
     }
 

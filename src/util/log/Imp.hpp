@@ -6,9 +6,9 @@
 #pragma once
 
 #include <chrono>
-#include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <source_location>
 #include <string_view>
 
 #include "internal/util/Log.hpp"
@@ -71,9 +71,8 @@ class Log::Imp final : public internal::Log
 public:
     [[noreturn]] auto Abort() const noexcept -> void;
     [[noreturn]] auto Assert(
-        const char* file,
-        const std::size_t line,
-        const char* message) const noexcept -> void;
+        const std::source_location& loc,
+        std::string_view message) const noexcept -> void;
     auto asHex(const Data& in) const noexcept -> void;
     auto asHex(std::string_view in) const noexcept -> void;
     auto Buffer(const Amount& in) const noexcept -> void;
@@ -92,9 +91,10 @@ public:
         const noexcept -> void;
     auto Buffer(const std::chrono::nanoseconds& in) const noexcept -> void;
     auto Buffer(const std::filesystem::path& in) const noexcept -> void;
+    auto Buffer(const std::source_location& loc) const noexcept -> void;
     auto Buffer(const std::string_view in) const noexcept -> void;
     auto Flush() const noexcept -> void;
-    auto Trace(const char* file, const std::size_t line, const char* message)
+    auto Trace(const std::source_location& loc, std::string_view message)
         const noexcept -> void;
 
     Imp(const int logLevel) noexcept;

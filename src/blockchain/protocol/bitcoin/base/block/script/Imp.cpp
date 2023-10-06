@@ -24,7 +24,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -99,7 +98,7 @@ auto Script::CalculateHash160(const api::Crypto& crypto, Writer&& output)
     auto preimage = Space{};
 
     if (false == Serialize(writer(preimage))) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize script").Flush();
+        LogError()()("Failed to serialize script").Flush();
 
         return false;
     }
@@ -324,7 +323,7 @@ auto Script::decode(const std::byte in) noexcept(false) -> script::OP
 auto Script::evaluate_data(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(2 <= script.size());
+    assert_true(2 <= script.size());
 
     using enum script::Pattern;
 
@@ -338,7 +337,7 @@ auto Script::evaluate_data(std::span<const value_type> script) noexcept
 auto Script::evaluate_multisig(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(4 <= script.size());
+    assert_true(4 <= script.size());
 
     auto it = script.rbegin();
     std::advance(it, 1);
@@ -367,7 +366,7 @@ auto Script::evaluate_multisig(std::span<const value_type> script) noexcept
 auto Script::evaluate_pubkey(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(2 == script.size());
+    assert_true(2 == script.size());
 
     using enum script::Pattern;
 
@@ -379,7 +378,7 @@ auto Script::evaluate_pubkey(std::span<const value_type> script) noexcept
 auto Script::evaluate_pubkey_hash(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(5 == script.size());
+    assert_true(5 == script.size());
 
     auto it = script.begin();
     using enum script::OP;
@@ -405,7 +404,7 @@ auto Script::evaluate_pubkey_hash(std::span<const value_type> script) noexcept
 auto Script::evaluate_script_hash(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(3 == script.size());
+    assert_true(3 == script.size());
 
     auto it = script.begin();
     using enum script::OP;
@@ -424,7 +423,7 @@ auto Script::evaluate_script_hash(std::span<const value_type> script) noexcept
 auto Script::evaluate_segwit(std::span<const value_type> script) noexcept
     -> script::Pattern
 {
-    OT_ASSERT(2 == script.size());
+    assert_true(2 == script.size());
 
     const auto& opcode = script[0].opcode_;
     const auto& program = script[1].data_.value();
@@ -463,14 +462,14 @@ auto Script::ExtractElements(const cfilter::Type style, Elements& out)
     const noexcept -> void
 {
     if (elements_.empty()) {
-        LogTrace()(OT_PRETTY_CLASS())("skipping empty script").Flush();
+        LogTrace()()("skipping empty script").Flush();
 
         return;
     }
 
     switch (style) {
         case cfilter::Type::ES: {
-            LogTrace()(OT_PRETTY_CLASS())("processing data pushes").Flush();
+            LogTrace()()("processing data pushes").Flush();
 
             for (const auto& element : get()) {
                 if (is_data_push(element)) {
@@ -512,14 +511,12 @@ auto Script::ExtractElements(const cfilter::Type style, Elements& out)
             using enum script::OP;
 
             if (RETURN == elements_.at(0).opcode_) {
-                LogTrace()(OT_PRETTY_CLASS())("skipping null data script")
-                    .Flush();
+                LogTrace()()("skipping null data script").Flush();
 
                 return;
             }
 
-            LogTrace()(OT_PRETTY_CLASS())("processing serialized script")
-                .Flush();
+            LogTrace()()("processing serialized script").Flush();
             auto& script = out.emplace_back();
             Serialize(writer(script));
         }
@@ -529,7 +526,7 @@ auto Script::ExtractElements(const cfilter::Type style, Elements& out)
 auto Script::first_opcode(std::span<const value_type> script) noexcept
     -> script::OP
 {
-    OT_ASSERT(false == script.empty());
+    assert_false(script.empty());
 
     return script.begin()->opcode_;
 }
@@ -588,7 +585,7 @@ auto Script::get_type(
             }
         }
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -682,7 +679,7 @@ auto Script::is_public_key(const value_type& element) noexcept -> bool
 auto Script::last_opcode(std::span<const value_type> script) noexcept
     -> script::OP
 {
-    OT_ASSERT(false == script.empty());
+    assert_false(script.empty());
 
     return script.rbegin()->opcode_;
 }
@@ -697,7 +694,7 @@ auto Script::LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
         case PayToPubkeyHash: {
             const auto hash = PubkeyHash();
 
-            OT_ASSERT(hash.has_value());
+            assert_true(hash.has_value());
 
             output.emplace_back(hash.value());
         } break;
@@ -706,7 +703,7 @@ auto Script::LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
                 auto hash = ByteArray{};
                 const auto key = MultisigPubkey(i);
 
-                OT_ASSERT(key.has_value());
+                assert_true(key.has_value());
 
                 blockchain::PubkeyHash(
                     crypto, chain_, key.value(), hash.WriteInto());
@@ -717,7 +714,7 @@ auto Script::LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
             auto hash = ByteArray{};
             const auto key = Pubkey();
 
-            OT_ASSERT(key.has_value());
+            assert_true(key.has_value());
 
             blockchain::PubkeyHash(
                 crypto, chain_, key.value(), hash.WriteInto());
@@ -738,11 +735,11 @@ auto Script::LikelyPubkeyHashes(const api::Crypto& crypto) const noexcept
         default: {
             for (const auto& element : elements_) {
                 if (is_hash160(element)) {
-                    OT_ASSERT(element.data_.has_value());
+                    assert_true(element.data_.has_value());
 
                     output.emplace_back(element.data_.value().Bytes());
                 } else if (is_public_key(element)) {
-                    OT_ASSERT(element.data_.has_value());
+                    assert_true(element.data_.has_value());
 
                     auto hash = ByteArray{};
                     blockchain::PubkeyHash(
@@ -1173,7 +1170,7 @@ auto Script::Serialize(Writer&& destination) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -1268,7 +1265,7 @@ auto Script::validate(
                 pBytes = buf.value();
             } break;
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
 

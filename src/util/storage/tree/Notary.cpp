@@ -11,6 +11,7 @@
 #include <StorageItemHash.pb.h>
 #include <StorageNotary.pb.h>
 #include <atomic>
+#include <source_location>
 #include <stdexcept>
 #include <variant>
 
@@ -19,7 +20,6 @@
 #include "internal/serialization/protobuf/verify/SpentTokenList.hpp"
 #include "internal/serialization/protobuf/verify/StorageNotary.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -50,7 +50,7 @@ Notary::Notary(
           factory,
           storage,
           hash,
-          OT_PRETTY_CLASS(),
+          std::source_location::current().function_name(),
           STORAGE_NOTARY_VERSION)
     , id_(id)
     , mint_map_()
@@ -74,15 +74,13 @@ auto Notary::CheckSpent(
 
     for (const auto& spent : list.spent()) {
         if (spent == key) {
-            LogTrace()(OT_PRETTY_CLASS())("Token ")(key)(" is already spent.")
-                .Flush();
+            LogTrace()()("Token ")(key)(" is already spent.").Flush();
 
             return true;
         }
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("Token ")(key)(" has never been spent.")
-        .Flush();
+    LogTrace()()("Token ")(key)(" has never been spent.").Flush();
 
     return false;
 }
@@ -95,7 +93,7 @@ auto Notary::create_list(
     auto hash = Hash{};
     output.reset(new proto::SpentTokenList);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     auto& list = *output;
     list.set_version(STORAGE_MINT_SPENT_LIST_VERSION);
@@ -123,8 +121,7 @@ auto Notary::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
         out.reserve(out.size() + map.size());
 
         for (const auto& [series, hash] : map) {
-            log(OT_PRETTY_CLASS())(name_)("adding cash series hash ")(hash)
-                .Flush();
+            log()(name_)("adding cash series hash ")(hash).Flush();
             out.emplace_back(hash);
         }
     }
@@ -137,7 +134,7 @@ auto Notary::get_or_create_list(
     const identifier::UnitDefinition& unitID,
     const MintSeries series) const -> proto::SpentTokenList
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     std::shared_ptr<proto::SpentTokenList> output{};
     auto& hash = mint_map_[unitID][series];
@@ -184,8 +181,8 @@ auto Notary::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -195,7 +192,7 @@ auto Notary::MarkSpent(
     std::string_view key) -> bool
 {
     if (key.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid key ").Flush();
+        LogError()()("Invalid key ").Flush();
 
         return false;
     }
@@ -204,10 +201,10 @@ auto Notary::MarkSpent(
     auto list = get_or_create_list(lock, unit, series);
     list.add_spent(key.data(), key.size());
 
-    OT_ASSERT(proto::Validate(list, VERBOSE));
+    assert_true(proto::Validate(list, VERBOSE));
 
     auto& hash = mint_map_[unit][series];
-    LogTrace()(OT_PRETTY_CLASS())("Token ")(key)(" marked as spent.").Flush();
+    LogTrace()()("Token ")(key)(" marked as spent.").Flush();
 
     return StoreProto(list, hash);
 }
@@ -215,9 +212,9 @@ auto Notary::MarkSpent(
 auto Notary::save(const Lock& lock) const -> bool
 {
     if (false == verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure").Flush();
+        LogError()()("Lock failure").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     auto serialized = serialize();

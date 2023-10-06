@@ -12,7 +12,6 @@
 #include "internal/network/zeromq/zap/Reply.hpp"
 #include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/network/zeromq/zap/ZAP.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Log.hpp"
@@ -79,7 +78,7 @@ auto Callback::Process(const zap::Request& request) const -> Reply
     auto [valid, error] = request.Validate();
 
     if (false == valid) {
-        LogError()(OT_PRETTY_CLASS())("Rejecting invalid request.").Flush();
+        LogError()()("Rejecting invalid request.").Flush();
 
         return factory::ZAPReply(request, Status::SystemError, error);
     }
@@ -96,14 +95,13 @@ auto Callback::SetDomain(
     auto lock = Lock{domain_lock_};
 
     if (domain.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid domain.").Flush();
+        LogError()()("Invalid domain.").Flush();
 
         return false;
     }
 
     if (0 < domains_.count(domain)) {
-        LogError()(OT_PRETTY_CLASS())("Domain ")(domain)(" already registered.")
-            .Flush();
+        LogError()()("Domain ")(domain)(" already registered.").Flush();
 
         return false;
     }

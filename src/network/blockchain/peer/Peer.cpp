@@ -7,15 +7,15 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "network/blockchain/peer/Imp.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::blockchain::internal
 {
 Peer::Peer(std::shared_ptr<Imp>&& imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Peer::Peer(Peer&& rhs) noexcept

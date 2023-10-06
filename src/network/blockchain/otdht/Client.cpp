@@ -9,7 +9,6 @@
 #include <stdexcept>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -66,8 +65,8 @@ auto Client::can_connect(const network::otdht::Data& data) const noexcept
     const auto start = data.FirstPosition(api_);
 
     if (start.height_ > max) {
-        log(OT_PRETTY_CLASS())(name_)(": incoming data starts at height ")(
-            start.height_)(" however local data stops at height ")(best.height_)
+        log()(name_)(": incoming data starts at height ")(start.height_)(
+            " however local data stops at height ")(best.height_)
             .Flush();
 
         return false;
@@ -89,17 +88,15 @@ auto Client::drain_queue() noexcept -> void
     const auto& log = log_;
 
     if (processing_) {
-        log(OT_PRETTY_CLASS())(name_)(": still processing last message")
-            .Flush();
+        log()(name_)(": still processing last message").Flush();
     } else if (queue_.empty()) {
-        log(OT_PRETTY_CLASS())(name_)(": no queued messages to process")
-            .Flush();
+        log()(name_)(": no queued messages to process").Flush();
     } else {
         auto post = ScopeGuard{[&] { queue_.pop_front(); }};
         auto& [msg, position] = queue_.front();
         processing_ = true;
         processing_position_ = std::move(position);
-        to_blockchain().SendDeferred(std::move(msg), __FILE__, __LINE__);
+        to_blockchain().SendDeferred(std::move(msg));
     }
 }
 
@@ -110,23 +107,20 @@ auto Client::fill_queue() noexcept -> void
     const auto local = local_position();
 
     if (have_outstanding_request()) {
-        log(OT_PRETTY_CLASS())(name_)(
+        log()(name_)(
             ": waiting for existing request to arrive or time out before "
             "requesting new data")
             .Flush();
     } else if (queue_.size() >= queue_limit_) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": avoiding requests for new data while queue is full")
+        log()(name_)(": avoiding requests for new data while queue is full")
             .Flush();
     } else if (local.NotReplacedBy(target)) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": no peers report data better than current position ")(local)
+        log()(name_)(": no peers report data better than current position ")(
+            local)
             .Flush();
     } else {
         const auto best = best_position();
-        log(OT_PRETTY_CLASS())(name_)(": requesting data for blocks after ")(
-            best)
-            .Flush();
+        log()(name_)(": requesting data for blocks after ")(best).Flush();
         send_request(best);
     }
 }
@@ -138,7 +132,7 @@ auto Client::process_ack(
     try {
         process_state(msg, ack.State(chain_));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -149,35 +143,29 @@ auto Client::process_data(
     const auto& log = log_;
 
     if (false == process_state(msg, data.State())) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": received data for wrong chain")
-            .Flush();
+        LogError()()(name_)(": received data for wrong chain").Flush();
 
         return;
     } else if (data.Blocks().empty()) {
-        log(OT_PRETTY_CLASS())(name_)(": ignoring empty update").Flush();
+        log()(name_)(": ignoring empty update").Flush();
 
         return;
     } else if (false == can_connect(data)) {
-        log(OT_PRETTY_CLASS())(name_)(": ignoring non-contiguous update")
-            .Flush();
+        log()(name_)(": ignoring non-contiguous update").Flush();
 
         return;
     }
 
     const auto& [_, position] =
         queue_.emplace_back(std::move(msg), data.LastPosition(api_));
-    log(OT_PRETTY_CLASS())(name_)(": queued data for block range ending at ")(
-        position)
-        .Flush();
+    log()(name_)(": queued data for block range ending at ")(position).Flush();
 }
 
 auto Client::process_job_processed(Message&& msg) noexcept -> void
 {
     const auto body = msg.Payload();
 
-    if (2 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (2 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     processing_ = false;
     processing_position_ = {};
@@ -248,7 +236,7 @@ auto Client::process_sync_peer(Message&& msg) noexcept -> void
 
         if (finish) { finish_request(peer); }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -256,9 +244,7 @@ auto Client::update_remote_position(
     const opentxs::blockchain::block::Position& incoming) noexcept -> void
 {
     update_position(incoming, best_remote_position_);
-    log_(OT_PRETTY_CLASS())(name_)(": best remote position is ")(
-        best_remote_position_)
-        .Flush();
+    log_()(name_)(": best remote position is ")(best_remote_position_).Flush();
 }
 
 Client::~Client() = default;

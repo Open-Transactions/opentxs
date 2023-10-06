@@ -9,7 +9,6 @@
 
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/PairEventCallback.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -31,9 +30,9 @@ PairEventListener::PairEventListener(
         PAIR_EVENT_ENDPOINT_PATH, instance, PAIR_EVENT_ENDPOINT_VERSION);
     const bool started = Start(endpoint);
 
-    OT_ASSERT(started);
+    assert_true(started);
 
-    LogVerbose()(OT_PRETTY_CLASS())("listening on ")(endpoint).Flush();
+    LogVerbose()()("listening on ")(endpoint).Flush();
 }
 
 auto PairEventListener::clone() const noexcept -> PairEventListener*

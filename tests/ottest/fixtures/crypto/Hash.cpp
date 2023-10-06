@@ -8,7 +8,6 @@
 #include <opentxs/opentxs.hpp>
 
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -27,7 +26,7 @@ auto Test_Hash::GetHash(
     auto secret = api.Factory().Secret(bytes);
     const auto rc = key.Internal().RawKey(secret, reason);
 
-    OT_ASSERT(rc);
+    opentxs::assert_true(rc);
 
     return api.Factory().DataFromBytes(secret.Bytes());
 }

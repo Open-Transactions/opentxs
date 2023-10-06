@@ -34,7 +34,6 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -141,7 +140,7 @@ auto Transaction::AssociatePreviousOutput(
     const block::Output& output) noexcept -> bool
 {
     if (index >= inputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return {};
     }
@@ -271,8 +270,7 @@ auto Transaction::ConfirmMatches(
 
     for (auto n = 0_uz; n < inputs_.size(); ++n) {
         if (inputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
-            log(OT_PRETTY_CLASS())("match found for input ")(
-                n)(" of transaction ")
+            log()("match found for input ")(n)(" of transaction ")
                 .asHex(id_)
                 .Flush();
             spent.emplace(n);
@@ -281,8 +279,7 @@ auto Transaction::ConfirmMatches(
 
     for (auto n = 0_uz; n < outputs_.size(); ++n) {
         if (outputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
-            log(OT_PRETTY_CLASS())("match found for output ")(
-                n)(" of transaction ")
+            log()("match found for output ")(n)(" of transaction ")
                 .asHex(id_)
                 .Flush();
             created.emplace(n);
@@ -295,7 +292,7 @@ auto Transaction::ConfirmMatches(
     const auto transactionPaysMe = (0_uz < outCount);
 
     if (transactionSpendsMyMoney || transactionPaysMe) {
-        log(OT_PRETTY_CLASS())(inCount)(" input matches and ")(
+        log()(inCount)(" input matches and ")(
             outCount)(" output matches in transaction ")
             .asHex(id_)
             .Flush();
@@ -303,7 +300,7 @@ auto Transaction::ConfirmMatches(
         const auto [_, added] = out.try_emplace(
             id_, std::move(spent), std::move(created), clone(alloc.result_));
 
-        OT_ASSERT(added);
+        assert_true(added);
     }
 }
 
@@ -317,7 +314,7 @@ auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
         auto preimage = Space{};
         const auto serialized = serialize(writer(preimage), true, data);
 
-        OT_ASSERT(serialized);
+        assert_true(serialized.has_value());
 
         return factory.IdentifierFromPreimage(
             reader(preimage), identifier::Algorithm::sha256);
@@ -367,7 +364,7 @@ auto Transaction::FindMatches(
     Matches& out,
     alloc::Default monotonic) const noexcept -> void
 {
-    log(OT_PRETTY_CLASS())("processing transaction ").asHex(ID()).Flush();
+    log()("processing transaction ").asHex(ID()).Flush();
 
     auto index = 0_uz;
     std::ranges::for_each(inputs_, [&](const auto& txin) {
@@ -386,7 +383,7 @@ auto Transaction::ForTestingOnlyAddKey(
     const blockchain::crypto::Key& key) noexcept -> bool
 {
     if (index >= outputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return false;
     }
@@ -403,7 +400,7 @@ auto Transaction::GetPreimageBTC(
 {
     if (SigHash::All != hashType.Type()) {
         // TODO
-        LogError()(OT_PRETTY_CLASS())("Mode not supported").Flush();
+        LogError()()("Mode not supported").Flush();
 
         return {};
     }
@@ -413,7 +410,7 @@ auto Transaction::GetPreimageBTC(
     copy.data_.lock()->reset_size();
 
     if (index >= inputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return {};
     }
@@ -422,8 +419,7 @@ auto Transaction::GetPreimageBTC(
     auto& input = base.Internal();
 
     if (false == input.ReplaceScript()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to initialize input script")
-            .Flush();
+        LogError()()("Failed to initialize input script").Flush();
 
         return {};
     }
@@ -501,10 +497,10 @@ auto Transaction::MergeMetadata(
     const internal::Transaction& rhs,
     const Log& log) noexcept -> void
 {
-    log(OT_PRETTY_CLASS())("merging transaction ").asHex(ID()).Flush();
+    log()("merging transaction ").asHex(ID()).Flush();
 
     if (id_ != rhs.ID()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong transaction").Flush();
+        LogError()()("Wrong transaction").Flush();
 
         return;
     }
@@ -515,13 +511,13 @@ auto Transaction::MergeMetadata(
     const auto rTxout = rhs.Outputs();
 
     if (iSize != rTxin.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number of inputs").Flush();
+        LogError()()("Wrong number of inputs").Flush();
 
         return;
     }
 
     if (oSize != rTxout.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number of outputs").Flush();
+        LogError()()("Wrong number of outputs").Flush();
 
         return;
     }
@@ -536,7 +532,7 @@ auto Transaction::NetBalanceChange(
     const identifier::Nym& nym) const noexcept -> opentxs::Amount
 {
     const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())("parsing transaction ")
+    log()("parsing transaction ")
         .asHex(ID())(" for balance change with respect to nym ")(
             nym, crypto.Internal().API())
         .Flush();
@@ -559,7 +555,7 @@ auto Transaction::NetBalanceChange(
             return prev + txout.Internal().NetBalanceChange(crypto, nym, log);
         });
     const auto total = spent + created;
-    log(OT_PRETTY_CLASS())
+    log()
         .asHex(ID())(" total input contribution is ")(
             spent)(" and total output contribution is ")(
             created)(" for a net balance change of ")(total)
@@ -687,7 +683,7 @@ auto Transaction::serialize(
 
         return size;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -854,7 +850,7 @@ auto Transaction::Serialize(EncodedTransaction& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -895,7 +891,7 @@ auto Transaction::vBytes(blockchain::Type chain) const noexcept -> std::size_t
     if (data.SupportsSegwit()) {
         const auto& scale = data.SegwitScaleFactor();
 
-        OT_ASSERT(0 < scale);
+        assert_true(0 < scale);
 
         const auto weight = (base_size() * (scale - 1u)) + total;
         static constexpr auto ceil = [](const auto a, const auto b) {

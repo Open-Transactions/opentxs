@@ -8,9 +8,9 @@
 #include <memory>
 
 #include "interface/ui/contactactivity/ContactActivityItem.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -41,8 +41,8 @@ MailItem::MailItem(
     CustomData& custom) noexcept
     : ContactActivityItem(parent, api, nymID, rowID, sortKey, custom)
 {
-    OT_ASSERT(false == nym_id_.empty());
-    OT_ASSERT(false == item_id_.empty());
+    assert_false(nym_id_.empty());
+    assert_false(item_id_.empty());
 }
 
 MailItem::~MailItem() = default;

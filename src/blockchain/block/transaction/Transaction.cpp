@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
@@ -17,6 +16,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::block
 {
@@ -42,7 +42,7 @@ namespace opentxs::blockchain::block
 Transaction::Transaction(TransactionPrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Transaction::Transaction(allocator_type alloc) noexcept

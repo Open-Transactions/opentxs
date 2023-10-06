@@ -9,8 +9,7 @@
 #include <Enums.pb.h>
 #include <StorageCredentials.pb.h>
 #include <atomic>
-#include <cstdlib>
-#include <iostream>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -22,13 +21,13 @@
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 
 namespace opentxs::storage::tree
@@ -40,7 +39,13 @@ Credentials::Credentials(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 2)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          2)
 {
     if (is_valid(hash)) {
         init(hash);
@@ -79,8 +84,7 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
         using enum ErrorReporting;
 
         if (!LoadProto(hash, existing, verbose)) {
-            std::cerr << __func__ << ": Failed to load object" << std::endl;
-            abort();
+            LogAbort()()("Failed to load object").Abort();
         }
 
         isPrivate =
@@ -110,8 +114,8 @@ auto Credentials::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -127,9 +131,9 @@ auto Credentials::Load(
         using enum ErrorReporting;
 
         if (verbose == checking) {
-            std::cerr << __func__ << ": Error: credential with id "
-                      << id.asBase58(crypto_) << " does not exist."
-                      << std::endl;
+            LogError()()("credential with id ")
+                .asHex(id)(" does not exist.")
+                .Flush();
         }
 
         return false;
@@ -149,10 +153,7 @@ auto Credentials::Load(
 
 auto Credentials::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     auto serialized = serialize();
 

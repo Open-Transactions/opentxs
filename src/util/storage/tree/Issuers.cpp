@@ -8,8 +8,7 @@
 #include <Issuer.pb.h>
 #include <StorageIssuers.pb.h>
 #include <atomic>
-#include <cstdlib>
-#include <iostream>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -19,12 +18,12 @@
 #include "internal/serialization/protobuf/verify/Issuer.hpp"
 #include "internal/serialization/protobuf/verify/StorageIssuers.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 
 namespace opentxs::storage::tree
@@ -36,7 +35,13 @@ Issuers::Issuers(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          current_version_)
 {
     if (is_valid(hash)) {
         init(hash);
@@ -64,8 +69,8 @@ auto Issuers::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -80,10 +85,7 @@ auto Issuers::Load(
 
 auto Issuers::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     auto serialized = serialize();
 

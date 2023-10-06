@@ -14,7 +14,6 @@
 #include "2_Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Group.hpp"
@@ -36,8 +35,7 @@ auto Factory::VerificationGroup(
 
         return new ReturnType(parent, external, version);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -56,8 +54,7 @@ auto Factory::VerificationGroup(
 
         return new ReturnType(parent, serialized, external);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -102,7 +99,7 @@ Group::operator SerializedType() const noexcept
     output.set_version(version_);
 
     for (const auto& pNym : nyms_) {
-        OT_ASSERT(pNym);
+        assert_false(nullptr == pNym);
 
         const auto& nym = *pNym;
         output.add_identity()->CopyFrom(nym);
@@ -122,7 +119,7 @@ auto Group::AddItem(
     const VersionNumber version) noexcept -> bool
 {
     if (external_) {
-        LogError()(OT_PRETTY_CLASS())("Invalid internal item").Flush();
+        LogError()()("Invalid internal item").Flush();
 
         return false;
     }
@@ -136,14 +133,13 @@ auto Group::AddItem(
     const internal::Item::SerializedType verification) noexcept -> bool
 {
     if (false == external_) {
-        LogError()(OT_PRETTY_CLASS())("Invalid external item").Flush();
+        LogError()()("Invalid external item").Flush();
 
         return false;
     }
 
     if (verifier == parent_.NymID()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Attempting to add internal claim to external section")
+        LogError()()("Attempting to add internal claim to external section")
             .Flush();
 
         return false;
@@ -164,7 +160,7 @@ auto Group::DeleteItem(const identifier::Generic& item) noexcept -> bool
 auto Group::get_nym(const identifier::Nym& id) noexcept -> internal::Nym&
 {
     for (auto& pNym : nyms_) {
-        OT_ASSERT(pNym);
+        assert_false(nullptr == pNym);
 
         auto& nym = *pNym;
 
@@ -174,7 +170,7 @@ auto Group::get_nym(const identifier::Nym& id) noexcept -> internal::Nym&
     auto pNym = std::unique_ptr<internal::Nym>{
         Factory::VerificationNym(*this, id, Nym::DefaultVersion)};
 
-    OT_ASSERT(pNym);
+    assert_false(nullptr == pNym);
 
     nyms_.emplace_back(std::move(pNym));
 
@@ -227,9 +223,7 @@ auto Group::UpgradeNymVersion(const VersionNumber nymVersion) noexcept -> bool
                 proto::VerificationGroupAllowedIdentity().at(groupVersion);
 
             if (nymVersion < min) {
-                LogError()(OT_PRETTY_CLASS())("Version ")(
-                    nymVersion)(" too old")
-                    .Flush();
+                LogError()()("Version ")(nymVersion)(" too old").Flush();
 
                 return false;
             }
@@ -245,9 +239,7 @@ auto Group::UpgradeNymVersion(const VersionNumber nymVersion) noexcept -> bool
             }
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("No support for version ")(
-            nymVersion)(" items")
-            .Flush();
+        LogError()()("No support for version ")(nymVersion)(" items").Flush();
 
         return false;
     }

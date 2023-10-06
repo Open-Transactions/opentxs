@@ -10,7 +10,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 
 namespace ottest
@@ -74,7 +73,7 @@ private:
     {
         const auto body = msg.Payload();
 
-        OT_ASSERT(3_uz < body.size());
+        opentxs::assert_true(3_uz < body.size());
 
         using BlockHeight = ot::blockchain::block::Height;
         process_position({body[2].as<BlockHeight>(), body[3].Bytes()});

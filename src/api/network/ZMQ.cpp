@@ -16,7 +16,6 @@
 #include "internal/network/ServerConnection.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
@@ -90,7 +89,7 @@ auto ZMQ::DefaultAddressType() const -> AddressType
         changed);
 
     if (changed && (false == api_.Config().Internal().Save())) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        LogAbort()()("failed to save config file").Abort();
     }
 
     return static_cast<AddressType>(configuredType);
@@ -98,7 +97,7 @@ auto ZMQ::DefaultAddressType() const -> AddressType
 
 void ZMQ::init(const Lock& lock) const
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const auto& config = api_.Config().Internal();
     bool notUsed{false};
@@ -147,7 +146,7 @@ void ZMQ::init(const Lock& lock) const
     }
 
     if (false == config.Save()) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        LogAbort()()("failed to save config file").Abort();
     }
 }
 
@@ -197,7 +196,7 @@ auto ZMQ::Server(const identifier::Notary& id) const noexcept(false)
             api_, *this, status_publisher_, contract));
     auto& connection = it->second;
 
-    OT_ASSERT(created);
+    assert_true(created);
 
     if (false == socks_proxy_.empty()) { connection.EnableProxy(); }
 
@@ -214,13 +213,13 @@ auto ZMQ::SetSocksProxy(const UnallocatedCString& proxy) const -> bool
         notUsed);
 
     if (false == set) {
-        LogError()(OT_PRETTY_CLASS())("Unable to set socks proxy.").Flush();
+        LogError()()("Unable to set socks proxy.").Flush();
 
         return false;
     }
 
     if (false == api_.Config().Internal().Save()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to set save config.").Flush();
+        LogError()()("Unable to set save config.").Flush();
 
         return false;
     }
@@ -238,9 +237,7 @@ auto ZMQ::SetSocksProxy(const UnallocatedCString& proxy) const -> bool
         }
     }
 
-    if (false == set) {
-        LogError()(OT_PRETTY_CLASS())("Unable to reset connection.").Flush();
-    }
+    if (false == set) { LogError()()("Unable to reset connection.").Flush(); }
 
     return set;
 }
@@ -285,13 +282,13 @@ auto ZMQ::Status(const identifier::Notary& server) const
 auto ZMQ::verify_lock(const Lock& lock) const -> bool
 {
     if (lock.mutex() != &lock_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect mutex.").Flush();
+        LogError()()("Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        LogError()(OT_PRETTY_CLASS())("Lock not owned.").Flush();
+        LogError()()("Lock not owned.").Flush();
 
         return false;
     }

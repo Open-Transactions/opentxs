@@ -28,7 +28,6 @@
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -72,7 +71,7 @@ auto BlockchainHDSubaccount(
         return std::make_unique<ReturnType>(
             api, parent, path, standard, reason, id);
     } catch (const std::exception& e) {
-        LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -90,7 +89,7 @@ auto BlockchainHDSubaccount(
 
         return std::make_unique<ReturnType>(api, parent, serialized, id);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -230,7 +229,7 @@ auto HD::Name() const noexcept -> UnallocatedCString
         name_ = name.str();
     }
 
-    OT_ASSERT(name_.has_value());
+    assert_true(name_.has_value());
 
     return name_.value();
 }
@@ -247,12 +246,12 @@ auto HD::PrivateKey(
         } break;
         case Subchain::Error: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid subchain (")(print(type))(
-                "). Only ")(print(internal_type_))(" and ")(
-                print(external_type_))(" are valid for this account.")
+            LogError()()("Invalid subchain (")(print(type))("). Only ")(
+                print(internal_type_))(" and ")(print(external_type_))(
+                " are valid for this account.")
                 .Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
@@ -272,8 +271,7 @@ auto HD::PrivateKey(
         key = api_.Crypto().Seed().Internal().AccountKey(path_, change, reason);
 
         if (false == key.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to derive account key")
-                .Flush();
+            LogError()()("Failed to derive account key").Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
@@ -307,7 +305,7 @@ auto HD::save(const rLock& lock) const noexcept -> bool
         parent_.NymID(), UnitToClaim(type), serialized);
 
     if (false == saved) {
-        LogError()(OT_PRETTY_CLASS())("Failed to save HD account.").Flush();
+        LogError()()("Failed to save HD account.").Flush();
 
         return false;
     }

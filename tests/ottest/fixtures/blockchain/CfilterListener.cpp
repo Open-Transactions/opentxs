@@ -14,7 +14,6 @@
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
@@ -101,8 +100,7 @@ private:
             case Work::init:
             case Work::statemachine:
             default: {
-                ot::LogAbort()(OT_PRETTY_CLASS())(
-                    name_)(" unhandled message type ")(
+                ot::LogAbort()()(name_)(" unhandled message type ")(
                     static_cast<ot::OTZMQWorkType>(work))
                     .Abort();
             }
@@ -112,7 +110,7 @@ private:
     {
         const auto body = msg.Payload();
 
-        OT_ASSERT(4_uz < body.size());
+        opentxs::assert_true(4_uz < body.size());
 
         using BlockHeight = ot::blockchain::block::Height;
         process_position({body[3].as<BlockHeight>(), body[4].Bytes()});

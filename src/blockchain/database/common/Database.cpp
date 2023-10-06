@@ -32,7 +32,6 @@ extern "C" {
 #include "blockchain/database/common/Sync.hpp"
 #include "blockchain/database/common/Wallet.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -164,7 +163,7 @@ struct Database::Imp {
         const auto saved =
             db.Store(Table::Config, tsv(Key::SiphashKey), reader(output));
 
-        OT_ASSERT(saved.first);
+        assert_true(saved.first);
 
         return output;
     }
@@ -256,7 +255,7 @@ struct Database::Imp {
         , wallet_(api_, blockchain, lmdb_, bulk_)
         , config_(api_, lmdb_)
     {
-        OT_ASSERT(crypto_shorthash_KEYBYTES == siphash_key_.size());
+        assert_true(crypto_shorthash_KEYBYTES == siphash_key_.size());
 
         static_assert(sizeof(ElementHash) == crypto_shorthash_BYTES);
     }
@@ -304,13 +303,13 @@ Database::Database(
     const Options& args) noexcept(false)
     : imp_(std::make_unique<Imp>(api, blockchain, legacy, dataFolder, args))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Database::Database(Database&& rhs) noexcept
     : imp_(std::move(rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Database::AddOrUpdate(network::blockchain::Address address) const noexcept

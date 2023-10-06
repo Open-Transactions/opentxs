@@ -11,7 +11,6 @@
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/listener/Actor.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -67,8 +66,8 @@ Listener::Listener(
     std::string_view routingID,
     std::string_view fromNode) noexcept
     : actor_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(shared);
+        assert_false(nullptr == api);
+        assert_false(nullptr == shared);
 
         const auto& zmq = api->Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
@@ -86,7 +85,7 @@ Listener::Listener(
             batchID);
     }())
 {
-    OT_ASSERT(actor_);
+    assert_false(nullptr == actor_);
 }
 
 auto Listener::NextID(alloc::Default alloc) noexcept -> CString

@@ -5,7 +5,7 @@
 
 #include "opentxs/util/PasswordCaller.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordCallback.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 
@@ -21,7 +21,7 @@ auto PasswordCaller::AskOnce(
     Secret& output,
     std::string_view key) noexcept -> void
 {
-    OT_ASSERT(callback_);
+    assert_true(callback_);
 
     callback_->runOne(output, prompt.GetDisplayString(), key);
 }
@@ -31,7 +31,7 @@ auto PasswordCaller::AskTwice(
     Secret& output,
     std::string_view key) noexcept -> void
 {
-    OT_ASSERT(callback_);
+    assert_true(callback_);
 
     callback_->runTwo(output, prompt.GetDisplayString(), key);
 }

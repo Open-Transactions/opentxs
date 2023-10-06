@@ -21,7 +21,6 @@ extern "C" {
 
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Util.hpp"
@@ -91,13 +90,13 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
     const noexcept -> bool
 {
     if ((0 == pubkey.size()) || (nullptr == pubkey.data())) {
-        LogError()(OT_PRETTY_CLASS())("Missing pubkey").Flush();
+        LogError()()("Missing pubkey").Flush();
 
         return false;
     }
 
     if ((secret_key_size_ != scalar.size()) || (nullptr == scalar.data())) {
-        LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
+        LogError()()("Invalid scalar").Flush();
 
         return false;
     }
@@ -110,7 +109,7 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
                        pubkey.size());
 
     if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Invalid public key").Flush();
+        LogError()()("Invalid public key").Flush();
 
         return false;
     }
@@ -121,8 +120,7 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
                   reinterpret_cast<const unsigned char*>(scalar.data()));
 
     if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Failed to add scalar to public key")
-            .Flush();
+        LogError()()("Failed to add scalar to public key").Flush();
 
         return false;
     }
@@ -130,8 +128,7 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
     auto out = result.Reserve(public_key_size_);
 
     if (false == out.IsValid(public_key_size_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
-            .Flush();
+        LogError()()("Failed to allocate space for result").Flush();
 
         return false;
     }
@@ -145,7 +142,7 @@ auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
         SECP256K1_EC_COMPRESSED);
 
     if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize public key").Flush();
+        LogError()()("Failed to serialize public key").Flush();
 
         return false;
     }
@@ -165,9 +162,7 @@ auto Secp256k1::RandomKeypair(
     auto output = privateKey.Reserve(secret_key_size_);
 
     if (false == output.IsValid(secret_key_size_)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to allocate space for private key")
-            .Flush();
+        LogError()()("Failed to allocate space for private key").Flush();
 
         return false;
     }
@@ -180,7 +175,7 @@ auto Secp256k1::RandomKeypair(
         valid = 1 == ::secp256k1_ec_seckey_verify(
                          context_, output.as<unsigned char>());
 
-        OT_ASSERT(3 > ++counter);
+        assert_true(3 > ++counter);
     }
 
     return ScalarMultiplyBase(output, std::move(publicKey));
@@ -190,13 +185,13 @@ auto Secp256k1::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
     const noexcept -> bool
 {
     if (secret_key_size_ != lhs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid lhs scalar").Flush();
+        LogError()()("Invalid lhs scalar").Flush();
 
         return false;
     }
 
     if (secret_key_size_ != rhs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid rhs scalar").Flush();
+        LogError()()("Invalid rhs scalar").Flush();
 
         return false;
     }
@@ -204,8 +199,7 @@ auto Secp256k1::ScalarAdd(ReadView lhs, ReadView rhs, Writer&& result)
     auto key = result.Reserve(secret_key_size_);
 
     if (false == key.IsValid(secret_key_size_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate space for result")
-            .Flush();
+        LogError()()("Failed to allocate space for result").Flush();
 
         return false;
     }
@@ -222,7 +216,7 @@ auto Secp256k1::ScalarMultiplyBase(ReadView scalar, Writer&& result)
     const noexcept -> bool
 {
     if (secret_key_size_ != scalar.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid scalar").Flush();
+        LogError()()("Invalid scalar").Flush();
 
         return false;
     }
@@ -239,8 +233,7 @@ auto Secp256k1::ScalarMultiplyBase(ReadView scalar, Writer&& result)
     auto pub = result.Reserve(public_key_size_);
 
     if (false == pub.IsValid(public_key_size_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate space for public key")
-            .Flush();
+        LogError()()("Failed to allocate space for public key").Flush();
 
         return false;
     }
@@ -262,7 +255,7 @@ auto Secp256k1::SharedSecret(
     Secret& secret) const noexcept -> bool
 {
     if (secret_key_size_ != prv.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid private key").Flush();
+        LogError()()("Invalid private key").Flush();
 
         return false;
     }
@@ -274,14 +267,14 @@ auto Secp256k1::SharedSecret(
                  &key,
                  reinterpret_cast<const unsigned char*>(pub.data()),
                  pub.size())) {
-        LogError()(OT_PRETTY_CLASS())("Invalid public key").Flush();
+        LogError()()("Invalid public key").Flush();
 
         return false;
     }
 
     auto out = secret.WriteInto(Secret::Mode::Mem).Reserve(secret_key_size_);
 
-    OT_ASSERT(out.IsValid(secret_key_size_));
+    assert_true(out.IsValid(secret_key_size_));
 
     const auto function = [&] {
         switch (style) {
@@ -316,19 +309,19 @@ auto Secp256k1::Sign(
         const auto digest = hash(type, plaintext);
 
         if (nullptr == priv.data() || 0 == priv.size()) {
-            LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
+            LogError()()("Missing private key").Flush();
 
             return false;
         }
 
         if (secret_key_size_ != priv.size()) {
-            LogError()(OT_PRETTY_CLASS())("Invalid private key").Flush();
+            LogError()()("Invalid private key").Flush();
 
             return false;
         }
 
         if (priv == blank_private()) {
-            LogError()(OT_PRETTY_CLASS())("Blank private key").Flush();
+            LogError()()("Blank private key").Flush();
 
             return false;
         }
@@ -337,9 +330,7 @@ auto Secp256k1::Sign(
         auto output = signature.Reserve(size);
 
         if (false == output.IsValid(size)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to allocate space for signature")
-                .Flush();
+            LogError()()("Failed to allocate space for signature").Flush();
 
             return false;
         }
@@ -353,16 +344,14 @@ auto Secp256k1::Sign(
             nullptr);
 
         if (false == signatureCreated) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Call to secp256k1_ecdsa_sign() failed.")
-                .Flush();
+            LogError()()("Call to secp256k1_ecdsa_sign() failed.").Flush();
 
             return false;
         }
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -436,7 +425,7 @@ auto Secp256k1::SignDER(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -459,7 +448,7 @@ auto Secp256k1::Verify(
                         reinterpret_cast<const unsigned char*>(digest.data()),
                         &parsed);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -487,16 +476,16 @@ auto Secp256k1::hash(const crypto::HashType type, const ReadView data) const
 
 void Secp256k1::Init()
 {
-    OT_ASSERT(false == Initialized_);
+    assert_false(Initialized_);
 
     auto seed = std::array<std::uint8_t, 32>{};
     ssl_.RandomizeMemory(seed.data(), seed.size());
 
-    OT_ASSERT(nullptr != context_);
+    assert_false(nullptr == context_);
 
     const auto randomize = secp256k1_context_randomize(context_, seed.data());
 
-    OT_ASSERT(1 == randomize);
+    assert_true(1 == randomize);
 
     Initialized_ = true;
 }

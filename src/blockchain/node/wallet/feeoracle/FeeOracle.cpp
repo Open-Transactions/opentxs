@@ -16,7 +16,6 @@
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -56,9 +55,9 @@ FeeOracle::FeeOracle(
     std::shared_ptr<const node::Manager> node) noexcept
     : shared_(std::make_shared<Shared>())
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
-    OT_ASSERT(shared_);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
+    assert_false(nullptr == shared_);
 
     const auto& asio = api->Network().ZeroMQ().Internal();
     const auto batchID = asio.PreallocateBatch();

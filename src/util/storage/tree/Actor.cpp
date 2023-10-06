@@ -21,7 +21,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -99,7 +98,7 @@ Actor::Actor(
         auto out = api_.Network().ZeroMQ().Internal().RawSocket(Push);
         const auto rc = out.Connect(endpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -143,12 +142,11 @@ auto Actor::pipeline(
         case shutdown:
         case init:
         case statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -166,29 +164,25 @@ auto Actor::run_gc(
     std::shared_ptr<Actor> self,
     const GCParams& params) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(parent);
-    OT_ASSERT(self);
+    assert_false(nullptr == api);
+    assert_false(nullptr == parent);
+    assert_false(nullptr == self);
 
     using enum Job;
     auto success{false};
     const auto post = ScopeGuard{[parent, self, &success] {
         parent->FinishGC(success);
-        self->push_.lock()->Send(MakeWork(finished), __FILE__, __LINE__);
+        self->push_.lock()->Send(MakeWork(finished));
     }};
     const auto& me = *self;
     const auto& log = me.log_;
-    log(OT_PRETTY_STATIC(Actor))(me.name_)(": garbage collection running")
-        .Flush();
+    log()(me.name_)(": garbage collection running").Flush();
     success = parent->DoGC(params);
 
     if (success) {
-        log(OT_PRETTY_STATIC(Actor))(me.name_)(": garbage collection finished")
-            .Flush();
+        log()(me.name_)(": garbage collection finished").Flush();
     } else {
-        LogError()(OT_PRETTY_STATIC(Actor))(me.name_)(
-            ": garbage collection failed")
-            .Flush();
+        LogError()()(me.name_)(": garbage collection failed").Flush();
     }
 }
 
@@ -196,15 +190,15 @@ auto Actor::schedule_gc(std::chrono::microseconds elapsed) noexcept -> void
 {
     using namespace std::chrono;
     const auto wait = duration_cast<seconds>(interval_ - elapsed);
-    log_(OT_PRETTY_CLASS())(name_)(": scheduling garbage collection in ")(
-        wait.count())(" seconds")
+    log_()(name_)(": scheduling garbage collection in ")(wait.count())(
+        " seconds")
         .Flush();
     reset_gc_timer(wait);
 }
 
 auto Actor::start_gc() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(": beginning garbage collection").Flush();
+    log_()(name_)(": beginning garbage collection").Flush();
 
     if (auto gc = parent_.StartGC(); gc) {
         RunJob([api = api_p_,
@@ -214,8 +208,7 @@ auto Actor::start_gc() noexcept -> void
             run_gc(api, parent, self, params);
         });
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": failed to start garbage collection")
-            .Flush();
+        log_()(name_)(": failed to start garbage collection").Flush();
         reset_gc_timer(10s);
     }
 }
@@ -226,14 +219,13 @@ auto Actor::work(allocator_type) noexcept -> bool
     const auto status = parent_.GCStatus();
 
     if (status.running_) {
-        log(OT_PRETTY_CLASS())(name_)(": garbage collection already running")
-            .Flush();
+        log()(name_)(": garbage collection already running").Flush();
     } else {
         using namespace std::chrono;
         const auto elapsed =
             duration_cast<seconds>(Clock::now() - status.last_);
         const auto seconds = std::chrono::seconds{std::llabs(elapsed.count())};
-        log(OT_PRETTY_CLASS())(name_)(": ")(seconds.count())(
+        log()(name_)(": ")(seconds.count())(
             " seconds since last garbage collection run")
             .Flush();
 

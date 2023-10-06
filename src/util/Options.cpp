@@ -15,7 +15,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
@@ -809,7 +808,7 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
 Options::Options() noexcept
     : imp_(std::make_unique<Imp>().release())
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Options::Options(int argc, char** argv) noexcept
@@ -821,13 +820,13 @@ Options::Options(int argc, char** argv) noexcept
 Options::Options(const Options& rhs) noexcept
     : imp_(std::make_unique<Imp>(*rhs.imp_).release())
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Options::Options(Options&& rhs) noexcept
     : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Options::AddBlockchainIpv4Bind(std::string_view endpoint) noexcept
@@ -1058,7 +1057,7 @@ auto Options::ParseCommandLine(int argc, char** argv) noexcept -> Options&
     try {
         imp_->parse(argc, argv);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return *this;

@@ -11,7 +11,6 @@
 #include "blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
@@ -31,39 +30,39 @@ ReorgSlavePrivate::ReorgSlavePrivate(
     , master_(std::move(master))
     , alloc_(std::move(alloc))
 {
-    OT_ASSERT(master_);
+    assert_false(nullptr == master_);
 
-    log_(OT_PRETTY_CLASS())("instantiated ")(name_)(" as id ")(id_).Flush();
+    log_()("instantiated ")(name_)(" as id ")(id_).Flush();
 }
 
 auto ReorgSlavePrivate::AcknowledgePrepareReorg(Reorg::Job&& job) noexcept
     -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
+    log_()(name_).Flush();
 
-    OT_ASSERT(master_);
+    assert_false(nullptr == master_);
 
     master_->AcknowledgePrepareReorg(id_, std::move(job));
 }
 
 auto ReorgSlavePrivate::AcknowledgeShutdown() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
+    log_()(name_).Flush();
 
-    OT_ASSERT(master_);
+    assert_false(nullptr == master_);
 
     master_->AcknowledgeShutdown(id_);
 }
 
 auto ReorgSlavePrivate::BroadcastFinishReorg() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
+    log_()(name_).Flush();
     parent_.Push(MakeWork(SubchainJobs::finish_reorg));
 }
 
 auto ReorgSlavePrivate::BroadcastPrepareReorg(StateSequence id) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(id)(" to ")(name_)().Flush();
+    log_()(id)(" to ")(name_)().Flush();
     parent_.Push([&] {
         auto out = MakeWork(SubchainJobs::prepare_reorg);
         out.AddFrame(id);
@@ -74,13 +73,13 @@ auto ReorgSlavePrivate::BroadcastPrepareReorg(StateSequence id) noexcept -> void
 
 auto ReorgSlavePrivate::BroadcastPrepareShutdown() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
+    log_()(name_).Flush();
     parent_.Push(MakeWork(SubchainJobs::prepare_shutdown));
 }
 
 auto ReorgSlavePrivate::BroadcastShutdown() noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_).Flush();
+    log_()(name_).Flush();
     parent_.Push(MakeWork(SubchainJobs::shutdown));
 }
 
@@ -89,7 +88,7 @@ auto ReorgSlavePrivate::GetSlave(
     std::string_view name,
     allocator_type alloc) noexcept -> ReorgSlave
 {
-    OT_ASSERT(master_);
+    assert_false(nullptr == master_);
 
     return master_->GetSlave(parent, std::move(name), std::move(alloc));
 }
@@ -101,10 +100,10 @@ auto ReorgSlavePrivate::get_allocator() const noexcept -> allocator_type
 
 auto ReorgSlavePrivate::Start() noexcept -> bool
 {
-    OT_ASSERT(master_);
+    assert_false(nullptr == master_);
 
     const auto state = master_->Register(shared_from_this());
-    log_(OT_PRETTY_CLASS())("registered ")(name_).Flush();
+    log_()("registered ")(name_).Flush();
 
     if (Reorg::State::shutdown == state) {
         Stop();
@@ -119,7 +118,7 @@ auto ReorgSlavePrivate::Start() noexcept -> bool
 auto ReorgSlavePrivate::Stop() noexcept -> void
 {
     if (master_) {
-        log_(OT_PRETTY_CLASS())(name_).Flush();
+        log_()(name_).Flush();
         master_->Unregister(id_);
         master_.reset();
     }

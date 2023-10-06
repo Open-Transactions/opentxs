@@ -14,7 +14,6 @@ extern "C" {
 #include <new>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::alloc
@@ -43,7 +42,7 @@ namespace opentxs::alloc
 Secure::Secure(Resource* upstream) noexcept
     : upstream_((nullptr == upstream) ? System() : upstream)
 {
-    OT_ASSERT(nullptr != upstream_);
+    assert_false(nullptr == upstream_);
 }
 
 auto Secure::do_allocate(std::size_t bytes, std::size_t alignment) -> void*

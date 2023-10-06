@@ -38,10 +38,10 @@ auto paymentcode_extra_notifications(
     boost::container::flat_set<opentxs::PaymentCode>& out) noexcept -> void
 {
     if (0_uz == account.IncomingNotificationCount()) {
-        log(__func__)(": adding extra notification to self").Flush();
+        log()(": adding extra notification to self").Flush();
         out.emplace(account.Local());
     } else {
-        log(__func__)(": contact has already sent notification").Flush();
+        log()(": contact has already sent notification").Flush();
     }
 }
 
@@ -101,7 +101,7 @@ auto paymentcode_preemptive_notifications(
 
         return result;
     }();
-    log(__func__)(": out of ")(all.size())(" known payment codes, ")(
+    log()(": out of ")(all.size())(" known payment codes, ")(
         unnotifiedAnyChain.size())(
         " have never received a notification on any chain and ")(
         unnotifiedThisChain.size())(
@@ -120,13 +120,13 @@ auto paymentcode_preemptive_notifications(
     }();
     const auto limit =
         opentxs::blockchain::params::get(chain).MaxNotifications();
-    log(__func__)(": notification list contains ")(out.size())(
+    log()(": notification list contains ")(out.size())(
         " payment codes out of a maximum of ")(limit)(" for ")(print(chain))
         .Flush();
 
     while ((out.size() < limit) && (false == queue.empty())) {
         auto& pc = queue.front();
-        log(__func__)(": adding ")(pc)(" to notification list").Flush();
+        log()(": adding ")(pc)(" to notification list").Flush();
         out.emplace(std::move(pc));
         queue.pop_front();
     }

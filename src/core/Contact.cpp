@@ -25,7 +25,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ContactItem.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -198,7 +197,7 @@ struct Contact::Imp {
                 serialized.contactdata());
         }
 
-        OT_ASSERT(contact_data_);
+        assert_false(nullptr == contact_data_);
 
         for (const auto& child : serialized.merged()) {
             merged_children_.emplace(
@@ -229,7 +228,7 @@ struct Contact::Imp {
             CONTACT_CONTACT_DATA_VERSION,
             identity::wot::claim::Data::SectionMap{});
 
-        OT_ASSERT(contact_data_);
+        assert_false(nullptr == contact_data_);
     }
 
     auto add_claim(const std::shared_ptr<identity::wot::claim::Item>& item)
@@ -244,10 +243,10 @@ struct Contact::Imp {
         const Lock& lock,
         const std::shared_ptr<identity::wot::claim::Item>& item) -> bool
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         if (false == bool(item)) {
-            LogError()(OT_PRETTY_CLASS())("Null claim.").Flush();
+            LogError()()("Null claim.").Flush();
 
             return false;
         }
@@ -262,7 +261,7 @@ struct Contact::Imp {
 
         if (false == proto::Validate<proto::ContactItem>(
                          proto, VERBOSE, proto::ClaimType::Indexed, version)) {
-            LogError()(OT_PRETTY_CLASS())("Invalid claim.").Flush();
+            LogError()()("Invalid claim.").Flush();
 
             return false;
         }
@@ -274,7 +273,7 @@ struct Contact::Imp {
 
     auto add_nym(const Lock& lock, const Nym_p& nym, const bool primary) -> bool
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         if (false == bool(nym)) { return false; }
 
@@ -286,7 +285,7 @@ struct Contact::Imp {
         const bool typeMismatch = (contactType != nymType);
 
         if (haveType && typeMismatch) {
-            LogError()(OT_PRETTY_CLASS())("Wrong nym type.").Flush();
+            LogError()()("Wrong nym type.").Flush();
 
             return false;
         }
@@ -308,7 +307,7 @@ struct Contact::Imp {
         const identifier::Nym& nymID,
         const bool primary)
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         UnallocatedSet<identity::wot::claim::Attribute> attr{
             identity::wot::claim::Attribute::Local,
@@ -337,14 +336,14 @@ struct Contact::Imp {
         const Lock& lock,
         const std::shared_ptr<identity::wot::claim::Item>& item)
     {
-        OT_ASSERT(verify_write_lock(lock));
-        OT_ASSERT(contact_data_);
+        assert_true(verify_write_lock(lock));
+        assert_false(nullptr == contact_data_);
 
         // NOLINTNEXTLINE(modernize-make-unique)
         contact_data_.reset(
             new identity::wot::claim::Data(contact_data_->AddItem(item)));
 
-        OT_ASSERT(contact_data_);
+        assert_false(nullptr == contact_data_);
 
         revision_++;
         cached_contact_data_.reset();
@@ -352,7 +351,7 @@ struct Contact::Imp {
 
     void init_nyms()
     {
-        OT_ASSERT(contact_data_);
+        assert_false(nullptr == contact_data_);
 
         const auto nyms = contact_data_->Group(
             identity::wot::claim::SectionType::Relationship,
@@ -366,15 +365,14 @@ struct Contact::Imp {
         for (const auto& it : *nyms) {
             const auto& item = it.second;
 
-            OT_ASSERT(item);
+            assert_false(nullptr == item);
 
             const auto nymID = api_.Factory().NymIDFromBase58(item->Value());
             auto& nym = nyms_[nymID];
             nym = api_.Wallet().Nym(nymID);
 
             if (false == bool(nym)) {
-                LogVerbose()(OT_PRETTY_CLASS())("Failed to load nym ")(
-                    nymID, api_.Crypto())(".")
+                LogVerbose()()("Failed to load nym ")(nymID, api_.Crypto())(".")
                     .Flush();
             }
         }
@@ -383,8 +381,8 @@ struct Contact::Imp {
     auto merged_data(const Lock& lock) const
         -> std::shared_ptr<identity::wot::claim::Data>
     {
-        OT_ASSERT(contact_data_);
-        OT_ASSERT(verify_write_lock(lock));
+        assert_false(nullptr == contact_data_);
+        assert_true(verify_write_lock(lock));
 
         if (cached_contact_data_) { return cached_contact_data_; }
 
@@ -392,7 +390,7 @@ struct Contact::Imp {
             new identity::wot::claim::Data(*contact_data_));
         auto& output = cached_contact_data_;
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         if (false == primary_nym_.empty()) {
             try {
@@ -435,7 +433,7 @@ struct Contact::Imp {
 
     auto type(const Lock& lock) const -> identity::wot::claim::ClaimType
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         const auto data = merged_data(lock);
 
@@ -448,7 +446,7 @@ struct Contact::Imp {
 
     void update_label(const Lock& lock, const identity::Nym& nym)
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         if (false == label_.empty()) { return; }
 
@@ -458,13 +456,13 @@ struct Contact::Imp {
     auto verify_write_lock(const Lock& lock) const -> bool
     {
         if (lock.mutex() != &lock_) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect mutex.").Flush();
+            LogError()()("Incorrect mutex.").Flush();
 
             return false;
         }
 
         if (false == lock.owns_lock()) {
-            LogError()(OT_PRETTY_CLASS())("Lock not owned.").Flush();
+            LogError()()("Lock not owned.").Flush();
 
             return false;
         }
@@ -478,13 +476,13 @@ Contact::Contact(
     const proto::Contact& serialized)
     : imp_(std::make_unique<Imp>(api, serialized))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Contact::Contact(const api::session::Client& api, std::string_view label)
     : imp_(std::make_unique<Imp>(api, label))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Contact::operator+=(Contact& rhs) -> Contact&
@@ -549,15 +547,13 @@ auto Contact::AddBlockchainAddress(
                      chains.empty();
 
     if (bad) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode address").Flush();
+        LogError()()("Failed to decode address").Flush();
 
         return false;
     }
 
     if (0 == chains.count(type)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Address is not valid for specified chain")
-            .Flush();
+        LogError()()("Address is not valid for specified chain").Flush();
 
         return false;
     }
@@ -603,7 +599,7 @@ auto Contact::AddEmail(
     imp_->contact_data_.reset(new identity::wot::claim::Data(
         imp_->contact_data_->AddEmail(value, primary, active)));
 
-    OT_ASSERT(imp_->contact_data_);
+    assert_false(nullptr == imp_->contact_data_);
 
     imp_->revision_++;
     imp_->cached_contact_data_.reset();
@@ -663,7 +659,7 @@ auto Contact::AddPaymentCode(
         ""));
 
     if (false == imp_->add_claim(claim)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to add claim.").Flush();
+        LogError()()("Unable to add claim.").Flush();
 
         return false;
     }
@@ -684,7 +680,7 @@ auto Contact::AddPhoneNumber(
     imp_->contact_data_.reset(new identity::wot::claim::Data(
         imp_->contact_data_->AddPhoneNumber(value, primary, active)));
 
-    OT_ASSERT(imp_->contact_data_);
+    assert_false(nullptr == imp_->contact_data_);
 
     imp_->revision_++;
     imp_->cached_contact_data_.reset();
@@ -707,7 +703,7 @@ auto Contact::AddSocialMediaProfile(
         imp_->contact_data_->AddSocialMediaProfile(
             value, type, primary, active)));
 
-    OT_ASSERT(imp_->contact_data_);
+    assert_false(nullptr == imp_->contact_data_);
 
     imp_->revision_++;
     imp_->cached_contact_data_.reset();
@@ -790,7 +786,7 @@ auto Contact::BlockchainAddresses() const -> UnallocatedVector<
         const auto& type = it.first;
         const auto& group = it.second;
 
-        OT_ASSERT(group);
+        assert_false(nullptr == group);
 
         const bool currency = proto::ValidContactItemType(
             {version, translate(identity::wot::claim::SectionType::Contract)},
@@ -801,7 +797,7 @@ auto Contact::BlockchainAddresses() const -> UnallocatedVector<
         for (const auto& inner : *group) {
             const auto& item = inner.second;
 
-            OT_ASSERT(item);
+            assert_false(nullptr == item);
 
             try {
                 output.push_back(Imp::translate(
@@ -856,7 +852,7 @@ auto Contact::Label() const -> const UnallocatedCString&
 
 auto Contact::LastUpdated() const -> std::time_t
 {
-    OT_ASSERT(imp_->contact_data_);
+    assert_false(nullptr == imp_->contact_data_);
 
     const auto group = imp_->contact_data_->Group(
         identity::wot::claim::SectionType::Event,
@@ -879,7 +875,7 @@ auto Contact::LastUpdated() const -> std::time_t
 
             return std::stoll(claim->Value());
         } else {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
     } catch (const std::out_of_range&) {
@@ -912,7 +908,7 @@ auto Contact::Nyms(const bool includeInactive) const
     for (const auto& it : *group) {
         const auto& item = it.second;
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         const auto& itemID = item->ID();
 
@@ -971,7 +967,7 @@ auto Contact::PaymentCodes(const UnitType currency) const
     UnallocatedVector<UnallocatedCString> output{};
 
     for (const auto& it : *group) {
-        OT_ASSERT(it.second);
+        assert_false(nullptr == it.second);
 
         const auto& item = *it.second;
         output.emplace_back(item.Value());
@@ -1146,7 +1142,7 @@ void Contact::Update(const proto::Nym& serialized)
     auto nym = imp_->api_.Wallet().Internal().Nym(serialized);
 
     if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid serialized nym.").Flush();
+        LogError()()("Invalid serialized nym.").Flush();
 
         return;
     }

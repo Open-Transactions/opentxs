@@ -16,7 +16,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
@@ -32,7 +31,7 @@ static auto create_group(
     const claim::SectionType section,
     const std::shared_ptr<Item>& item) -> Section::GroupMap
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     Section::GroupMap output{};
     const auto& itemType = item->Type();
@@ -61,7 +60,7 @@ static auto extract_groups(
             translate(section),
             item);
 
-        OT_ASSERT(instantiated);
+        assert_false(nullptr == instantiated);
 
         const auto& itemID = instantiated->ID();
         auto& itemMap = itemMaps[translate(itemType)];
@@ -87,7 +86,7 @@ struct Section::Imp {
 
     auto add_scope(const std::shared_ptr<Item>& item) const -> Section
     {
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         auto scope = item;
 
@@ -158,13 +157,13 @@ Section::Section(
 Section::Section(const Section& rhs) noexcept
     : imp_(std::make_unique<Imp>(*rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Section::Section(Section&& rhs) noexcept
     : imp_(std::move(rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Section::Section(
@@ -183,8 +182,8 @@ Section::Section(
           create_group(nym, section, item))
 {
     if (0 == version) {
-        LogError()(OT_PRETTY_CLASS())("Warning: malformed version. "
-                                      "Setting to ")(parentVersion)(".")
+        LogError()()("Warning: malformed version. "
+                     "Setting to ")(parentVersion)(".")
             .Flush();
     }
 }
@@ -225,7 +224,7 @@ auto Section::operator+(const Section& rhs) const -> Section
         const auto& rhsID = it.first;
         const auto& rhsGroup = it.second;
 
-        OT_ASSERT(rhsGroup);
+        assert_false(nullptr == rhsGroup);
 
         auto lhs = map.find(rhsID);
         const bool exists = (map.end() != lhs);
@@ -233,16 +232,16 @@ auto Section::operator+(const Section& rhs) const -> Section
         if (exists) {
             auto& group = lhs->second;
 
-            OT_ASSERT(group);
+            assert_false(nullptr == group);
 
             group.reset(new claim::Group(*group + *rhsGroup));
 
-            OT_ASSERT(group);
+            assert_false(nullptr == group);
         } else {
             [[maybe_unused]] const auto [i, inserted] =
                 map.emplace(rhsID, rhsGroup);
 
-            OT_ASSERT(inserted);
+            assert_true(inserted);
         }
     }
 
@@ -253,7 +252,7 @@ auto Section::operator+(const Section& rhs) const -> Section
 
 auto Section::AddItem(const std::shared_ptr<Item>& item) const -> Section
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     const bool specialCaseScope = (claim::SectionType::Scope == imp_->section_);
 
@@ -266,7 +265,7 @@ auto Section::AddItem(const std::shared_ptr<Item>& item) const -> Section
     if (groupExists) {
         auto& existing = map.at(groupID);
 
-        OT_ASSERT(existing);
+        assert_false(nullptr == existing);
 
         existing.reset(new claim::Group(existing->AddItem(item)));
     } else {
@@ -288,7 +287,7 @@ auto Section::Claim(const identifier::Generic& item) const
     -> std::shared_ptr<Item>
 {
     for (const auto& group : imp_->groups_) {
-        OT_ASSERT(group.second);
+        assert_false(nullptr == group.second);
 
         auto claim = group.second->Claim(item);
 
@@ -306,7 +305,7 @@ auto Section::Delete(const identifier::Generic& id) const -> Section
     for (auto& it : map) {
         auto& group = it.second;
 
-        OT_ASSERT(group);
+        assert_false(nullptr == group);
 
         if (group->HaveClaim(id)) {
             group.reset(new claim::Group(group->Delete(id)));
@@ -347,7 +346,7 @@ auto Section::Group(const claim::ClaimType& type) const
 auto Section::HaveClaim(const identifier::Generic& item) const -> bool
 {
     for (const auto& group : imp_->groups_) {
-        OT_ASSERT(group.second);
+        assert_false(nullptr == group.second);
 
         if (group.second->HaveClaim(item)) { return true; }
     }
@@ -359,8 +358,7 @@ auto Section::Serialize(Writer&& destination, const bool withIDs) const -> bool
 {
     proto::ContactData data;
     if (false == SerializeTo(data, withIDs) || data.section_size() != 1) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize the contactsection.")
-            .Flush();
+        LogError()()("Failed to serialize the contactsection.").Flush();
         return false;
     }
 
@@ -382,7 +380,7 @@ auto Section::SerializeTo(proto::ContactData& section, const bool withIDs) const
     for (const auto& it : imp_->groups_) {
         const auto& group = it.second;
 
-        OT_ASSERT(group);
+        assert_false(nullptr == group);
 
         output &= group->SerializeTo(serialized, withIDs);
     }

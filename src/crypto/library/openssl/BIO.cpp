@@ -14,7 +14,6 @@ extern "C" {
 #include <limits>
 
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -23,7 +22,7 @@ namespace opentxs::crypto::openssl
 {
 auto BIO::assertBioNotNull(::BIO* pBIO) -> ::BIO*
 {
-    if (nullptr == pBIO) { OT_FAIL; }
+    if (nullptr == pBIO) { LogAbort()().Abort(); }
     return pBIO;
 }
 
@@ -57,7 +56,7 @@ void BIO::read_bio(
     std::size_t& total,
     UnallocatedVector<std::byte>& output)
 {
-    OT_ASSERT(std::numeric_limits<int>::max() >= amount);
+    assert_true(std::numeric_limits<int>::max() >= amount);
 
     output.resize(output.size() + amount);
     read = BIO_read(*this, &output[total], static_cast<int>(amount));
@@ -72,7 +71,7 @@ auto BIO::ToBytes() -> UnallocatedVector<std::byte>
     read_bio(read_amount_, read, total, output);
 
     if (0 == read) {
-        LogError()(OT_PRETTY_CLASS())("Read failed").Flush();
+        LogError()()("Read failed").Flush();
 
         return {};
     }
@@ -82,7 +81,7 @@ auto BIO::ToBytes() -> UnallocatedVector<std::byte>
     }
 
     output.resize(total);
-    LogInsane()(OT_PRETTY_CLASS())("Read ")(total)(" bytes").Flush();
+    LogInsane()()("Read ")(total)(" bytes").Flush();
 
     return output;
 }
@@ -97,7 +96,10 @@ auto BIO::ToString() -> OTString
         bytes.resize(size + 1);
         bytes[size] = static_cast<std::byte>(0x0);
 
-        OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= bytes.size());
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+        assert_true(std::numeric_limits<std::uint32_t>::max() >= bytes.size());
+#pragma GCC diagnostic pop
 
         output->Set(
             reinterpret_cast<const char*>(bytes.data()),

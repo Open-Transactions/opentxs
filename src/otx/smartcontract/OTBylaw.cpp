@@ -14,7 +14,6 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTClause.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -43,16 +42,13 @@ OTBylaw::OTBylaw(const char* szName, const char* szLanguage)
     if (nullptr != szName) {
         name_->Set(szName);
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "nullptr szName passed in to OTBylaw::OTBylaw.")
-            .Flush();
+        LogError()()("nullptr szName passed in to OTBylaw::OTBylaw.").Flush();
     }
 
     if (nullptr != szLanguage) {
         language_ = String::Factory(szLanguage);  // "chai", "angelscript" etc.
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "nullptr szLanguage passed in to OTBylaw::OTBylaw.")
+        LogError()()("nullptr szLanguage passed in to OTBylaw::OTBylaw.")
             .Flush();
     }
 
@@ -64,9 +60,7 @@ OTBylaw::OTBylaw(const char* szName, const char* szLanguage)
     //
     if (!OTScriptable::ValidateName(str_bylaw_name) ||
         !OTScriptable::ValidateName(str_language)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed validation in to OTBylaw::OTBylaw.")
-            .Flush();
+        LogError()()("Failed validation in to OTBylaw::OTBylaw.").Flush();
     }
 }
 
@@ -92,7 +86,7 @@ void OTBylaw::Serialize(
 
     for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
         // Variables save in a specific state during ID calculation (no matter
         // their current actual value.)
         pVar->Serialize(crypto, *pTag, bCalculatingID);
@@ -100,7 +94,7 @@ void OTBylaw::Serialize(
 
     for (const auto& it : clauses_) {
         OTClause* pClause = it.second;
-        OT_ASSERT(nullptr != pClause);
+        assert_false(nullptr == pClause);
 
         pClause->Serialize(crypto, *pTag);
     }
@@ -141,7 +135,7 @@ auto OTBylaw::IsDirty() const -> bool
 
     for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         // "Persistent" *AND* "Important" Variables are both considered
         // "persistent".
@@ -154,9 +148,8 @@ auto OTBylaw::IsDirty() const -> bool
                 break;
             } else {  // If it's not persistent (which also includes important)
                 // the only other option is CONSTANT. Then why is it dirty?
-                LogError()(OT_PRETTY_CLASS())(
-                    "Error: Why is it that a variable "
-                    "is CONSTANT, yet DIRTY at the same time?")
+                LogError()()("Error: Why is it that a variable "
+                             "is CONSTANT, yet DIRTY at the same time?")
                     .Flush();
             }
         }
@@ -174,7 +167,7 @@ auto OTBylaw::IsDirtyImportant() const -> bool
 
     for (const auto& it : variables_) {
         OTVariable* pVar = it.second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         // "Persistent" *AND* "Important" Variables are both considered
         // "persistent".
@@ -199,7 +192,7 @@ void OTBylaw::SetAsClean()
 {
     for (auto& it : variables_) {
         OTVariable* pVar = it.second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         pVar->SetAsClean();  // so we can check for dirtiness later, if it's
                              // changed.
@@ -214,7 +207,7 @@ void OTBylaw::RegisterVariablesForExecution(OTScript& theScript)
     for (auto& it : variables_) {
         const UnallocatedCString str_var_name = it.first;
         OTVariable* pVar = it.second;
-        OT_ASSERT((nullptr != pVar) && (str_var_name.size() > 0));
+        assert_true((nullptr != pVar) && (str_var_name.size() > 0));
 
         pVar->RegisterForExecution(theScript);
     }
@@ -226,29 +219,26 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
     if ((name_->Compare(rhs.GetName())) &&
         (language_->Compare(rhs.GetLanguage()))) {
         if (GetVariableCount() != rhs.GetVariableCount()) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "The variable count doesn't match for "
-                "bylaw: ")(name_.get())(".")
+            LogConsole()()("The variable count doesn't match for "
+                           "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetClauseCount() != rhs.GetClauseCount()) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "The clause count doesn't match for "
-                "bylaw: ")(name_.get())(".")
+            LogConsole()()("The clause count doesn't match for "
+                           "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetHookCount() != rhs.GetHookCount()) {
-            LogConsole()(OT_PRETTY_CLASS())("The hook count doesn't match for "
-                                            "bylaw: ")(name_.get())(".")
+            LogConsole()()("The hook count doesn't match for "
+                           "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
         if (GetCallbackCount() != rhs.GetCallbackCount()) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "The callback count doesn't match for "
-                "bylaw: ")(name_.get())(".")
+            LogConsole()()("The callback count doesn't match for "
+                           "bylaw: ")(name_.get())(".")
                 .Flush();
             return false;
         }
@@ -257,20 +247,19 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
 
         for (const auto& it : variables_) {
             OTVariable* pVar = it.second;
-            OT_ASSERT(nullptr != pVar);
+            assert_false(nullptr == pVar);
 
             OTVariable* pVar2 = rhs.GetVariable(pVar->GetName().Get());
 
             if (nullptr == pVar2) {
-                LogConsole()(OT_PRETTY_CLASS())("Failed: Variable not found: ")(
-                    pVar->GetName())(".")
+                LogConsole()()("Failed: Variable not found: ")(pVar->GetName())(
+                    ".")
                     .Flush();
                 return false;
             }
             if (!pVar->Compare(*pVar2)) {
-                LogConsole()(OT_PRETTY_CLASS())(
-                    "Failed comparison between 2 "
-                    "variables named ")(pVar->GetName())(".")
+                LogConsole()()("Failed comparison between 2 "
+                               "variables named ")(pVar->GetName())(".")
                     .Flush();
                 return false;
             }
@@ -278,20 +267,19 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
 
         for (const auto& it : clauses_) {
             OTClause* pClause = it.second;
-            OT_ASSERT(nullptr != pClause);
+            assert_false(nullptr == pClause);
 
             OTClause* pClause2 = rhs.GetClause(pClause->GetName().Get());
 
             if (nullptr == pClause2) {
-                LogConsole()(OT_PRETTY_CLASS())("Failed: Clause not found: ")(
+                LogConsole()()("Failed: Clause not found: ")(
                     pClause->GetName())(".")
                     .Flush();
                 return false;
             }
             if (!pClause->Compare(*pClause2)) {
-                LogConsole()(OT_PRETTY_CLASS())(
-                    "Failed comparison between 2 "
-                    "clauses named ")(pClause->GetName())(".")
+                LogConsole()()("Failed comparison between 2 "
+                               "clauses named ")(pClause->GetName())(".")
                     .Flush();
                 return false;
             }
@@ -305,14 +293,14 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             OTClause* pCallbackClause2 = rhs.GetCallback(str_callback_name);
 
             if (nullptr == pCallbackClause) {
-                LogConsole()(OT_PRETTY_CLASS())(" Failed: Callback (")(
+                LogConsole()()(" Failed: Callback (")(
                     str_callback_name)(") clause (")(
                     str_clause_name)(") not found on this bylaw: ")(
                     name_.get())(".")
                     .Flush();
                 return false;
             } else if (nullptr == pCallbackClause2) {
-                LogConsole()(OT_PRETTY_CLASS())(" Failed: Callback (")(
+                LogConsole()()(" Failed: Callback (")(
                     str_callback_name)(") clause (")(
                     str_clause_name)(") not found on rhs bylaw: ")(
                     rhs.GetName())(".")
@@ -320,7 +308,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
                 return false;
             } else if (!(pCallbackClause->GetName().Compare(
                            pCallbackClause2->GetName()))) {
-                LogConsole()(OT_PRETTY_CLASS())(" Failed: Callback (")(
+                LogConsole()()(" Failed: Callback (")(
                     str_callback_name)(") clause (")(
                     str_clause_name)(") on rhs has a different name (")(
                     pCallbackClause2->GetName())(") than *this bylaw: ")(
@@ -354,7 +342,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
 
             if (!GetHooks(str_hook_name, theHookClauses) ||
                 !rhs.GetHooks(str_hook_name, theHookClauses2)) {
-                LogConsole()(OT_PRETTY_CLASS())("Failed finding hook (")(
+                LogConsole()()("Failed finding hook (")(
                     str_hook_name)(") clauses on this bylaw or rhs bylaw: ")(
                     name_.get())(".")
                     .Flush();
@@ -362,7 +350,7 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             }
 
             if (theHookClauses.size() != theHookClauses2.size()) {
-                LogConsole()(OT_PRETTY_CLASS())("Hook (")(
+                LogConsole()()("Hook (")(
                     str_hook_name)(") clauses count doesn't match between this "
                                    "bylaw and the rhs bylaw named: ")(
                     name_.get())(".")
@@ -373,13 +361,12 @@ auto OTBylaw::Compare(OTBylaw& rhs) -> bool
             for (auto& it : theHookClauses) {
                 const UnallocatedCString str_clause_name = it.first;
                 OTClause* pClause = it.second;
-                OT_ASSERT(nullptr != pClause);
+                assert_false(nullptr == pClause);
 
                 auto it_rhs = theHookClauses2.find(str_clause_name);
 
                 if (theHookClauses2.end() == it_rhs) {
-                    LogConsole()(OT_PRETTY_CLASS())(
-                        "Unable to find hook clause (")(
+                    LogConsole()()("Unable to find hook clause (")(
                         str_clause_name)(") on rhs that was definitely present "
                                          "on *this. Bylaw: ")(name_.get())(".")
                         .Flush();
@@ -406,8 +393,7 @@ auto OTBylaw::GetCallbackNameByIndex(std::int32_t nIndex)
 {
     if ((nIndex < 0) ||
         (nIndex >= static_cast<std::int64_t>(callbacks_.size()))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
@@ -423,8 +409,7 @@ auto OTBylaw::GetCallbackNameByIndex(std::int32_t nIndex)
 auto OTBylaw::GetCallback(UnallocatedCString str_Name) -> OTClause*
 {
     if (false == OTScriptable::ValidateCallbackName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid Callback name: ")(str_Name)(".")
-            .Flush();
+        LogError()()("Invalid Callback name: ")(str_Name)(".").Flush();
         return nullptr;
     }
     // -----------------------------------------
@@ -441,7 +426,7 @@ auto OTBylaw::GetCallback(UnallocatedCString str_Name) -> OTClause*
         {
             return pClause;
         } else {
-            LogConsole()(OT_PRETTY_CLASS())("Couldn't find clause (")(
+            LogConsole()()("Couldn't find clause (")(
                 str_clause_name)(") that was registered for callback (")(
                 str_Name)(")")(".")
                 .Flush();
@@ -454,7 +439,7 @@ auto OTBylaw::GetCallback(UnallocatedCString str_Name) -> OTClause*
 auto OTBylaw::RemoveVariable(UnallocatedCString str_Name) -> bool
 {
     if (!OTScriptable::ValidateVariableName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Invalid str_Name.").Flush();
+        LogError()()("Error: Invalid str_Name.").Flush();
         return false;
     }
 
@@ -463,7 +448,7 @@ auto OTBylaw::RemoveVariable(UnallocatedCString str_Name) -> bool
     if (variables_.end() != it)  // Found it.
     {
         OTVariable* pVar = it->second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         variables_.erase(it);
         delete pVar;
@@ -477,8 +462,7 @@ auto OTBylaw::RemoveVariable(UnallocatedCString str_Name) -> bool
 auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
 {
     if (!OTScriptable::ValidateClauseName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())("Failed: Empty or invalid str_Name.")
-            .Flush();
+        LogError()()("Failed: Empty or invalid str_Name.").Flush();
         return false;
     }
 
@@ -487,7 +471,7 @@ auto OTBylaw::RemoveClause(UnallocatedCString str_Name) -> bool
     if (clauses_.end() == it) { return false; }
     // -----------------------------------
     OTClause* pClause = it->second;
-    OT_ASSERT(nullptr != pClause);
+    assert_false(nullptr == pClause);
 
     // At this point we have the clause name (str_Name)
     // so we go ahead and delete the clause itself, and
@@ -543,14 +527,11 @@ auto OTBylaw::RemoveHook(
     UnallocatedCString str_ClauseName) -> bool
 {
     if (!OTScriptable::ValidateHookName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())("Failed: Empty or invalid str_Name.")
-            .Flush();
+        LogError()()("Failed: Empty or invalid str_Name.").Flush();
         return false;
     }
     if (!OTScriptable::ValidateClauseName(str_ClauseName)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed: Empty or invalid str_ClauseName.")
-            .Flush();
+        LogError()()("Failed: Empty or invalid str_ClauseName.").Flush();
         return false;
     }
     // ----------------------------------------
@@ -575,8 +556,7 @@ auto OTBylaw::RemoveHook(
 auto OTBylaw::RemoveCallback(UnallocatedCString str_Name) -> bool
 {
     if (false == OTScriptable::ValidateCallbackName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid Callback name: ")(str_Name)(".")
-            .Flush();
+        LogError()()("Invalid Callback name: ")(str_Name)(".").Flush();
         return false;
     }
     // -----------------------------------------
@@ -601,8 +581,7 @@ auto OTBylaw::RemoveCallback(UnallocatedCString str_Name) -> bool
         return true;
     }
 
-    LogError()(OT_PRETTY_CLASS())("Failed. No such callback: ")(str_Name)(".")
-        .Flush();
+    LogError()()("Failed. No such callback: ")(str_Name)(".").Flush();
 
     return false;
 }
@@ -622,7 +601,7 @@ auto OTBylaw::AddCallback(
                                  // twice.)
     {
         const UnallocatedCString str_existing_clause = it->second;
-        LogConsole()(OT_PRETTY_CLASS())("Failed to add callback (")(
+        LogConsole()()("Failed to add callback (")(
             str_CallbackName)(") to bylaw ")(name_.get())(
             ", already there as ")(str_existing_clause)(".")
             .Flush();
@@ -632,7 +611,7 @@ auto OTBylaw::AddCallback(
 
     if (!OTScriptable::ValidateCallbackName(str_CallbackName) ||
         !OTScriptable::ValidateClauseName(str_ClauseName)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Empty or invalid name (")(
+        LogError()()("Error: Empty or invalid name (")(
             str_CallbackName)(") or clause (")(str_ClauseName)(").")
             .Flush();
     } else if (
@@ -641,7 +620,7 @@ auto OTBylaw::AddCallback(
             callbacks_.begin(),
             std::pair<UnallocatedCString, UnallocatedCString>(
                 str_CallbackName.c_str(), str_ClauseName.c_str()))) {
-        LogError()(OT_PRETTY_CLASS())("Failed inserting to callbacks_: ")(
+        LogError()()("Failed inserting to callbacks_: ")(
             str_CallbackName)(" / ")(str_ClauseName)(".")
             .Flush();
     } else {
@@ -660,7 +639,7 @@ auto OTBylaw::AddHook(
 {
     if (!OTScriptable::ValidateHookName(str_HookName) ||
         !OTScriptable::ValidateClauseName(str_ClauseName)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Invalid or empty hook name (")(
+        LogError()()("Error: Invalid or empty hook name (")(
             str_HookName)(") or clause name (")(str_ClauseName)(").")
             .Flush();
         return false;
@@ -674,7 +653,7 @@ auto OTBylaw::AddHook(
 
         if ((0 == str_hook_name.compare(str_HookName)) &&
             (0 == str_clause_name.compare(str_ClauseName))) {
-            LogConsole()(OT_PRETTY_CLASS())("Failed: Hook already exists: ")(
+            LogConsole()()("Failed: Hook already exists: ")(
                 str_HookName)(". For clause name: ")(str_ClauseName)(".")
                 .Flush();
             return false;
@@ -686,8 +665,8 @@ auto OTBylaw::AddHook(
     if (hooks_.end() ==
         hooks_.insert(std::pair<UnallocatedCString, UnallocatedCString>(
             str_HookName.c_str(), str_ClauseName.c_str()))) {
-        LogError()(OT_PRETTY_CLASS())("Failed inserting to hooks_: ")(
-            str_HookName)(" / ")(str_ClauseName)(".")
+        LogError()()("Failed inserting to hooks_: ")(str_HookName)(" / ")(
+            str_ClauseName)(".")
             .Flush();
     } else {
         return true;
@@ -708,14 +687,13 @@ auto OTBylaw::GetVariable(UnallocatedCString str_var_name)
     if (variables_.end() == it) { return nullptr; }
 
     if (!OTScriptable::ValidateVariableName(str_var_name)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Invalid variable name: ")(
-            str_var_name)(".")
+        LogError()()("Error: Invalid variable name: ")(str_var_name)(".")
             .Flush();
         return nullptr;
     }
 
     OTVariable* pVar = it->second;
-    OT_ASSERT(nullptr != pVar);
+    assert_false(nullptr == pVar);
 
     return pVar;
 }
@@ -726,14 +704,13 @@ auto OTBylaw::GetVariableByIndex(std::int32_t nIndex) -> OTVariable*
 {
     if (!((nIndex >= 0) &&
           (nIndex < static_cast<std::int64_t>(variables_.size())))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
         for (auto& it : variables_) {
             OTVariable* pVar = it.second;
-            OT_ASSERT(nullptr != pVar);
+            assert_false(nullptr == pVar);
 
             ++nLoopIndex;  // 0 on first iteration.
 
@@ -746,7 +723,7 @@ auto OTBylaw::GetVariableByIndex(std::int32_t nIndex) -> OTVariable*
 auto OTBylaw::GetClause(UnallocatedCString str_clause_name) const -> OTClause*
 {
     if (!OTScriptable::ValidateClauseName(str_clause_name)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Empty str_clause_name.").Flush();
+        LogError()()("Error: Empty str_clause_name.").Flush();
         return nullptr;
     }
 
@@ -755,7 +732,7 @@ auto OTBylaw::GetClause(UnallocatedCString str_clause_name) const -> OTClause*
     if (clauses_.end() == it) { return nullptr; }
 
     OTClause* pClause = it->second;
-    OT_ASSERT(nullptr != pClause);
+    assert_false(nullptr == pClause);
 
     return pClause;
 }
@@ -766,14 +743,13 @@ auto OTBylaw::GetClauseByIndex(std::int32_t nIndex) -> OTClause*
 {
     if (!((nIndex >= 0) &&
           (nIndex < static_cast<std::int64_t>(clauses_.size())))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
         for (auto& it : clauses_) {
             OTClause* pClause = it.second;
-            OT_ASSERT(nullptr != pClause);
+            assert_false(nullptr == pClause);
 
             ++nLoopIndex;  // 0 on first iteration.
 
@@ -787,8 +763,7 @@ auto OTBylaw::GetHookNameByIndex(std::int32_t nIndex)
     -> const UnallocatedCString
 {
     if ((nIndex < 0) || (nIndex >= static_cast<std::int64_t>(hooks_.size()))) {
-        LogError()(OT_PRETTY_CLASS())("Index out of bounds: ")(nIndex)(".")
-            .Flush();
+        LogError()()("Index out of bounds: ")(nIndex)(".").Flush();
     } else {
         std::int32_t nLoopIndex = -1;
 
@@ -812,7 +787,7 @@ auto OTBylaw::GetHooks(
     mapOfClauses& theResults) -> bool
 {
     if (!OTScriptable::ValidateHookName(str_HookName)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Invalid str_HookName.").Flush();
+        LogError()()("Error: Invalid str_HookName.").Flush();
         return false;
     }
 
@@ -848,7 +823,7 @@ auto OTBylaw::GetHooks(
                     bReturnVal = true;
                 }
             } else {
-                LogConsole()(OT_PRETTY_CLASS())("Couldn't find clause (")(
+                LogConsole()()("Couldn't find clause (")(
                     str_clause_name)(") that was registered for hook (")(
                     str_hook_name)(")")(".")
                     .Flush();
@@ -865,8 +840,8 @@ auto OTBylaw::AddVariable(OTVariable& theVariable) -> bool
     const UnallocatedCString str_name = theVariable.GetName().Get();
 
     if (!OTScriptable::ValidateVariableName(str_name)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid variable name. In Bylaw: ")(name_.get())(".")
+        LogError()()("Failed due to invalid variable name. In Bylaw: ")(
+            name_.get())(".")
             .Flush();
         return false;
     }
@@ -886,9 +861,8 @@ auto OTBylaw::AddVariable(OTVariable& theVariable) -> bool
 
         return true;
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed -- A variable was already there "
-            "named: ")(str_name)(".")
+        LogConsole()()("Failed -- A variable was already there "
+                       "named: ")(str_name)(".")
             .Flush();
         return false;
     }
@@ -900,7 +874,7 @@ auto OTBylaw::AddVariable(
     OTVariable::OTVariable_Access theAccess) -> bool
 {
     auto* pVar = new OTVariable(str_Name, bValue, theAccess);
-    OT_ASSERT(nullptr != pVar);
+    assert_false(nullptr == pVar);
 
     if (!AddVariable(*pVar)) {
         delete pVar;
@@ -916,7 +890,7 @@ auto OTBylaw::AddVariable(
     OTVariable::OTVariable_Access theAccess) -> bool
 {
     auto* pVar = new OTVariable(str_Name, str_Value, theAccess);
-    OT_ASSERT(nullptr != pVar);
+    assert_false(nullptr == pVar);
 
     if (!AddVariable(*pVar)) {
         delete pVar;
@@ -932,7 +906,7 @@ auto OTBylaw::AddVariable(
     OTVariable::OTVariable_Access theAccess) -> bool
 {
     auto* pVar = new OTVariable(str_Name, nValue, theAccess);
-    OT_ASSERT(nullptr != pVar);
+    assert_false(nullptr == pVar);
 
     if (!AddVariable(*pVar)) {
         delete pVar;
@@ -944,14 +918,14 @@ auto OTBylaw::AddVariable(
 
 auto OTBylaw::AddClause(const char* szName, const char* szCode) -> bool
 {
-    OT_ASSERT(nullptr != szName);
-    //  OT_ASSERT(nullptr != szCode);
+    assert_false(nullptr == szName);
+    //  assert_false(nullptr == szCode);
 
     // Note: name is validated in the AddClause call below.
     // (So I don't validate it here.)
 
     auto* pClause = new OTClause(szName, szCode);
-    OT_ASSERT(nullptr != pClause);
+    assert_false(nullptr == pClause);
 
     if (!AddClause(*pClause)) {
         delete pClause;
@@ -966,8 +940,8 @@ auto OTBylaw::UpdateClause(
     UnallocatedCString str_Code) -> bool
 {
     if (!OTScriptable::ValidateClauseName(str_Name)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid clause name. In Bylaw: ")(name_.get())(".")
+        LogError()()("Failed due to invalid clause name. In Bylaw: ")(
+            name_.get())(".")
             .Flush();
         return false;
     }
@@ -979,7 +953,7 @@ auto OTBylaw::UpdateClause(
     }
     // -----------------------------------
     OTClause* pClause = it->second;
-    OT_ASSERT(nullptr != pClause);
+    assert_false(nullptr == pClause);
 
     pClause->SetCode(str_Code);
 
@@ -989,8 +963,8 @@ auto OTBylaw::UpdateClause(
 auto OTBylaw::AddClause(OTClause& theClause) -> bool
 {
     if (!theClause.GetName().Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed attempt to add a clause with a "
-                                      "blank name.")
+        LogError()()("Failed attempt to add a clause with a "
+                     "blank name.")
             .Flush();
         return false;
     }
@@ -998,8 +972,8 @@ auto OTBylaw::AddClause(OTClause& theClause) -> bool
     const UnallocatedCString str_clause_name = theClause.GetName().Get();
 
     if (!OTScriptable::ValidateClauseName(str_clause_name)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed due to invalid clause name. In Bylaw: ")(name_.get())(".")
+        LogError()()("Failed due to invalid clause name. In Bylaw: ")(
+            name_.get())(".")
             .Flush();
         return false;
     }
@@ -1017,8 +991,8 @@ auto OTBylaw::AddClause(OTClause& theClause) -> bool
 
         return true;
     } else {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed -- Clause was already there named ")(str_clause_name)(".")
+        LogConsole()()("Failed -- Clause was already there named ")(
+            str_clause_name)(".")
             .Flush();
 
         return false;
@@ -1038,7 +1012,7 @@ OTBylaw::~OTBylaw()
     //
     while (!clauses_.empty()) {
         OTClause* pClause = clauses_.begin()->second;
-        OT_ASSERT(nullptr != pClause);
+        assert_false(nullptr == pClause);
 
         clauses_.erase(clauses_.begin());
 
@@ -1048,7 +1022,7 @@ OTBylaw::~OTBylaw()
 
     while (!variables_.empty()) {
         OTVariable* pVar = variables_.begin()->second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         variables_.erase(variables_.begin());
 

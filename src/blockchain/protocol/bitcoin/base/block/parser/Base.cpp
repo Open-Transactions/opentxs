@@ -20,7 +20,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -89,8 +88,7 @@ auto ParserBase::calculate_committment() const noexcept -> Hash
     auto out = Hash{};
 
     if (false == BlockHash(crypto_, chain_, data.Bytes(), out.WriteInto())) {
-        LogError()(OT_PRETTY_CLASS())("failed to calculate witness committment")
-            .Flush();
+        LogError()()("failed to calculate witness committment").Flush();
     }
 
     return out;
@@ -220,8 +218,7 @@ auto ParserBase::find_payload() noexcept -> bool
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to decode transaction count")
-            .Flush();
+        LogError()()("failed to decode transaction count").Flush();
 
         return false;
     }
@@ -269,7 +266,7 @@ auto ParserBase::is_dip_2(ReadView version) const noexcept -> bool
         };
         static_assert(sizeof(Version) == sizeof(std::uint32_t));
 
-        OT_ASSERT(sizeof(Version) == version.size());
+        assert_true(sizeof(Version) == version.size());
 
         auto decoded = Version{};
         std::memcpy(
@@ -354,11 +351,11 @@ auto ParserBase::operator()(
     if (parse(expected, bytes)) {
         const auto count = transactions_.size();
 
-        OT_ASSERT(header_.IsValid());
-        OT_ASSERT(count == txids_.size());
-        OT_ASSERT(count == wtxids_.size());
+        assert_true(header_.IsValid());
+        assert_true(count == txids_.size());
+        assert_true(count == wtxids_.size());
     } else {
-        LogError()(OT_PRETTY_CLASS())("invalid block").Flush();
+        LogError()()("invalid block").Flush();
 
         return false;
     }
@@ -383,7 +380,7 @@ auto ParserBase::operator()(
             throw std::runtime_error{"failed to parse transaction"};
         }
 
-        OT_ASSERT(false == transactions_.empty());
+        assert_false(transactions_.empty());
 
         auto& encoded = transactions_.back();
         out = factory::BitcoinTransaction(
@@ -391,7 +388,7 @@ auto ParserBase::operator()(
 
         return out.IsValid();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         out = {alloc_.result_};
 
         return false;
@@ -405,19 +402,19 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
     bytes_ = data_.size();
 
     if (data_.empty()) {
-        LogError()(OT_PRETTY_CLASS())("empty input").Flush();
+        LogError()()("empty input").Flush();
 
         return false;
     }
 
     if (false == parse_header()) {
-        LogError()(OT_PRETTY_CLASS())("failed to parse block header").Flush();
+        LogError()()("failed to parse block header").Flush();
 
         return false;
     }
 
     if (false == compare_header_to_hash(expected)) {
-        LogError()(OT_PRETTY_CLASS())(print(chain_))(
+        LogError()()(print(chain_))(
             " block header hash does not match expected value")
             .Flush();
 
@@ -425,16 +422,13 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
     }
 
     if (false == find_payload()) {
-        LogError()(OT_PRETTY_CLASS())(print(chain_))(
-            " failed to locate transactions")
-            .Flush();
+        LogError()()(print(chain_))(" failed to locate transactions").Flush();
 
         return false;
     }
 
     if (false == parse_transactions()) {
-        LogError()(OT_PRETTY_CLASS())(print(chain_))(
-            " failed to parse transactions for block: ")
+        LogError()()(print(chain_))(" failed to parse transactions for block: ")
             .asHex(original)
             .Flush();
 
@@ -442,13 +436,11 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
     }
 
     if (const auto excess = data_.size(); 0_uz < excess) {
-        LogError()(OT_PRETTY_CLASS())(
-            excess)(" excess bytes remain after parsing")
-            .Flush();
+        LogError()()(excess)(" excess bytes remain after parsing").Flush();
     }
 
     if (false == compare_merkle_to_header()) {
-        LogError()(OT_PRETTY_CLASS())(print(chain_))(
+        LogError()()(print(chain_))(
             " merkle root does not match expected value")
             .Flush();
 
@@ -457,7 +449,7 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
 
     if (has_segwit_transactions_) {
         if (false == has_segwit_commitment_) {
-            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+            LogError()()(print(chain_))(
                 " generation transaction does not contain segwit commitment")
                 .Flush();
 
@@ -465,7 +457,7 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
         }
 
         if (false == has_segwit_reserved_value_) {
-            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+            LogError()()(print(chain_))(
                 " generation transaction does not contain segwit reserved "
                 "value")
                 .Flush();
@@ -474,7 +466,7 @@ auto ParserBase::parse(const Hash& expected, ReadView bytes) noexcept -> bool
         }
 
         if (false == compare_segwit_to_commitment()) {
-            LogError()(OT_PRETTY_CLASS())(print(chain_))(
+            LogError()()(print(chain_))(
                 " witness root hash does not match expected value")
                 .Flush();
 
@@ -528,8 +520,8 @@ auto ParserBase::parse_header() noexcept -> bool
     constexpr auto merkleStart = 36_uz;
 
     if (data_.size() < header) {
-        LogError()(OT_PRETTY_CLASS())("input does not contain a valid ")(
-            print(chain_))(" block header")
+        LogError()()("input does not contain a valid ")(print(chain_))(
+            " block header")
             .Flush();
 
         return false;
@@ -538,15 +530,14 @@ auto ParserBase::parse_header() noexcept -> bool
     header_view_ = data_.substr(0_uz, header);
 
     if (false == calculate_hash(header_view_)) {
-        LogError()(OT_PRETTY_CLASS())("failed to calculate ")(print(chain_))(
-            " block hash")
+        LogError()()("failed to calculate ")(print(chain_))(" block hash")
             .Flush();
 
         return false;
     }
 
     if (!merkle_root_.Assign(data_.substr(merkleStart, merkle_root_.size()))) {
-        LogError()(OT_PRETTY_CLASS())("failed to extract merkle root").Flush();
+        LogError()()("failed to extract merkle root").Flush();
 
         return false;
     }
@@ -558,8 +549,7 @@ auto ParserBase::parse_header() noexcept -> bool
         if (header_.IsValid()) {
             timestamp_ = header_.Timestamp();
         } else {
-            LogError()(OT_PRETTY_CLASS())("failed to instantiate header")
-                .Flush();
+            LogError()()("failed to instantiate header").Flush();
 
             return false;
         }
@@ -776,7 +766,7 @@ auto ParserBase::parse_next_transaction(const bool isGeneration) noexcept
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -950,8 +940,8 @@ auto ParserBase::parse_transactions() noexcept -> bool
 {
     for (auto i = 0_uz; i < transaction_count_; ++i) {
         if (false == parse_next_transaction(0_uz == i)) {
-            LogError()(OT_PRETTY_CLASS())("failed to parse transaction ")(
-                i + 1)(" of ")(transaction_count_)
+            LogError()()("failed to parse transaction ")(i + 1)(" of ")(
+                transaction_count_)
                 .Flush();
 
             return false;

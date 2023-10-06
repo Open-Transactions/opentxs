@@ -18,7 +18,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -70,7 +69,7 @@ auto print(BalanceOracleJobs job) noexcept -> std::string_view
             static_cast<OTZMQWorkType>(job))
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 }  // namespace opentxs::api::crypto::blockchain
@@ -117,7 +116,7 @@ BalanceOracle::Imp::Imp(
     , publish_(pipeline_.Internal().ExtraSocket(1))
     , data_(alloc)
 {
-    OT_ASSERT(api_);
+    assert_false(nullptr == api_);
 }
 
 auto BalanceOracle::Imp::do_shutdown() noexcept -> void { api_.reset(); }
@@ -161,21 +160,15 @@ auto BalanceOracle::Imp::notify_subscribers(
     const Chain chain) noexcept -> void
 {
     const auto& log = LogTrace();
-    publish_.Send(
-        make_message(
-            {}, nullptr, chain, balance, WorkType::BlockchainWalletUpdated),
-        __FILE__,
-        __LINE__);
+    publish_.Send(make_message(
+        {}, nullptr, chain, balance, WorkType::BlockchainWalletUpdated));
 
     for (const auto& id : recipients) {
-        log(OT_PRETTY_CLASS())("notifying connection ")
+        log()("notifying connection ")
             .asHex(id.get()[0].Bytes())(" for ")(print(chain))(
                 " balance update");
-        router_.Send(
-            make_message(
-                id, nullptr, chain, balance, WorkType::BlockchainBalance),
-            __FILE__,
-            __LINE__);
+        router_.Send(make_message(
+            id, nullptr, chain, balance, WorkType::BlockchainBalance));
     }
 }
 
@@ -186,21 +179,15 @@ auto BalanceOracle::Imp::notify_subscribers(
     const Chain chain) noexcept -> void
 {
     const auto& log = LogTrace();
-    publish_.Send(
-        make_message(
-            {}, &owner, chain, balance, WorkType::BlockchainWalletUpdated),
-        __FILE__,
-        __LINE__);
+    publish_.Send(make_message(
+        {}, &owner, chain, balance, WorkType::BlockchainWalletUpdated));
 
     for (const auto& id : recipients) {
-        log(OT_PRETTY_CLASS())("notifying connection ")
+        log()("notifying connection ")
             .asHex(id.get()[0].Bytes())(" for ")(print(chain))(
                 " balance update for nym ")(owner, api_->Crypto());
-        router_.Send(
-            make_message(
-                id, &owner, chain, balance, WorkType::BlockchainBalance),
-            __FILE__,
-            __LINE__);
+        router_.Send(make_message(
+            id, &owner, chain, balance, WorkType::BlockchainBalance));
     }
 }
 
@@ -220,9 +207,9 @@ auto BalanceOracle::Imp::pipeline(
         case Work::init:
         case Work::statemachine:
         default: {
-            LogError()(OT_PRETTY_CLASS())(": unhandled type").Flush();
+            LogError()()(": unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -233,11 +220,11 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
     connection_id(in);
     const auto connectionID = in.Envelope();
 
-    OT_ASSERT(connectionID.IsValid());
+    assert_true(connectionID.IsValid());
 
     const auto body = in.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     const auto haveNym = (2_uz < body.size());
     auto output = opentxs::blockchain::Balance{};
@@ -253,20 +240,17 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
     }();
     const auto chain = chainFrame.as<Chain>();
     const auto postcondition = ScopeGuard{[&]() {
-        router_.Send(
-            [&] {
-                auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                    in, WorkType::BlockchainBalance);
-                work.AddFrame(chainFrame);
-                output.first.Serialize(work.AppendBytes());
-                output.second.Serialize(work.AppendBytes());
+        router_.Send([&] {
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                in, WorkType::BlockchainBalance);
+            work.AddFrame(chainFrame);
+            output.first.Serialize(work.AppendBytes());
+            output.second.Serialize(work.AppendBytes());
 
-                if (haveNym) { work.AddFrame(nym); }
+            if (haveNym) { work.AddFrame(nym); }
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
     }};
     const auto unsupported =
         (false == opentxs::blockchain::is_supported(chain)) &&
@@ -287,9 +271,8 @@ auto BalanceOracle::Imp::process_registration(Message&& in) noexcept -> void
     }();
     const auto& id = *(subscribers.emplace(connectionID).first);
     const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())
-        .asHex(id.get()[0].Bytes())(" subscribed to ")(print(chain))(
-            " balance updates");
+    log().asHex(id.get()[0].Bytes())(" subscribed to ")(print(chain))(
+        " balance updates");
 
     if (haveNym) { log(" for nym ")(nym, api_->Crypto()); }
 
@@ -317,7 +300,7 @@ auto BalanceOracle::Imp::process_update_balance(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3_uz < body.size());
+    assert_true(3_uz < body.size());
 
     const auto chain = body[1_uz].as<Chain>();
     auto balance = std::make_pair(
@@ -409,7 +392,7 @@ BalanceOracle::BalanceOracle(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, endpoint, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto BalanceOracle::Start() noexcept -> void { imp_->Init(imp_); }

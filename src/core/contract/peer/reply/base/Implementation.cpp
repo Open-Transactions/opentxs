@@ -20,7 +20,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerReply.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -99,13 +98,13 @@ Implementation::Implementation(
 auto Implementation::add_signature(const PasswordPrompt& reason) -> bool
 {
     if (sig_.ready()) {
-        LogError()(OT_PRETTY_CLASS())("already signed").Flush();
+        LogError()()("already signed").Flush();
 
         return false;
     }
 
     if (false == signer_.operator bool()) {
-        LogError()(OT_PRETTY_CLASS())("missing signer nym").Flush();
+        LogError()()("missing signer nym").Flush();
 
         return false;
     }
@@ -120,7 +119,7 @@ auto Implementation::add_signature(const PasswordPrompt& reason) -> bool
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to create signature").Flush();
+        LogError()()("failed to create signature").Flush();
 
         return false;
     }
@@ -158,7 +157,7 @@ auto Implementation::final_form() const noexcept -> serialized_type
 {
     auto out = signing_form();
 
-    OT_ASSERT(sig_.ready());
+    assert_true(sig_.ready());
 
     out.mutable_signature()->CopyFrom(sig_.get());
 
@@ -185,7 +184,7 @@ auto Implementation::Finish(const PasswordPrompt& reason) noexcept -> bool
 
 auto Implementation::ID() const noexcept -> const identifier_type&
 {
-    OT_ASSERT(id_.ready());
+    assert_true(id_.ready());
 
     return id_.get();
 }
@@ -244,25 +243,25 @@ auto Implementation::Validate() const noexcept -> bool { return validate(); }
 auto Implementation::validate() const noexcept -> bool
 {
     if (calculate_id() != ID()) {
-        LogError()(OT_PRETTY_CLASS())("id mismatch").Flush();
+        LogError()()("id mismatch").Flush();
 
         return false;
     }
 
     if (false == proto::Validate(final_form(), VERBOSE)) {
-        LogError()(OT_PRETTY_CLASS())("invalid syntax").Flush();
+        LogError()()("invalid syntax").Flush();
 
         return false;
     }
 
     if (false == sig_.ready()) {
-        LogError()(OT_PRETTY_CLASS())("missing signature").Flush();
+        LogError()()("missing signature").Flush();
 
         return false;
     }
 
     if (false == verify_signature(sig_.get())) {
-        LogError()(OT_PRETTY_CLASS())("invalid signature").Flush();
+        LogError()()("invalid signature").Flush();
 
         return false;
     }
@@ -274,7 +273,7 @@ auto Implementation::verify_signature(
     const proto::Signature& signature) const noexcept -> bool
 {
     if (false == signer_.operator bool()) {
-        LogError()(OT_PRETTY_CLASS())("missing signer nym").Flush();
+        LogError()()("missing signer nym").Flush();
 
         return false;
     }

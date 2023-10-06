@@ -11,7 +11,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -38,16 +37,16 @@ Sync::Sync(
         const auto saved = SetTip(genesis);
         tip = genesis;
 
-        OT_ASSERT(saved);
+        assert_true(saved);
     }
 
-    LogVerbose()(OT_PRETTY_CLASS())("Sync tip: ")(tip.height_).Flush();
+    LogVerbose()()("Sync tip: ")(tip.height_).Flush();
 
     if (const auto ctip = common_.SyncTip(chain_); tip.height_ == ctip) {
-        LogVerbose()(OT_PRETTY_CLASS())("Database is consistent").Flush();
+        LogVerbose()()("Database is consistent").Flush();
     } else {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "Database inconsistency detected. Storage tip height: ")(ctip)
+        LogVerbose()()("Database inconsistency detected. Storage tip height: ")(
+            ctip)
             .Flush();
     }
 }
@@ -78,7 +77,7 @@ auto Sync::Store(
     const network::otdht::SyncData& items) const noexcept -> bool
 {
     if (false == common_.StoreSync(items, chain_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to store sync data").Flush();
+        LogError()()("Failed to store sync data").Flush();
 
         return false;
     }

@@ -13,7 +13,6 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTScript.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -42,8 +41,7 @@ void OTVariable::Serialize(
         } break;
         case OTVariable::Var_Error_Access:
         default: {
-            LogError()(OT_PRETTY_CLASS())("ERROR: Bad variable access.")
-                .Flush();
+            LogError()()("ERROR: Bad variable access.").Flush();
         }
     }
 
@@ -79,7 +77,7 @@ void OTVariable::Serialize(
         } break;
         case OTVariable::Var_Error_Type:
         default: {
-            LogError()(OT_PRETTY_CLASS())("ERROR: Bad variable type.").Flush();
+            LogError()()("ERROR: Bad variable type.").Flush();
         }
     }
 
@@ -176,7 +174,7 @@ OTVariable::~OTVariable()
 auto OTVariable::SetValue(const std::int32_t& nValue) -> bool
 {
     if (!IsInteger()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
+        LogError()()("Error: This variable (")(name_.get())(
             ") is not an integer.")
             .Flush();
         return false;
@@ -190,8 +188,7 @@ auto OTVariable::SetValue(const std::int32_t& nValue) -> bool
 auto OTVariable::SetValue(bool bValue) -> bool
 {
     if (!IsBool()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
-            ") is not a bool.")
+        LogError()()("Error: This variable (")(name_.get())(") is not a bool.")
             .Flush();
         return false;
     }
@@ -204,7 +201,7 @@ auto OTVariable::SetValue(bool bValue) -> bool
 auto OTVariable::SetValue(const UnallocatedCString& str_Value) -> bool
 {
     if (!IsString()) {
-        LogError()(OT_PRETTY_CLASS())("Error: This variable (")(name_.get())(
+        LogError()()("Error: This variable (")(name_.get())(
             ") is not a string.")
             .Flush();
         return false;
@@ -249,8 +246,7 @@ auto OTVariable::IsDirty() const -> bool
         } break;
         case OTVariable::Var_Error_Type:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Error: Unknown type for variable: ")(
-                name_.get())(".")
+            LogError()()("Error: Unknown type for variable: ")(name_.get())(".")
                 .Flush();
         }
     }
@@ -280,8 +276,7 @@ void OTVariable::SetAsClean()
         } break;
         case OTVariable::Var_Error_Type:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Error: Unknown type for variable: ")(
-                name_.get())(".")
+            LogError()()("Error: Unknown type for variable: ")(name_.get())(".")
                 .Flush();
             string_backup_ = string_;
             number_backup_ = number_;
@@ -316,25 +311,21 @@ auto OTVariable::Compare(OTVariable& rhs) -> bool
 {
     if (!(GetName().Compare(rhs.GetName()))) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Names don't match: ")(GetName())(
-                " / ")(rhs.GetName())(".")
+            LogConsole()()("Names don't match: ")(GetName())(" / ")(
+                rhs.GetName())(".")
                 .Flush();
         }
         return false;
     }
     if (!(GetType() == rhs.GetType())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Type doesn't match: ")(GetName())(
-                ".")
-                .Flush();
+            LogConsole()()("Type doesn't match: ")(GetName())(".").Flush();
         }
         return false;
     }
     if (!(GetAccess() == rhs.GetAccess())) {
         {
-            LogConsole()(OT_PRETTY_CLASS())("Access tyes don't match: ")(
-                GetName())(".")
-                .Flush();
+            LogConsole()()("Access tyes don't match: ")(GetName())(".").Flush();
         }
         return false;
     }
@@ -353,9 +344,7 @@ auto OTVariable::Compare(OTVariable& rhs) -> bool
         } break;
         case OTVariable::Var_Error_Type:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unknown type in variable ")(
-                name_.get())(".")
-                .Flush();
+            LogError()()("Unknown type in variable ")(name_.get())(".").Flush();
         }
     }
 
