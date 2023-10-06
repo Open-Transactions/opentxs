@@ -8,8 +8,6 @@
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <string_view>
 
@@ -46,11 +44,8 @@ auto HeaderOracle(
     const auto& zmq = api.Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
 
-    return boost::allocate_shared<ReturnType>(
+    return std::allocate_shared<ReturnType>(
         alloc::PMR<ReturnType>{alloc},
         api,
         chain,
@@ -89,7 +84,7 @@ auto print(Job job) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::internal
 {
-HeaderOracle::HeaderOracle(boost::shared_ptr<Shared> shared) noexcept
+HeaderOracle::HeaderOracle(std::shared_ptr<Shared> shared) noexcept
     : shared_(std::move(shared))
 {
     OT_ASSERT(shared_);
@@ -303,7 +298,7 @@ auto HeaderOracle::Start(
     OT_ASSERT(node);
     OT_ASSERT(shared_);
 
-    auto actor = boost::allocate_shared<HeaderOracle::Actor>(
+    auto actor = std::allocate_shared<HeaderOracle::Actor>(
         alloc::PMR<HeaderOracle::Actor>{shared_->get_allocator()},
         api,
         node,

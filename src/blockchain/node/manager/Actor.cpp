@@ -5,7 +5,6 @@
 
 #include "blockchain/node/manager/Actor.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <chrono>
@@ -189,7 +188,7 @@ auto Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
+auto Actor::Init(std::shared_ptr<Actor> me) noexcept -> void
 {
     signal_startup(me);
 }

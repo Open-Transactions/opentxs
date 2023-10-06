@@ -5,8 +5,6 @@
 
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <cstddef>
@@ -109,15 +107,12 @@ auto BlockOracle::Start(
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    shared_ = boost::allocate_shared<BlockOracle::Shared>(
+    shared_ = std::allocate_shared<BlockOracle::Shared>(
         alloc::PMR<BlockOracle::Shared>{alloc}, *api, *node);
 
     OT_ASSERT(shared_);
 
-    auto actor = boost::allocate_shared<BlockOracle::Actor>(
+    auto actor = std::allocate_shared<BlockOracle::Actor>(
         alloc::PMR<BlockOracle::Actor>{alloc}, api, node, shared_, batchID);
 
     OT_ASSERT(actor);

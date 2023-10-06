@@ -5,7 +5,6 @@
 
 #include "blockchain/node/blockoracle/Shared.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <functional>
 #include <future>
@@ -436,7 +435,7 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
         log(OT_PRETTY_CLASS())(name_)(": issuing job ")(id)(" for ")(
             hashes.size())(" blocks")
             .Flush();
-        auto me = boost::shared_from(this);
+        auto me = shared_from_this();
 
         OT_ASSERT(me);
 

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
 #include "internal/api/network/Types.hpp"
@@ -39,7 +38,7 @@ namespace opentxs::api::network::blockchain
 class Actor final : public opentxs::Actor<blockchain::Actor, BlockchainJob>
 {
 public:
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }

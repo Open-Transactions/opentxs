@@ -5,8 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Progress.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -44,7 +42,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Progress::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Job(LogTrace(),
@@ -137,15 +135,12 @@ auto Progress::Imp::process_do_rescan(Message&& in) noexcept -> void
 namespace opentxs::blockchain::node::wallet
 {
 Progress::Progress(
-    const boost::shared_ptr<const SubchainStateData>& parent) noexcept
+    const std::shared_ptr<const SubchainStateData>& parent) noexcept
     : imp_([&] {
         const auto& asio = parent->api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, parent, batchID);
     }())
 {

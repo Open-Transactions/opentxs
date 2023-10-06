@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 
 namespace opentxs::network::blockchain::internal
 {
@@ -16,7 +16,7 @@ public:
 
     auto Start() noexcept -> void;
 
-    Peer(boost::shared_ptr<Imp>&& imp) noexcept;
+    Peer(std::shared_ptr<Imp>&& imp) noexcept;
     Peer() = delete;
     Peer(const Peer&) = delete;
     Peer(Peer&&) noexcept;
@@ -26,8 +26,6 @@ public:
     ~Peer();
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<Imp> imp_;
+    std::shared_ptr<Imp> imp_;
 };
 }  // namespace opentxs::network::blockchain::internal

@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
@@ -52,7 +52,7 @@ namespace opentxs::blockchain::node::wallet
 class Index::Imp : public statemachine::Job
 {
 public:
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const std::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;

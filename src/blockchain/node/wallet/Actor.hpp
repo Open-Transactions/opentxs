@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
 #include "internal/blockchain/node/Wallet.hpp"
@@ -56,7 +55,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Wallet::Actor> me) noexcept -> void
+    auto Init(std::shared_ptr<Wallet::Actor> me) noexcept -> void
     {
         signal_startup(me);
     }
@@ -64,7 +63,7 @@ public:
     Actor(
         std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,
-        boost::shared_ptr<internal::Wallet::Shared> shared,
+        std::shared_ptr<internal::Wallet::Shared> shared,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Actor() = delete;
@@ -80,7 +79,7 @@ private:
 
     std::shared_ptr<const api::session::Client> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
-    boost::shared_ptr<internal::Wallet::Shared> shared_p_;
+    std::shared_ptr<internal::Wallet::Shared> shared_p_;
     const api::session::Client& api_;
     const node::Manager& node_;
     internal::Wallet::Shared& shared_;

@@ -5,7 +5,6 @@
 
 #include "blockchain/node/filteroracle/BlockIndexer.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -249,7 +248,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 }
 
 auto BlockIndexer::Imp::background(
-    boost::shared_ptr<Imp> me,
+    std::shared_ptr<Imp> me,
     JobPointer job,
     std::shared_ptr<const ScopeGuard> post) noexcept -> void
 {
@@ -335,7 +334,7 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
         auto expected{downloaded};
 
         if (job->state_.compare_exchange_strong(expected, running)) {
-            auto me = boost::shared_from(this);
+            auto me = shared_from_this();
             auto post = std::make_shared<ScopeGuard>(
                 [me] { ++me->running_; },
                 [me] {
@@ -610,7 +609,7 @@ auto BlockIndexer::Imp::get_next_checkpoint(block::Height tip) noexcept -> void
         params::get(chain_).CfheaderAfter(shared_.default_type_, tip);
 }
 
-auto BlockIndexer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
+auto BlockIndexer::Imp::Init(std::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
 }
@@ -843,7 +842,7 @@ auto BlockIndexer::Imp::queue_blocks(allocator_type monotonic) noexcept -> bool
 
                 const auto [i, added] = queued_.try_emplace(
                     height,
-                    boost::allocate_shared<Job>(alloc, hash, cfheader, height));
+                    std::allocate_shared<Job>(alloc, hash, cfheader, height));
 
                 OT_ASSERT(added);
 
@@ -978,11 +977,8 @@ BlockIndexer::BlockIndexer(
 
         const auto& zmq = shared->api_.Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{zmq.Alloc(batchID)}, api, node, shared, batchID);
     }())
 {

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <memory>
 #include <optional>
@@ -75,7 +74,7 @@ namespace opentxs::blockchain::node::wallet::statemachine
 {
 class Job : virtual public wallet::Job, public opentxs::Actor<Job, SubchainJobs>
 {
-    boost::shared_ptr<const SubchainStateData> parent_p_;
+    std::shared_ptr<const SubchainStateData> parent_p_;
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
 
@@ -83,10 +82,7 @@ public:
     using wallet::Job::Init;
 
     auto Init() noexcept -> void final {}
-    auto Init(boost::shared_ptr<Job> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
+    auto Init(std::shared_ptr<Job> me) noexcept -> void { signal_startup(me); }
 
     ~Job() override;
 
@@ -109,7 +105,7 @@ protected:
     virtual auto work(allocator_type monotonic) noexcept -> bool;
 
     Job(const Log& logger,
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const std::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         const JobType type,
         allocator_type alloc,
@@ -188,7 +184,7 @@ private:
 
     Job(tag_t,
         const Log& logger,
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const std::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         const JobType type,
         allocator_type alloc,

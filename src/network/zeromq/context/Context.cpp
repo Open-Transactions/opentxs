@@ -5,8 +5,6 @@
 
 #include "network/zeromq/context/Context.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <zmq.h>
 #include <atomic>
 #include <exception>
@@ -375,10 +373,7 @@ auto Context::SpawnActor(
     const auto extraCount = extra.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc},
         context,
         name,
@@ -415,10 +410,7 @@ auto Context::SpawnActor(
     const auto extraCount = extra.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc},
         session,
         name,

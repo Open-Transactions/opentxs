@@ -302,7 +302,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
                 // ee.call_stack[0]->start().column << ")";
 
                 //                const UnallocatedCString text;
-                //                boost::shared_ptr<const UnallocatedCString>
+                //                std::shared_ptr<const UnallocatedCString>
                 //                filename;
 
                 for (auto j = 1_uz; j < ee.call_stack.size(); ++j) {

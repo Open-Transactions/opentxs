@@ -42,7 +42,7 @@ using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
     std::shared_ptr<const api::Context> context,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     allocator_type alloc) noexcept
     : opentxs::Actor<asio::Actor, OTZMQWorkType>(
           *context,

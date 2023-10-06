@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <optional>
 
@@ -53,8 +52,6 @@ public:
     ~FeeOracle();
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<Shared> shared_;
+    std::shared_ptr<Shared> shared_;
 };
 }  // namespace opentxs::blockchain::node::wallet

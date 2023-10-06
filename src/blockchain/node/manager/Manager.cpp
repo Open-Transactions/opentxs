@@ -5,8 +5,6 @@
 
 #include "blockchain/node/manager/Manager.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <string_view>
 #include <utility>
 
@@ -174,10 +172,7 @@ auto Base::Start(
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<manager::Actor>(
+    auto actor = std::allocate_shared<manager::Actor>(
         alloc::PMR<manager::Actor>{alloc}, api, me, shared_, batchID);
 
     OT_ASSERT(actor);

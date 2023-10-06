@@ -6,7 +6,6 @@
 #pragma once
 
 #include <boost/json.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <cstdint>
 #include <future>
@@ -63,10 +62,7 @@ class opentxs::blockchain::node::wallet::FeeSource::Imp
     : public Actor<Imp, FeeSourceJobs>
 {
 public:
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void { signal_startup(me); }
 
     ~Imp() override;
 

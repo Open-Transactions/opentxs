@@ -6,7 +6,6 @@
 #include "blockchain/node/wallet/ReorgMaster.hpp"  // IWYU pragma: associated
 #include "internal/blockchain/node/wallet/ReorgMaster.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -288,10 +287,10 @@ auto ReorgMasterPrivate::GetSlave(
     const auto id = ++data.counter_;
     const auto [it, added] = data.shutdown_slaves_.try_emplace(
         id,
-        boost::allocate_shared<ReorgSlavePrivate>(
+        std::allocate_shared<ReorgSlavePrivate>(
             alloc::PMR<ReorgMasterPrivate>{alloc},
             parent,
-            boost::shared_from(this),
+            shared_from_this(),
             id,
             std::move(name)));
 
@@ -411,7 +410,7 @@ auto ReorgMasterPrivate::PrepareShutdown() noexcept -> bool
 }
 
 auto ReorgMasterPrivate::Register(
-    boost::shared_ptr<ReorgSlavePrivate> slave) noexcept -> Reorg::State
+    std::shared_ptr<ReorgSlavePrivate> slave) noexcept -> Reorg::State
 {
     OT_ASSERT(slave);
 
@@ -454,7 +453,7 @@ namespace opentxs::blockchain::node::wallet
 ReorgMaster::ReorgMaster(
     const network::zeromq::Pipeline& parent,
     allocator_type alloc) noexcept
-    : imp_(boost::allocate_shared<ReorgMasterPrivate>(
+    : imp_(std::allocate_shared<ReorgMasterPrivate>(
           alloc::PMR<ReorgMasterPrivate>{alloc},
           parent))
 {

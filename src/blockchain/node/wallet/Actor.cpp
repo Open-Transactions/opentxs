@@ -40,7 +40,7 @@ using enum opentxs::network::zeromq::socket::Type;
 Wallet::Actor::Actor(
     std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<const node::Manager> node,
-    boost::shared_ptr<internal::Wallet::Shared> shared,
+    std::shared_ptr<internal::Wallet::Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : opentxs::Actor<Wallet::Actor, wallet::WalletJobs>(

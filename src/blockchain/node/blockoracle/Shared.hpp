@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from.hpp>
 #include <cs_plain_guarded.h>
 #include <cstddef>
 #include <memory>
@@ -76,7 +75,7 @@ using namespace blockoracle;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 class BlockOracle::Shared final : public Allocated,
-                                  public boost::enable_shared_from
+                                  public std::enable_shared_from_this<Shared>
 {
 public:
     const Log& log_;

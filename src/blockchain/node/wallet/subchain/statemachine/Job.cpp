@@ -99,7 +99,7 @@ using enum opentxs::network::zeromq::socket::Type;
 Job::Job(
     tag_t,
     const Log& logger,
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     const JobType type,
     allocator_type alloc,
@@ -149,7 +149,7 @@ Job::Job(
 
 Job::Job(
     const Log& logger,
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     const JobType type,
     allocator_type alloc,

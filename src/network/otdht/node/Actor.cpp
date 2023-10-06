@@ -6,7 +6,6 @@
 #include "network/otdht/node/Actor.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <algorithm>
 #include <chrono>
@@ -81,7 +80,7 @@ using zeromq::socket::Type;
 
 Node::Actor::Actor(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     zeromq::BatchID batchID,
     Vector<network::zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
@@ -163,7 +162,7 @@ Node::Actor::Actor(
 
 Node::Actor::Actor(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     zeromq::BatchID batchID,
     allocator_type alloc) noexcept
     : Actor(

@@ -6,8 +6,6 @@
 #include "internal/blockchain/node/wallet/Factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <exception>
 #include <optional>
 #include <string_view>
@@ -443,73 +441,78 @@ auto BTCFeeSources(
 
     using Source = blockchain::node::wallet::FeeSource;
     const auto& asio = api->Network().ZeroMQ().Internal();
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
-    // clang-format off
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Bitcoiner_live;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::BitGo;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Bitpay;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Blockchain_info;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Blockchair;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::BlockCypher;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Blockstream;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::BTC_com;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
-    Source{[&]() -> boost::shared_ptr<Source::Imp> {
+    }()}
+        .Init();
+    Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Earn;
         const auto batchID = asio.PreallocateBatch();
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, api, node, batchID);
-    }()}.Init();
+    }()}
+        .Init();
     // clang-format on
 }
 }  // namespace opentxs::factory

@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
 #include "internal/blockchain/node/Types.hpp"
@@ -50,7 +49,7 @@ namespace opentxs::blockchain::node::stats
 class Actor final : public opentxs::Actor<stats::Actor, StatsJobs>
 {
 public:
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }

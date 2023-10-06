@@ -8,9 +8,8 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
 
 #include <ankerl/unordered_dense.h>
-#include <boost/smart_ptr/enable_shared_from.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
+#include <memory>
 #include <span>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
@@ -65,7 +64,7 @@ class Raw;
 namespace opentxs::blockchain::node::wallet
 {
 class Process::Imp final : public statemachine::Job,
-                           public boost::enable_shared_from
+                           public std::enable_shared_from_this<Imp>
 {
 public:
     auto get_deleter() noexcept -> delete_function final
@@ -73,7 +72,7 @@ public:
         return pmr::make_deleter(this);
     }
 
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const std::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;

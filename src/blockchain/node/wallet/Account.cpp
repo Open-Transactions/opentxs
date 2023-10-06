@@ -5,7 +5,6 @@
 
 #include "blockchain/node/wallet/Account.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -199,7 +198,7 @@ auto Account::Imp::check(
             .Flush();
         const auto& asio = api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        auto ptr = boost::allocate_shared<DeterministicStateData>(
+        auto ptr = std::allocate_shared<DeterministicStateData>(
             alloc::PMR<DeterministicStateData>{asio.Alloc(batchID)},
             reorg_,
             subaccount,
@@ -243,7 +242,7 @@ auto Account::Imp::check_notification(
             .Flush();
         const auto& asio = api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        auto ptr = boost::allocate_shared<NotificationStateData>(
+        auto ptr = std::allocate_shared<NotificationStateData>(
             alloc::PMR<NotificationStateData>{asio.Alloc(batchID)},
             reorg_,
             subaccount,
@@ -313,7 +312,7 @@ auto Account::Imp::index_nym(const identifier::Nym& id) noexcept -> void
     }
 }
 
-auto Account::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
+auto Account::Imp::Init(std::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
 }
@@ -652,11 +651,8 @@ Account::Account(
 
         const auto& asio = api->Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)},
             reorg,
             account,

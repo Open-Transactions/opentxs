@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <cstdint>
 #include <cstdlib>
@@ -121,7 +120,7 @@ public:
 
 private:
     const PasswordPrompt reason_;
-    boost::shared_ptr<notary::Shared> shared_p_;
+    std::shared_ptr<notary::Shared> shared_p_;
     std::unique_ptr<opentxs::server::Server> server_p_;
     std::unique_ptr<opentxs::server::MessageProcessor> message_processor_p_;
     notary::Shared& shared_;

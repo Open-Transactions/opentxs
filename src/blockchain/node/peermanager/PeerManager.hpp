@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_plain_guarded.h>
 #include <chrono>
 #include <cstddef>
@@ -73,7 +72,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Actor> me) noexcept -> void
+    auto Init(std::shared_ptr<Actor> me) noexcept -> void
     {
         me_ = me;
         signal_startup(me_);
@@ -168,7 +167,7 @@ private:
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
-    boost::shared_ptr<Actor> me_;
+    std::shared_ptr<Actor> me_;
     const api::Session& api_;
     const node::Manager& node_;
     database::Peer& db_;
@@ -207,7 +206,7 @@ private:
         const network::blockchain::Transport type,
         const network::asio::Endpoint& endpoint,
         network::asio::Socket&& socket,
-        boost::shared_ptr<Actor> me) noexcept -> void;
+        std::shared_ptr<Actor> me) noexcept -> void;
 
     auto active_addresses(allocator_type monotonic) const noexcept
         -> Set<AddressID>;

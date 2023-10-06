@@ -7,7 +7,6 @@
 
 #include <BlockchainPeerAddress.pb.h>
 #include <boost/json.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -476,7 +475,7 @@ auto Actor::accept(
     const network::blockchain::Transport type,
     const network::asio::Endpoint& endpoint,
     network::asio::Socket&& socket,
-    boost::shared_ptr<Actor> me) noexcept -> void
+    std::shared_ptr<Actor> me) noexcept -> void
 
 {
     OT_ASSERT(me);

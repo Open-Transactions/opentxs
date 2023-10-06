@@ -5,8 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/NotificationIndex.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <array>
 #include <cstddef>
 #include <iterator>
@@ -31,16 +29,13 @@
 namespace opentxs::blockchain::node::wallet
 {
 auto Index::NotificationFactory(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const PaymentCode& code) noexcept -> Index
 {
     const auto& asio = parent->api_.Network().ZeroMQ().Internal();
     const auto batchID = asio.PreallocateBatch();
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
 
-    return Index{boost::allocate_shared<NotificationIndex>(
+    return Index{std::allocate_shared<NotificationIndex>(
         alloc::PMR<NotificationIndex>{asio.Alloc(batchID)},
         parent,
         code,
@@ -51,7 +46,7 @@ auto Index::NotificationFactory(
 namespace opentxs::blockchain::node::wallet
 {
 NotificationIndex::NotificationIndex(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const PaymentCode& code,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept

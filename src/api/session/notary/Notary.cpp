@@ -5,8 +5,6 @@
 
 #include "api/session/notary/Notary.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -167,7 +165,7 @@ Notary::Notary(
           },
           factory::SessionFactoryAPI(*this, parent.Factory()))
     , reason_(factory_.PasswordPrompt("Notary operation"))
-    , shared_p_(boost::make_shared<notary::Shared>(context))
+    , shared_p_(std::make_shared<notary::Shared>(context))
     , server_p_(new opentxs::server::Server(*this, reason_))
     , message_processor_p_(
           new opentxs::server::MessageProcessor(*server_p_, reason_))
@@ -530,10 +528,7 @@ auto Notary::start(std::shared_ptr<session::Notary> me) -> void
     message_processor_.Start();
 
     if (opentxs::server::ServerSettings::_cmd_get_mint) {
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-        auto actor = boost::allocate_shared<notary::Actor>(
+        auto actor = std::allocate_shared<notary::Actor>(
             alloc::PMR<notary::Actor>{shared_.get_allocator()}, me, shared_p_);
 
         OT_ASSERT(actor);

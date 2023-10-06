@@ -41,7 +41,7 @@ namespace opentxs::blockchain::node::wallet
 class Subchain
 {
 public:
-    virtual auto Init(boost::shared_ptr<SubchainStateData> me) noexcept
+    virtual auto Init(std::shared_ptr<SubchainStateData> me) noexcept
         -> void = 0;
 
     Subchain(const Subchain&) = delete;

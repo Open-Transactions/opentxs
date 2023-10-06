@@ -131,7 +131,7 @@ auto DeterministicStateData::flush_cache(
 }
 
 auto DeterministicStateData::get_index(
-    const boost::shared_ptr<const SubchainStateData>& me) const noexcept -> void
+    const std::shared_ptr<const SubchainStateData>& me) const noexcept -> void
 {
     Index::DeterministicFactory(me, *this).Init();
 }

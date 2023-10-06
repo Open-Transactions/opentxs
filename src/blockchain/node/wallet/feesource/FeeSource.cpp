@@ -325,7 +325,7 @@ FeeSource::Imp::~Imp() = default;
 
 namespace opentxs::blockchain::node::wallet
 {
-FeeSource::FeeSource(boost::shared_ptr<Imp> imp) noexcept
+FeeSource::FeeSource(std::shared_ptr<Imp> imp) noexcept
     : imp_(std::move(imp))
 {
     OT_ASSERT(imp_);

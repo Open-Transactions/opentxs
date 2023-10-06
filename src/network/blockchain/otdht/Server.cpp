@@ -95,7 +95,7 @@ Server::Server(
 }
 
 auto Server::background(
-    boost::shared_ptr<Server> me,
+    std::shared_ptr<Server> me,
     std::shared_ptr<const ScopeGuard> post) noexcept -> void
 {
     OT_ASSERT(me);
@@ -128,7 +128,7 @@ auto Server::check_caught_up(Shared& shared) noexcept -> void
 auto Server::do_work() noexcept -> bool
 {
     if (false == running_.is_limited()) {
-        auto me = boost::shared_from(this);
+        auto me = shared_from_this();
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
         RunJob([me, post] { background(me, post); });

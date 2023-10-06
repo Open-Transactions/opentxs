@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from_this.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
 #include <cs_shared_guarded.h>
@@ -113,12 +111,14 @@ class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"  // NOLINT
 namespace opentxs::blockchain::node::wallet
 {
 class SubchainStateData
     : virtual public Subchain,
       public opentxs::Actor<SubchainStateData, SubchainJobs>,
-      public boost::enable_shared_from_this<SubchainStateData>
+      public std::enable_shared_from_this<SubchainStateData>
 {
 private:
     std::shared_ptr<const api::Session> api_p_;
@@ -207,7 +207,7 @@ public:
         -> std::optional<block::Position>;
     auto TriggerRescan() const noexcept -> void;
 
-    auto Init(boost::shared_ptr<SubchainStateData> me) noexcept -> void final;
+    auto Init(std::shared_ptr<SubchainStateData> me) noexcept -> void final;
 
     SubchainStateData() = delete;
     SubchainStateData(const SubchainStateData&) = delete;
@@ -293,7 +293,7 @@ private:
         -> std::size_t;
     auto get_account_targets(const Elements& elements, alloc::Default alloc)
         const noexcept -> Targets;
-    virtual auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+    virtual auto get_index(const std::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void = 0;
     auto get_targets(const Elements& elements, Targets& targets) const noexcept
         -> void;
@@ -391,4 +391,5 @@ private:
         CString&& toProgress,
         allocator_type alloc) noexcept;
 };
+#pragma GCC diagnostic pop
 }  // namespace opentxs::blockchain::node::wallet

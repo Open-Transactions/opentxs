@@ -20,7 +20,7 @@ namespace opentxs::blockchain::node::wallet
 {
 ReorgSlavePrivate::ReorgSlavePrivate(
     const network::zeromq::Pipeline& parent,
-    boost::shared_ptr<ReorgMasterPrivate> master,
+    std::shared_ptr<ReorgMasterPrivate> master,
     const int id,
     std::string_view name,
     allocator_type alloc) noexcept
@@ -103,7 +103,7 @@ auto ReorgSlavePrivate::Start() noexcept -> bool
 {
     OT_ASSERT(master_);
 
-    const auto state = master_->Register(boost::shared_from(this));
+    const auto state = master_->Register(shared_from_this());
     log_(OT_PRETTY_CLASS())("registered ")(name_).Flush();
 
     if (Reorg::State::shutdown == state) {
@@ -130,7 +130,7 @@ ReorgSlavePrivate::~ReorgSlavePrivate() { Stop(); }
 
 namespace opentxs::blockchain::node::wallet
 {
-ReorgSlave::ReorgSlave(boost::shared_ptr<ReorgSlavePrivate> imp) noexcept
+ReorgSlave::ReorgSlave(std::shared_ptr<ReorgSlavePrivate> imp) noexcept
     : imp_(std::move(imp))
 {
 }

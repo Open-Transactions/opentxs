@@ -5,8 +5,6 @@
 
 #include "api/network/blockchain/Imp.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -205,10 +203,7 @@ auto BlockchainImp::Init(
         const auto& zmq = api->Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
         auto* alloc = zmq.Alloc(batchID);
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-        auto actor = boost::allocate_shared<blockchain::Actor>(
+        auto actor = std::allocate_shared<blockchain::Actor>(
             alloc::PMR<blockchain::Actor>{alloc}, api, batchID);
 
         OT_ASSERT(actor);

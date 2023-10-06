@@ -24,8 +24,6 @@
 #include <StorageThread.pb.h>
 #include <StorageThreadItem.pb.h>
 #include <UnitDefinition.pb.h>
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstdint>
 #include <ctime>
 #include <functional>
@@ -1809,11 +1807,8 @@ auto Storage::Start(std::shared_ptr<const api::Session> api) noexcept -> void
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
     using Actor = opentxs::storage::tree::Actor;
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc},
         api,
         me,

@@ -6,8 +6,6 @@
 #include "network/blockchain/bitcoin/Peer.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/set.h>
 #include <algorithm>
 #include <chrono>
@@ -148,11 +146,8 @@ auto BlockchainPeerBitcoin(
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
     auto alloc = alloc::PMR<ReturnType>{zmq.Alloc(batchID)};
-    auto actor = boost::allocate_shared<ReturnType>(
+    auto actor = std::allocate_shared<ReturnType>(
         alloc,
         std::move(api),
         std::move(network),

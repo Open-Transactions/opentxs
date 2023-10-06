@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <string_view>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -56,7 +56,7 @@ public:
     [[nodiscard]] auto Start() noexcept -> bool;
     auto Stop() noexcept -> void;
 
-    ReorgSlave(boost::shared_ptr<ReorgSlavePrivate> imp) noexcept;
+    ReorgSlave(std::shared_ptr<ReorgSlavePrivate> imp) noexcept;
     ReorgSlave(const ReorgSlave&) = delete;
     ReorgSlave(ReorgSlave&& rhs) noexcept;
     auto operator=(const ReorgSlave&) -> ReorgSlave& = delete;
@@ -65,8 +65,6 @@ public:
     ~ReorgSlave() final;
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<ReorgSlavePrivate> imp_;
+    std::shared_ptr<ReorgSlavePrivate> imp_;
 };
 }  // namespace opentxs::blockchain::node::wallet

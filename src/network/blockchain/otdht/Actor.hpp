@@ -6,7 +6,6 @@
 #pragma once
 
 #include <boost/circular_buffer.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <chrono>
 #include <cstdint>
@@ -79,7 +78,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }

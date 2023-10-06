@@ -7,8 +7,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <compare>
 #include <cstddef>
@@ -367,7 +365,7 @@ auto Bip39::words_to_root_pkt(
             mp::unchecked,
             void>>;
         auto allocM = alloc::PMR<BigInt>{alloc::Secure::get()};
-        auto pSeed = boost::allocate_shared<BigInt>(allocM);
+        auto pSeed = std::allocate_shared<BigInt>(allocM);
 
         OT_ASSERT(pSeed);
 

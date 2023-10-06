@@ -25,12 +25,6 @@
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-template <class T>
-class shared_ptr;
-}  // namespace boost
-
 namespace opentxs
 {
 namespace api
@@ -119,7 +113,7 @@ private:
         const database::MatchedTransaction& tx,
         database::MatchedTransaction& into) const noexcept(false) -> void;
 
-    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+    auto get_index(const std::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_block_matches(
         const block::Position& position,

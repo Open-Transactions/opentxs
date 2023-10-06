@@ -6,7 +6,6 @@
 #pragma once
 
 #include <HDPath.pb.h>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <string_view>
 
@@ -87,7 +86,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void;
 
     Imp(Reorg& reorg,
         const crypto::Account& account,

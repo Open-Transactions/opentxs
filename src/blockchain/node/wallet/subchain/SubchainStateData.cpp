@@ -555,7 +555,7 @@ auto SubchainStateData::IndexElement(
     }
 }
 
-auto SubchainStateData::Init(boost::shared_ptr<SubchainStateData> me) noexcept
+auto SubchainStateData::Init(std::shared_ptr<SubchainStateData> me) noexcept
     -> void
 {
     signal_startup(me);

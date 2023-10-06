@@ -163,7 +163,7 @@ auto Actor::reset_gc_timer(std::chrono::microseconds wait) noexcept -> void
 auto Actor::run_gc(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<api::session::imp::Storage> parent,
-    boost::shared_ptr<Actor> self,
+    std::shared_ptr<Actor> self,
     const GCParams& params) noexcept -> void
 {
     OT_ASSERT(api);

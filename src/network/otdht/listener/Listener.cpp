@@ -5,8 +5,6 @@
 
 #include "internal/network/otdht/Listener.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <cstddef>
 #include <string_view>
@@ -61,7 +59,7 @@ namespace opentxs::network::otdht
 {
 Listener::Listener(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Node::Shared> shared,
+    std::shared_ptr<Node::Shared> shared,
     std::string_view routerBind,
     std::string_view routerAdvertise,
     std::string_view publishBind,
@@ -74,11 +72,8 @@ Listener::Listener(
 
         const auto& zmq = api->Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
 
-        return boost::allocate_shared<Actor>(
+        return std::allocate_shared<Actor>(
             alloc::PMR<Actor>{zmq.Alloc(batchID)},
             api,
             shared,

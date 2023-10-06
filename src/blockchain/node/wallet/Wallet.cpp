@@ -5,7 +5,6 @@
 
 #include "internal/blockchain/node/Wallet.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -233,15 +232,12 @@ auto Wallet::Init(
     OT_ASSERT(node);
 
     if (node->Internal().GetConfig().disable_wallet_) {
-        shared_ = boost::make_shared<Shared>();
+        shared_ = std::make_shared<Shared>();
     } else {
         const auto& asio = api->Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
-        shared_ = boost::make_shared<wallet::Shared>(api, node);
-        auto actor = boost::allocate_shared<Wallet::Actor>(
+        shared_ = std::make_shared<wallet::Shared>(api, node);
+        auto actor = std::allocate_shared<Wallet::Actor>(
             alloc::PMR<Wallet::Actor>{asio.Alloc(batchID)},
             api,
             node,

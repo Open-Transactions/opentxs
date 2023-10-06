@@ -111,7 +111,7 @@ auto NotificationStateData::do_startup(allocator_type monotonic) noexcept
 }
 
 auto NotificationStateData::get_index(
-    const boost::shared_ptr<const SubchainStateData>& me) const noexcept -> void
+    const std::shared_ptr<const SubchainStateData>& me) const noexcept -> void
 {
     Index::NotificationFactory(me, pc_).Init();
 }

@@ -60,7 +60,7 @@ using opentxs::network::zeromq::socket::Type;
 
 Peer::Actor::Actor(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Node::Shared> shared,
+    std::shared_ptr<Node::Shared> shared,
     std::string_view routingID,
     std::string_view toRemote,
     std::string_view fromNode,
@@ -133,7 +133,7 @@ Peer::Actor::Actor(
 
 Peer::Actor::Actor(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Node::Shared> shared,
+    std::shared_ptr<Node::Shared> shared,
     std::string_view routingID,
     std::string_view toRemote,
     std::string_view fromNode,

@@ -36,10 +36,10 @@ public:
     class Imp;
 
     static auto DeterministicFactory(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const std::shared_ptr<const SubchainStateData>& parent,
         const DeterministicStateData& deterministic) noexcept -> Index;
     static auto NotificationFactory(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const std::shared_ptr<const SubchainStateData>& parent,
         const PaymentCode& code) noexcept -> Index;
 
     auto Init() noexcept -> void final;
@@ -53,10 +53,8 @@ public:
     ~Index() final;
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<Imp> imp_;
+    std::shared_ptr<Imp> imp_;
 
-    Index(boost::shared_ptr<Imp>&& imp) noexcept;
+    Index(std::shared_ptr<Imp>&& imp) noexcept;
 };
 }  // namespace opentxs::blockchain::node::wallet

@@ -5,7 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <span>
 #include <utility>
@@ -52,7 +51,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Index::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Job(LogTrace(),
@@ -213,7 +212,7 @@ auto Index::Imp::work(allocator_type monotonic) noexcept -> bool
 
 namespace opentxs::blockchain::node::wallet
 {
-Index::Index(boost::shared_ptr<Imp>&& imp) noexcept
+Index::Index(std::shared_ptr<Imp>&& imp) noexcept
     : imp_(std::move(imp))
 {
     OT_ASSERT(imp_);

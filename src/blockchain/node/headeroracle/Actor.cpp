@@ -5,7 +5,6 @@
 
 #include "blockchain/node/headeroracle/Actor.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <iterator>
 #include <memory>
@@ -57,7 +56,7 @@ using enum opentxs::network::zeromq::socket::Type;
 HeaderOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : HeaderOracleActor(
@@ -127,7 +126,7 @@ auto HeaderOracle::Actor::do_startup(allocator_type) noexcept -> bool
     return false;
 }
 
-auto HeaderOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
+auto HeaderOracle::Actor::Init(std::shared_ptr<Actor> me) noexcept -> void
 {
     signal_startup(me);
 }

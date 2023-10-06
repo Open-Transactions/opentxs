@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
 #include "internal/api/session/notary/Types.hpp"
@@ -37,7 +36,7 @@ namespace opentxs::api::session::notary
 class Actor final : public opentxs::Actor<notary::Actor, Job>
 {
 public:
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }
@@ -49,7 +48,7 @@ public:
 
     Actor(
         std::shared_ptr<api::session::Notary> api,
-        boost::shared_ptr<Shared> shared,
+        std::shared_ptr<Shared> shared,
         allocator_type alloc) noexcept;
     Actor() = delete;
     Actor(const Actor&) = delete;
@@ -63,7 +62,7 @@ private:
     friend opentxs::Actor<notary::Actor, Job>;
 
     std::shared_ptr<api::session::Notary> api_p_;
-    boost::shared_ptr<Shared> shared_p_;
+    std::shared_ptr<Shared> shared_p_;
     api::session::Notary& api_;
     Shared& shared_;
     Deque<identifier::UnitDefinition> queue_;

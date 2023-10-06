@@ -8,7 +8,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/json.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <cs_plain_guarded.h>
 #include <algorithm>
@@ -74,7 +73,7 @@ Shared::Shared(const opentxs::network::zeromq::Context& zmq, bool test) noexcept
 }
 
 auto Shared::Connect(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     internal::Asio::SocketImp socket) noexcept -> bool
 {
@@ -114,7 +113,7 @@ auto Shared::Connect(
 }
 
 auto Shared::FetchJson(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const ReadView host,
     const ReadView path,
     const bool https,
@@ -395,7 +394,7 @@ auto Shared::process_transmit(
 }
 
 auto Shared::Receive(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes,
@@ -447,7 +446,7 @@ auto Shared::Receive(
 }
 
 auto Shared::Resolve(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     std::string_view server,
     std::uint16_t port) noexcept -> void
@@ -521,7 +520,7 @@ auto Shared::retrieve_address_async_ssl(
 }
 
 auto Shared::retrieve_json_http(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     opentxs::network::asio::TLS,
     const Data& data,
     const ReadView host,
@@ -553,7 +552,7 @@ auto Shared::retrieve_json_http(
 }
 
 auto Shared::retrieve_json_https(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     opentxs::network::asio::TLS tls,
     const Data& data,
     const ReadView host,
@@ -743,7 +742,7 @@ auto Shared::StateMachine() noexcept -> bool
 }
 
 auto Shared::Transmit(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     const ReadView bytes,
     internal::Asio::SocketImp socket) noexcept -> bool

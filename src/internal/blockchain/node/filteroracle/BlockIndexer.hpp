@@ -53,8 +53,6 @@ public:
 private:
     class Imp;
 
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<Imp> imp_;
+    std::shared_ptr<Imp> imp_;
 };
 }  // namespace opentxs::blockchain::node::filteroracle

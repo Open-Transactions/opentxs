@@ -637,7 +637,7 @@ auto Peer::Imp::hash(const blockchain::Address& addr) const noexcept
     return out;
 }
 
-auto Peer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
+auto Peer::Imp::Init(std::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
 }

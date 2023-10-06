@@ -58,7 +58,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 
 Actor::Actor(
     std::shared_ptr<api::session::Notary> api,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     allocator_type alloc) noexcept
     : opentxs::Actor<notary::Actor, Job>(
           *api,

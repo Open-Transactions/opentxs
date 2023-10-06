@@ -49,7 +49,7 @@ using enum opentxs::network::zeromq::socket::Direction;
 FeeOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : opentxs::Actor<FeeOracle::Actor, FeeOracleJobs>(

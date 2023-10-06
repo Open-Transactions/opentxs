@@ -5,8 +5,6 @@
 
 #include "network/blockchain/otdht/Actor.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <chrono>
 #include <compare>
@@ -290,29 +288,25 @@ auto OTDHT::Actor::Factory(
     network::zeromq::BatchID batchID) noexcept -> void
 {
     const auto& zmq = api->Network().ZeroMQ().Internal();
-    auto actor = [&]() -> boost::shared_ptr<Actor> {
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-
+    auto actor = [&]() -> std::shared_ptr<Actor> {
         switch (node->Internal().GetConfig().profile_) {
             case BlockchainProfile::mobile:
             case BlockchainProfile::desktop: {
                 using Type = blockchain::otdht::Client;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             case BlockchainProfile::desktop_native: {
                 using Type = Actor;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             case BlockchainProfile::server: {
                 using Type = blockchain::otdht::Server;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             default: {

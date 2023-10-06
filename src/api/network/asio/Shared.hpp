@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <atomic>
 #include <cstddef>
@@ -40,9 +39,6 @@ namespace system
 {
 class error_code;
 }  // namespace system
-
-template <class T>
-class shared_ptr;
 }  // namespace boost
 
 namespace opentxs
@@ -80,28 +76,28 @@ public:
     mutable GuardedData data_;
 
     static auto Connect(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         const opentxs::network::zeromq::Envelope& id,
         internal::Asio::SocketImp socket) noexcept -> bool;
     static auto FetchJson(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         const ReadView host,
         const ReadView path,
         const bool https,
         const ReadView notify) noexcept -> std::future<boost::json::value>;
     static auto Receive(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         const opentxs::network::zeromq::Envelope& id,
         const OTZMQWorkType type,
         const std::size_t bytes,
         internal::Asio::SocketImp socket) noexcept -> bool;
     static auto Resolve(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         const opentxs::network::zeromq::Envelope& id,
         std::string_view server,
         std::uint16_t port) noexcept -> void;
     static auto Transmit(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         const opentxs::network::zeromq::Envelope& id,
         const ReadView bytes,
         internal::Asio::SocketImp socket) noexcept -> bool;
@@ -140,7 +136,7 @@ private:
     };
 
     static auto retrieve_json_http(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         opentxs::network::asio::TLS tls,
         const Data& data,
         const ReadView host,
@@ -149,7 +145,7 @@ private:
         std::shared_ptr<std::promise<boost::json::value>> promise) noexcept
         -> void;
     static auto retrieve_json_https(
-        boost::shared_ptr<const Shared> me,
+        std::shared_ptr<const Shared> me,
         opentxs::network::asio::TLS tls,
         const Data& data,
         const ReadView host,

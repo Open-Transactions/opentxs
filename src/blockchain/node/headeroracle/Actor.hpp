@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
@@ -57,7 +56,7 @@ using HeaderOracleActor =
 class HeaderOracle::Actor final : public HeaderOracleActor
 {
 public:
-    auto Init(boost::shared_ptr<Actor> me) noexcept -> void;
+    auto Init(std::shared_ptr<Actor> me) noexcept -> void;
 
     auto get_deleter() noexcept -> delete_function final
     {
@@ -67,7 +66,7 @@ public:
     Actor(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
-        boost::shared_ptr<Shared> shared,
+        std::shared_ptr<Shared> shared,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Actor() = delete;
@@ -83,7 +82,7 @@ private:
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
-    boost::shared_ptr<Shared> shared_p_;
+    std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;
     const node::Manager& node_;
     Shared& shared_;

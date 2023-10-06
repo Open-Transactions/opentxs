@@ -5,8 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/DeterministicIndex.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/DeterministicStateData.hpp"
@@ -26,16 +24,13 @@
 namespace opentxs::blockchain::node::wallet
 {
 auto Index::DeterministicFactory(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const DeterministicStateData& deterministic) noexcept -> Index
 {
     const auto& asio = parent->api_.Network().ZeroMQ().Internal();
     const auto batchID = asio.PreallocateBatch();
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
 
-    return Index{boost::allocate_shared<DeterministicIndex>(
+    return Index{std::allocate_shared<DeterministicIndex>(
         alloc::PMR<DeterministicIndex>{asio.Alloc(batchID)},
         parent,
         deterministic,
@@ -46,7 +41,7 @@ auto Index::DeterministicFactory(
 namespace opentxs::blockchain::node::wallet
 {
 DeterministicIndex::DeterministicIndex(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const DeterministicStateData& deterministic,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
