@@ -11,7 +11,6 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/Spaceship.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -25,7 +24,7 @@ auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
 auto operator<=>(const Key& lhs, const Key& rhs) noexcept
     -> std::strong_ordering
 {
-    return llvm_sucks(lhs.PublicKey(), rhs.PublicKey());
+    return lhs.PublicKey() <=> rhs.PublicKey();
 }
 
 Key::Key(KeyPrivate* imp) noexcept

@@ -20,24 +20,11 @@ auto operator==(const Position& lhs, const Position& rhs) noexcept -> bool
 auto operator<=>(const Position& lhs, const Position& rhs) noexcept
     -> std::strong_ordering
 {
-    // TODO it sure will be nice when we aren't limited by the ancient standard
-    // library in Android NDK 25.
-    // TODO constexpr auto& equal = std::strong_ordering::equal;
-    //
-    // TODO if (const auto out = lhs.height_ <=> rhs.height_; equal != out) {
-    // TODO
-    // TODO     return out;
-    // TODO } else {
-    // TODO
-    // TODO     return lhs.hash_ <=> rhs.hash_;
-    // TODO }
+    constexpr auto& equal = std::strong_ordering::equal;
 
-    if (lhs.height_ < rhs.height_) {
+    if (const auto out = lhs.height_ <=> rhs.height_; equal != out) {
 
-        return std::strong_ordering::less;
-    } else if (rhs.height_ < lhs.height_) {
-
-        return std::strong_ordering::greater;
+        return out;
     } else {
 
         return lhs.hash_ <=> rhs.hash_;

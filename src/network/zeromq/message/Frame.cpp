@@ -20,7 +20,6 @@
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Spaceship.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -73,7 +72,7 @@ auto operator==(std::span<const Frame> lhs, std::span<const Frame> rhs) noexcept
 auto operator<=>(const Frame& lhs, const Frame& rhs) noexcept
     -> std::strong_ordering
 {
-    return llvm_sucks(lhs.Bytes(), rhs.Bytes());
+    return lhs.Bytes() <=> rhs.Bytes();
 }
 
 auto operator<=>(
@@ -90,15 +89,7 @@ auto operator<=>(
         constexpr auto same = std::strong_ordering::equal;
 
         for (auto n = 0_uz; n < s1; ++n) {
-            // TODO revisit this after libc++ in Android NDK is less broken
-            // if (auto val = lhs[n] <=> rhs[n]; same != val) { return val; }
-            if (lhs[n] == rhs[n]) {
-
-                continue;
-            } else {
-
-                return lhs[n] <=> rhs[n];
-            }
+            if (auto val = lhs[n] <=> rhs[n]; same != val) { return val; }
         }
 
         return same;

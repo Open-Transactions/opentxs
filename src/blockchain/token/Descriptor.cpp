@@ -20,22 +20,14 @@ auto operator==(const Descriptor& lhs, const Descriptor& rhs) noexcept -> bool
 auto operator<=>(const Descriptor& lhs, const Descriptor& rhs) noexcept
     -> std::strong_ordering
 {
-    using namespace std;
+    constexpr auto& equal = std::strong_ordering::equal;
 
-    // TODO this can be improved after XCode 15 and Android NDK 26
+    if (const auto host = lhs.host_ <=> rhs.host_; equal != host) {
 
-    if (lhs.host_ < rhs.host_) {
+        return host;
+    } else if (const auto type = lhs.type_ <=> rhs.type_; equal != type) {
 
-        return strong_ordering::less;
-    } else if (lhs.host_ > rhs.host_) {
-
-        return strong_ordering::greater;
-    } else if (lhs.type_ < rhs.type_) {
-
-        return strong_ordering::less;
-    } else if (lhs.type_ > rhs.type_) {
-
-        return strong_ordering::greater;
+        return type;
     } else {
 
         return lhs.id_ <=> rhs.id_;

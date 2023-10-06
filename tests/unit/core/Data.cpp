@@ -97,14 +97,14 @@ TEST(Data, comparison_rhs_short)
     EXPECT_FALSE(two == one);
     EXPECT_TRUE(one != two);
     EXPECT_TRUE(two != one);
-    EXPECT_FALSE(one < two);
-    EXPECT_FALSE(one <= two);
-    EXPECT_TRUE(two < one);
-    EXPECT_TRUE(two <= one);
-    EXPECT_FALSE(two > one);
-    EXPECT_FALSE(two >= one);
-    EXPECT_TRUE(one > two);
-    EXPECT_TRUE(one >= two);
+    EXPECT_TRUE(one < two);
+    EXPECT_TRUE(one <= two);
+    EXPECT_FALSE(two < one);
+    EXPECT_FALSE(two <= one);
+    EXPECT_TRUE(two > one);
+    EXPECT_TRUE(two >= one);
+    EXPECT_FALSE(one > two);
+    EXPECT_FALSE(one >= two);
 }
 
 TEST(Data, compare_equal_to_self)
