@@ -135,14 +135,11 @@ SpendPrivate::SpendPrivate(
 {
     memo_.assign(proto.memo());
     const auto& outputs = proto.output();
-    std::for_each(outputs.begin(), outputs.end(), [this](const auto& i) {
-        deserialize_output(i);
-    });
+    std::ranges::for_each(
+        outputs, [this](const auto& i) { deserialize_output(i); });
     const auto& notifications = proto.notification();
-    std::for_each(
-        notifications.begin(), notifications.end(), [this](const auto& i) {
-            deserialize_notification(i);
-        });
+    std::ranges::for_each(
+        notifications, [this](const auto& i) { deserialize_notification(i); });
 
     if (proto.has_finished()) { transaction_.emplace(proto.finished()); }
 
@@ -464,7 +461,7 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
             matterfi::paymentcode_extra_notifications(
                 LogTrace(), account, notifications_);
         };
-        std::for_each(pc_recipients_.begin(), pc_recipients_.end(), check);
+        std::ranges::for_each(pc_recipients_, check);
         const auto self = notifications_.size();
         matterfi::paymentcode_preemptive_notifications(
             log, api_, spender_, chain_, notifications_, alloc);
@@ -487,7 +484,7 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
                 .Flush();
         }
     };
-    std::for_each(notifications_.begin(), notifications_.end(), check);
+    std::ranges::for_each(notifications_, check);
 }
 
 auto SpendPrivate::Funding() const noexcept -> node::Funding { return policy_; }
@@ -551,7 +548,7 @@ auto SpendPrivate::Notify(std::span<const PaymentCode> recipients) noexcept
             validate_payment_code(pc);
             notifications_.emplace(pc);
         };
-        std::for_each(recipients.begin(), recipients.end(), process);
+        std::ranges::for_each(recipients, process);
 
         return true;
     } catch (const std::exception& e) {
@@ -580,7 +577,7 @@ auto SpendPrivate::OutgoingKeys() const noexcept -> Set<crypto::Key>
 
         return keyID;
     };
-    std::transform(in.begin(), in.end(), std::inserter(out, out.end()), key);
+    std::ranges::transform(in, std::inserter(out, out.end()), key);
 
     return out;
 }
@@ -699,14 +696,14 @@ auto SpendPrivate::Serialize(
         auto make_output = [&, this](const auto& in) {
             this->serialize_output(in, *out.add_output());
         };
-        std::for_each(addr.begin(), addr.end(), make_output);
-        std::for_each(pc.begin(), pc.end(), make_output);
+        std::ranges::for_each(addr, make_output);
+        std::ranges::for_each(pc, make_output);
         const auto& notif = notifications_;
         auto make_notif = [&](const auto& in) {
             serialize_notification(
                 sender_payment_code(), path(), in, *out.add_notification());
         };
-        std::for_each(notif.begin(), notif.end(), make_notif);
+        std::ranges::for_each(notif, make_notif);
 
         if (is_sweep()) { serialize_sweep(*out.mutable_sweep()); }
 

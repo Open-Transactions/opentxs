@@ -6,12 +6,12 @@
 #include "blockchain/protocol/bitcoin/base/block/parser/Base.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <ranges>
 
 namespace opentxs::blockchain::protocol::bitcoin::base::block
 {
 auto ParserBase::get_transactions(std::span<Data> view) const noexcept -> void
 {
-    std::for_each(
-        view.begin(), view.end(), [this](auto& t) { get_transaction(t); });
+    std::ranges::for_each(view, [this](auto& t) { get_transaction(t); });
 }
 }  // namespace opentxs::blockchain::protocol::bitcoin::base::block

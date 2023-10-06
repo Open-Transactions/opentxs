@@ -99,7 +99,7 @@ auto Threads::BlockchainThreadMap(
 
     try {
         const auto& data = blockchain_.map_.at(txid);
-        std::copy(std::begin(data), std::end(data), std::back_inserter(output));
+        std::ranges::copy(data, std::back_inserter(output));
     } catch (...) {
     }
 
@@ -111,9 +111,8 @@ auto Threads::BlockchainTransactionList() const noexcept
 {
     auto output = UnallocatedVector<ByteArray>{};
     Lock lock(blockchain_.lock_);
-    std::transform(
-        std::begin(blockchain_.map_),
-        std::end(blockchain_.map_),
+    std::ranges::transform(
+        blockchain_.map_,
         std::back_inserter(output),
         [&](const auto& in) -> auto { return in.first; });
 
@@ -485,7 +484,7 @@ auto Threads::serialize() const -> proto::StorageNymList
         auto index = proto::StorageBlockchainTransactions{};
         index.set_version(1);
         index.set_txid(UnallocatedCString{txid.Bytes()});
-        std::for_each(std::begin(data), std::end(data), [&](const auto& id) {
+        std::ranges::for_each(data, [&](const auto& id) {
             OT_ASSERT(false == id.empty());
 
             index.add_thread(UnallocatedCString{id.Bytes()});

@@ -263,9 +263,8 @@ auto Pair::State::count_currencies(
     const UnallocatedVector<AccountDetails>& in) noexcept -> std::size_t
 {
     auto unique = UnallocatedSet<identifier::UnitDefinition>{};
-    std::transform(
-        std::begin(in),
-        std::end(in),
+    std::ranges::transform(
+        in,
         std::inserter(unique, unique.end()),
         [](const auto& item) -> identifier::UnitDefinition {
             return std::get<0>(item);
@@ -356,14 +355,13 @@ auto Pair::State::run(const std::function<void(const IssuerID&)> fn) noexcept
 
     {
         Lock lock(lock_);
-        std::transform(
-            std::begin(state_),
-            std::end(state_),
+        std::ranges::transform(
+            state_,
             std::inserter(list, list.end()),
             [](const auto& in) -> IssuerID { return in.first; });
     }
 
-    std::for_each(std::begin(list), std::end(list), fn);
+    std::ranges::for_each(list, fn);
 
     return check_state();
 }

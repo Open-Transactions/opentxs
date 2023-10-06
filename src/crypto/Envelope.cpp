@@ -109,7 +109,7 @@ const Envelope::SupportedKeys Envelope::supported_{[] {
         out.emplace_back(Type::ED25519);
     }
 
-    std::sort(out.begin(), out.end());
+    std::ranges::sort(out);
 
     return out;
 }()};
@@ -588,12 +588,8 @@ auto Envelope::test_solution(
             if (0 == keys.size()) { return false; }
 
             auto test = SupportedKeys{};
-            std::set_intersection(
-                std::begin(solution),
-                std::end(solution),
-                std::begin(keys),
-                std::end(keys),
-                std::back_inserter(test));
+            std::ranges::set_intersection(
+                solution, keys, std::back_inserter(test));
 
             if (test.size() != keys.size()) { return false; }
 

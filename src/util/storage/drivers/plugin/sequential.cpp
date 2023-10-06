@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <memory>
 #include <numeric>
+#include <ranges>
 
 #include "internal/util/LogMacros.hpp"
 
@@ -26,7 +27,7 @@ auto Plugin::empty_bucket(Bucket bucket) const noexcept -> Results
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), store);
+    std::ranges::for_each(out, store);
 
     return out;
 }
@@ -72,7 +73,7 @@ auto Plugin::scan(const Log& log) const noexcept -> Results
 {
     auto out = make_results();
     auto check = [&log](auto& row) { check_revision(log, row); };
-    std::for_each(out.begin(), out.end(), check);
+    std::ranges::for_each(out, check);
 
     return out;
 }
@@ -91,7 +92,7 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), save);
+    std::ranges::for_each(out, save);
 
     return out;
 }
@@ -109,7 +110,7 @@ auto Plugin::store(Transaction data, Bucket bucket) const noexcept -> Results
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), save);
+    std::ranges::for_each(out, save);
 
     return out;
 }
@@ -118,6 +119,6 @@ auto Plugin::synchronize_drivers(const Hash& hash, Bucket bucket) noexcept
     -> void
 {
     auto sync = [&, this](auto* driver) { synchronize(hash, bucket, *driver); };
-    std::for_each(drivers_.begin(), drivers_.end(), sync);
+    std::ranges::for_each(drivers_, sync);
 }
 }  // namespace opentxs::storage::driver::implementation

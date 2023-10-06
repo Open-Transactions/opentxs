@@ -9,6 +9,7 @@
 #include <VerificationItem.pb.h>
 #include <algorithm>
 #include <exception>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -89,8 +90,7 @@ Verification::Verification(
             return api.Factory().Internal().Identifier(p);
         };
         out.reserve(ids.size());
-        std::transform(
-            ids.begin(), ids.end(), std::back_inserter(out), from_proto);
+        std::ranges::transform(ids, std::back_inserter(out), from_proto);
 
         return out;
     }())

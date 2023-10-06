@@ -9,6 +9,7 @@
 #include <chrono>
 #include <compare>
 #include <cstddef>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <stdexcept>
@@ -673,9 +674,8 @@ auto Shared::process_block(
         auto output = Vector<ByteArray>{monotonic};
         output.reserve(input.size());
         output.clear();
-        std::transform(
-            input.begin(),
-            input.end(),
+        std::ranges::transform(
+            input,
             std::back_inserter(output),
             [&](const auto& element) -> ByteArray {
                 return api.Factory().DataFromBytes(reader(element));

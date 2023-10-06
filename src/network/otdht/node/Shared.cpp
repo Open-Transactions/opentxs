@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <span>
 #include <utility>
 
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -34,7 +33,7 @@ auto Node::Shared::Chains() noexcept -> const Set<opentxs::blockchain::Type>&
     static const auto chains = [] {
         const auto& set = opentxs::blockchain::supported_chains();
         auto out = Set<opentxs::blockchain::Type>{};
-        std::copy(set.begin(), set.end(), std::inserter(out, out.end()));
+        std::ranges::copy(set, std::inserter(out, out.end()));
         out.emplace(opentxs::blockchain::Type::UnitTest);
 
         return out;

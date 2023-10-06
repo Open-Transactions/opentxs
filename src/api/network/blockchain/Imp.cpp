@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <utility>
 
@@ -141,11 +142,10 @@ auto BlockchainImp::EnabledChains(alloc::Default alloc) const noexcept
 
         return db_.get().LoadEnabledChains();
     }();
-    std::transform(
-        data.begin(),
-        data.end(),
-        std::inserter(out, out.begin()),
-        [](const auto value) { return value.first; });
+    std::ranges::transform(
+        data, std::inserter(out, out.begin()), [](const auto value) {
+            return value.first;
+        });
 
     return out;
 }

@@ -8,9 +8,7 @@
 #include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainWalletKey.pb.h>
 #include <algorithm>
-#include <iterator>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/output/Imp.hpp"
@@ -58,9 +56,8 @@ auto BitcoinTransactionOutput(
     try {
         auto keySet = Set<blockchain::crypto::Key>{alloc.result_};
         keySet.clear();
-        std::for_each(std::begin(keys), std::end(keys), [&](const auto& key) {
-            keySet.emplace(key);
-        });
+        std::ranges::for_each(
+            keys, [&](const auto& key) { keySet.emplace(key); });
 
         return pmr::construct<ReturnType>(
             alloc.result_,

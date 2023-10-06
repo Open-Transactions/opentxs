@@ -11,6 +11,7 @@
 #include <ContactItem.pb.h>
 #include <ContactItemAttribute.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -57,10 +58,7 @@ auto Claim(
             [&] {
                 auto a = Set<identity::wot::claim::Attribute>{alloc.result_};
                 a.clear();
-                std::copy(
-                    attributes.begin(),
-                    attributes.end(),
-                    std::inserter(a, a.end()));
+                std::ranges::copy(attributes, std::inserter(a, a.end()));
 
                 return a;
             }(),
@@ -131,11 +129,8 @@ auto Claim(
                     return proto::translate(
                         static_cast<proto::ContactItemAttribute>(in));
                 };
-                std::transform(
-                    proto.attribute().begin(),
-                    proto.attribute().end(),
-                    std::inserter(a, a.end()),
-                    translate);
+                std::ranges::transform(
+                    proto.attribute(), std::inserter(a, a.end()), translate);
 
                 return a;
             }(),

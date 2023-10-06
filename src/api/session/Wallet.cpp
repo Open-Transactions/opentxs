@@ -3038,9 +3038,8 @@ auto Wallet::Server(
 
     if (nym) {
         auto list = UnallocatedList<Endpoint>{};
-        std::transform(
-            std::begin(endpoints),
-            std::end(endpoints),
+        std::ranges::transform(
+            endpoints,
             std::back_inserter(list),
             [](const auto& in) -> Endpoint {
                 return {

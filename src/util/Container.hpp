@@ -10,6 +10,7 @@
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
 #include <robin_hood.h>
+#include <ranges>
 #include <span>
 
 #include "internal/util/P0330.hpp"
@@ -36,7 +37,7 @@ auto copy_construct(std::span<const Value> in, Args... args) noexcept
     auto out = Container{args...};
     out.reserve(in.size());
     out.clear();
-    std::copy(in.begin(), in.end(), std::back_inserter(out));
+    std::ranges::copy(in, std::back_inserter(out));
 
     return out;
 }
@@ -44,7 +45,7 @@ auto copy_construct(std::span<const Value> in, Args... args) noexcept
 template <typename Container>
 auto dedup(Container& vector) noexcept -> void
 {
-    std::sort(vector.begin(), vector.end());
+    std::ranges::sort(vector);
     vector.erase(std::unique(vector.begin(), vector.end()), vector.end());
 }
 
@@ -80,7 +81,7 @@ auto move_construct(std::span<Value> in, Args... args) noexcept -> Container
     auto out = Container{args...};
     out.reserve(in.size());
     out.clear();
-    std::move(in.begin(), in.end(), std::back_inserter(out));
+    std::ranges::move(in, std::back_inserter(out));
 
     return out;
 }

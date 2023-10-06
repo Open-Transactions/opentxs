@@ -8,6 +8,7 @@
 #include <boost/smart_ptr/make_shared.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <span>
@@ -163,11 +164,8 @@ auto Rescan::Imp::do_process_update(
     decode(api_, msg, clean, dirty);
     const auto highestClean = highest_clean([&] {
         auto out = Set<block::Position>{};
-        std::transform(
-            clean.begin(),
-            clean.end(),
-            std::inserter(out, out.end()),
-            [&](const auto& in) {
+        std::ranges::transform(
+            clean, std::inserter(out, out.end()), [&](const auto& in) {
                 auto& [type, pos] = in;
 
                 return pos;

@@ -35,10 +35,7 @@ auto BitcoinP2PAddr(
                 auto vec = ReturnType::AddressVector{alloc};
                 vec.reserve(addresses.size());
                 vec.clear();
-                std::move(
-                    addresses.begin(),
-                    addresses.end(),
-                    std::back_inserter(vec));
+                std::ranges::move(addresses, std::back_inserter(vec));
 
                 return vec;
             }());

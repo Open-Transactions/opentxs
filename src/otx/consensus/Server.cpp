@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <atomic>
 #include <filesystem>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <stdexcept>
@@ -566,12 +567,8 @@ auto Server::Accounts() const -> UnallocatedVector<identifier::Generic>
         api_.Storage().Internal().AccountsByServer(server_id_);
     const auto nymSet =
         api_.Storage().Internal().AccountsByOwner(Signer()->ID());
-    std::set_intersection(
-        serverSet.begin(),
-        serverSet.end(),
-        nymSet.begin(),
-        nymSet.end(),
-        std::back_inserter(output));
+    std::ranges::set_intersection(
+        serverSet, nymSet, std::back_inserter(output));
 
     return output;
 }

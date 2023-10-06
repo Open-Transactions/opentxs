@@ -121,16 +121,15 @@ auto Logging::set_name(std::string_view name) noexcept -> void
     constexpr auto replace = frozen::make_unordered_set<char>(
         {'<', '>', ':', '"', '/', '\\', '|', '?', '*'});
     auto link = UnallocatedCString{};
-    std::transform(
-        name.begin(), name.end(), std::back_inserter(link), [&](const auto c) {
-            if (0_uz < replace.count(c)) {
+    std::ranges::transform(name, std::back_inserter(link), [&](const auto c) {
+        if (0_uz < replace.count(c)) {
 
-                return '_';
-            } else {
+            return '_';
+        } else {
 
-                return c;
-            }
-        });
+            return c;
+        }
+    });
     const auto symlink =
         (file_.parent_path() / link).replace_extension(file_.extension());
     std::filesystem::remove_all(symlink);

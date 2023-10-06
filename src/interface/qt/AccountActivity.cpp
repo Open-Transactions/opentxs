@@ -12,6 +12,7 @@
 #include <QString>
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -102,11 +103,10 @@ auto AccountActivityQt::depositChains() const noexcept -> QVariantList
 {
     const auto input = imp_->parent_.DepositChains();
     auto output = QVariantList{};
-    std::transform(
-        std::begin(input),
-        std::end(input),
-        std::back_inserter(output),
-        [](const auto& in) -> auto { return static_cast<int>(in); });
+    std::ranges::transform(
+        input, std::back_inserter(output), [](const auto& in) -> auto {
+            return static_cast<int>(in);
+        });
 
     return output;
 }
@@ -186,11 +186,8 @@ auto AccountActivityQt::notifyContacts(QStringList paymentCodes) const noexcept
         auto out = Vector<PaymentCode>{};
         out.reserve(paymentCodes.size());
         out.clear();
-        std::transform(
-            paymentCodes.begin(),
-            paymentCodes.end(),
-            std::back_inserter(out),
-            from_base58);
+        std::ranges::transform(
+            paymentCodes, std::back_inserter(out), from_base58);
 
         return out;
     }();
@@ -216,8 +213,7 @@ auto AccountActivityQt::sendToAddress(
         auto out = Vector<PaymentCode>{};
         out.reserve(notify.size());
         out.clear();
-        std::transform(
-            notify.begin(), notify.end(), std::back_inserter(out), from_base58);
+        std::ranges::transform(notify, std::back_inserter(out), from_base58);
 
         return out;
     }();

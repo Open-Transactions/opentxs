@@ -317,9 +317,8 @@ auto BitcoinTransaction(
 
     try {
         auto chains = Set<blockchain::Type>{alloc.result_};
-        std::transform(
-            std::begin(in.chain()),
-            std::end(in.chain()),
+        std::ranges::transform(
+            in.chain(),
             std::inserter(chains, chains.end()),
             [](const auto type) -> auto {
                 return unit_to_blockchain(ClaimToUnit(
@@ -355,11 +354,10 @@ auto BitcoinTransaction(
                         alloc));
             }
 
-            std::transform(
-                std::begin(map),
-                std::end(map),
-                std::back_inserter(inputs),
-                [](auto& i) -> auto { return std::move(i.second); });
+            std::ranges::transform(
+                map, std::back_inserter(inputs), [](auto& i) -> auto {
+                    return std::move(i.second);
+                });
         }
 
         auto outputs =
@@ -384,11 +382,10 @@ auto BitcoinTransaction(
                         crypto, factory, chain, output, alloc));
             }
 
-            std::transform(
-                std::begin(map),
-                std::end(map),
-                std::back_inserter(outputs),
-                [](auto& i) -> auto { return std::move(i.second); });
+            std::ranges::transform(
+                map, std::back_inserter(outputs), [](auto& i) -> auto {
+                    return std::move(i.second);
+                });
         }
 
         return pmr::construct<ReturnType>(

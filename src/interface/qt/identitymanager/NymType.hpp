@@ -6,6 +6,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <ranges>
 #include <tuple>
 
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -75,10 +76,8 @@ public:
             out.emplace_back(std::make_pair(government, print(government)));
             out.emplace_back(std::make_pair(server, print(server)));
             out.emplace_back(std::make_pair(bot, print(bot)));
-            std::sort(
-                out.begin(),
-                out.end(),
-                [](const auto& lhs, const auto& rhs) -> bool {
+            std::ranges::sort(
+                out, [](const auto& lhs, const auto& rhs) -> bool {
                     return lhs.second < rhs.second;
                 });
 

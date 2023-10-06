@@ -11,6 +11,7 @@
 #include <frozen/set.h>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iterator>
 #include <random>
 #include <span>
@@ -1056,8 +1057,7 @@ auto Peer::process_protocol(
     const auto exclude = [&] {
         auto out = Set<opentxs::blockchain::block::Hash>{monotonic};
         out.clear();
-        std::copy(
-            parents.begin(), parents.end(), std::inserter(out, out.end()));
+        std::ranges::copy(parents, std::inserter(out, out.end()));
 
         return out;
     }();
@@ -1065,11 +1065,10 @@ auto Peer::process_protocol(
         auto out = decltype(hashes){monotonic};
         out.reserve(hashes.size());
         out.clear();
-        std::copy_if(
-            hashes.begin(),
-            hashes.end(),
-            std::back_inserter(out),
-            [&](const auto& hash) { return false == exclude.contains(hash); });
+        std::ranges::copy_if(
+            hashes, std::back_inserter(out), [&](const auto& hash) {
+                return false == exclude.contains(hash);
+            });
 
         return out;
     }();
@@ -1077,11 +1076,8 @@ auto Peer::process_protocol(
         auto out = Vector<opentxs::blockchain::block::Header>{monotonic};
         out.reserve(hashes.size());
         out.clear();
-        std::transform(
-            effective.begin(),
-            effective.end(),
-            std::back_inserter(out),
-            [&](const auto& hash) -> auto {
+        std::ranges::transform(
+            effective, std::back_inserter(out), [&](const auto& hash) -> auto {
                 return header_oracle_.LoadHeader(hash);
             });
 
@@ -1386,11 +1382,10 @@ auto Peer::process_transaction_hashes(
     const auto& log = log_;
     const auto hashes = [&] {
         auto out = Vector<Txid>{monotonic};
-        std::transform(
-            invs.begin(),
-            invs.end(),
-            std::back_inserter(out),
-            [&](const auto& in) { return in.hash_.Bytes(); });
+        std::ranges::transform(
+            invs, std::back_inserter(out), [&](const auto& in) {
+                return in.hash_.Bytes();
+            });
 
         return out;
     }();
@@ -1440,12 +1435,7 @@ auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
         auto out = Vector<Txid>{monotonic};
         out.reserve(std::max(local.size(), remote.size()));
         out.clear();
-        std::set_difference(
-            local.begin(),
-            local.end(),
-            remote.begin(),
-            remote.end(),
-            std::back_inserter(out));
+        std::ranges::set_difference(local, remote, std::back_inserter(out));
 
         return out;
     }();
@@ -1454,9 +1444,8 @@ auto Peer::reconcile_mempool(allocator_type monotonic) noexcept -> void
         auto out = Vector<Inventory>{monotonic};
         out.reserve(missing.size());
         out.clear();
-        std::transform(
-            missing.begin(),
-            missing.end(),
+        std::ranges::transform(
+            missing,
             std::back_inserter(out),
             [this](const auto& hash) -> Inventory {
                 return {inv_tx_, hash.Bytes()};
@@ -1839,9 +1828,8 @@ auto Peer::transmit_request_blocks(
         auto out = Vector<Inventory>{monotonic};
         out.reserve(data.size());
         out.clear();
-        std::transform(
-            data.begin(),
-            data.end(),
+        std::ranges::transform(
+            data,
             std::back_inserter(out),
             [this](const auto& hash) -> Inventory {
                 log_(OT_PRETTY_CLASS())("requesting block ")

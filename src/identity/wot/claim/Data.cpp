@@ -14,6 +14,7 @@
 #include <ContactSectionName.pb.h>
 #include <ankerl/unordered_dense.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <sstream>
 #include <string_view>
@@ -1077,9 +1078,8 @@ auto Data::SocialMediaProfileTypes() const
                 CONTACT_CONTACT_DATA_VERSION, proto::CONTACTSECTION_PROFILE));
 
         UnallocatedSet<claim::ClaimType> output;
-        std::transform(
-            profiletypes.begin(),
-            profiletypes.end(),
+        std::ranges::transform(
+            profiletypes,
             std::inserter(output, output.end()),
             [](proto::ContactItemType itemtype) -> claim::ClaimType {
                 return translate(itemtype);

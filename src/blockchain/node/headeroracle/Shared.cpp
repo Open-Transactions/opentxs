@@ -157,7 +157,7 @@ auto HeaderOracle::Shared::ancestors(
     OT_ASSERT(0 < cache.size());
 
     auto output = Positions{alloc};
-    std::move(cache.begin(), cache.end(), std::back_inserter(output));
+    std::ranges::move(cache, std::back_inserter(output));
 
     OT_ASSERT(output.front().height_ <= check);
 

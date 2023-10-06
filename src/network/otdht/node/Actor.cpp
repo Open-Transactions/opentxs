@@ -238,16 +238,14 @@ auto Node::Actor::forward(
 auto Node::Actor::get_peers() const noexcept -> Set<CString>
 {
     auto out = Set<CString>{get_allocator()};
-    std::transform(
-        peers_.begin(),
-        peers_.end(),
-        std::inserter(out, out.end()),
-        [](const auto& data) { return std::get<0>(data.second); });
-    std::transform(
-        listeners_.begin(),
-        listeners_.end(),
-        std::inserter(out, out.end()),
-        [](const auto& data) { return std::get<0>(data.second); });
+    std::ranges::transform(
+        peers_, std::inserter(out, out.end()), [](const auto& data) {
+            return std::get<0>(data.second);
+        });
+    std::ranges::transform(
+        listeners_, std::inserter(out, out.end()), [](const auto& data) {
+            return std::get<0>(data.second);
+        });
 
     return out;
 }
@@ -1048,12 +1046,7 @@ auto Node::Actor::process_registration(Message&& msg) noexcept -> void
     }();
     const auto missing = [&] {
         auto out = Vector<CString>{get_allocator()};
-        std::set_difference(
-            local.begin(),
-            local.end(),
-            remote.begin(),
-            remote.end(),
-            std::back_inserter(out));
+        std::ranges::set_difference(local, remote, std::back_inserter(out));
 
         return out;
     }();

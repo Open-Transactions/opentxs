@@ -196,12 +196,11 @@ auto Pool::GetStartArgs(BatchID id) noexcept -> ThreadStartArgs
     }();
     auto sockets = [&] {
         auto out = ThreadStartArgs{};
-        std::transform(
-            args.begin(), args.end(), std::back_inserter(out), [](auto& val) {
-                auto& [sID, socket, cb] = val;
+        std::ranges::transform(args, std::back_inserter(out), [](auto& val) {
+            auto& [sID, socket, cb] = val;
 
-                return std::make_pair(socket, std::move(cb));
-            });
+            return std::make_pair(socket, std::move(cb));
+        });
 
         return out;
     }();

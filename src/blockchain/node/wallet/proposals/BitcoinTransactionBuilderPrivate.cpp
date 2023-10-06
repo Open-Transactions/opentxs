@@ -225,7 +225,7 @@ auto BitcoinTransactionBuilderPrivate::add_existing_inputs(
             throw std::runtime_error{"failed to add input"};
         }
     };
-    std::for_each(existing.begin(), existing.end(), add_existing);
+    std::ranges::for_each(existing, add_existing);
 }
 
 auto BitcoinTransactionBuilderPrivate::add_input(const UTXO& utxo) noexcept
@@ -709,8 +709,8 @@ auto BitcoinTransactionBuilderPrivate::bip_69() noexcept -> void
         }
     };
 
-    std::sort(std::begin(inputs_), std::end(inputs_), inputSort);
-    std::sort(std::begin(outputs_), std::end(outputs_), outputSort);
+    std::ranges::sort(inputs_, inputSort);
+    std::ranges::sort(outputs_, outputSort);
     auto index{-1};
 
     for (auto& output : outputs_) { output.Internal().SetIndex(++index); }
@@ -873,8 +873,7 @@ auto BitcoinTransactionBuilderPrivate::BuildSweepTransaction() noexcept
                 return output;
             }
 
-            std::move(
-                change_.begin(), change_.end(), std::back_inserter(outputs_));
+            std::ranges::move(change_, std::back_inserter(outputs_));
             change_.clear();
         }
 
@@ -939,8 +938,8 @@ auto BitcoinTransactionBuilderPrivate::create_outputs() noexcept -> bool
         };
         const auto addr = proposal_.Internal().AddressRecipients();
         const auto pc = proposal_.Internal().PaymentCodeRecipients();
-        std::for_each(addr.begin(), addr.end(), make_addr);
-        std::for_each(pc.begin(), pc.end(), make_pc);
+        std::ranges::for_each(addr, make_addr);
+        std::ranges::for_each(pc, make_pc);
         output_count_ = outputs_.size() + change_.size();
 
         return true;
@@ -1009,7 +1008,7 @@ auto BitcoinTransactionBuilderPrivate::distribute_change_amounts() noexcept
 
     OT_ASSERT(0 == remaining);
 
-    std::move(change_.begin(), change_.end(), std::back_inserter(outputs_));
+    std::ranges::move(change_, std::back_inserter(outputs_));
     change_.clear();
 }
 
@@ -1163,11 +1162,10 @@ auto BitcoinTransactionBuilderPrivate::finalize_transaction() noexcept
         auto output = Vector<Input>{};  // TODO allocator
         output.reserve(inputs_.size());
         output.clear();
-        std::transform(
-            std::begin(inputs_),
-            std::end(inputs_),
-            std::back_inserter(output),
-            [](auto& input) -> auto { return std::move(input.first); });
+        std::ranges::transform(
+            inputs_, std::back_inserter(output), [](auto& input) -> auto {
+                return std::move(input.first);
+            });
 
         return output;
     }();
@@ -1328,19 +1326,16 @@ auto BitcoinTransactionBuilderPrivate::init_txcopy(
     auto inputs = Vector<Input>{};  // TODO allocator
     inputs.reserve(inputs_.size());
     inputs.clear();
-    std::transform(
-        std::begin(inputs_),
-        std::end(inputs_),
+    std::ranges::transform(
+        inputs_,
         std::back_inserter(inputs),
-        [](const auto& input) -> auto {
-            // TODO allocator
+        [](const auto& input) -> auto {  // TODO allocator
             return input.first.Internal().SignatureVersion({});
         });
     auto outputs = Vector<Output>{};  // TODO allocator
     outputs.reserve(outputs_.size());
     outputs.clear();
-    std::copy(
-        std::begin(outputs_), std::end(outputs_), std::back_inserter(outputs));
+    std::ranges::copy(outputs_, std::back_inserter(outputs));
 
     txcopy = factory::BitcoinTransaction(
         api_.Crypto(),
@@ -1631,7 +1626,7 @@ auto BitcoinTransactionBuilderPrivate::sign_input_btc(
         return false;
     }
 
-    std::copy(sigHash.begin(), sigHash.end(), std::back_inserter(preimage));
+    std::ranges::copy(sigHash, std::back_inserter(preimage));
 
     return add_signatures(reader(preimage), sigHash, input);
 }

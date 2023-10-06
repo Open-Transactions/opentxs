@@ -98,11 +98,10 @@ auto DeterministicStateData::flush_cache(
         auto txoConsumed = database::ConsumedTXOs{alloc.work_};
         auto positions = Vector<block::Position>{alloc.result_};
         positions.reserve(matches.size());
-        std::transform(
-            matches.begin(),
-            matches.end(),
-            std::back_inserter(positions),
-            [](const auto& data) { return data.first; });
+        std::ranges::transform(
+            matches, std::back_inserter(positions), [](const auto& data) {
+                return data.first;
+            });
         const auto updated = db_.AddConfirmedTransactions(
             log_,
             id_,

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -61,7 +62,7 @@ struct GetAccountBalance final : public Base::Imp {
         , balances_([&] {
             auto out = Data{};
             const auto& data = in.balance();
-            std::copy(data.begin(), data.end(), std::back_inserter(out));
+            std::ranges::copy(data, std::back_inserter(out));
 
             return out;
         }())

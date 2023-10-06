@@ -279,12 +279,9 @@ auto Input::AssociatedRemoteContacts(
     Set<identifier::Generic>& output) const noexcept -> void
 {
     const auto hashes = script_.Internal().LikelyPubkeyHashes(api.Crypto());
-    std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& hash) {
+    std::ranges::for_each(hashes, [&](const auto& hash) {
         auto contacts = api.Crypto().Blockchain().LookupContacts(hash);
-        std::move(
-            std::begin(contacts),
-            std::end(contacts),
-            std::inserter(output, output.end()));
+        std::ranges::move(contacts, std::inserter(output, output.end()));
     });
 
     auto payer = cache_.lock()->payer();
@@ -522,7 +519,7 @@ auto Input::ExtractElements(const cfilter::Type style, alloc::Default alloc)
 {
     auto out = Elements{alloc};
     ExtractElements(style, out);
-    std::sort(out.begin(), out.end());
+    std::ranges::sort(out);
 
     return out;
 }
@@ -625,7 +622,7 @@ auto Input::IndexElements(const api::Session& api, ElementHashes& out)
 {
     // TODO monotonic allocator
     const auto& keys = get_pubkeys(api, {});
-    std::copy(keys.begin(), keys.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys, std::inserter(out, out.end()));
 }
 
 auto Input::index_elements(
@@ -640,10 +637,7 @@ auto Input::index_elements(
 
         return out;
     }();
-    std::move(
-        std::begin(patterns),
-        std::end(patterns),
-        std::inserter(hashes, hashes.end()));
+    std::ranges::move(patterns, std::inserter(hashes, hashes.end()));
 }
 
 auto Input::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>

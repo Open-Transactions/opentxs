@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 #include <compare>
+#include <ranges>
 #include <utility>
 
 #include "internal/api/session/Session.hpp"
@@ -55,7 +56,7 @@ auto Peers::init_chains(
             }
         }
     };
-    std::for_each(chains.begin(), chains.end(), read);
+    std::ranges::for_each(chains, read);
 }
 
 auto Peers::init_tables(
@@ -75,6 +76,6 @@ auto Peers::init_tables(
             return;
         }
     };
-    std::for_each(work.begin(), work.end(), read);
+    std::ranges::for_each(work, read);
 }
 }  // namespace opentxs::blockchain::database::common

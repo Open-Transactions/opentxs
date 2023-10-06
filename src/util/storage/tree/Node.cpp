@@ -10,12 +10,12 @@
 #include <Seed.pb.h>
 #include <StorageItemHash.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -62,7 +62,7 @@ auto Node::copy(const Log& log, const Index& in, Vector<Hash>& out)
 
         return hash;
     };
-    std::transform(in.begin(), in.end(), std::back_inserter(out), get_hash);
+    std::ranges::transform(in, std::back_inserter(out), get_hash);
 }
 
 auto Node::delete_item(const identifier::Generic& id) -> bool
@@ -150,7 +150,7 @@ auto Node::init_map(
     const auto load_metadata = [this, &lock](const auto& proto) {
         init_map(lock, proto);
     };
-    std::for_each(items.begin(), items.end(), load_metadata);
+    std::ranges::for_each(items, load_metadata);
 }
 
 auto Node::init_map(
@@ -160,7 +160,7 @@ auto Node::init_map(
     const auto load_metadata = [this, &out](const auto& proto) {
         init_map(proto, out);
     };
-    std::for_each(in.begin(), in.end(), load_metadata);
+    std::ranges::for_each(in, load_metadata);
 }
 
 auto Node::init_map(const Lock&, const proto::StorageItemHash& item) noexcept

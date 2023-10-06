@@ -14,6 +14,7 @@
 #include <memory>
 #include <numeric>
 #include <optional>
+#include <ranges>
 #include <span>
 #include <stdexcept>
 #include <tuple>
@@ -275,7 +276,7 @@ auto Output::add_transactions_in_block(
             tx,
             alloc);
     };
-    std::for_each(p.transaction_.begin(), p.transaction_.end(), process);
+    std::ranges::for_each(p.transaction_, process);
 
     if (false == mempool) {
         const auto finished =
@@ -288,7 +289,7 @@ auto Output::add_transactions_in_block(
                     id.asBase58(api_.Crypto()))};
             }
         };
-        std::for_each(finished.begin(), finished.end(), close);
+        std::ranges::for_each(finished, close);
     }
 }
 
@@ -475,7 +476,7 @@ auto Output::check_proposals(
             confirm_proposal(log, proposal, outpoint, cache, tx);
         }
     };
-    std::for_each(proposals.begin(), proposals.end(), check);
+    std::ranges::for_each(proposals, check);
 }
 
 auto Output::choose(
@@ -662,8 +663,8 @@ auto Output::FinalizeProposal(
                 index_keys(id, keys, cache, tx, alloc);
             }
         };
-        std::for_each(consumed.begin(), consumed.end(), set_input_state);
-        std::for_each(created.begin(), created.end(), set_output_state);
+        std::ranges::for_each(consumed, set_input_state);
+        std::ranges::for_each(created, set_output_state);
         const auto reason = api_.Factory().PasswordPrompt(
             "Save an outgoing blockchain transaction");
         auto transactions = Set<block::Transaction>{transaction};
@@ -835,11 +836,7 @@ auto Output::get_inputs(
     };
     const auto inputs = bitcoin.Inputs();
     auto out = Outpoints{alloc.result_};
-    std::transform(
-        inputs.begin(),
-        inputs.end(),
-        std::inserter(out, out.end()),
-        get_spends);
+    std::ranges::transform(inputs, std::inserter(out, out.end()), get_spends);
 
     return out;
 }
@@ -1159,12 +1156,7 @@ auto Output::pick_one(
         auto out = Vector<block::Outpoint>{alloc.work_};
         out.reserve(std::min(in.size(), byNym.size()));
         out.clear();
-        std::set_intersection(
-            in.begin(),
-            in.end(),
-            byNym.begin(),
-            byNym.end(),
-            std::back_inserter(out));
+        std::ranges::set_intersection(in, byNym, std::back_inserter(out));
 
         return out;
     }();
@@ -1175,12 +1167,7 @@ auto Output::pick_one(
         auto out = Vector<block::Outpoint>{alloc.work_};
         out.reserve(owned.size());
         out.clear();
-        std::set_difference(
-            owned.begin(),
-            owned.end(),
-            reserved.begin(),
-            reserved.end(),
-            std::back_inserter(out));
+        std::ranges::set_difference(owned, reserved, std::back_inserter(out));
 
         return out;
     }();
@@ -1197,8 +1184,7 @@ auto Output::pick_one(
             return true;
         }
     };
-    const auto selected =
-        std::find_if(sorted.begin(), sorted.end(), acceptable);
+    const auto selected = std::ranges::find_if(sorted, acceptable);
 
     if (sorted.end() == selected) {
 
@@ -1353,24 +1339,20 @@ auto Output::release_unused_inputs(
                     .append(id.str())};
         }
     };
-    std::for_each(consumed.begin(), consumed.end(), sanity_check);
+    std::ranges::for_each(consumed, sanity_check);
     const auto unused = [&] {
         auto out = Vector<block::Outpoint>{alloc.work_};
         out.reserve(consumed.size());
         out.clear();
-        std::set_difference(
-            reserved.begin(),
-            reserved.end(),
-            consumed.begin(),
-            consumed.end(),
-            std::back_inserter(out));
+        std::ranges::set_difference(
+            reserved, consumed, std::back_inserter(out));
 
         return out;
     }();
     const auto release = [&](const auto& id) {
         cache.Release(log, id, proposal, tx);
     };
-    std::for_each(unused.begin(), unused.end(), release);
+    std::ranges::for_each(unused, release);
 }
 
 auto Output::ReserveUTXO(
@@ -1523,8 +1505,7 @@ auto Output::StartReorg(
             const auto subchain_match = [&](const auto& id) {
                 return cache.GetSubchain(subchain).contains(id);
             };
-            std::copy_if(
-                in.begin(), in.end(), std::back_inserter(out), subchain_match);
+            std::ranges::copy_if(in, std::back_inserter(out), subchain_match);
 
             return out;
         }();
@@ -1597,7 +1578,7 @@ auto Output::translate(Vector<UTXO>&& outputs) const noexcept
     for (auto& [outpoint, output] : outputs) { temp.emplace(outpoint.Txid()); }
 
     out.reserve(temp.size());
-    std::move(temp.begin(), temp.end(), std::back_inserter(out));
+    std::ranges::move(temp, std::back_inserter(out));
 
     return out;
 }
@@ -1623,7 +1604,7 @@ auto Output::validate_inputs(
                 " is not available for spending")};
         }
     };
-    std::for_each(consumed.begin(), consumed.end(), check);
+    std::ranges::for_each(consumed, check);
 }
 
 auto Output::validate_outputs(
@@ -1656,7 +1637,7 @@ auto Output::validate_outputs(
             }
         }
     };
-    std::for_each(created.begin(), created.end(), check);
+    std::ranges::for_each(created, check);
 }
 
 Output::~Output() = default;

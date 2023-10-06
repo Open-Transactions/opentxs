@@ -6,6 +6,7 @@
 #include "network/blockchain/bitcoin/message/addr2/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
@@ -139,9 +140,8 @@ auto Message::get_size() const noexcept -> std::size_t
             auto& v = cached_items_.emplace(get_allocator());
             v.reserve(count);
             v.clear();
-            std::transform(
-                payload_.begin(),
-                payload_.end(),
+            std::ranges::transform(
+                payload_,
                 std::back_inserter(v),
                 [&](const auto& item) -> Bip155 {
                     auto out = Bip155{chain_, version_, item};

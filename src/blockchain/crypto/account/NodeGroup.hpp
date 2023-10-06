@@ -6,6 +6,8 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
+#include <algorithm>
+#include <ranges>
 #include <shared_mutex>
 
 #include "blockchain/crypto/account/Factory.hpp"
@@ -99,9 +101,8 @@ public:
     {
         auto handle = data_.lock_shared();
         const auto& items = handle->nodes_;
-        std::for_each(items.begin(), items.end(), [&](const auto& i) {
-            std::invoke(cb, *i);
-        });
+        std::ranges::for_each(
+            items, [&](const auto& i) { std::invoke(cb, *i); });
     }
     auto size() const noexcept -> std::size_t final
     {

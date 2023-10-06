@@ -974,12 +974,8 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
     const auto unitaccounts =
         client.Storage().Internal().AccountsByContract(unitID);
     UnallocatedVector<identifier::Generic> compatible{};
-    std::set_intersection(
-        owneraccounts.begin(),
-        owneraccounts.end(),
-        unitaccounts.begin(),
-        unitaccounts.end(),
-        std::back_inserter(compatible));
+    std::ranges::set_intersection(
+        owneraccounts, unitaccounts, std::back_inserter(compatible));
 
     for (const auto& accountid : compatible) {
         output.add_identifier(accountid.asBase58(ot_.Crypto()));

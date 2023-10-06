@@ -9,7 +9,6 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"
@@ -70,7 +69,7 @@ auto Data::associate(const block::Output& in) noexcept -> bool
 
     OT_ASSERT(0 < keys.size());
 
-    std::move(keys.begin(), keys.end(), std::inserter(keys_, keys_.end()));
+    std::ranges::move(keys, std::inserter(keys_, keys_.end()));
 
     return previous_output_.IsValid();
 }
@@ -78,7 +77,7 @@ auto Data::associate(const block::Output& in) noexcept -> bool
 auto Data::for_each_key(
     std::function<void(const crypto::Key&)> cb) const noexcept -> void
 {
-    std::for_each(std::begin(keys_), std::end(keys_), cb);
+    std::ranges::for_each(keys_, cb);
 }
 
 auto Data::Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&
@@ -94,7 +93,7 @@ auto Data::Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&
 
 auto Data::keys(Set<crypto::Key>& out) const noexcept -> void
 {
-    std::copy(keys_.begin(), keys_.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys_, std::inserter(out, out.end()));
 }
 
 auto Data::merge(
@@ -123,7 +122,7 @@ auto Data::merge(
 
     if (previous_output_.IsValid()) {
         auto keys = previous_output_.Keys(get_allocator());
-        std::move(keys.begin(), keys.end(), std::inserter(keys_, keys_.end()));
+        std::ranges::move(keys, std::inserter(keys_, keys_.end()));
     }
 
     for (const auto& key : rhs.Keys(get_allocator())) {

@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include <BlockchainBlockHeader.pb.h>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -18,6 +19,7 @@ extern "C" {
 #include <fstream>  // IWYU pragma: keep
 #include <iterator>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -557,9 +559,9 @@ auto Database::LoadEnabledChains() const noexcept
 
         if (true_byte_ == data.front()) {
             auto seed = UnallocatedCString{};
-            std::transform(
-                std::next(data.begin()),
-                data.end(),
+            using namespace std::ranges;
+            transform(
+                views::drop(data, 1),
                 std::back_inserter(seed),
                 [](const auto& val) { return static_cast<char>(val); });
             output.emplace_back(chain, std::move(seed));

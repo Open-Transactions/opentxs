@@ -8,6 +8,7 @@
 #include <HDPath.pb.h>
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -180,11 +181,8 @@ auto NotificationStateData::init_contacts(allocator_type monotonic) noexcept
         auto out = Vector<identifier::Generic>{monotonic};
         out.reserve(data.size());
         out.clear();
-        std::transform(
-            data.begin(),
-            data.end(),
-            std::back_inserter(out),
-            [this](const auto& item) {
+        std::ranges::transform(
+            data, std::back_inserter(out), [this](const auto& item) {
                 return api_.Factory().IdentifierFromBase58(item.first);
             });
 

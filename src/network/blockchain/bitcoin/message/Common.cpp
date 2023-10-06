@@ -14,7 +14,6 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
-#include <iterator>
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -560,12 +559,11 @@ auto TranslateServices(
 
     try {
         const auto& data = opentxs::blockchain::params::get(chain);
-        std::for_each(
-            std::begin(input), std::end(input), [&](const auto& in) -> void {
-                if (auto value = data.TranslateService(in); value) {
-                    output.emplace(*value);
-                }
-            });
+        std::ranges::for_each(input, [&](const auto& in) -> void {
+            if (auto value = data.TranslateService(in); value) {
+                output.emplace(*value);
+            }
+        });
     } catch (const std::exception& e) {
         LogAbort()("opentxs::network::blockchain::bitcoin::message::")(
             __func__)(": ")(e.what())
@@ -585,12 +583,11 @@ auto TranslateServices(
     auto output = Set<bitcoin::Service>{};  // TODO allocator
     output.clear();
     const auto& data = opentxs::blockchain::params::get(chain);
-    std::for_each(
-        std::begin(input), std::end(input), [&](const auto& in) -> void {
-            if (auto value = data.TranslateService(in); value) {
-                output.emplace(*value);
-            }
-        });
+    std::ranges::for_each(input, [&](const auto& in) -> void {
+        if (auto value = data.TranslateService(in); value) {
+            output.emplace(*value);
+        }
+    });
 
     return output;
 }

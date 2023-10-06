@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <chrono>
 #include <exception>
+#include <functional>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -388,9 +389,9 @@ auto Account::Imp::process_contact(
         api_.Crypto().Blockchain().LoadOrCreateSubaccount(
             nym_->ID(), remote, chain_, reason);
     };
-    std::for_each(nyms.begin(), nyms.end(), parse_nym);
-    std::for_each(published.begin(), published.end(), parse_base58);
-    std::for_each(codes.begin(), codes.end(), check_account);
+    std::ranges::for_each(nyms, parse_nym);
+    std::ranges::for_each(published, parse_base58);
+    std::ranges::for_each(codes, check_account);
 }
 
 auto Account::Imp::process_key(Message&& in) noexcept -> void
@@ -484,7 +485,7 @@ auto Account::Imp::scan_contacts(allocator_type monotonic) noexcept -> void
             api_.Factory().IdentifierFromBase58(item.first, monotonic);
         process_contact(id, monotonic);
     };
-    std::for_each(contacts.begin(), contacts.end(), scan);
+    std::ranges::for_each(contacts, scan);
 }
 
 auto Account::Imp::state_normal(

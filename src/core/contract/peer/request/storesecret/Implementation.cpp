@@ -8,6 +8,7 @@
 #include <PeerRequest.pb.h>
 #include <StoreSecret.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -46,7 +47,7 @@ Implementation::Implementation(
             throw std::runtime_error{"too many elements"};
         }
 
-        std::copy(data.begin(), data.end(), std::back_inserter(out));
+        std::ranges::copy(data, std::back_inserter(out));
 
         return out;
     }())
@@ -131,7 +132,7 @@ auto Implementation::make_views(const Vector<ByteArray>& in) noexcept
     static constexpr auto as_read_view = [](const auto& i) {
         return i.Bytes();
     };
-    std::transform(in.begin(), in.end(), std::back_inserter(out), as_read_view);
+    std::ranges::transform(in, std::back_inserter(out), as_read_view);
 
     return out;
 }

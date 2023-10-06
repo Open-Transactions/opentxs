@@ -45,11 +45,8 @@ ChainDataPrivate::ChainDataPrivate(
     , genesis_cfheader_([&] {
         auto out = GenesisCfheader{};
         const auto& map = data.genesis_bip158_;
-        std::transform(
-            map.begin(),
-            map.end(),
-            std::inserter(out, out.end()),
-            [](const auto& value) {
+        std::ranges::transform(
+            map, std::inserter(out, out.end()), [](const auto& value) {
                 const auto& [type, bytes] = value;
                 const auto& [cfheader, _] = bytes;
 
@@ -60,9 +57,8 @@ ChainDataPrivate::ChainDataPrivate(
     }())
     , known_cfilter_types_([&] {
         auto out = Set<cfilter::Type>{};
-        std::transform(
-            genesis_cfheader_.begin(),
-            genesis_cfheader_.end(),
+        std::ranges::transform(
+            genesis_cfheader_,
             std::inserter(out, out.end()),
             [](const auto& value) { return value.first; });
 
@@ -97,7 +93,7 @@ ChainDataPrivate::ChainDataPrivate(
     , dns_seeds_([&] {
         auto out = Vector<std::string_view>{};
         const auto& in = data.dns_seeds_;
-        std::copy(in.begin(), in.end(), std::back_inserter(out));
+        std::ranges::copy(in, std::back_inserter(out));
 
         return out;
     }())

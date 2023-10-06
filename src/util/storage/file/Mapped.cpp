@@ -6,6 +6,7 @@
 #include "internal/util/storage/file/Mapped.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
@@ -81,11 +82,8 @@ auto Mapped::Write(
         auto out = Vector<SourceData>{monotonic};
         out.reserve(data.size());
         out.clear();
-        std::transform(
-            data.begin(),
-            data.end(),
-            std::back_inserter(out),
-            [](const auto& view) {
+        std::ranges::transform(
+            data, std::back_inserter(out), [](const auto& view) {
                 return std::make_pair(
                     [&](Writer&& writer) {
                         return copy(view, std::move(writer));

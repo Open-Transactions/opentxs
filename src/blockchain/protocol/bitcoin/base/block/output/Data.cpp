@@ -92,7 +92,7 @@ auto Output::Cache::has_keys() const noexcept -> bool
 auto Output::Cache::keys(Set<crypto::Key>& out) const noexcept -> void
 {
     auto lock = Lock{lock_};
-    std::copy(keys_.begin(), keys_.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys_, std::inserter(out, out.end()));
 }
 
 auto Output::Cache::payee() const noexcept -> identifier::Generic
@@ -135,7 +135,7 @@ auto Output::Cache::merge(
     mined_position_ = rhs.MinedPosition();
     state_ = rhs.State();
     const auto tags = rhs.Tags();
-    std::copy(tags.begin(), tags.end(), std::inserter(tags_, tags_.end()));
+    std::ranges::copy(tags, std::inserter(tags_, tags_.end()));
 }
 
 auto Output::Cache::payer() const noexcept -> identifier::Generic

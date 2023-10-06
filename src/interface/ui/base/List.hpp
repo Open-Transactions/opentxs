@@ -144,12 +144,8 @@ protected:
     {
         const auto existing = items_.active();
         auto deleteIDs = UnallocatedVector<RowID>{};
-        std::set_difference(
-            existing.begin(),
-            existing.end(),
-            active.begin(),
-            active.end(),
-            std::back_inserter(deleteIDs));
+        std::ranges::set_difference(
+            existing, active, std::back_inserter(deleteIDs));
 
         for (const auto& id : deleteIDs) { delete_item(lock, id); }
 

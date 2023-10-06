@@ -15,6 +15,7 @@
 #include <compare>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <memory>
@@ -520,11 +521,10 @@ auto Actor::active_addresses(allocator_type monotonic) const noexcept
     -> Set<AddressID>
 {
     auto out = Set<AddressID>{monotonic};
-    std::transform(
-        index_.begin(),
-        index_.end(),
-        std::inserter(out, out.end()),
-        [](const auto& pair) { return pair.first; });
+    std::ranges::transform(
+        index_, std::inserter(out, out.end()), [](const auto& pair) {
+            return pair.first;
+        });
 
     return out;
 }

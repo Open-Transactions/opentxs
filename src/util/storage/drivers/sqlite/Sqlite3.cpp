@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -97,8 +98,8 @@ Sqlite3::Data::Data(const storage::Config& config) noexcept(false)
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
     }
 }
 
@@ -238,8 +239,8 @@ auto Sqlite3::Data::EmptyBucket(Bucket bucket) noexcept -> bool
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
 
         return out;
     } catch (const std::exception& e) {
@@ -500,8 +501,7 @@ auto Sqlite3::Data::store(
             const auto& in = data.first;
             auto out = Vector<UnallocatedCString>{};
             out.reserve(in.size());
-            std::transform(
-                in.begin(), in.end(), std::back_inserter(out), to_string);
+            std::ranges::transform(in, std::back_inserter(out), to_string);
 
             return out;
         }();
@@ -525,8 +525,8 @@ auto Sqlite3::Data::store(
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
 
         return out;
     } catch (const std::exception& e) {

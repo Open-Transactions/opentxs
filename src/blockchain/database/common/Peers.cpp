@@ -189,9 +189,8 @@ auto Peers::Find(
     const auto use = [&](const auto& in) {
         auto output = Vector<network::blockchain::AddressID>{};
         constexpr auto count = 1_uz;
-        std::sample(
-            in.begin(),
-            in.end(),
+        std::ranges::sample(
+            in,
             std::back_inserter(output),
             count,
             std::mt19937{std::random_device{}()});
@@ -208,20 +207,11 @@ auto Peers::Find(
         auto first = Vector<network::blockchain::AddressID>{};
         first.reserve(std::min(lhs.size(), rhs.size()));
         first.clear();
-        std::set_intersection(
-            lhs.begin(),
-            lhs.end(),
-            rhs.begin(),
-            rhs.end(),
-            std::back_inserter(first));
+        std::ranges::set_intersection(lhs, rhs, std::back_inserter(first));
         auto second = Set<network::blockchain::AddressID>{};
         second.clear();
-        std::set_difference(
-            first.begin(),
-            first.end(),
-            data.in_use_.begin(),
-            data.in_use_.end(),
-            std::inserter(second, second.end()));
+        std::ranges::set_difference(
+            first, data.in_use_, std::inserter(second, second.end()));
 
         return second;
     };

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <chrono>
 #include <compare>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -585,23 +586,15 @@ auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
     auto newPeers = get_peers(msg.Payload(), 1_z);
     add_peers([&] {
         auto out = Set<PeerID>{get_allocator()};
-        std::set_difference(
-            newPeers.begin(),
-            newPeers.end(),
-            known_peers_.begin(),
-            known_peers_.end(),
-            std::inserter(out, out.end()));
+        std::ranges::set_difference(
+            newPeers, known_peers_, std::inserter(out, out.end()));
 
         return out;
     }());
     remove_peers([&] {
         auto out = Set<PeerID>{get_allocator()};
-        std::set_difference(
-            known_peers_.begin(),
-            known_peers_.end(),
-            newPeers.begin(),
-            newPeers.end(),
-            std::inserter(out, out.end()));
+        std::ranges::set_difference(
+            known_peers_, newPeers, std::inserter(out, out.end()));
 
         return out;
     }());

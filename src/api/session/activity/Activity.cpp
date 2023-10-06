@@ -134,18 +134,9 @@ auto Activity::add_blockchain_transaction(
         api_.Storage().Internal().BlockchainThreadMap(nym, txid);
     auto added = UnallocatedVector<identifier::Generic>{};
     auto removed = UnallocatedVector<identifier::Generic>{};
-    std::set_difference(
-        std::begin(incoming),
-        std::end(incoming),
-        std::begin(existing),
-        std::end(existing),
-        std::back_inserter(added));
-    std::set_difference(
-        std::begin(existing),
-        std::end(existing),
-        std::begin(incoming),
-        std::end(incoming),
-        std::back_inserter(removed));
+    std::ranges::set_difference(incoming, existing, std::back_inserter(added));
+    std::ranges::set_difference(
+        existing, incoming, std::back_inserter(removed));
     auto output{true};
     const auto chains = tx.Chains({});  // TODO allocator
 
@@ -154,11 +145,10 @@ auto Activity::add_blockchain_transaction(
 
         if (verify_thread_exists(nym, thread)) {
             auto saved{true};
-            std::for_each(
-                std::begin(chains), std::end(chains), [&](const auto& chain) {
-                    saved &= api_.Storage().Internal().Store(
-                        nym, thread, chain, txid, tx.asBitcoin().Timestamp());
-                });
+            std::ranges::for_each(chains, [&](const auto& chain) {
+                saved &= api_.Storage().Internal().Store(
+                    nym, thread, chain, txid, tx.asBitcoin().Timestamp());
+            });
 
             if (saved) { publish(nym, thread); }
 
@@ -173,7 +163,7 @@ auto Activity::add_blockchain_transaction(
 
         auto saved{true};
         const auto c = tx.Chains({});  // TODO allocator
-        std::for_each(std::begin(c), std::end(c), [&](const auto& chain) {
+        std::ranges::for_each(c, [&](const auto& chain) {
             saved &= api_.Storage().Internal().RemoveBlockchainThreadItem(
                 nym, thread, chain, txid);
         });
@@ -197,7 +187,7 @@ auto Activity::add_blockchain_transaction(
         return false;
     }
 
-    std::for_each(std::begin(chains), std::end(chains), [&](const auto& chain) {
+    std::ranges::for_each(chains, [&](const auto& chain) {
         get_blockchain(lock, nym).Send([&] {
             auto out = opentxs::network::zeromq::tagged_message(
                 WorkType::BlockchainNewTransaction, true);

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <numeric>
 #include <sstream>
@@ -596,11 +597,8 @@ auto Script::IndexElements(const api::Session& api, ElementHashes& out)
     const noexcept -> void
 {
     const auto hashes = LikelyPubkeyHashes(api.Crypto());
-    std::transform(
-        std::begin(hashes),
-        std::end(hashes),
-        std::inserter(out, out.end()),
-        [&](const auto& hash) -> auto {
+    std::ranges::transform(
+        hashes, std::inserter(out, out.end()), [&](const auto& hash) -> auto {
             return api.Crypto().Blockchain().Internal().IndexItem(hash.Bytes());
         });
 }

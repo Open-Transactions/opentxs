@@ -164,7 +164,7 @@ auto Contacts::check_nyms() noexcept -> void
         OT_ASSERT(contact);
 
         auto ids = contact->Nyms();
-        std::move(ids.begin(), ids.end(), std::back_inserter(nyms));
+        std::ranges::move(ids, std::back_inserter(nyms));
     }
 
     for (const auto& id : nyms) {

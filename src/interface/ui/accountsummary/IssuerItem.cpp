@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -151,9 +152,8 @@ void IssuerItem::refresh_accounts() noexcept
     for (const auto& id : accounts) { process_account(id); }
 
     UnallocatedSet<IssuerItemRowID> active{};
-    std::transform(
-        accounts.begin(),
-        accounts.end(),
+    std::ranges::transform(
+        accounts,
         std::inserter(active, active.end()),
         [&](const auto& in) -> IssuerItemRowID {
             return {in, currency_};

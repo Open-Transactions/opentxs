@@ -187,13 +187,13 @@ auto Actor::send(actor::SocketIndex index, std::span<Message> msg) noexcept
                 .Abort();
         }
         case DealerIndex: {
-            std::for_each(msg.begin(), msg.end(), send_via_dealer);
+            std::ranges::for_each(msg, send_via_dealer);
         } break;
         case LoopbackIndex: {
-            std::for_each(msg.begin(), msg.end(), send_via_loopback);
+            std::ranges::for_each(msg, send_via_loopback);
         } break;
         default: {
-            std::for_each(msg.begin(), msg.end(), send_via_extra);
+            std::ranges::for_each(msg, send_via_extra);
         }
     }
 }

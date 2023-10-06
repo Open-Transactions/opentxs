@@ -20,11 +20,10 @@ auto Read(std::span<const Position> in, alloc::Default alloc) noexcept
 {
     auto out = Vector<Reader>{alloc};
     out.clear();
-    std::transform(
-        in.begin(),
-        in.end(),
-        std::back_inserter(out),
-        [&](const auto& position) { return Read(position, alloc); });
+    std::ranges::transform(
+        in, std::back_inserter(out), [&](const auto& position) {
+            return Read(position, alloc);
+        });
 
     return out;
 }

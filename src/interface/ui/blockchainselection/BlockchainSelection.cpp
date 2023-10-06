@@ -134,7 +134,7 @@ auto BlockchainSelection::filter(const ui::Blockchains type) noexcept
 {
     const auto& all = opentxs::blockchain::supported_chains();
     auto out = UnallocatedSet<blockchain::Type>{};
-    std::copy(all.begin(), all.end(), std::inserter(out, out.end()));
+    std::ranges::copy(all, std::inserter(out, out.end()));
 
     switch (type) {
         case Blockchains::Main: {

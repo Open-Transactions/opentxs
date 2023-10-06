@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/cfilter/GCSImp.hpp"
@@ -201,9 +200,8 @@ auto GCS(
         auto elements = blockchain::cfilter::Targets{monotonic};
         elements.reserve(input.size());
         elements.clear();
-        std::transform(
-            std::begin(input),
-            std::end(input),
+        std::ranges::transform(
+            input,
             std::back_inserter(elements),
             [](const auto& element) -> auto { return reader(element); });
         const auto count = shorten(elements.size());

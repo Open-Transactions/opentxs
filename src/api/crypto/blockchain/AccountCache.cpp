@@ -83,7 +83,7 @@ auto AccountCache::AccountList(const identifier::Nym& nymID) const noexcept
             out.emplace(id);
         }
     };
-    std::for_each(nym_index_.begin(), nym_index_.end(), get_matching_accounts);
+    std::ranges::for_each(nym_index_, get_matching_accounts);
 
     return out;
 }
@@ -100,7 +100,7 @@ auto AccountCache::AccountList(const opentxs::blockchain::Type chain)
 
     if (const auto i = nym_index_.find(chain); nym_index_.end() != i) {
         const auto& map = i->second;
-        std::for_each(map.begin(), map.end(), get_account);
+        std::ranges::for_each(map, get_account);
     }
 
     return out;
@@ -117,9 +117,9 @@ auto AccountCache::AccountList() const noexcept
     };
     const auto get_accounts = [&](const auto& item) {
         const auto& [chain, map] = item;
-        std::for_each(map.begin(), map.end(), get_account);
+        std::ranges::for_each(map, get_account);
     };
-    std::for_each(nym_index_.begin(), nym_index_.end(), get_accounts);
+    std::ranges::for_each(nym_index_, get_accounts);
 
     return out;
 }
@@ -132,7 +132,7 @@ auto AccountCache::build_account_map(
     auto load_nym = [&, this](const auto& nym) mutable {
         this->load_nym(chain, nym, map);
     };
-    std::for_each(std::begin(nyms), std::end(nyms), load_nym);
+    std::ranges::for_each(nyms, load_nym);
 }
 
 auto AccountCache::SubaccountList(
@@ -148,7 +148,7 @@ auto AccountCache::SubaccountList(
         if (const auto j = index.find(nymID); index.end() != j) {
             const auto& in = j->second.second;
             auto out = UnallocatedSet<identifier::Account>{};
-            std::copy(in.begin(), in.end(), std::inserter(out, out.end()));
+            std::ranges::copy(in, std::inserter(out, out.end()));
 
             return out;
         } else {
@@ -185,8 +185,8 @@ auto AccountCache::load_nym(
         nym, blockchain_to_unit(chain));
     auto pc = api_.Storage().Internal().Bip47ChannelsByChain(
         nym, blockchain_to_unit(chain));
-    std::for_each(std::begin(hd), std::end(hd), populate_hd);
-    std::for_each(std::begin(pc), std::end(pc), populate_pc);
+    std::ranges::for_each(hd, populate_hd);
+    std::ranges::for_each(pc, populate_pc);
 }
 
 auto AccountCache::Owner(const identifier::Account& id) const noexcept

@@ -7,6 +7,7 @@
 
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <memory>
@@ -581,9 +582,8 @@ auto BlockOracle::Shared::load_blocks(
                 .Abort();
         }
 
-        std::transform(
-            result.begin(),
-            result.end(),
+        std::ranges::transform(
+            result,
             std::back_inserter(out),
             [](const auto& position) -> BlockLocation {
                 if (valid(position)) {
@@ -597,9 +597,8 @@ auto BlockOracle::Shared::load_blocks(
     } else {
         auto handle = cache_.lock();
         auto& cache = *handle;
-        std::transform(
-            blocks.begin(),
-            blocks.end(),
+        std::ranges::transform(
+            blocks,
             std::back_inserter(out),
             [&](const auto& id) -> BlockLocation {
                 auto block = cache.Load(id);

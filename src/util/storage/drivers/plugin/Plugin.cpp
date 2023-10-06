@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -247,11 +248,8 @@ auto Plugin::Init_Plugin() -> void
 
         return sp.get();
     };
-    std::transform(
-        backup_drivers_.begin(),
-        backup_drivers_.end(),
-        std::back_inserter(drivers_),
-        get_pointer);
+    std::ranges::transform(
+        backup_drivers_, std::back_inserter(drivers_), get_pointer);
 }
 
 auto Plugin::InitBackup() -> void
@@ -333,8 +331,7 @@ auto Plugin::make_results() const noexcept -> Results
     out.reserve(drivers_.size());
     out.clear();
     const auto get_pointer = [](auto& p) { return std::make_pair(p, 0); };
-    std::transform(
-        drivers_.begin(), drivers_.end(), std::back_inserter(out), get_pointer);
+    std::ranges::transform(drivers_, std::back_inserter(out), get_pointer);
 
     return out;
 }

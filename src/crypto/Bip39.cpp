@@ -14,8 +14,10 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -305,7 +307,7 @@ auto Bip39::tokenize(const Language lang, const ReadView words) noexcept(false)
     const auto first = d.begin();
 
     for (const auto& word : s) {
-        if (auto it = std::find(d.begin(), d.end(), word); it != d.end()) {
+        if (auto it = std::ranges::find(d, word); it != d.end()) {
             output.emplace_back(std::distance(first, it));
         }
     }

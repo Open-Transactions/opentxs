@@ -258,7 +258,7 @@ auto BlockchainStatistics::process_chain(
     delete_inactive([&] {
         auto out = UnallocatedSet<blockchain::Type>{};
         const auto in = blockchain_.EnabledChains();
-        std::copy(in.begin(), in.end(), std::inserter(out, out.end()));
+        std::ranges::copy(in, std::inserter(out, out.end()));
 
         return out;
     }());

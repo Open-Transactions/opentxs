@@ -11,11 +11,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <optional>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"
@@ -161,14 +161,11 @@ auto HashedSetConstruct(
     alloc::Default alloc) noexcept(false) -> Elements
 {
     auto output = Elements{alloc};
-    std::transform(
-        std::begin(items),
-        std::end(items),
-        std::back_inserter(output),
-        [&](const auto& item) {
+    std::ranges::transform(
+        items, std::back_inserter(output), [&](const auto& item) {
             return HashToRange(api, key, range(N, M), item);
         });
-    std::sort(output.begin(), output.end());
+    std::ranges::sort(output);
 
     return output;
 }
@@ -322,7 +319,7 @@ auto GCS::decompress() const noexcept -> const gcs::Elements&
     if (false == elements_.has_value()) {
         auto& set = elements_;
         set = gcs::GolombDecode(count_, bits_, compressed_, alloc_);
-        std::sort(set.value().begin(), set.value().end());
+        std::ranges::sort(set.value());
     }
 
     return elements_.value();
@@ -390,11 +387,10 @@ auto GCS::hashed_set_construct(const gcs::Hashes& targets, allocator_type alloc)
     auto out = gcs::Elements{alloc};
     out.reserve(targets.size());
     const auto range = Range();
-    std::transform(
-        targets.begin(),
-        targets.end(),
-        std::back_inserter(out),
-        [&](const auto& hash) { return gcs::HashToRange(range, hash); });
+    std::ranges::transform(
+        targets, std::back_inserter(out), [&](const auto& hash) {
+            return gcs::HashToRange(range, hash);
+        });
 
     return out;
 }
@@ -445,16 +441,11 @@ auto GCS::Match(
 
     dedup(hashed);
     const auto& set = decompress();
-    std::set_intersection(
-        std::begin(hashed),
-        std::end(hashed),
-        std::begin(set),
-        std::end(set),
-        std::back_inserter(matches));
+    std::ranges::set_intersection(hashed, set, std::back_inserter(matches));
 
     for (const auto& match : matches) {
         auto& values = map.at(match);
-        std::copy(values.begin(), values.end(), std::back_inserter(output));
+        std::ranges::copy(values, std::back_inserter(output));
     }
 
     return output;
@@ -483,16 +474,11 @@ auto GCS::Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
 
     dedup(hashed);
     const auto& set = decompress();
-    std::set_intersection(
-        std::begin(hashed),
-        std::end(hashed),
-        std::begin(set),
-        std::end(set),
-        std::back_inserter(matches));
+    std::ranges::set_intersection(hashed, set, std::back_inserter(matches));
 
     for (const auto& match : matches) {
         auto& values = map.at(match);
-        std::copy(values.begin(), values.end(), std::back_inserter(output));
+        std::ranges::copy(values, std::back_inserter(output));
     }
 
     return output;
@@ -585,12 +571,7 @@ auto GCS::test(const gcs::Elements& targets, allocator_type monotonic)
     auto matches = Vector<gcs::Element>{monotonic};
     matches.reserve(std::min(targets.size(), set.size()));
     matches.clear();
-    std::set_intersection(
-        std::begin(targets),
-        std::end(targets),
-        std::begin(set),
-        std::end(set),
-        std::back_inserter(matches));
+    std::ranges::set_intersection(targets, set, std::back_inserter(matches));
 
     return false == matches.empty();
 }
@@ -601,11 +582,9 @@ auto GCS::transform(const Vector<ByteArray>& in, allocator_type alloc) noexcept
     auto output = Targets{alloc};
     output.reserve(in.size());
     output.clear();
-    std::transform(
-        std::begin(in),
-        std::end(in),
-        std::back_inserter(output),
-        [](const auto& i) { return i.Bytes(); });
+    std::ranges::transform(in, std::back_inserter(output), [](const auto& i) {
+        return i.Bytes();
+    });
 
     return output;
 }
@@ -616,11 +595,9 @@ auto GCS::transform(const Vector<Space>& in, allocator_type alloc) noexcept
     auto output = Targets{alloc};
     output.reserve(in.size());
     output.clear();
-    std::transform(
-        std::begin(in),
-        std::end(in),
-        std::back_inserter(output),
-        [](const auto& i) { return reader(i); });
+    std::ranges::transform(in, std::back_inserter(output), [](const auto& i) {
+        return reader(i);
+    });
 
     return output;
 }

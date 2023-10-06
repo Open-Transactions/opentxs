@@ -11,12 +11,12 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <optional>
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/block/block/BlockPrivate.hpp"
@@ -208,7 +208,7 @@ auto Block::ConfirmMatches(
     const auto confirm = [&](auto& tx) {
         tx.Internal().ConfirmMatches(log, api, candidates, out, alloc);
     };
-    std::for_each(transactions_.begin(), transactions_.end(), confirm);
+    std::ranges::for_each(transactions_, confirm);
 
     return out;
 }
@@ -227,7 +227,7 @@ auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
 
     LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
         .Flush();
-    std::sort(output.begin(), output.end());
+    std::ranges::sort(output);
 
     return output;
 }

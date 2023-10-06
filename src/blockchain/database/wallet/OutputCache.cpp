@@ -14,6 +14,7 @@
 #include <cstring>
 #include <functional>
 #include <iterator>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -512,11 +513,7 @@ auto OutputCache::CheckProposals(
     const auto is_finished = [this](const auto& id) {
         return this->is_finished(id);
     };
-    std::copy_if(
-        proposals.begin(),
-        proposals.end(),
-        std::back_inserter(out),
-        is_finished);
+    std::ranges::copy_if(proposals, std::back_inserter(out), is_finished);
 
     return out;
 }
@@ -818,7 +815,8 @@ auto OutputCache::GetMatured(
     auto out = Vector<block::Outpoint>{alloc.result_};
     out.clear();
     constexpr auto get_value = [](const auto& data) { return data.second; };
-    std::transform(start, limit, std::back_inserter(out), get_value);
+    using namespace std::ranges;
+    transform(subrange{start, limit}, std::back_inserter(out), get_value);
 
     return out;
 }
@@ -900,9 +898,9 @@ auto OutputCache::GetReserved(alloc::Strategy alloc) const noexcept -> Reserved
     out.clear();
     const auto get_values = [&](const auto& item) {
         const auto& [key, value] = item;
-        std::copy(value.begin(), value.end(), std::inserter(out, out.end()));
+        std::ranges::copy(value, std::inserter(out, out.end()));
     };
-    std::for_each(map.begin(), map.end(), get_values);
+    std::ranges::for_each(map, get_values);
 
     return out;
 }
@@ -926,8 +924,7 @@ auto OutputCache::GetReserved(
 
                 return std::make_pair(id, output);
             };
-            std::transform(
-                set.begin(), set.end(), std::back_inserter(out), make_utxo);
+            std::ranges::transform(set, std::back_inserter(out), make_utxo);
         } catch (const std::exception& e) {
             LogAbort()(OT_PRETTY_CLASS())(
                 "fatal database corruption: an output referenced by proposal ")(

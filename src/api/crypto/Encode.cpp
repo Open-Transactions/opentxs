@@ -11,6 +11,7 @@
 #include <frozen/unordered_set.h>
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -345,11 +346,7 @@ auto Encode::SanatizeBase58(std::string_view input) const -> UnallocatedCString
     auto out = UnallocatedCString();
     out.reserve(input.size());
     out.clear();
-    std::copy_if(
-        input.begin(),
-        input.end(),
-        std::back_inserter(out),
-        acceptable_character);
+    std::ranges::copy_if(input, std::back_inserter(out), acceptable_character);
 
     return out;
 }
@@ -371,11 +368,7 @@ auto Encode::SanatizeBase64(std::string_view input) const -> UnallocatedCString
     auto out = UnallocatedCString();
     out.reserve(input.size());
     out.clear();
-    std::copy_if(
-        input.begin(),
-        input.end(),
-        std::back_inserter(out),
-        acceptable_character);
+    std::ranges::copy_if(input, std::back_inserter(out), acceptable_character);
 
     return out;
 }

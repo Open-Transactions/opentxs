@@ -247,10 +247,8 @@ auto BlockchainImp::broadcast_update_signal(
     alloc::Default monotonic) const noexcept -> void
 {
     const auto& db = api_.Network().Blockchain().Internal().Database();
-    std::for_each(
-        std::begin(transactions),
-        std::end(transactions),
-        [this, &db, alloc = monotonic](const auto& txid) {
+    std::ranges::for_each(
+        transactions, [this, &db, alloc = monotonic](const auto& txid) {
             auto proto = proto::BlockchainTransaction{};
             const auto tx =
                 db.LoadTransaction(txid.Bytes(), proto, alloc, alloc);
@@ -263,7 +261,7 @@ auto BlockchainImp::broadcast_update_signal(
     const opentxs::blockchain::block::Transaction& tx) const noexcept -> void
 {
     const auto chains = tx.Chains({});  // TODO allocator
-    std::for_each(std::begin(chains), std::end(chains), [&](const auto& chain) {
+    std::ranges::for_each(chains, [&](const auto& chain) {
         transaction_updates_->Send([&] {
             auto work = opentxs::network::zeromq::tagged_message(
                 WorkType::BlockchainNewTransaction, true);
@@ -568,11 +566,10 @@ auto BlockchainImp::UpdateElement(
         auto out = Vector<opentxs::blockchain::block::ElementHash>{monotonic};
         out.reserve(hashes.size());
         out.clear();
-        std::transform(
-            hashes.begin(),
-            hashes.end(),
-            std::back_inserter(out),
-            [&](const auto& val) { return IndexItem(val); });
+        std::ranges::transform(
+            hashes, std::back_inserter(out), [&](const auto& val) {
+                return IndexItem(val);
+            });
 
         return out;
     }();
@@ -581,29 +578,22 @@ auto BlockchainImp::UpdateElement(
             Vector<opentxs::blockchain::block::TransactionHash>{monotonic};
         out.reserve(patterns.size());
         out.clear();
-        std::for_each(
-            patterns.begin(), patterns.end(), [&](const auto& pattern) {
-                auto matches = api_.Network()
-                                   .Blockchain()
-                                   .Internal()
-                                   .Database()
-                                   .LookupTransactions(pattern);
-                out.reserve(out.size() + matches.size());
-                std::move(
-                    std::begin(matches),
-                    std::end(matches),
-                    std::back_inserter(out));
-            });
+        std::ranges::for_each(patterns, [&](const auto& pattern) {
+            auto matches = api_.Network()
+                               .Blockchain()
+                               .Internal()
+                               .Database()
+                               .LookupTransactions(pattern);
+            out.reserve(out.size() + matches.size());
+            std::ranges::move(matches, std::back_inserter(out));
+        });
         dedup(out);
 
         return out;
     }();
     auto lock = Lock{lock_};
-    std::for_each(
-        std::begin(transactions),
-        std::end(transactions),
-        [&](const auto& txid) {
-            reconcile_contact_activities(lock, txid, monotonic);
-        });
+    std::ranges::for_each(transactions, [&](const auto& txid) {
+        reconcile_contact_activities(lock, txid, monotonic);
+    });
 }
 }  // namespace opentxs::api::crypto::imp

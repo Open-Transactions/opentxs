@@ -9,6 +9,7 @@
 #include <Verification.pb.h>
 #include <VerificationItem.pb.h>
 #include <algorithm>
+#include <functional>
 #include <stdexcept>
 
 #include "internal/api/FactoryAPI.hpp"
@@ -46,7 +47,7 @@ auto Verification::CalculateID(
         const auto serialize = [&](const auto& id) {
             id.Internal().Serialize(*out.add_superscedes());
         };
-        std::for_each(superscedes.begin(), superscedes.end(), serialize);
+        std::ranges::for_each(superscedes, serialize);
 
         return out;
     }();
@@ -94,7 +95,7 @@ auto Verification::Serialize(
     const auto serialize = [&](const auto& id) {
         id.Internal().Serialize(*out.add_superscedes());
     };
-    std::for_each(superscedes.begin(), superscedes.end(), serialize);
+    std::ranges::for_each(superscedes, serialize);
 
     return out;
 }

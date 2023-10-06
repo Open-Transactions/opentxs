@@ -17,6 +17,7 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
+#include <ranges>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -922,9 +923,8 @@ auto SubchainStateData::scan(
     const auto cfilters = [&] {
         auto output = filterFuture.get();
         output.erase(
-            std::find_if(
-                output.begin(),
-                output.end(),
+            std::ranges::find_if(
+                output,
                 [](const auto& filter) { return false == filter.IsValid(); }),
             output.end());
 
@@ -974,11 +974,10 @@ auto SubchainStateData::scan(
         highestClean = highest_clean(*handle, highestTested);
 
         if (false == rescan) {
-            std::transform(
-                sizes.begin(),
-                sizes.end(),
-                std::back_inserter(filter_sizes_),
-                [](const auto& in) { return in.second; });
+            std::ranges::transform(
+                sizes, std::back_inserter(filter_sizes_), [](const auto& in) {
+                    return in.second;
+                });
 
             // NOTE these statements calculate a 1000 block (or whatever
             // cfilter_size_window_ is set to) simple moving average of

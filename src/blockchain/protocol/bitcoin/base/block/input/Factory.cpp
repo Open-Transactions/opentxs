@@ -13,10 +13,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/input/Imp.hpp"
@@ -119,10 +117,8 @@ auto BitcoinTransactionInput(
 
         auto keys = Set<blockchain::crypto::Key>{alloc.result_};
         keys.clear();
-        std::for_each(
-            std::begin(outputKeys), std::end(outputKeys), [&](const auto& key) {
-                keys.emplace(key);
-            });
+        std::ranges::for_each(
+            outputKeys, [&](const auto& key) { keys.emplace(key); });
 
         return pmr::construct<ReturnType>(
             alloc.result_,

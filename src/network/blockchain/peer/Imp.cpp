@@ -12,6 +12,7 @@
 #include <zmq.h>
 #include <algorithm>
 #include <compare>
+#include <functional>
 #include <iterator>
 #include <span>
 #include <tuple>
@@ -297,7 +298,7 @@ Peer::Imp::Imp(
         auto out = decltype(gossip_address_queue_){alloc};
         out.reserve(gossip.size());
         out.clear();
-        std::move(gossip.begin(), gossip.end(), std::back_inserter(out));
+        std::ranges::move(gossip, std::back_inserter(out));
 
         return out;
     }())
@@ -608,10 +609,7 @@ auto Peer::Imp::finish_job(allocator_type monotonic, bool shutdown) noexcept
 auto Peer::Imp::get_known_tx(alloc::Default alloc) const noexcept -> Set<Txid>
 {
     auto out = Set<Txid>{alloc};
-    std::copy(
-        known_transactions_.begin(),
-        known_transactions_.end(),
-        std::inserter(out, out.end()));
+    std::ranges::copy(known_transactions_, std::inserter(out, out.end()));
 
     return out;
 }
@@ -1112,11 +1110,8 @@ auto Peer::Imp::process_gossip_address(
     const auto frames = payload.subspan(1_uz);
     auto& out = gossip_address_queue_;
     out.reserve(out.size() + payload.size());
-    std::transform(
-        frames.begin(),
-        frames.end(),
-        std::back_inserter(out),
-        [this](const auto& frame) {
+    std::ranges::transform(
+        frames, std::back_inserter(out), [this](const auto& frame) {
             return api_.Factory().InternalSession().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(frame));
         });
@@ -1375,10 +1370,7 @@ auto Peer::Imp::run_job(allocator_type monotonic) noexcept -> void
 auto Peer::Imp::send_good_addresses(allocator_type monotonic) noexcept -> void
 {
     auto good = database_.Good(get_allocator(), monotonic);
-    std::move(
-        std::begin(good),
-        std::end(good),
-        std::back_inserter(gossip_address_queue_));
+    std::ranges::move(good, std::back_inserter(gossip_address_queue_));
 }
 
 auto Peer::Imp::set_block_header_capability(bool value) noexcept -> void

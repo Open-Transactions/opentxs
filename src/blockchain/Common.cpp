@@ -192,7 +192,7 @@ auto defined_chains() noexcept -> std::span<const Type>
         auto out = Vector<Type>{};
         const auto& chains = params::chains();
         out.reserve(chains.size());
-        std::copy(chains.begin(), chains.end(), std::back_inserter(out));
+        std::ranges::copy(chains, std::back_inserter(out));
 
         return out;
     }();
@@ -563,7 +563,7 @@ auto supported_chains() noexcept -> std::span<const Type>
         auto out = Vector<Type>{};
         const auto& chains = params::supported();
         out.reserve(chains.size());
-        std::copy(chains.begin(), chains.end(), std::back_inserter(out));
+        std::ranges::copy(chains, std::back_inserter(out));
 
         return out;
     }();

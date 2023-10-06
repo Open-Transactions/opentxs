@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -180,12 +181,8 @@ auto Listener::Actor::check_registration() noexcept -> void
 {
     const auto unregistered = [&] {
         auto out = Chains{get_allocator()};
-        std::set_difference(
-            active_chains_.begin(),
-            active_chains_.end(),
-            registered_chains_.begin(),
-            registered_chains_.end(),
-            std::inserter(out, out.end()));
+        std::ranges::set_difference(
+            active_chains_, registered_chains_, std::inserter(out, out.end()));
 
         return out;
     }();
@@ -226,11 +223,10 @@ auto Listener::Actor::do_startup(allocator_type monotonic) noexcept -> bool
         auto& out = active_chains_;
         auto handle = data_.lock_shared();
         const auto& map = handle->state_;
-        std::transform(
-            map.begin(),
-            map.end(),
-            std::inserter(out, out.end()),
-            [](const auto& in) { return in.first; });
+        std::ranges::transform(
+            map, std::inserter(out, out.end()), [](const auto& in) {
+                return in.first;
+            });
     }
 
     do_work(monotonic);

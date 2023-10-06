@@ -15,6 +15,7 @@ extern "C" {
 #include <Token.pb.h>
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <limits>
 #include <regex>
 #include <stdexcept>
@@ -477,9 +478,8 @@ auto Lucre::ID(const PasswordPrompt& reason) const -> UnallocatedCString
 
     if (std::regex_search(spendable->Get(), match, reg)) { output = match[1]; }
 
-    std::transform(output.begin(), output.end(), output.begin(), [](char c) {
-        return (std::toupper(c));
-    });
+    std::ranges::transform(
+        output, output.begin(), [](char c) { return (std::toupper(c)); });
 
     return output;
 }

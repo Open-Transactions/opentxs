@@ -2944,7 +2944,7 @@ auto Workflow::WorkflowsByAccount(
     const auto workflows =
         api_.Storage().Internal().PaymentWorkflowsByAccount(nymID, accountID);
     output.reserve(workflows.size());
-    std::copy(workflows.begin(), workflows.end(), std::back_inserter(output));
+    std::ranges::copy(workflows, std::back_inserter(output));
 
     return output;
 }

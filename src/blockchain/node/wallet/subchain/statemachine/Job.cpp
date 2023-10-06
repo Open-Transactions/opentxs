@@ -173,7 +173,7 @@ Job::Job(
               out.clear();
               out.emplace_back(parent->from_parent_, Connect);
               out.emplace_back(parent->from_ssd_endpoint_, Connect);
-              std::copy(sub.begin(), sub.end(), std::back_inserter(out));
+              std::ranges::copy(sub, std::back_inserter(out));
 
               return out;
           }(),
@@ -190,7 +190,7 @@ Job::Job(
                   network::zeromq::socket::EndpointRequests{
                       {parent->to_ssd_endpoint_, Connect},
                   });
-              std::copy(ex.begin(), ex.end(), std::back_inserter(out));
+              std::ranges::copy(ex, std::back_inserter(out));
 
               return out;
           }(),

@@ -19,6 +19,7 @@
 #include <Verification.pb.h>
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
@@ -365,10 +366,9 @@ auto Factory::BitcoinBlock(
             Vector<blockchain::protocol::bitcoin::base::block::Transaction>{};
         out.reserve(in.size());
         out.clear();
-        std::transform(
-            in.begin(), in.end(), std::back_inserter(out), [](auto& tx) {
-                return std::move(tx).asBitcoin();
-            });
+        std::ranges::transform(in, std::back_inserter(out), [](auto& tx) {
+            return std::move(tx).asBitcoin();
+        });
 
         return out;
     }();

@@ -107,7 +107,7 @@ auto reverse(const StyleMap& in) noexcept -> StyleReverseMap;
 auto reverse(const StyleMap& in) noexcept -> StyleReverseMap
 {
     auto output = StyleReverseMap{};
-    std::for_each(std::begin(in), std::end(in), [&](const auto& data) {
+    std::ranges::for_each(in, [&](const auto& data) {
         const auto& [metadata, prefixData] = data;
         const auto& [preferred, additional] = prefixData;
         output[preferred].emplace(metadata);
@@ -1166,11 +1166,8 @@ auto Blockchain::Imp::p2wpkh(
         const auto prog = [&] {
             auto out = UnallocatedVector<std::uint8_t>{};
             auto d = hash.get();
-            std::transform(
-                d.begin(),
-                d.end(),
-                std::back_inserter(out),
-                [](const auto& byte) {
+            std::ranges::transform(
+                d, std::back_inserter(out), [](const auto& byte) {
                     return std::to_integer<std::uint8_t>(byte);
                 });
 

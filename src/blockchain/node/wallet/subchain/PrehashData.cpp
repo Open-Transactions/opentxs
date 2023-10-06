@@ -135,12 +135,9 @@ auto SubchainStateData::PrehashData::match(
     matched.modify([&](auto& out) {
         const auto& [iClean, iDirty, iSizes] = cache;
         auto& [oClean, oDirty, oSizes] = out;
-        std::copy(
-            iClean.begin(), iClean.end(), std::inserter(oClean, oClean.end()));
-        std::copy(
-            iDirty.begin(), iDirty.end(), std::inserter(oDirty, oDirty.end()));
-        std::copy(
-            iSizes.begin(), iSizes.end(), std::inserter(oSizes, oSizes.end()));
+        std::ranges::copy(iClean, std::inserter(oClean, oClean.end()));
+        std::ranges::copy(iDirty, std::inserter(oDirty, oDirty.end()));
+        std::ranges::copy(iSizes, std::inserter(oSizes, oSizes.end()));
     });
 }
 

@@ -17,6 +17,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -67,7 +68,7 @@ namespace opentxs
 template <typename Range, typename Function>
 auto for_each(Range& range, Function f) -> Function
 {
-    return std::for_each(std::begin(range), std::end(range), f);
+    return std::for_each(range.begin(), range.end(), f);
 }
 
 auto Factory::Authority(
@@ -566,7 +567,7 @@ auto Authority::EncryptionTargets() const noexcept -> AuthorityKeys
         set.emplace(keypair.GetPublicKey().Type());
     }
 
-    std::copy(std::begin(set), std::end(set), std::back_inserter(list));
+    std::ranges::copy(set, std::back_inserter(list));
 
     return output;
 }
@@ -797,8 +798,7 @@ auto Authority::is_revoked(
 
     const auto base58 = id.asBase58(api.Crypto());
 
-    return std::find(
-               plistRevokedIDs->begin(), plistRevokedIDs->end(), base58) !=
+    return std::ranges::find(*plistRevokedIDs, base58) !=
            plistRevokedIDs->end();
 }
 
