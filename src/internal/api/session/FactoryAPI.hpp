@@ -92,7 +92,6 @@ namespace proto
 {
 class AsymmetricKey;
 class BlockchainBlockHeader;
-class BlockchainPeerAddress;
 class BlockchainTransaction;
 class Claim;
 class ContactItem;
@@ -171,10 +170,6 @@ public:
         std::int32_t version,
         AbortFunction abort,
         alloc::Default alloc) const noexcept -> blockchain::block::Block = 0;
-    using session::Factory::BlockchainAddress;
-    virtual auto BlockchainAddress(
-        const proto::BlockchainPeerAddress& serialized) const
-        -> opentxs::network::blockchain::Address = 0;
     using session::Factory::BlockchainTransaction;
     virtual auto BlockchainTransaction(
         const proto::BlockchainTransaction& serialized,

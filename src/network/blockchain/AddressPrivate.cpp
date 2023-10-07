@@ -14,15 +14,14 @@
 #include <stdexcept>
 
 #include "BoostAsio.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
-#include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
@@ -89,8 +88,7 @@ public:
         const auto printEep = [&]() {
             // TODO handle errors
             [[maybe_unused]] const auto rc =
-                api_.Crypto().Encode().Base64Encode(
-                    bytes_.Bytes(), writer(output));
+                crypto_.Encode().Base64Encode(bytes_.Bytes(), writer(output));
             output += ".i2p";
         };
         using enum Transport;
@@ -172,7 +170,7 @@ public:
             chain_,
             last_connected_,
             services_);
-        out.set_id(id_.asBase58(api_.Crypto()));
+        out.set_id(id_.asBase58(crypto_));
 
         return true;
     }
@@ -204,7 +202,8 @@ public:
     }
 
     Address(
-        const api::Session& api,
+        const api::Crypto& crypto,
+        const api::Factory& factory,
         const VersionNumber version,
         const Protocol protocol,
         const Transport network,
@@ -217,10 +216,10 @@ public:
         const Set<bitcoin::Service>& services,
         const bool incoming,
         const ReadView cookie) noexcept(false)
-        : api_(api)
+        : crypto_(crypto)
         , version_(version)
         , id_(calculate_id(
-              api,
+              factory,
               version,
               protocol,
               network,
@@ -320,7 +319,7 @@ public:
 
     Address() = delete;
     Address(const Address& rhs) noexcept
-        : api_(rhs.api_)
+        : crypto_(rhs.crypto_)
         , version_(rhs.version_)
         , id_(rhs.id_)
         , protocol_(rhs.protocol_)
@@ -345,7 +344,7 @@ public:
     ~Address() final = default;
 
 private:
-    const api::Session& api_;
+    const api::Crypto& crypto_;
     const VersionNumber version_;
     const identifier::Generic id_;
     const Protocol protocol_;
@@ -363,7 +362,7 @@ private:
     Set<bitcoin::Service> services_;
 
     static auto calculate_id(
-        const api::Session& api,
+        const api::Factory& api,
         const VersionNumber version,
         const Protocol protocol,
         const Transport network,
@@ -385,8 +384,7 @@ private:
             convert_stime(0),
             {});
 
-        return api.Factory().InternalSession().IdentifierFromPreimage(
-            serialized);
+        return api.Internal().IdentifierFromPreimage(serialized);
     }
     static auto serialize(
         const VersionNumber version,
@@ -430,7 +428,8 @@ const VersionNumber Address::DefaultVersion{1};
 namespace opentxs::factory
 {
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const network::blockchain::Protocol protocol,
     const network::blockchain::Transport type,
     const network::blockchain::Transport subtype,
@@ -447,7 +446,8 @@ auto BlockchainAddress(
 
     try {
         return std::make_unique<ReturnType>(
-                   api,
+                   crypto,
+                   factory,
                    ReturnType::DefaultVersion,
                    protocol,
                    type,
@@ -469,7 +469,8 @@ auto BlockchainAddress(
 }
 
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const network::blockchain::Protocol protocol,
     const network::blockchain::Transport type,
     const network::blockchain::Transport subtype,
@@ -486,7 +487,8 @@ auto BlockchainAddress(
 
     try {
         return std::make_unique<ReturnType>(
-                   api,
+                   crypto,
+                   factory,
                    ReturnType::DefaultVersion,
                    protocol,
                    type,
@@ -508,7 +510,8 @@ auto BlockchainAddress(
 }
 
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const proto::BlockchainPeerAddress& serialized) noexcept
     -> network::blockchain::Address
 {
@@ -516,7 +519,8 @@ auto BlockchainAddress(
 
     try {
         return std::make_unique<ReturnType>(
-                   api,
+                   crypto,
+                   factory,
                    serialized.version(),
                    static_cast<network::blockchain::Protocol>(
                        serialized.protocol()),

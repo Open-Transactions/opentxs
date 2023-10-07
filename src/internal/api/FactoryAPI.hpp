@@ -35,6 +35,7 @@ class HDSeed;
 
 namespace proto
 {
+class BlockchainPeerAddress;
 class HDPath;
 class Identifier;
 }  // namespace proto
@@ -77,6 +78,21 @@ public:
     virtual auto Armored(
         const google::protobuf::MessageLite& input,
         const UnallocatedCString& header) const -> OTString = 0;
+    using api::Factory::BlockchainAddress;
+    virtual auto BlockchainAddress(
+        const proto::BlockchainPeerAddress& serialized) const noexcept
+        -> opentxs::network::blockchain::Address = 0;
+    virtual auto BlockchainAddressIncoming(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const opentxs::network::blockchain::Transport subtype,
+        const ReadView bytes,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView cookie) const noexcept
+        -> opentxs::network::blockchain::Address = 0;
     using api::Factory::Data;
     virtual auto Data(const google::protobuf::MessageLite& input) const
         -> ByteArray = 0;

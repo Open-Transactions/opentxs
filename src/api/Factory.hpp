@@ -13,6 +13,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -24,8 +25,12 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -43,6 +48,7 @@ class Envelope;
 
 namespace proto
 {
+class BlockchainPeerAddress;
 class HDPath;
 class Identifier;
 }  // namespace proto
@@ -118,6 +124,37 @@ public:
     auto Armored(const ProtobufType& input) const -> OTArmored final;
     auto Armored(const ProtobufType& input, const UnallocatedCString& header)
         const -> OTString final;
+    auto BlockchainAddress(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const ReadView bytes,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const noexcept -> opentxs::network::blockchain::Address final;
+    auto BlockchainAddressIncoming(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const opentxs::network::blockchain::Transport subtype,
+        const ReadView bytes,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView cookie) const noexcept
+        -> opentxs::network::blockchain::Address final;
+    auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const ReadView bytes,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView key) const noexcept
+        -> opentxs::network::blockchain::Address final;
+    auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+        const noexcept -> opentxs::network::blockchain::Address final;
     auto Data() const -> ByteArray final;
     auto Data(const opentxs::Armored& input) const -> ByteArray final;
     auto Data(const ProtobufType& input) const -> ByteArray final;

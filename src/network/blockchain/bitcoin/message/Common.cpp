@@ -20,11 +20,12 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -375,20 +376,15 @@ auto Bip155::ToAddress(
                 addr, preallocated(key.size(), key.data()), key.size(), "key");
             deserialize_object(addr, subtype, "subtype");
 
-            return factory::BlockchainAddress(
-                api,
+            return api.Factory().BlockchainAddressZMQ(
                 bitcoin,
-                type,
                 GetNetwork(subtype, addr.size()),
-                keyView,
                 addr,
-                port_.value(),
                 chain,
                 convert_time(time_.value()),
                 TranslateServices(
                     chain, version, GetServices(services_.Value())),
-                false,
-                {});
+                keyView);
         } catch (const std::exception& e) {
             LogError()()(": ")(e.what()).Flush();
 
@@ -396,18 +392,14 @@ auto Bip155::ToAddress(
         }
     }
 
-    return factory::BlockchainAddress(
-        api,
+    return api.Factory().BlockchainAddress(
         bitcoin,
         type,
-        network::blockchain::Transport::invalid,
         addr_.Bytes(),
         port_.value(),
         chain,
         convert_time(time_.value()),
-        TranslateServices(chain, version, GetServices(services_.Value())),
-        false,
-        {});
+        TranslateServices(chain, version, GetServices(services_.Value())));
 }
 
 auto BitcoinString(const UnallocatedCString& in) noexcept -> ByteArray

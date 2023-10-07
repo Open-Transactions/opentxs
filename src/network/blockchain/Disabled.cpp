@@ -10,7 +10,8 @@
 namespace opentxs::factory
 {
 auto BlockchainAddress(
-    const api::Session&,
+    const api::Crypto&,
+    const api::Factory&,
     const network::blockchain::Protocol,
     const network::blockchain::Transport,
     const network::blockchain::Transport,
@@ -26,7 +27,8 @@ auto BlockchainAddress(
 }
 
 auto BlockchainAddress(
-    const api::Session&,
+    const api::Crypto&,
+    const api::Factory&,
     const network::blockchain::Protocol,
     const network::blockchain::Transport,
     const network::blockchain::Transport,
@@ -43,7 +45,8 @@ auto BlockchainAddress(
 }
 
 auto BlockchainAddress(
-    const api::Session&,
+    const api::Crypto&,
+    const api::Factory&,
     const proto::BlockchainPeerAddress&) noexcept
     -> network::blockchain::Address
 {

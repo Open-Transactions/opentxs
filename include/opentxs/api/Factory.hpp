@@ -5,11 +5,17 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -35,6 +41,11 @@ class UnitDefinition;
 
 namespace network
 {
+namespace blockchain
+{
+class Address;
+}  // namespace blockchain
+
 namespace zeromq
 {
 class Frame;
@@ -102,6 +113,24 @@ public:
         allocator_type alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto Amount(const opentxs::network::zeromq::Frame& zmq)
         const noexcept -> opentxs::Amount = 0;
+    virtual auto BlockchainAddress(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport network,
+        const ReadView bytes,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const noexcept -> opentxs::network::blockchain::Address = 0;
+    virtual auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport subtype,
+        const ReadView bytes,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView key) const noexcept
+        -> opentxs::network::blockchain::Address = 0;
     virtual auto Data() const -> ByteArray = 0;
     virtual auto Data(const opentxs::Armored& input) const -> ByteArray = 0;
     virtual auto Data(const opentxs::network::zeromq::Frame& input) const

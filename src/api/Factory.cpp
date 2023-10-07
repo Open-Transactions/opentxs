@@ -24,6 +24,8 @@
 #include "internal/core/String.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/network/blockchain/Factory.hpp"
+#include "internal/network/blockchain/Types.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -49,6 +51,9 @@
 #include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -587,6 +592,93 @@ auto Factory::Armored(
     armored->WriteArmoredString(output, header);
 
     return output;
+}
+
+auto Factory::BlockchainAddress(
+    const opentxs::network::blockchain::Protocol protocol,
+    const opentxs::network::blockchain::Transport network,
+    const ReadView bytes,
+    const std::uint16_t port,
+    const opentxs::blockchain::Type chain,
+    const Time lastConnected,
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+    const noexcept -> opentxs::network::blockchain::Address
+{
+    using enum opentxs::network::blockchain::Transport;
+
+    return factory::BlockchainAddress(
+        crypto_,
+        *this,
+        protocol,
+        network,
+        invalid,
+        bytes,
+        port,
+        chain,
+        lastConnected,
+        services,
+        false,
+        {});
+}
+
+auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+    const noexcept -> opentxs::network::blockchain::Address
+{
+    return factory::BlockchainAddress(crypto_, *this, serialized);
+}
+
+auto Factory::BlockchainAddressIncoming(
+    const opentxs::network::blockchain::Protocol protocol,
+    const opentxs::network::blockchain::Transport network,
+    const opentxs::network::blockchain::Transport subtype,
+    const ReadView bytes,
+    const std::uint16_t port,
+    const opentxs::blockchain::Type chain,
+    const Time lastConnected,
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+    const ReadView cookie) const noexcept
+    -> opentxs::network::blockchain::Address
+{
+    return factory::BlockchainAddress(
+        crypto_,
+        *this,
+        protocol,
+        network,
+        subtype,
+        bytes,
+        port,
+        chain,
+        lastConnected,
+        services,
+        true,
+        cookie);
+}
+
+auto Factory::BlockchainAddressZMQ(
+    const opentxs::network::blockchain::Protocol protocol,
+    const opentxs::network::blockchain::Transport network,
+    const ReadView bytes,
+    const blockchain::Type chain,
+    const Time lastConnected,
+    const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+    const ReadView key) const noexcept -> opentxs::network::blockchain::Address
+{
+    using enum opentxs::network::blockchain::Transport;
+
+    return factory::BlockchainAddress(
+        crypto_,
+        *this,
+        protocol,
+        zmq,
+        network,
+        key,
+        bytes,
+        opentxs::network::blockchain::otdht_listen_port_,
+        chain,
+        lastConnected,
+        services,
+        false,
+        {});
 }
 
 auto Factory::Data() const -> ByteArray { return {}; }
