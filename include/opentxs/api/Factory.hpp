@@ -19,6 +19,17 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+namespace asio
+{
+namespace ip
+{
+class address;
+}  // namespace ip
+}  // namespace asio
+}  // namespace boost
+
 namespace opentxs
 {
 namespace api
@@ -122,10 +133,26 @@ public:
         const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services)
         const noexcept -> opentxs::network::blockchain::Address = 0;
+    virtual auto BlockchainAddress(
+        const opentxs::network::blockchain::Protocol protocol,
+        const boost::asio::ip::address& address,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const noexcept -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainAddressZMQ(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport subtype,
         const ReadView bytes,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView key) const noexcept
+        -> opentxs::network::blockchain::Address = 0;
+    virtual auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const boost::asio::ip::address& address,
         const blockchain::Type chain,
         const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services,

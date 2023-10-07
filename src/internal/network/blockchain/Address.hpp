@@ -5,9 +5,14 @@
 
 #pragma once
 
-#include "opentxs/network/blockchain/Address.hpp"
+#include <cstdint>
+#include <memory>
 
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -17,6 +22,8 @@ namespace proto
 {
 class BlockchainPeerAddress;
 }  // namespace proto
+
+class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -25,21 +32,35 @@ namespace opentxs::network::blockchain::internal
 class Address
 {
 public:
-    virtual auto Cookie() const noexcept -> ReadView = 0;
-    virtual auto Incoming() const noexcept -> bool = 0;
-    virtual auto PreviousLastConnected() const noexcept -> Time = 0;
-    virtual auto PreviousServices() const noexcept -> Set<bitcoin::Service> = 0;
+    virtual auto Bytes() const noexcept -> ByteArray;
+    virtual auto Chain() const noexcept -> opentxs::blockchain::Type;
+    virtual auto clone() const noexcept -> std::unique_ptr<Address>
+    {
+        return std::make_unique<Address>();
+    }
+    virtual auto Cookie() const noexcept -> ReadView;
+    virtual auto Display() const noexcept -> UnallocatedCString;
+    virtual auto ID() const noexcept -> const AddressID&;
+    virtual auto Incoming() const noexcept -> bool;
+    virtual auto IsValid() const noexcept -> bool;
+    virtual auto Key() const noexcept -> ReadView;
+    virtual auto LastConnected() const noexcept -> Time;
+    virtual auto Port() const noexcept -> std::uint16_t;
+    virtual auto PreviousLastConnected() const noexcept -> Time;
+    virtual auto PreviousServices() const noexcept -> Set<bitcoin::Service>;
     virtual auto Serialize(proto::BlockchainPeerAddress& out) const noexcept
-        -> bool = 0;
+        -> bool;
+    virtual auto Services() const noexcept -> Set<bitcoin::Service>;
+    virtual auto Style() const noexcept -> Protocol;
+    virtual auto Subtype() const noexcept -> Transport;
+    virtual auto Type() const noexcept -> Transport;
 
-    virtual auto AddService(const bitcoin::Service service) noexcept
-        -> void = 0;
-    virtual auto RemoveService(const bitcoin::Service service) noexcept
-        -> void = 0;
-    virtual auto SetIncoming(bool value) noexcept -> void = 0;
-    virtual auto SetLastConnected(const Time& time) noexcept -> void = 0;
+    virtual auto AddService(const bitcoin::Service service) noexcept -> void;
+    virtual auto RemoveService(const bitcoin::Service service) noexcept -> void;
+    virtual auto SetIncoming(bool value) noexcept -> void;
+    virtual auto SetLastConnected(const Time& time) noexcept -> void;
     virtual auto SetServices(const Set<bitcoin::Service>& services) noexcept
-        -> void = 0;
+        -> void;
 
     virtual ~Address() = default;
 };
