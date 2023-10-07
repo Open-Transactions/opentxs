@@ -10,9 +10,11 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <optional>
 #include <sstream>
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
@@ -100,52 +102,104 @@ auto MakeDeterministicInproc(
 
 auto RawToZ85(const ReadView input, Writer&& destination) noexcept -> bool
 {
-    if (0 != input.size() % 4) {
+    if (const auto size = input.size(); 0_uz != size % 4_uz) {
         LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid input size.")
+            "Invalid input size ")(size)(" not divisible by 4")
             .Flush();
 
         return false;
     }
 
-    const auto target = input.size() + input.size() / 4_uz + 1_uz;
-    auto out = destination.Reserve(target);
+    const auto target = input.size() + input.size() / 4_uz;
+    const auto nullTerminatedTarget = target + 1_uz;
+    auto buffer = std::optional<Space>{};
+    auto out = [&] {
+        if (destination.CanTruncate()) {
 
-    if (false == out.IsValid(target)) {
+            return destination.Reserve(nullTerminatedTarget);
+        } else {
+            buffer.emplace();
+
+            return writer(*buffer).Reserve(nullTerminatedTarget);
+        }
+    }();
+
+    if (false == out.IsValid(nullTerminatedTarget)) {
         LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Failed to allocate output")
+            "Failed to allocate output")
             .Flush();
 
         return false;
     }
 
-    return nullptr != ::zmq_z85_encode(
-                          out.as<char>(),
-                          reinterpret_cast<const std::uint8_t*>(input.data()),
-                          input.size());
+    const auto* rc = ::zmq_z85_encode(
+        out.as<char>(),
+        reinterpret_cast<const std::uint8_t*>(input.data()),
+        input.size());
+
+    if (nullptr == rc) {
+        LogError()("opentxs::network::zeromq::")(__func__)(
+            "failed to encoded bytes")
+            .Flush();
+
+        return false;
+    }
+
+    if (destination.CanTruncate()) {
+        if (destination.Truncate(target)) {
+
+            return true;
+        } else {
+            LogError()("opentxs::network::zeromq::")(__func__)(
+                "failed to strip superfluous null terminator")
+                .Flush();
+
+            return false;
+        }
+    } else {
+        auto bytes = reader(*buffer);
+        bytes.remove_suffix(1_uz);
+
+        return copy(bytes, std::move(destination));
+    }
 }
 
-auto Z85ToRaw(const ReadView input, Writer&& destination) noexcept -> bool
+auto Z85ToRaw(
+    const ReadView input,
+    Writer&& destination,
+    bool inputIsNullTerminated) noexcept -> bool
 {
-    if (0 != input.size() % 5) {
+    auto buffer = std::optional<CString>{};
+    const auto view = [&]() -> std::string_view {
+        if (inputIsNullTerminated) {
+
+            return input;
+        } else {
+            buffer.emplace(input);
+
+            return *buffer;
+        }
+    }();
+
+    if (const auto size = view.size(); 0_uz != size % 5_uz) {
         LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid input size.")
+            "Invalid input size ")(size)(" not divisible by 5")
             .Flush();
 
         return false;
     }
 
-    const auto target = input.size() * 4_uz / 5_uz;
+    const auto target = view.size() * 4_uz / 5_uz;
     auto out = destination.Reserve(target);
 
     if (false == out.IsValid(target)) {
         LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Failed to allocate output")
+            "Failed to allocate output")
             .Flush();
 
         return false;
     }
 
-    return ::zmq_z85_decode(out.as<std::uint8_t>(), input.data());
+    return ::zmq_z85_decode(out.as<std::uint8_t>(), view.data());
 }
 }  // namespace opentxs::network::zeromq

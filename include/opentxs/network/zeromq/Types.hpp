@@ -67,5 +67,8 @@ auto MakeDeterministicInproc(
     const int version,
     const std::string_view suffix) noexcept -> UnallocatedCString;
 auto RawToZ85(const ReadView input, Writer&& output) noexcept -> bool;
-auto Z85ToRaw(const ReadView input, Writer&& output) noexcept -> bool;
+auto Z85ToRaw(
+    const ReadView input,
+    Writer&& output,
+    bool inputIsNullTerminated = false) noexcept -> bool;
 }  // namespace opentxs::network::zeromq
