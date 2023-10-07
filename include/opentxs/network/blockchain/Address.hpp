@@ -33,7 +33,6 @@ class Address;
 }  // namespace internal
 
 class Address;
-class AddressPrivate;
 }  // namespace blockchain
 }  // namespace network
 
@@ -81,7 +80,7 @@ public:
 
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Address&;
 
-    OPENTXS_NO_EXPORT Address(AddressPrivate* imp) noexcept;
+    OPENTXS_NO_EXPORT Address(internal::Address* imp) noexcept;
     Address() noexcept;
     Address(const Address&) noexcept;
     Address(Address&&) noexcept;
@@ -91,6 +90,6 @@ public:
     ~Address();
 
 private:
-    AddressPrivate* imp_;
+    internal::Address* imp_;
 };
 }  // namespace opentxs::network::blockchain

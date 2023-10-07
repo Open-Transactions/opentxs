@@ -23,8 +23,6 @@
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
-#include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -144,11 +142,6 @@ class Nym;
 
 namespace network
 {
-namespace blockchain
-{
-class Address;
-}  // namespace blockchain
-
 namespace otdht
 {
 class Base;
@@ -285,23 +278,6 @@ public:
         const blockchain::protocol::bitcoin::base::block::Script& script,
         alloc::Default alloc) const noexcept
         -> blockchain::protocol::bitcoin::base::block::Script = 0;
-    virtual auto BlockchainAddress(
-        const opentxs::network::blockchain::Protocol protocol,
-        const opentxs::network::blockchain::Transport network,
-        const ReadView bytes,
-        const std::uint16_t port,
-        const blockchain::Type chain,
-        const Time lastConnected,
-        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
-        const -> opentxs::network::blockchain::Address = 0;
-    virtual auto BlockchainAddressZMQ(
-        const opentxs::network::blockchain::Protocol protocol,
-        const opentxs::network::blockchain::Transport network,
-        const ReadView bytes,
-        const blockchain::Type chain,
-        const Time lastConnected,
-        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
-        const ReadView key) const -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,

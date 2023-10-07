@@ -18,9 +18,9 @@
 #include <stdexcept>
 #include <utility>
 
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/network/blockchain/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -758,7 +758,7 @@ auto Peers::load_address(const network::blockchain::AddressID& id) noexcept(
         throw std::out_of_range("Invalid address");
     }
 
-    auto out = factory::BlockchainAddress(api_, serialized);
+    auto out = api_.Factory().Internal().BlockchainAddress(serialized);
     using enum network::blockchain::Transport;
 
     if ((out.Type() == zmq) && (out.Subtype() == invalid)) {

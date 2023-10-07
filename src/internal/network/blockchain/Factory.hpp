@@ -19,7 +19,8 @@ namespace opentxs
 {
 namespace api
 {
-class Session;
+class Crypto;
+class Factory;
 }  // namespace api
 
 namespace network
@@ -40,7 +41,8 @@ class BlockchainPeerAddress;
 namespace opentxs::factory
 {
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const network::blockchain::Protocol protocol,
     const network::blockchain::Transport type,
     const network::blockchain::Transport subtype,
@@ -52,7 +54,8 @@ auto BlockchainAddress(
     const bool incoming,
     const ReadView cookie) noexcept -> network::blockchain::Address;
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const network::blockchain::Protocol protocol,
     const network::blockchain::Transport type,
     const network::blockchain::Transport subtype,
@@ -65,7 +68,8 @@ auto BlockchainAddress(
     const bool incoming,
     const ReadView cookie) noexcept -> network::blockchain::Address;
 auto BlockchainAddress(
-    const api::Session& api,
+    const api::Crypto& crypto,
+    const api::Factory& factory,
     const proto::BlockchainPeerAddress& serialized) noexcept
     -> network::blockchain::Address;
 }  // namespace opentxs::factory

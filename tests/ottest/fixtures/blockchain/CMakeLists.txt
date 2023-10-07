@@ -48,6 +48,8 @@ if(OT_BLOCKCHAIN_EXPORT)
       "MinedBlocks.hpp"
       "NumericHash.cpp"
       "NumericHash.hpp"
+      "P2PAddress.cpp"
+      "P2PAddress.hpp"
       "PeerListener.cpp"
       "PeerListener.hpp"
       "ScanListener.cpp"
