@@ -5,7 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <span>
 #include <utility>
@@ -20,7 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -52,7 +50,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Index::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Job(LogTrace(),
@@ -90,23 +88,18 @@ auto Index::Imp::check_mempool(allocator_type monotonic) noexcept -> void
 {
     const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
     const auto& oracle = parent_.mempool_oracle_;
-    log(OT_PRETTY_CLASS())(name_)(": checking mempool for transactions")
-        .Flush();
+    log()(name_)(": checking mempool for transactions").Flush();
     // TODO cache the mempool transactions and process them in batches to place
     // an upper bound on how long this function blocks.
 
     for (const auto& txid : oracle.Dump(monotonic)) {
-        log(OT_PRETTY_CLASS())(name_)(": found transaction ")
-            .asHex(txid)(" in mempool")
-            .Flush();
+        log()(name_)(": found transaction ").asHex(txid)(" in mempool").Flush();
 
         if (auto tx = oracle.Query(txid, monotonic); tx.IsValid()) {
             parent_.ProcessTransaction(tx, log, monotonic);
-            log(OT_PRETTY_CLASS())(name_)(": transaction ")
-                .asHex(txid)(" processed")
-                .Flush();
+            log()(name_)(": transaction ").asHex(txid)(" processed").Flush();
         } else {
-            log(OT_PRETTY_CLASS())(name_)(": transaction ")
+            log()(name_)(": transaction ")
                 .asHex(txid)(" is not instantiated")
                 .Flush();
         }
@@ -123,23 +116,22 @@ auto Index::Imp::do_process_update(
 
     for (const auto& [type, position] : clean) {
         if (ScanState::processed == type) {
-            log_(OT_PRETTY_CLASS())(name_)(" re-indexing ")(
-                name_)(" due to processed block ")(position)
+            log_()(name_)(" re-indexing ")(name_)(" due to processed block ")(
+                position)
                 .Flush();
         }
     }
 
     do_work(monotonic);
-    to_rescan_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(msg));
 }
 
 auto Index::Imp::do_startup_internal(allocator_type monotonic) noexcept -> void
 {
     last_indexed_ = parent_.db_.SubchainLastIndexed(parent_.db_key_);
     do_work(monotonic);
-    log_(OT_PRETTY_CLASS())(name_)(" notifying scan task to begin work")
-        .Flush();
-    to_scan_.SendDeferred(MakeWork(Work::start_scan), __FILE__, __LINE__);
+    log_()(name_)(" notifying scan task to begin work").Flush();
+    to_scan_.SendDeferred(MakeWork(Work::start_scan));
 }
 
 auto Index::Imp::done(database::ElementMap&& elements) noexcept -> void
@@ -154,12 +146,12 @@ auto Index::Imp::done(database::ElementMap&& elements) noexcept -> void
 
 auto Index::Imp::forward_to_next(Message&& msg) noexcept -> void
 {
-    to_rescan_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(msg));
 }
 
 auto Index::Imp::process_do_rescan(Message&& in) noexcept -> void
 {
-    to_rescan_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(in));
 }
 
 auto Index::Imp::process_filter(
@@ -167,7 +159,7 @@ auto Index::Imp::process_filter(
     block::Position&&,
     allocator_type) noexcept -> void
 {
-    to_rescan_.SendDeferred(std::move(in), __FILE__, __LINE__);
+    to_rescan_.SendDeferred(std::move(in));
 }
 
 auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
@@ -175,7 +167,7 @@ auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(4u < body.size());
+    assert_true(4u < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -213,10 +205,10 @@ auto Index::Imp::work(allocator_type monotonic) noexcept -> bool
 
 namespace opentxs::blockchain::node::wallet
 {
-Index::Index(boost::shared_ptr<Imp>&& imp) noexcept
+Index::Index(std::shared_ptr<Imp>&& imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Index::Index(Index&& rhs) noexcept

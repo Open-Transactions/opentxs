@@ -27,7 +27,6 @@
 #include "internal/core/Amount.hpp"
 #include "internal/core/display/Types.hpp"
 #include "internal/util/Literals.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"

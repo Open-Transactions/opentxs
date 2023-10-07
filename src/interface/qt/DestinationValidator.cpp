@@ -9,10 +9,10 @@
 #include <cctype>
 
 #include "interface/qt/DestinationValidator.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui
 {
@@ -38,7 +38,7 @@ DestinationValidator::DestinationValidator(
               ? Imp::Blockchain(api, *this, account, parent)
               : Imp::Custodial(api, parent))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto DestinationValidator::fixup(QString& input) const -> void

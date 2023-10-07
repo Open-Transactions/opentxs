@@ -24,7 +24,7 @@ EnvelopePrivate::EnvelopePrivate(
         auto out = decltype(data_){alloc};
         out.reserve(header.size());
         out.clear();
-        std::copy(header.begin(), header.end(), std::back_inserter(out));
+        std::ranges::copy(header, std::back_inserter(out));
 
         return out;
     }())
@@ -38,7 +38,7 @@ EnvelopePrivate::EnvelopePrivate(Message&& in, allocator_type alloc) noexcept
         auto out = decltype(data_){alloc};
         out.reserve(header.size());
         out.clear();
-        std::move(header.begin(), header.end(), std::back_inserter(out));
+        std::ranges::move(header, std::back_inserter(out));
 
         return out;
     }())

@@ -22,7 +22,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -99,7 +98,7 @@ using enum opentxs::network::zeromq::socket::Type;
 Job::Job(
     tag_t,
     const Log& logger,
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     const JobType type,
     allocator_type alloc,
@@ -142,14 +141,14 @@ Job::Job(
     , reorgs_(alloc)
     , watchdog_(api_.Network().Asio().Internal().GetTimer())
 {
-    OT_ASSERT(parent_p_);
-    OT_ASSERT(api_p_);
-    OT_ASSERT(node_p_);
+    assert_false(nullptr == parent_p_);
+    assert_false(nullptr == api_p_);
+    assert_false(nullptr == node_p_);
 }
 
 Job::Job(
     const Log& logger,
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     const JobType type,
     allocator_type alloc,
@@ -173,7 +172,7 @@ Job::Job(
               out.clear();
               out.emplace_back(parent->from_parent_, Connect);
               out.emplace_back(parent->from_ssd_endpoint_, Connect);
-              std::copy(sub.begin(), sub.end(), std::back_inserter(out));
+              std::ranges::copy(sub, std::back_inserter(out));
 
               return out;
           }(),
@@ -190,7 +189,7 @@ Job::Job(
                   network::zeromq::socket::EndpointRequests{
                       {parent->to_ssd_endpoint_, Connect},
                   });
-              std::copy(ex.begin(), ex.end(), std::back_inserter(out));
+              std::ranges::copy(ex, std::back_inserter(out));
 
               return out;
           }(),
@@ -209,7 +208,7 @@ auto Job::add_last_reorg(Message& out) const noexcept -> void
 
 auto Job::do_process_update(Message&& msg, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::do_reorg(
@@ -268,7 +267,7 @@ auto Job::pipeline(
             // NOTE do nothing
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid state").Abort();
+            LogAbort()()(name_)(": invalid state").Abort();
         }
     }
 
@@ -280,7 +279,7 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
     const auto body = in.Payload();
     const auto frames = body.size();
 
-    OT_ASSERT(1_uz < frames);
+    assert_true(1_uz < frames);
 
     auto alloc = alloc::Strategy{get_allocator(), monotonic};
     auto blocks = Vector<block::Block>{alloc.work_};
@@ -289,8 +288,7 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 
     if (false == Parser::Construct(
                      crypto, parent_.chain_, in, blocks, alloc.WorkOnly())) {
-        LogAbort()(OT_PRETTY_CLASS())(
-            name_)(": received invalid block(s) from block oracle")
+        LogAbort()()(name_)(": received invalid block(s) from block oracle")
             .Abort();
     }
 
@@ -300,7 +298,7 @@ auto Job::process_block(Message&& in, allocator_type monotonic) noexcept -> void
 auto Job::process_blocks(std::span<block::Block>, allocator_type) noexcept
     -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
@@ -308,7 +306,7 @@ auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3_uz < body.size());
+    assert_true(3_uz < body.size());
 
     const auto type = body[1].as<cfilter::Type>();
 
@@ -322,19 +320,19 @@ auto Job::process_filter(Message&& in, allocator_type monotonic) noexcept
 auto Job::process_filter(Message&&, block::Position&&, allocator_type) noexcept
     -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_key(Message&& in, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_prepare_reorg(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1u < body.size());
+    assert_true(1u < body.size());
 
     transition_state_reorg(body[1].as<StateSequence>());
 }
@@ -344,7 +342,7 @@ auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2_uz < body.size());
+    assert_true(2_uz < body.size());
 
     process_process(
         block::Position{body[1].as<block::Height>(), body[2].Bytes()},
@@ -353,22 +351,22 @@ auto Job::process_process(Message&& in, allocator_type monotonic) noexcept
 
 auto Job::process_process(block::Position&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_reprocess(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_start_scan(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_mempool(Message&&, allocator_type) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type").Abort();
+    LogAbort()()(name_)(": unhandled message type").Abort();
 }
 
 auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
@@ -376,14 +374,14 @@ auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     const auto& epoc = body[1];
     const auto expected = last_reorg();
 
     if (0_uz == epoc.size()) {
         if (expected.has_value()) {
-            log_(OT_PRETTY_CLASS())(name_)(" ignoring stale update").Flush();
+            log_()(name_)(" ignoring stale update").Flush();
 
             return;
         }
@@ -392,13 +390,12 @@ auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
             const auto reorg = epoc.as<StateSequence>();
 
             if (reorg != expected.value()) {
-                log_(OT_PRETTY_CLASS())(name_)(" ignoring stale update")
-                    .Flush();
+                log_()(name_)(" ignoring stale update").Flush();
 
                 return;
             }
         } else {
-            log_(OT_PRETTY_CLASS())(name_)(" ignoring stale update").Flush();
+            log_()(name_)(" ignoring stale update").Flush();
 
             return;
         }
@@ -409,15 +406,12 @@ auto Job::process_update(Message&& msg, allocator_type monotonic) noexcept
 
 auto Job::process_watchdog() noexcept -> void
 {
-    to_parent_.SendDeferred(
-        [&] {
-            auto out = MakeWork(Work::watchdog_ack);
-            out.AddFrame(job_type_);
+    to_parent_.SendDeferred([&] {
+        auto out = MakeWork(Work::watchdog_ack);
+        out.AddFrame(job_type_);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
     using namespace std::literals;
     reset_timer(10s, watchdog_, Work::watchdog);
 }
@@ -468,8 +462,7 @@ auto Job::state_normal(
             transition_state_pre_shutdown();
         } break;
         case Work::finish_reorg: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
@@ -503,8 +496,7 @@ auto Job::state_pre_shutdown(const Work work, Message&& msg) noexcept -> void
         case Work::prepare_reorg:
         case Work::finish_reorg:
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
@@ -535,7 +527,7 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
         case Work::do_rescan:
         case Work::block:
         case Work::key: {
-            log_(OT_PRETTY_CLASS())(name_)(" deferring ")(print(work))(
+            log_()(name_)(" deferring ")(print(work))(
                 " message processing until reorg is complete")
                 .Flush();
             defer(std::move(msg));
@@ -544,8 +536,7 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
             transition_state_normal();
         } break;
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::watchdog: {
@@ -566,7 +557,7 @@ auto Job::state_reorg(const Work work, Message&& msg) noexcept -> void
 auto Job::transition_state_normal() noexcept -> void
 {
     state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(name_)(" transitioned to normal state ").Flush();
+    log_()(name_)(" transitioned to normal state ").Flush();
     trigger();
 }
 
@@ -575,25 +566,23 @@ auto Job::transition_state_pre_shutdown() noexcept -> void
     watchdog_.Cancel();
     reorg_.AcknowledgeShutdown();
     state_ = State::pre_shutdown;
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to pre_shutdown state")
-        .Flush();
+    log_()(name_)(": transitioned to pre_shutdown state").Flush();
 }
 
 auto Job::transition_state_reorg(StateSequence id) noexcept -> void
 {
-    OT_ASSERT(0_uz < id);
+    assert_true(0_uz < id);
 
     if (0_uz == reorgs_.count(id)) {
         reorgs_.emplace(id);
         state_ = State::reorg;
-        log_(OT_PRETTY_CLASS())(name_)(" ready to process reorg ")(id).Flush();
+        log_()(name_)(" ready to process reorg ")(id).Flush();
         reorg_.AcknowledgePrepareReorg(
             [this](const auto& header, const auto& lock, auto& params) {
                 return do_reorg(header, lock, params);
             });
     } else {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" reorg ")(id)(" already handled")
-            .Abort();
+        LogAbort()()(name_)(" reorg ")(id)(" already handled").Abort();
     }
 }
 

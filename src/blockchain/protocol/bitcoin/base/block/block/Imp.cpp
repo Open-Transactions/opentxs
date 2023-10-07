@@ -11,19 +11,18 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <optional>
 #include <span>
 #include <sstream>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -208,7 +207,7 @@ auto Block::ConfirmMatches(
     const auto confirm = [&](auto& tx) {
         tx.Internal().ConfirmMatches(log, api, candidates, out, alloc);
     };
-    std::for_each(transactions_.begin(), transactions_.end(), confirm);
+    std::ranges::for_each(transactions_, confirm);
 
     return out;
 }
@@ -217,17 +216,14 @@ auto Block::ExtractElements(const cfilter::Type style, alloc::Default alloc)
     const noexcept -> Elements
 {
     auto output = Elements{alloc};
-    LogTrace()(OT_PRETTY_CLASS())("processing ")(transactions_.size())(
-        " transactions")
-        .Flush();
+    LogTrace()()("processing ")(transactions_.size())(" transactions").Flush();
 
     for (const auto& tx : transactions_) {
         tx.Internal().asBitcoin().ExtractElements(style, output);
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("extracted ")(output.size())(" elements")
-        .Flush();
-    std::sort(output.begin(), output.end());
+    LogTrace()()("extracted ")(output.size())(" elements").Flush();
+    std::ranges::sort(output);
 
     return output;
 }
@@ -243,7 +239,7 @@ auto Block::FindMatches(
 {
     if (0 == (outpoints.size() + patterns.size())) { return {}; }
 
-    log(OT_PRETTY_CLASS())("Verifying ")(patterns.size() + outpoints.size())(
+    log()("Verifying ")(patterns.size() + outpoints.size())(
         " potential matches in ")(transactions_.size())(
         " transactions of block ")
         .asHex(ID())
@@ -267,7 +263,7 @@ auto Block::get_or_calculate_size() const noexcept -> CalculatedSize
 {
     if (false == size_.has_value()) { size_ = calculate_size(); }
 
-    OT_ASSERT(size_.has_value());
+    assert_true(size_.has_value());
 
     return size_.value();
 }
@@ -332,7 +328,7 @@ auto Block::Serialize(Writer&& bytes) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

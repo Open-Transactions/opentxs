@@ -12,7 +12,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -97,12 +96,12 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
             blockHash, data.GenesisCfheader(style), gcs.Hash());
         success = common_.StoreFilterHeaders(style, headers);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         if (needHeader) {
             success = SetHeaderTip(style, {0, blockHash});
 
-            OT_ASSERT(success);
+            assert_true(success);
         }
 
         auto filters = Vector<database::Cfilter::CFilterParams>{alloc.work_};
@@ -110,17 +109,17 @@ auto Filters::import_genesis(const blockchain::Type chain) const noexcept
         filters.emplace_back(blockHash, std::move(gcs));
         success = common_.StoreFilters(style, filters, alloc.work_);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         if (needFilter) {
             success = SetTip(style, {0, blockHash});
 
-            OT_ASSERT(success);
+            assert_true(success);
         }
 
         const auto loaded = LoadFilter(style, blockHash.Bytes(), alloc);
 
-        OT_ASSERT(loaded.IsValid());
+        assert_true(loaded.IsValid());
     }
 }
 
@@ -199,7 +198,7 @@ auto Filters::StoreFilters(
     auto output = common_.StoreFilters(type, headers, filters, alloc);
 
     if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to save filters").Flush();
+        LogError()()("Failed to save filters").Flush();
 
         return false;
     }
@@ -216,7 +215,7 @@ auto Filters::StoreFilters(
                  .first;
 
     if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set header tip").Flush();
+        LogError()()("Failed to set header tip").Flush();
 
         return false;
     }
@@ -230,7 +229,7 @@ auto Filters::StoreFilters(
                  .first;
 
     if (false == output) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set filter tip").Flush();
+        LogError()()("Failed to set filter tip").Flush();
 
         return false;
     }

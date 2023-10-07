@@ -13,7 +13,6 @@ extern "C" {
 #include "blockchain/database/common/Database.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -40,7 +39,7 @@ Configuration::Configuration(
         const auto rc =
             out->Start(api_.Endpoints().BlockchainSyncServerUpdated().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -59,8 +58,7 @@ auto Configuration::AddSyncServer(std::string_view endpoint) const noexcept
         MDB_NODUPDATA);
 
     if (success) {
-        LogDetail()(OT_PRETTY_CLASS())("successfully added endpoint ")(endpoint)
-            .Flush();
+        LogDetail()()("successfully added endpoint ")(endpoint).Flush();
         static const auto value = bool{true};
         socket_->Send([&] {
             auto work = network::zeromq::tagged_message(

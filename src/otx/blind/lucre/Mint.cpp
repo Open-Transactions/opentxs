@@ -28,7 +28,6 @@ extern "C" {
 #include "internal/crypto/Envelope.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Token.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -108,7 +107,7 @@ auto Lucre::AddDenomination(
     const PasswordPrompt& reason) -> bool
 {
     if (std::numeric_limits<int>::max() < keySize) {
-        LogError()(OT_PRETTY_CLASS())("Invalid key size").Flush();
+        LogError()()("Invalid key size").Flush();
         return false;
     }
 
@@ -118,28 +117,27 @@ auto Lucre::AddDenomination(
     // Let's make sure it doesn't already exist
     auto theArmor = Armored::Factory(api_.Crypto());
     if (GetPublic(theArmor, denomination)) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: Denomination public already exists in AddDenomination.")
             .Flush();
         return false;
     }
     if (GetPrivate(theArmor, denomination)) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error: Denomination private already exists in AddDenomination.")
             .Flush();
         return false;
     }
 
     if ((size / 8) < (MIN_COIN_LENGTH + DIGEST_LENGTH)) {
-        LogError()(OT_PRETTY_CLASS())("Prime must be at least ")(
+        LogError()()("Prime must be at least ")(
             (MIN_COIN_LENGTH + DIGEST_LENGTH) * 8)(" bits.")
             .Flush();
         return false;
     }
 
     if (size % 8) {
-        LogError()(OT_PRETTY_CLASS())("Prime length must be a multiple of 8.")
-            .Flush();
+        LogError()()("Prime length must be a multiple of 8.").Flush();
         return false;
     }
 
@@ -158,14 +156,13 @@ auto Lucre::AddDenomination(
     const auto strPublicBank = bioPublic.ToString();
 
     if (strPrivateBank->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to generate private mint")
-            .Flush();
+        LogError()()("Failed to generate private mint").Flush();
 
         return false;
     }
 
     if (strPublicBank->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to generate public mint").Flush();
+        LogError()()("Failed to generate public mint").Flush();
 
         return false;
     }
@@ -191,9 +188,7 @@ auto Lucre::AddDenomination(
     theNotary.GetIdentifier(server_nym_id_);
     denomination_count_++;
     bReturnValue = true;
-    LogDetail()(OT_PRETTY_CLASS())("Successfully added denomination: ")(
-        denomination)
-        .Flush();
+    LogDetail()()("Successfully added denomination: ")(denomination).Flush();
 
     return bReturnValue;
 }
@@ -208,18 +203,17 @@ auto Lucre::SignToken(
     auto setDumper = LucreDumper{};
 
     if (opentxs::otx::blind::CashType::Lucre != token.Type()) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect token type").Flush();
+        LogError()()("Incorrect token type").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Signing a lucre token").Flush();
+        LogInsane()()("Signing a lucre token").Flush();
     }
 
     auto* lucre = dynamic_cast<otx::blind::token::Lucre*>(&(token.Internal()));
 
     if (nullptr == lucre) {
-        LogError()(OT_PRETTY_CLASS())("provided token is not a lucre token")
-            .Flush();
+        LogError()()("provided token is not a lucre token").Flush();
 
         return false;
     }
@@ -232,11 +226,11 @@ auto Lucre::SignToken(
     auto armoredPrivate = Armored::Factory(api_.Crypto());
 
     if (false == GetPrivate(armoredPrivate, lToken.Value())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load private key").Flush();
+        LogError()()("Failed to load private key").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Loaded private mint key").Flush();
+        LogInsane()()("Loaded private mint key").Flush();
     }
 
     auto privateKey = String::Factory();
@@ -246,16 +240,14 @@ auto Lucre::SignToken(
             api_.Factory().InternalSession().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to decrypt private key")
-                .Flush();
+            LogError()()("Failed to decrypt private key").Flush();
 
             return false;
         } else {
-            LogInsane()(OT_PRETTY_CLASS())("Decrypted private mint key")
-                .Flush();
+            LogInsane()()("Decrypted private mint key").Flush();
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode ciphertext").Flush();
+        LogError()()("Failed to decode ciphertext").Flush();
 
         return false;
     }
@@ -265,11 +257,11 @@ auto Lucre::SignToken(
     auto prototoken = String::Factory();
 
     if (false == lToken.GetPublicPrototoken(prototoken, reason)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to extract prototoken").Flush();
+        LogError()()("Failed to extract prototoken").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Extracted prototoken").Flush();
+        LogInsane()()("Extracted prototoken").Flush();
     }
 
     ::BIO_puts(bioRequest, prototoken->Get());
@@ -277,11 +269,11 @@ auto Lucre::SignToken(
     BIGNUM* bnSignature = bank.SignRequest(req);
 
     if (nullptr == bnSignature) {
-        LogError()(OT_PRETTY_CLASS())("Failed to sign prototoken").Flush();
+        LogError()()("Failed to sign prototoken").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Signed prototoken").Flush();
+        LogInsane()()("Signed prototoken").Flush();
     }
 
     req.WriteBIO(bioSignature);
@@ -292,21 +284,21 @@ auto Lucre::SignToken(
     sig_buf[sig_len] = '\0';
 
     if (0 == sig_len) {
-        LogError()(OT_PRETTY_CLASS())("Failed to copy signature").Flush();
+        LogError()()("Failed to copy signature").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Signature copied").Flush();
+        LogInsane()()("Signature copied").Flush();
     }
 
     auto signature = String::Factory(sig_buf.data());
 
     if (false == lToken.AddSignature(signature)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set signature").Flush();
+        LogError()()("Failed to set signature").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Signature serialized").Flush();
+        LogInsane()()("Signature serialized").Flush();
     }
 
     return true;
@@ -319,7 +311,7 @@ auto Lucre::VerifyToken(
 {
 
     if (opentxs::otx::blind::CashType::Lucre != token.Type()) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect token type").Flush();
+        LogError()()("Incorrect token type").Flush();
 
         return false;
     }
@@ -328,8 +320,7 @@ auto Lucre::VerifyToken(
         dynamic_cast<const otx::blind::token::Lucre*>(&(token.Internal()));
 
     if (nullptr == lucre) {
-        LogError()(OT_PRETTY_CLASS())("provided token is not a lucre token")
-            .Flush();
+        LogError()()("provided token is not a lucre token").Flush();
 
         return false;
     }
@@ -341,7 +332,7 @@ auto Lucre::VerifyToken(
     auto spendable = String::Factory();
 
     if (false == lucreToken.GetSpendable(spendable, reason)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to extract").Flush();
+        LogError()()("Failed to extract").Flush();
 
         return false;
     }
@@ -356,15 +347,12 @@ auto Lucre::VerifyToken(
             api_.Factory().InternalSession().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
-            LogError()(OT_PRETTY_CLASS())(
-                ": Failed to decrypt private mint key")
-                .Flush();
+            LogError()()(": Failed to decrypt private mint key").Flush();
 
             return false;
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decode private mint key")
-            .Flush();
+        LogError()()("Failed to decode private mint key").Flush();
 
         return false;
     }

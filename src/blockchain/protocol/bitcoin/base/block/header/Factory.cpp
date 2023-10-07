@@ -16,7 +16,6 @@
 #include "blockchain/protocol/bitcoin/base/block/header/HeaderPrivate.hpp"
 #include "blockchain/protocol/bitcoin/base/block/header/Imp.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/blockchain/Work.hpp"
@@ -93,7 +92,7 @@ auto BitcoinBlockHeader(
             serialized.nonce_.value(),
             false);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -112,7 +111,7 @@ auto BitcoinBlockHeader(
 
         return pmr::construct<ReturnType>(alloc.result_, crypto, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -142,7 +141,7 @@ auto BitcoinBlockHeader(
             ReadView{raw.data(), sizeof(ReturnType::BitcoinFormat)};
         auto serialized = ReturnType::BitcoinFormat{};
 
-        OT_ASSERT(sizeof(serialized) <= header.size());
+        assert_true(sizeof(serialized) <= header.size());
 
         auto* const result = std::memcpy(
             static_cast<void*>(&serialized), header.data(), header.size());
@@ -169,7 +168,7 @@ auto BitcoinBlockHeader(
             serialized.nonce_.value(),
             isGenesis);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -192,7 +191,7 @@ auto BitcoinBlockHeader(
         return pmr::construct<ReturnType>(
             alloc.result_, crypto, chain, merkle, parent, height);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

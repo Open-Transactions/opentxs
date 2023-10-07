@@ -181,7 +181,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
                                                                                \
     const auto pClient = get_client(command.session());                        \
                                                                                \
-    OT_ASSERT(nullptr != pClient);                                             \
+    assert_false(nullptr == pClient);                                          \
                                                                                \
     [[maybe_unused]] const auto& client = *pClient
 
@@ -196,7 +196,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
                                                                                \
     const auto pServer = get_server(command.session());                        \
                                                                                \
-    OT_ASSERT(nullptr != pServer);                                             \
+    assert_false(nullptr == pServer);                                          \
                                                                                \
     [[maybe_unused]] const auto& server = *pServer
 
@@ -244,12 +244,12 @@ RPC::RPC(const api::Context& native)
     auto bound = push_receiver_->Start(
         network::zeromq::MakeDeterministicInproc("rpc/push/internal", -1, 1));
 
-    OT_ASSERT(bound);
+    assert_true(bound);
 
     bound = rpc_publisher_->Start(
         network::zeromq::MakeDeterministicInproc("rpc/push", -1, 1));
 
-    OT_ASSERT(bound);
+    assert_true(bound);
 }
 
 auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
@@ -294,8 +294,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                     const auto& [state, cheque] = chequeState;
 
                     if (false == bool(cheque)) {
-                        LogError()(OT_PRETTY_CLASS())(
-                            "Unable to load cheque from workflow")
+                        LogError()()("Unable to load cheque from workflow")
                             .Flush();
                         add_output_task(output, "");
                         add_output_status(
@@ -313,8 +312,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                 case otx::client::PaymentWorkflowType::OutgoingInvoice:
                 case otx::client::PaymentWorkflowType::Error:
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Unsupported workflow type")
-                        .Flush();
+                    LogError()()("Unsupported workflow type").Flush();
                     add_output_task(output, "");
                     add_output_status(output, proto::RPCRESPONSE_ERROR);
 
@@ -323,8 +321,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
             }
 
             if (false == bool(payment)) {
-                LogError()(OT_PRETTY_CLASS())("Failed to instantiate payment")
-                    .Flush();
+                LogError()()("Failed to instantiate payment").Flush();
                 add_output_task(output, "");
                 add_output_status(output, proto::RPCRESPONSE_PAYMENT_NOT_FOUND);
 
@@ -347,7 +344,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                     output);
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             continue;
         }
@@ -764,7 +761,7 @@ void RPC::evaluate_deposit_payment(
     } else if (otx::LastReplyStatus::MessageFailed == status) {
         add_output_status(output, proto::RPCRESPONSE_TRANSACTION_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        OT_ASSERT(pReply);
+        assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
         evaluate_transaction_reply(client, reply, output);
@@ -788,7 +785,7 @@ void RPC::evaluate_move_funds(
     } else if (otx::LastReplyStatus::MessageFailed == status) {
         add_output_status(output, proto::RPCRESPONSE_MOVE_FUNDS_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        OT_ASSERT(pReply);
+        assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
         evaluate_transaction_reply(client, reply, output);
@@ -826,7 +823,7 @@ auto RPC::evaluate_send_payment_transfer(
     } else if (otx::LastReplyStatus::MessageFailed == status) {
         add_output_status(output, proto::RPCRESPONSE_SEND_PAYMENT_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        OT_ASSERT(pReply);
+        assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
 
@@ -898,7 +895,7 @@ auto RPC::get_client(const std::int32_t instance) const
     -> const api::session::Client*
 {
     if (is_server_session(instance)) {
-        LogError()(OT_PRETTY_CLASS())("Error: provided instance ")(
+        LogError()()("Error: provided instance ")(
             instance)(" is a server session.")
             .Flush();
 
@@ -908,7 +905,7 @@ auto RPC::get_client(const std::int32_t instance) const
             return &dynamic_cast<const api::session::Client&>(
                 ot_.ClientSession(static_cast<int>(get_index(instance))));
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Error: provided instance ")(
+            LogError()()("Error: provided instance ")(
                 instance)(" is not a valid "
                           "client session.")
                 .Flush();
@@ -974,12 +971,8 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
     const auto unitaccounts =
         client.Storage().Internal().AccountsByContract(unitID);
     UnallocatedVector<identifier::Generic> compatible{};
-    std::set_intersection(
-        owneraccounts.begin(),
-        owneraccounts.end(),
-        unitaccounts.begin(),
-        unitaccounts.end(),
-        std::back_inserter(compatible));
+    std::ranges::set_intersection(
+        owneraccounts, unitaccounts, std::back_inserter(compatible));
 
     for (const auto& accountid : compatible) {
         output.add_identifier(accountid.asBase58(ot_.Crypto()));
@@ -1138,7 +1131,7 @@ auto RPC::get_server(const std::int32_t instance) const
     -> const api::session::Notary*
 {
     if (is_client_session(instance)) {
-        LogError()(OT_PRETTY_CLASS())("Error: provided instance ")(
+        LogError()()("Error: provided instance ")(
             instance)(" is a client session.")
             .Flush();
 
@@ -1147,7 +1140,7 @@ auto RPC::get_server(const std::int32_t instance) const
         try {
             return &ot_.NotarySession(static_cast<int>(get_index(instance)));
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("Error: provided instance ")(
+            LogError()()("Error: provided instance ")(
                 instance)(" is not a valid server session.")
                 .Flush();
 
@@ -1641,7 +1634,7 @@ auto RPC::Process(const proto::RPCCommand& command) const -> proto::RPCResponse
     const auto valid = proto::Validate(command, VERBOSE);
 
     if (false == valid) {
-        LogError()(OT_PRETTY_CLASS())("Invalid serialized command").Flush();
+        LogError()()("Invalid serialized command").Flush();
 
         return invalid_command(command);
     }
@@ -1731,7 +1724,7 @@ auto RPC::Process(const proto::RPCCommand& command) const -> proto::RPCResponse
         case proto::RPCCOMMAND_ACCEPTVERIFICATION:
         case proto::RPCCOMMAND_SENDCONTACTMESSAGE:
         case proto::RPCCOMMAND_GETCONTACTACTIVITY: {
-            LogError()(OT_PRETTY_CLASS())("Command not implemented.").Flush();
+            LogError()()("Command not implemented.").Flush();
         } break;
         case proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS: {
             return accept_pending_payments(command);
@@ -1768,7 +1761,7 @@ auto RPC::Process(const proto::RPCCommand& command) const -> proto::RPCResponse
         }
         case proto::RPCCOMMAND_ERROR:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported command.").Flush();
+            LogError()()("Unsupported command.").Flush();
         }
     }
 
@@ -1836,7 +1829,7 @@ auto RPC::Process(const request::Base& command) const
         case CommandType::rename_account:
         case CommandType::error:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported command.").Flush();
+            LogError()()("Unsupported command.").Flush();
 
             return std::make_unique<response::Invalid>(command);
         }
@@ -1979,7 +1972,7 @@ auto RPC::start_client(const proto::RPCCommand& command) const
         auto bound = task_subscriber_->Start(
             UnallocatedCString{manager.Endpoints().TaskComplete()});
 
-        OT_ASSERT(bound);
+        assert_true(bound);
 
     } catch (...) {
         add_output_status(output, proto::RPCRESPONSE_INVALID);
@@ -2030,13 +2023,13 @@ void RPC::task_handler(const zmq::Message& in)
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     using ID = api::session::OTX::TaskID;
 
     const auto taskID = std::to_string(body[1].as<ID>());
     const auto success = body[2].as<bool>();
-    LogTrace()(OT_PRETTY_CLASS())("Received notice for task ")(taskID).Flush();
+    LogTrace()()("Received notice for task ")(taskID).Flush();
     auto lock = Lock{task_lock_};
     auto it = queued_tasks_.find(taskID);
     lock.unlock();
@@ -2049,8 +2042,7 @@ void RPC::task_handler(const zmq::Message& in)
 
         if (finish) { finish(future.get(), task); }
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("We don't care about task ")(taskID)
-            .Flush();
+        LogTrace()()("We don't care about task ")(taskID).Flush();
 
         return;
     }

@@ -15,7 +15,6 @@ extern "C" {
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -86,7 +85,7 @@ namespace opentxs::crypto::implementation
 AsymmetricProvider::AsymmetricProvider() noexcept
     : factory_()
 {
-    if (0 > ::sodium_init()) { OT_FAIL; }
+    if (0 > ::sodium_init()) { LogAbort()().Abort(); }
 }
 
 auto AsymmetricProvider::Init(
@@ -168,7 +167,7 @@ auto AsymmetricProvider::SeedToCurveKey(
                      seed,
                      edPrivate.WriteInto(Secret::Mode::Mem),
                      edPublic.WriteInto())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to expand seed.").Flush();
+        LogError()()("Failed to expand seed.").Flush();
 
         return false;
     }
@@ -201,9 +200,7 @@ auto AsymmetricProvider::SignContract(
     output.SetData(signature, true);  // true means, "yes, with newlines in the
                                       // b64-encoded output, please."
 
-    if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to sign contract").Flush();
-    }
+    if (false == success) { LogError()()("Failed to sign contract").Flush(); }
 
     return success;
 }

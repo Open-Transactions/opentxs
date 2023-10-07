@@ -13,7 +13,6 @@
 #include "internal/otx/smartcontract/Factory.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -26,8 +25,7 @@ auto OTScript(const UnallocatedCString& script_type)
 
         return OTScriptChai();
     } else {
-        LogError()("opentxs::factory::")(__func__)(": Script language (")(
-            script_type)(") invalid not found")
+        LogError()()("Script language (")(script_type)(") invalid not found")
             .Flush();
 
         return std::make_shared<opentxs::OTScript>();
@@ -43,8 +41,7 @@ auto OTScript(
 
         return OTScriptChai(script_contents);
     } else {
-        LogError()("opentxs::factory::")(__func__)(": Script language (")(
-            script_type)(") invalid not found")
+        LogError()()("Script language (")(script_type)(") invalid not found")
             .Flush();
 
         return std::make_shared<opentxs::OTScript>();
@@ -146,7 +143,7 @@ OTScript::~OTScript()
 
     while (!variables_.empty()) {
         OTVariable* pVar = variables_.begin()->second;
-        OT_ASSERT(nullptr != pVar);
+        assert_false(nullptr == pVar);
 
         // NOTE: We're NOT going to delete pVar, since we don't own it.
         // But we ARE going to remove pVar's pointer to this script, so
@@ -259,7 +256,7 @@ void OTScript::RemoveVariable(OTVariable& theVar)
 
 auto OTScript::ExecuteScript(OTVariable*) -> bool
 {
-    LogError()(OT_PRETTY_CLASS())("Scripting has been disabled.").Flush();
+    LogError()()("Scripting has been disabled.").Flush();
     return true;
 }
 

@@ -6,11 +6,11 @@
 #include "api/session/notary/Shared.hpp"  // IWYU pragma: associated
 
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::session::notary
 {
@@ -28,7 +28,7 @@ Shared::Shared(const opentxs::network::zeromq::Context& zmq) noexcept
         auto out = zmq.Internal().RawSocket(Type::Push);
         const auto rc = out.Bind(endpoint_.data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())

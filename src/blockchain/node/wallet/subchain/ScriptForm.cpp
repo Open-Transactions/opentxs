@@ -8,7 +8,6 @@
 #include <optional>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -45,7 +44,7 @@ ScriptForm::ScriptForm(
             case Type::Empty:
             case Type::Malformed:
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
 
@@ -90,7 +89,7 @@ ScriptForm::ScriptForm(
             case Type::Empty:
             case Type::Malformed:
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
 
@@ -158,8 +157,7 @@ ScriptForm::ScriptForm(
                 case Type::Empty:
                 case Type::Malformed:
                 default: {
-                    LogAbort()(OT_PRETTY_CLASS())("invalid script type")
-                        .Abort();
+                    LogAbort()()("invalid script type").Abort();
                 }
             }
         }();
@@ -175,8 +173,8 @@ ScriptForm::ScriptForm(
         return out;
     }())
 {
-    OT_ASSERT(script_.IsValid());
-    OT_ASSERT(0 < element_.size());
+    assert_true(script_.IsValid());
+    assert_true(0 < element_.size());
 }
 
 ScriptForm::ScriptForm(

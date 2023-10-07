@@ -9,14 +9,14 @@
 #include <utility>
 
 #include "crypto/hasher/HasherPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::crypto
 {
 Hasher::Hasher(HasherPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Hasher::Hasher() noexcept

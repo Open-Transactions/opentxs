@@ -17,7 +17,6 @@
 #include "identity/credential/Base.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -54,9 +53,7 @@ auto Factory::ContactCredential(
         return new ReturnType(
             api, parent, source, master, parameters, version, reason);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Failed to create credential: ")(e.what())
-            .Flush();
+        LogError()()("Failed to create credential: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -76,9 +73,7 @@ auto Factory::ContactCredential(
 
         return new ReturnType(api, parent, source, master, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Failed to deserialize credential: ")(e.what())
-            .Flush();
+        LogError()()("Failed to deserialize credential: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -186,8 +181,7 @@ auto Contact::serialize(
         if (auto sig = MasterSignature(); sig) {
             *out->add_signature() = *sig;
         } else {
-            LogError()(OT_PRETTY_CLASS())("Failed to get master signature.")
-                .Flush();
+            LogError()()("Failed to get master signature.").Flush();
         }
     }
 

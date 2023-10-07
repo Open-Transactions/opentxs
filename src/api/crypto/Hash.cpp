@@ -20,7 +20,6 @@
 #include "internal/crypto/library/Pbkdf2.hpp"
 #include "internal/crypto/library/Ripemd160.hpp"
 #include "internal/crypto/library/Scrypt.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/Data.hpp"
@@ -65,7 +64,7 @@ Hash::Hash(
     , scrypt_(scrypt)
     , dash_(factory::Dash())
 {
-    OT_ASSERT(dash_);
+    assert_false(nullptr == dash_);
 }
 
 auto Hash::bitcoin_hash_160(const ReadView data, Writer&& destination)
@@ -86,7 +85,7 @@ auto Hash::bitcoin_hash_160(const ReadView data, Writer&& destination)
             reader(temp),
             std::move(destination));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -136,7 +135,7 @@ auto Hash::Digest(
         case None:
         case SipHash24:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported hash type.").Flush();
+            LogError()()("Unsupported hash type.").Flush();
 
             return false;
         }
@@ -184,7 +183,7 @@ auto Hash::HMAC(
         case Error:
         case None:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported hash type.").Flush();
+            LogError()()("Unsupported hash type.").Flush();
 
             return false;
         }
@@ -204,7 +203,7 @@ auto Hash::MurmurHash3_32(
 {
     const auto size = data.size();
 
-    OT_ASSERT(size <= std::numeric_limits<int>::max());
+    assert_true(size <= std::numeric_limits<int>::max());
 
     MurmurHash3_x86_32(
         data.data(), static_cast<int>(data.size()), key, &output);
@@ -235,7 +234,7 @@ auto Hash::PKCS5_PBKDF2_HMAC(
             bytes,
             buf.data());
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -271,7 +270,7 @@ auto Hash::sha_256_double(const ReadView data, Writer&& destination)
             reader(temp),
             std::move(destination));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -290,7 +289,7 @@ auto Hash::sha_256_double_checksum(const ReadView data, Writer&& destination)
 
         return copy(reader(temp), std::move(destination), 4_uz);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

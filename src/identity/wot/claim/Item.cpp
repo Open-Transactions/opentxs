@@ -14,7 +14,6 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -98,8 +97,8 @@ struct Item::Imp {
         , subtype_(subtype)
     {
         if (0 == version) {
-            LogError()(OT_PRETTY_CLASS())("Warning: malformed version. "
-                                          "Setting to ")(parentVersion)(".")
+            LogError()()("Warning: malformed version. "
+                         "Setting to ")(parentVersion)(".")
                 .Flush();
         }
     }
@@ -179,19 +178,19 @@ Item::Item(
           end,
           subtype))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Item::Item(const Item& rhs) noexcept
     : imp_(std::make_unique<Imp>(*rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Item::Item(Item&& rhs) noexcept
     : imp_(std::move(rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Item::Item(

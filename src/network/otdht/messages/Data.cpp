@@ -15,7 +15,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -146,7 +145,7 @@ auto Data::Add(ReadView data) noexcept -> bool
             static_cast<opentxs::blockchain::block::Height>(proto.height());
 
         if (height != expected) {
-            LogError()(OT_PRETTY_CLASS())("Non-contiguous sync data").Flush();
+            LogError()()("Non-contiguous sync data").Flush();
 
             return false;
         }
@@ -157,7 +156,7 @@ auto Data::Add(ReadView data) noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -204,7 +203,7 @@ auto Data::PreviousCfheader() const noexcept -> ReadView
 
 auto Data::State() const noexcept -> const otdht::State&
 {
-    OT_ASSERT(0 < imp_->state_.size());
+    assert_true(0 < imp_->state_.size());
 
     return imp_->state_.front();
 }

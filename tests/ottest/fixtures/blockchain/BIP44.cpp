@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -41,13 +40,13 @@ BIP44::BIP44()
                 reason_));
             const auto& seed = seed_id_.get();
 
-            OT_ASSERT(false == seed.empty());
+            opentxs::assert_true(false == seed.empty());
 
             nym_.set_value(
                 api_.Wallet().Nym({api_.Factory(), seed, 0}, reason_, "Alice"));
             const auto& nym = nym_.get();
 
-            OT_ASSERT(nym);
+            opentxs::assert_false(nullptr == nym);
 
             api_.Crypto().Blockchain().NewHDSubaccount(
                 nym->ID(),

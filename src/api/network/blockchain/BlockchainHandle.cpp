@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "api/network/blockchain/BlockchainHandle.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::network
 {
@@ -23,7 +23,7 @@ namespace opentxs::api::network
 BlockchainHandle::BlockchainHandle(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 BlockchainHandle::BlockchainHandle(const BlockchainHandle& rhs) noexcept

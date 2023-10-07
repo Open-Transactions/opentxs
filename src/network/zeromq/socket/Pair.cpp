@@ -11,7 +11,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/socket/Bidirectional.tpp"
 #include "network/zeromq/socket/Receiver.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Log.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Pair>;
 
@@ -141,16 +141,16 @@ void Pair::init() noexcept
 {
     Bidirectional::init();
 
-    OT_ASSERT(false == endpoint_.empty());
+    assert_false(endpoint_.empty());
 
     const auto init = Bidirectional::Start(endpoint_);
 
-    OT_ASSERT(init);
+    assert_true(init);
 }
 
 void Pair::process_incoming(const Lock& lock, Message&& message) noexcept
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     callback_.Process(std::move(message));
 }

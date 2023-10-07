@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -59,14 +58,14 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }
 
     Actor(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Node::Shared> shared,
+        std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,
         std::string_view fromNode,
@@ -89,7 +88,7 @@ private:
     using Queue = Map<opentxs::blockchain::Type, Vector<Message>>;
 
     std::shared_ptr<const api::Session> api_p_;
-    boost::shared_ptr<Node::Shared> shared_p_;
+    std::shared_ptr<Node::Shared> shared_p_;
     const api::Session& api_;
     Node::Shared::Guarded& data_;
     zeromq::socket::Raw& external_dealer_;
@@ -139,7 +138,7 @@ private:
 
     Actor(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Node::Shared> shared,
+        std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,
         std::string_view fromNode,

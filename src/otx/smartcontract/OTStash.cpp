@@ -16,7 +16,6 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTStashItem.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -50,7 +49,7 @@ OTStash::OTStash(
     , stash_items_()
 {
     auto* pItem = new OTStashItem(api_, strInstrumentDefinitionID, lAmount);
-    OT_ASSERT(nullptr != pItem);
+    assert_false(nullptr == pItem);
 
     stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
         strInstrumentDefinitionID.Get(), pItem));
@@ -65,7 +64,7 @@ OTStash::OTStash(
     , stash_items_()
 {
     auto* pItem = new OTStashItem(api_, theInstrumentDefinitionID, lAmount);
-    OT_ASSERT(nullptr != pItem);
+    assert_false(nullptr == pItem);
 
     auto strInstrumentDefinitionID =
         String::Factory(theInstrumentDefinitionID, api_.Crypto());
@@ -86,7 +85,7 @@ void OTStash::Serialize(Tag& parent) const
     for (const auto& it : stash_items_) {
         const UnallocatedCString str_instrument_definition_id = it.first;
         OTStashItem* pStashItem = it.second;
-        OT_ASSERT(
+        assert_true(
             (str_instrument_definition_id.size() > 0) &&
             (nullptr != pStashItem));
 
@@ -110,8 +109,8 @@ auto OTStash::ReadFromXMLNode(
     const String& strItemCount) -> std::int32_t
 {
     if (!strStashName.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed: Empty stash 'name' "
-                                      "attribute.")
+        LogError()()("Failed: Empty stash 'name' "
+                     "attribute.")
             .Flush();
         return (-1);
     }
@@ -127,8 +126,8 @@ auto OTStash::ReadFromXMLNode(
         while (nCount-- > 0) {
             //            xml->read();
             if (!SkipToElement(xml)) {
-                LogConsole()(OT_PRETTY_CLASS())("Failure: Unable to find "
-                                                "expected element.")
+                LogConsole()()("Failure: Unable to find "
+                               "expected element.")
                     .Flush();
                 return (-1);
             }
@@ -144,7 +143,7 @@ auto OTStash::ReadFromXMLNode(
 
                 if (!strInstrumentDefinitionID->Exists() ||
                     !strAmount->Exists()) {
-                    LogError()(OT_PRETTY_CLASS())(
+                    LogError()()(
                         "Error loading "
                         "stashItem: Either the instrumentDefinitionID (")(
                         strInstrumentDefinitionID.get())("), or the balance (")(
@@ -157,8 +156,8 @@ auto OTStash::ReadFromXMLNode(
                         strInstrumentDefinitionID->Get(),
                         strAmount->ToLong()))  // <===============
                 {
-                    LogError()(OT_PRETTY_CLASS())("Failed crediting "
-                                                  "stashItem for stash ")(
+                    LogError()()("Failed crediting "
+                                 "stashItem for stash ")(
                         strStashName)(". instrumentDefinitionID (")(
                         strInstrumentDefinitionID.get())("), balance (")(
                         strAmount.get())(").")
@@ -168,8 +167,7 @@ auto OTStash::ReadFromXMLNode(
 
                 // (Success)
             } else {
-                LogError()(OT_PRETTY_CLASS())("Expected stashItem element.")
-                    .Flush();
+                LogError()()("Expected stashItem element.").Flush();
                 return (-1);  // error condition
             }
         }  // while
@@ -177,9 +175,9 @@ auto OTStash::ReadFromXMLNode(
 
     if (!SkipAfterLoadingField(xml))  // </stash>
     {
-        LogConsole()(OT_PRETTY_CLASS())("Bad data? Expected "
-                                        "EXN_ELEMENT_END here, but "
-                                        "didn't get it. Returning -1.")
+        LogConsole()()("Bad data? Expected "
+                       "EXN_ELEMENT_END here, but "
+                       "didn't get it. Returning -1.")
             .Flush();
         return (-1);
     }
@@ -201,7 +199,7 @@ auto OTStash::GetStash(const UnallocatedCString& str_instrument_definition_id)
         const auto strInstrumentDefinitionID =
             String::Factory(str_instrument_definition_id.c_str());
         auto* pStashItem = new OTStashItem(api_, strInstrumentDefinitionID);
-        OT_ASSERT(nullptr != pStashItem);
+        assert_false(nullptr == pStashItem);
 
         stash_items_.insert(std::pair<UnallocatedCString, OTStashItem*>(
             strInstrumentDefinitionID->Get(), pStashItem));
@@ -209,7 +207,7 @@ auto OTStash::GetStash(const UnallocatedCString& str_instrument_definition_id)
     }
 
     OTStashItem* pStashItem = it->second;
-    OT_ASSERT(nullptr != pStashItem);
+    assert_false(nullptr == pStashItem);
 
     return pStashItem;
 }
@@ -219,7 +217,7 @@ auto OTStash::GetAmount(const UnallocatedCString& str_instrument_definition_id)
 {
     OTStashItem* pStashItem =
         GetStash(str_instrument_definition_id);  // (Always succeeds, and will
-                                                 // OT_ASSERT();
+                                                 // assert_true();
                                                  // if failure.)
 
     return pStashItem->GetAmount();
@@ -231,7 +229,7 @@ auto OTStash::CreditStash(
 {
     OTStashItem* pStashItem =
         GetStash(str_instrument_definition_id);  // (Always succeeds, and will
-                                                 // OT_ASSERT();
+                                                 // assert_true();
                                                  // if failure.)
 
     return pStashItem->CreditStash(lAmount);
@@ -243,7 +241,7 @@ auto OTStash::DebitStash(
 {
     OTStashItem* pStashItem =
         GetStash(str_instrument_definition_id);  // (Always succeeds, and will
-                                                 // OT_ASSERT();
+                                                 // assert_true();
                                                  // if failure.)
 
     return pStashItem->DebitStash(lAmount);
@@ -253,7 +251,7 @@ OTStash::~OTStash()
 {
     while (!stash_items_.empty()) {
         OTStashItem* pTemp = stash_items_.begin()->second;
-        OT_ASSERT(nullptr != pTemp);
+        assert_false(nullptr == pTemp);
         delete pTemp;
         pTemp = nullptr;
         stash_items_.erase(stash_items_.begin());

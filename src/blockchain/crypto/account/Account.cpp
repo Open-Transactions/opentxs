@@ -21,7 +21,6 @@
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -122,7 +121,7 @@ Account::Account(
         auto out = api_.Network().ZeroMQ().Internal().PushSocket(Dir::Connect);
         const auto started = out->Start(api_.Endpoints().FindNym().data());
 
-        OT_ASSERT(started);
+        assert_true(started);
 
         return out;
     }())
@@ -130,7 +129,7 @@ Account::Account(
     const auto& bc = parent_.Parent().Internal();
 
     if (false == bc.RegisterAccount(chain_, nym_id_, account_id_)) {
-        LogAbort()(OT_PRETTY_CLASS())("invalid account").Abort();
+        LogAbort()()("invalid account").Abort();
     }
 
     init_notification();
@@ -283,8 +282,8 @@ auto Account::GetDepositAddress(
 
 auto Account::init_hd(const Accounts& accounts) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("loading ")(accounts.size())(
-        " hd subaccounts for ")(nym_id_, api_.Crypto())(" on ")(print(chain_))
+    LogTrace()()("loading ")(accounts.size())(" hd subaccounts for ")(
+        nym_id_, api_.Crypto())(" on ")(print(chain_))
         .Flush();
 
     for (const auto& id : accounts) {
@@ -322,7 +321,7 @@ auto Account::init_notification() noexcept -> void
 {
     const auto nym = api_.Wallet().Nym(nym_id_);
 
-    OT_ASSERT(nym);
+    assert_false(nullptr == nym);
 
     if (auto code = nym->PaymentCodePublic(); 0 < code.Version()) {
         auto notUsed = identifier::Account{};
@@ -332,9 +331,8 @@ auto Account::init_notification() noexcept -> void
 
 auto Account::init_payment_code(const Accounts& accounts) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("loading ")(accounts.size())(
-        " payment code subaccounts for ")(nym_id_, api_.Crypto())(" on ")(
-        print(chain_))
+    LogTrace()()("loading ")(accounts.size())(" payment code subaccounts for ")(
+        nym_id_, api_.Crypto())(" on ")(print(chain_))
         .Flush();
 
     for (const auto& id : accounts) {

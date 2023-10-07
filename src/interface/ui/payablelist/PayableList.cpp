@@ -12,7 +12,6 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -79,9 +78,9 @@ auto PayableList::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -90,7 +89,7 @@ auto PayableList::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -113,9 +112,9 @@ auto PayableList::pipeline(const Message& in) noexcept -> void
             }
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -129,27 +128,25 @@ auto PayableList::process_contact(
     const auto contact = api_.Contacts().Contact(id);
 
     if (false == bool(contact)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Contact ")(id, api_.Crypto())(
+        LogError()()("Error: Contact ")(id, api_.Crypto())(
             " can not be loaded.")
             .Flush();
 
         return;
     }
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     auto paymentCode =
         std::make_unique<UnallocatedCString>(contact->PaymentCode(currency_));
 
-    OT_ASSERT(paymentCode);
+    assert_false(nullptr == paymentCode);
 
     if (false == paymentCode->empty()) {
         auto custom = CustomData{paymentCode.release()};
         add_item(id, key, custom);
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Skipping unpayable contact ")(
-            id, api_.Crypto())
-            .Flush();
+        LogDetail()()("Skipping unpayable contact ")(id, api_.Crypto()).Flush();
     }
 }
 
@@ -157,12 +154,12 @@ auto PayableList::process_contact(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromProtobuf(id.Bytes());
 
-    OT_ASSERT(false == contactID.empty());
+    assert_false(contactID.empty());
 
     const auto name = api_.Contacts().ContactName(contactID);
     process_contact(contactID, {false, name});
@@ -172,12 +169,12 @@ auto PayableList::process_nym(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto nymID = api_.Factory().NymIDFromHash(id.Bytes());
 
-    OT_ASSERT(false == nymID.empty());
+    assert_false(nymID.empty());
 
     const auto contactID = api_.Contacts().ContactID(nymID);
     const auto name = api_.Contacts().ContactName(contactID);
@@ -187,8 +184,7 @@ auto PayableList::process_nym(const Message& message) noexcept -> void
 auto PayableList::startup() noexcept -> void
 {
     const auto contacts = api_.Contacts().ContactList();
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(contacts.size())(" contacts.")
-        .Flush();
+    LogDetail()()("Loading ")(contacts.size())(" contacts.").Flush();
 
     for (const auto& [id, alias] : contacts) {
         process_contact(

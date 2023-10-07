@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "api/network/asio/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/asio/WebRequest.tpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -36,7 +35,7 @@ HTTPS::HTTPS(
     Finish&& cb,
     allocator_type alloc) noexcept
     : WebRequest(hostname, file, asio, std::move(cb), std::move(alloc))
-    , ssl_([this, level] {
+    , ssl_([level] {
         // NOTE Initializing an ssl::context works 100% of the time with
         // versions of OpenSSL < 3, but randomly fails with versions of OpenSSL
         // >= 3 apparently due to some race condition in the SSL library
@@ -80,15 +79,14 @@ HTTPS::HTTPS(
 
                 return out;
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
             }
 
             Sleep(retry);
             retry *= 2;
         }
 
-        LogAbort()(OT_PRETTY_CLASS())("failed to initialize ssl context")
-            .Abort();
+        LogAbort()()("failed to initialize ssl context").Abort();
     }())
     , stream_(std::nullopt)
 {
@@ -196,7 +194,7 @@ HTTPS::~HTTPS()
             stream_ = std::nullopt;
         }
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
     }
 }
 }  // namespace opentxs::network::asio

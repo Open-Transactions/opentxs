@@ -12,7 +12,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iterator>
 #include <mutex>
 #include <optional>
 #include <tuple>
@@ -264,7 +263,7 @@ private:
         auto for_each_key(F cb) const noexcept -> void
         {
             auto lock = Lock{lock_};
-            std::for_each(std::begin(keys_), std::end(keys_), cb);
+            std::for_each(keys_.begin(), keys_.end(), cb);
         }
         auto has_keys() const noexcept -> bool;
         auto keys(Set<crypto::Key>& out) const noexcept -> void;

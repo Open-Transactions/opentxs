@@ -10,7 +10,6 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -73,9 +72,7 @@ void OTClause::Serialize(const api::Crypto& crypto, Tag& parent) const
     if (code_->GetLength() > 2) {
         ascCode->SetString(code_);
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Empty script code in OTClause::Serialize().")
-            .Flush();
+        LogError()()("Empty script code in OTClause::Serialize().").Flush();
     }
 
     TagPtr pTag(new Tag("clause", ascCode->Get()));
@@ -89,16 +86,15 @@ void OTClause::Serialize(const api::Crypto& crypto, Tag& parent) const
 auto OTClause::Compare(const OTClause& rhs) const -> bool
 {
     if (!(GetName().Compare(rhs.GetName()))) {
-        LogConsole()(OT_PRETTY_CLASS())("Names don't match: ")(GetName())(
-            " / ")(rhs.GetName())(".")
+        LogConsole()()("Names don't match: ")(GetName())(" / ")(rhs.GetName())(
+            ".")
             .Flush();
         return false;
     }
 
     if (!(code_->Compare(rhs.GetCode()))) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Source code for interpreted script fails "
-            "to match, on clause: ")(GetName())(".")
+        LogConsole()()("Source code for interpreted script fails "
+                       "to match, on clause: ")(GetName())(".")
             .Flush();
         return false;
     }

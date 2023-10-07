@@ -6,7 +6,6 @@
 
 #include "internal/blockchain/crypto/Factory.hpp"
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"

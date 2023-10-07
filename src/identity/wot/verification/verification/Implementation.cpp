@@ -9,6 +9,7 @@
 #include <VerificationItem.pb.h>
 #include <algorithm>
 #include <exception>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <utility>
@@ -22,7 +23,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Verification.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -89,8 +89,7 @@ Verification::Verification(
             return api.Factory().Internal().Identifier(p);
         };
         out.reserve(ids.size());
-        std::transform(
-            ids.begin(), ids.end(), std::back_inserter(out), from_proto);
+        std::ranges::transform(ids, std::back_inserter(out), from_proto);
 
         return out;
     }())
@@ -192,7 +191,7 @@ auto Verification::update_signature(const PasswordPrompt& reason) -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -201,13 +200,13 @@ auto Verification::update_signature(const PasswordPrompt& reason) -> bool
 auto Verification::validate() const -> bool
 {
     if (calculate_id() != ID()) {
-        LogError()(OT_PRETTY_CLASS())("id mismatch").Flush();
+        LogError()()("id mismatch").Flush();
 
         return false;
     }
 
     if (false == proto::Validate(final_form(), VERBOSE)) {
-        LogError()(OT_PRETTY_CLASS())("invalid syntax").Flush();
+        LogError()()("invalid syntax").Flush();
 
         return false;
     }
@@ -215,7 +214,7 @@ auto Verification::validate() const -> bool
     const auto sigs = signatures();
 
     if (sigs.empty()) {
-        LogError()(OT_PRETTY_CLASS())("missing signature").Flush();
+        LogError()()("missing signature").Flush();
 
         return false;
     }
@@ -223,13 +222,13 @@ auto Verification::validate() const -> bool
     const auto& sig = sigs[0];
 
     if (false == sig.operator bool()) {
-        LogError()(OT_PRETTY_CLASS())("null signature").Flush();
+        LogError()()("null signature").Flush();
 
         return false;
     }
 
     if (false == verify_signature(*sig)) {
-        LogError()(OT_PRETTY_CLASS())("invalid signature").Flush();
+        LogError()()("invalid signature").Flush();
 
         return false;
     }

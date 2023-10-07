@@ -14,7 +14,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -52,12 +51,11 @@ struct UpdateManager::Imp {
     auto ClearUICallbacks(const identifier::Generic& id) const noexcept -> void
     {
         if (id.empty()) {
-            LogError()(OT_PRETTY_CLASS())("Invalid widget id").Flush();
+            LogError()()("Invalid widget id").Flush();
 
             return;
         } else {
-            LogTrace()(OT_PRETTY_CLASS())("Clearing callback for widget ")(
-                id, api_.Crypto())
+            LogTrace()()("Clearing callback for widget ")(id, api_.Crypto())
                 .Flush();
         }
 
@@ -69,12 +67,11 @@ struct UpdateManager::Imp {
         const SimpleCallback& cb) const noexcept -> void
     {
         if (id.empty()) {
-            LogError()(OT_PRETTY_CLASS())("Invalid widget id").Flush();
+            LogError()()("Invalid widget id").Flush();
 
             return;
         } else {
-            LogTrace()(OT_PRETTY_CLASS())("Registering callback for widget ")(
-                id, api_.Crypto())
+            LogTrace()()("Registering callback for widget ")(id, api_.Crypto())
                 .Flush();
         }
 
@@ -82,7 +79,7 @@ struct UpdateManager::Imp {
             auto lock = Lock{lock_};
             map_[id].emplace_back(cb);
         } else {
-            LogError()(OT_PRETTY_CLASS())("Invalid callback").Flush();
+            LogError()()("Invalid callback").Flush();
         }
     }
 
@@ -96,8 +93,7 @@ struct UpdateManager::Imp {
               "UpdateManager"))
     {
         publisher_->Start(api_.Endpoints().WidgetUpdate().data());
-        LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(pipeline_.BatchID())
-            .Flush();
+        LogTrace()()("using ZMQ batch ")(pipeline_.BatchID()).Flush();
     }
 
 private:
@@ -114,11 +110,11 @@ private:
     {
         const auto body = in.Payload();
 
-        OT_ASSERT(0_uz < body.size());
+        assert_true(0_uz < body.size());
 
         const auto& idFrame = body[0];
 
-        OT_ASSERT(0_uz < idFrame.size());
+        assert_true(0_uz < idFrame.size());
 
         const auto id = api_.Factory().IdentifierFromHash(idFrame.Bytes());
         auto lock = Lock{lock_};

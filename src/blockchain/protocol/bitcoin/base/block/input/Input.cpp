@@ -8,16 +8,16 @@
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/input/InputPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::protocol::bitcoin::base::block
 {
 Input::Input(InputPrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Input::Input(allocator_type alloc) noexcept

@@ -144,7 +144,7 @@ namespace opentxs
 Amount::Amount(Imp* rhs) noexcept
     : imp_(rhs)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Amount::Amount(const Imp& rhs) noexcept

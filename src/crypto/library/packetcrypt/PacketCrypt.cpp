@@ -34,7 +34,6 @@ extern "C" {
 #include "blockchain/protocol/bitcoin/pkt/block/block/Imp.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/pkt/block/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -99,9 +98,8 @@ struct PacketCrypt::Imp {
             static constexpr auto threshold = decltype(height){122622};
 
             if (threshold > height) {
-                LogDetail()(OT_PRETTY_CLASS())(
-                    ": Validation protocol for this block height not "
-                    "supported. Assuming block is valid.")
+                LogDetail()()(": Validation protocol for this block height not "
+                              "supported. Assuming block is valid.")
                     .Flush();
 
                 return true;
@@ -218,7 +216,7 @@ struct PacketCrypt::Imp {
                 return false;
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }
@@ -246,7 +244,7 @@ auto PacketCrypt::Validate(
     const auto* p = dynamic_cast<const Imp::PktBlock*>(&block);
 
     if (nullptr == p) {
-        LogError()(OT_PRETTY_CLASS())("Invalid block type").Flush();
+        LogError()()("Invalid block type").Flush();
 
         return false;
     }

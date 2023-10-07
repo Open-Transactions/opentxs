@@ -16,7 +16,6 @@
 #include "internal/otx/common/basket/BasketItem.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -105,7 +104,7 @@ void Basket::HarvestClosingNumbers(
     for (std::uint32_t i = 0; i < nCount; i++) {
         BasketItem* pRequestItem = At(i);
 
-        OT_ASSERT(nullptr != pRequestItem);
+        assert_false(nullptr == pRequestItem);
 
         const TransactionNumber lClosingTransNo =
             pRequestItem->closing_transaction_no_;
@@ -134,9 +133,7 @@ void Basket::AddRequestSubContract(
 {
     auto* pItem = new BasketItem;
 
-    OT_ASSERT_MSG(
-        nullptr != pItem,
-        "Error allocating memory in Basket::AddRequestSubContract\n");
+    assert_false(nullptr == pItem, "Error allocating memory");
 
     // Minimum transfer amount is not set on a request. The server already knows
     // its value.
@@ -162,9 +159,7 @@ void Basket::AddSubContract(
 {
     auto* pItem = new BasketItem;
 
-    OT_ASSERT_MSG(
-        nullptr != pItem,
-        "Error allocating memory in Basket::AddSubContract\n");
+    assert_false(nullptr == pItem, "Error allocating memory");
 
     pItem->sub_contract_id_ = SUB_CONTRACT_ID;
     pItem->minimum_transfer_amount_ = lMinimumTransferAmount;
@@ -180,16 +175,11 @@ void Basket::AddSubContract(
 //
 auto Basket::GetClosingTransactionNoAt(std::uint32_t nIndex) -> std::int64_t
 {
-    OT_ASSERT_MSG(
-        (nIndex < items_.size()),
-        "Basket::GetClosingTransactionNoAt: index out of bounds.");
+    assert_true(nIndex < items_.size(), "index out of bounds");
 
     BasketItem* pItem = items_.at(nIndex);
 
-    OT_ASSERT_MSG(
-        nullptr != pItem,
-        "Basket::GetClosingTransactionNoAt: basket "
-        "item was nullptr at that index.");
+    assert_false(nullptr == pItem, "basket item was nullptr at that index");
 
     return pItem->closing_transaction_no_;
 }
@@ -220,7 +210,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         sub_count_ = atoi(strSubCount->Get());
         minimum_transfer_ = factory::Amount(strMinTrans->Get());
 
-        LogDetail()(OT_PRETTY_CLASS())("Loading currency basket...").Flush();
+        LogDetail()()("Loading currency basket...").Flush();
 
         return 1;
     } else if (strNodeName->Compare("requestExchange")) {
@@ -246,7 +236,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         }
         if (strTemp->Exists()) { SetClosingNum(strTemp->ToLong()); }
 
-        LogVerbose()(OT_PRETTY_CLASS())("Basket Transfer multiple is ")(
+        LogVerbose()()("Basket Transfer multiple is ")(
             transfer_multiple_)(". Direction is ")(strDirection.get())(
             ". Closing number is ")(
             closing_transaction_no_)(". Target account is: ")(
@@ -257,9 +247,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
     } else if (strNodeName->Compare("basketItem")) {
         auto* pItem = new BasketItem;
 
-        OT_ASSERT_MSG(
-            nullptr != pItem,
-            "Error allocating memory in Basket::ProcessXMLNode\n");
+        assert_false(nullptr == pItem, "Error allocating memory");
 
         auto strTemp =
             String::Factory(xml->getAttributeValue("minimumTransfer"));
@@ -284,7 +272,7 @@ auto Basket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         items_.push_back(pItem);
 
-        LogVerbose()(OT_PRETTY_CLASS())("Loaded basket item. ").Flush();
+        LogVerbose()()("Loaded basket item. ").Flush();
 
         return 1;
     }
@@ -336,9 +324,7 @@ void Basket::GenerateContents(StringXML& xmlUnsigned, bool bHideAccountID) const
     for (std::int32_t i = 0; i < Count(); i++) {
         BasketItem* pItem = items_[i];
 
-        OT_ASSERT_MSG(
-            nullptr != pItem,
-            "Error allocating memory in Basket::UpdateContents\n");
+        assert_false(nullptr == pItem, "Error allocating memory");
 
         auto strAcctID = String::Factory(pItem->sub_account_id_, api_.Crypto()),
              strContractID =

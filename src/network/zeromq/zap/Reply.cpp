@@ -16,13 +16,13 @@
 #include "internal/network/zeromq/zap/Reply.hpp"
 #include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/network/zeromq/zap/ZAP.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::factory
@@ -153,7 +153,7 @@ Reply::Reply(Imp* imp) noexcept
     : Message(imp)
     , imp_(imp)
 {
-    OT_ASSERT(Reply::imp_);
+    assert_true(Reply::imp_);
 }
 
 Reply::Reply(const Reply& rhs) noexcept

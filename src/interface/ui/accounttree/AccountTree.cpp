@@ -24,7 +24,6 @@
 #include "internal/interface/ui/AccountCurrency.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -105,12 +104,12 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                     auto& data = [&]() -> auto& {
                         auto p = std::make_unique<Accounts>();
 
-                        OT_ASSERT(p);
+                        assert_false(nullptr == p);
 
                         auto& ptr = out.emplace_back(p.release());
 
-                        OT_ASSERT(1_uz == out.size());
-                        OT_ASSERT(nullptr != ptr);
+                        assert_true(1_uz == out.size());
+                        assert_false(nullptr == ptr);
 
                         return *reinterpret_cast<Accounts*>(ptr);
                     }();
@@ -127,7 +126,7 @@ auto AccountTree::add_children(ChildMap&& map) noexcept -> void
                                 std::move(accountName)),
                             std::move(aCustom),
                             CustomData{});
-                        LogInsane()(OT_PRETTY_CLASS())("processing account ")(
+                        LogInsane()()("processing account ")(
                             row.id_, api_.Crypto())
                             .Flush();
                     }
@@ -185,7 +184,7 @@ auto AccountTree::load() noexcept -> void
         add_children(std::move(map));
         subscribe(std::move(chains));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -206,8 +205,8 @@ auto AccountTree::load_blockchain_account(
 {
     const auto [chain, owner] = api_.Crypto().Blockchain().LookupAccount(id);
 
-    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
-    OT_ASSERT(owner == primary_id_);
+    assert_true(blockchain::Type::UnknownBlockchain != chain);
+    assert_true(owner == primary_id_);
 
     load_blockchain_account(std::move(id), chain, out, subscribe);
 }
@@ -242,9 +241,7 @@ auto AccountTree::load_blockchain_account(
     ChildMap& out,
     SubscribeSet& subscribe) const noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())("processing blockchain account ")(
-        id, api_.Crypto())
-        .Flush();
+    LogInsane()()("processing blockchain account ")(id, api_.Crypto()).Flush();
 
     if (api_.Crypto().Blockchain().SubaccountList(primary_id_, chain).empty()) {
         return;
@@ -287,7 +284,7 @@ auto AccountTree::load_blockchain_account(
             return data;
         }());
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     subscribe.emplace(chain);
 }
@@ -383,10 +380,9 @@ auto AccountTree::load_custodial_account(
             return data;
         }());
 
-    OT_ASSERT(added);
+    assert_true(added);
 
-    LogInsane()(OT_PRETTY_CLASS())("processing custodial account ")(
-        it->first, api_.Crypto())
+    LogInsane()()("processing custodial account ")(it->first, api_.Crypto())
         .Flush();
 }
 
@@ -397,9 +393,9 @@ auto AccountTree::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -408,7 +404,7 @@ auto AccountTree::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -440,9 +436,9 @@ auto AccountTree::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -451,20 +447,19 @@ auto AccountTree::process_blockchain(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[2].Bytes());
 
     if (nymID != primary_id_) {
-        LogInsane()(OT_PRETTY_CLASS())("Update does not apply to this widget")
-            .Flush();
+        LogInsane()()("Update does not apply to this widget").Flush();
 
         return;
     }
 
     const auto chain = body[1].as<blockchain::Type>();
 
-    OT_ASSERT(blockchain::Type::UnknownBlockchain != chain);
+    assert_true(blockchain::Type::UnknownBlockchain != chain);
 
     auto chains = SubscribeSet{};
     add_children([&] {
@@ -480,7 +475,7 @@ auto AccountTree::process_blockchain_balance(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     const auto& accountID =
@@ -503,7 +498,7 @@ auto AccountTree::process_custodial(Message&& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto& api = api_;
     auto id = api.Factory().AccountIDFromZMQ(body[1]);

@@ -17,7 +17,6 @@
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -93,7 +92,7 @@ class Log;
 namespace opentxs::blockchain::database::implementation
 {
 class Wallet final : private pmr::HasUpstreamAllocator,
-                     private pmr::AllocatesChildren<alloc::BoostPoolSync>
+                     private pmr::AllocatesChildren<alloc::PoolSync>
 {
 public:
     auto CompletedProposals() const noexcept

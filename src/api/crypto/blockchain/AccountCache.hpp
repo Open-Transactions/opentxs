@@ -12,7 +12,6 @@
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -34,7 +33,7 @@ class Session;
 namespace opentxs::api::crypto::blockchain
 {
 class AccountCache final : public pmr::HasUpstreamAllocator,
-                           public pmr::AllocatesChildren<alloc::BoostPoolUnsync>
+                           public pmr::AllocatesChildren<alloc::PoolUnsync>
 {
 public:
     auto AccountData(const identifier::Account& id) const noexcept

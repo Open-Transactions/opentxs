@@ -14,6 +14,7 @@
 #include <exception>
 #include <functional>
 #include <iostream>
+#include <source_location>
 #include <span>
 #include <thread>
 #include <utility>
@@ -22,7 +23,6 @@
 #include "internal/network/zeromq/Pool.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
@@ -169,8 +169,8 @@ auto Thread::poll() noexcept -> void
         timeout.count());
 
     if (0 > events) {
-        std::cout << OT_PRETTY_CLASS() << ::zmq_strerror(::zmq_errno())
-                  << std::endl;
+        std::cout << std::source_location::current().function_name() << ": "
+                  << ::zmq_strerror(::zmq_errno()) << std::endl;
 
         return;
     } else if (0 == events) {
@@ -238,11 +238,12 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
             auto zerr = ::zmq_errno();
             if (EAGAIN == zerr) {
                 std::cerr
-                    << (OT_PRETTY_CLASS())
+                    << std::source_location::current().function_name() << ": "
                     << "zmq_msg_recv returns EAGAIN. This should never happen."
                     << std::endl;
             } else {
-                std::cerr << (OT_PRETTY_CLASS())
+                std::cerr << std::source_location::current().function_name()
+                          << ": "
                           << ": Receive error: " << ::zmq_strerror(zerr)
                           << std::endl;
             }
@@ -259,7 +260,7 @@ auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
              ::zmq_getsockopt(socket, ZMQ_RCVMORE, &option, &optionBytes));
 
         if (false == haveOption) {
-            std::cerr << (OT_PRETTY_CLASS())
+            std::cerr << std::source_location::current().function_name() << ": "
                       << "Failed to check socket options error:\n"
                       << ::zmq_strerror(zmq_errno()) << std::endl;
 

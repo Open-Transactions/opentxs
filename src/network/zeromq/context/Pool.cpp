@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <source_location>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -24,14 +25,13 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "network/zeromq/context/Thread.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
@@ -121,7 +121,7 @@ auto Pool::allocate_next_batch() const noexcept -> BatchID
 
 auto Pool::BelongsToThreadPool(const std::thread::id id) const noexcept -> bool
 {
-    auto alloc = alloc::BoostMonotonic{1024};
+    auto alloc = alloc::MonotonicUnsync{1024};
     auto threads = Set<std::thread::id>{&alloc};
 
     for (const auto& [tid, thread] : threads_) { threads.emplace(thread.ID()); }
@@ -149,7 +149,8 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
                     callback(null);
                 } catch (const std::exception& e) {
-                    std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+                    std::cerr << std::source_location::current().function_name()
+                              << ": " << e.what() << std::endl;
                 }
             }
 
@@ -171,7 +172,8 @@ auto Pool::DoModify(SocketID id) noexcept -> void
 
                     callback(*socket);
                 } catch (const std::exception& e) {
-                    std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+                    std::cerr << std::source_location::current().function_name()
+                              << ": " << e.what() << std::endl;
                 }
             }
 
@@ -196,12 +198,11 @@ auto Pool::GetStartArgs(BatchID id) noexcept -> ThreadStartArgs
     }();
     auto sockets = [&] {
         auto out = ThreadStartArgs{};
-        std::transform(
-            args.begin(), args.end(), std::back_inserter(out), [](auto& val) {
-                auto& [sID, socket, cb] = val;
+        std::ranges::transform(args, std::back_inserter(out), [](auto& val) {
+            auto& [sID, socket, cb] = val;
 
-                return std::make_pair(socket, std::move(cb));
-            });
+            return std::make_pair(socket, std::move(cb));
+        });
 
         return out;
     }();
@@ -302,22 +303,20 @@ auto Pool::Modify(SocketID id, ModifyCallback cb) noexcept -> void
             map[id].emplace_back(std::move(cb));
         }
         auto& notify = socket(batchID);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::change_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::change_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (false == rc) {
 
             throw std::runtime_error{"failed to queue socket modification"};
         }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
     }
 }
 
@@ -340,8 +339,7 @@ auto Pool::Shutdown() noexcept -> void
 
         for (auto& [id, data] : notify_) {
             auto& socket = data.second;
-            socket.lock()->Send(
-                MakeWork(Operation::shutdown), __FILE__, __LINE__);
+            socket.lock()->Send(MakeWork(Operation::shutdown));
         }
     }
 }
@@ -371,15 +369,12 @@ auto Pool::Start(BatchID id, StartArgs&& sockets) noexcept
 
         auto& thread = get(id);
         auto& notify = socket(id);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::add_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::add_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (rc) {
 
@@ -388,7 +383,8 @@ auto Pool::Start(BatchID id, StartArgs&& sockets) noexcept
             throw std::runtime_error{"failed to add batch to thread"};
         }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
 
         return nullptr;
     }
@@ -422,19 +418,17 @@ auto Pool::Stop(BatchID id) noexcept -> void
         }
 
         auto& notify = socket(id);
-        const auto rc = notify.lock()->Send(
-            [&] {
-                auto out = MakeWork(Operation::remove_socket);
-                out.AddFrame(id);
+        const auto rc = notify.lock()->Send([&] {
+            auto out = MakeWork(Operation::remove_socket);
+            out.AddFrame(id);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
 
         if (false == rc) { throw std::runtime_error{"failed stop batch"}; }
     } catch (const std::exception& e) {
-        std::cerr << OT_PRETTY_CLASS() << e.what() << std::endl;
+        std::cerr << std::source_location::current().function_name() << ": "
+                  << e.what() << std::endl;
     }
 }
 

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <cstddef>
 #include <filesystem>
@@ -64,14 +62,14 @@ namespace opentxs::blockchain::node::filteroracle
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 class BlockIndexer::Imp final : public Actor<Imp, BlockIndexerJob>,
-                                public boost::enable_shared_from
+                                public std::enable_shared_from_this<Imp>
 {
 public:
     auto get_deleter() noexcept -> delete_function final
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void;
 
     Imp(std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
@@ -130,7 +128,7 @@ private:
         }
     };
 
-    using JobPointer = boost::shared_ptr<Job>;
+    using JobPointer = std::shared_ptr<Job>;
     using WorkMap = Map<block::Height, JobPointer>;
     using Index = Map<block::Hash, block::Height>;
 
@@ -162,7 +160,7 @@ private:
     Outstanding running_;
 
     static auto background(
-        boost::shared_ptr<Imp> me,
+        std::shared_ptr<Imp> me,
         JobPointer job,
         std::shared_ptr<const ScopeGuard> post) noexcept -> void;
 

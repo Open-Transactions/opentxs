@@ -10,9 +10,9 @@
 
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/asio/Socket.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::asio
 {
@@ -45,7 +45,7 @@ auto Socket::Imp::Buffer::Receive(
         type,
         notify);
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     auto& params = it->second;
 
@@ -67,7 +67,7 @@ auto Socket::Imp::Buffer::Transmit(
     auto [it, added] = map.try_emplace(
         counter, counter, boost::asio::buffer(buf.data(), buf.size()), notify);
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     auto& params = it->second;
 
@@ -113,11 +113,11 @@ auto Socket::Imp::Connect(const zeromq::Envelope& id) noexcept -> bool
 
 auto Socket::Imp::Destroy(void* imp) noexcept -> void
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 
     auto p = std::unique_ptr<Pointer>{static_cast<Pointer*>(imp)};
 
-    OT_ASSERT(p);
+    assert_false(nullptr == p);
 
     p->reset();
     p.reset();
@@ -148,7 +148,7 @@ Socket::Imp::~Imp() { Close(); }
 Socket::Socket(std::function<void*()>&& builder) noexcept
     : imp_(std::invoke(builder))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Socket::Socket(Socket&& rhs) noexcept

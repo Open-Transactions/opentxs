@@ -15,7 +15,6 @@
 #include "interface/ui/accountsummary/IssuerItem.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -83,9 +82,7 @@ auto AccountSummaryItem::qt_data(
             try {
                 out = qlonglong{Balance().Internal().ExtractInt64()};
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())("Error getting balance.")(
-                    e.what())
-                    .Flush();
+                LogError()()("Error getting balance.")(e.what()).Flush();
                 out = {};
             }
         } break;

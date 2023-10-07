@@ -19,7 +19,6 @@
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -49,7 +48,7 @@ auto WalletAPI(const api::session::Client& parent) noexcept
 
         return std::make_unique<ReturnType>(parent);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -69,7 +68,7 @@ Wallet::Wallet(const api::session::Client& parent)
     bound &=
         reply_received_->Start(api_.Endpoints().ServerReplyReceived().data());
 
-    OT_ASSERT(bound);
+    assert_true(bound);
 }
 
 auto Wallet::Context(
@@ -118,7 +117,7 @@ auto Wallet::mutable_Context(
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };
 
-    OT_ASSERT(base);
+    assert_false(nullptr == base);
 
     return {base.get(), callback};
 }
@@ -139,16 +138,18 @@ auto Wallet::mutable_ServerContext(
     };
 
     if (base) {
-        OT_ASSERT(otx::ConsensusType::Server == base->Type());
+        assert_true(otx::ConsensusType::Server == base->Type());
     } else {
         // Obtain nyms.
         const auto localNym = Nym(localNymID);
 
-        OT_ASSERT_MSG(localNym, "Local nym does not exist in the wallet.");
+        assert_false(
+            nullptr == localNym, "Local nym does not exist in the wallet.");
 
         const auto remoteNym = Nym(remoteNymID);
 
-        OT_ASSERT_MSG(remoteNym, "Remote nym does not exist in the wallet.");
+        assert_false(
+            nullptr == remoteNym, "Remote nym does not exist in the wallet.");
 
         // Create a new Context
         const ContextID contextID = {
@@ -168,11 +169,11 @@ auto Wallet::mutable_ServerContext(
         base = entry;
     }
 
-    OT_ASSERT(base);
+    assert_false(nullptr == base);
 
     auto* child = dynamic_cast<otx::context::Server*>(base.get());
 
-    OT_ASSERT(nullptr != child);
+    assert_false(nullptr == child);
 
     return {child, callback};
 }

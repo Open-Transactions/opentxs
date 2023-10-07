@@ -27,7 +27,7 @@ auto BitcoinP2PGetaddr(
 
         return pmr::construct<ReturnType>(alloc, api, chain, std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

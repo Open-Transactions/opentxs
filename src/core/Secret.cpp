@@ -9,8 +9,8 @@
 #include <utility>
 
 #include "core/SecretPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Allocator.hpp"
 
@@ -19,7 +19,7 @@ namespace opentxs
 Secret::Secret(SecretPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 Secret::Secret(const Secret& rhs) noexcept

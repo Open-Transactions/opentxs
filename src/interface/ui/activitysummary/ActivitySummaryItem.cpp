@@ -15,7 +15,6 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -87,7 +86,7 @@ ActivitySummaryItem::ActivitySummaryItem(
     newest_item_thread_ =
         std::make_unique<std::thread>(&ActivitySummaryItem::get_text, this);
 
-    OT_ASSERT(newest_item_thread_);
+    assert_false(nullptr == newest_item_thread_);
 }
 
 auto ActivitySummaryItem::DisplayName() const noexcept -> UnallocatedCString
@@ -129,8 +128,7 @@ auto ActivitySummaryItem::find_text(
 
                 return *text;
             } else {
-                LogError()(OT_PRETTY_CLASS())("Cheque item does not exist.")
-                    .Flush();
+                LogError()()("Cheque item does not exist.").Flush();
             }
         } break;
         case otx::client::StorageBox::BLOCKCHAIN: {
@@ -138,7 +136,7 @@ auto ActivitySummaryItem::find_text(
                 nym_id_, thread, itemID);
         }
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 

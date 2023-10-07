@@ -8,13 +8,14 @@
 #include <PeerRequest.pb.h>
 #include <StoreSecret.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/core/contract/peer/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::contract::peer::request::storesecret
 {
@@ -46,14 +47,14 @@ Implementation::Implementation(
             throw std::runtime_error{"too many elements"};
         }
 
-        std::copy(data.begin(), data.end(), std::back_inserter(out));
+        std::ranges::copy(data, std::back_inserter(out));
 
         return out;
     }())
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 Implementation::Implementation(
@@ -80,14 +81,14 @@ Implementation::Implementation(
             }
         }
 
-        OT_ASSERT(out.size() <= max_values_);
+        assert_true(out.size() <= max_values_);
 
         return out;
     }())
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 Implementation::Implementation(
@@ -101,7 +102,7 @@ Implementation::Implementation(
     , views_(make_views(values_))
     , self_(this)
 {
-    OT_ASSERT(values_.size() == views_.size());
+    assert_true(values_.size() == views_.size());
 }
 
 auto Implementation::id_form() const noexcept -> serialized_type
@@ -131,7 +132,7 @@ auto Implementation::make_views(const Vector<ByteArray>& in) noexcept
     static constexpr auto as_read_view = [](const auto& i) {
         return i.Bytes();
     };
-    std::transform(in.begin(), in.end(), std::back_inserter(out), as_read_view);
+    std::ranges::transform(in, std::back_inserter(out), as_read_view);
 
     return out;
 }

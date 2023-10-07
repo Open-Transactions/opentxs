@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -93,13 +92,13 @@ Envelope::Envelope()
             }();
             auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
 
-            OT_ASSERT(rNym);
+            opentxs::assert_false(nullptr == rNym);
 
             auto bytes = ot::Space{};
-            OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
+            opentxs::assert_true(rNym->Serialize(ot::writer(bytes)));
             nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
 
-            OT_ASSERT(bool(*nyms_.crbegin()));
+            opentxs::assert_false(nullptr == *nyms_.crbegin());
         }
         {
             auto params = [this] {
@@ -124,13 +123,13 @@ Envelope::Envelope()
             }();
             auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
 
-            OT_ASSERT(rNym);
+            opentxs::assert_false(nullptr == rNym);
 
             auto bytes = ot::Space{};
-            OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
+            opentxs::assert_true(rNym->Serialize(ot::writer(bytes)));
             nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
 
-            OT_ASSERT(bool(*nyms_.crbegin()));
+            opentxs::assert_false(nullptr == *nyms_.crbegin());
         }
         {
             auto params = [this] {
@@ -155,13 +154,13 @@ Envelope::Envelope()
             }();
             auto rNym = recipient_.Wallet().Nym(params, reason_r_, "");
 
-            OT_ASSERT(rNym);
+            opentxs::assert_false(nullptr == rNym);
 
             auto bytes = ot::Space{};
-            OT_ASSERT(rNym->Serialize(ot::writer(bytes)));
+            opentxs::assert_true(rNym->Serialize(ot::writer(bytes)));
             nyms_.emplace_back(sender_.Wallet().Nym(ot::reader(bytes)));
 
-            OT_ASSERT(bool(*nyms_.crbegin()));
+            opentxs::assert_false(nullptr == *nyms_.crbegin());
         }
     }
 }

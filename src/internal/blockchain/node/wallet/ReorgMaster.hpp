@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <string_view>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -91,8 +91,6 @@ public:
     ~ReorgMaster() final;
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<ReorgMasterPrivate> imp_;
+    std::shared_ptr<ReorgMasterPrivate> imp_;
 };
 }  // namespace opentxs::blockchain::node::wallet

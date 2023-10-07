@@ -11,7 +11,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
@@ -45,7 +44,7 @@ NumericHashPrivate::NumericHashPrivate(std::uint32_t input) noexcept
 
             return target;
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("failed to calculate target").Flush();
+            LogError()()("failed to calculate target").Flush();
 
             return {};
         }
@@ -67,7 +66,7 @@ NumericHashPrivate::NumericHashPrivate(const Data& data) noexcept
 
             return value;
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("failed to decode hash").Flush();
+            LogError()()("failed to decode hash").Flush();
 
             return {};
         }
@@ -90,7 +89,7 @@ auto NumericHashPrivate::asHex(const std::size_t minimumBytes) const noexcept
         boost::multiprecision::export_bits(
             data_, std::back_inserter(bytes), 8, true);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encode number").Flush();
+        LogError()()("Failed to encode number").Flush();
 
         return {};
     }

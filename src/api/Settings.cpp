@@ -13,7 +13,6 @@
 #include <utility>
 
 #include "internal/api/Legacy.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -84,21 +83,18 @@ Settings::Settings(const api::Legacy& legacy, const String& strConfigFilePath)
     , configuration_file_exact_path_(strConfigFilePath)
 {
     if (!configuration_file_exact_path_->Exists()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error: configuration_file_exact_path_ is empty!")
-            .Flush();
-        OT_FAIL;
+        LogError()()("Error: configuration_file_exact_path_ is empty!").Flush();
+        LogAbort()().Abort();
     }
 
-    if (!Init()) { OT_FAIL; }
+    if (!Init()) { LogAbort()().Abort(); }
 }
 
 auto Settings::Init() -> bool
 {
     // First Load, Create new fresh config file if failed loading.
     if (!Load()) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "No existing configuration. Creating a new file.")
+        LogConsole()()("No existing configuration. Creating a new file.")
             .Flush();
         if (!Reset()) { return false; }
         if (!Save()) { return false; }
@@ -108,10 +104,10 @@ auto Settings::Init() -> bool
 
     // Second Load, Throw Assert if Failed loading.
     if (!Load()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Unable to load config file. It should exist, as we just saved it!")
             .Flush();
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return true;
@@ -120,22 +116,20 @@ auto Settings::Init() -> bool
 auto Settings::Load(const String& strConfigurationFileExactPath) const -> bool
 {
     if (!strConfigurationFileExactPath.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strConfigurationFileExactPath is empty!")
-            .Flush();
+        LogError()()("strConfigurationFileExactPath is empty!").Flush();
         return false;
     }
 
     if (!legacy_.BuildFilePath(strConfigurationFileExactPath.Get())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to construct path ")(
-            strConfigurationFileExactPath)
+        LogError()()("Failed to construct path ")(strConfigurationFileExactPath)
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     if (!IsEmpty()) {
-        LogError()(OT_PRETTY_CLASS())("p_Settings is not empty!").Flush();
-        OT_FAIL;
+        LogError()()("p_Settings is not empty!").Flush();
+        LogAbort()().Abort();
     }
 
     auto lFilelength = 0_uz;
@@ -168,9 +162,7 @@ auto Settings::Load(const String& strConfigurationFileExactPath) const -> bool
 auto Settings::Save(const String& strConfigurationFileExactPath) const -> bool
 {
     if (!strConfigurationFileExactPath.Exists()) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error: strConfigurationFileExactPath is empty!")
-            .Flush();
+        LogError()()("Error: strConfigurationFileExactPath is empty!").Flush();
         return false;
     }
 
@@ -189,12 +181,12 @@ auto Settings::LogChange_str(
     const String& strValue) const -> bool
 {
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection  is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection  is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* const szValue = (strValue.Exists() && !strValue.Compare(""))
@@ -205,8 +197,8 @@ auto Settings::LogChange_str(
     if (!StringFill(strCategory, strSection.Get(), 12)) { return false; }
     if (!StringFill(strOption, strKey.Get(), 30, " to:")) { return false; }
 
-    LogDetail()(OT_PRETTY_CLASS())("Setting ")(strCategory.get())(" ")(
-        strOption.get())(" ")(szValue)
+    LogDetail()()("Setting ")(strCategory.get())(" ")(strOption.get())(" ")(
+        szValue)
         .Flush();
     return true;
 }
@@ -272,21 +264,21 @@ auto Settings::Check_str(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strSection.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strSection is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strKey.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strKey is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* szVar =
@@ -313,21 +305,21 @@ auto Settings::Check_long(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strSection.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strSection is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strKey.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strKey is Blank!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is Blank!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* szVar =
@@ -355,21 +347,21 @@ auto Settings::Check_bool(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strSection.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strSection is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strKey.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strKey is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* szVar =
@@ -411,21 +403,21 @@ auto Settings::Set_str(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection  is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection  is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strSection.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strSection is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strKey.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strKey is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* const szValue =
@@ -483,7 +475,7 @@ auto Settings::Set_str(
     }
 
     // If we get here, error!
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto Settings::Set_long(
@@ -505,21 +497,21 @@ auto Settings::Set_long(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strSection.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strSection is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (strKey.Compare("")) {
-        LogError()(OT_PRETTY_CLASS())("strKey is blank!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is blank!").Flush();
+        LogAbort()().Abort();
     }
 
     auto strValue = String::Factory();
@@ -571,7 +563,7 @@ auto Settings::Set_long(
     }
 
     // If we get here, error!
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto Settings::Set_bool(
@@ -593,12 +585,12 @@ auto Settings::Set_bool(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
     const auto strValue = String::Factory(bValue ? "true" : "false");
 
@@ -613,12 +605,12 @@ auto Settings::CheckSetSection(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strComment.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strComment is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strComment is empty!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* const szComment =
@@ -689,12 +681,12 @@ auto Settings::CheckSet_str(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection  is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection  is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
 
     const char* const szDefault =
@@ -736,7 +728,7 @@ auto Settings::CheckSet_str(
     }
 
     // If we get here, error!
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto Settings::CheckSet_long(
@@ -761,12 +753,12 @@ auto Settings::CheckSet_long(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection  is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection  is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
 
     std::int64_t lTempResult = 0;
@@ -794,7 +786,7 @@ auto Settings::CheckSet_long(
     }
 
     // If we get here, error!
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto Settings::CheckSet_bool(
@@ -819,12 +811,12 @@ auto Settings::CheckSet_bool(
     rLock lock(lock_);
 
     if (!strSection.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strSection is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strSection is empty!").Flush();
+        LogAbort()().Abort();
     }
     if (!strKey.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("strKey is empty!").Flush();
-        OT_FAIL;
+        LogError()()("strKey is empty!").Flush();
+        LogAbort()().Abort();
     }
 
     bool bKeyExist = false, bTempResult = false;
@@ -851,7 +843,7 @@ auto Settings::CheckSet_bool(
     }
 
     // If we get here, error!
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto Settings::SetOption_bool(
@@ -962,9 +954,7 @@ Settings::~Settings()
 {
     rLock lock(lock_);
 
-    if (false == Save()) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
-    }
+    if (false == Save()) { LogAbort()()("failed to save config file").Abort(); }
 
     Reset();
 }

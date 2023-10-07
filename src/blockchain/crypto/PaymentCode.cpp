@@ -28,7 +28,6 @@
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -69,7 +68,7 @@ auto BlockchainPCSubaccount(
         return std::make_unique<ReturnType>(
             api, contacts, parent, local, remote, path, reason, id);
     } catch (const std::exception& e) {
-        LogVerbose()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -88,14 +87,14 @@ auto BlockchainPCSubaccount(
         api.Factory().InternalSession().PaymentCode(serialized.remote()),
         parent.Chain());
 
-    OT_ASSERT(false == contact.empty());
+    assert_false(contact.empty());
 
     try {
 
         return std::make_unique<ReturnType>(
             api, contacts, parent, serialized, id, std::move(contact));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -282,7 +281,7 @@ auto PaymentCode::has_private(const PasswordPrompt& reason) const noexcept
     const auto& key = local_.get().Key();
 
     if (false == key.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("No local HD key").Flush();
+        LogError()()("No local HD key").Flush();
 
         return false;
     }
@@ -323,7 +322,7 @@ auto PaymentCode::PrivateKey(
     -> const opentxs::crypto::asymmetric::key::EllipticCurve
 {
     if (false == has_private(reason)) {
-        LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
+        LogError()()("Missing private key").Flush();
 
         return {};
     }
@@ -338,7 +337,7 @@ auto PaymentCode::PrivateKey(
             return local_.get().Incoming(remote_.get(), index, chain_, reason);
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid subchain").Flush();
+            LogError()()("Invalid subchain").Flush();
 
             return {};
         }
@@ -385,16 +384,14 @@ auto PaymentCode::save(const rLock& lock) const noexcept -> bool
     serialize_deterministic(lock, *serialized.mutable_deterministic());
     auto local = proto::PaymentCode{};
     if (false == local_.get().Internal().Serialize(local)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize local paymentcode")
-            .Flush();
+        LogError()()("Failed to serialize local paymentcode").Flush();
 
         return false;
     }
     *serialized.mutable_local() = local;
     auto remote = proto::PaymentCode{};
     if (false == remote_.get().Internal().Serialize(remote)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize remote paymentcode")
-            .Flush();
+        LogError()()("Failed to serialize remote paymentcode").Flush();
 
         return false;
     }
@@ -432,8 +429,7 @@ auto PaymentCode::save(const rLock& lock) const noexcept -> bool
         api_.Storage().Internal().Store(parent_.NymID(), id_, serialized);
 
     if (false == saved) {
-        LogError()(OT_PRETTY_CLASS())("Failed to save PaymentCode account")
-            .Flush();
+        LogError()()("Failed to save PaymentCode account").Flush();
 
         return false;
     }

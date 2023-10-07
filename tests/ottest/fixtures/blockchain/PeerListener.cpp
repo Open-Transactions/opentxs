@@ -13,7 +13,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 
 namespace ottest
@@ -40,17 +39,17 @@ struct PeerListener::Imp {
 
             switch (payload[0].as<ot::WorkType>()) {
                 case ot::WorkType::BlockchainPeerAdded: {
-                    OT_ASSERT(3 < payload.size());
+                    opentxs::assert_true(3 < payload.size());
 
                     return payload[3].as<std::size_t>();
                 }
                 case ot::WorkType::BlockchainPeerConnected: {
-                    OT_ASSERT(2 < payload.size());
+                    opentxs::assert_true(2 < payload.size());
 
                     return payload[2].as<std::size_t>();
                 }
                 default: {
-                    OT_FAIL;
+                    opentxs::LogAbort()().Abort();
                 }
             }
         }());

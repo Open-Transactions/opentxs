@@ -31,17 +31,16 @@ Log::Log(Imp* imp) noexcept
 
 auto Log::Abort() const noexcept -> void { imp_->Abort(); }
 
-auto Log::Assert(const char* file, const std::size_t line) noexcept -> void
+auto Log::Assert(const std::source_location& loc) noexcept -> void
 {
-    Assert(file, line, nullptr);
+    Assert({}, loc);
 }
 
 auto Log::Assert(
-    const char* file,
-    const std::size_t line,
-    const char* message) noexcept -> void
+    std::string_view message,
+    const std::source_location& loc) noexcept -> void
 {
-    LogError().imp_->Assert(file, line, message);
+    LogError().imp_->Assert(loc, message);
 }
 
 auto Log::asHex(const Data& in) const noexcept -> const Log&
@@ -64,7 +63,13 @@ auto Log::Internal() const noexcept -> const internal::Log& { return *imp_; }
 
 auto Log::Internal() noexcept -> internal::Log& { return *imp_; }
 
-auto Log::operator()() const noexcept -> const Log& { return *this; }
+auto Log::operator()(const std::source_location& loc) const noexcept
+    -> const Log&
+{
+    imp_->Buffer(loc);
+
+    return *this;
+}
 
 auto Log::operator()(char* in) const noexcept -> const Log&
 {
@@ -229,17 +234,16 @@ auto Log::operator()(const std::string_view in) const noexcept -> const Log&
     return *this;
 }
 
-auto Log::Trace(const char* file, const std::size_t line) noexcept -> void
+auto Log::Trace(const std::source_location& loc) noexcept -> void
 {
-    Trace(file, line, nullptr);
+    Trace({}, loc);
 }
 
 auto Log::Trace(
-    const char* file,
-    const std::size_t line,
-    const char* message) noexcept -> void
+    std::string_view message,
+    const std::source_location& loc) noexcept -> void
 {
-    LogError().imp_->Trace(file, line, message);
+    LogError().imp_->Trace(loc, message);
 }
 
 Log::~Log()
@@ -253,6 +257,34 @@ Log::~Log()
 
 namespace opentxs
 {
+auto assert_true(bool expression, const std::source_location& loc) noexcept
+    -> void
+{
+    assert_true(expression, "assertion failure", loc);
+}
+
+auto assert_true(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc) noexcept -> void
+{
+    if (false == expression) { LogAbort()(loc)(message).Abort(); }
+}
+
+auto assert_false(bool expression, const std::source_location& loc) noexcept
+    -> void
+{
+    assert_false(expression, "assertion failure", loc);
+}
+
+auto assert_false(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc) noexcept -> void
+{
+    if (expression) { LogAbort()(loc)(message).Abort(); }
+}
+
 auto LogAbort() noexcept -> Log&
 {
     static auto logger = Log{std::make_unique<Log::Imp>(-2).release()};

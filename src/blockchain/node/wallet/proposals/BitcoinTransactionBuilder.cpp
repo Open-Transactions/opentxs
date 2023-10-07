@@ -7,9 +7,9 @@
 
 #include "blockchain/node/wallet/proposals/BitcoinTransactionBuilderPrivate.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {
@@ -30,7 +30,7 @@ BitcoinTransactionBuilder::BitcoinTransactionBuilder(
           proposal,
           promise))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto BitcoinTransactionBuilder::operator()() noexcept -> BuildResult

@@ -9,7 +9,7 @@
 #include <future>
 #include <thread>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -62,19 +62,19 @@ struct Ticket::Imp {
 Gatekeeper::Gatekeeper() noexcept
     : imp_(std::make_unique<Imp>())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Ticket::Ticket(Gatekeeper::Imp& parent) noexcept
     : imp_(std::make_unique<Imp>(parent))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Ticket::Ticket(Ticket&& rhs) noexcept
     : imp_(rhs.imp_.release())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Gatekeeper::get() const noexcept -> Ticket { return Ticket{*imp_}; }
@@ -100,7 +100,7 @@ auto Gatekeeper::shutdown() noexcept -> void
         }
     }
 
-    OT_ASSERT(0 <= jobs);
+    assert_true(0 <= jobs);
 
     const auto target = shutdown - jobs;
 

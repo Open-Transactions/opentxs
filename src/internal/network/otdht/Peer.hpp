@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <string_view>
 
@@ -36,7 +35,7 @@ public:
 
     Peer(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Node::Shared> shared,
+        std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,
         std::string_view fromNode) noexcept;
@@ -49,6 +48,6 @@ public:
     ~Peer();
 
 private:
-    boost::shared_ptr<Actor> actor_;
+    std::shared_ptr<Actor> actor_;
 };
 }  // namespace opentxs::network::otdht

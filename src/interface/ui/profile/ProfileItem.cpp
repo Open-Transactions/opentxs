@@ -9,7 +9,6 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -18,6 +17,7 @@
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
@@ -86,7 +86,7 @@ auto ProfileItem::reindex(
     item_ = std::make_unique<identity::wot::claim::Item>(
         extract_custom<identity::wot::claim::Item>(custom));
 
-    OT_ASSERT(item_);
+    assert_false(nullptr == item_);
 
     return true;
 }

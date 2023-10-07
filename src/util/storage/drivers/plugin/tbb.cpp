@@ -11,8 +11,8 @@
 #include <memory>
 
 #include "TBB.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
@@ -20,14 +20,13 @@ auto Plugin::empty_bucket(Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
     tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, out.size()},
-        [&, this](const auto& r) {
+        tbb::blocked_range<std::size_t>{0_uz, out.size()}, [&](const auto& r) {
             for (auto i = r.begin(); i != r.end(); ++i) {
                 auto& [driver, result] = out[i];
                 result = driver->EmptyBucket(bucket);
 
                 if (false == result) {
-                    LogError()(OT_PRETTY_CLASS())("error emptying bucket in ")(
+                    LogError()()("error emptying bucket in ")(
                         driver->Description())(" driver")
                         .Flush();
                 }
@@ -82,8 +81,8 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
                 result = driver->Commit(root, data, bucket);
 
                 if (false == result) {
-                    LogError()(OT_PRETTY_CLASS())("error committing to ")(
-                        driver->Description())(" driver")
+                    LogError()()("error committing to ")(driver->Description())(
+                        " driver")
                         .Flush();
                 }
             }
@@ -96,15 +95,14 @@ auto Plugin::store(Transaction data, Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
     tbb::parallel_for(
-        tbb::blocked_range<std::size_t>{0_uz, out.size()},
-        [&, this](const auto& r) {
+        tbb::blocked_range<std::size_t>{0_uz, out.size()}, [&](const auto& r) {
             for (auto i = r.begin(); i != r.end(); ++i) {
                 auto& [driver, result] = out[i];
                 result = driver->Store(data, bucket);
 
                 if (false == result) {
-                    LogError()(OT_PRETTY_CLASS())("error storing to ")(
-                        driver->Description())(" driver")
+                    LogError()()("error storing to ")(driver->Description())(
+                        " driver")
                         .Flush();
                 }
             }

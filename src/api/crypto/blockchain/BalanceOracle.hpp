@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <functional>
 #include <memory>
 #include <string_view>
@@ -48,10 +47,7 @@ namespace opentxs::api::crypto::blockchain
 class BalanceOracle::Imp final : public opentxs::Actor<Imp, BalanceOracleJobs>
 {
 public:
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void { signal_startup(me); }
 
     auto get_deleter() noexcept -> delete_function final
     {

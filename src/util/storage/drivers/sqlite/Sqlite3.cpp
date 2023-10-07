@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -19,7 +20,6 @@
 #include <utility>
 #include <variant>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
@@ -43,7 +43,7 @@ auto StorageSqlite3(
 
         return std::make_unique<ReturnType>(crypto, config);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -93,12 +93,12 @@ Sqlite3::Data::Data(const storage::Config& config) noexcept(false)
             try {
                 this->execute(s);
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
     }
 }
 
@@ -123,8 +123,8 @@ auto Sqlite3::Data::bind_key(
     ReadView key,
     const std::size_t start) const noexcept(false) -> UnallocatedCString
 {
-    OT_ASSERT(std::numeric_limits<int>::max() >= key.size());
-    OT_ASSERT(std::numeric_limits<int>::max() >= start);
+    assert_true(std::numeric_limits<int>::max() >= key.size());
+    assert_true(std::numeric_limits<int>::max() >= start);
 
     sqlite3_stmt* statement{nullptr};
     auto rc = ::sqlite3_prepare_v2(
@@ -234,16 +234,16 @@ auto Sqlite3::Data::EmptyBucket(Bucket bucket) noexcept -> bool
             try {
                 this->execute(s);
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
 
         return out;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -280,7 +280,7 @@ auto Sqlite3::Data::get_table_name(Bucket bucket) const noexcept
             return config_.sqlite3_secondary_bucket_;
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("invalid bucket").Abort();
+            LogAbort()()("invalid bucket").Abort();
         }
     }
 }
@@ -452,14 +452,12 @@ auto Sqlite3::Data::select(ReadView key, ReadView tablename, Writer& value)
                     }
                 } break;
                 case SQLITE_BUSY: {
-                    LogError()(OT_PRETTY_CLASS())("Busy.").Flush();
+                    LogError()()("Busy.").Flush();
                     result = ::sqlite3_step(statement);
                     --retry;
                 } break;
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Unknown error (")(
-                        result)(").")
-                        .Flush();
+                    LogError()()("Unknown error (")(result)(").").Flush();
                     result = ::sqlite3_step(statement);
                     --retry;
                 }
@@ -471,7 +469,7 @@ auto Sqlite3::Data::select(ReadView key, ReadView tablename, Writer& value)
 
         return success;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -500,8 +498,7 @@ auto Sqlite3::Data::store(
             const auto& in = data.first;
             auto out = Vector<UnallocatedCString>{};
             out.reserve(in.size());
-            std::transform(
-                in.begin(), in.end(), std::back_inserter(out), to_string);
+            std::ranges::transform(in, std::back_inserter(out), to_string);
 
             return out;
         }();
@@ -521,16 +518,16 @@ auto Sqlite3::Data::store(
             try {
                 this->execute(s);
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
                 out = false;
             }
         };
-        std::for_each(sql.begin(), sql.end(), execute);
-        std::for_each(sql.begin(), sql.end(), ::sqlite3_finalize);
+        std::ranges::for_each(sql, execute);
+        std::ranges::for_each(sql, ::sqlite3_finalize);
 
         return out;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

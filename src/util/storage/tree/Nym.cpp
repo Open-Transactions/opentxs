@@ -16,6 +16,7 @@
 #include <StorageNym.pb.h>
 #include <StoragePurse.pb.h>
 #include <functional>
+#include <source_location>
 #include <stdexcept>
 #include <variant>
 
@@ -27,7 +28,6 @@
 #include "internal/serialization/protobuf/verify/Purse.hpp"
 #include "internal/serialization/protobuf/verify/StorageNym.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -62,15 +62,15 @@ void Nym::_save(
     std::mutex& mutex,
     Hash& root)
 {
-    OT_ASSERT(mail_inbox_);
-    OT_ASSERT(mail_outbox_);
+    assert_false(nullptr == mail_inbox_);
+    assert_false(nullptr == mail_outbox_);
 
     _save(mail_inbox_.get(), lock, mail_inbox_lock_, mail_inbox_root_);
     _save(mail_outbox_.get(), lock, mail_outbox_lock_, mail_outbox_root_);
 
     if (nullptr == input) {
-        LogError()(OT_PRETTY_CLASS())("Null target.").Flush();
-        OT_FAIL;
+        LogError()()("Null target.").Flush();
+        LogAbort()().Abort();
     }
 
     Lock rootLock(mutex);
@@ -78,8 +78,8 @@ void Nym::_save(
     rootLock.unlock();
 
     if (false == save(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Save error.").Flush();
-        OT_FAIL;
+        LogError()()("Save error.").Flush();
+        LogAbort()().Abort();
     }
 }
 
@@ -90,7 +90,13 @@ Nym::Nym(
     const identifier::Nym& id,
     const Hash& hash,
     std::string_view alias)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          current_version_)
     , alias_(alias)
     , nymid_(id)
     , credentials_(NullHash{})
@@ -206,8 +212,8 @@ auto Nym::construct(
         pointer.reset(new T(crypto_, factory_, plugin_, root, params...));
 
         if (!pointer) {
-            LogError()(OT_PRETTY_CLASS())("Unable to instantiate.").Flush();
-            OT_FAIL;
+            LogError()()("Unable to instantiate.").Flush();
+            LogAbort()().Abort();
         }
     }
 
@@ -233,13 +239,12 @@ auto Nym::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
     out.reserve(out.size() + purse_id_.size() + 1_uz);
 
     for (const auto& [_, hash] : purse_id_) {
-        log(OT_PRETTY_CLASS())(name_)("adding purse hash ")(hash).Flush();
+        log()(name_)("adding purse hash ")(hash).Flush();
         out.emplace_back(hash);
     }
 
     if (is_valid(credentials_)) {
-        log(OT_PRETTY_CLASS())(name_)("adding credential hash ")(credentials_)
-            .Flush();
+        log()(name_)("adding credential hash ")(credentials_).Flush();
         out.emplace_back(credentials_);
     }
 
@@ -466,7 +471,7 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
             case 1u:
             default: {
                 if (nymid_ != factory_.IdentifierFromBase58(proto.nymid())) {
-                    LogAbort()(OT_PRETTY_CLASS())("nym id mismatch").Abort();
+                    LogAbort()()("nym id mismatch").Abort();
                 }
 
                 credentials_ = read(proto.credlist().hash());
@@ -484,8 +489,8 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -509,7 +514,7 @@ auto Nym::Load(
         using enum ErrorReporting;
 
         if (verbose == checking) {
-            LogError()(OT_PRETTY_CLASS())("Account does not exist.").Flush();
+            LogError()()("Account does not exist.").Flush();
         }
 
         return false;
@@ -530,8 +535,8 @@ auto Nym::Load(
 
     if (!is_valid(credentials_)) {
         if (verbose == checking) {
-            LogError()(OT_PRETTY_CLASS())("Error: nym with id ")(
-                nymid_, crypto_)(" has no credentials.")
+            LogError()()("Error: nym with id ")(nymid_, crypto_)(
+                " has no credentials.")
                 .Flush();
         }
 
@@ -561,9 +566,7 @@ auto Nym::Load(
     using enum ErrorReporting;
 
     if (purse_id_.end() == it) {
-        if (verbose == checking) {
-            LogError()(OT_PRETTY_CLASS())("Purse not found ").Flush();
-        }
+        if (verbose == checking) { LogError()()("Purse not found ").Flush(); }
 
         return false;
     }
@@ -678,7 +681,7 @@ auto Nym::mutable_Threads(
 {
     auto* threads = this->threads();
 
-    OT_ASSERT(threads);
+    assert_true(threads);
 
     if (add) {
         threads->AddIndex(txid, contact);
@@ -742,8 +745,8 @@ auto Nym::ProcessedReplyBox() const -> const PeerReplies&
 auto Nym::save(const Lock& lock) const -> bool
 {
     if (!verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
-        OT_FAIL;
+        LogError()()("Lock failure.").Flush();
+        LogAbort()().Abort();
     }
 
     auto serialized = serialize();
@@ -757,13 +760,13 @@ template <typename O>
 void Nym::_save(O* input, const Lock& lock, std::mutex& mutex, Hash& root)
 {
     if (!verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
-        OT_FAIL;
+        LogError()()("Lock failure.").Flush();
+        LogAbort()().Abort();
     }
 
     if (nullptr == input) {
-        LogError()(OT_PRETTY_CLASS())("Null target.").Flush();
-        OT_FAIL;
+        LogError()()("Null target.").Flush();
+        LogAbort()().Abort();
     }
 
     Lock rootLock(mutex);
@@ -771,8 +774,8 @@ void Nym::_save(O* input, const Lock& lock, std::mutex& mutex, Hash& root)
     rootLock.unlock();
 
     if (false == save(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Save error.").Flush();
-        OT_FAIL;
+        LogError()()("Save error.").Flush();
+        LogAbort()().Abort();
     }
 }
 
@@ -835,7 +838,7 @@ auto Nym::serialize() const -> proto::StorageNym
     }
 
     for (const auto& it : blockchain_accounts_) {
-        OT_ASSERT(it.second);
+        assert_false(nullptr == it.second);
 
         const auto& account = *it.second;
         *proto.add_hdaccount() = account;
@@ -872,13 +875,13 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
         factory_.AccountIDFromBase58(data.deterministic().common().id());
 
     if (accountID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account ID.").Flush();
+        LogError()()("Invalid account ID.").Flush();
 
         return false;
     }
 
     if (false == proto::Validate(data, VERBOSE)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid account.").Flush();
+        LogError()()("Invalid account.").Flush();
 
         return false;
     }
@@ -896,9 +899,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
 
         if (existing->deterministic().common().revision() >
             data.deterministic().common().revision()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Not saving object with older revision.")
-                .Flush();
+            LogError()()("Not saving object with older revision.").Flush();
         } else {
             existing = std::make_shared<proto::HDAccount>(data);
         }

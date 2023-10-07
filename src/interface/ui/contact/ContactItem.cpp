@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -40,7 +40,7 @@ ContactItem::ContactItem(
     , item_{new identity::wot::claim::Item(
           extract_custom<identity::wot::claim::Item>(custom))}
 {
-    OT_ASSERT(item_);
+    assert_false(nullptr == item_);
 }
 
 auto ContactItem::reindex(
@@ -51,7 +51,7 @@ auto ContactItem::reindex(
     item_ = std::make_unique<identity::wot::claim::Item>(
         extract_custom<identity::wot::claim::Item>(custom));
 
-    OT_ASSERT(item_);
+    assert_false(nullptr == item_);
 
     return true;
 }

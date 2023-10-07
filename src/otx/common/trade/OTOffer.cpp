@@ -17,7 +17,6 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -216,9 +215,8 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                               // below error to fire.
 
         if (!isPowerOfTen(lScale)) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failure: marketScale *must* be "
-                "1, or a power of 10. Instead I got: ")(lScale)(".")
+            LogConsole()()("Failure: marketScale *must* be "
+                           "1, or a power of 10. Instead I got: ")(lScale)(".")
                 .Flush();
             return (-1);
         } else {
@@ -237,8 +235,8 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         if (!strPriceLimit->Exists())
         //      if (lPriceLimit < 1)
         {
-            LogConsole()(OT_PRETTY_CLASS())("Failure: priceLimit *must* be "
-                                            "provided(")(lPriceLimit)(").")
+            LogConsole()()("Failure: priceLimit *must* be "
+                           "provided(")(lPriceLimit)(").")
                 .Flush();
             return (-1);
         } else {
@@ -253,7 +251,7 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                               // the 0 here causes the
                                               // below error to fire.
         if (lTotal < 1) {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Failure: totalAssetsOnOffer "
                 "*must* be larger than 0. Instead I got: ")(lTotal)(".")
                 .Flush();
@@ -269,9 +267,8 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                   : 0;  // if it doesn't exist, the 0 here
                                         // causes the below error to fire.
         if (lFinished < 0) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Failure: finishedSoFar *must* "
-                "be 0 or larger. Instead I got: ")(lFinished)(".")
+            LogConsole()()("Failure: finishedSoFar *must* "
+                           "be 0 or larger. Instead I got: ")(lFinished)(".")
                 .Flush();
             return (-1);
         } else {
@@ -288,7 +285,7 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         // logically be higher than the
         // total assets on offer...
         {
-            LogConsole()(OT_PRETTY_CLASS())(
+            LogConsole()()(
                 "Failure: minimumIncrement "
                 "*must* be 1 or larger, "
                 "and must also be less than the total assets on offer. "
@@ -319,7 +316,7 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                   : Time{};
 
         if ((tValidTo < tValidFrom) && (tValidTo != Time{})) {
-            LogConsole()(OT_PRETTY_CLASS())("Failure: validTo date (")(
+            LogConsole()()("Failure: validTo date (")(
                 tValidFrom)(") cannot be earlier than "
                             "validFrom date (")(tValidTo)(").")
                 .Flush();
@@ -332,7 +329,7 @@ auto OTOffer::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         const auto unittype =
             api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
                 GetInstrumentDefinitionID());
-        LogTrace()(OT_PRETTY_CLASS())("Offer Transaction Number: ")(
+        LogTrace()()("Offer Transaction Number: ")(
             transaction_num_)("\n Valid From: ")(tValidFrom)("\n Valid To: ")(
             tValidTo)("\n InstrumentDefinitionID: ")(
             strInstrumentDefinitionID.get())("\n  CurrencyTypeID: ")(

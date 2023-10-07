@@ -35,7 +35,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -279,12 +278,9 @@ auto Input::AssociatedRemoteContacts(
     Set<identifier::Generic>& output) const noexcept -> void
 {
     const auto hashes = script_.Internal().LikelyPubkeyHashes(api.Crypto());
-    std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& hash) {
+    std::ranges::for_each(hashes, [&](const auto& hash) {
         auto contacts = api.Crypto().Blockchain().LookupContacts(hash);
-        std::move(
-            std::begin(contacts),
-            std::end(contacts),
-            std::inserter(output, output.end()));
+        std::ranges::move(contacts, std::inserter(output, output.end()));
     });
 
     auto payer = cache_.lock()->payer();
@@ -369,7 +365,7 @@ auto Input::ConfirmMatches(
         using enum crypto::Subchain;
 
         if (Outgoing == subchain) {
-            LogAbort()(OT_PRETTY_CLASS())(
+            LogAbort()()(
                 "critical database error: outputs owed by a payment code "
                 "recipient were recorded as spendable by the sender")
                 .Abort();
@@ -379,8 +375,7 @@ auto Input::ConfirmMatches(
         auto key = crypto::Key{{subaccount, alloc}, subchain, index};
 
         if (outpoint == previous_) {
-            log(OT_PRETTY_CLASS())("found spend of previous output ")(previous_)
-                .Flush();
+            log()("found spend of previous output ")(previous_).Flush();
             cache.add(std::move(key));
 
             return true;
@@ -469,7 +464,7 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
 
     switch (style) {
         case cfilter::Type::ES: {
-            LogTrace()(OT_PRETTY_CLASS())("processing input script").Flush();
+            LogTrace()()("processing input script").Flush();
             script_.Internal().ExtractElements(style, out);
 
             if (false == witness_.empty()) {
@@ -495,8 +490,7 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
                     if (sub.IsValid()) {
                         sub.Internal().ExtractElements(style, out);
                     } else if (Redeem::MaybeP2WSH != type) {
-                        LogError()(OT_PRETTY_CLASS())("Invalid redeem script")
-                            .Flush();
+                        LogError()()("Invalid redeem script").Flush();
                     }
                 }
             }
@@ -504,15 +498,14 @@ auto Input::ExtractElements(const cfilter::Type style, Elements& out)
             [[fallthrough]];
         }
         case cfilter::Type::Basic_BCHVariant: {
-            LogTrace()(OT_PRETTY_CLASS())("processing consumed outpoint")
-                .Flush();
+            LogTrace()()("processing consumed outpoint").Flush();
             const auto* it = reinterpret_cast<const std::byte*>(&previous_);
             out.emplace_back(it, it + sizeof(previous_));
         } break;
         case cfilter::Type::Basic_BIP158:
         case cfilter::Type::UnknownCfilter:
         default: {
-            LogTrace()(OT_PRETTY_CLASS())("skipping input").Flush();
+            LogTrace()()("skipping input").Flush();
         }
     }
 }
@@ -522,7 +515,7 @@ auto Input::ExtractElements(const cfilter::Type style, alloc::Default alloc)
 {
     auto out = Elements{alloc};
     ExtractElements(style, out);
-    std::sort(out.begin(), out.end());
+    std::ranges::sort(out);
 
     return out;
 }
@@ -547,7 +540,7 @@ auto Input::FindMatches(
         const auto& [index, subchainID] = element;
         const auto& [subchain, account] = subchainID;
         cache_.lock()->add({account, subchain, index});
-        log(OT_PRETTY_CLASS())("input ")(position)(" of transaction ")
+        log()("input ")(position)(" of transaction ")
             .asHex(txid)(" spends ")(Outpoint{reader(outpoint)})
             .Flush();
     }
@@ -625,7 +618,7 @@ auto Input::IndexElements(const api::Session& api, ElementHashes& out)
 {
     // TODO monotonic allocator
     const auto& keys = get_pubkeys(api, {});
-    std::copy(keys.begin(), keys.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys, std::inserter(out, out.end()));
 }
 
 auto Input::index_elements(
@@ -640,10 +633,7 @@ auto Input::index_elements(
 
         return out;
     }();
-    std::move(
-        std::begin(patterns),
-        std::end(patterns),
-        std::inserter(hashes, hashes.end()));
+    std::ranges::move(patterns, std::inserter(hashes, hashes.end()));
 }
 
 auto Input::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
@@ -779,7 +769,7 @@ auto Input::ReplaceScript() noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -815,7 +805,7 @@ auto Input::serialize(Writer&& destination, const bool normalized)
 
         return size;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }

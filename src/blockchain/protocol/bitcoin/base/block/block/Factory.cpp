@@ -134,7 +134,7 @@ auto BitcoinBlock(
             }
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc.result_};
     }
@@ -150,9 +150,7 @@ auto BitcoinBlock(
     using blockchain::block::Parser;
 
     if (false == Parser::Construct(crypto, chain, in, out, alloc)) {
-        LogError()("opentxs::factory::")(__func__)(": failed to deserialize ")(
-            print(chain))(" block")
-            .Flush();
+        LogError()()("failed to deserialize ")(print(chain))(" block").Flush();
 
         return {alloc.result_};
     }
@@ -185,7 +183,7 @@ auto BitcoinBlock(
             std::move(transactions),
             std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

@@ -23,7 +23,6 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Base.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -334,9 +333,8 @@ auto Message::HarvestTransactionNumbers(
                      // ledger from *this.
 
     if (!strLedger->Exists() || !theLedger->LoadLedgerFromString(strLedger)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "ERROR: Failed trying to load message ledger: ")(strLedger.get())(
-            ".")
+        LogError()()("ERROR: Failed trying to load message ledger: ")(
+            strLedger.get())(".")
             .Flush();
         return false;
     }
@@ -345,7 +343,7 @@ auto Message::HarvestTransactionNumbers(
     // we can...
     for (const auto& it : theLedger->GetTransactionMap()) {
         auto pTransaction = it.second;
-        OT_ASSERT(false != bool(pTransaction));
+        assert_true(false != bool(pTransaction));
 
         // NOTE: You would ONLY harvest the transaction numbers if your
         // request failed.
@@ -533,8 +531,8 @@ auto Message::processXmlNodeAckReplies(
 {
     auto strDepth = String::Factory();
     if (!LoadEncodedTextField(api_.Crypto(), xml, strDepth)) {
-        LogError()(OT_PRETTY_CLASS())("Error: ackReplies field "
-                                      "without value.")
+        LogError()()("Error: ackReplies field "
+                     "without value.")
             .Flush();
         return (-1);  // error condition
     }
@@ -550,8 +548,8 @@ auto Message::processXmlNodeAcknowledgedReplies(
     [[maybe_unused]] Message& m,
     irr::io::IrrXMLReader*& xml) -> std::int32_t
 {
-    LogError()(OT_PRETTY_CLASS())("SKIPPING DEPRECATED FIELD: "
-                                  "acknowledgedReplies.")
+    LogError()()("SKIPPING DEPRECATED FIELD: "
+                 "acknowledgedReplies.")
         .Flush();
 
     while (xml->getNodeType() != irr::io::EXN_ELEMENT_END) { xml->read(); }
@@ -571,8 +569,7 @@ auto Message::processXmlNodeNotaryMessage(
         time_ = Clock::to_time_t(parseTimestamp(strDateSigned->Get()));
     }
 
-    LogVerbose()(OT_PRETTY_CLASS())(
-        "===> Loading XML for Message into memory structures... ")
+    LogVerbose()()("===> Loading XML for Message into memory structures... ")
         .Flush();
 
     return 1;
@@ -625,9 +622,7 @@ auto Message::SignContract(
     is_signed_ = Contract::SignContractAuthent(theNym, reason);
 
     if (false == is_signed_) {
-        LogError()(OT_PRETTY_CLASS())("Failure signing message: ")(
-            xml_unsigned_.get())
-            .Flush();
+        LogError()()("Failure signing message: ")(xml_unsigned_.get()).Flush();
     }
 
     return is_signed_;
@@ -713,10 +708,9 @@ public:
 
         if (strDepth->GetLength() > 0) { m.depth_ = strDepth->ToLong(); }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Market ID: ")(m.nym_id2_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Market ID: ")(
+            m.nym_id2_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -777,7 +771,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -792,14 +786,14 @@ public:
         }
 
         if (m.success_) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
                 " MarketID: ")(m.nym_id2_.get())
                 .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
                 " MarketID: ")(m.nym_id2_.get())
                 .Flush();  // in_reference_to_.Get()
@@ -837,10 +831,9 @@ public:
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
         m.nym_id2_ = String::Factory(xml->getAttributeValue("marketID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Market ID: ")(m.nym_id2_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Market ID: ")(
+            m.nym_id2_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -901,7 +894,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -916,14 +909,14 @@ public:
         }
 
         if (m.success_) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
                 " MarketID: ")(m.nym_id2_.get())
                 .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
                 " MarketID: ")(m.nym_id2_.get())
                 .Flush();  // in_reference_to_.Get()
@@ -959,9 +952,9 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request #: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1020,7 +1013,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -1035,13 +1028,13 @@ public:
         }
 
         if (m.success_) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
                 .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
                 .Flush();  // in_reference_to_.Get()
         }
@@ -1101,7 +1094,7 @@ public:
                 ascTextExpected,
                 pElementExpected,
                 &temp_MapAttributesAuthent)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
@@ -1124,7 +1117,7 @@ public:
                 ascTextExpected,
                 pElementExpected,
                 &temp_MapAttributesEncrypt)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
@@ -1133,8 +1126,8 @@ public:
 
         m.nym_id2_->Set(ascTextExpected);
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
             " Public signing key: ")(m.nym_public_key_.get())(
             " Public encryption key: ")(m.nym_id2_.get())
             .Flush();
@@ -1170,9 +1163,9 @@ public:
         m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " Success: ")(m.success_ ? "true" : "false")(" NymID:    ")(
-            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" Success: ")(
+            m.success_ ? "true" : "false")(" NymID:    ")(m.nym_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1217,8 +1210,8 @@ public:
             m.enum_ = 0;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1265,14 +1258,14 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+        LogDetail()()("Command: ")(m.command_.get())("  ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -1311,8 +1304,8 @@ public:
         m.payload_->Set(xml->getAttributeValue("publicnym"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1364,7 +1357,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -1377,14 +1370,14 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+        LogDetail()()("Command: ")(m.command_.get())("  ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -1419,8 +1412,8 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -1465,14 +1458,14 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+        LogDetail()()("Command: ")(m.command_.get())("  ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -1511,10 +1504,9 @@ public:
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
-            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1531,7 +1523,7 @@ public:
         // This means new-style credentials are being sent, not just the public
         // key as before.
         const bool bCredentials = (m.payload_->Exists());
-        OT_ASSERT(!m.bool_ || bCredentials);
+        assert_true(!m.bool_ || bCredentials);
 
         TagPtr pTag(new Tag(m.command_->Get()));
 
@@ -1576,7 +1568,7 @@ public:
             m.in_reference_to_ = ascTextExpected;
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -1588,7 +1580,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -1598,15 +1590,15 @@ public:
         }
 
         if (m.bool_) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
                 " NotaryID: ")(m.notary_id_.get())(" Nym2 Public Key: ")(
                 m.nym_public_key_.get())
                 .Flush();
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
                 " NotaryID: ")(m.notary_id_.get())
                 .Flush();
@@ -1653,10 +1645,10 @@ public:
             m.depth_ = strAdjustment->ToLong();
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
-            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
-            m.request_num_.get())(" Adjustment: ")(m.depth_)
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Request #: ")(m.request_num_.get())(
+            " Adjustment: ")(m.depth_)
             .Flush();
 
         return 1;
@@ -1702,7 +1694,7 @@ public:
             m.depth_ = strTotalCredits->ToLong();
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
             m.notary_id_.get())(" Total Credits: ")(m.depth_)
@@ -1755,17 +1747,16 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
-            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1815,17 +1806,16 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
-            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1865,7 +1855,7 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -1928,17 +1918,16 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(
-            " NotaryID: ")(m.notary_id_.get())(" Request #: ")(
-            m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NymID2:    ")(m.nym_id2_.get())(" NotaryID: ")(
+            m.notary_id_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
 
         return 1;
@@ -1975,8 +1964,8 @@ public:
         m.nym_id_ = String::Factory(xml->getAttributeValue("nymID"));
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -2025,7 +2014,7 @@ public:
         m.new_request_num_ =
             strNewRequestNum->Exists() ? strNewRequestNum->ToLong() : 0;
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())(" Request Number:    ")(
             m.request_num_.get())(" New Number: ")(m.new_request_num_)
@@ -2074,16 +2063,16 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())(" Asset Type: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())(" Asset Type: ")(
             m.instrument_definition_id_.get())
             .Flush();
 
@@ -2149,7 +2138,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2163,7 +2152,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2176,17 +2165,16 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (m.success_ && !m.payload_->GetLength())) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: "
-                "Expected issuerAccount and/or inReferenceTo elements "
-                "with text fields in "
-                "registerInstrumentDefinitionResponse reply.")
+            LogError()()("Error: "
+                         "Expected issuerAccount and/or inReferenceTo elements "
+                         "with text fields in "
+                         "registerInstrumentDefinitionResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
         auto acctContents = String::Factory(m.payload_);
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" Instrument Definition ID: ")(
             m.instrument_definition_id_.get())(" NotaryID: ")(
@@ -2235,16 +2223,16 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -2300,7 +2288,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2314,7 +2302,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2327,7 +2315,7 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (m.success_ && !m.payload_->GetLength())) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected stringMap and/or inReferenceTo elements "
                 "with text fields in "
                 "queryInstrumentDefinitionsResponse reply.")
@@ -2335,7 +2323,7 @@ public:
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -2380,7 +2368,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2391,16 +2379,16 @@ public:
         // Did we find everything we were looking for?
         // If the Payload isn't there, then failure.
         if (!m.payload_->GetLength()) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected currencyBasket element with text fields in "
                 "issueBasket message.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -2452,7 +2440,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2464,14 +2452,14 @@ public:
         // If the "command responding to" isn't there,
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.in_reference_to_->GetLength()) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected inReferenceTo element with text fields in "
                 "issueBasketResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" InstrumentDefinitionID: ")(
             m.instrument_definition_id_.get())(" NotaryID: ")(
@@ -2512,9 +2500,9 @@ public:
             String::Factory(xml->getAttributeValue("instrumentDefinitionID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())(" Asset Type: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())(" Asset Type: ")(
             m.instrument_definition_id_.get())
             .Flush();
 
@@ -2574,7 +2562,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2588,7 +2576,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2601,14 +2589,14 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         //
         if (m.success_ && !m.payload_->GetLength()) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected newAccount element with text field, in "
                 "registerAccountResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -2672,16 +2660,16 @@ public:
             m.depth_ = 2;
         } else {
             m.depth_ = 0;
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected boxType to be inbox, outbox, or nymbox, in "
                 "getBoxReceipt.")
                 .Flush();
             return (-1);
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
-            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" AccountID:    ")(m.acct_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request#: ")(
             m.request_num_.get())(" Transaction#: ")(m.transaction_num_)(
             " boxType: ")(((m.depth_ == 0)   ? "nymbox"
                            : (m.depth_ == 1) ? "inbox"
@@ -2755,7 +2743,7 @@ public:
             m.depth_ = 2;
         } else {
             m.depth_ = 0;
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected boxType to be inbox, outbox, or nymbox, in "
                 "getBoxReceiptResponse reply.")
                 .Flush();
@@ -2771,7 +2759,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2785,7 +2773,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2798,14 +2786,14 @@ public:
         // OR if it was successful but the Payload isn't there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (m.success_ && !m.payload_->GetLength())) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected boxReceipt and/or inReferenceTo elements "
                 "with text fields in getBoxReceiptResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -2843,9 +2831,9 @@ public:
         m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
-            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" AccountID:    ")(m.acct_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request#: ")(
             m.request_num_.get())
             .Flush();
 
@@ -2897,7 +2885,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2908,14 +2896,14 @@ public:
         // Did we find everything we were looking for?
         // If the "command responding to" isn't there, then failure.
         if (!m.in_reference_to_->GetLength()) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Expected inReferenceTo element with text fields in "
                 "unregisterAccountResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -2967,7 +2955,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -2975,9 +2963,9 @@ public:
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
-            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" AccountID:    ")(m.acct_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request#: ")(
             m.request_num_.get())
             .Flush();
 
@@ -3034,7 +3022,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3048,7 +3036,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3061,17 +3049,16 @@ public:
         // there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (!m.payload_->GetLength() && m.success_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: Expected responseLedger and/or inReferenceTo "
-                "elements "
-                "with text fields in "
-                "notarizeTransactionResponse reply.")
+            LogError()()("Error: Expected responseLedger and/or inReferenceTo "
+                         "elements "
+                         "with text fields in "
+                         "notarizeTransactionResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
         //      OTString acctContents(m.payload_);
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -3111,9 +3098,9 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3151,7 +3138,7 @@ public:
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -3188,9 +3175,9 @@ public:
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request #: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3245,7 +3232,7 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
@@ -3258,7 +3245,7 @@ public:
             m.in_reference_to_ = ascTextExpected;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -3295,8 +3282,8 @@ public:
         m.acct_id_ = String::Factory(xml->getAttributeValue("accountID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
             " AccountID:    ")(m.acct_id_.get())(" Request #: ")(
             m.request_num_.get())
             .Flush();
@@ -3358,7 +3345,7 @@ public:
 
         if (m.success_) {
             if (!LoadEncodedTextFieldByName(xml, m.payload_, "account")) {
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "Error: Expected account "
                     "element with text field, for ")(m.command_.get())(".")
                     .Flush();
@@ -3366,7 +3353,7 @@ public:
             }
 
             if (!LoadEncodedTextFieldByName(xml, m.payload2_, "inbox")) {
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "Error: Expected inbox"
                     " element with text field, for ")(m.command_.get())(".")
                     .Flush();
@@ -3374,7 +3361,7 @@ public:
             }
 
             if (!LoadEncodedTextFieldByName(xml, m.payload3_, "outbox")) {
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "Error: Expected outbox"
                     " element with text field, for ")(m.command_.get())(".")
                     .Flush();
@@ -3383,16 +3370,15 @@ public:
         } else {  // Message success=false
             if (!LoadEncodedTextFieldByName(
                     xml, m.in_reference_to_, "inReferenceTo")) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Error: Expected "
-                    "inReferenceTo element with text field, for ")(
+                LogError()()("Error: Expected "
+                             "inReferenceTo element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
                 return (-1);  // error condition
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID:    ")(m.acct_id_.get())(" NotaryID: ")(
             m.notary_id_.get())
@@ -3442,8 +3428,8 @@ public:
             m.enum_ = 0;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
             " Asset Type:    ")(m.instrument_definition_id_.get())(
             " Request #: ")(m.request_num_.get())
             .Flush();
@@ -3513,7 +3499,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3526,7 +3512,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3538,7 +3524,7 @@ public:
 
         if (false == m.success_) { m.in_reference_to_ = ascTextExpected; }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " Instrument Definition ID:    ")(
             m.instrument_definition_id_.get())(" NotaryID: ")(
@@ -3581,8 +3567,8 @@ public:
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
             " Asset Type:    ")(m.instrument_definition_id_.get())(
             " Request #: ")(m.request_num_.get())
             .Flush();
@@ -3642,7 +3628,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3657,7 +3643,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3667,7 +3653,7 @@ public:
             m.payload_ = ascTextExpected;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " Instrument Definition ID:    ")(
             m.instrument_definition_id_.get())(" NotaryID: ")(
@@ -3718,7 +3704,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3726,9 +3712,9 @@ public:
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" AccountID:    ")(
-            m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" AccountID:    ")(m.acct_id_.get())(
+            " NotaryID: ")(m.notary_id_.get())(" Request#: ")(
             m.request_num_.get())
             .Flush();
 
@@ -3785,7 +3771,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3799,7 +3785,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3812,16 +3798,15 @@ public:
         // there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (!m.payload_->GetLength() && m.success_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: Expected responseLedger and/or inReferenceTo "
-                "elements "
-                "with text fields in "
-                "processInboxResponse reply.")
+            LogError()()("Error: Expected responseLedger and/or inReferenceTo "
+                         "elements "
+                         "with text fields in "
+                         "processInboxResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " AccountID: ")(m.acct_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -3869,7 +3854,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3877,9 +3862,9 @@ public:
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request#: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request#: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -3933,7 +3918,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3947,7 +3932,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -3960,16 +3945,15 @@ public:
         // there, then failure.
         if (!m.in_reference_to_->GetLength() ||
             (!m.payload_->GetLength() && m.success_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Error: Expected responseLedger and/or inReferenceTo "
-                "elements "
-                "with text fields in "
-                "processNymboxResponse reply.")
+            LogError()()("Error: Expected responseLedger and/or inReferenceTo "
+                         "elements "
+                         "with text fields in "
+                         "processNymboxResponse reply.")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -4030,7 +4014,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -4040,8 +4024,8 @@ public:
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
             " Clause TransNum and Name:  ")(m.transaction_num_)("  /  ")(
             m.nym_id2_.get())(" Request #: ")(m.request_num_.get())
             .Flush();
@@ -4089,7 +4073,7 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
@@ -4098,7 +4082,7 @@ public:
 
         m.in_reference_to_ = ascTextExpected;
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("   ")(
+        LogDetail()()("Command: ")(m.command_.get())("   ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -4133,9 +4117,9 @@ public:
         m.notary_id_ = String::Factory(xml->getAttributeValue("notaryID"));
         m.request_num_ = String::Factory(xml->getAttributeValue("requestNum"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(
-            " Request #: ")(m.request_num_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())(" Request #: ")(
+            m.request_num_.get())
             .Flush();
 
         return 1;
@@ -4175,7 +4159,7 @@ public:
 
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -4190,13 +4174,13 @@ public:
         }
 
         if (m.success_) {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
                 .Flush();  // payload_.Get()
         } else {
-            LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-                "   ")(m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
+            LogDetail()()("Command: ")(m.command_.get())("   ")(
+                m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(
                 m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
                 .Flush();  // in_reference_to_.Get()
         }
@@ -4255,8 +4239,8 @@ public:
         m.acct_id_->Set(xml->getAttributeValue("password"));
         m.nymbox_hash_ = String::Factory(xml->getAttributeValue("nymboxHash"));
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4307,14 +4291,14 @@ public:
 
         if (!LoadEncodedTextFieldByName(
                 xml, ascTextExpected, pElementExpected)) {
-            LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+            LogError()()("Error: Expected ")(
                 pElementExpected)(" element with text field, for ")(
                 m.command_.get())(".")
                 .Flush();
             return (-1);  // error condition
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+        LogDetail()()("Command: ")(m.command_.get())("  ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();
@@ -4358,8 +4342,8 @@ public:
         const auto primary = String::Factory(xml->getAttributeValue("primary"));
         m.bool_ = primary->Compare("true");
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())(
-            " NymID:    ")(m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
+        LogDetail()()("Command: ")(m.command_.get())(" NymID:    ")(
+            m.nym_id_.get())(" NotaryID: ")(m.notary_id_.get())
             .Flush();
 
         return 1;
@@ -4411,7 +4395,7 @@ public:
         if (false == m.success_) {
             if (!LoadEncodedTextFieldByName(
                     xml, ascTextExpected, pElementExpected)) {
-                LogError()(OT_PRETTY_CLASS())("Error: Expected ")(
+                LogError()()("Error: Expected ")(
                     pElementExpected)(" element with text field, for ")(
                     m.command_.get())(".")
                     .Flush();
@@ -4419,7 +4403,7 @@ public:
             }
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Command: ")(m.command_.get())("  ")(
+        LogDetail()()("Command: ")(m.command_.get())("  ")(
             m.success_ ? "SUCCESS" : "FAILURE")(" NymID:    ")(m.nym_id_.get())(
             " NotaryID: ")(m.notary_id_.get())
             .Flush();

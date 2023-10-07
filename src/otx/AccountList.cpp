@@ -18,7 +18,6 @@
 #include "internal/otx/common/Helpers.hpp"
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -59,7 +58,7 @@ void AccountList::Serialize(Tag& parent) const
     for (const auto& it : map_acct_ids_) {
         UnallocatedCString instrumentDefinitionID = it.first;
         UnallocatedCString accountId = it.second;
-        OT_ASSERT(
+        assert_true(
             (instrumentDefinitionID.size() > 0) && (accountId.size() > 0));
 
         TagPtr pTagEntry(new Tag("accountEntry"));
@@ -80,8 +79,8 @@ auto AccountList::ReadFromXMLNode(
     const String& acctCount) -> std::int32_t
 {
     if (!acctType.Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed: Empty accountList "
-                                      "'type' attribute.")
+        LogError()()("Failed: Empty accountList "
+                     "'type' attribute.")
             .Flush();
         return -1;
     }
@@ -89,8 +88,8 @@ auto AccountList::ReadFromXMLNode(
     acct_type_ = TranslateAccountTypeStringToEnum(acctType);
 
     if (Account::err_acct == acct_type_) {
-        LogError()(OT_PRETTY_CLASS())("Failed: accountList 'type' "
-                                      "attribute contains unknown value.")
+        LogError()()("Failed: accountList 'type' "
+                     "attribute contains unknown value.")
             .Flush();
         return -1;
     }
@@ -101,8 +100,8 @@ auto AccountList::ReadFromXMLNode(
     if (count > 0) {
         while (count-- > 0) {
             if (!SkipToElement(xml)) {
-                LogConsole()(OT_PRETTY_CLASS())("Failure: Unable to find "
-                                                "expected element.")
+                LogConsole()()("Failure: Unable to find "
+                               "expected element.")
                     .Flush();
                 return -1;
             }
@@ -117,9 +116,8 @@ auto AccountList::ReadFromXMLNode(
                     "accountID"));  // Account ID for this account.
 
                 if (!instrumentDefinitionID->Exists() || !accountID->Exists()) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        "Error loading accountEntry: Either the "
-                        "instrumentDefinitionID (")(
+                    LogError()()("Error loading accountEntry: Either the "
+                                 "instrumentDefinitionID (")(
                         instrumentDefinitionID.get())("), or the accountID (")(
                         accountID.get())(") was EMPTY.")
                         .Flush();
@@ -129,8 +127,7 @@ auto AccountList::ReadFromXMLNode(
                 map_acct_ids_.insert(std::make_pair(
                     instrumentDefinitionID->Get(), accountID->Get()));
             } else {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Expected accountEntry element in accountList.")
+                LogError()()("Expected accountEntry element in accountList.")
                     .Flush();
                 return -1;
             }
@@ -139,7 +136,7 @@ auto AccountList::ReadFromXMLNode(
 
     if (!SkipAfterLoadingField(xml))  // </accountList>
     {
-        LogConsole()(OT_PRETTY_CLASS())(
+        LogConsole()()(
             "Bad data? Expected EXN_ELEMENT_END here, but didn't get it. "
             "Returning false.")
             .Flush();
@@ -167,9 +164,8 @@ auto AccountList::GetOrRegisterAccount(
 
     if (Account::stash == acct_type_) {
         if (1 > stashTransNum) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed attempt to "
-                "create stash account without cron item #.")
+            LogError()()("Failed attempt to "
+                         "create stash account without cron item #.")
                 .Flush();
 
             return {};
@@ -191,9 +187,8 @@ auto AccountList::GetOrRegisterAccount(
 
         if (account) {
 
-            LogDebug()(OT_PRETTY_CLASS())("Successfully loaded ")(
-                acctTypeString.get())(" account ID: ")(
-                accountID)("Unit Type ID:: ")(
+            LogDebug()()("Successfully loaded ")(acctTypeString.get())(
+                " account ID: ")(accountID)("Unit Type ID:: ")(
                 instrumentDefinitionID, api_.Crypto())
                 .Flush();
 
@@ -213,17 +208,16 @@ auto AccountList::GetOrRegisterAccount(
         reason);
 
     if (false == bool(account)) {
-        LogError()(OT_PRETTY_CLASS())("Failed trying to generate ")(
-            acctTypeString.get())(" account with instrument definition ID: ")(
+        LogError()()("Failed trying to generate ")(acctTypeString.get())(
+            " account with instrument definition ID: ")(
             instrumentDefinitionID, api_.Crypto())(".")
             .Flush();
     } else {
         auto acctIDString = String::Factory();
         account.get().GetIdentifier(acctIDString);
 
-        LogConsole()(OT_PRETTY_CLASS())("Successfully created ")(
-            acctTypeString.get())(" account ID: ")(acctIDString.get())(
-            " Instrument Definition ID: ")(
+        LogConsole()()("Successfully created ")(acctTypeString.get())(
+            " account ID: ")(acctIDString.get())(" Instrument Definition ID: ")(
             instrumentDefinitionID, api_.Crypto())
             .Flush();
         map_acct_ids_[instrumentDefinitionID.asBase58(api_.Crypto())] =

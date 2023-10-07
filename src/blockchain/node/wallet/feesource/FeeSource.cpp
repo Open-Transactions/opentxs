@@ -20,7 +20,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -48,8 +47,8 @@ auto FeeSources(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
 
     if (api->GetOptions().TestMode()) { return; }
 
@@ -207,12 +206,11 @@ auto FeeSource::Imp::pipeline(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(" unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled type: ")(
+            LogAbort()()(name_)(": unhandled type: ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -226,9 +224,8 @@ auto FeeSource::Imp::process_double(
     auto out = std::optional<Amount>{
         static_cast<std::int64_t>(rate * static_cast<double>(scale))};
     const auto& value = out.value();
-    log_(OT_PRETTY_CLASS())(name_)(": obtained scaled amount ")(
-        display_scale().Format(value))(" from raw input ")(
-        rate)(" and scale value ")(scale)
+    log_()(name_)(": obtained scaled amount ")(display_scale().Format(value))(
+        " from raw input ")(rate)(" and scale value ")(scale)
         .Flush();
 
     if (0 > value) {
@@ -246,9 +243,8 @@ auto FeeSource::Imp::process_int(
 {
     auto out = std::optional<Amount>{static_cast<std::int64_t>(rate * scale)};
     const auto& value = out.value();
-    log_(OT_PRETTY_CLASS())(name_)(": obtained scaled amount ")(
-        display_scale().Format(value))(" from raw input ")(
-        rate)(" and scale value ")(scale)
+    log_()(name_)(": obtained scaled amount ")(display_scale().Format(value))(
+        " from raw input ")(rate)(" and scale value ")(scale)
         .Flush();
 
     if (0 > value) {
@@ -274,8 +270,8 @@ auto FeeSource::Imp::reset_timer() noexcept -> void
     timer_.Wait([this](const auto& ec) {
         if (ec) {
             if (unexpected_asio_error(ec)) {
-                LogError()(OT_PRETTY_CLASS())(name_)(": received asio error (")(
-                    ec.value())(") :")(ec)
+                LogError()()(name_)(": received asio error (")(ec.value())(
+                    ") :")(ec)
                     .Flush();
             }
         } else {
@@ -293,23 +289,19 @@ auto FeeSource::Imp::work(allocator_type monotonic) noexcept -> bool
     try {
         if (const auto status = future.wait_for(limit); status == ready) {
             if (const auto data = process(future.get()); data.has_value()) {
-                to_oracle_.SendDeferred(
-                    [&] {
-                        auto out = MakeWork(FeeOracleJobs::update_estimate);
-                        data->Serialize(out.AppendBytes());
+                to_oracle_.SendDeferred([&] {
+                    auto out = MakeWork(FeeOracleJobs::update_estimate);
+                    data->Serialize(out.AppendBytes());
 
-                        return out;
-                    }(),
-                    __FILE__,
-                    __LINE__);
+                    return out;
+                }());
             }
 
             reset_timer();
 
             return false;
         } else {
-            LogError()(OT_PRETTY_CLASS())(name_)(": future is not ready")
-                .Flush();
+            LogError()()(name_)(": future is not ready").Flush();
 
             return true;
         }
@@ -325,10 +317,10 @@ FeeSource::Imp::~Imp() = default;
 
 namespace opentxs::blockchain::node::wallet
 {
-FeeSource::FeeSource(boost::shared_ptr<Imp> imp) noexcept
+FeeSource::FeeSource(std::shared_ptr<Imp> imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto FeeSource::Init() noexcept -> void

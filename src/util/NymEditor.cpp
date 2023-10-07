@@ -11,7 +11,6 @@
 
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
@@ -38,8 +37,8 @@ NymData::NymData(
     , locked_save_callback_{new LockedSave(save)}
     , nym_(nym)
 {
-    OT_ASSERT(object_lock_);
-    OT_ASSERT(locked_save_callback_);
+    assert_false(nullptr == object_lock_);
+    assert_false(nullptr == locked_save_callback_);
 }
 
 NymData::NymData(NymData&& rhs)
@@ -90,8 +89,7 @@ auto NymData::AddContract(
     auto id = factory_.UnitIDFromBase58(instrumentDefinitionID);
 
     if (id.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid instrument definition id.")
-            .Flush();
+        LogError()()("Invalid instrument definition id.").Flush();
 
         return false;
     }
@@ -118,7 +116,7 @@ auto NymData::AddPaymentCode(
     auto paymentCode = factory_.PaymentCodeFromBase58(code);
 
     if (false == paymentCode.Valid()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid payment code.").Flush();
+        LogError()()("Invalid payment code.").Flush();
 
         return false;
     }
@@ -141,7 +139,7 @@ auto NymData::AddPreferredOTServer(
     const PasswordPrompt& reason) -> bool
 {
     if (id.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid server id.").Flush();
+        LogError()()("Invalid server id.").Flush();
 
         return false;
     }
@@ -211,7 +209,7 @@ auto NymData::HaveContract(
     const bool primary,
     const bool active) const -> bool
 {
-    OT_ASSERT(nym_);
+    assert_false(nullptr == nym_);
 
     const auto contracts = nym().Contracts(currency, active);
 
@@ -222,7 +220,7 @@ auto NymData::HaveContract(
     for (const auto& id : contracts) {
         const auto& claim = data.Claim(id);
 
-        OT_ASSERT(claim);
+        assert_false(nullptr == claim);
 
         const auto value = factory_.UnitIDFromBase58(claim->Value());
 
@@ -240,14 +238,14 @@ auto NymData::Nym() const -> const identity::Nym& { return nym(); }
 
 auto NymData::nym() -> identity::Nym&
 {
-    OT_ASSERT(nym_);
+    assert_false(nullptr == nym_);
 
     return *nym_;
 }
 
 auto NymData::nym() const -> const identity::Nym&
 {
-    OT_ASSERT(nym_);
+    assert_false(nullptr == nym_);
 
     return *nym_;
 }

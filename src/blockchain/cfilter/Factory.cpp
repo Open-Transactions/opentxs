@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/cfilter/GCSImp.hpp"
@@ -73,7 +72,7 @@ auto GCS(
             std::move(hashed),
             std::move(compressed));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -98,7 +97,7 @@ auto GCS(
             in.key(),
             in.filter());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -120,7 +119,7 @@ auto GCS(
 
         return GCS(api, proto, alloc);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -143,7 +142,7 @@ auto GCS(
         return pmr::construct<ReturnType>(
             alloc, api, bits, fpRate, filterElementCount, key, filter);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -173,7 +172,7 @@ auto GCS(
             key,
             encoded);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -201,9 +200,8 @@ auto GCS(
         auto elements = blockchain::cfilter::Targets{monotonic};
         elements.reserve(input.size());
         elements.clear();
-        std::transform(
-            std::begin(input),
-            std::end(input),
+        std::ranges::transform(
+            input,
             std::back_inserter(elements),
             [](const auto& element) -> auto { return reader(element); });
         const auto count = shorten(elements.size());
@@ -222,7 +220,7 @@ auto GCS(
             std::move(hashed),
             gcs::GolombEncode(params.first, hashed, alloc));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }

@@ -29,7 +29,6 @@
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -117,9 +116,7 @@ auto Factory::NymIDSource(
             }
 
             if (false == bool(params.Internal().Keypair().get())) {
-                LogError()("opentxs::Factory::")(__func__)(
-                    ": Failed to generate signing keypair")
-                    .Flush();
+                LogError()()("Failed to generate signing keypair").Flush();
 
                 return nullptr;
             }
@@ -127,9 +124,7 @@ auto Factory::NymIDSource(
             return new ReturnType{api.Crypto(), api.Factory(), params};
         case identity::SourceType::Error:
         default: {
-            LogError()("opentxs::Factory::")(__func__)(
-                ": Unsupported source type.")
-                .Flush();
+            LogError()()("Unsupported source type.").Flush();
 
             return nullptr;
         }
@@ -296,7 +291,7 @@ auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
 
     switch (type_) {
         case identity::SourceType::PubKey: {
-            OT_ASSERT(pubkey_.IsValid());
+            assert_true(pubkey_.IsValid());
 
             auto key = proto::AsymmetricKey{};
             if (false == pubkey_.Internal().Serialize(key)) { return false; }
@@ -372,7 +367,7 @@ auto Source::Verify(
                  master.masterdata().sourceproof().type());
 
             if (!isSelfSigned) {
-                OT_ASSERT_MSG(false, "Not yet implemented");
+                assert_true(false, "Not yet implemented");
 
                 return false;
             }
@@ -380,24 +375,22 @@ auto Source::Verify(
             signingKey = extract_key(master, proto::KEYROLE_SIGN);
 
             if (!signingKey) {
-                LogError()(OT_PRETTY_CLASS())("Failed to extract signing key.")
-                    .Flush();
+                LogError()()("Failed to extract signing key.").Flush();
 
                 return false;
             }
 
             auto sourceKey = proto::AsymmetricKey{};
             if (false == pubkey_.Internal().Serialize(sourceKey)) {
-                LogError()(OT_PRETTY_CLASS())("Failed to serialize key")
-                    .Flush();
+                LogError()()("Failed to serialize key").Flush();
 
                 return false;
             }
             sameSource = (sourceKey.key() == signingKey->key());
 
             if (!sameSource) {
-                LogError()(OT_PRETTY_CLASS())("Master credential was not"
-                                              " derived from this source.")
+                LogError()()("Master credential was not"
+                             " derived from this source.")
                     .Flush();
 
                 return false;
@@ -405,8 +398,7 @@ auto Source::Verify(
         } break;
         case identity::SourceType::Bip47: {
             if (!payment_code_.Internal().Verify(master, sourceSignature)) {
-                LogError()(OT_PRETTY_CLASS())("Invalid source signature.")
-                    .Flush();
+                LogError()()("Invalid source signature.").Flush();
 
                 return false;
             }
@@ -429,7 +421,7 @@ auto Source::Sign(
 
     switch (type_) {
         case identity::SourceType::PubKey: {
-            OT_ASSERT_MSG(false, "This is not implemented yet.");
+            assert_true(false, "This is not implemented yet.");
 
         } break;
         case identity::SourceType::Bip47: {

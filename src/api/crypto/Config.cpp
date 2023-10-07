@@ -10,13 +10,13 @@
 #include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -138,8 +138,8 @@ auto Config::GetSetValue(
     std::int32_t& out_nValue) const -> bool
 
 {
-    OT_ASSERT(false == strKeyName.empty());
-    OT_ASSERT(2 < strKeyName.size());
+    assert_false(strKeyName.empty());
+    assert_true(2 < strKeyName.size());
 
     bool bIsNew{false};
     std::int64_t nValue{0};

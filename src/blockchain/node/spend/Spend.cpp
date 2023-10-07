@@ -9,14 +9,14 @@
 #include <utility>
 
 #include "blockchain/node/spend/SpendPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node
 {
 Spend::Spend(SpendPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Spend::Spend() noexcept

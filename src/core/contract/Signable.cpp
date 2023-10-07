@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
@@ -118,7 +117,7 @@ auto Signable<IDType>::Alias(alloc::Strategy alloc) const noexcept -> CString
 template <typename IDType>
 auto Signable<IDType>::add_signatures(Signatures signatures) noexcept -> void
 {
-    OT_ASSERT(false == signatures_.ready());
+    assert_false(signatures_.ready());
 
     signatures_.set_value(std::move(signatures));
 }
@@ -163,14 +162,14 @@ auto Signable<IDType>::first_time_init(GetName cb) noexcept(false) -> void
     try {
         set_once_.set_value(Calculated{std::move(id), std::move(name)});
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
 template <typename IDType>
 auto Signable<IDType>::ID() const noexcept -> const IDType&
 {
-    OT_ASSERT(set_once_.ready());
+    assert_true(set_once_.ready());
 
     return set_once_.get().id_;
 }
@@ -193,7 +192,7 @@ auto Signable<IDType>::init_serialized() noexcept(false) -> void
 template <typename IDType>
 auto Signable<IDType>::Name() const noexcept -> std::string_view
 {
-    OT_ASSERT(set_once_.ready());
+    assert_true(set_once_.ready());
 
     return set_once_.get().name_;
 }
@@ -216,7 +215,7 @@ auto Signable<IDType>::SetAlias(std::string_view alias) noexcept -> bool
 template <typename IDType>
 auto Signable<IDType>::signatures() const noexcept -> std::span<const Signature>
 {
-    OT_ASSERT(signatures_.ready());
+    assert_true(signatures_.ready());
 
     return signatures_.get();
 }
@@ -237,7 +236,7 @@ template <typename IDType>
 auto Signable<IDType>::update_signature(const PasswordPrompt& reason) -> bool
 {
     if (!Signer()) {
-        LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
+        LogError()()("Missing nym.").Flush();
 
         return false;
     }
@@ -255,7 +254,7 @@ template <typename IDType>
 auto Signable<IDType>::verify_signature(const proto::Signature&) const -> bool
 {
     if (!Signer()) {
-        LogError()(OT_PRETTY_CLASS())("Missing nym.").Flush();
+        LogError()()("Missing nym.").Flush();
 
         return false;
     }

@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "interface/qt/identitymanager/NymType.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -33,6 +32,7 @@
 #include "opentxs/interface/qt/ContactList.hpp"
 #include "opentxs/interface/qt/NymList.hpp"
 #include "opentxs/interface/qt/Profile.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -213,7 +213,7 @@ namespace opentxs::ui
 IdentityManagerQt::IdentityManagerQt(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 
     imp_->init(this);
 }

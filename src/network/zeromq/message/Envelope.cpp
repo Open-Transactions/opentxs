@@ -8,9 +8,9 @@
 #include <utility>
 
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/zeromq/message/EnvelopePrivate.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::zeromq
 {
@@ -33,7 +33,7 @@ namespace opentxs::network::zeromq
 Envelope::Envelope(EnvelopePrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Envelope::Envelope(std::span<Frame> frames, allocator_type alloc) noexcept

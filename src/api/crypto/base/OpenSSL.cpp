@@ -6,11 +6,11 @@
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
 #include "internal/crypto/library/OpenSSL.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::imp
 {
-auto Crypto::Init_OpenSSL() noexcept -> void { OT_ASSERT(ssl_); }
+auto Crypto::Init_OpenSSL() noexcept -> void { assert_false(nullptr == ssl_); }
 
 auto Crypto::OpenSSL() const noexcept -> const opentxs::crypto::OpenSSL&
 {

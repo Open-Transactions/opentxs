@@ -35,7 +35,6 @@
 #include "internal/otx/common/Item.hpp"    // IWYU pragma: keep
 #include "internal/otx/common/Message.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -93,7 +92,7 @@ Activity::Activity(
         auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
         const auto rc = out->Start(api_.Endpoints().MessageLoaded().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -127,25 +126,16 @@ auto Activity::add_blockchain_transaction(
     const auto& txid = tx.ID();
     // TODO allocator
     const auto incoming = tx.AssociatedRemoteContacts(api_, nym, {});
-    LogTrace()(OT_PRETTY_CLASS())("transaction ")(txid.asHex())(
-        " is associated with ")(incoming.size())(" contacts")
+    LogTrace()()("transaction ")(txid.asHex())(" is associated with ")(
+        incoming.size())(" contacts")
         .Flush();
     const auto existing =
         api_.Storage().Internal().BlockchainThreadMap(nym, txid);
     auto added = UnallocatedVector<identifier::Generic>{};
     auto removed = UnallocatedVector<identifier::Generic>{};
-    std::set_difference(
-        std::begin(incoming),
-        std::end(incoming),
-        std::begin(existing),
-        std::end(existing),
-        std::back_inserter(added));
-    std::set_difference(
-        std::begin(existing),
-        std::end(existing),
-        std::begin(incoming),
-        std::end(incoming),
-        std::back_inserter(removed));
+    std::ranges::set_difference(incoming, existing, std::back_inserter(added));
+    std::ranges::set_difference(
+        existing, incoming, std::back_inserter(removed));
     auto output{true};
     const auto chains = tx.Chains({});  // TODO allocator
 
@@ -154,11 +144,10 @@ auto Activity::add_blockchain_transaction(
 
         if (verify_thread_exists(nym, thread)) {
             auto saved{true};
-            std::for_each(
-                std::begin(chains), std::end(chains), [&](const auto& chain) {
-                    saved &= api_.Storage().Internal().Store(
-                        nym, thread, chain, txid, tx.asBitcoin().Timestamp());
-                });
+            std::ranges::for_each(chains, [&](const auto& chain) {
+                saved &= api_.Storage().Internal().Store(
+                    nym, thread, chain, txid, tx.asBitcoin().Timestamp());
+            });
 
             if (saved) { publish(nym, thread); }
 
@@ -173,7 +162,7 @@ auto Activity::add_blockchain_transaction(
 
         auto saved{true};
         const auto c = tx.Chains({});  // TODO allocator
-        std::for_each(std::begin(c), std::end(c), [&](const auto& chain) {
+        std::ranges::for_each(c, [&](const auto& chain) {
             saved &= api_.Storage().Internal().RemoveBlockchainThreadItem(
                 nym, thread, chain, txid);
         });
@@ -190,14 +179,12 @@ auto Activity::add_blockchain_transaction(
     const auto proto = tx.Internal().asBitcoin().Serialize(api_);
 
     if (false == proto.has_value()) {
-        LogError()(OT_PRETTY_CLASS())("failed to serialize transaction ")(
-            txid.asHex())
-            .Flush();
+        LogError()()("failed to serialize transaction ")(txid.asHex()).Flush();
 
         return false;
     }
 
-    std::for_each(std::begin(chains), std::end(chains), [&](const auto& chain) {
+    std::ranges::for_each(chains, [&](const auto& chain) {
         get_blockchain(lock, nym).Send([&] {
             auto out = opentxs::network::zeromq::tagged_message(
                 WorkType::BlockchainNewTransaction, true);
@@ -220,12 +207,11 @@ auto Activity::AddBlockchainTransaction(
 
     // TODO allocator
     for (const auto& nym : transaction.AssociatedLocalNyms(crypto, {})) {
-        LogTrace()(OT_PRETTY_CLASS())("blockchain transaction ")(
-            transaction.ID().asHex())(" is relevant to local nym ")(
-            nym, api_.Crypto())
+        LogTrace()()("blockchain transaction ")(transaction.ID().asHex())(
+            " is relevant to local nym ")(nym, api_.Crypto())
             .Flush();
 
-        OT_ASSERT(false == nym.empty());
+        assert_false(nym.empty());
 
         if (false == add_blockchain_transaction(lock, nym, transaction)) {
             return false;
@@ -287,7 +273,7 @@ auto Activity::Cheque(
         case otx::client::PaymentWorkflowType::OutgoingCash:
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Wrong workflow type.").Flush();
+            LogError()()("Wrong workflow type.").Flush();
 
             return output;
         }
@@ -296,8 +282,8 @@ auto Activity::Cheque(
     auto workflow = proto::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
-            " for nym ")(nym, api_.Crypto())(" can not be loaded.")
+        LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
+            nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -306,16 +292,14 @@ auto Activity::Cheque(
     auto instantiated = session::Workflow::InstantiateCheque(api_, workflow);
     cheque.reset(std::get<1>(instantiated).release());
 
-    OT_ASSERT(cheque);
+    assert_false(nullptr == cheque);
 
     const auto& unit = cheque->GetInstrumentDefinitionID();
 
     try {
         contract = api_.Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Unable to load unit definition contract.")
-            .Flush();
+        LogError()()("Unable to load unit definition contract.").Flush();
     }
 
     return output;
@@ -347,7 +331,7 @@ auto Activity::Transfer(
         case otx::client::PaymentWorkflowType::OutgoingCash:
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Wrong workflow type").Flush();
+            LogError()()("Wrong workflow type").Flush();
 
             return output;
         }
@@ -356,8 +340,8 @@ auto Activity::Transfer(
     auto workflow = proto::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
-            " for nym ")(nym, api_.Crypto())(" can not be loaded")
+        LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
+            nym, api_.Crypto())(" can not be loaded")
             .Flush();
 
         return output;
@@ -366,11 +350,10 @@ auto Activity::Transfer(
     auto instantiated = session::Workflow::InstantiateTransfer(api_, workflow);
     transfer.reset(std::get<1>(instantiated).release());
 
-    OT_ASSERT(transfer);
+    assert_false(nullptr == transfer);
 
     if (0 == workflow.account_size()) {
-        LogError()(OT_PRETTY_CLASS())("Workflow does not list any accounts.")
-            .Flush();
+        LogError()()("Workflow does not list any accounts.").Flush();
 
         return output;
     }
@@ -379,8 +362,7 @@ auto Activity::Transfer(
         api_.Factory().AccountIDFromBase58(workflow.account(0)));
 
     if (unit.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Unable to calculate unit definition id.")
-            .Flush();
+        LogError()()("Unable to calculate unit definition id.").Flush();
 
         return output;
     }
@@ -388,9 +370,7 @@ auto Activity::Transfer(
     try {
         contract = api_.Wallet().Internal().UnitDefinition(unit);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Unable to load unit definition contract.")
-            .Flush();
+        LogError()()("Unable to load unit definition contract.").Flush();
     }
 
     return output;
@@ -415,7 +395,7 @@ auto Activity::get_blockchain(const eLock&, const identifier::Nym& nymID)
     const auto& [publisher, inserted] =
         blockchain_publishers_.emplace(nymID, start_publisher(endpoint.data()));
 
-    OT_ASSERT(inserted);
+    assert_true(inserted);
 
     return publisher->second.get();
 }
@@ -434,7 +414,7 @@ auto Activity::get_publisher(
     const auto& [publisher, inserted] =
         thread_publishers_.emplace(nymID, start_publisher(endpoint));
 
-    OT_ASSERT(inserted);
+    assert_true(inserted);
 
     return publisher->second.get();
 }
@@ -469,7 +449,7 @@ auto Activity::Mail(
                      ->Bytes());
     const auto contact = nym_to_contact(participantNymID);
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     auto lock = eLock(shared_lock_);
     const auto& alias = contact->Label();
@@ -589,8 +569,8 @@ auto Activity::PaymentText(
     auto workflow = proto::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
-        LogError()(OT_PRETTY_CLASS())("Workflow ")(workflowID, api_.Crypto())(
-            " for nym ")(nym, api_.Crypto())(" can not be loaded.")
+        LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
+            nym, api_.Crypto())(" can not be loaded.")
             .Flush();
 
         return output;
@@ -604,7 +584,7 @@ auto Activity::PaymentText(
             auto chequeData = Cheque(nym, workflowID);
             const auto& [cheque, contract] = chequeData;
 
-            OT_ASSERT(cheque);
+            assert_false(nullptr == cheque);
 
             if (0 < contract->Version()) {
                 const auto& definition =
@@ -625,7 +605,7 @@ auto Activity::PaymentText(
             auto transferData = Transfer(nym, id, workflowID);
             const auto& [transfer, contract] = transferData;
 
-            OT_ASSERT(transfer);
+            assert_false(nullptr == transfer);
 
             if (0 < contract->Version()) {
                 const auto& definition =
@@ -703,9 +683,9 @@ auto Activity::start_publisher(
     auto output = api_.Network().ZeroMQ().Internal().PublishSocket();
     const auto started = output->Start(endpoint);
 
-    OT_ASSERT(started);
+    assert_true(started);
 
-    LogDetail()(OT_PRETTY_CLASS())("Publisher started on ")(endpoint).Flush();
+    LogDetail()()("Publisher started on ")(endpoint).Flush();
 
     return output;
 }
@@ -749,8 +729,8 @@ auto Activity::thread_preload_thread(
     auto thread = proto::StorageThread{};
 
     if (false == api_.Storage().Internal().Load(nymID, threadID, thread)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to load thread ")(
-            threadID, api_.Crypto())(" for nym ")(nymID, api_.Crypto())
+        LogError()()("Unable to load thread ")(threadID, api_.Crypto())(
+            " for nym ")(nymID, api_.Crypto())
             .Flush();
 
         return;
@@ -760,14 +740,13 @@ auto Activity::thread_preload_thread(
     auto cached = 0_uz;
 
     if (start > size) {
-        LogError()(OT_PRETTY_CLASS())("Error: start larger than size (")(
-            start)(" / ")(size)(")")
+        LogError()()("Error: start larger than size (")(start)(" / ")(size)(")")
             .Flush();
 
         return;
     }
 
-    OT_ASSERT((size - start) <= std::numeric_limits<int>::max());
+    assert_true((size - start) <= std::numeric_limits<int>::max());
 
     for (auto i = (size - start); i > 0_uz; --i) {
         if (cached >= count) { break; }
@@ -778,8 +757,8 @@ auto Activity::thread_preload_thread(
         switch (box) {
             case otx::client::StorageBox::MAILINBOX:
             case otx::client::StorageBox::MAILOUTBOX: {
-                LogTrace()(OT_PRETTY_CLASS())("Preloading item ")(item.id())(
-                    " in thread ")(threadID, api_.Crypto())
+                LogTrace()()("Preloading item ")(item.id())(" in thread ")(
+                    threadID, api_.Crypto())
                     .Flush();
                 mail_.GetText(
                     nymID,

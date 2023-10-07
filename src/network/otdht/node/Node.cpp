@@ -5,8 +5,6 @@
 
 #include "internal/network/otdht/Node.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <string_view>
@@ -14,7 +12,6 @@
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
 #include "network/otdht/node/Shared.hpp"
@@ -69,18 +66,15 @@ Node::Node(
     : shared_([&] {
         const auto& zmq = api.Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
 
-        return boost::allocate_shared<Shared>(
+        return std::allocate_shared<Shared>(
             alloc::PMR<Shared>{zmq.Alloc(batchID)},
             batchID,
             publicKey,
             secretKey);
     }())
 {
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 }
 
 auto Node::get_allocator() const noexcept -> allocator_type
@@ -90,16 +84,13 @@ auto Node::get_allocator() const noexcept -> allocator_type
 
 auto Node::Init(std::shared_ptr<const api::Session> api) noexcept -> void
 {
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{get_allocator()},
         std::move(api),
         shared_,
         shared_->batch_id_);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

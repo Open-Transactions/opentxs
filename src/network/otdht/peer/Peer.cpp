@@ -5,15 +5,12 @@
 
 #include "internal/network/otdht/Peer.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <cstddef>
 #include <string_view>
 
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/peer/Actor.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -59,21 +56,18 @@ namespace opentxs::network::otdht
 {
 Peer::Peer(
     std::shared_ptr<const api::Session> api,
-    boost::shared_ptr<Node::Shared> shared,
+    std::shared_ptr<Node::Shared> shared,
     std::string_view routingID,
     std::string_view toRemote,
     std::string_view fromNode) noexcept
     : actor_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(shared);
+        assert_false(nullptr == api);
+        assert_false(nullptr == shared);
 
         const auto& zmq = api->Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
 
-        return boost::allocate_shared<Actor>(
+        return std::allocate_shared<Actor>(
             alloc::PMR<Actor>{zmq.Alloc(batchID)},
             api,
             shared,
@@ -83,7 +77,7 @@ Peer::Peer(
             batchID);
     }())
 {
-    OT_ASSERT(actor_);
+    assert_false(nullptr == actor_);
 }
 
 auto Peer::NextID(alloc::Default alloc) noexcept -> CString

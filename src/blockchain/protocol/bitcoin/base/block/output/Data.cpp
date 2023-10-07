@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -70,7 +69,9 @@ auto Output::Cache::add(crypto::Key key) noexcept -> void
 {
     const auto& [account, subchain, index] = key;
 
-    if (blockchain::crypto::Subchain::Outgoing == subchain) { OT_FAIL; }
+    if (blockchain::crypto::Subchain::Outgoing == subchain) {
+        LogAbort()().Abort();
+    }
 
     auto lock = Lock{lock_};
     keys_.emplace(std::move(key));
@@ -92,7 +93,7 @@ auto Output::Cache::has_keys() const noexcept -> bool
 auto Output::Cache::keys(Set<crypto::Key>& out) const noexcept -> void
 {
     auto lock = Lock{lock_};
-    std::copy(keys_.begin(), keys_.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys_, std::inserter(out, out.end()));
 }
 
 auto Output::Cache::payee() const noexcept -> identifier::Generic
@@ -112,7 +113,7 @@ auto Output::Cache::merge(
         const auto& [account, subchain, idx] = key;
 
         if (crypto::Subchain::Outgoing == subchain) {
-            LogError()(OT_PRETTY_CLASS())("discarding invalid key").Flush();
+            LogError()()("discarding invalid key").Flush();
         } else {
             add(key);
         }
@@ -120,22 +121,20 @@ auto Output::Cache::merge(
 
     if (auto p = rhs.Payer(); payer_.empty() || false == p.empty()) {
         set_payer(std::move(p));
-        log(OT_PRETTY_CLASS())("setting payer for output ")(index)(" to ")(
-            payer_, crypto)
+        log()("setting payer for output ")(index)(" to ")(payer_, crypto)
             .Flush();
     }
 
     if (auto p = rhs.Payee(); payee_.empty() || false == p.empty()) {
         set_payee(std::move(p));
-        log(OT_PRETTY_CLASS())("setting payee for output ")(index)(" to ")(
-            payee_, crypto)
+        log()("setting payee for output ")(index)(" to ")(payee_, crypto)
             .Flush();
     }
 
     mined_position_ = rhs.MinedPosition();
     state_ = rhs.State();
     const auto tags = rhs.Tags();
-    std::copy(tags.begin(), tags.end(), std::inserter(tags_, tags_.end()));
+    std::ranges::copy(tags, std::inserter(tags_, tags_.end()));
 }
 
 auto Output::Cache::payer() const noexcept -> identifier::Generic

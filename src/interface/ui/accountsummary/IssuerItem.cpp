@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <span>
@@ -19,7 +20,6 @@
 #include "internal/core/String.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -80,12 +80,12 @@ IssuerItem::IssuerItem(
     , issuer_{api_.Wallet().Internal().Issuer(parent.NymID(), rowID)}
     , currency_{currency}
 {
-    OT_ASSERT(issuer_);
+    assert_false(nullptr == issuer_);
 
     setup_listeners(api_, listeners_);
     startup_ = std::make_unique<std::thread>(&IssuerItem::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto IssuerItem::Debug() const noexcept -> UnallocatedCString
@@ -128,11 +128,11 @@ void IssuerItem::process_account(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(2 < message.Payload().size());
+    assert_true(2 < message.Payload().size());
 
     const auto accountID = api_.Factory().AccountIDFromZMQ(body[1].Bytes());
 
-    OT_ASSERT(false == accountID.empty());
+    assert_false(accountID.empty());
 
     const auto rowID = IssuerItemRowID{
         accountID, {api_.Storage().Internal().AccountUnit(accountID)}};
@@ -145,15 +145,13 @@ void IssuerItem::refresh_accounts() noexcept
 {
     const auto blank = identifier::UnitDefinition{};
     const auto accounts = issuer_->AccountList(currency_, blank);
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(accounts.size())(" accounts.")
-        .Flush();
+    LogDetail()()("Loading ")(accounts.size())(" accounts.").Flush();
 
     for (const auto& id : accounts) { process_account(id); }
 
     UnallocatedSet<IssuerItemRowID> active{};
-    std::transform(
-        accounts.begin(),
-        accounts.end(),
+    std::ranges::transform(
+        accounts,
         std::inserter(active, active.end()),
         [&](const auto& in) -> IssuerItemRowID {
             return {in, currency_};

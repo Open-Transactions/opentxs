@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
@@ -16,8 +15,7 @@ namespace opentxs::storage::driver::implementation
 {
 auto Plugin::init_sqlite(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Initializing primary sqlite3 plugin.")
-        .Flush();
+    LogVerbose()()("Initializing primary sqlite3 plugin.").Flush();
     plugin = factory::StorageSqlite3(crypto_, config_);
 }
 }  // namespace opentxs::storage::driver::implementation

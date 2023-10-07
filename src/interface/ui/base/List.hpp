@@ -144,12 +144,8 @@ protected:
     {
         const auto existing = items_.active();
         auto deleteIDs = UnallocatedVector<RowID>{};
-        std::set_difference(
-            existing.begin(),
-            existing.end(),
-            active.begin(),
-            active.end(),
-            std::back_inserter(deleteIDs));
+        std::ranges::set_difference(
+            existing, active, std::back_inserter(deleteIDs));
 
         for (const auto& id : deleteIDs) { delete_item(lock, id); }
 
@@ -310,8 +306,8 @@ protected:
         , startup_promise_()
         , startup_future_(startup_promise_.get_future())
     {
-        OT_ASSERT(blank_p_);
-        OT_ASSERT(!(subnode_ && bool(cb)));
+        assert_false(nullptr == blank_p_);
+        assert_false(subnode_ && (nullptr != cb));
     }
     // NOTE basic lists (not subnodes) call this constructor
     List(
@@ -358,7 +354,7 @@ private:
     {
         auto pointer = construct_row(id, key, custom);
 
-        OT_ASSERT(pointer);
+        assert_false(nullptr == pointer);
 
         const auto position = items_.find_insert_position(key, id);
         auto& [it, prev] = position;
@@ -381,7 +377,7 @@ private:
     {
         auto move = items_.find_move_position(id, key, id);
 
-        OT_ASSERT(move.has_value());
+        assert_true(move.has_value());
 
         auto& [from, to] = move.value();
         auto& [source, oldBefore] = from;
@@ -389,7 +385,7 @@ private:
         auto* item = source->item_.get();
         auto* parent = qt_parent();
 
-        OT_ASSERT(nullptr != item);
+        assert_false(nullptr == item);
 
         const auto samePosition{
             (oldBefore == newBefore) || (item == newBefore)};

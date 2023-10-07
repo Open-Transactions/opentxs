@@ -20,9 +20,8 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -95,14 +94,14 @@ Server::Server(
 }
 
 auto Server::background(
-    boost::shared_ptr<Server> me,
+    std::shared_ptr<Server> me,
     std::shared_ptr<const ScopeGuard> post) noexcept -> void
 {
-    OT_ASSERT(me);
-    OT_ASSERT(post);
+    assert_false(nullptr == me);
+    assert_false(nullptr == post);
 
     // WARNING this function must not be be called from a zmq thread
-    auto alloc = alloc::Monotonic{me->get_allocator().resource()};
+    auto alloc = alloc::MonotonicSync{me->get_allocator().resource()};
     auto handle = me->shared_.lock();
     auto& shared = *handle;
     me->fill_queue(shared);
@@ -128,7 +127,7 @@ auto Server::check_caught_up(Shared& shared) noexcept -> void
 auto Server::do_work() noexcept -> bool
 {
     if (false == running_.is_limited()) {
-        auto me = boost::shared_from(this);
+        auto me = shared_from_this();
         auto post = std::make_shared<ScopeGuard>(
             [me] { ++me->running_; }, [me] { --me->running_; });
         RunJob([me, post] { background(me, post); });
@@ -156,11 +155,10 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
         auto count = 0_uz;
         const auto& hOracle = node_.HeaderOracle();
         const auto& fOracle = node_.FilterOracle();
-        log_(OT_PRETTY_CLASS())(name_)(": processing ")(items)(" blocks")
-            .Flush();
+        log_()(name_)(": processing ")(items)(" blocks").Flush();
 
         while (count < items) {
-            OT_ASSERT(false == shared.queue_.empty());
+            assert_false(shared.queue_.empty());
 
             const auto& position = shared.queue_.front();
             const auto header = hOracle.LoadHeader(position.hash_);
@@ -225,7 +223,7 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
                     out.StartBody();
                     const auto serialized = msg.Serialize(out);
 
-                    OT_ASSERT(serialized);
+                    assert_true(serialized);
 
                     return out;
                 }());
@@ -234,21 +232,19 @@ auto Server::drain_queue(Shared& shared, allocator_type monotonic) noexcept
             shared.queue_.pop_front();
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
         shared.queue_.clear();
     }
 
     if (data.empty()) {
-        log_(OT_PRETTY_CLASS())(name_)("no data to process").Flush();
+        log_()(name_)("no data to process").Flush();
 
         return;
     }
 
     const auto stored = shared.db_.StoreSync(tip, data);
 
-    if (false == stored) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": database error").Abort();
-    }
+    if (false == stored) { LogAbort()()(name_)(": database error").Abort(); }
 
     update_tip(shared, false, tip);
 
@@ -263,17 +259,15 @@ auto Server::fill_queue(Shared& shared) noexcept -> void
 
     if (0 == oracle.height_) { return; }
 
-    log(OT_PRETTY_CLASS())(name_)(": current position: ")(current).Flush();
-    log(OT_PRETTY_CLASS())(name_)(":  oracle position: ")(oracle).Flush();
+    log()(name_)(": current position: ")(current).Flush();
+    log()(name_)(":  oracle position: ")(oracle).Flush();
     auto blocks = node_.HeaderOracle().Ancestors(current, oracle, 0_uz);
 
-    OT_ASSERT(false == blocks.empty());
+    assert_false(blocks.empty());
 
-    log(OT_PRETTY_CLASS())(name_)(": loaded ")(blocks.size())(
-        " blocks hashes from oracle")
+    log()(name_)(": loaded ")(blocks.size())(" blocks hashes from oracle")
         .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": newest common parent is ")(blocks.front())
-        .Flush();
+    log()(name_)(": newest common parent is ")(blocks.front()).Flush();
     const auto& best = blocks.front();
 
     if (best.height_ <= shared.sync_tip_.height_) {
@@ -281,31 +275,25 @@ auto Server::fill_queue(Shared& shared) noexcept -> void
     }
 
     if (1_uz < blocks.size()) {
-        log(OT_PRETTY_CLASS())(name_)(": first unqueued block is ")(
-            blocks.at(1_uz))
-            .Flush();
-        log(OT_PRETTY_CLASS())(name_)(":  last unqueued block is ")(
-            blocks.back())
-            .Flush();
+        log()(name_)(": first unqueued block is ")(blocks.at(1_uz)).Flush();
+        log()(name_)(":  last unqueued block is ")(blocks.back()).Flush();
     }
 
     while ((!shared.queue_.empty()) &&
            (shared.queue_.back().height_ > best.height_)) {
-        log(OT_PRETTY_CLASS())(name_)(": removing orphaned block")(
-            shared.queue_.back())
-            .Flush();
+        log()(name_)(": removing orphaned block")(shared.queue_.back()).Flush();
         shared.queue_.pop_back();
     }
 
     if (false == shared.queue_.empty()) {
         const auto& last = shared.queue_.back();
 
-        OT_ASSERT(last == best);
+        assert_true(last == best);
     }
 
     if (1_uz < blocks.size()) {
         const auto first = std::next(blocks.begin());
-        log(OT_PRETTY_CLASS())(name_)(": adding ")(blocks.size() - 1_uz)(
+        log()(name_)(": adding ")(blocks.size() - 1_uz)(
             " blocks to queue from ") (*first)(" to ")(blocks.back())
             .Flush();
         std::move(
@@ -313,7 +301,7 @@ auto Server::fill_queue(Shared& shared) noexcept -> void
             blocks.end(),
             std::back_inserter(shared.queue_));
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": no blocks to add to queue").Flush();
+        log()(name_)(": no blocks to add to queue").Flush();
     }
 }
 
@@ -346,7 +334,7 @@ auto Server::process_checksum_failure(Message&& msg) noexcept -> void
         update_tip(
             shared, true, {target, node_.HeaderOracle().BestHash(target)});
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -356,7 +344,7 @@ auto Server::process_sync_request(Message&& msg) noexcept -> void
 {
     const auto pBase = api_.Factory().BlockchainSyncMessage(msg);
 
-    OT_ASSERT(pBase);
+    assert_false(nullptr == pBase);
 
     const auto& base = *pBase;
     const auto& request = base.asRequest();
@@ -375,7 +363,7 @@ auto Server::process_sync_request(Message&& msg) noexcept -> void
         const auto& header = node_.HeaderOracle();
         auto positions = header.Ancestors(position, data.sync_tip_);
 
-        OT_ASSERT(false == positions.empty());
+        assert_false(positions.empty());
 
         const auto& parent = positions.front();
         auto& best = positions.back();
@@ -401,17 +389,14 @@ auto Server::process_sync_request(Message&& msg) noexcept -> void
 
         if (needSync) { data.db_.LoadSync(target, reply); }
 
-        to_dht().SendDeferred(
-            [&] {
-                auto out = zeromq::reply_to_message(std::move(msg));
-                reply.Serialize(out);
+        to_dht().SendDeferred([&] {
+            auto out = zeromq::reply_to_message(std::move(msg));
+            reply.Serialize(out);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -423,17 +408,14 @@ auto Server::report() noexcept -> void
 auto Server::report(const opentxs::blockchain::block::Position& tip) noexcept
     -> void
 {
-    to_api().SendDeferred(
-        [&] {
-            auto out = MakeWork(WorkType::BlockchainSyncServerProgress);
-            out.AddFrame(chain_);
-            out.AddFrame(tip.height_);
-            out.AddFrame(tip.hash_);
+    to_api().SendDeferred([&] {
+        auto out = MakeWork(WorkType::BlockchainSyncServerProgress);
+        out.AddFrame(chain_);
+        out.AddFrame(tip.height_);
+        out.AddFrame(tip.hash_);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Server::reset_to_genesis() noexcept -> void
@@ -453,12 +435,11 @@ auto Server::update_tip(
     if (db) {
         auto saved = shared.db_.SetSyncTip(tip);
 
-        OT_ASSERT(saved);
+        assert_true(saved);
     }
 
     shared.sync_tip_ = std::move(tip);
-    log(OT_PRETTY_CLASS())(name_)(": sync data updated to ")(shared.sync_tip_)
-        .Flush();
+    log()(name_)(": sync data updated to ")(shared.sync_tip_).Flush();
     report(shared.sync_tip_);
 }
 

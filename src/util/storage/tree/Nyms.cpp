@@ -9,6 +9,7 @@
 #include <StorageNymList.pb.h>
 #include <atomic>
 #include <functional>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -22,7 +23,6 @@
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -43,7 +43,13 @@ Nyms::Nyms(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          current_version_)
     , nyms_()
     , local_nyms_()
     , default_local_nym_()
@@ -58,9 +64,7 @@ Nyms::Nyms(
 auto Nyms::Default() const -> identifier::Nym
 {
     auto lock = Lock{write_lock_};
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(
-        default_local_nym_, crypto_)
-        .Flush();
+    LogTrace()()("Default nym is ")(default_local_nym_, crypto_).Flush();
 
     return default_local_nym_;
 }
@@ -117,8 +121,8 @@ auto Nyms::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -148,7 +152,7 @@ auto Nyms::nym(const identifier::Nym& id) const -> tree::Nym*
 
 auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const -> tree::Nym*
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     const auto& index = item_map_[id];
     const auto hash = std::get<0>(index);
@@ -160,8 +164,7 @@ auto Nyms::nym(const Lock& lock, const identifier::Nym& id) const -> tree::Nym*
             crypto_, factory_, plugin_, id, hash, alias);
 
         if (false == nym.operator bool()) {
-            LogAbort()(OT_PRETTY_CLASS())("failed to instantiate storage nym ")(
-                id, crypto_)
+            LogAbort()()("failed to instantiate storage nym ")(id, crypto_)
                 .Abort();
         }
     }
@@ -185,7 +188,7 @@ auto Nyms::RelabelThread(
         const auto nymID = factory_.Internal().NymIDConvertSafe(it.first);
         auto* nym = Nyms::nym(lock, nymID);
 
-        OT_ASSERT(nym);
+        assert_true(nym);
 
         const auto& threads = nym->Threads();
 
@@ -212,15 +215,13 @@ auto Nyms::RelabelThread(
 
 auto Nyms::save(const Lock& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("Lock failure.").Abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure.").Abort(); }
 
     auto serialized = serialize();
 
     if (!proto::Validate(serialized, VERBOSE)) { return false; }
 
-    OT_ASSERT(current_version_ == serialized.version());
+    assert_true(current_version_ == serialized.version());
 
     return StoreProto(serialized, root_);
 }
@@ -228,13 +229,9 @@ auto Nyms::save(const Lock& lock) const -> bool
 auto Nyms::save(tree::Nym* nym, const Lock& lock, const identifier::Nym& id)
     -> void
 {
-    if (!verify_write_lock(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("Lock failure").Abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
-    if (nullptr == nym) {
-        LogAbort()(OT_PRETTY_CLASS())("Null target").Abort();
-    }
+    if (nullptr == nym) { LogAbort()()("Null target").Abort(); }
 
     auto& index = item_map_[id];
     auto& hash = std::get<0>(index);
@@ -244,9 +241,7 @@ auto Nyms::save(tree::Nym* nym, const Lock& lock, const identifier::Nym& id)
 
     if (nym->private_.get()) { local_nyms_.emplace(id); }
 
-    if (false == save(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save nym").Abort();
-    }
+    if (false == save(lock)) { LogAbort()()("failed to save nym").Abort(); }
 }
 
 auto Nyms::serialize() const -> proto::StorageNymList
@@ -283,7 +278,7 @@ auto Nyms::SetDefault(const identifier::Nym& id) -> bool
 
 auto Nyms::set_default(const Lock&, const identifier::Nym& id) -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(id, crypto_).Flush();
+    LogTrace()()("Default nym is ")(id, crypto_).Flush();
     default_local_nym_ = id;
 }
 
@@ -333,11 +328,10 @@ auto Nyms::upgrade_create_local_nym_index(const Lock& lock) noexcept -> void
 
         if (false == loaded) { continue; }
 
-        OT_ASSERT(node.checked_.get());
+        assert_true(node.checked_.get());
 
         if (node.private_.get()) {
-            LogError()(OT_PRETTY_CLASS())("Adding nym ")(id, crypto_)(
-                " to local nym list.")
+            LogError()()("Adding nym ")(id, crypto_)(" to local nym list.")
                 .Flush();
             local_nyms_.emplace(id);
         }

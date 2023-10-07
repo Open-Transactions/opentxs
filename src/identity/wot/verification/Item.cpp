@@ -8,6 +8,7 @@
 #include <Signature.pb.h>
 #include <VerificationItem.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <stdexcept>
 
@@ -56,8 +57,7 @@ auto Factory::VerificationItem(
             version,
             superscedes);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification item: ")(e.what())
+        LogError()()("Failed to construct verification item: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -76,8 +76,7 @@ auto Factory::VerificationItem(
 
         return new ReturnType(parent, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification item: ")(e.what())
+        LogError()()("Failed to construct verification item: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -131,7 +130,7 @@ Item::Item(
         auto out = decltype(superscedes_){};
         const auto& in = superscedes;
         out.reserve(in.size());
-        std::copy(in.begin(), in.end(), std::back_inserter(out));
+        std::ranges::copy(in, std::back_inserter(out));
 
         return out;
     }())
@@ -154,8 +153,7 @@ Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
             return parent.API().Factory().Internal().Identifier(p);
         };
         out.reserve(proto.size());
-        std::transform(
-            proto.begin(), proto.end(), std::back_inserter(out), from_proto);
+        std::ranges::transform(proto, std::back_inserter(out), from_proto);
 
         return out;
     }())

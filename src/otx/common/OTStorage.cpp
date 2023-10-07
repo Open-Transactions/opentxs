@@ -50,7 +50,7 @@
  // itself, instead of asking the API to use it for me:
 
  OTDB::Storage * pStorage = OTDB::GetDefaultStorage();
- OT_ASSERT(nullptr!=pStorage);
+ assert_true(nullptr!=pStorage);
 
  bool bSuccessStore = pStorage->StoreString(strContents, strFolder,
  strFilename);
@@ -63,7 +63,7 @@
 
  OTDB::Storage * pStorage = OTDB::CreateStorageContext(STORE_FILESYSTEM,
  PACK_MESSAGE_PACK);
- OT_ASSERT(nullptr!=pStorage);
+ assert_true(nullptr!=pStorage);
 
  bool bSuccessInit  = pStorage->Init("/path/to/data_folder", "wallet.xml");
 
@@ -94,7 +94,7 @@
 
  Storage * pStorage =
  CreateStorageContext(STORE_COUCHDB, PACK_PROTOCOL_BUFFERS);
- OT_ASSERT(nullptr!=pStorage);
+ assert_true(nullptr!=pStorage);
 
  // This time, Init receives database connect info instead of filesystem info...
  bool bSuccessInit  = pStorage->Init("IP ADDRESS", "PORT", "USERNAME",
@@ -115,7 +115,7 @@
     // Then do this as normal:
 
     Storage * pStorage = GetDefaultStorage();
-    OT_ASSERT(nullptr!=pStorage);
+    assert_true(nullptr!=pStorage);
 
     bool bSuccessStore = pStorage->StoreString(strContents, strFolder,
  strFilename);
@@ -128,7 +128,7 @@
  // The object must be instantiated by the Storage Context...
 
  BitcoinAcct * pAcct = pStorage->CreateObject(STORED_OBJ_BITCOIN_ACCT);
- OT_ASSERT(nullptr != pAcct);
+ assert_false(nullptr == pAcct);
 
  pAcct->acct_id_                = "jkhsdf987345kjhf8lkjhwef987345";
  pAcct->bitcoin_acct_name_    = "Read-Only Label (Bitcoin Internal acct)";
@@ -236,10 +236,10 @@ InitOTDBDetails theOTDBConstructor;  // Constructor for this instance (define
 InitOTDBDetails::InitOTDBDetails()  // Constructor for namespace
 {
 #if defined(OTDB_MESSAGE_PACK) || defined(OTDB_PROTOCOL_BUFFERS)
-    OT_ASSERT(nullptr == details::pFunctionMap);
+    assert_true(nullptr == details::pFunctionMap);
     details::pFunctionMap = new mapOfFunctions;
 
-    OT_ASSERT(nullptr != details::pFunctionMap);
+    assert_false(nullptr == details::pFunctionMap);
     mapOfFunctions& theMap = *(details::pFunctionMap);
 #endif
 
@@ -279,7 +279,7 @@ InitOTDBDetails::InitOTDBDetails()  // Constructor for namespace
 
 InitOTDBDetails::~InitOTDBDetails()  // Destructor for namespace
 {
-    OT_ASSERT(nullptr != details::pFunctionMap);
+    assert_false(nullptr == details::pFunctionMap);
     delete details::pFunctionMap;
     details::pFunctionMap = nullptr;
 
@@ -313,7 +313,7 @@ auto InitDefaultStorage(StorageType eStoreType, PackType ePackType) -> bool
     //        }
 
     if (nullptr == details::s_pStorage) {
-        LogVerbose()(__func__)(": Existing storage context doesn't ")(
+        LogVerbose()()("Existing storage context doesn't ")(
             "already exist. (Creating it.) ")
             .Flush();
 
@@ -321,8 +321,8 @@ auto InitDefaultStorage(StorageType eStoreType, PackType ePackType) -> bool
     }
 
     if (nullptr == details::s_pStorage) {
-        LogError()(__func__)(": Failed while calling "
-                             "OTDB::Storage::Create().")
+        LogError()()("Failed while calling "
+                     "OTDB::Storage::Create().")
             .Flush();
         return false;
     }
@@ -365,10 +365,8 @@ auto CheckStringsExistInOrder(
     const UnallocatedCString& oneStr,
     const UnallocatedCString& twoStr,
     const UnallocatedCString& threeStr,
-    const char* szFuncName) -> bool
+    const std::source_location& loc) -> bool
 {
-    if (nullptr == szFuncName) { szFuncName = __func__; }
-
     auto ot_strFolder = String::Factory(strFolder),
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
@@ -379,25 +377,20 @@ auto CheckStringsExistInOrder(
             if (!ot_oneStr->Exists()) {
                 if ((!ot_twoStr->Exists()) && (!ot_threeStr->Exists())) {
                 } else {
-                    LogError()(szFuncName)(
-                        ": ot_twoStr or ot_threeStr exist, when "
-                        "ot_oneStr doesn't exist!")
-                        .Flush();
-                    OT_FAIL;
+                    LogAbort()(loc)(": ot_twoStr or ot_threeStr exist, when "
+                                    "ot_oneStr doesn't exist!")
+                        .Abort();
                 }
             } else if ((!ot_twoStr->Exists()) && (ot_threeStr->Exists())) {
-                LogError()(szFuncName)(": ot_twoStr or ot_threeStr exist, when "
-                                       "ot_oneStr doesn't exist!")
-                    .Flush();
-                OT_FAIL;
+                LogAbort()(loc)(": ot_twoStr or ot_threeStr exist, when "
+                                "ot_oneStr doesn't exist!")
+                    .Abort();
             }
         } else {
-            LogError()(szFuncName)(": ot_strFolder must always exist!").Flush();
-            OT_FAIL;
+            LogAbort()(loc)(": ot_strFolder must always exist!").Abort();
         }
     } else {
-        LogError()(szFuncName)(": dataFolder must always exist!").Flush();
-        OT_FAIL;
+        LogAbort()(loc)(": dataFolder must always exist!").Abort();
     }
     return true;
 }
@@ -416,13 +409,11 @@ auto Exists(
              ot_oneStr = String::Factory(oneStr),
              ot_twoStr = String::Factory(twoStr),
              ot_threeStr = String::Factory(threeStr);
-        OT_ASSERT_MSG(
-            ot_strFolder->Exists(), "OTDB::Exists: strFolder is empty.");
+        assert_true(ot_strFolder->Exists(), "ot_strFolder is empty.");
 
         if (!ot_oneStr->Exists()) {
-            OT_ASSERT_MSG(
-                (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-                "Exists: bad options");
+            assert_true(
+                !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
             oneStr = strFolder;
             strFolder = ".";
         }
@@ -431,8 +422,7 @@ auto Exists(
     Storage* pStorage = details::s_pStorage;
 
     if (nullptr == pStorage) {
-        LogConsole()(__func__)(
-            ": details::s_pStorage is null. (Returning false.).")
+        LogConsole()()("details::s_pStorage is null. (Returning false.).")
             .Flush();
         return false;
     }
@@ -454,13 +444,11 @@ auto FormPathString(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB::FormPathString: strFolder is empty.");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is empty.");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "FormPathString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -468,8 +456,7 @@ auto FormPathString(
     Storage* pStorage = details::s_pStorage;
 
     if (nullptr == pStorage) {
-        LogConsole()(__func__)(": details::s_pStorage is null. (Returning -1).")
-            .Flush();
+        LogConsole()()("details::s_pStorage is null. (Returning -1).").Flush();
         return -1;
     }
 
@@ -498,13 +485,11 @@ auto StoreString(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB::StoreString: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "OTDB::StoreString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -529,7 +514,8 @@ auto QueryString(
     const UnallocatedCString& strFolder,
     const UnallocatedCString& oneStr,
     const UnallocatedCString& twoStr,
-    const UnallocatedCString& threeStr) -> UnallocatedCString
+    const UnallocatedCString& threeStr,
+    const std::source_location& loc) -> UnallocatedCString
 {
     auto ot_strFolder = String::Factory(strFolder),
          ot_oneStr = String::Factory(oneStr),
@@ -537,14 +523,13 @@ auto QueryString(
          ot_threeStr = String::Factory(threeStr);
 
     if (!CheckStringsExistInOrder(
-            dataFolder, strFolder, oneStr, twoStr, threeStr)) {
+            dataFolder, strFolder, oneStr, twoStr, threeStr, loc)) {
         return {};
     }
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "Storage::StoreString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -577,20 +562,19 @@ auto StorePlainString(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB::StorePlainString: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "OTDB::StorePlainString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
     Storage* pStorage = details::s_pStorage;
 
-    OT_ASSERT((strFolder.length() > 3) || (0 == strFolder.compare(0, 1, ".")));
-    OT_ASSERT((oneStr.length() < 1) || (oneStr.length() > 3));
+    assert_true(
+        (strFolder.length() > 3) || (0 == strFolder.compare(0, 1, ".")));
+    assert_true((oneStr.length() < 1) || (oneStr.length() > 3));
 
     if (nullptr == pStorage) { return false; }
 
@@ -616,21 +600,20 @@ auto QueryPlainString(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB::QueryPlainString: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "OTDB::QueryPlainString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
 
     Storage* pStorage = details::s_pStorage;
 
-    OT_ASSERT((strFolder.length() > 3) || (0 == strFolder.compare(0, 1, ".")));
-    OT_ASSERT((oneStr.length() < 1) || (oneStr.length() > 3));
+    assert_true(
+        (strFolder.length() > 3) || (0 == strFolder.compare(0, 1, ".")));
+    assert_true((oneStr.length() < 1) || (oneStr.length() > 3));
 
     if (nullptr == pStorage) { return {}; }
 
@@ -658,13 +641,11 @@ auto StoreObject(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB:StoreObject: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "OTDB:StoreObject: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -672,7 +653,7 @@ auto StoreObject(
     Storage* pStorage = details::s_pStorage;
 
     if (nullptr == pStorage) {
-        LogError()(__func__)(": No default storage object allocated.").Flush();
+        LogError()()("No default storage object allocated.").Flush();
         return false;
     }
 
@@ -700,13 +681,11 @@ auto QueryObject(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "OTDB::QueryObject: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "OTDB::QueryObject: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -733,7 +712,7 @@ auto EncodeObject(const api::Session& api, Storable& theContents)
     Storage* pStorage = details::s_pStorage;
 
     if (nullptr == pStorage) {
-        LogError()(__func__)(": No Default Storage object allocated.").Flush();
+        LogError()()("No Default Storage object allocated.").Flush();
         return "";
     }
     return pStorage->EncodeObject(api, theContents);
@@ -765,7 +744,7 @@ auto EraseValueByKey(
     Storage* pStorage = details::s_pStorage;
 
     if (nullptr == pStorage) {
-        LogError()(__func__)(": No Default Storage object allocated.").Flush();
+        LogError()()("No Default Storage object allocated.").Flush();
         return false;
     }
 
@@ -813,13 +792,13 @@ auto OTPacker::Create(PackType ePackType) -> OTPacker*
 #if defined(OTDB_MESSAGE_PACK)
         case PACK_MESSAGE_PACK: {
             pPacker = new PackerMsgpack;
-            OT_ASSERT(nullptr != pPacker);
+            assert_false(nullptr == pPacker);
         } break;
 #endif
 #if defined(OTDB_PROTOCOL_BUFFERS)
         case PACK_PROTOCOL_BUFFERS: {
             pPacker = new PackerPB;
-            OT_ASSERT(nullptr != pPacker);
+            assert_false(nullptr == pPacker);
         } break;
 #endif
 #if !defined(OTDB_MESSAGE_PACK)
@@ -859,14 +838,14 @@ auto OTPacker::Pack(Storable& inObj) -> PackedBuffer*
     if (nullptr == pStorable)  // ALL Storables should implement SOME
                                // subinterface of IStorable
     {
-        LogError()(__func__)(": Error: IStorable dynamic_cast failed.").Flush();
+        LogError()()("Error: IStorable dynamic_cast failed.").Flush();
         return nullptr;
     }
 
     // This is polymorphic, so we get the right kind of buffer for the packer.
     //
     PackedBuffer* pBuffer = CreateBuffer();
-    OT_ASSERT(nullptr != pBuffer);
+    assert_false(nullptr == pBuffer);
 
     // Must delete pBuffer, or return it, below this point.
 
@@ -916,7 +895,7 @@ auto OTPacker::Pack(const UnallocatedCString& inObj) -> PackedBuffer*
     // This is polymorphic, so we get the right kind of buffer for the packer.
     //
     PackedBuffer* pBuffer = CreateBuffer();
-    OT_ASSERT(nullptr != pBuffer);
+    assert_false(nullptr == pBuffer);
 
     // Must delete pBuffer, or return it, below this point.
 
@@ -1377,7 +1356,7 @@ auto BufferPB::ReadFromIStream(std::istream& inStream, std::int64_t lFilesize)
     auto size = static_cast<unsigned long>(lFilesize);
 
     char* buf = new char[size];
-    OT_ASSERT(nullptr != buf);
+    assert_false(nullptr == buf);
 
     inStream.read(buf, size);
 
@@ -1402,8 +1381,7 @@ auto BufferPB::WriteToOStream(std::ostream& outStream) -> bool
         outStream.write(buffer_.c_str(), buffer_.length());
         return outStream.good() ? true : false;
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            "Buffer had zero length in BufferPB::WriteToOStream.")
+        LogError()()("Buffer had zero length in BufferPB::WriteToOStream.")
             .Flush();
     }
 
@@ -1445,14 +1423,14 @@ void BufferPB::SetData(const std::uint8_t* pData, std::size_t theSize)
         PointerTo##element_type thePtr = (*it);                                \
         element_type##PB* pObject =                                            \
             dynamic_cast<element_type##PB*>(thePtr.get());                     \
-        OT_ASSERT(nullptr != pObject);                                         \
+        assert_false(nullptr == pObject);                                      \
         ::google::protobuf::MessageLite* pMessage = pObject->getPBMessage();   \
-        OT_ASSERT(nullptr != pMessage);                                        \
+        assert_false(nullptr == pMessage);                                     \
         element_type##_InternalPB* pInternal =                                 \
             dynamic_cast<element_type##_InternalPB*>(pMessage);                \
-        OT_ASSERT(nullptr != pInternal);                                       \
+        assert_false(nullptr == pInternal);                                    \
         element_type##_InternalPB* pNewInternal = pb_obj_.add_##pb_name();     \
-        OT_ASSERT(nullptr != pNewInternal);                                    \
+        assert_false(nullptr == pNewInternal);                                 \
         pObject->hookBeforePack();                                             \
         pNewInternal->CopyFrom(*pInternal);                                    \
     }
@@ -1463,13 +1441,13 @@ void BufferPB::SetData(const std::uint8_t* pData, std::size_t theSize)
         const element_type##_InternalPB& theInternal = pb_obj_.pb_name(i);     \
         element_type##PB* pNewWrapper = dynamic_cast<element_type##PB*>(       \
             Storable::Create(ELEMENT_ENUM, PACK_PROTOCOL_BUFFERS));            \
-        OT_ASSERT(nullptr != pNewWrapper);                                     \
+        assert_false(nullptr == pNewWrapper);                                  \
         ::google::protobuf::MessageLite* pMessage =                            \
             pNewWrapper->getPBMessage();                                       \
-        OT_ASSERT(nullptr != pMessage);                                        \
+        assert_false(nullptr == pMessage);                                     \
         element_type##_InternalPB* pInternal =                                 \
             dynamic_cast<element_type##_InternalPB*>(pMessage);                \
-        OT_ASSERT(nullptr != pInternal);                                       \
+        assert_false(nullptr == pInternal);                                    \
         pInternal->CopyFrom(theInternal);                                      \
         pNewWrapper->hookAfterUnpack();                                        \
         PointerTo##element_type thePtr(                                        \
@@ -1820,9 +1798,8 @@ auto Storage::GetPacker(PackType ePackType) -> OTPacker*
 
 // (SetPacker(), from .h file)
 // This is called once, in the factory.
-// void Storage::SetPacker(OTPacker& thePacker) { OT_ASSERT(nullptr ==
-// packer_);
-// packer_ =  &thePacker; }
+// void Storage::SetPacker(OTPacker& thePacker) { assert_true(nullptr ==
+// packer_); packer_ =  &thePacker; }
 
 //
 // Factory for Storable objects...
@@ -1832,8 +1809,8 @@ auto Storage::CreateObject(const StoredObjectType& eType) -> Storable*
     OTPacker* pPacker = GetPacker();
 
     if (nullptr == pPacker) {
-        LogError()(OT_PRETTY_CLASS())("Failed, since GetPacker() "
-                                      "returned nullptr.")
+        LogError()()("Failed, since GetPacker() "
+                     "returned nullptr.")
             .Flush();
         return nullptr;
     }
@@ -1853,13 +1830,11 @@ auto Storage::Create(const StorageType& eStorageType, const PackType& ePackType)
     switch (eStorageType) {
         case STORE_FILESYSTEM: {
             pStore = StorageFS::Instantiate();
-            OT_ASSERT(nullptr != pStore);
+            assert_false(nullptr == pStore);
         } break;
         case STORE_TYPE_SUBCLASS:
         default: {
-            LogError()(OT_PRETTY_STATIC(Storage))(
-                "Failed: Unknown storage type.")
-                .Flush();
+            LogError()()("Failed: Unknown storage type.").Flush();
         }
     }
 
@@ -1871,9 +1846,7 @@ auto Storage::Create(const StorageType& eStorageType, const PackType& ePackType)
         OTPacker* pPacker = OTPacker::Create(ePackType);
 
         if (nullptr == pPacker) {
-            LogError()(OT_PRETTY_STATIC(Storage))(
-                "Failed while creating packer.")
-                .Flush();
+            LogError()()("Failed while creating packer.").Flush();
 
             // For whatever reason, we failed. Memory issues or whatever.
             delete pStore;
@@ -1884,9 +1857,7 @@ auto Storage::Create(const StorageType& eStorageType, const PackType& ePackType)
         // Now they're married.
         pStore->SetPacker(*pPacker);
     } else {
-        LogError()(OT_PRETTY_STATIC(Storage))(
-            "Failed, since pStore is nullptr.")
-            .Flush();
+        LogError()()("Failed, since pStore is nullptr.").Flush();
     }
 
     return pStore;  // Possible to return nullptr.
@@ -1923,13 +1894,11 @@ auto Storage::StoreString(
          ot_oneStr = String::Factory(oneStr),
          ot_twoStr = String::Factory(twoStr),
          ot_threeStr = String::Factory(threeStr);
-    OT_ASSERT_MSG(
-        ot_strFolder->Exists(), "Storage::StoreString: strFolder is null");
+    assert_true(ot_strFolder->Exists(), "ot_strFolder is null");
 
     if (!ot_oneStr->Exists()) {
-        OT_ASSERT_MSG(
-            (!ot_twoStr->Exists() && !ot_threeStr->Exists()),
-            "Storage::StoreString: bad options");
+        assert_true(
+            !ot_twoStr->Exists() && !ot_threeStr->Exists(), "bad options");
         ot_oneStr = String::Factory(strFolder.c_str());
         ot_strFolder = String::Factory(".");
     }
@@ -2053,7 +2022,7 @@ auto Storage::StoreObject(
 
     if (nullptr == pPacker) {
 
-        LogError()(OT_PRETTY_CLASS())("No packer allocated.").Flush();
+        LogError()()("No packer allocated.").Flush();
 
         return false;
     }
@@ -2061,7 +2030,7 @@ auto Storage::StoreObject(
     PackedBuffer* pBuffer = pPacker->Pack(theContents);
 
     if (nullptr == pBuffer) {
-        LogError()(OT_PRETTY_CLASS())("Packing failed.").Flush();
+        LogError()()("Packing failed.").Flush();
         return false;
     }
 
@@ -2069,8 +2038,8 @@ auto Storage::StoreObject(
         api, *pBuffer, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
-        LogError()(OT_PRETTY_CLASS())("Storing failed calling "
-                                      "onStorePackedBuffer.")
+        LogError()()("Storing failed calling "
+                     "onStorePackedBuffer.")
             .Flush();
         return false;
     }
@@ -2149,14 +2118,14 @@ auto Storage::EncodeObject(const api::Session& api, Storable& theContents)
     OTPacker* pPacker = GetPacker();
 
     if (nullptr == pPacker) {
-        LogError()(OT_PRETTY_CLASS())("No packer allocated.").Flush();
+        LogError()()("No packer allocated.").Flush();
         return strReturnValue;
     }
 
     PackedBuffer* pBuffer = pPacker->Pack(theContents);
 
     if (nullptr == pBuffer) {
-        LogError()(OT_PRETTY_CLASS())("Packing failed.").Flush();
+        LogError()()("Packing failed.").Flush();
         return strReturnValue;
     }
 
@@ -2172,7 +2141,7 @@ auto Storage::EncodeObject(const api::Session& api, Storable& theContents)
         delete pBuffer;
         pBuffer = nullptr;
 
-        LogError()(OT_PRETTY_CLASS())("Packing failed (2).").Flush();
+        LogError()()("Packing failed (2).").Flush();
         return strReturnValue;
     }
 
@@ -2256,8 +2225,8 @@ auto Storage::EraseValueByKey(
         onEraseValueByKey(api, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
-        LogError()(OT_PRETTY_CLASS())("Failed trying to erase a value "
-                                      "(while calling onEraseValueByKey).")
+        LogError()()("Failed trying to erase a value "
+                     "(while calling onEraseValueByKey).")
             .Flush();
     }
 
@@ -2325,22 +2294,22 @@ auto StorageFS::ConstructAndConfirmPathImp(
 
     // must be 3chars in length, or equal to "."
     if (strZero.empty() && (0 != zeroStr.compare("."))) {
-        LogError()(OT_PRETTY_CLASS())("Empty: zeroStr"
-                                      " is too short (and not)! "
-                                      "zeroStr was: ")(zeroStr)(".")
+        LogError()()("Empty: zeroStr"
+                     " is too short (and not)! "
+                     "zeroStr was: ")(zeroStr)(".")
             .Flush();
         return -1;
     }
 
     // the first string must not be empty
     if (strOne.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Empty: oneStr is passed in!").Flush();
+        LogError()()("Empty: oneStr is passed in!").Flush();
         return -2;
     }
 
     // if the second string is empty, so must the third.
     if (strTwo.empty() && !strThree.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Error: strThree passed in: ")(
+        LogError()()("Error: strThree passed in: ")(
             strThree)(" while strTwo is empty!")
             .Flush();
         return -3;
@@ -2393,7 +2362,7 @@ auto StorageFS::ConstructAndConfirmPathImp(
             goto ot_exit_block;
         }
         // should never get here.
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 ot_exit_block:
 
@@ -2408,15 +2377,13 @@ ot_exit_block:
         const bool bFolderExists = std::filesystem::exists(strFolder);
 
         if (bMakePath && !bFolderExists) {
-            LogError()(OT_PRETTY_CLASS())("Error: was told to make path (")(
+            LogError()()("Error: was told to make path (")(
                 strFolder)("), however cannot confirm the path!")
                 .Flush();
             return -4;
         }
         if (!bMakePath && !bFolderExists) {
-            LogDetail()(OT_PRETTY_CLASS())("Debug: Cannot find Folder: ")(
-                strFolder)
-                .Flush();
+            LogDetail()()("Debug: Cannot find Folder: ")(strFolder).Flush();
         }
     }
 
@@ -2449,8 +2416,7 @@ auto StorageFS::onStorePackedBuffer(
     if (0 >
         ConstructAndCreatePath(
             api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr)) {
-        LogError()(OT_PRETTY_CLASS())("Error writing to ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error writing to ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2463,8 +2429,7 @@ auto StorageFS::onStorePackedBuffer(
     std::ofstream ofs(strOutput.c_str(), std::ios::out | std::ios::binary);
 
     if (ofs.fail()) {
-        LogError()(OT_PRETTY_CLASS())("Error opening file: ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error opening file: ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2492,10 +2457,10 @@ auto StorageFS::onQueryPackedBuffer(
         api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (0 > lRet) {
-        LogError()(OT_PRETTY_CLASS())("Error with ")(strOutput)(".").Flush();
+        LogError()()("Error with ")(strOutput)(".").Flush();
         return false;
     } else if (0 == lRet) {
-        LogDetail()(OT_PRETTY_CLASS())("Failure reading from ")(
+        LogDetail()()("Failure reading from ")(
             strOutput)(": file does not exist.")
             .Flush();
         return false;
@@ -2506,8 +2471,7 @@ auto StorageFS::onQueryPackedBuffer(
     std::ifstream fin(strOutput.c_str(), std::ios::in | std::ios::binary);
 
     if (!fin.is_open()) {
-        LogError()(OT_PRETTY_CLASS())("Error opening file: ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error opening file: ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2534,8 +2498,7 @@ auto StorageFS::onStorePlainString(
     if (0 >
         ConstructAndCreatePath(
             api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr)) {
-        LogError()(OT_PRETTY_CLASS())("Error writing to ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error writing to ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2554,8 +2517,7 @@ auto StorageFS::onStorePlainString(
     std::ofstream ofs(strOutput.c_str(), std::ios::out | std::ios::binary);
 
     if (ofs.fail()) {
-        LogError()(OT_PRETTY_CLASS())("Error opening file: ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error opening file: ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2584,10 +2546,10 @@ auto StorageFS::onQueryPlainString(
         api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (0 > lRet) {
-        LogError()(OT_PRETTY_CLASS())("Error with ")(strOutput)(".").Flush();
+        LogError()()("Error with ")(strOutput)(".").Flush();
         return false;
     } else if (0 == lRet) {
-        LogDetail()(OT_PRETTY_CLASS())("Failure reading from ")(
+        LogDetail()()("Failure reading from ")(
             strOutput)(": file does not exist.")
             .Flush();
         return false;
@@ -2598,8 +2560,7 @@ auto StorageFS::onQueryPlainString(
     std::ifstream fin(strOutput.c_str(), std::ios::in | std::ios::binary);
 
     if (!fin.is_open()) {
-        LogError()(OT_PRETTY_CLASS())("Error opening file: ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error opening file: ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2639,10 +2600,9 @@ auto StorageFS::onEraseValueByKey(
     if (0 >
         ConstructAndConfirmPath(
             api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr)) {
-        LogError()(OT_PRETTY_CLASS())(
-            ":Error: "
-            "Failed calling ConstructAndConfirmPath with: "
-            "strOutput: ")(strOutput)(" | strFolder: ")(
+        LogError()()(":Error: "
+                     "Failed calling ConstructAndConfirmPath with: "
+                     "strOutput: ")(strOutput)(" | strFolder: ")(
             strFolder)(" | oneStr: ")(oneStr)(" | twoStr: ")(
             twoStr)(" | threeStr: ")(threeStr)(".")
             .Flush();
@@ -2665,8 +2625,7 @@ auto StorageFS::onEraseValueByKey(
     std::ofstream ofs(strOutput.c_str(), std::ios::out | std::ios::binary);
 
     if (ofs.fail()) {
-        LogError()(OT_PRETTY_CLASS())("Error opening file: ")(strOutput)(".")
-            .Flush();
+        LogError()()("Error opening file: ")(strOutput)(".").Flush();
         return false;
     }
 
@@ -2681,14 +2640,11 @@ auto StorageFS::onEraseValueByKey(
 
     if (std::remove(strOutput.c_str()) != 0) {
         bSuccess = false;
-        LogError()(OT_PRETTY_CLASS())("** Failed trying to delete file: ")(
-            strOutput)(".")
+        LogError()()("** Failed trying to delete file: ")(strOutput)(".")
             .Flush();
     } else {
         bSuccess = true;
-        LogVerbose()(OT_PRETTY_CLASS())("** Success deleting file:  ")(
-            strOutput)
-            .Flush();
+        LogVerbose()()("** Success deleting file:  ")(strOutput).Flush();
     }
 
     // TODO: Remove the .lock file.

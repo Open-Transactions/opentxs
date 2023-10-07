@@ -6,6 +6,7 @@
 #include "network/blockchain/bitcoin/message/addr2/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
@@ -13,7 +14,6 @@
 #include <utility>
 
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -77,14 +77,11 @@ Message::Message(
                           bip155.ToAddress(api, chain, version));
 
                       if (false == address.IsValid()) {
-                          LogError()(OT_PRETTY_CLASS())(
-                              "error decoding address")
-                              .Flush();
+                          LogError()()("error decoding address").Flush();
                           out.pop_back();
                       }
                   } else {
-                      LogError()(OT_PRETTY_CLASS())("ignoring invalid addr")
-                          .Flush();
+                      LogError()()("ignoring invalid addr").Flush();
                   }
               }
 
@@ -139,9 +136,8 @@ auto Message::get_size() const noexcept -> std::size_t
             auto& v = cached_items_.emplace(get_allocator());
             v.reserve(count);
             v.clear();
-            std::transform(
-                payload_.begin(),
-                payload_.end(),
+            std::ranges::transform(
+                payload_,
                 std::back_inserter(v),
                 [&](const auto& item) -> Bip155 {
                     auto out = Bip155{chain_, version_, item};

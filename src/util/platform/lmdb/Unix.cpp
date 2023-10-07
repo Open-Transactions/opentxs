@@ -13,7 +13,6 @@ extern "C" {
 
 #include <cstdint>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::file
@@ -27,8 +26,7 @@ auto Mapped::preload_platform(std::span<ReadView> bytes) noexcept -> void
         if (0 != rc) {
             char buf[1024];  // NOLINT(modernize-avoid-c-arrays)
             const auto* text = ::strerror_r(errno, buf, sizeof(buf));
-            LogError()(OT_PRETTY_STATIC(Mapped))(
-                "error calling madvise (MADV_WILLNEED) for ")(
+            LogError()()("error calling madvise (MADV_WILLNEED) for ")(
                 reinterpret_cast<std::uintptr_t>(item.data()))(", ")(
                 item.size())(": ")(text)
                 .Flush();

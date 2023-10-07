@@ -14,7 +14,6 @@
 
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -93,7 +92,7 @@ auto BlockchainSelection::disable(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     process_state(chain, false);
@@ -117,7 +116,7 @@ auto BlockchainSelection::enable(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     process_state(chain, true);
@@ -134,7 +133,7 @@ auto BlockchainSelection::filter(const ui::Blockchains type) noexcept
 {
     const auto& all = opentxs::blockchain::supported_chains();
     auto out = UnallocatedSet<blockchain::Type>{};
-    std::copy(all.begin(), all.end(), std::inserter(out, out.end()));
+    std::ranges::copy(all, std::inserter(out, out.end()));
 
     switch (type) {
         case Blockchains::Main: {
@@ -170,9 +169,9 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -181,7 +180,7 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -207,11 +206,10 @@ auto BlockchainSelection::pipeline(const Message& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type: ")(
-                static_cast<OTZMQWorkType>(work))
+            LogError()()("Unhandled type: ")(static_cast<OTZMQWorkType>(work))
                 .Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -220,7 +218,7 @@ auto BlockchainSelection::process_state(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     process_state(body[1].as<blockchain::Type>(), body[2].as<bool>());
 }

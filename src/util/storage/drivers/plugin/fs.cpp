@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -17,8 +16,7 @@ namespace opentxs::storage::driver::implementation
 {
 auto Plugin::init_fs(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Initializing primary filesystem plugin.")
-        .Flush();
+    LogVerbose()()("Initializing primary filesystem plugin.").Flush();
     plugin = factory::StorageFSGC(crypto_, config_);
 }
 

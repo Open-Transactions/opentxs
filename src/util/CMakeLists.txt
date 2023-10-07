@@ -49,7 +49,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/SharedPimpl.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Signals.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Size.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/Spaceship.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/TSV.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Thread.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Time.hpp"

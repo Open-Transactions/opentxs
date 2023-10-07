@@ -12,7 +12,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -48,7 +47,7 @@ auto MemDB::Data::get_bucket(Bucket bucket) noexcept -> Map&
             return b_;
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("invalid bucket").Abort();
+            LogAbort()()("invalid bucket").Abort();
         }
     }
 }

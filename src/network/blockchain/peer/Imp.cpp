@@ -12,6 +12,7 @@
 #include <zmq.h>
 #include <algorithm>
 #include <compare>
+#include <functional>
 #include <iterator>
 #include <span>
 #include <tuple>
@@ -36,7 +37,6 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/peer/HasJob.hpp"
 #include "network/blockchain/peer/JobType.hpp"
@@ -175,7 +175,7 @@ Peer::Imp::Imp(
               using opentxs::blockchain::print;
               auto out = CString{print(network->Internal().Chain()), alloc};
 
-              OT_ASSERT(address.IsValid());
+              assert_true(address.IsValid());
 
               if (address.Internal().Incoming()) {
                   out.append(" incoming"sv);
@@ -263,7 +263,7 @@ Peer::Imp::Imp(
         const auto rc = ::zmq_curve_keypair(
             static_cast<char*>(pub.data()), static_cast<char*>(sec.data()));
 
-        OT_ASSERT(0 == rc);
+        assert_true(0 == rc);
 
         return out;
     }())
@@ -297,7 +297,7 @@ Peer::Imp::Imp(
         auto out = decltype(gossip_address_queue_){alloc};
         out.reserve(gossip.size());
         out.clear();
-        std::move(gossip.begin(), gossip.end(), std::back_inserter(out));
+        std::ranges::move(gossip, std::back_inserter(out));
 
         return out;
     }())
@@ -310,9 +310,9 @@ Peer::Imp::Imp(
     , failed_peer_(false)
     , fetch_all_blocks_(false)
 {
-    OT_ASSERT(api_p_);
-    OT_ASSERT(network_p_);
-    OT_ASSERT(connection_p_);
+    assert_false(nullptr == api_p_);
+    assert_false(nullptr == network_p_);
+    assert_false(nullptr == connection_p_);
 
     known_addresses_.emplace(hash(this->address()));
 }
@@ -359,7 +359,7 @@ auto Peer::Imp::check_addresses(allocator_type monotonic) noexcept -> void
     const auto& log = log_;
 
     if (gossip_address_queue_.empty()) {
-        log(OT_PRETTY_CLASS())(name_)(": address queue is empty").Flush();
+        log()(name_)(": address queue is empty").Flush();
 
         return;
     }
@@ -378,16 +378,14 @@ auto Peer::Imp::check_jobs(allocator_type monotonic) noexcept -> void
     const auto& log = log_;
 
     if (has_job()) {
-        log(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
+        log()(name_)(": already have ")(job_name()).Flush();
 
         return;
     } else if (auto bhJob = header.GetJob(alloc); bhJob) {
-        log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(bhJob)).Flush();
+        log()(name_)(": accepted ")(job_name(bhJob)).Flush();
         job_ = std::move(bhJob);
     } else if (auto bJob = block.GetWork(alloc); bJob) {
-        log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(bJob))(" ")(
-            bJob.ID())
-            .Flush();
+        log()(name_)(": accepted ")(job_name(bJob))(" ")(bJob.ID()).Flush();
         job_ = std::move(bJob);
     }
 
@@ -400,7 +398,7 @@ auto Peer::Imp::check_positions() noexcept -> void
         is_caught_up_ = local_position_.NotReplacedBy(remote_position_);
 
         if (is_caught_up_) {
-            log_(OT_PRETTY_CLASS())(name_)(": local tip ")(
+            log_()(name_)(": local tip ")(
                 local_position_)(" caught up to remote tip: ")(remote_position_)
                 .Flush();
         }
@@ -416,7 +414,7 @@ auto Peer::Imp::connect(allocator_type monotonic) noexcept -> void
         const auto& ep = *endpoint;
 
         if (false == valid(ep)) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 name_)(": connection manager provided empty endpoint for "
                        "outgoing connection")
                 .Flush();
@@ -438,7 +436,7 @@ auto Peer::Imp::connect_dealer(
 {
     const auto& log = log_;
 
-    OT_ASSERT(valid(endpoint));
+    assert_true(valid(endpoint));
 
     using enum blockchain::Transport;
 
@@ -451,34 +449,32 @@ auto Peer::Imp::connect_dealer(
             const auto rc =
                 api_.Crypto().Encode().Z85Encode(address().Key(), writer(out));
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }();
-        log(OT_PRETTY_CLASS())(name_)(": enabling CurveZMQ for ")(
+        log()(name_)(": enabling CurveZMQ for ")(
             endpoint)(" using remote pubkey ")(pubkey)
             .Flush();
         const auto& [sec, pub] = curve_keys_;
         auto rc = external_.EnableCurveClient(
             address().Key(), pub.Bytes(), sec.Bytes());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         rc = external_.SetZAPDomain("blockchain");
 
-        OT_ASSERT(rc);
+        assert_true(rc);
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": skipping CurveZMQ for ")(endpoint)
-            .Flush();
+        log()(name_)(": skipping CurveZMQ for ")(endpoint).Flush();
     }
 
-    log(OT_PRETTY_CLASS())(name_)(": connecting dealer socket to ")(endpoint)
-        .Flush();
+    log()(name_)(": connecting dealer socket to ")(endpoint).Flush();
     const auto ep = CString{endpoint, monotonic};
     external_.Connect(ep.c_str());
 
     if (init) {
-        external_.SendDeferred(connection_.on_init(), __FILE__, __LINE__);
+        external_.SendDeferred(connection_.on_init());
     } else {
         process_connect(true, monotonic);
     }
@@ -489,7 +485,7 @@ auto Peer::Imp::disconnect(
     allocator_type monotonic) noexcept -> void
 {
     const auto& log = api_.GetOptions().TestMode() ? LogConsole() : log_;
-    log(OT_PRETTY_CLASS())("disconnecting ")(name_);
+    log()("disconnecting ")(name_);
 
     if (valid(why)) { log(": ")(why); }
 
@@ -520,7 +516,7 @@ auto Peer::Imp::disconnect(
 auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
 {
     if (auto m = connection_.stop_external(); m.has_value()) {
-        external_.SendDeferred(std::move(*m), __FILE__, __LINE__);
+        external_.SendDeferred(std::move(*m));
     }
 
     cancel_timers();
@@ -537,17 +533,14 @@ auto Peer::Imp::do_disconnect(allocator_type monotonic) noexcept -> void
     }
 
     database_.Release(address().ID());
-    to_peer_manager_.SendDeferred(
-        [&] {
-            using enum opentxs::blockchain::node::PeerManagerJobs;
-            auto out = MakeWork(disconnect);
-            out.AddFrame(id_);
-            out.AddFrame(address().Display());
+    to_peer_manager_.SendDeferred([&] {
+        using enum opentxs::blockchain::node::PeerManagerJobs;
+        auto out = MakeWork(disconnect);
+        out.AddFrame(id_);
+        out.AddFrame(address().Display());
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Peer::Imp::do_shutdown() noexcept -> void
@@ -571,7 +564,7 @@ auto Peer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
         const auto& ep = *endpoint;
 
         if (false == valid(ep)) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 name_)(": connection manager provided empty endpoint for "
                        "incoming connection")
                 .Flush();
@@ -608,10 +601,7 @@ auto Peer::Imp::finish_job(allocator_type monotonic, bool shutdown) noexcept
 auto Peer::Imp::get_known_tx(alloc::Default alloc) const noexcept -> Set<Txid>
 {
     auto out = Set<Txid>{alloc};
-    std::copy(
-        known_transactions_.begin(),
-        known_transactions_.end(),
-        std::inserter(out, out.end()));
+    std::ranges::copy(known_transactions_, std::inserter(out, out.end()));
 
     return out;
 }
@@ -639,7 +629,7 @@ auto Peer::Imp::hash(const blockchain::Address& addr) const noexcept
     return out;
 }
 
-auto Peer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
+auto Peer::Imp::Init(std::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
 }
@@ -667,7 +657,7 @@ auto Peer::Imp::init_connection_manager(
         }
     } else {
         if (address.Internal().Incoming()) {
-            OT_ASSERT(socket);
+            assert_true(socket.has_value());
 
             return network::blockchain::ConnectionManager::TCPIncoming(
                 api,
@@ -798,7 +788,7 @@ auto Peer::Imp::is_allowed_state(Work work) const noexcept -> bool
         case State::shutdown:
         default: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -822,8 +812,8 @@ auto Peer::Imp::pipeline(
     if (State::shutdown == state_) { return; }
 
     if (false == is_allowed_state(work)) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" received ")(print(work))(
-            " message in ")(print_state(state_))(" state")
+        LogAbort()()(name_)(" received ")(print(work))(" message in ")(
+            print_state(state_))(" state")
             .Abort();
     }
 
@@ -981,11 +971,9 @@ auto Peer::Imp::print_state(State state) noexcept -> std::string_view
 
         return map.at(state);
     } catch (...) {
-        LogError()(OT_PRETTY_STATIC(Imp))("invalid State: ")(
-            static_cast<int>(state))
-            .Flush();
+        LogError()()("invalid State: ")(static_cast<int>(state)).Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -1001,7 +989,7 @@ auto Peer::Imp::process_block(Message&& msg, allocator_type monotonic) noexcept
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     process_block(opentxs::blockchain::block::Hash{body[2].Bytes()}, monotonic);
 }
@@ -1012,11 +1000,10 @@ auto Peer::Imp::process_block(
 {
     if (State::run != state_) { return; }
 
-    log_(OT_PRETTY_CLASS())(name_)(": received block oracle update message")
-        .Flush();
+    log_()(name_)(": received block oracle update message").Flush();
 
     if (false == is_caught_up_) {
-        log_(OT_PRETTY_CLASS())(name_)(
+        log_()(name_)(
             ": ignoring block oracle update message until local block header "
             "chain is synchronized with remote")
             .Flush();
@@ -1025,16 +1012,13 @@ auto Peer::Imp::process_block(
     }
 
     if (auto h = header_oracle_.LoadHeader(hash); false == h.IsValid()) {
-        log_(OT_PRETTY_CLASS())(name_)(": block ")
-            .asHex(hash)(" can not be loaded")
-            .Flush();
+        log_()(name_)(": block ").asHex(hash)(" can not be loaded").Flush();
 
         return;
     }
 
     if (0_uz == known_blocks_.count(hash)) {
-        log_(OT_PRETTY_CLASS())(name_)(
-            ": remote peer does not know about block ")
+        log_()(name_)(": remote peer does not know about block ")
             .asHex(hash)
             .Flush();
         transmit_block_hash(std::move(hash), monotonic);
@@ -1047,7 +1031,7 @@ auto Peer::Imp::process_blockheader(
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
@@ -1072,7 +1056,7 @@ auto Peer::Imp::process_connect(allocator_type monotonic) noexcept -> void
         process_connect(true, monotonic);
     } else {
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -1112,17 +1096,12 @@ auto Peer::Imp::process_gossip_address(
     const auto frames = payload.subspan(1_uz);
     auto& out = gossip_address_queue_;
     out.reserve(out.size() + payload.size());
-    std::transform(
-        frames.begin(),
-        frames.end(),
-        std::back_inserter(out),
-        [this](const auto& frame) {
+    std::ranges::transform(
+        frames, std::back_inserter(out), [this](const auto& frame) {
             return api_.Factory().InternalSession().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(frame));
         });
-    log(OT_PRETTY_CLASS())(name_)(": address queue contains ")(out.size())(
-        " items")
-        .Flush();
+    log()(name_)(": address queue contains ")(out.size())(" items").Flush();
 }
 
 auto Peer::Imp::process_gossip_address(
@@ -1138,7 +1117,7 @@ auto Peer::Imp::process_gossip_address(
         std::make_move_iterator(addresses.end()),
         std::back_inserter(out),
         [this](const auto& addr) { return false == is_known(addr); });
-    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(addresses.size())(
+    log()(name_)(": ")(out.size())(" of ")(addresses.size())(
         " received addresses are not previously seen by this peer")
         .Flush();
 
@@ -1163,7 +1142,7 @@ auto Peer::Imp::process_jobavailableblock(
     const auto& log = log_;
 
     if (has_job()) {
-        log(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
+        log()(name_)(": already have ")(job_name()).Flush();
 
         return;
     }
@@ -1171,14 +1150,11 @@ auto Peer::Imp::process_jobavailableblock(
     auto job = block_oracle_.Internal().GetWork(get_allocator());
 
     if (0_uz < job.Remaining()) {
-        log(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(job))(" ")(
-            job.ID())
-            .Flush();
+        log()(name_)(": accepted ")(job_name(job))(" ")(job.ID()).Flush();
         job_ = std::move(job);
         run_job(monotonic);
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": job already accepted by another peer")
-            .Flush();
+        log()(name_)(": job already accepted by another peer").Flush();
     }
 }
 
@@ -1187,7 +1163,7 @@ auto Peer::Imp::process_jobavailablegetheaders(
     allocator_type monotonic) noexcept -> void
 {
     if (has_job()) {
-        log_(OT_PRETTY_CLASS())(name_)(": already have ")(job_name()).Flush();
+        log_()(name_)(": already have ")(job_name()).Flush();
 
         return;
     }
@@ -1195,13 +1171,11 @@ auto Peer::Imp::process_jobavailablegetheaders(
     auto job = header_oracle_.Internal().GetJob(get_allocator());
 
     if (job.operator bool()) {
-        log_(OT_PRETTY_CLASS())(name_)(": accepted ")(job_name(job))(" ")
-            .Flush();
+        log_()(name_)(": accepted ")(job_name(job))(" ").Flush();
         job_ = std::move(job);
         run_job(monotonic);
     } else {
-        log_(OT_PRETTY_CLASS())(name_)(": job already accepted by another peer")
-            .Flush();
+        log_()(name_)(": job already accepted by another peer").Flush();
     }
 }
 
@@ -1210,7 +1184,7 @@ auto Peer::Imp::process_jobtimeout(
     allocator_type monotonic) noexcept -> void
 {
     const auto& log = log_;
-    log(OT_PRETTY_CLASS())(name_)(": cancelling ")(job_name())(" due to ")(
+    log()(name_)(": cancelling ")(job_name())(" due to ")(
         std::chrono::duration_cast<std::chrono::nanoseconds>(job_timeout_))(
         " of inactivity")
         .Flush();
@@ -1224,7 +1198,7 @@ auto Peer::Imp::process_mempool(
     const auto& log = log_;
     const auto body = msg.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
@@ -1232,12 +1206,10 @@ auto Peer::Imp::process_mempool(
     const auto isNew = add_known_tx(txid);
 
     if (isNew) {
-        log(OT_PRETTY_CLASS())(name_)(": propagating transaction ")
-            .asHex(txid)
-            .Flush();
+        log()(name_)(": propagating transaction ").asHex(txid).Flush();
         transmit_txid(txid, monotonic);
     } else {
-        log(OT_PRETTY_CLASS())(name_)(": transaction ")
+        log()(name_)(": transaction ")
             .asHex(txid)(" was already received from this peer")
             .Flush();
     }
@@ -1279,7 +1251,7 @@ auto Peer::Imp::process_reorg(Message&& msg, allocator_type monotonic) noexcept
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(5 < body.size());
+    assert_true(5 < body.size());
 
     if (body[1].as<decltype(chain_)>() != chain_) { return; }
 
@@ -1303,7 +1275,7 @@ auto Peer::Imp::process_sendresult(
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     static constexpr auto error = std::byte{0x00};
 
@@ -1365,7 +1337,7 @@ auto Peer::Imp::reset_state_timer(std::chrono::microseconds value) noexcept
 
 auto Peer::Imp::run_job(allocator_type monotonic) noexcept -> void
 {
-    OT_ASSERT(has_job());
+    assert_true(has_job());
 
     auto visitor = RunJob{*this, monotonic};
     std::visit(visitor, job_);
@@ -1375,10 +1347,7 @@ auto Peer::Imp::run_job(allocator_type monotonic) noexcept -> void
 auto Peer::Imp::send_good_addresses(allocator_type monotonic) noexcept -> void
 {
     auto good = database_.Good(get_allocator(), monotonic);
-    std::move(
-        std::begin(good),
-        std::end(good),
-        std::back_inserter(gossip_address_queue_));
+    std::ranges::move(good, std::back_inserter(gossip_address_queue_));
 }
 
 auto Peer::Imp::set_block_header_capability(bool value) noexcept -> void
@@ -1398,9 +1367,7 @@ auto Peer::Imp::transition_state(
     const auto& log = log_;
     state_timer_.Cancel();
     state_ = state;
-    log(OT_PRETTY_CLASS())(name_)(": transitioned to ")(print_state(state))(
-        " state")
-        .Flush();
+    log()(name_)(": transitioned to ")(print_state(state))(" state").Flush();
 
     if (timeout.has_value()) { reset_state_timer(timeout.value()); }
 }
@@ -1451,17 +1418,14 @@ auto Peer::Imp::transition_state_run(allocator_type monotonic) noexcept -> void
 
     database_.Confirm(address().ID());
     transition_state(State::run);
-    to_peer_manager_.SendDeferred(
-        [&] {
-            using enum opentxs::blockchain::node::PeerManagerJobs;
-            auto out = MakeWork(verifypeer);
-            out.AddFrame(id_);
-            out.AddFrame(address().Display());
+    to_peer_manager_.SendDeferred([&] {
+        using enum opentxs::blockchain::node::PeerManagerJobs;
+        auto out = MakeWork(verifypeer);
+        out.AddFrame(id_);
+        out.AddFrame(address().Display());
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
     reset_peers_timer(0s);
 
     if (bloom) { transmit_request_mempool(monotonic); }
@@ -1493,7 +1457,7 @@ auto Peer::Imp::transmit(
         case State::connect:
         case State::shutdown:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("attempting to transmit in state ")(
+            LogAbort()()("attempting to transmit in state ")(
                 print_state(state_))
                 .Abort();
         }
@@ -1510,7 +1474,7 @@ auto Peer::Imp::transmit(
 auto Peer::Imp::transmit(Message&& message) noexcept -> void
 {
     if (auto m = connection_.transmit(std::move(message)); m.has_value()) {
-        external_.SendDeferred(std::move(*m), __FILE__, __LINE__);
+        external_.SendDeferred(std::move(*m));
     }
 }
 
@@ -1558,7 +1522,7 @@ auto Peer::Imp::update_get_headers_job(allocator_type monotonic) noexcept
 auto Peer::Imp::update_local_position(
     opentxs::blockchain::block::Position pos) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(": local position updated to ")(pos).Flush();
+    log_()(name_)(": local position updated to ")(pos).Flush();
     update_position(local_position_, std::move(pos));
 }
 
@@ -1573,8 +1537,7 @@ auto Peer::Imp::update_position(
 auto Peer::Imp::update_remote_position(
     opentxs::blockchain::block::Position pos) noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(": remote position updated to ")(pos)
-        .Flush();
+    log_()(name_)(": remote position updated to ")(pos).Flush();
     update_position(remote_position_, std::move(pos));
 }
 

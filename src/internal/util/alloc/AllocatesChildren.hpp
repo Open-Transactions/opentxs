@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "internal/util/alloc/Boost.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::pmr
@@ -13,18 +13,24 @@ namespace opentxs::pmr
 class HasUpstreamAllocator
 {
 public:
+    HasUpstreamAllocator(const HasUpstreamAllocator&) = delete;
+    HasUpstreamAllocator(HasUpstreamAllocator&&) = delete;
+    auto operator=(const HasUpstreamAllocator&)
+        -> HasUpstreamAllocator& = delete;
+    auto operator=(HasUpstreamAllocator&&) -> HasUpstreamAllocator& = delete;
+
     virtual ~HasUpstreamAllocator() = default;
 
 protected:
-    alloc::StandardToBoost upstream_resource_as_boost_;
+    alloc::Resource* upstream_resource_;
 
-    auto parent_resource() noexcept -> boost::container::pmr::memory_resource*
+    auto parent_resource() noexcept -> alloc::Resource*
     {
-        return std::addressof(upstream_resource_as_boost_);
+        return upstream_resource_;
     }
 
     HasUpstreamAllocator(alloc::Resource* mr) noexcept
-        : upstream_resource_as_boost_(mr)
+        : upstream_resource_(mr)
     {
     }
 };

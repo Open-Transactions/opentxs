@@ -10,12 +10,12 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui::implementation
 {
@@ -39,7 +39,7 @@ ContactActivityItem::ContactActivityItem(
     , pending_(Flag::Factory(extract_custom<bool>(custom, 3)))
     , outgoing_(Flag::Factory(extract_custom<bool>(custom, 4)))
 {
-    OT_ASSERT(verify_empty(custom));
+    assert_true(verify_empty(custom));
 }
 
 auto ContactActivityItem::From() const noexcept -> UnallocatedCString

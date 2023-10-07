@@ -7,8 +7,8 @@
 #include <functional>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/WriterPrivate.hpp"
@@ -18,7 +18,7 @@ namespace opentxs
 Writer::Writer(WriterPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Writer::Writer(

@@ -12,7 +12,6 @@
 
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -158,11 +157,11 @@ auto Test_BlockchainActivity::get_test_transaction(
         auto& tx = output.Internal().asBitcoin();
         auto added = tx.ForTestingOnlyAddKey(0, first.KeyID());
 
-        OT_ASSERT(added);
+        opentxs::assert_true(added);
 
         added = tx.ForTestingOnlyAddKey(1, second.KeyID());
 
-        OT_ASSERT(added);
+        opentxs::assert_true(added);
     }
 
     return output;
@@ -187,8 +186,8 @@ auto Test_BlockchainActivity::monkey_patch(
         std::regex{"cd6878fd84ce63a88104a1c8343bd63880b2989e"};
     static const auto input = ot::UnallocatedCString{test_transaction_hex_};
 
-    OT_ASSERT(40 == first.size());
-    OT_ASSERT(40 == second.size());
+    opentxs::assert_true(40 == first.size());
+    opentxs::assert_true(40 == second.size());
 
     auto output = ot::UnallocatedCString{};
     auto temp = ot::UnallocatedCString{};

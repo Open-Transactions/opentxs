@@ -11,12 +11,12 @@
 #include <utility>
 
 #include "internal/blockchain/database/Header.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node
 {
@@ -166,7 +166,7 @@ auto UpdateTransaction::Header(const block::Hash& hash) noexcept(false)
 {
     auto& output = headers_.at(hash).first;
 
-    OT_ASSERT(output.IsValid());
+    assert_true(output.IsValid());
 
     return output;
 }
@@ -221,7 +221,7 @@ auto UpdateTransaction::Stage() noexcept -> block::Header&
     if (0 == best_.size()) {
         auto best = db_.CurrentBest();
 
-        OT_ASSERT(best.IsValid());
+        assert_true(best.IsValid());
 
         {
             auto it = headers_.find(best.Hash());
@@ -262,7 +262,7 @@ auto UpdateTransaction::stage(
     const bool newHeader,
     block::Header header) noexcept -> block::Header&
 {
-    OT_ASSERT(header.IsValid());
+    assert_true(header.IsValid());
 
     auto hash = header.Hash();
     auto [it, added] = headers_.emplace(
@@ -270,7 +270,7 @@ auto UpdateTransaction::stage(
         std::forward_as_tuple(std::move(hash)),
         std::forward_as_tuple(std::move(header), newHeader));
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     return it->second.first;
 }

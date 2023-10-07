@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include <BlockchainBlockHeader.pb.h>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -18,6 +19,7 @@ extern "C" {
 #include <fstream>  // IWYU pragma: keep
 #include <iterator>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -30,7 +32,6 @@ extern "C" {
 #include "blockchain/database/common/Sync.hpp"
 #include "blockchain/database/common/Wallet.hpp"
 #include "internal/api/Legacy.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -162,7 +163,7 @@ struct Database::Imp {
         const auto saved =
             db.Store(Table::Config, tsv(Key::SiphashKey), reader(output));
 
-        OT_ASSERT(saved.first);
+        assert_true(saved.first);
 
         return output;
     }
@@ -254,7 +255,7 @@ struct Database::Imp {
         , wallet_(api_, blockchain, lmdb_, bulk_)
         , config_(api_, lmdb_)
     {
-        OT_ASSERT(crypto_shorthash_KEYBYTES == siphash_key_.size());
+        assert_true(crypto_shorthash_KEYBYTES == siphash_key_.size());
 
         static_assert(sizeof(ElementHash) == crypto_shorthash_BYTES);
     }
@@ -302,13 +303,13 @@ Database::Database(
     const Options& args) noexcept(false)
     : imp_(std::make_unique<Imp>(api, blockchain, legacy, dataFolder, args))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Database::Database(Database&& rhs) noexcept
     : imp_(std::move(rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Database::AddOrUpdate(network::blockchain::Address address) const noexcept
@@ -557,9 +558,9 @@ auto Database::LoadEnabledChains() const noexcept
 
         if (true_byte_ == data.front()) {
             auto seed = UnallocatedCString{};
-            std::transform(
-                std::next(data.begin()),
-                data.end(),
+            using namespace std::ranges;
+            transform(
+                views::drop(data, 1),
                 std::back_inserter(seed),
                 [](const auto& val) { return static_cast<char>(val); });
             output.emplace_back(chain, std::move(seed));

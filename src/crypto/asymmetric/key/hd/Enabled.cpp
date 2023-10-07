@@ -13,7 +13,6 @@
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/Crypto.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -46,10 +45,7 @@ auto HD::ChildKey(
                 auto out = Bip32::Path{};
 
                 if (path_) {
-                    std::copy(
-                        path_->child().begin(),
-                        path_->child().end(),
-                        std::back_inserter(out));
+                    std::ranges::copy(path_->child(), std::back_inserter(out));
                 }
 
                 return out;
@@ -112,7 +108,7 @@ auto HD::ChildKey(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

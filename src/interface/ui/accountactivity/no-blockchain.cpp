@@ -5,7 +5,7 @@
 
 #include "internal/interface/ui/UI.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -50,7 +50,7 @@ auto BlockchainAccountActivityModel(
         [[noreturn]] auto Contract() const noexcept
             -> const contract::Unit& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         auto ContractID() const noexcept -> UnallocatedCString final
         {
@@ -98,7 +98,7 @@ auto BlockchainAccountActivityModel(
         [[noreturn]] auto Notary() const noexcept
             -> const contract::Server& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         auto NotaryID() const noexcept -> UnallocatedCString final
         {
@@ -178,7 +178,7 @@ auto BlockchainAccountActivityModel(
         [[noreturn]] auto SendMonitor() const noexcept
             -> ui::implementation::SendMonitor& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         auto SyncPercentage() const noexcept -> double final { return {}; }
         auto SyncProgress() const noexcept -> std::pair<int, int> final
@@ -201,21 +201,21 @@ auto BlockchainAccountActivityModel(
         [[noreturn]] auto AmountValidator() noexcept
             -> ui::AmountValidator& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         [[noreturn]] auto DestinationValidator() noexcept
             -> ui::DestinationValidator& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         [[noreturn]] auto DisplayScaleQt() noexcept -> ui::DisplayScaleQt& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
         [[noreturn]] auto SendMonitor() noexcept
             -> ui::implementation::SendMonitor& final
         {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
         auto SetCallbacks(Callbacks&&) noexcept -> void final {}

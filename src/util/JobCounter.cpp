@@ -12,10 +12,10 @@
 #include <mutex>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -118,7 +118,7 @@ struct JobCounter::Imp {
         auto lock = Lock{lock_};
         auto [it, added] = map_.emplace(++counter_, 0);
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         return Outstanding{
             std::make_unique<Outstanding::Imp>(*this, it, limit).release()};
@@ -161,7 +161,7 @@ auto JobCounter::Allocate(int limit) noexcept -> Outstanding
 Outstanding::Outstanding(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Outstanding::Outstanding(Outstanding&& rhs) noexcept

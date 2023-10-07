@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/crypto/library/EcdsaProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -78,7 +77,7 @@ EllipticCurve::EllipticCurve(
         throw std::runtime_error("Failed to instantiate encrypted_key_");
     }
 
-    OT_ASSERT(0 < plaintext_key_.size());
+    assert_true(0 < plaintext_key_.size());
 }
 
 EllipticCurve::EllipticCurve(
@@ -171,9 +170,7 @@ EllipticCurve::EllipticCurve(
 
                   return pubkey;
               } else {
-                  LogError()(OT_PRETTY_CLASS())(
-                      "Failed to calculate public key")
-                      .Flush();
+                  LogError()()("Failed to calculate public key").Flush();
 
                   return rhs.api_.Factory().Data();
               }
@@ -196,7 +193,7 @@ auto EllipticCurve::extract_key(
     if ((proto::KEYMODE_PRIVATE == proto.mode()) && proto.has_encryptedkey()) {
         output = std::make_unique<proto::Ciphertext>(proto.encryptedkey());
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
     }
 
     return output;
@@ -220,7 +217,7 @@ auto EllipticCurve::IncrementPrivate(
 
         return replace_secret_key(std::move(newKey), alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }
@@ -239,7 +236,7 @@ auto EllipticCurve::IncrementPublic(const Secret& rhs, allocator_type alloc)
 
         return replace_public_key(reader(newKey), alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }
@@ -250,7 +247,7 @@ auto EllipticCurve::serialize_public(EllipticCurve* in)
 {
     auto copy = std::unique_ptr<EllipticCurve>{in};
 
-    OT_ASSERT(copy);
+    assert_false(nullptr == copy);
 
     auto serialized = proto::AsymmetricKey{};
 
@@ -273,7 +270,7 @@ auto EllipticCurve::SignDER(
     auto lock = Lock{lock_};
 
     if (false == has_private(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Missing private key").Flush();
+        LogError()()("Missing private key").Flush();
 
         return false;
     }
@@ -281,9 +278,7 @@ auto EllipticCurve::SignDER(
     bool success = ecdsa_.SignDER(
         preimage, private_key(lock, reason), hash, std::move(output));
 
-    if (false == success) {
-        LogError()(OT_PRETTY_CLASS())("Failed to sign preimage").Flush();
-    }
+    if (false == success) { LogError()()("Failed to sign preimage").Flush(); }
 
     return success;
 }

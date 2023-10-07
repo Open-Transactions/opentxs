@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/network/zeromq/message/Frame.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/zeromq/message/EnvelopePrivate.hpp"
@@ -25,6 +24,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -379,7 +379,7 @@ namespace opentxs::network::zeromq
 Message::Message(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 
     imp_->parent_ = this;
 }

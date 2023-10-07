@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "blockchain/database/common/Database.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -301,7 +300,7 @@ auto Wallet::ReorgTo(
             return true;
         }
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 
     {
@@ -326,9 +325,7 @@ auto Wallet::ReserveUTXO(
     alloc::Strategy alloc) noexcept -> std::pair<std::optional<UTXO>, bool>
 {
     if (false == proposals_.Exists(id)) {
-        LogError()(OT_PRETTY_CLASS())("Proposal ")(id, api_.Crypto())(
-            " does not exist")
-            .Flush();
+        LogError()()("Proposal ")(id, api_.Crypto())(" does not exist").Flush();
 
         return std::make_pair(std::nullopt, false);
     }
@@ -344,8 +341,7 @@ auto Wallet::ReserveUTXO(
     alloc::Strategy alloc) noexcept -> std::optional<UTXO>
 {
     if (false == proposals_.Exists(proposal)) {
-        LogError()(OT_PRETTY_CLASS())("Proposal ")(proposal, api_.Crypto())(
-            " does not exist")
+        LogError()()("Proposal ")(proposal, api_.Crypto())(" does not exist")
             .Flush();
 
         return std::nullopt;

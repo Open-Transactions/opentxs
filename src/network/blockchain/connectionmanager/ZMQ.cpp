@@ -17,7 +17,6 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -50,7 +49,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     auto do_connect() noexcept
         -> std::pair<bool, std::optional<std::string_view>> override
     {
-        log_(OT_PRETTY_CLASS())("Connecting to ")(zmq_).Flush();
+        log_()("Connecting to ")(zmq_).Flush();
 
         return std::make_pair<bool, std::optional<std::string_view>>(
             false, zmq_);
@@ -74,16 +73,22 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
     auto on_body(zeromq::Message&&) noexcept
         -> std::optional<zeromq::Message> final
     {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
     auto on_connect() noexcept -> void override {}
     auto on_header(zeromq::Message&&) noexcept
         -> std::optional<zeromq::Message> final
     {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
-    auto on_init() noexcept -> zeromq::Message override { OT_FAIL; }
-    auto on_register(zeromq::Message&&) noexcept -> void override { OT_FAIL; }
+    auto on_init() noexcept -> zeromq::Message override
+    {
+        LogAbort()().Abort();
+    }
+    auto on_register(zeromq::Message&&) noexcept -> void override
+    {
+        LogAbort()().Abort();
+    }
     auto shutdown_external() noexcept -> void final {}
     auto stop_external() noexcept -> std::optional<zeromq::Message> override
     {
@@ -150,7 +155,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
                         }
                     }
                 } catch (const std::exception& e) {
-                    LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                    LogError()()(e.what()).Flush();
                 }
 
                 return out;
@@ -177,8 +182,7 @@ struct ZMQIncomingConnectionManager final : public ZMQConnectionManager {
     }
     auto do_init() noexcept -> std::optional<std::string_view> final
     {
-        log_(OT_PRETTY_CLASS())("Accepting incoming connection from ")(zmq_)
-            .Flush();
+        log_()("Accepting incoming connection from ")(zmq_).Flush();
 
         return zmq_;
     }

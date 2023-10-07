@@ -10,15 +10,15 @@
 
 #include "blockchain/node/stats/Imp.hpp"
 #include "blockchain/node/stats/Shared.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node
 {
 Stats::Stats(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Stats::Stats() noexcept
@@ -43,7 +43,7 @@ auto Stats::operator=(const Stats& rhs) noexcept -> Stats&
     imp_ = rhs.imp_->clone().release();
     old.reset();
 
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 
     return *this;
 }
@@ -53,7 +53,7 @@ auto Stats::operator=(Stats&& rhs) noexcept -> Stats&
     using std::swap;
     swap(imp_, rhs.imp_);
 
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 
     return *this;
 }

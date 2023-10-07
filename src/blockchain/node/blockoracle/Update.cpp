@@ -14,7 +14,6 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -45,7 +44,7 @@ Update::Update(
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Push);
         const auto rc = out.Connect(endpoints.block_oracle_pull_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -61,7 +60,7 @@ auto Update::construct() noexcept -> Cache::value_type&
 
 auto Update::FinishJob() noexcept -> void
 {
-    OT_ASSERT(0_uz < job_count_);
+    assert_true(0_uz < job_count_);
 
     --job_count_;
     send();
@@ -112,7 +111,9 @@ auto Update::Queue(const block::Hash& id, const BlockLocation& block) noexcept
     }();
     message.AddFrame(id);
 
-    if (false == serialize(block, message.AppendBytes())) { OT_FAIL; }
+    if (false == serialize(block, message.AppendBytes())) {
+        LogAbort()().Abort();
+    }
 
     send();
 }
@@ -122,13 +123,13 @@ auto Update::ready_to_send() const noexcept -> bool
     const auto& log = log_;
 
     if (pending_.empty()) {
-        log(OT_PRETTY_CLASS())(name_)(": no pending message to send").Flush();
+        log()(name_)(": no pending message to send").Flush();
 
         return false;
     }
 
     if (actor_is_working_) {
-        log(OT_PRETTY_CLASS())(name_)(
+        log()(name_)(
             ": waiting to send until actor is finished with previous message")
             .Flush();
 
@@ -136,7 +137,7 @@ auto Update::ready_to_send() const noexcept -> bool
     }
 
     if (0_uz == job_count_) {
-        log(OT_PRETTY_CLASS())(name_)(": all jobs are complete").Flush();
+        log()(name_)(": all jobs are complete").Flush();
 
         return true;
     }
@@ -154,10 +155,10 @@ auto Update::send() noexcept -> void
 
     if (ready_to_send()) {
         auto& [_, message] = pending_.front();
-        log(OT_PRETTY_CLASS())(name_)(": notifying actor of ")(
+        log()(name_)(": notifying actor of ")(
             (message.Payload().size() - 1_uz) / 2_uz)(" downloaded blocks")
             .Flush();
-        to_actor_.SendDeferred(std::move(message), __FILE__, __LINE__);
+        to_actor_.SendDeferred(std::move(message));
         actor_is_working_ = true;
         pending_.pop_front();
     }
@@ -165,7 +166,7 @@ auto Update::send() noexcept -> void
 
 auto Update::StartJob() noexcept -> void
 {
-    OT_ASSERT(std::numeric_limits<decltype(job_count_)>::max() > job_count_);
+    assert_true(std::numeric_limits<decltype(job_count_)>::max() > job_count_);
 
     ++job_count_;
 }

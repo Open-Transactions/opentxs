@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
@@ -44,7 +44,7 @@ public:
     }
 
     NotificationIndex(
-        const boost::shared_ptr<const SubchainStateData>& parent,
+        const std::shared_ptr<const SubchainStateData>& parent,
         const PaymentCode& code,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;

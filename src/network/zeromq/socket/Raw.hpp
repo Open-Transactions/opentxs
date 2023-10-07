@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstddef>
 #include <memory>
+#include <source_location>
 
 #include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -64,17 +65,22 @@ public:
         return {};
     }
     virtual auto Native() noexcept -> void* { return nullptr; }
-    virtual auto Send(Message&&, const char*, int, bool silent) noexcept -> bool
-    {
-        return {};
-    }
-    virtual auto SendDeferred(Message&&, const char*, int, bool) noexcept
+    virtual auto Send(Message&&, bool, const std::source_location&) noexcept
         -> bool
     {
         return {};
     }
-    virtual auto SendExternal(Message&&, const char*, int, bool) noexcept
-        -> bool
+    virtual auto SendDeferred(
+        Message&&,
+        bool,
+        const std::source_location&) noexcept -> bool
+    {
+        return {};
+    }
+    virtual auto SendExternal(
+        Message&&,
+        bool,
+        const std::source_location&) noexcept -> bool
     {
         return {};
     }
@@ -126,18 +132,18 @@ public:
         const ReadView secretKey) noexcept -> bool final;
     auto EnableCurveServer(const ReadView secretKey) noexcept -> bool final;
     auto Native() noexcept -> void* final { return socket_.get(); }
-    auto Send(Message&& msg, const char* file, int line, bool silent) noexcept
-        -> bool final;
+    auto Send(
+        Message&& msg,
+        bool silent,
+        const std::source_location& loc) noexcept -> bool final;
     auto SendDeferred(
         Message&& msg,
-        const char* file,
-        int line,
-        bool silent) noexcept -> bool final;
+        bool silent,
+        const std::source_location& loc) noexcept -> bool final;
     auto SendExternal(
         Message&& msg,
-        const char* file,
-        int line,
-        bool silent) noexcept -> bool final;
+        bool silent,
+        const std::source_location& loc) noexcept -> bool final;
     auto SetExposedUntrusted() noexcept -> bool final;
     auto SetIncomingHWM(int value) noexcept -> bool final;
     auto SetLinger(int value) noexcept -> bool final;
@@ -181,8 +187,7 @@ private:
     auto send(
         Message&& msg,
         const int flags,
-        const char* file,
-        int line,
+        const std::source_location& loc,
         bool silent) noexcept -> bool;
     auto wait(int flags) noexcept -> bool;
 };

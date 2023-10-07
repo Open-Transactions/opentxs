@@ -13,7 +13,6 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -52,7 +51,7 @@ AccountCache::AccountCache(
         const auto rc =
             out.Bind(api_.Endpoints().BlockchainAccountCreated().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -83,7 +82,7 @@ auto AccountCache::AccountList(const identifier::Nym& nymID) const noexcept
             out.emplace(id);
         }
     };
-    std::for_each(nym_index_.begin(), nym_index_.end(), get_matching_accounts);
+    std::ranges::for_each(nym_index_, get_matching_accounts);
 
     return out;
 }
@@ -100,7 +99,7 @@ auto AccountCache::AccountList(const opentxs::blockchain::Type chain)
 
     if (const auto i = nym_index_.find(chain); nym_index_.end() != i) {
         const auto& map = i->second;
-        std::for_each(map.begin(), map.end(), get_account);
+        std::ranges::for_each(map, get_account);
     }
 
     return out;
@@ -117,9 +116,9 @@ auto AccountCache::AccountList() const noexcept
     };
     const auto get_accounts = [&](const auto& item) {
         const auto& [chain, map] = item;
-        std::for_each(map.begin(), map.end(), get_account);
+        std::ranges::for_each(map, get_account);
     };
-    std::for_each(nym_index_.begin(), nym_index_.end(), get_accounts);
+    std::ranges::for_each(nym_index_, get_accounts);
 
     return out;
 }
@@ -132,7 +131,7 @@ auto AccountCache::build_account_map(
     auto load_nym = [&, this](const auto& nym) mutable {
         this->load_nym(chain, nym, map);
     };
-    std::for_each(std::begin(nyms), std::end(nyms), load_nym);
+    std::ranges::for_each(nyms, load_nym);
 }
 
 auto AccountCache::SubaccountList(
@@ -140,7 +139,7 @@ auto AccountCache::SubaccountList(
     const opentxs::blockchain::Type chain) const noexcept
     -> UnallocatedSet<identifier::Account>
 {
-    OT_ASSERT(populated_);
+    assert_true(populated_);
 
     if (const auto i = nym_index_.find(chain); nym_index_.end() != i) {
         const auto& index = i->second;
@@ -148,7 +147,7 @@ auto AccountCache::SubaccountList(
         if (const auto j = index.find(nymID); index.end() != j) {
             const auto& in = j->second.second;
             auto out = UnallocatedSet<identifier::Account>{};
-            std::copy(in.begin(), in.end(), std::inserter(out, out.end()));
+            std::ranges::copy(in, std::inserter(out, out.end()));
 
             return out;
         } else {
@@ -185,14 +184,14 @@ auto AccountCache::load_nym(
         nym, blockchain_to_unit(chain));
     auto pc = api_.Storage().Internal().Bip47ChannelsByChain(
         nym, blockchain_to_unit(chain));
-    std::for_each(std::begin(hd), std::end(hd), populate_hd);
-    std::for_each(std::begin(pc), std::end(pc), populate_pc);
+    std::ranges::for_each(hd, populate_hd);
+    std::ranges::for_each(pc, populate_pc);
 }
 
 auto AccountCache::Owner(const identifier::Account& id) const noexcept
     -> const identifier::Nym&
 {
-    OT_ASSERT(populated_);
+    assert_true(populated_);
 
     const auto& account = account_params_;
     const auto& subaccount = subaccount_params_;
@@ -226,7 +225,7 @@ auto AccountCache::RegisterAccount(
     const identifier::Account& account) noexcept -> bool
 {
     if (owner.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid owner").Flush();
+        LogError()()("invalid owner").Flush();
 
         return false;
     }
@@ -235,7 +234,7 @@ auto AccountCache::RegisterAccount(
         api_, owner, chain);
 
     if (account != expected) {
-        LogError()(OT_PRETTY_CLASS())("invalid account").Flush();
+        LogError()()("invalid account").Flush();
 
         return false;
     }
@@ -255,19 +254,19 @@ auto AccountCache::RegisterSubaccount(
     const identifier::Account& subaccount) noexcept -> bool
 {
     if (owner.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid owner").Flush();
+        LogError()()("invalid owner").Flush();
 
         return false;
     }
 
     if (account.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid parent account").Flush();
+        LogError()()("invalid parent account").Flush();
 
         return false;
     }
 
     if (subaccount.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid subaccount").Flush();
+        LogError()()("invalid subaccount").Flush();
 
         return false;
     }
@@ -276,8 +275,8 @@ auto AccountCache::RegisterSubaccount(
 
     if (subaccount_params_.try_emplace(subaccount, type, chain, owner, account)
             .second) {
-        LogTrace()(OT_PRETTY_CLASS())("subaccount ")(subaccount, crypto)(
-            " for ")(owner, crypto)(" on ")(print(chain))(" registered")
+        LogTrace()()("subaccount ")(subaccount, crypto)(" for ")(owner, crypto)(
+            " on ")(print(chain))(" registered")
             .Flush();
         account_params_.try_emplace(account, chain, owner);
         auto& index = nym_index_[chain][owner];
@@ -285,7 +284,7 @@ auto AccountCache::RegisterSubaccount(
         if (index.first.empty()) {
             index.first = account;
         } else if (index.first != account) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "aubaccount parent does not match existing recorded value")
                 .Flush();
 
@@ -294,24 +293,21 @@ auto AccountCache::RegisterSubaccount(
 
         index.second.emplace(subaccount);
         account_index_[account].emplace(subaccount);
-        socket_.SendDeferred(
-            [&] {
-                auto work = opentxs::network::zeromq::tagged_message(
-                    WorkType::BlockchainAccountCreated, true);
-                work.AddFrame(chain);
-                work.AddFrame(owner);
-                work.AddFrame(type);
-                subaccount.Serialize(work);
+        socket_.SendDeferred([&] {
+            auto work = opentxs::network::zeromq::tagged_message(
+                WorkType::BlockchainAccountCreated, true);
+            work.AddFrame(chain);
+            work.AddFrame(owner);
+            work.AddFrame(type);
+            subaccount.Serialize(work);
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
 
         return true;
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("subaccount ")(subaccount, crypto)(
-            " for ")(owner, crypto)(" on ")(print(chain))(" already registered")
+        LogTrace()()("subaccount ")(subaccount, crypto)(" for ")(owner, crypto)(
+            " on ")(print(chain))(" already registered")
             .Flush();
 
         return false;
@@ -321,7 +317,7 @@ auto AccountCache::RegisterSubaccount(
 auto AccountCache::SubaccountType(const identifier::Account& id) const noexcept
     -> std::pair<opentxs::blockchain::crypto::SubaccountType, identifier::Nym>
 {
-    OT_ASSERT(populated_);
+    assert_true(populated_);
 
     if (const auto i = subaccount_params_.find(id);
         subaccount_params_.end() != i) {

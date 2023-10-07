@@ -18,7 +18,6 @@
 #include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
@@ -58,10 +57,7 @@ auto Shared::ConstructTransaction(
 
     if (data.proposals_.Add(spend, std::move(promise))) {
         data.to_actor_.SendDeferred(
-            MakeWork(wallet::WalletJobs::statemachine),
-            __FILE__,
-            __LINE__,
-            true);
+            MakeWork(wallet::WalletJobs::statemachine), true);
     }
 }
 
@@ -89,7 +85,7 @@ auto Shared::Execute(node::Spend& spend) const noexcept -> PendingOutgoing
         internal.Finalize(
             api_.GetOptions().TestMode() ? LogConsole() : LogTrace(), {});
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         promise.set_value(std::make_pair(UnspecifiedError, blank));
 
         return future;
@@ -194,7 +190,7 @@ auto Shared::Run() noexcept -> bool { return data_.lock()->proposals_.Run(); }
 auto Shared::StartRescan() const noexcept -> bool
 {
     return data_.lock()->to_actor_.SendDeferred(
-        MakeWork(wallet::WalletJobs::rescan), __FILE__, __LINE__, true);
+        MakeWork(wallet::WalletJobs::rescan), true);
 }
 
 Shared::~Shared() = default;

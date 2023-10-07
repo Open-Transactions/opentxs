@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/otx/consensus/TransactionStatement.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
@@ -106,7 +105,7 @@ auto ClientContext::AcceptIssuedNumbers(
 
 auto ClientContext::client_nym_id() const -> const identifier::Nym&
 {
-    OT_ASSERT(remote_nym_);
+    assert_false(nullptr == remote_nym_);
 
     return remote_nym_->ID();
 }
@@ -187,7 +186,7 @@ auto ClientContext::serialize(const Data& data) const -> proto::Context
 
 auto ClientContext::server_nym_id() const -> const identifier::Nym&
 {
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     return Signer()->ID();
 }
@@ -208,16 +207,16 @@ auto ClientContext::Verify(
         const bool inserted = effective.insert(number).second;
 
         if (!inserted) {
-            LogConsole()(OT_PRETTY_CLASS())("New transaction # ")(
+            LogConsole()()("New transaction # ")(
                 number)(" already exists in context.")
                 .Flush();
 
             return false;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Transaction statement MUST ")(
-            "include number ")(number)(" which IS NOT currently in "
-                                       "the context. ")
+        LogDetail()()("Transaction statement MUST ")("include number ")(
+            number)(" which IS NOT currently in "
+                    "the context. ")
             .Flush();
     }
 
@@ -225,15 +224,14 @@ auto ClientContext::Verify(
         const bool removed = (1 == effective.erase(number));
 
         if (!removed) {
-            LogConsole()(OT_PRETTY_CLASS())("Burned transaction # ")(
+            LogConsole()()("Burned transaction # ")(
                 number)(" does not exist in context.")
                 .Flush();
 
             return false;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())(
-            "Transaction statement MUST NOT include number ")(
+        LogDetail()()("Transaction statement MUST NOT include number ")(
             number)(" which IS currently in the context.")
             .Flush();
     }
@@ -242,7 +240,7 @@ auto ClientContext::Verify(
         const bool found = effective.contains(number);
 
         if (!found) {
-            LogConsole()(OT_PRETTY_CLASS())("Issued transaction # ")(
+            LogConsole()()("Issued transaction # ")(
                 number)(" from statement not found on context.")
                 .Flush();
 
@@ -254,7 +252,7 @@ auto ClientContext::Verify(
         const bool found = statement.Issued().contains(number);
 
         if (!found) {
-            LogConsole()(OT_PRETTY_CLASS())("Issued transaction # ")(
+            LogConsole()()("Issued transaction # ")(
                 number)(" from context not found on statement.")
                 .Flush();
 
@@ -280,7 +278,7 @@ auto ClientContext::VerifyIssuedNumber(
     const bool excluded = (1 == exclude.count(number));
 
     if (excluded) {
-        LogVerbose()(OT_PRETTY_CLASS())("Transaction number ")(
+        LogVerbose()()("Transaction number ")(
             number)(" appears on the list of numbers which are being removed")
             .Flush();
 

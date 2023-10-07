@@ -118,8 +118,7 @@ auto BitcoinTransaction(
                 output.Value().Internal().SerializeBitcoin(
                     preallocated(sizeof(txout.value_), &txout.value_));
             } catch (const std::exception& e) {
-                LogError()("opentxs::factory::")(__func__)(": ")(e.what())
-                    .Flush();
+                LogError()()(e.what()).Flush();
 
                 return {};
             }
@@ -153,7 +152,7 @@ auto BitcoinTransaction(
             blockchain::block::Position{},
             std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -177,9 +176,7 @@ auto BitcoinTransaction(
 
         return out;
     } else {
-        LogError()("opentxs::factory::")(__func__)(": failed to parse ")(
-            print(chain))(" transaction")
-            .Flush();
+        LogError()()("failed to parse ")(print(chain))(" transaction").Flush();
 
         return {};
     }
@@ -297,7 +294,7 @@ auto BitcoinTransaction(
                 }
             }());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -317,9 +314,8 @@ auto BitcoinTransaction(
 
     try {
         auto chains = Set<blockchain::Type>{alloc.result_};
-        std::transform(
-            std::begin(in.chain()),
-            std::end(in.chain()),
+        std::ranges::transform(
+            in.chain(),
             std::inserter(chains, chains.end()),
             [](const auto type) -> auto {
                 return unit_to_blockchain(ClaimToUnit(
@@ -355,11 +351,10 @@ auto BitcoinTransaction(
                         alloc));
             }
 
-            std::transform(
-                std::begin(map),
-                std::end(map),
-                std::back_inserter(inputs),
-                [](auto& i) -> auto { return std::move(i.second); });
+            std::ranges::transform(
+                map, std::back_inserter(inputs), [](auto& i) -> auto {
+                    return std::move(i.second);
+                });
         }
 
         auto outputs =
@@ -384,11 +379,10 @@ auto BitcoinTransaction(
                         crypto, factory, chain, output, alloc));
             }
 
-            std::transform(
-                std::begin(map),
-                std::end(map),
-                std::back_inserter(outputs),
-                [](auto& i) -> auto { return std::move(i.second); });
+            std::ranges::transform(
+                map, std::back_inserter(outputs), [](auto& i) -> auto {
+                    return std::move(i.second);
+                });
         }
 
         return pmr::construct<ReturnType>(
@@ -439,7 +433,7 @@ auto BitcoinTransaction(
                 }()},
             std::nullopt);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

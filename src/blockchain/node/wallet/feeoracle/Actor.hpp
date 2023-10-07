@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <utility>
 
@@ -52,7 +51,7 @@ class opentxs::blockchain::node::wallet::FeeOracle::Actor final
     : public opentxs::Actor<FeeOracle::Actor, FeeOracleJobs>
 {
 public:
-    auto Init(boost::shared_ptr<Actor> me) noexcept -> void
+    auto Init(std::shared_ptr<Actor> me) noexcept -> void
     {
         signal_startup(me);
     }
@@ -65,7 +64,7 @@ public:
     Actor(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
-        boost::shared_ptr<Shared> shared,
+        std::shared_ptr<Shared> shared,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
 
@@ -78,7 +77,7 @@ private:
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
-    boost::shared_ptr<Shared> shared_p_;
+    std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;
     const node::Manager& node_;
     const blockchain::Type chain_;

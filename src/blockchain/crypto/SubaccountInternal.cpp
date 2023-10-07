@@ -7,9 +7,9 @@
 
 #include <stdexcept>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {
@@ -45,7 +45,7 @@ auto Subaccount::IsValid() const noexcept -> bool { return false; }
 
 auto Subaccount::Parent() const noexcept -> const crypto::Account&
 {
-    OT_FAIL;  // TODO
+    LogAbort()().Abort();  // TODO
 }
 
 auto Subaccount::PrivateKey(

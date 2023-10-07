@@ -26,7 +26,6 @@
 #include "internal/blockchain/node/wallet/Factory.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/display/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -49,7 +48,7 @@ using enum opentxs::network::zeromq::socket::Direction;
 FeeOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : opentxs::Actor<FeeOracle::Actor, FeeOracleJobs>(
@@ -81,9 +80,9 @@ FeeOracle::Actor::Actor(
     , data_(alloc)
     , output_(shared_p_->data_)
 {
-    OT_ASSERT(api_p_);
-    OT_ASSERT(node_p_);
-    OT_ASSERT(shared_p_);
+    assert_false(nullptr == api_p_);
+    assert_false(nullptr == node_p_);
+    assert_false(nullptr == shared_p_);
 }
 
 auto FeeOracle::Actor::do_shutdown() noexcept -> void
@@ -119,13 +118,11 @@ auto FeeOracle::Actor::pipeline(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(" unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("unhandled type: ")(
-                static_cast<OTZMQWorkType>(work))
+            LogAbort()()("unhandled type: ")(static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
     }
@@ -137,12 +134,12 @@ auto FeeOracle::Actor::process_update(
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     try {
         data_.emplace_back(Clock::now(), opentxs::factory::Amount(body[1]));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     do_work(monotonic);
@@ -177,14 +174,13 @@ auto FeeOracle::Actor::work(allocator_type monotonic) noexcept -> bool
         if (0 < average) {
             static const auto scale =
                 display::Scale{factory::DisplayScale("", "", {{10, 0}}, 0, 0)};
-            log_(OT_PRETTY_CLASS())(name_)(": Updated ")(print(chain_))(
-                " fee estimate to ")(scale.Format(average))(
-                " sat / 1000 vBytes")
+            log_()(name_)(": Updated ")(print(chain_))(" fee estimate to ")(
+                scale.Format(average))(" sat / 1000 vBytes")
                 .Flush();
             value.emplace(std::move(average));
         } else {
-            log_(OT_PRETTY_CLASS())(name_)(": Fee estimate for ")(
-                print(chain_))(" not available")
+            log_()(name_)(": Fee estimate for ")(print(chain_))(
+                " not available")
                 .Flush();
             value = std::nullopt;
         }

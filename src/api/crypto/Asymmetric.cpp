@@ -18,7 +18,6 @@
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -115,8 +114,7 @@ auto Asymmetric::instantiate_hd_key(
         case opentxs::crypto::asymmetric::Algorithm::Null:
         case opentxs::crypto::asymmetric::Algorithm::Legacy:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
-                .Flush();
+            LogError()()("Invalid key type: ")(print(type)).Flush();
 
             return {alloc};
         }
@@ -151,8 +149,7 @@ auto Asymmetric::instantiate_serialized_key(
         case Type::Null:
         case Type::Legacy:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
-                .Flush();
+            LogError()()("Invalid key type: ")(print(type)).Flush();
 
             return {alloc};
         }
@@ -173,7 +170,7 @@ auto Asymmetric::InstantiateECKey(
             return instantiate_serialized_key<ReturnType>(serialized, alloc);
         }
         case proto::AKEYTYPE_LEGACY: {
-            LogError()(OT_PRETTY_CLASS())("Wrong key type (RSA)").Flush();
+            LogError()()("Wrong key type (RSA)").Flush();
         } break;
         case proto::AKEYTYPE_ERROR:
         case proto::AKEYTYPE_NULL:
@@ -197,7 +194,7 @@ auto Asymmetric::InstantiateHDKey(
             return instantiate_serialized_key<ReturnType>(serialized, alloc);
         }
         case proto::AKEYTYPE_LEGACY: {
-            LogError()(OT_PRETTY_CLASS())("Wrong key type (RSA)").Flush();
+            LogError()()("Wrong key type (RSA)").Flush();
         } break;
         case proto::AKEYTYPE_ERROR:
         case proto::AKEYTYPE_NULL:
@@ -299,8 +296,7 @@ auto Asymmetric::InstantiateKey(
         case Type::Error:
         case Type::Null:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
-                .Flush();
+            LogError()()("Invalid key type: ")(print(type)).Flush();
 
             return {alloc};
         }
@@ -427,7 +423,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
         api_.Crypto().Internal().EllipticProvider(Type::Secp256k1);
 
     if (false == ecdsa.ScalarMultiplyBase(priv.Bytes(), pub.WriteInto())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to calculate public key").Flush();
+        LogError()()("Failed to calculate public key").Flush();
 
         return {alloc};
     }
@@ -598,8 +594,7 @@ auto Asymmetric::NewKey(
         case Type::Error:
         case Type::Null:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid key type: ")(print(type))
-                .Flush();
+            LogError()()("Invalid key type: ")(print(type)).Flush();
 
             return {alloc};
         }

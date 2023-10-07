@@ -14,7 +14,6 @@
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -98,8 +97,7 @@ auto Subaccount::AddressData::check_keys() const noexcept -> bool
 
     for (const auto& [index, element] : map_) {
         if (index != static_cast<Bip32Index>(++counter)) {
-            LogError()(OT_PRETTY_CLASS())("key ")(
-                index)(" present at position ")(counter)
+            LogError()()("key ")(index)(" present at position ")(counter)
                 .Flush();
 
             return false;
@@ -128,7 +126,7 @@ auto Subaccount::Confirm(
             return false;
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/node/wallet/subchain/statemachine/Scan.hpp"
 
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <optional>
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
@@ -63,7 +63,7 @@ public:
         return pmr::make_deleter(this);
     }
 
-    Imp(const boost::shared_ptr<const SubchainStateData>& parent,
+    Imp(const std::shared_ptr<const SubchainStateData>& parent,
         const network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
     Imp() = delete;

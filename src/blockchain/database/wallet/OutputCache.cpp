@@ -14,6 +14,7 @@
 #include <cstring>
 #include <functional>
 #include <iterator>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
@@ -27,7 +28,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -65,7 +65,7 @@ auto OutputCache::load_output_index(
 
     auto [row, added] = map.try_emplace(key, Outpoints{});
 
-    OT_ASSERT(added);
+    assert_true(added);
 
     return row->second;
 }
@@ -145,7 +145,7 @@ auto OutputCache::AddOutput(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to write output").Flush();
+        LogError()()("failed to write output").Flush();
 
         return false;
     }
@@ -160,8 +160,8 @@ auto OutputCache::AddOutput(
     storage::lmdb::Transaction& tx,
     protocol::bitcoin::base::block::Output output) noexcept -> bool
 {
-    OT_ASSERT(false == account.empty());
-    OT_ASSERT(false == subchain.empty());
+    assert_false(account.empty());
+    assert_false(subchain.empty());
 
     auto rc = AddOutput(id, tx, std::move(output));
 
@@ -180,7 +180,7 @@ auto OutputCache::AddToAccount(
     const block::Outpoint& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
-    OT_ASSERT(0 < outputs_.count(output));
+    assert_true(0 < outputs_.count(output));
 
     try {
         auto& set = load_output_index(id, accounts_);
@@ -195,7 +195,7 @@ auto OutputCache::AddToAccount(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -206,7 +206,7 @@ auto OutputCache::AddToKey(
     const block::Outpoint& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
-    OT_ASSERT(0 < outputs_.count(output));
+    assert_true(0 < outputs_.count(output));
 
     const auto key = serialize(id);
 
@@ -223,7 +223,7 @@ auto OutputCache::AddToKey(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -256,7 +256,7 @@ auto OutputCache::AddToPosition(
     const block::Outpoint& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
-    OT_ASSERT(0 < outputs_.count(output));
+    assert_true(0 < outputs_.count(output));
 
     const auto key = db::Position{id};
 
@@ -276,7 +276,7 @@ auto OutputCache::AddToPosition(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -287,7 +287,7 @@ auto OutputCache::AddToState(
     const block::Outpoint& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
-    OT_ASSERT(0 < outputs_.count(output));
+    assert_true(0 < outputs_.count(output));
 
     try {
         auto& set = load_output_index(id, states_);
@@ -307,7 +307,7 @@ auto OutputCache::AddToState(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -318,7 +318,7 @@ auto OutputCache::AddToSubchain(
     const block::Outpoint& output,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
-    OT_ASSERT(0 < outputs_.count(output));
+    assert_true(0 < outputs_.count(output));
 
     try {
         auto& set = load_output_index(id, subchains_);
@@ -334,7 +334,7 @@ auto OutputCache::AddToSubchain(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -385,9 +385,8 @@ auto OutputCache::associate_proposal(
     }
 
     map.emplace(output, proposal);
-    log(OT_PRETTY_CLASS())("associated ")(
-        (kind == Kind::create) ? "created" : "consumed")(" output ")(
-        output.str())(" to proposal ")(proposal, crypto)
+    log()("associated ")((kind == Kind::create) ? "created" : "consumed")(
+        " output ")(output.str())(" to proposal ")(proposal, crypto)
         .Flush();
 }
 
@@ -409,8 +408,8 @@ auto OutputCache::ChangePosition(
                 throw std::runtime_error{"Failed to remove old position index"};
             }
         } else {
-            LogError()(OT_PRETTY_CLASS())("Warning: position index for ")(
-                id.str())(" already removed")
+            LogError()()("Warning: position index for ")(id.str())(
+                " already removed")
                 .Flush();
         }
 
@@ -431,7 +430,7 @@ auto OutputCache::ChangePosition(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -459,13 +458,13 @@ auto OutputCache::ChangeState(
         }
 
         if ((0u == deleted.size()) || (oldState != deleted.front())) {
-            LogError()(OT_PRETTY_CLASS())("Warning: state index for ")(
-                id.str())(" did not match expected value")
+            LogError()()("Warning: state index for ")(id.str())(
+                " did not match expected value")
                 .Flush();
         }
 
         if (1u != deleted.size()) {
-            LogError()(OT_PRETTY_CLASS())("Warning: output ")(id.str())(
+            LogError()()("Warning: output ")(id.str())(
                 " found in multiple state indices")
                 .Flush();
         }
@@ -496,7 +495,7 @@ auto OutputCache::ChangeState(
 
         return rc;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -512,11 +511,7 @@ auto OutputCache::CheckProposals(
     const auto is_finished = [this](const auto& id) {
         return this->is_finished(id);
     };
-    std::copy_if(
-        proposals.begin(),
-        proposals.end(),
-        std::back_inserter(out),
-        is_finished);
+    std::ranges::copy_if(proposals, std::back_inserter(out), is_finished);
 
     return out;
 }
@@ -668,8 +663,8 @@ auto OutputCache::dissociate_proposal(
     }
 
     map.erase(output);
-    log(OT_PRETTY_CLASS())("dissociating output ")(output.str())(
-        " from proposal ")(proposal, crypto)
+    log()("dissociating output ")(output.str())(" from proposal ")(
+        proposal, crypto)
         .Flush();
 }
 
@@ -777,8 +772,7 @@ auto OutputCache::GetAssociation(
 
         return created;
     } else {
-        LogAbort()(OT_PRETTY_CLASS())(
-            "irrecoverable database corruption: proposal ")(
+        LogAbort()()("irrecoverable database corruption: proposal ")(
             proposal,
             api_.Crypto())(" both creates and consumes output ")(output)
             .Abort();
@@ -818,7 +812,8 @@ auto OutputCache::GetMatured(
     auto out = Vector<block::Outpoint>{alloc.result_};
     out.clear();
     constexpr auto get_value = [](const auto& data) { return data.second; };
-    std::transform(start, limit, std::back_inserter(out), get_value);
+    using namespace std::ranges;
+    transform(subrange{start, limit}, std::back_inserter(out), get_value);
 
     return out;
 }
@@ -900,9 +895,9 @@ auto OutputCache::GetReserved(alloc::Strategy alloc) const noexcept -> Reserved
     out.clear();
     const auto get_values = [&](const auto& item) {
         const auto& [key, value] = item;
-        std::copy(value.begin(), value.end(), std::inserter(out, out.end()));
+        std::ranges::copy(value, std::inserter(out, out.end()));
     };
-    std::for_each(map.begin(), map.end(), get_values);
+    std::ranges::for_each(map, get_values);
 
     return out;
 }
@@ -926,10 +921,9 @@ auto OutputCache::GetReserved(
 
                 return std::make_pair(id, output);
             };
-            std::transform(
-                set.begin(), set.end(), std::back_inserter(out), make_utxo);
+            std::ranges::transform(set, std::back_inserter(out), make_utxo);
         } catch (const std::exception& e) {
-            LogAbort()(OT_PRETTY_CLASS())(
+            LogAbort()()(
                 "fatal database corruption: an output referenced by proposal ")(
                 proposal, api_.Crypto())(" does not exist in index: ")(e.what())
                 .Abort();
@@ -985,7 +979,7 @@ auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
     if (outputs_.end() != it) {
         auto& out = it->second;
 
-        OT_ASSERT(0 < out.Keys({}).size());  // TODO monotonic allocator
+        assert_true(0 < out.Keys({}).size());  // TODO monotonic allocator
 
         return out;
     }
@@ -1130,47 +1124,47 @@ auto OutputCache::Populate() noexcept -> void
     auto tx = lmdb_.TransactionRO();
     auto rc = lmdb_.Read(wallet::outputs_, outputs, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::accounts_, accounts, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::keys_, keys, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::nyms_, nyms, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::positions_, positions, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::states_, states, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::subchains_, subchains, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::generation_, generation, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::output_proposal_, output_proposal, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::proposal_created_, proposal_created, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = lmdb_.Read(wallet::proposal_spent_, proposal_consumed, Forward, tx);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     if (lmdb_.Exists(
             wallet::output_config_, tsv(database::Key::WalletPosition), tx)) {
@@ -1180,10 +1174,10 @@ auto OutputCache::Populate() noexcept -> void
             [&](const auto bytes) { position_.emplace(bytes); },
             tx);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
     }
 
-    OT_ASSERT(outputs_.size() == outputCount);
+    assert_true(outputs_.size() == outputCount);
 
     populated_ = true;
 }
@@ -1320,32 +1314,24 @@ auto OutputCache::Print() const noexcept -> void
     const auto& outgoingOrphan = output[node::TxoState::OrphanedSpend];
     const auto& immature = output[node::TxoState::Immature];
     auto& log = LogConsole();
-    log(OT_PRETTY_CLASS())("Instance ")(api_.Instance())(
-        " TXO database contents:")
-        .Flush();
-    log(OT_PRETTY_CLASS())("Unconfirmed available value: ")(unconfirmed.total_)(
+    log()("Instance ")(api_.Instance())(" TXO database contents:").Flush();
+    log()("Unconfirmed available value: ")(unconfirmed.total_)(
         unconfirmed.text_.str())
         .Flush();
-    log(OT_PRETTY_CLASS())("Confirmed available value: ")(confirmed.total_)(
+    log()("Confirmed available value: ")(confirmed.total_)(
         confirmed.text_.str())
         .Flush();
-    log(OT_PRETTY_CLASS())("Unconfirmed spent value: ")(pending.total_)(
-        pending.text_.str())
+    log()("Unconfirmed spent value: ")(pending.total_)(pending.text_.str())
         .Flush();
-    log(OT_PRETTY_CLASS())("Confirmed spent value: ")(spent.total_)(
-        spent.text_.str())
+    log()("Confirmed spent value: ")(spent.total_)(spent.text_.str()).Flush();
+    log()("Orphaned incoming value: ")(orphan.total_)(orphan.text_.str())
         .Flush();
-    log(OT_PRETTY_CLASS())("Orphaned incoming value: ")(orphan.total_)(
-        orphan.text_.str())
-        .Flush();
-    log(OT_PRETTY_CLASS())("Orphaned spend value: ")(outgoingOrphan.total_)(
+    log()("Orphaned spend value: ")(outgoingOrphan.total_)(
         outgoingOrphan.text_.str())
         .Flush();
-    log(OT_PRETTY_CLASS())("Immature value: ")(immature.total_)(
-        immature.text_.str())
-        .Flush();
+    log()("Immature value: ")(immature.total_)(immature.text_.str()).Flush();
 
-    log(OT_PRETTY_CLASS())("Outputs by block:\n");
+    log()("Outputs by block:\n");
 
     for (const auto& [position, outputs] : positions_) {
         log("  * block ")(position)("\n");
@@ -1356,7 +1342,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Outputs by nym:\n");
+    log()("Outputs by nym:\n");
 
     for (const auto& [id, outputs] : nyms_) {
         log("  * ")(id, api_.Crypto())("\n");
@@ -1367,7 +1353,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Outputs by subaccount:\n");
+    log()("Outputs by subaccount:\n");
 
     for (const auto& [id, outputs] : accounts_) {
         log("  * ")(id, api_.Crypto())("\n");
@@ -1378,7 +1364,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Outputs by subchain:\n");
+    log()("Outputs by subchain:\n");
 
     for (const auto& [id, outputs] : subchains_) {
         log("  * ")(id, api_.Crypto())("\n");
@@ -1389,7 +1375,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Outputs by key:\n");
+    log()("Outputs by key:\n");
 
     for (const auto& [key, outputs] : keys_) {
         log("  * ")(print(key, api_.Crypto()))("\n");
@@ -1400,7 +1386,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Outputs by state:\n");
+    log()("Outputs by state:\n");
 
     for (const auto& [state, outputs] : states_) {
         log("  * ")(print(state))("\n");
@@ -1411,7 +1397,7 @@ auto OutputCache::Print() const noexcept -> void
     }
 
     log.Flush();
-    log(OT_PRETTY_CLASS())("Generation outputs:\n");
+    log()("Generation outputs:\n");
 
     for (const auto& [height, outpoint] : generation_outputs_) {
         log("  *  ")(outpoint.str())(" at height ")(height)("\n");
@@ -1478,7 +1464,7 @@ auto OutputCache::UpdatePosition(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -1535,7 +1521,7 @@ auto OutputCache::write_output(
         return lmdb_.Store(wallet::outputs_, id.Bytes(), reader(serialized), tx)
             .first;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

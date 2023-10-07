@@ -23,7 +23,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
@@ -270,7 +269,7 @@ auto Regtest_fixture_simple::CreateClient(
     const auto start = client.Network().Blockchain().Start(test_chain_);
     const auto handle = client.Network().Blockchain().GetChain(test_chain_);
 
-    OT_ASSERT(handle);
+    opentxs::assert_true(handle);
 
     const auto& network = handle.get();
     const auto added = network.AddPeer(address);

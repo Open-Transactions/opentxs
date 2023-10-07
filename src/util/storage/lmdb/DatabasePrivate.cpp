@@ -13,7 +13,6 @@ extern "C" {
 #include <limits>
 #include <stdexcept>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -71,7 +70,7 @@ auto DatabasePrivate::Commit() const noexcept -> bool
 
         return tx.Success();
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return false;
     }
@@ -99,7 +98,7 @@ auto DatabasePrivate::Delete(const Table table, Transaction& parent)
 
         return tx.Success();
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return false;
     }
@@ -131,7 +130,7 @@ auto DatabasePrivate::Delete(
 
         return tx.Success();
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return false;
     }
@@ -209,7 +208,7 @@ auto DatabasePrivate::Delete(
 
         return tx.Success();
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return false;
     }
@@ -258,7 +257,7 @@ auto DatabasePrivate::Exists(
 
         return 0 == ::mdb_cursor_get(cursor, &key, &value, MDB_SET);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -275,7 +274,7 @@ auto DatabasePrivate::init_db(
         ::mdb_dbi_open(
             *tx.imp_, names_.at(table).c_str(), MDB_CREATE | flags, &output);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     return output;
 }
@@ -285,7 +284,10 @@ auto DatabasePrivate::init_environment(
     const std::size_t tables,
     const Flags flags) noexcept -> void
 {
-    OT_ASSERT(std::numeric_limits<unsigned int>::max() >= tables);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+    assert_true(std::numeric_limits<unsigned int>::max() >= tables);
+#pragma GCC diagnostic pop
 
     auto rc = ::mdb_env_create(&env_);
     bool set = 0 == rc;
@@ -294,8 +296,8 @@ auto DatabasePrivate::init_environment(
         close_env();
     }
 
-    OT_ASSERT(set);
-    OT_ASSERT(nullptr != env_);
+    assert_true(set);
+    assert_false(nullptr == env_);
 
     rc = ::mdb_env_set_mapsize(env_, db_file_size());
     set = 0 == rc;
@@ -304,7 +306,7 @@ auto DatabasePrivate::init_environment(
         close_env();
     }
 
-    OT_ASSERT(set);
+    assert_true(set);
 
     rc = ::mdb_env_set_maxdbs(env_, static_cast<unsigned int>(tables));
     set = 0 == rc;
@@ -313,7 +315,7 @@ auto DatabasePrivate::init_environment(
         close_env();
     }
 
-    OT_ASSERT(set);
+    assert_true(set);
 
     rc = ::mdb_env_set_maxreaders(env_, 1024u);
     set = 0 == rc;
@@ -322,7 +324,7 @@ auto DatabasePrivate::init_environment(
         close_env();
     }
 
-    OT_ASSERT(set);
+    assert_true(set);
 
     rc = ::mdb_env_open(env_, folder.string().c_str(), flags, 0664);
     set = 0 == rc;
@@ -333,7 +335,7 @@ auto DatabasePrivate::init_environment(
         close_env();
     }
 
-    OT_ASSERT(set);
+    assert_true(set);
 }
 
 auto DatabasePrivate::init_tables(const TablesToInit init) noexcept -> void
@@ -346,7 +348,7 @@ auto DatabasePrivate::init_tables(const TablesToInit init) noexcept -> void
 
     const auto rc = tx.Finalize(true);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 }
 
 auto DatabasePrivate::Load(
@@ -411,7 +413,7 @@ auto DatabasePrivate::Load(
 
         return success;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -425,7 +427,7 @@ auto DatabasePrivate::PurgeTables(const TablesToInit& tables, Transaction& tx)
             auto& [_, dbi] = *i;
 
             if (0 != ::mdb_drop(*tx.imp_, dbi, 1)) {
-                LogError()(OT_PRETTY_CLASS())("Failed to delete table").Flush();
+                LogError()()("Failed to delete table").Flush();
 
                 return false;
             }
@@ -524,7 +526,7 @@ auto DatabasePrivate::read(
 
         return success;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -539,7 +541,7 @@ auto DatabasePrivate::ReadAndDelete(
     auto dbi = MDB_dbi{};
 
     if (0 != ::mdb_dbi_open(*tx.imp_, names_.at(table).c_str(), 0, &dbi)) {
-        LogTrace()(OT_PRETTY_CLASS())("table does not exist").Flush();
+        LogTrace()()("table does not exist").Flush();
 
         return false;
     }
@@ -548,7 +550,7 @@ auto DatabasePrivate::ReadAndDelete(
     read(dbi, cb, Dir::Forward, tx);
 
     if (0 != ::mdb_drop(*tx.imp_, dbi, 1)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to delete table").Flush();
+        LogError()()("Failed to delete table").Flush();
 
         return false;
     }
@@ -611,7 +613,7 @@ auto DatabasePrivate::ReadFrom(
 
         return success;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -702,7 +704,7 @@ auto DatabasePrivate::StoreOrUpdate(
         code = ::mdb_put(*tx.imp_, dbi, &key, &replace, flags);
         success = 0 == code;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return output;

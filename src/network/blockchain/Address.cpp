@@ -8,11 +8,11 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "network/blockchain/AddressPrivate.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::blockchain
 {
@@ -33,7 +33,7 @@ namespace opentxs::network::blockchain
 Address::Address(AddressPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Address::Address() noexcept
@@ -89,7 +89,7 @@ auto Address::operator=(const Address& rhs) noexcept -> Address&
     auto old = std::unique_ptr<AddressPrivate>(imp_);
     imp_ = rhs.imp_->clone().release();
 
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 
     return *this;
 }

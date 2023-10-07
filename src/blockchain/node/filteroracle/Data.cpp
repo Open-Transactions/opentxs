@@ -8,13 +8,13 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::filteroracle
 {
@@ -31,7 +31,7 @@ Data::Data(
             api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
         const auto rc = out.Connect(endpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -41,7 +41,7 @@ Data::Data(
             api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
         auto rc = socket.Bind(endpoints.new_filter_publish_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -51,7 +51,7 @@ Data::Data(
             api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
         auto rc = socket.Bind(endpoints.filter_oracle_reindex_publish_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())

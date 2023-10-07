@@ -8,7 +8,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -31,7 +30,7 @@ auto Pending::Add(
     auto& data = *handle;
 
     if (data.ids_.contains(id)) {
-        LogError()(OT_PRETTY_CLASS())("Proposal already exists").Flush();
+        LogError()()("Proposal already exists").Flush();
         promise.set_value(
             {SendResult::DuplicateProposal, block::TransactionHash{}});
 
@@ -50,7 +49,7 @@ auto Pending::Add(Data&& job) noexcept -> void
     auto& data = *handle;
     const auto& [id, promise] = job;
 
-    OT_ASSERT(0 == data.ids_.count(id));
+    assert_true(0 == data.ids_.count(id));
 
     data.ids_.emplace(id);
     data.data_.emplace_back(std::move(job));

@@ -12,10 +12,11 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <source_location>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -226,7 +227,7 @@ public:
         std::cout                                                              \
             << "********* THIS SHOULD NEVER HAPPEN!!!!! *****************"     \
             << std::endl;                                                      \
-        OT_FAIL;                                                               \
+        LogAbort()().Abort();                                                  \
     }                                                                          \
     static auto ot_dynamic_cast(Storable* pObject) -> CLASS_NAME*              \
     {                                                                          \
@@ -364,7 +365,7 @@ protected:
     // This is called once, in the factory.
     void SetPacker(OTPacker& thePacker)
     {
-        OT_ASSERT(nullptr == packer_);
+        assert_true(nullptr == packer_);
         packer_ = &thePacker;
     }
 
@@ -595,7 +596,7 @@ auto CheckStringsExistInOrder(
     const UnallocatedCString& oneStr,
     const UnallocatedCString& twoStr,
     const UnallocatedCString& threeStr,
-    const char* szFuncName = nullptr) -> bool;
+    const std::source_location& loc) -> bool;
 
 // See if the file is there.
 //
@@ -632,7 +633,9 @@ auto QueryString(
     const UnallocatedCString& strFolder,
     const UnallocatedCString& oneStr,
     const UnallocatedCString& twoStr,
-    const UnallocatedCString& threeStr) -> UnallocatedCString;
+    const UnallocatedCString& threeStr,
+    const std::source_location& loc = std::source_location::current())
+    -> UnallocatedCString;
 
 auto StorePlainString(
     const api::Session& api,

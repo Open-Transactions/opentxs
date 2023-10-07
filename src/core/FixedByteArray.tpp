@@ -19,7 +19,6 @@ extern "C" {
 #include <string_view>
 
 #include "internal/core/Core.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -59,9 +58,7 @@ template <std::size_t N>
 auto FixedByteArray<N>::Assign(const ReadView rhs) noexcept -> bool
 {
     if (const auto size = rhs.size(); N != size) {
-        LogError()(OT_PRETTY_CLASS())("wrong input size ")(
-            size)(" vs expected ")(N)
-            .Flush();
+        LogError()()("wrong input size ")(size)(" vs expected ")(N).Flush();
 
         return false;
     }
@@ -121,8 +118,7 @@ auto FixedByteArray<N>::DecodeHex(const std::string_view hex) noexcept -> bool
     if (0_uz == ssize) { return true; }
 
     if ((ssize != (2 * N)) && (ssize != ((2 * N) - 1))) {
-        LogError()(OT_PRETTY_CLASS())("invalid size for input hex ")(hex.size())
-            .Flush();
+        LogError()()("invalid size for input hex ")(hex.size()).Flush();
 
         return false;
     }
@@ -223,9 +219,7 @@ template <std::size_t N>
 auto FixedByteArray<N>::Randomize(const std::size_t size) noexcept -> bool
 {
     if (N != size) {
-        LogError()(OT_PRETTY_CLASS())("wrong input size ")(
-            size)(" vs expected ")(N)
-            .Flush();
+        LogError()()("wrong input size ")(size)(" vs expected ")(N).Flush();
 
         return false;
     }

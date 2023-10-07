@@ -5,8 +5,6 @@
 
 #include "network/zeromq/context/Context.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <zmq.h>
 #include <atomic>
 #include <exception>
@@ -33,7 +31,6 @@
 #include "internal/network/zeromq/socket/Request.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/zeromq/Actor.hpp"
 #include "network/zeromq/PairEventListener.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -324,9 +321,9 @@ auto Context::PushToEndpoint(std::string_view endpoint, Message&& message)
         auto handle = guarded.lock();
         auto& socket = *handle;
 
-        return socket.SendDeferred(std::move(message), __FILE__, __LINE__);
+        return socket.SendDeferred(std::move(message));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -375,10 +372,7 @@ auto Context::SpawnActor(
     const auto extraCount = extra.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc},
         context,
         name,
@@ -393,7 +387,7 @@ auto Context::SpawnActor(
         batchID,
         extraCount);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 
@@ -415,10 +409,7 @@ auto Context::SpawnActor(
     const auto extraCount = extra.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<Actor>(
+    auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{alloc},
         session,
         name,
@@ -433,7 +424,7 @@ auto Context::SpawnActor(
         batchID,
         extraCount);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 

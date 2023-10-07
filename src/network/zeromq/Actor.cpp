@@ -13,7 +13,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -144,7 +143,7 @@ auto Actor::get_index(SocketID id) const noexcept -> actor::SocketIndex
 
         return i->second;
     } else {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -176,24 +175,23 @@ auto Actor::send(actor::SocketIndex index, std::span<Message> msg) noexcept
     auto send_via_extra = [this, index](auto& m) {
         pipeline_.Internal()
             .ExtraSocket(index - fixed_)
-            .SendDeferred(std::move(m), __FILE__, __LINE__);
+            .SendDeferred(std::move(m));
     };
 
     switch (index) {
         case SubscribeIndex:
         case PullIndex: {
-            LogAbort()(OT_PRETTY_CLASS())(
-                "unable to send message via receive-only socket")
+            LogAbort()()("unable to send message via receive-only socket")
                 .Abort();
         }
         case DealerIndex: {
-            std::for_each(msg.begin(), msg.end(), send_via_dealer);
+            std::ranges::for_each(msg, send_via_dealer);
         } break;
         case LoopbackIndex: {
-            std::for_each(msg.begin(), msg.end(), send_via_loopback);
+            std::ranges::for_each(msg, send_via_loopback);
         } break;
         default: {
-            std::for_each(msg.begin(), msg.end(), send_via_extra);
+            std::ranges::for_each(msg, send_via_extra);
         }
     }
 }

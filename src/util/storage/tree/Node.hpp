@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <source_location>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -18,7 +19,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
@@ -99,7 +99,7 @@ protected:
         if (loaded) {
             serialized = proto::DynamicFactory<T>(raw.data(), raw.size());
 
-            OT_ASSERT(serialized);
+            assert_false(nullptr == serialized);
 
             valid = proto::Validate<T>(*serialized, VERBOSE);
         } else {
@@ -122,7 +122,7 @@ protected:
             }
         }
 
-        OT_ASSERT(valid);
+        assert_true(valid);
 
         return valid;
     }
@@ -149,9 +149,10 @@ protected:
 protected:
     template <class T>
     auto check_revision(
-        const UnallocatedCString& method,
         const std::uint64_t incoming,
-        Metadata& metadata) const noexcept -> bool
+        Metadata& metadata,
+        const std::source_location& loc =
+            std::source_location::current()) const noexcept -> bool
     {
         const auto& hash = std::get<0>(metadata);
         auto& revision = std::get<2>(metadata);
@@ -166,8 +167,7 @@ protected:
             using enum ErrorReporting;
 
             if (false == LoadProto(hash, existing, verbose)) {
-                LogAbort()(method)(__func__)(": Unable to load object.")
-                    .Abort();
+                LogAbort()(loc)(": Unable to load object.").Abort();
             }
 
             revision = extract_revision(*existing);
@@ -192,8 +192,8 @@ protected:
             using enum ErrorReporting;
 
             if (verbose == checking) {
-                LogError()(OT_PRETTY_CLASS())("Error: item with id ")(
-                    id, crypto_)(" does not exist.")
+                LogError()()("Error: item with id ")(id, crypto_)(
+                    " does not exist.")
                     .Flush();
             }
 
@@ -213,7 +213,7 @@ protected:
         std::string_view alias,
         UnallocatedCString& plaintext) noexcept -> bool
     {
-        OT_ASSERT(verify_write_lock(lock));
+        assert_true(verify_write_lock(lock));
 
         auto& metadata = item_map_[id];
         auto& hash = std::get<0>(metadata);

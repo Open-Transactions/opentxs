@@ -31,7 +31,7 @@ ParsedPatterns::ParsedPatterns(
         data_.emplace_back(data);
     }
 
-    std::sort(data_.begin(), data_.end());
+    std::ranges::sort(data_);
 }
 
 auto ParsedPatterns::get_allocator() const noexcept -> allocator_type
@@ -67,21 +67,14 @@ auto SetIntersection(
         auto intersection = Elements{monotonic};
         intersection.reserve(std::min(patterns.data_.size(), compare.size()));
         intersection.clear();
-        std::set_intersection(
-            std::begin(patterns.data_),
-            std::end(patterns.data_),
-            std::begin(compare),
-            std::end(compare),
-            std::back_inserter(intersection));
+        std::ranges::set_intersection(
+            patterns.data_, compare, std::back_inserter(intersection));
 
         return intersection;
     }();
 
-    std::transform(
-        std::begin(matches),
-        std::end(matches),
-        std::back_inserter(out.second),
-        [&](const auto& match) {
+    std::ranges::transform(
+        matches, std::back_inserter(out.second), [&](const auto& match) {
             auto output = Match{txid, patterns.map_.at(reader(match))->first};
 
             if (cb) { std::invoke(cb, output); }

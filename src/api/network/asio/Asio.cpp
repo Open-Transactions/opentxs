@@ -7,8 +7,6 @@
 #include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>  // IWYU pragma: keep
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <functional>
 #include <future>
@@ -24,13 +22,13 @@
 #include "api/network/asio/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Timer.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/asio/Socket.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
@@ -47,11 +45,11 @@ auto AsioAPI(const network::zeromq::Context& zmq, bool test) noexcept
 namespace opentxs::api::network::implementation
 {
 Asio::Asio(const opentxs::network::zeromq::Context& zmq, bool test) noexcept
-    : Asio(boost::make_shared<asio::Shared>(zmq, test), test)
+    : Asio(std::make_shared<asio::Shared>(zmq, test), test)
 {
 }
 
-Asio::Asio(boost::shared_ptr<asio::Shared> shared, const bool test) noexcept
+Asio::Asio(std::shared_ptr<asio::Shared> shared, const bool test) noexcept
     : test_(test)
     , main_(shared)
     , weak_(main_)
@@ -90,7 +88,7 @@ auto Asio::IOContext() const noexcept -> boost::asio::io_context&
         return p->IOContext();
     } else {
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 
@@ -100,7 +98,7 @@ auto Asio::FetchJson(
     const bool https,
     const ReadView notify) const noexcept -> std::future<boost::json::value>
 {
-    if (test_) { OT_FAIL; }
+    if (test_) { LogAbort()().Abort(); }
 
     if (auto p = weak_.lock(); p) {
 
@@ -148,20 +146,17 @@ auto Asio::Init(std::shared_ptr<const api::Context> context) noexcept -> void
 {
     auto shared = weak_.lock();
 
-    OT_ASSERT(shared);
+    assert_false(nullptr == shared);
 
     shared->Init();
 
-    OT_ASSERT(context);
+    assert_false(nullptr == context);
 
-    // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-    // broken std::allocate_shared function so we're using boost::shared_ptr
-    // instead of std::shared_ptr
     auto alloc = alloc::PMR<asio::Shared>{
         shared->zmq_.Internal().Alloc(shared->batch_id_)};
-    auto actor = boost::allocate_shared<asio::Actor>(alloc, context, shared);
+    auto actor = std::allocate_shared<asio::Actor>(alloc, context, shared);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

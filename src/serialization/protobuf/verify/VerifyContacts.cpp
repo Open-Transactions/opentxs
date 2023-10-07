@@ -10,8 +10,9 @@
 #include <ContactItemAttribute.pb.h>
 #include <ContactItemType.pb.h>
 #include <ankerl/unordered_dense.h>
-#include <algorithm>
+#include <functional>
 #include <iterator>
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -199,9 +200,7 @@ auto ValidContactSectionName(
         AllowedSectionNames().at(version);
 
     try {
-        return (
-            std::find(allowedNames.begin(), allowedNames.end(), name) !=
-            allowedNames.end());
+        return (std::ranges::find(allowedNames, name) != allowedNames.end());
     } catch (const std::out_of_range&) {
         return false;
     }
@@ -216,8 +215,7 @@ auto ValidContactItemType(
 
     try {
         return (
-            std::find(allowedTypes.begin(), allowedTypes.end(), itemType) !=
-            allowedTypes.end());
+            std::ranges::find(allowedTypes, itemType) != allowedTypes.end());
     } catch (const std::out_of_range&) {
         return false;
     }
@@ -230,10 +228,8 @@ auto ValidContactItemAttribute(
 
     try {
         return (
-            std::find(
-                allowedAttributes.begin(),
-                allowedAttributes.end(),
-                attribute) != allowedAttributes.end());
+            std::ranges::find(allowedAttributes, attribute) !=
+            allowedAttributes.end());
     } catch (const std::out_of_range&) {
         return false;
     }

@@ -32,7 +32,6 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
@@ -197,7 +196,7 @@ void Basic::init()
             .Nym({client_2_.Factory(), SeedB_, 0}, reason_c2_, "Bob")
             ->ID();
 
-    OT_ASSERT(false == server_1_id_.empty());
+    opentxs::assert_true(false == server_1_id_.empty());
 
     import_server_contract(server_contract_, client_1_);
     import_server_contract(server_contract_, client_2_);
@@ -205,13 +204,13 @@ void Basic::init()
     alice_state_machine_.reset(ot::Factory::Operation(
         client_1_, alice_nym_id_, server_1_id_, reason_c1_));
 
-    OT_ASSERT(alice_state_machine_);
+    opentxs::assert_false(nullptr == alice_state_machine_);
 
     alice_state_machine_->SetPush(false);
     bob_state_machine_.reset(ot::Factory::Operation(
         client_2_, bob_nym_id_, server_1_id_, reason_c2_));
 
-    OT_ASSERT(bob_state_machine_);
+    opentxs::assert_false(nullptr == bob_state_machine_);
 
     bob_state_machine_->SetPush(false);
     init_ = true;
@@ -262,7 +261,7 @@ auto Basic::find_issuer_account() -> ot::identifier::Account
     const auto accounts =
         client_1_.Storage().Internal().AccountsByOwner(alice_nym_id_);
 
-    OT_ASSERT(1 == accounts.size());
+    opentxs::assert_true(1 == accounts.size());
 
     return *accounts.begin();
 }
@@ -271,12 +270,12 @@ auto Basic::find_unit_definition_id_1() -> ot::identifier::UnitDefinition
 {
     const auto accountID = find_issuer_account();
 
-    OT_ASSERT(false == accountID.empty());
+    opentxs::assert_true(false == accountID.empty());
 
     const auto output =
         client_1_.Storage().Internal().AccountContract(accountID);
 
-    OT_ASSERT(false == output.empty());
+    opentxs::assert_true(false == output.empty());
 
     return output;
 }

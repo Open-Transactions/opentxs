@@ -100,9 +100,7 @@ auto MakeDeterministicInproc(
 auto RawToZ85(const ReadView input, Writer&& destination) noexcept -> bool
 {
     if (0 != input.size() % 4) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid input size.")
-            .Flush();
+        LogError()()("Invalid input size.").Flush();
 
         return false;
     }
@@ -111,9 +109,7 @@ auto RawToZ85(const ReadView input, Writer&& destination) noexcept -> bool
     auto out = destination.Reserve(target);
 
     if (false == out.IsValid(target)) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Failed to allocate output")
-            .Flush();
+        LogError()()("Failed to allocate output").Flush();
 
         return false;
     }
@@ -127,9 +123,7 @@ auto RawToZ85(const ReadView input, Writer&& destination) noexcept -> bool
 auto Z85ToRaw(const ReadView input, Writer&& destination) noexcept -> bool
 {
     if (0 != input.size() % 5) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Invalid input size.")
-            .Flush();
+        LogError()()("Invalid input size.").Flush();
 
         return false;
     }
@@ -138,9 +132,7 @@ auto Z85ToRaw(const ReadView input, Writer&& destination) noexcept -> bool
     auto out = destination.Reserve(target);
 
     if (false == out.IsValid(target)) {
-        LogError()("opentxs::network::zeromq::")(__func__)(
-            ": Failed to allocate output")
-            .Flush();
+        LogError()()("Failed to allocate output").Flush();
 
         return false;
     }

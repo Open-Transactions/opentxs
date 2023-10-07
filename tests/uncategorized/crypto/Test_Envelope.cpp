@@ -14,7 +14,6 @@
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/fixtures/crypto/Envelope.hpp"
@@ -53,7 +52,7 @@ TEST_F(Envelope, one_recipient)
 
             auto rNym = recipient_.Wallet().Nym(nym.ID());
 
-            OT_ASSERT(rNym);
+            opentxs::assert_false(nullptr == rNym);
 
             opened = recipient->Open(*rNym, plaintext->WriteInto(), reason_r_);
 
@@ -101,7 +100,7 @@ TEST_F(Envelope, multiple_recipients)
                     ot::reader(bytes));
                 auto rNym = recipient_.Wallet().Nym((*nym)->ID());
 
-                OT_ASSERT(rNym);
+                opentxs::assert_false(nullptr == rNym);
 
                 const auto opened =
                     recipient->Open(*rNym, plaintext->WriteInto(), reason_s_);

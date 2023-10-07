@@ -8,8 +8,8 @@
 #include <utility>
 
 #include "crypto/symmetric/KeyPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::symmetric
@@ -17,7 +17,7 @@ namespace opentxs::crypto::symmetric
 Key::Key(KeyPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Key::Key(allocator_type alloc) noexcept

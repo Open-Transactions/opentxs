@@ -10,7 +10,6 @@
 #include <functional>
 #include <span>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -92,7 +91,7 @@ auto SecretPrivate::assign(
     std::size_t copy,
     std::size_t reserve) noexcept -> bool
 {
-    OT_ASSERT(reserve >= copy);
+    assert_true(reserve >= copy);
 
     data_.clear();
     data_.reserve(reserve);
@@ -110,7 +109,7 @@ auto SecretPrivate::size() const noexcept -> std::size_t
 
         return size;
     } else {
-        OT_ASSERT(0_uz < size);
+        assert_true(0_uz < size);
 
         return size - 1_uz;
     }
@@ -128,8 +127,7 @@ auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> Writer
             const auto effective = (Text == mode_) ? size + 1_uz : size;
 
             if (false == resize(effective)) {
-                LogError()(OT_PRETTY_CLASS())("failed to resize to ")(
-                    effective)(" bytes")
+                LogError()()("failed to resize to ")(effective)(" bytes")
                     .Flush();
 
                 return std::span<std::byte>{};
@@ -138,8 +136,8 @@ auto SecretPrivate::WriteInto(Secret::Mode mode) noexcept -> Writer
             if (Text == mode_) { data_.back() = {}; }
 
             if (const auto got = this->size(); got != size) {
-                LogError()(OT_PRETTY_CLASS())("tried to reserve ")(
-                    size)(" bytes but got ")(got)(" bytes")
+                LogError()()("tried to reserve ")(size)(" bytes but got ")(
+                    got)(" bytes")
                     .Flush();
 
                 return std::span<std::byte>{};

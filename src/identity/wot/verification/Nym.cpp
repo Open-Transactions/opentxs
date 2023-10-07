@@ -18,7 +18,6 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -43,8 +42,7 @@ auto Factory::VerificationNym(
 
         return new ReturnType(parent, nym, version);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -63,8 +61,7 @@ auto Factory::VerificationNym(
 
         return new ReturnType(parent, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            "Failed to construct verification nym: ")(e.what())
+        LogError()()("Failed to construct verification nym: ")(e.what())
             .Flush();
 
         return nullptr;
@@ -106,7 +103,7 @@ Nym::operator SerializedType() const noexcept
     id_.Internal().Serialize(*output.mutable_nym());
 
     for (const auto& pItem : items_) {
-        OT_ASSERT(pItem);
+        assert_false(nullptr == pItem);
 
         const auto& item = *pItem;
         output.add_verification()->CopyFrom(item.Serialize(api));
@@ -128,7 +125,7 @@ auto Nym::AddItem(
         *this, claim, signer, reason, value, start, end, version, {})};
 
     if (false == bool(pCandidate)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to construct item").Flush();
+        LogError()()("Failed to construct item").Flush();
 
         return false;
     }
@@ -141,7 +138,7 @@ auto Nym::AddItem(const internal::Item::SerializedType item) noexcept -> bool
     auto pCandidate = Child{Factory::VerificationItem(*this, item)};
 
     if (false == bool(pCandidate)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to construct item").Flush();
+        LogError()()("Failed to construct item").Flush();
 
         return false;
     }
@@ -151,7 +148,7 @@ auto Nym::AddItem(const internal::Item::SerializedType item) noexcept -> bool
 
 auto Nym::add_item(Child pCandidate) noexcept -> bool
 {
-    OT_ASSERT(pCandidate);
+    assert_false(nullptr == pCandidate);
 
     auto accept{true};
     const auto& candidate = *pCandidate;
@@ -171,7 +168,7 @@ auto Nym::add_item(Child pCandidate) noexcept -> bool
     for (auto i{items_.cbegin()}; i != items_.cend();) {
         const auto& pItem = *i;
 
-        OT_ASSERT(pItem);
+        assert_false(nullptr == pItem);
 
         const auto& item = *pItem;
 
@@ -205,7 +202,7 @@ auto Nym::DeleteItem(const identifier::Generic& id) noexcept -> bool
     for (auto i{items_.cbegin()}; i != items_.cend(); ++i) {
         const auto& pItem = *i;
 
-        OT_ASSERT(pItem);
+        assert_false(nullptr == pItem);
 
         const auto& item = *pItem;
 
@@ -272,9 +269,7 @@ auto Nym::UpgradeItemVersion(
                     nymVersion);
 
             if (itemVersion < min) {
-                LogError()(OT_PRETTY_CLASS())("Version ")(
-                    itemVersion)(" too old")
-                    .Flush();
+                LogError()()("Version ")(itemVersion)(" too old").Flush();
 
                 return false;
             }
@@ -287,9 +282,7 @@ auto Nym::UpgradeItemVersion(
             }
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("No support for version ")(
-            itemVersion)(" items")
-            .Flush();
+        LogError()()("No support for version ")(itemVersion)(" items").Flush();
 
         return false;
     }

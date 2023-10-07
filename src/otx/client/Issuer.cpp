@@ -25,7 +25,6 @@
 #include "internal/serialization/protobuf/verify/Issuer.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
@@ -183,12 +182,12 @@ auto Issuer::toString() const -> UnallocatedCString
     output << "* Issued units:\n";
 
     for (const auto& [type, pGroup] : *contractSection) {
-        OT_ASSERT(pGroup);
+        assert_false(nullptr == pGroup);
 
         const auto& group = *pGroup;
 
         for (const auto& [id, pClaim] : group) {
-            OT_ASSERT(pClaim);
+            assert_false(nullptr == pClaim);
 
             const auto& notUsed [[maybe_unused]] = id;
             const auto& claim = *pClaim;
@@ -267,14 +266,13 @@ auto Issuer::add_request(
     const identifier::Generic& requestID,
     const identifier::Generic& replyID) -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     auto [found, it] = find_request(lock, type, requestID);
     const auto& notUsed [[maybe_unused]] = it;
 
     if (found) {
-        LogError()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
-            " already exists.")
+        LogError()()("Request ")(requestID, crypto_)(" already exists.")
             .Flush();
 
         return false;
@@ -296,9 +294,7 @@ auto Issuer::AddReply(
     auto& [reply, used] = it->second;
 
     if (false == found) {
-        LogDetail()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
-            " not found.")
-            .Flush();
+        LogDetail()()("Request ")(requestID, crypto_)(" not found.").Flush();
 
         return add_request(lock, type, requestID, replyID);
     }
@@ -323,16 +319,14 @@ auto Issuer::AddRequest(
 auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
     -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())(
-        "Searching for initiated bailment requests for unit ")(unitID, crypto_)
+    LogVerbose()()("Searching for initiated bailment requests for unit ")(
+        unitID, crypto_)
         .Flush();
     Lock lock(lock_);
     std::size_t count{0};
     const auto requests = get_requests(
         lock, contract::peer::RequestType::Bailment, RequestStatus::Requested);
-    LogVerbose()(OT_PRETTY_CLASS())("Have ")(requests.size())(
-        " initiated requests.")
-        .Flush();
+    LogVerbose()()("Have ")(requests.size())(" initiated requests.").Flush();
 
     for (const auto& [requestID, a, b] : requests) {
         const auto& replyID [[maybe_unused]] = a;
@@ -353,13 +347,12 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
             if (unitID == requestType) {
                 ++count;
             } else {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                LogVerbose()()("Request ")(requestID, crypto_)(
                     " is wrong type (")(requestType, crypto_)(")")
                     .Flush();
             }
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID, crypto_)
+            LogVerbose()()("Failed to serialize request: ")(requestID, crypto_)
                 .Flush();
         }
     }
@@ -402,16 +395,14 @@ auto Issuer::BailmentInstructions(
             }
 
             if (false == reply.IsValid()) {
-                LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize reply: ")(
-                    replyID, crypto_)
+                LogVerbose()()("Failed to serialize reply: ")(replyID, crypto_)
                     .Flush();
             } else {
                 auto nym = wallet_.Nym(issuer_id_);
                 output.emplace_back(requestID, std::move(reply).asBailment());
             }
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID, crypto_)
+            LogVerbose()()("Failed to serialize request: ")(requestID, crypto_)
                 .Flush();
         }
     }
@@ -424,8 +415,7 @@ auto Issuer::ConnectionInfo(
     const contract::peer::ConnectionInfoType type) const
     -> UnallocatedVector<Issuer::ConnectionDetails>
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Searching for type ")(
-        static_cast<std::uint32_t>(type))(
+    LogVerbose()()("Searching for type ")(static_cast<std::uint32_t>(type))(
         " connection info requests (which have replies).")
         .Flush();
     Lock lock(lock_);
@@ -434,8 +424,7 @@ auto Issuer::ConnectionInfo(
         lock,
         contract::peer::RequestType::ConnectionInfo,
         RequestStatus::Replied);
-    LogVerbose()(OT_PRETTY_CLASS())("Have ")(replies.size())(" total requests.")
-        .Flush();
+    LogVerbose()()("Have ")(replies.size())(" total requests.").Flush();
 
     for (const auto& [requestID, replyID, isUsed] : replies) {
         auto request = wallet_.Internal().PeerRequest(
@@ -448,7 +437,7 @@ auto Issuer::ConnectionInfo(
 
         if (request.IsValid()) {
             if (const auto kind = request.asConnection().Kind(); type != kind) {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                LogVerbose()()("Request ")(requestID, crypto_)(
                     " is wrong type (")(print(kind))(")")
                     .Flush();
 
@@ -469,13 +458,12 @@ auto Issuer::ConnectionInfo(
                 auto nym = wallet_.Nym(issuer_id_);
                 output.emplace_back(requestID, std::move(reply).asConnection());
             } else {
-                LogVerbose()(OT_PRETTY_CLASS())(
-                    ": Failed to serialize reply: ")(replyID, crypto_)
+                LogVerbose()()(": Failed to serialize reply: ")(
+                    replyID, crypto_)
                     .Flush();
             }
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID, crypto_)
+            LogVerbose()()("Failed to serialize request: ")(requestID, crypto_)
                 .Flush();
         }
     }
@@ -486,16 +474,14 @@ auto Issuer::ConnectionInfo(
 auto Issuer::ConnectionInfoInitiated(
     const contract::peer::ConnectionInfoType type) const -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Searching for all type ")(
-        static_cast<std::uint32_t>(type))(" connection info requests.")
+    LogVerbose()()("Searching for all type ")(static_cast<std::uint32_t>(type))(
+        " connection info requests.")
         .Flush();
     Lock lock(lock_);
     std::size_t count{0};
     const auto requests = get_requests(
         lock, contract::peer::RequestType::ConnectionInfo, RequestStatus::All);
-    LogVerbose()(OT_PRETTY_CLASS())("Have ")(requests.size())(
-        " total requests.")
-        .Flush();
+    LogVerbose()()("Have ")(requests.size())(" total requests.").Flush();
 
     for (const auto& [requestID, replyID, isUsed] : requests) {
         auto request = wallet_.Internal().PeerRequest(
@@ -513,13 +499,12 @@ auto Issuer::ConnectionInfoInitiated(
             if (const auto kind = request.asConnection().Kind(); type == kind) {
                 ++count;
             } else {
-                LogVerbose()(OT_PRETTY_CLASS())("Request ")(requestID, crypto_)(
+                LogVerbose()()("Request ")(requestID, crypto_)(
                     " is wrong type (")(print(kind))(")")
                     .Flush();
             }
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request: ")(
-                requestID, crypto_);
+            LogVerbose()()("Failed to serialize request: ")(requestID, crypto_);
         }
     }
 
@@ -532,7 +517,7 @@ auto Issuer::find_request(
     const identifier::Generic& requestID)
     -> std::pair<bool, Issuer::Workflow::iterator>
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     auto& work = peer_requests_[type];
     auto it = work.find(requestID);
@@ -558,7 +543,7 @@ auto Issuer::get_requests(
     -> UnallocatedSet<
         std::tuple<identifier::Generic, identifier::Generic, bool>>
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     UnallocatedSet<std::tuple<identifier::Generic, identifier::Generic, bool>>
         output;
@@ -686,7 +671,7 @@ auto Issuer::Serialize(proto::Issuer& output) const -> bool
         }
     }
 
-    OT_ASSERT(proto::Validate(output, VERBOSE));
+    assert_true(proto::Validate(output, VERBOSE));
 
     return true;
 }

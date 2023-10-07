@@ -13,7 +13,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -29,6 +28,7 @@
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -197,7 +197,7 @@ auto blockchain_thread_item_id(
         txid.Bytes(),
         writer(preimage));
 
-    OT_ASSERT(hashed);
+    assert_true(hashed);
 
     return factory.IdentifierFromPreimage(preimage);
 }

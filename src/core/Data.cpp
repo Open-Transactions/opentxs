@@ -12,7 +12,6 @@
 
 #include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Spaceship.hpp"
 
 namespace opentxs
 {
@@ -55,12 +54,12 @@ auto operator==(const Data& lhs, const Data& rhs) noexcept -> bool
 auto operator<=>(const Data& lhs, const Data& rhs) noexcept
     -> std::strong_ordering
 {
-    return llvm_sucks(lhs.Bytes(), rhs.Bytes());
+    return lhs.Bytes() <=> rhs.Bytes();
 }
 
 auto operator<=>(const Data& lhs, ReadView rhs) noexcept -> std::strong_ordering
 {
-    return llvm_sucks(lhs.Bytes(), rhs);
+    return lhs.Bytes() <=> rhs;
 }
 
 auto to_hex(const std::byte* in, std::size_t size) noexcept

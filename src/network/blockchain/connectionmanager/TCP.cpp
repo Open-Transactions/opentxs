@@ -14,7 +14,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -57,13 +56,13 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     auto do_connect() noexcept
         -> std::pair<bool, std::optional<std::string_view>> override
     {
-        OT_ASSERT(is_initialized());
+        assert_true(is_initialized());
 
         const auto& id = connection_id_.get();
 
-        OT_ASSERT(id.IsValid());
+        assert_true(id.IsValid());
 
-        log_()(OT_PRETTY_CLASS())("Connecting to ")(endpoint_.str()).Flush();
+        log_()()("Connecting to ")(endpoint_.str()).Flush();
 
         if (running_) { socket_.Connect(id); }
 
@@ -85,7 +84,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     {
         auto body = message.Payload();
 
-        OT_ASSERT(1 < body.size());
+        assert_true(1 < body.size());
 
         run();
 
@@ -101,8 +100,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     }
     auto on_connect() noexcept -> void final
     {
-        log_()(OT_PRETTY_CLASS())("Connect to ")(endpoint_.str())(" successful")
-            .Flush();
+        log_()()("Connect to ")(endpoint_.str())(" successful").Flush();
         run();
     }
     auto on_header(zeromq::Message&& message) noexcept
@@ -110,7 +108,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     {
         auto body = message.Payload();
 
-        OT_ASSERT(1 < body.size());
+        assert_true(1 < body.size());
 
         auto& header = body[1];
         const auto size = get_body_size_(header);
@@ -147,13 +145,13 @@ struct TCPConnectionManager : virtual public ConnectionManager {
     {
         auto body = message.Payload();
 
-        OT_ASSERT(1 < body.size());
+        assert_true(1 < body.size());
 
         auto frames = std::span<zeromq::Frame>{
             std::addressof(body[1]), body.size() - 1_uz};
         const auto& id = connection_id_.set_value(frames);
 
-        OT_ASSERT(id.IsValid());
+        assert_true(id.IsValid());
 
         try {
             connection_id_promise_.set_value();
@@ -217,7 +215,7 @@ struct TCPConnectionManager : virtual public ConnectionManager {
         }())
         , running_(true)
     {
-        OT_ASSERT(get_body_size_);
+        assert_false(nullptr == get_body_size_);
     }
 
     ~TCPConnectionManager() override { socket_.Close(); }
@@ -270,7 +268,7 @@ protected:
         }())
         , running_(true)
     {
-        OT_ASSERT(get_body_size_);
+        assert_false(nullptr == get_body_size_);
     }
 };
 

@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_shared_guarded.h>
 #include <memory>
 #include <shared_mutex>
@@ -49,7 +47,8 @@ class ScopeGuard;
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 namespace opentxs::network::blockchain::otdht
 {
-class Server final : public OTDHT::Actor, public boost::enable_shared_from
+class Server final : public OTDHT::Actor,
+                     public std::enable_shared_from_this<Server>
 {
 public:
     auto get_deleter() noexcept -> delete_function final
@@ -100,7 +99,7 @@ private:
     Outstanding running_;
 
     static auto background(
-        boost::shared_ptr<Server> me,
+        std::shared_ptr<Server> me,
         std::shared_ptr<const ScopeGuard> post) noexcept -> void;
 
     auto local_position() const noexcept

@@ -24,7 +24,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/interface/ui/SeedTreeItem.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -106,8 +105,8 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                         auto& ptr = output.emplace_back(
                             std::make_unique<Nyms>().release());
 
-                        OT_ASSERT(1u == output.size());
-                        OT_ASSERT(nullptr != ptr);
+                        assert_true(1u == output.size());
+                        assert_false(nullptr == ptr);
 
                         return *reinterpret_cast<Nyms*>(ptr);
                     }();
@@ -129,8 +128,7 @@ auto SeedTree::add_children(ChildMap&& map) noexcept -> void
                                 return out;
                             }(),
                             CustomData{});
-                        LogInsane()(OT_PRETTY_CLASS())("processing nym ")(
-                            row.id_, api_.Crypto())
+                        LogInsane()()("processing nym ")(row.id_, api_.Crypto())
                             .Flush();
                     }
 
@@ -275,7 +273,7 @@ auto SeedTree::load_seed(
 auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
     -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())(nymID, api_.Crypto()).Flush();
+    LogTrace()()(nymID, api_.Crypto()).Flush();
     const auto& api = api_;
     const auto nym = api.Wallet().Nym(nymID);
 
@@ -317,7 +315,7 @@ auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
                 nym_name(*nym));
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return;
     }
@@ -355,7 +353,7 @@ auto SeedTree::load_seeds(ChildMap& out) const noexcept -> void
         try {
             load_seed(seedID, out);
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
             out.erase(seedID);
         }
     }
@@ -368,8 +366,7 @@ auto SeedTree::nym_name(const identity::Nym& nym) const noexcept
     out << nym.Name();
     auto handle = default_nym_.lock_shared();
     const auto& id = handle;
-    LogTrace()(OT_PRETTY_CLASS())("Default nym is ")(*id, api_.Crypto())
-        .Flush();
+    LogTrace()()("Default nym is ")(*id, api_.Crypto()).Flush();
 
     if (nym.ID() == *id) { out << " (default)"; }
 
@@ -383,9 +380,9 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -394,7 +391,7 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -424,9 +421,9 @@ auto SeedTree::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -435,7 +432,7 @@ auto SeedTree::process_nym(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto id = api_.Factory().NymIDFromHash(body[1].Bytes());
     check_default_nym();
@@ -457,7 +454,7 @@ auto SeedTree::process_seed(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto id = api_.Factory().SeedIDFromHash(body[1].Bytes());
     check_default_seed();
@@ -480,7 +477,7 @@ auto SeedTree::process_seed(const crypto::SeedID& id) noexcept -> void
         load_seed(id, index.second, type, index.first);
         add_item(id, index, custom);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return;
     }

@@ -7,7 +7,6 @@
 
 #include "interface/qt/AmountValidator.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: keep
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 
@@ -24,7 +23,7 @@ AmountValidator::AmountValidator(
     implementation::AccountActivity& parent) noexcept
     : imp_(std::make_unique<Imp>(parent))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto AmountValidator::fixup(QString& input) const -> void

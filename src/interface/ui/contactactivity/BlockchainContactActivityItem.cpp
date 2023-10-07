@@ -10,12 +10,12 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "interface/ui/contactactivity/ContactActivityItem.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -66,9 +66,9 @@ BlockchainContactActivityItem::BlockchainContactActivityItem(
     , memo_(std::move(memo))
     , amount_(amount)
 {
-    OT_ASSERT(false == nym_id_.empty());
-    OT_ASSERT(false == item_id_.empty());
-    OT_ASSERT(false == txid_.empty());
+    assert_false(nym_id_.empty());
+    assert_false(item_id_.empty());
+    assert_false(txid_.empty());
 }
 
 auto BlockchainContactActivityItem::Amount() const noexcept -> opentxs::Amount
@@ -121,7 +121,7 @@ auto BlockchainContactActivityItem::reindex(
     auto [txid, amount, display, memo] = extract(api_, nym_id_, custom);
     auto output = ContactActivityItem::reindex(key, custom);
 
-    OT_ASSERT(txid_ == txid);
+    assert_true(txid_ == txid);
 
     auto lock = eLock{shared_lock_};
 

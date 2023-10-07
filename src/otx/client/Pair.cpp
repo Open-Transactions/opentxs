@@ -35,7 +35,6 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -157,7 +156,7 @@ void Pair::State::Add(
     const identifier::Nym& issuerNymID,
     const bool trusted) noexcept
 {
-    OT_ASSERT(CheckLock(lock, lock_));
+    assert_true(CheckLock(lock, lock_));
 
     issuers_.emplace(issuerNymID);  // copy, then move
     state_.emplace(
@@ -204,18 +203,18 @@ auto Pair::State::check_state() const noexcept -> bool
         auto& [mutex, serverID, serverNymID, status, trusted, offered, registered, accountDetails, pending, needRename] =
             details;
 
-        OT_ASSERT(mutex);
+        assert_false(nullptr == mutex);
 
         Lock rowLock(*mutex);
 
         if (Status::Registered != status) {
-            LogTrace()(OT_PRETTY_CLASS())("Not registered").Flush();
+            LogTrace()()("Not registered").Flush();
 
             goto repeat;
         }
 
         if (needRename) {
-            LogTrace()(OT_PRETTY_CLASS())("Notary name not set").Flush();
+            LogTrace()()("Notary name not set").Flush();
 
             goto repeat;
         }
@@ -223,8 +222,7 @@ auto Pair::State::check_state() const noexcept -> bool
         const auto accountCount = count_currencies(accountDetails);
 
         if (accountCount != offered) {
-            LogTrace()(OT_PRETTY_CLASS())(
-                ": Waiting for account registration, expected: ")(
+            LogTrace()()(": Waiting for account registration, expected: ")(
                 offered)(", have ")(accountCount)
                 .Flush();
 
@@ -233,9 +231,8 @@ auto Pair::State::check_state() const noexcept -> bool
 
         for (const auto& [unit, account, bailments] : accountDetails) {
             if (bailments < MINIMUM_UNUSED_BAILMENTS) {
-                LogTrace()(OT_PRETTY_CLASS())(
-                    ": Waiting for bailment instructions for "
-                    "account ")(account, crypto_)(", expected: ")(
+                LogTrace()()(": Waiting for bailment instructions for "
+                             "account ")(account, crypto_)(", expected: ")(
                     MINIMUM_UNUSED_BAILMENTS)(", have ")(bailments)
                     .Flush();
 
@@ -245,13 +242,13 @@ auto Pair::State::check_state() const noexcept -> bool
     }
 
     // No reason to continue executing state machine
-    LogTrace()(OT_PRETTY_CLASS())("Done").Flush();
+    LogTrace()()("Done").Flush();
 
     return false;
 
 repeat:
     lock.unlock();
-    LogTrace()(OT_PRETTY_CLASS())("Repeating").Flush();
+    LogTrace()()("Repeating").Flush();
     // Rate limit state machine to reduce unproductive execution while waiting
     // on network activity
     Sleep(50ms);
@@ -263,9 +260,8 @@ auto Pair::State::count_currencies(
     const UnallocatedVector<AccountDetails>& in) noexcept -> std::size_t
 {
     auto unique = UnallocatedSet<identifier::UnitDefinition>{};
-    std::transform(
-        std::begin(in),
-        std::end(in),
+    std::ranges::transform(
+        in,
         std::inserter(unique, unique.end()),
         [](const auto& item) -> identifier::UnitDefinition {
             return std::get<0>(item);
@@ -281,12 +277,12 @@ auto Pair::State::count_currencies(
     auto unique = UnallocatedSet<identifier::UnitDefinition>{};
 
     for (const auto& [type, pGroup] : in) {
-        OT_ASSERT(pGroup);
+        assert_false(nullptr == pGroup);
 
         const auto& group = *pGroup;
 
         for (const auto& [id, pClaim] : group) {
-            OT_ASSERT(pClaim);
+            assert_false(nullptr == pClaim);
 
             const auto& claim = *pClaim;
             unique.emplace(api.Factory().UnitIDFromBase58(claim.Value()));
@@ -302,8 +298,8 @@ auto Pair::State::get_account(
     const identifier::Account& account,
     UnallocatedVector<AccountDetails>& details) noexcept -> AccountDetails&
 {
-    OT_ASSERT(false == unit.empty());
-    OT_ASSERT(false == account.empty());
+    assert_false(unit.empty());
+    assert_false(account.empty());
 
     for (auto& row : details) {
         const auto& [unitID, accountID, bailment] = row;
@@ -337,7 +333,7 @@ auto Pair::State::IssuerList(
     for (auto& [key, value] : state_) {
         auto& pMutex = std::get<0>(value);
 
-        OT_ASSERT(pMutex);
+        assert_false(nullptr == pMutex);
 
         Lock rowLock(*pMutex);
         const auto& issuerID = std::get<1>(key);
@@ -356,14 +352,13 @@ auto Pair::State::run(const std::function<void(const IssuerID&)> fn) noexcept
 
     {
         Lock lock(lock_);
-        std::transform(
-            std::begin(state_),
-            std::end(state_),
+        std::ranges::transform(
+            state_,
             std::inserter(list, list.end()),
             [](const auto& in) -> IssuerID { return in.first; });
     }
 
-    std::for_each(std::begin(list), std::end(list), fn);
+    std::ranges::for_each(list, fn);
 
     return check_state();
 }
@@ -374,28 +369,26 @@ auto Pair::AddIssuer(
     const UnallocatedCString& pairingCode) const noexcept -> bool
 {
     if (localNymID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid local nym id.").Flush();
+        LogError()()("Invalid local nym id.").Flush();
 
         return false;
     }
 
     if (!api_.Wallet().IsLocalNym(localNymID.asBase58(api_.Crypto()))) {
-        LogError()(OT_PRETTY_CLASS())("Invalid local nym.").Flush();
+        LogError()()("Invalid local nym.").Flush();
 
         return false;
     }
 
     if (issuerNymID.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid issuer nym id.").Flush();
+        LogError()()("Invalid issuer nym id.").Flush();
 
         return false;
     }
 
     if (blockchain::Type::UnknownBlockchain !=
         blockchain::Chain(api_, issuerNymID)) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": blockchains can not be used as otx issuers.")
-            .Flush();
+        LogError()()(": blockchains can not be used as otx issuers.").Flush();
 
         return false;
     }
@@ -427,7 +420,7 @@ auto Pair::callback_nym(const zmq::Message& in) noexcept -> void
     startup_.get();
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
     auto trigger{state_.CheckIssuer(nymID)};
@@ -439,7 +432,7 @@ auto Pair::callback_nym(const zmq::Message& in) noexcept -> void
             auto& [mutex, serverID, serverNymID, status, trusted, offered, registered, accountDetails, pending, needRename] =
                 details;
 
-            OT_ASSERT(mutex);
+            assert_false(nullptr == mutex);
 
             Lock rowLock(*mutex);
 
@@ -455,7 +448,7 @@ auto Pair::callback_peer_reply(const zmq::Message& in) noexcept -> void
     startup_.get();
     const auto body = in.Payload();
 
-    OT_ASSERT(2 <= body.size());
+    assert_true(2 <= body.size());
 
     auto trigger{false};
     const auto nymID = api_.Factory().NymIDFromBase58(body[0].Bytes());
@@ -465,27 +458,24 @@ auto Pair::callback_peer_reply(const zmq::Message& in) noexcept -> void
 
     switch (reply.Type()) {
         case contract::peer::RequestType::Bailment: {
-            LogDetail()(OT_PRETTY_CLASS())("Received bailment reply.").Flush();
+            LogDetail()()("Received bailment reply.").Flush();
             Lock lock(decision_lock_);
             trigger = process_request_bailment(lock, nymID, reply.asBailment());
         } break;
         case contract::peer::RequestType::OutBailment: {
-            LogDetail()(OT_PRETTY_CLASS())("Received outbailment reply.")
-                .Flush();
+            LogDetail()()("Received outbailment reply.").Flush();
             Lock lock(decision_lock_);
             trigger =
                 process_request_outbailment(lock, nymID, reply.asOutbailment());
         } break;
         case contract::peer::RequestType::ConnectionInfo: {
-            LogDetail()(OT_PRETTY_CLASS())(": Received connection info reply.")
-                .Flush();
+            LogDetail()()(": Received connection info reply.").Flush();
             Lock lock(decision_lock_);
             trigger =
                 process_connection_info(lock, nymID, reply.asConnection());
         } break;
         case contract::peer::RequestType::StoreSecret: {
-            LogDetail()(OT_PRETTY_CLASS())("Received store secret reply.")
-                .Flush();
+            LogDetail()()("Received store secret reply.").Flush();
             Lock lock(decision_lock_);
             trigger = process_store_secret(lock, nymID, reply.asStoreSecret());
         } break;
@@ -505,7 +495,7 @@ auto Pair::callback_peer_request(const zmq::Message& in) noexcept -> void
     startup_.get();
     const auto body = in.Payload();
 
-    OT_ASSERT(2 <= body.size());
+    assert_true(2 <= body.size());
 
     auto trigger{false};
     const auto nymID = api_.Factory().NymIDFromBase58(body[0].Bytes());
@@ -542,13 +532,11 @@ auto Pair::check_accounts(
     const auto haveAccounts = bool(contractSection);
 
     if (false == haveAccounts) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Issuer does not advertise any contracts.")
-            .Flush();
+        LogError()()(": Issuer does not advertise any contracts.").Flush();
     } else {
         offered = State::count_currencies(api_, *contractSection);
-        LogDetail()(OT_PRETTY_CLASS())("Issuer advertises ")(
-            offered)(" contract")((1 == offered) ? "." : "s.")
+        LogDetail()()("Issuer advertises ")(offered)(" contract")(
+            (1 == offered) ? "." : "s.")
             .Flush();
     }
 
@@ -558,21 +546,20 @@ auto Pair::check_accounts(
 
     for (const auto& [type, pGroup] : *contractSection) {
         PAIR_SHUTDOWN();
-        OT_ASSERT(pGroup);
+        assert_false(nullptr == pGroup);
 
         const auto& group = *pGroup;
 
         for (const auto& [id, pClaim] : group) {
             PAIR_SHUTDOWN();
-            OT_ASSERT(pClaim);
+            assert_false(nullptr == pClaim);
 
             const auto& notUsed [[maybe_unused]] = id;
             const auto& claim = *pClaim;
             const auto unitID = api_.Factory().UnitIDFromBase58(claim.Value());
 
             if (unitID.empty()) {
-                LogDetail()(OT_PRETTY_CLASS())("Invalid unit definition")
-                    .Flush();
+                LogDetail()()("Invalid unit definition").Flush();
 
                 continue;
             }
@@ -581,30 +568,25 @@ auto Pair::check_accounts(
                 issuer.AccountList(ClaimToUnit(type), unitID);
 
             if (0 == accountList.size()) {
-                LogDetail()(OT_PRETTY_CLASS())("Registering ")(
-                    unitID,
-                    api_.Crypto())(" account for ")(localNymID, api_.Crypto())(
-                    " on ")(serverID, api_.Crypto())(".")
+                LogDetail()()("Registering ")(unitID, api_.Crypto())(
+                    " account for ")(localNymID, api_.Crypto())(" on ")(
+                    serverID, api_.Crypto())(".")
                     .Flush();
                 const auto& [registered, accountid] =
                     register_account(localNymID, serverID, unitID);
 
                 if (registered) {
-                    LogDetail()(OT_PRETTY_CLASS())(
-                        ": Success registering account")
-                        .Flush();
+                    LogDetail()()(": Success registering account").Flush();
                     issuer.AddAccount(ClaimToUnit(type), unitID, accountid);
                 } else {
-                    LogError()(OT_PRETTY_CLASS())(
-                        ": Failed to register account")
-                        .Flush();
+                    LogError()()(": Failed to register account").Flush();
                 }
 
                 continue;
             } else {
-                LogDetail()(OT_PRETTY_CLASS())(unitID, api_.Crypto())(
-                    " account for ")(localNymID, api_.Crypto())(" on ")(
-                    serverID, api_.Crypto())(" already exists.")
+                LogDetail()()(unitID, api_.Crypto())(" account for ")(
+                    localNymID, api_.Crypto())(" on ")(serverID, api_.Crypto())(
+                    " already exists.")
                     .Flush();
             }
 
@@ -622,8 +604,7 @@ auto Pair::check_accounts(
                     (false == issuer.BailmentInitiated(unitID));
 
                 if (needBailment && nonePending) {
-                    LogDetail()(OT_PRETTY_CLASS())(
-                        ": Requesting bailment info for ")(
+                    LogDetail()()(": Requesting bailment info for ")(
                         unitID, api_.Crypto())(".")
                         .Flush();
                     const auto& [sent, requestID] = initiate_bailment(
@@ -656,9 +637,7 @@ auto Pair::check_connection_info(otx::client::Issuer& issuer) const noexcept
                        contract::peer::ConnectionInfoType::BtcRpc)));
 
     if (needInfo) {
-        LogDetail()(OT_PRETTY_CLASS())(
-            ": Sending connection info peer request.")
-            .Flush();
+        LogDetail()()(": Sending connection info peer request.").Flush();
         const auto [sent, requestID] = get_connection(
             issuer.LocalNymID(),
             issuer.IssuerID(),
@@ -678,7 +657,7 @@ auto Pair::check_rename(
     bool& needRename) const noexcept -> void
 {
     if (false == issuer.Paired()) {
-        LogTrace()(OT_PRETTY_CLASS())("Not trusted").Flush();
+        LogTrace()()("Not trusted").Flush();
 
         return;
     }
@@ -709,16 +688,13 @@ auto Pair::check_rename(
         }());
 
         if (published) {
-            LogDetail()(OT_PRETTY_CLASS())(
-                ": Published should rename notification.")
-                .Flush();
+            LogDetail()()(": Published should rename notification.").Flush();
         } else {
-            LogError()(OT_PRETTY_CLASS())(
-                ": Error publishing should rename notification.")
+            LogError()()(": Error publishing should rename notification.")
                 .Flush();
         }
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("No reason to rename").Flush();
+        LogTrace()()("No reason to rename").Flush();
     }
 }
 
@@ -732,8 +708,7 @@ auto Pair::check_store_secret(otx::client::Issuer& issuer) const noexcept
                                  api::crypto::HaveHDKeys();
 
     if (needStoreSecret) {
-        LogDetail()(OT_PRETTY_CLASS())("Sending store secret peer request.")
-            .Flush();
+        LogDetail()()("Sending store secret peer request.").Flush();
         const auto [sent, requestID] =
             store_secret(issuer.LocalNymID(), issuer.IssuerID());
 
@@ -754,9 +729,7 @@ auto Pair::CheckIssuer(
 
         return AddIssuer(localNymID, contract->Signer()->ID(), "");
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Unit definition contract does not exist.")
-            .Flush();
+        LogError()()(": Unit definition contract does not exist.").Flush();
 
         return false;
     }
@@ -803,7 +776,7 @@ auto Pair::init() noexcept -> void
             const auto pIssuer =
                 api_.Wallet().Internal().Issuer(nymID, issuerID);
 
-            OT_ASSERT(pIssuer);
+            assert_false(nullptr == pIssuer);
 
             const auto& issuer = *pIssuer;
             state_.Add(lock, nymID, issuerID, issuer.Paired());
@@ -877,7 +850,7 @@ auto Pair::process_connection_info(
     const identifier::Nym& nymID,
     const contract::peer::reply::Connection& reply) const -> bool
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto& requestID = reply.InReferenceToRequest();
     const auto& replyID = reply.ID();
@@ -892,7 +865,7 @@ auto Pair::process_connection_info(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add reply.").Flush();
+        LogError()()("Failed to add reply.").Flush();
 
         return false;
     }
@@ -901,7 +874,7 @@ auto Pair::process_connection_info(
 auto Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
     const -> void
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     auto replies = api_.Wallet().PeerReplyIncoming(nymID);
 
@@ -911,33 +884,26 @@ auto Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
             nymID, replyID, otx::client::StorageBox::INCOMINGPEERREPLY);
 
         if (false == reply.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load peer reply ")(
-                it.first)(".")
-                .Flush();
+            LogError()()("Failed to load peer reply ")(it.first)(".").Flush();
 
             continue;
         }
 
         switch (reply.Type()) {
             case contract::peer::RequestType::Bailment: {
-                LogDetail()(OT_PRETTY_CLASS())("Received bailment reply.")
-                    .Flush();
+                LogDetail()()("Received bailment reply.").Flush();
                 process_request_bailment(lock, nymID, reply.asBailment());
             } break;
             case contract::peer::RequestType::OutBailment: {
-                LogDetail()(OT_PRETTY_CLASS())(": Received outbailment reply.")
-                    .Flush();
+                LogDetail()()(": Received outbailment reply.").Flush();
                 process_request_outbailment(lock, nymID, reply.asOutbailment());
             } break;
             case contract::peer::RequestType::ConnectionInfo: {
-                LogDetail()(OT_PRETTY_CLASS())(
-                    ": Received connection info reply.")
-                    .Flush();
+                LogDetail()()(": Received connection info reply.").Flush();
                 process_connection_info(lock, nymID, reply.asConnection());
             } break;
             case contract::peer::RequestType::StoreSecret: {
-                LogDetail()(OT_PRETTY_CLASS())(": Received store secret reply.")
-                    .Flush();
+                LogDetail()()(": Received store secret reply.").Flush();
                 process_store_secret(lock, nymID, reply.asStoreSecret());
             } break;
             case contract::peer::RequestType::Error:
@@ -954,7 +920,7 @@ auto Pair::process_peer_replies(const Lock& lock, const identifier::Nym& nymID)
 auto Pair::process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
     const -> void
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto requests = api_.Wallet().PeerRequestIncoming(nymID);
 
@@ -964,17 +930,14 @@ auto Pair::process_peer_requests(const Lock& lock, const identifier::Nym& nymID)
             nymID, requestID, otx::client::StorageBox::INCOMINGPEERREQUEST);
 
         if (false == request.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load peer request ")(
-                it.first)(".")
-                .Flush();
+            LogError()()("Failed to load peer request ")(it.first)(".").Flush();
 
             continue;
         }
 
         switch (request.Type()) {
             case contract::peer::RequestType::PendingBailment: {
-                LogError()(OT_PRETTY_CLASS())(
-                    ": Received pending bailment notification.")
+                LogError()()(": Received pending bailment notification.")
                     .Flush();
                 process_pending_bailment(
                     lock, nymID, request.asBailmentNotice());
@@ -999,7 +962,7 @@ auto Pair::process_pending_bailment(
     const identifier::Nym& nymID,
     const contract::peer::request::BailmentNotice& request) const -> bool
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto requestID = request.ID();
     const auto issuerNymID = request.Initiator();
@@ -1022,18 +985,14 @@ auto Pair::process_pending_bailment(
             issuer.SetUsed(
                 contract::peer::RequestType::Bailment, originalRequest, true);
         } else {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to set request as used on issuer.")
-                .Flush();
+            LogError()()("Failed to set request as used on issuer.").Flush();
         }
 
         auto [taskID, future] = api_.OTX().AcknowledgeStoreSecret(
             nymID, issuerNymID, requestID, true);
 
         if (0 == taskID) {
-            LogDetail()(OT_PRETTY_CLASS())(
-                "StoreSecret request already queued.")
-                .Flush();
+            LogDetail()()("StoreSecret request already queued.").Flush();
 
             return false;
         }
@@ -1053,7 +1012,7 @@ auto Pair::process_pending_bailment(
             return true;
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add request.").Flush();
+        LogError()()("Failed to add request.").Flush();
     }
 
     return false;
@@ -1064,7 +1023,7 @@ auto Pair::process_request_bailment(
     const identifier::Nym& nymID,
     const contract::peer::reply::Bailment& reply) const -> bool
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto requestID = reply.InReferenceToRequest();
     const auto replyID = reply.ID();
@@ -1079,7 +1038,7 @@ auto Pair::process_request_bailment(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add reply.").Flush();
+        LogError()()("Failed to add reply.").Flush();
 
         return false;
     }
@@ -1090,7 +1049,7 @@ auto Pair::process_request_outbailment(
     const identifier::Nym& nymID,
     const contract::peer::reply::Outbailment& reply) const -> bool
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto requestID = reply.InReferenceToRequest();
     const auto replyID = reply.ID();
@@ -1105,7 +1064,7 @@ auto Pair::process_request_outbailment(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add reply.").Flush();
+        LogError()()("Failed to add reply.").Flush();
 
         return false;
     }
@@ -1116,7 +1075,7 @@ auto Pair::process_store_secret(
     const identifier::Nym& nymID,
     const contract::peer::reply::StoreSecret& reply) const -> bool
 {
-    OT_ASSERT(CheckLock(lock, decision_lock_));
+    assert_true(CheckLock(lock, decision_lock_));
 
     const auto requestID = reply.InReferenceToRequest();
     const auto replyID = reply.ID();
@@ -1143,18 +1102,15 @@ auto Pair::process_store_secret(
         }());
 
         if (published) {
-            LogDetail()(OT_PRETTY_CLASS())(
-                ": Published store secret notification.")
-                .Flush();
+            LogDetail()()(": Published store secret notification.").Flush();
         } else {
-            LogError()(OT_PRETTY_CLASS())(
-                ": Error Publishing store secret notification.")
+            LogError()()(": Error Publishing store secret notification.")
                 .Flush();
         }
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to add reply.").Flush();
+        LogError()()("Failed to add reply.").Flush();
 
         return false;
     }
@@ -1197,9 +1153,7 @@ auto Pair::queue_unit_definition(
         api_.OTX().DownloadUnitDefinition(nymID, serverID, unitID);
 
     if (0 == taskID) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Failed to queue unit definition download")
-            .Flush();
+        LogError()()(": Failed to queue unit definition download").Flush();
 
         return;
     }
@@ -1208,11 +1162,10 @@ auto Pair::queue_unit_definition(
     const auto success = (otx::LastReplyStatus::MessageSuccess == result);
 
     if (success) {
-        LogDetail()(OT_PRETTY_CLASS())("Obtained unit definition ")(
-            unitID, api_.Crypto())
+        LogDetail()()("Obtained unit definition ")(unitID, api_.Crypto())
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())(": Failed to download unit definition ")(
+        LogError()()(": Failed to download unit definition ")(
             unitID, api_.Crypto())
             .Flush();
     }
@@ -1230,8 +1183,7 @@ auto Pair::register_account(
     try {
         api_.Wallet().Internal().UnitDefinition(unitID);
     } catch (...) {
-        LogTrace()(OT_PRETTY_CLASS())("Waiting for unit definition ")(
-            unitID, api_.Crypto())
+        LogTrace()()("Waiting for unit definition ")(unitID, api_.Crypto())
             .Flush();
         queue_unit_definition(nymID, serverID, unitID);
 
@@ -1246,7 +1198,7 @@ auto Pair::register_account(
     success = (otx::LastReplyStatus::MessageSuccess == result);
 
     if (success) {
-        OT_ASSERT(pReply);
+        assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
         accountID = api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
@@ -1258,18 +1210,18 @@ auto Pair::register_account(
 auto Pair::state_machine(const IssuerID& id) const -> void
 {
     const auto& [localNymID, issuerNymID] = id;
-    LogDetail()(OT_PRETTY_CLASS())("Local nym: ")(localNymID, api_.Crypto())(
-        " Issuer Nym: ")(issuerNymID, api_.Crypto())
+    LogDetail()()("Local nym: ")(localNymID, api_.Crypto())(" Issuer Nym: ")(
+        issuerNymID, api_.Crypto())
         .Flush();
     auto reason = api_.Factory().PasswordPrompt("Pairing state machine");
     auto it = state_.GetDetails(localNymID, issuerNymID);
 
-    OT_ASSERT(state_.end() != it);
+    assert_true(state_.end() != it);
 
     auto& [mutex, serverID, serverNymID, status, trusted, offered, registeredAccounts, accountDetails, pending, needRename] =
         it->second;
 
-    OT_ASSERT(mutex);
+    assert_false(nullptr == mutex);
 
     for (auto i = pending.begin(); i != pending.end();) {
         const auto& [task, future] = *i;
@@ -1279,12 +1231,9 @@ auto Pair::state_machine(const IssuerID& id) const -> void
             const auto result = future.get();
 
             if (otx::LastReplyStatus::MessageSuccess == result.first) {
-                LogTrace()(OT_PRETTY_CLASS())("Task ")(
-                    task)(" completed successfully.")
-                    .Flush();
+                LogTrace()()("Task ")(task)(" completed successfully.").Flush();
             } else {
-                LogError()(OT_PRETTY_CLASS())("Task ")(task)(" failed.")
-                    .Flush();
+                LogError()()("Task ")(task)(" failed.").Flush();
             }
 
             i = pending.erase(i);
@@ -1299,8 +1248,7 @@ auto Pair::state_machine(const IssuerID& id) const -> void
     const auto issuerNym = api_.Wallet().Nym(issuerNymID);
 
     if (false == bool(issuerNym)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Issuer nym not yet downloaded.")
-            .Flush();
+        LogVerbose()()("Issuer nym not yet downloaded.").Flush();
         pending.emplace_back(queue_nym_download(localNymID, issuerNymID));
         status = Status::Error;
 
@@ -1313,9 +1261,7 @@ auto Pair::state_machine(const IssuerID& id) const -> void
     serverID = issuerClaims.PreferredOTServer();
 
     if (serverID.empty()) {
-        LogError()(OT_PRETTY_CLASS())(
-            ": Issuer nym does not advertise a server.")
-            .Flush();
+        LogError()()(": Issuer nym does not advertise a server.").Flush();
         // Maybe there's a new version
         pending.emplace_back(queue_nym_download(localNymID, issuerNymID));
         status = Status::Error;
@@ -1334,17 +1280,14 @@ auto Pair::state_machine(const IssuerID& id) const -> void
 
     switch (status) {
         case Status::Error: {
-            LogDetail()(OT_PRETTY_CLASS())(
-                ": First pass through state machine.")
-                .Flush();
+            LogDetail()()(": First pass through state machine.").Flush();
             status = Status::Started;
 
             [[fallthrough]];
         }
         case Status::Started: {
             if (need_registration(localNymID, serverID)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    ": Local nym not registered on issuer's notary.")
+                LogError()()(": Local nym not registered on issuer's notary.")
                     .Flush();
 
                 try {
@@ -1356,9 +1299,7 @@ auto Pair::state_machine(const IssuerID& id) const -> void
                     pending.emplace_back(
                         queue_nym_registration(localNymID, serverID, trusted));
                 } catch (...) {
-                    LogError()(OT_PRETTY_CLASS())(
-                        ": Waiting on server contract.")
-                        .Flush();
+                    LogError()()(": Waiting on server contract.").Flush();
                     pending.emplace_back(
                         queue_server_contract(localNymID, serverID));
 
@@ -1375,8 +1316,7 @@ auto Pair::state_machine(const IssuerID& id) const -> void
         case Status::Registered: {
             PAIR_SHUTDOWN();
 
-            LogDetail()(OT_PRETTY_CLASS())(
-                ": Local nym is registered on issuer's notary.")
+            LogDetail()()(": Local nym is registered on issuer's notary.")
                 .Flush();
 
             if (serverNymID.empty()) {

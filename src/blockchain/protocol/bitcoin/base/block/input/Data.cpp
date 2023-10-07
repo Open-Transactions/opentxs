@@ -9,12 +9,10 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
@@ -68,9 +66,9 @@ auto Data::associate(const block::Output& in) noexcept -> bool
     previous_output_ = in;
     auto keys = previous_output_.Keys(get_allocator());
 
-    OT_ASSERT(0 < keys.size());
+    assert_true(0 < keys.size());
 
-    std::move(keys.begin(), keys.end(), std::inserter(keys_, keys_.end()));
+    std::ranges::move(keys, std::inserter(keys_, keys_.end()));
 
     return previous_output_.IsValid();
 }
@@ -78,13 +76,13 @@ auto Data::associate(const block::Output& in) noexcept -> bool
 auto Data::for_each_key(
     std::function<void(const crypto::Key&)> cb) const noexcept -> void
 {
-    std::for_each(std::begin(keys_), std::end(keys_), cb);
+    std::ranges::for_each(keys_, cb);
 }
 
 auto Data::Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&
 {
     if (false == pubkey_hashes_.has_value()) {
-        OT_ASSERT(cb);
+        assert_false(nullptr == cb);
 
         pubkey_hashes_.emplace(std::invoke(cb));
     }
@@ -94,7 +92,7 @@ auto Data::Hashes(std::function<PubkeyHashes()> cb) noexcept -> PubkeyHashes&
 
 auto Data::keys(Set<crypto::Key>& out) const noexcept -> void
 {
-    std::copy(keys_.begin(), keys_.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys_, std::inserter(out, out.end()));
 }
 
 auto Data::merge(
@@ -105,9 +103,7 @@ auto Data::merge(
 {
     try {
         const auto& previous = rhs.Spends();
-        log(OT_PRETTY_CLASS())("previous output for input ")(
-            index)(" instantiated")
-            .Flush();
+        log()("previous output for input ")(index)(" instantiated").Flush();
 
         if (previous_output_.IsValid()) {
             previous_output_.Internal().MergeMetadata(
@@ -116,24 +112,22 @@ auto Data::merge(
             previous_output_ = previous;
         }
     } catch (...) {
-        log(OT_PRETTY_CLASS())(
-            "failed to instantiate previous output for input ")(index)
+        log()("failed to instantiate previous output for input ")(index)
             .Flush();
     }
 
     if (previous_output_.IsValid()) {
         auto keys = previous_output_.Keys(get_allocator());
-        std::move(keys.begin(), keys.end(), std::inserter(keys_, keys_.end()));
+        std::ranges::move(keys, std::inserter(keys_, keys_.end()));
     }
 
     for (const auto& key : rhs.Keys(get_allocator())) {
         if (0u == keys_.count(key)) {
-            log(OT_PRETTY_CLASS())("adding key ")(print(key, crypto))(
-                " to input ")(index)
+            log()("adding key ")(print(key, crypto))(" to input ")(index)
                 .Flush();
         } else {
-            log(OT_PRETTY_CLASS())("input ")(
-                index)(" is already associated with ")(print(key, crypto))
+            log()("input ")(index)(" is already associated with ")(
+                print(key, crypto))
                 .Flush();
         }
     }
@@ -146,7 +140,7 @@ auto Data::net_balance_change(
     const Log& log) const noexcept -> opentxs::Amount
 {
     if (false == previous_output_.IsValid()) {
-        log(OT_PRETTY_CLASS())("previous output data for input ")(
+        log()("previous output data for input ")(
             index)(" is missing, possibly because the input is not known to "
                    "belong to any nym in this wallet")
             .Flush();
@@ -157,19 +151,16 @@ auto Data::net_balance_change(
     for (const auto& key : keys_) {
         if (crypto.Owner(key) == nym) {
             const auto value = -1 * previous_output_.Value();
-            log(OT_PRETTY_CLASS())("input ")(index)(" contributes ")(value)
-                .Flush();
+            log()("input ")(index)(" contributes ")(value).Flush();
 
             return value;
         } else {
-            log(OT_PRETTY_CLASS())("input ")(
-                index)(" belongs to a different nym")
-                .Flush();
+            log()("input ")(index)(" belongs to a different nym").Flush();
         }
     }
 
     if (0 == keys_.size()) {
-        log(OT_PRETTY_CLASS())("no keys are associated with input ")(
+        log()("no keys are associated with input ")(
             index)(" even though the previous output data is present")
             .Flush();
     }
@@ -189,7 +180,7 @@ auto Data::ScriptHash(std::function<std::optional<ElementHash>()> cb) noexcept
     -> std::optional<ElementHash>&
 {
     if (false == script_hash_.has_value()) {
-        OT_ASSERT(cb);
+        assert_false(nullptr == cb);
 
         script_hash_.emplace(std::invoke(cb));
     }

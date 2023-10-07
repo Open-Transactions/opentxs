@@ -34,7 +34,6 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -110,15 +109,15 @@ Server::Server(
     const auto bound = notification_socket_->Start(
         api_.Endpoints().Internal().PushNotification().data());
 
-    OT_ASSERT(bound);
+    assert_true(bound);
 }
 
 void Server::ActivateCron()
 {
     if (cron_->ActivateCron()) {
-        LogVerbose()(OT_PRETTY_CLASS())("Activate Cron. (STARTED)").Flush();
+        LogVerbose()()("Activate Cron. (STARTED)").Flush();
     } else {
-        LogConsole()(OT_PRETTY_CLASS())("Activate Cron. (FAILED)").Flush();
+        LogConsole()()("Activate Cron. (FAILED)").Flush();
     }
 }
 
@@ -198,8 +197,7 @@ void Server::CreateMainFile(bool& mainFileExists)
             api_, api_.DataFolder().string(), SEED_BACKUP_FILE, "", "", "");
 
         if (false == backup.empty()) {
-            LogError()(OT_PRETTY_CLASS())("Seed backup found. Restoring.")
-                .Flush();
+            LogError()()("Seed backup found. Restoring.").Flush();
             auto parsed = parse_seed_backup(backup);
             auto phrase = api_.Factory().SecretFromText(parsed.first);
             auto words = api_.Factory().SecretFromText(parsed.second);
@@ -211,11 +209,9 @@ void Server::CreateMainFile(bool& mainFileExists)
                 reason_);
 
             if (seed.empty()) {
-                LogError()(OT_PRETTY_CLASS())("Seed restoration failed.")
-                    .Flush();
+                LogError()()("Seed restoration failed.").Flush();
             } else {
-                LogError()(OT_PRETTY_CLASS())("Seed ")(seed, api_.Crypto())(
-                    " restored.")
+                LogError()()("Seed ")(seed, api_.Crypto())(" restored.")
                     .Flush();
             }
         }
@@ -234,12 +230,11 @@ void Server::CreateMainFile(bool& mainFileExists)
         api_.Wallet().Nym(nymParameters, identity::Type::server, reason_, name);
 
     if (false == bool(nym_server_)) {
-        LogError()(OT_PRETTY_CLASS())("Error: Failed to create server nym.")
-            .Flush();
-        OT_FAIL;
+        LogError()()("Error: Failed to create server nym.").Flush();
+        LogAbort()().Abort();
     }
 
-    if (!nym_server_->VerifyPseudonym()) { OT_FAIL; }
+    if (!nym_server_->VerifyPseudonym()) { LogAbort()().Abort(); }
 
     const auto& nymID = nym_server_->ID();
     using namespace std::literals;
@@ -377,8 +372,7 @@ void Server::CreateMainFile(bool& mainFileExists)
                 (inproc) ? std::max(2u, contract::Server::DefaultVersion)
                          : contract::Server::DefaultVersion);
         } else {
-            LogError()(OT_PRETTY_CLASS())("Existing contract found. Restoring.")
-                .Flush();
+            LogError()()("Existing contract found. Restoring.").Flush();
             const auto serialized = proto::StringToProto<proto::ServerContract>(
                 api_.Crypto(), existing);
 
@@ -391,36 +385,34 @@ void Server::CreateMainFile(bool& mainFileExists)
     AddressType type{};
 
     if (!contract->ConnectInfo(strHostname, nPort, type, type)) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Unable to retrieve connection info from this contract.")
+        LogConsole()()("Unable to retrieve connection info from this contract.")
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     strNotaryID = String::Factory(contract->ID(), api_.Crypto())->Get();
 
-    OT_ASSERT(nym_server_);
+    assert_false(nullptr == nym_server_);
 
     {
         auto nymData = api_.Wallet().mutable_Nym(nymID, reason_);
 
         if (false == nymData.SetCommonName(
                          contract->ID().asBase58(api_.Crypto()), reason_)) {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 
     nym_server_ = api_.Wallet().Nym(nymID);
 
-    OT_ASSERT(nym_server_);
+    assert_false(nullptr == nym_server_);
 
     auto proto = proto::ServerContract{};
     if (false == contract->Serialize(proto, true)) {
-        LogConsole()(OT_PRETTY_CLASS())("Failed to serialize server contract.")
-            .Flush();
+        LogConsole()()("Failed to serialize server contract.").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
     const auto signedContract = api_.Factory().Internal().Data(proto);
     auto ascContract = api_.Factory().Internal().Armored(signedContract);
@@ -456,7 +448,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         strBookended->Get(), strNotaryID, nymID.asBase58(API().Crypto()));
 
     if (false == config.Save()) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        LogAbort()()("failed to save config file").Abort();
     }
 }
 
@@ -466,8 +458,8 @@ void Server::Init(bool readOnly)
     const auto& config = api_.Config().Internal();
 
     if (!ConfigLoader::load(api_, config, WalletFilename())) {
-        LogError()(OT_PRETTY_CLASS())("Unable to Load Config File!").Flush();
-        OT_FAIL;
+        LogError()()("Unable to Load Config File!").Flush();
+        LogAbort()().Abort();
     }
 
     OTDB::InitDefaultStorage(OTDB_DEFAULT_STORAGE, OTDB_DEFAULT_PACKER);
@@ -485,22 +477,20 @@ void Server::Init(bool readOnly)
 
     if (false == mainFileExists) {
         if (readOnly) {
-            LogError()(OT_PRETTY_CLASS())("Error: Main file non-existent (")(
+            LogError()()("Error: Main file non-existent (")(
                 WalletFilename().Get())(
                 "). Plus, unable to create, since read-only flag is set.")
                 .Flush();
-            OT_FAIL;
+            LogAbort()().Abort();
         } else {
             CreateMainFile(mainFileExists);
         }
     }
 
-    OT_ASSERT(mainFileExists);
+    assert_true(mainFileExists);
 
     if (false == main_file_.LoadMainFile(readOnly)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error in Loading Main File, re-creating.")
-            .Flush();
+        LogError()()("Error in Loading Main File, re-creating.").Flush();
         OTDB::EraseValueByKey(
             api_,
             api_.DataFolder().string(),
@@ -510,9 +500,9 @@ void Server::Init(bool readOnly)
             "");
         CreateMainFile(mainFileExists);
 
-        OT_ASSERT(mainFileExists);
+        assert_true(mainFileExists);
 
-        if (!main_file_.LoadMainFile(readOnly)) { OT_FAIL; }
+        if (!main_file_.LoadMainFile(readOnly)) { LogAbort()().Abort(); }
     }
 
     auto password = api_.Crypto().Encode().InternalEncode().Nonce(16);
@@ -526,7 +516,7 @@ void Server::Init(bool readOnly)
         ignored);
 
     if (false == config.Save()) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        LogAbort()()("failed to save config file").Abort();
     }
 
     // With the Server's private key loaded, and the latest transaction number
@@ -539,8 +529,7 @@ auto Server::LoadServerNym(const identifier::Nym& nymID) -> bool
     auto nym = api_.Wallet().Nym(nymID);
 
     if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Server nym ")(nymID, api_.Crypto())(
-            " does not exist.")
+        LogError()()("Server nym ")(nymID, api_.Crypto())(" does not exist.")
             .Flush();
 
         return false;
@@ -548,7 +537,7 @@ auto Server::LoadServerNym(const identifier::Nym& nymID) -> bool
 
     nym_server_ = nym;
 
-    OT_ASSERT(nym_server_);
+    assert_false(nullptr == nym_server_);
 
     return true;
 }
@@ -565,7 +554,7 @@ auto Server::SendInstrumentToNym(
     const OTPayment& pPayment,
     const char* szCommand) -> bool
 {
-    OT_ASSERT(pPayment.IsValid());
+    assert_true(pPayment.IsValid());
 
     // If a payment was passed in (for us to use it to construct pMsg, which is
     // nullptr in the case where payment isn't nullptr)
@@ -574,8 +563,7 @@ auto Server::SendInstrumentToNym(
     const bool bGotPaymentContents = pPayment.GetPaymentContents(strPayment);
 
     if (!bGotPaymentContents) {
-        LogError()(OT_PRETTY_CLASS())("Error GetPaymentContents Failed!")
-            .Flush();
+        LogError()()("Error GetPaymentContents Failed!").Flush();
     }
 
     const bool bDropped = DropMessageToNymbox(
@@ -685,21 +673,20 @@ auto Server::DropMessageToNymbox(
     const String& pstrMessage,
     const char* szCommand) -> bool  // If you pass something here, it will
 {                                   // replace pMsg->command_ below.
-    OT_ASSERT_MSG(
-        !((nullptr == pMsg) && (pstrMessage.empty())),
-        "pMsg and pstrMessage -- these can't BOTH be nullptr.\n");
+    assert_false(
+        (nullptr == pMsg) && (pstrMessage.empty()),
+        "pMsg and pstrMessage -- these can't BOTH be nullptr.");
     // ^^^ Must provde one or the other.
-    OT_ASSERT_MSG(
-        !((nullptr != pMsg) && (!pstrMessage.empty())),
-        "pMsg and pstrMessage -- these can't BOTH be not-nullptr.\n");
+    assert_false(
+        (nullptr != pMsg) && (!pstrMessage.empty()),
+        "pMsg and pstrMessage -- these can't BOTH be not-nullptr.");
     // ^^^ Can't provide both.
     std::int64_t lTransNum{0};
     const bool bGotNextTransNum =
         transactor_.issueNextTransactionNumber(lTransNum);
 
     if (!bGotNextTransNum) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error: Failed trying to get next transaction number.")
+        LogError()()("Error: Failed trying to get next transaction number.")
             .Flush();
         return false;
     }
@@ -709,7 +696,7 @@ auto Server::DropMessageToNymbox(
         case transactionType::instrumentNotice:
             break;
         default:
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Unexpected transactionType passed here (Expected message "
                 "or instrumentNotice).")
                 .Flush();
@@ -773,7 +760,7 @@ auto Server::DropMessageToNymbox(
             theMsgAngel->SignContract(*nym_server_, reason_);
             theMsgAngel->SaveContract();
         } else {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Failed trying to seal envelope containing theMsgAngel "
                 "(or while grabbing the base64-encoded result).")
                 .Flush();
@@ -814,10 +801,7 @@ auto Server::DropMessageToNymbox(
         auto pTransaction{api_.Factory().InternalSession().Transaction(
             *theLedger, theType, originType::not_applicable, lTransNum)};
 
-        if (false != bool(pTransaction))  // The above has an OT_ASSERT within,
-                                          // but I just like to check my
-                                          // pointers.
-        {
+        if (false != bool(pTransaction)) {
             // NOTE: todo: SHOULD this be "in reference to" itself? The reason,
             // I assume we are doing this
             // is because there is a reference STRING so "therefore" there must
@@ -870,7 +854,7 @@ auto Server::DropMessageToNymbox(
         {
             const auto strRecipientNymID =
                 String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Failed while trying to generate transaction in order to "
                 "add a message to Nymbox: ")(strRecipientNymID->Get())(".")
                 .Flush();
@@ -878,8 +862,8 @@ auto Server::DropMessageToNymbox(
     } else {
         const auto strRecipientNymID =
             String::Factory(RECIPIENT_NYM_ID, api_.Crypto());
-        LogError()(OT_PRETTY_CLASS())("Failed while trying to load or verify "
-                                      "Nymbox: ")(strRecipientNymID->Get())(".")
+        LogError()()("Failed while trying to load or verify "
+                     "Nymbox: ")(strRecipientNymID->Get())(".")
             .Flush();
     }
 
@@ -897,7 +881,7 @@ auto Server::GetConnectInfo(
     const auto haveEndpoints =
         contract->ConnectInfo(contractHostname, contractPort, type, type);
 
-    OT_ASSERT(haveEndpoints);
+    assert_true(haveEndpoints);
 
     bool notUsed = false;
     std::int64_t port = 0;
@@ -922,7 +906,7 @@ auto Server::GetConnectInfo(
 
         return (haveIP && havePort);
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to save config file").Flush();
+        LogError()()("failed to save config file").Flush();
 
         return false;
     }
@@ -945,7 +929,7 @@ auto Server::nymbox_push(
 
 auto Server::SetNotaryID(const identifier::Notary& id) noexcept -> void
 {
-    OT_ASSERT(false == id.empty());
+    assert_false(id.empty());
 
     notary_id_.set_value(id);
 }

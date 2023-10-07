@@ -9,9 +9,9 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/blockchain/Blockchain.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -60,7 +60,7 @@ auto BlockchainStatisticsItem::reindex(
     const BlockchainStatisticsSortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    OT_ASSERT(name_ == key);
+    assert_true(name_ == key);
 
     const auto header = extract_custom<blockchain::block::Height>(custom, 0);
     const auto filter = extract_custom<blockchain::block::Height>(custom, 1);

@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <mutex>
 #include <queue>
@@ -18,7 +19,6 @@
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/otx/common/Message.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -107,28 +107,24 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             api_.Storage().Internal().Load(nym, id, box, raw, alias, silent);
 
         if (false == loaded) {
-            LogError()(OT_PRETTY_CLASS())("Failed to load message ")(
-                id, api_.Crypto())
-                .Flush();
+            LogError()()("Failed to load message ")(id, api_.Crypto()).Flush();
 
             return output;
         }
 
         if (raw.empty()) {
-            LogError()(OT_PRETTY_CLASS())("Empty message ")(id, api_.Crypto())
-                .Flush();
+            LogError()()("Empty message ")(id, api_.Crypto()).Flush();
 
             return output;
         }
 
         output = api_.Factory().InternalSession().Message();
 
-        OT_ASSERT(output);
+        assert_false(nullptr == output);
 
         if (false ==
             output->LoadContractFromString(String::Factory(raw.c_str()))) {
-            LogError()(OT_PRETTY_CLASS())("Failed to deserialize message ")(
-                id, api_.Crypto())
+            LogError()()("Failed to deserialize message ")(id, api_.Crypto())
                 .Flush();
 
             output.reset();
@@ -138,7 +134,7 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
     }
     auto ProcessThreadPool(Task* pTask) const noexcept -> void
     {
-        OT_ASSERT(nullptr != pTask);
+        assert_false(nullptr == pTask);
 
         auto& task = *pTask;
         auto message = UnallocatedCString{};
@@ -159,7 +155,7 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             // the task
             const auto cb{task.done_};
 
-            OT_ASSERT(cb);
+            assert_false(nullptr == cb);
 
             cb();
         }};
@@ -234,13 +230,13 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             [this, key] { finish_task(key); },
             jobs_);
 
-        OT_ASSERT(newTask);
+        assert_true(newTask);
 
         auto& task = tIt->second;
         const auto [fIt, newFuture] =
             results_.try_emplace(key, task.promise_.get_future());
 
-        OT_ASSERT(newFuture);
+        assert_true(newFuture);
 
         const auto& future = fIt->second;
         fifo_.push(std::move(key));
@@ -346,7 +342,7 @@ MailCache::MailCache(
     const opentxs::network::zeromq::socket::Publish& messageLoaded) noexcept
     : imp_(std::make_shared<Imp>(api, messageLoaded))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto MailCache::CacheText(

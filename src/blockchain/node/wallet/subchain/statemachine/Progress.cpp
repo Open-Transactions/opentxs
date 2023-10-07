@@ -5,8 +5,6 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Progress.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -22,7 +20,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -44,7 +41,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Progress::Imp::Imp(
-    const boost::shared_ptr<const SubchainStateData>& parent,
+    const std::shared_ptr<const SubchainStateData>& parent,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Job(LogTrace(),
@@ -78,20 +75,20 @@ auto Progress::Imp::do_process_update(
     auto dirty = Set<block::Position>{alloc.work_};
     decode(api_, msg, clean, dirty);
 
-    OT_ASSERT(0u == dirty.size());
-    OT_ASSERT(0u < clean.size());
+    assert_true(0u == dirty.size());
+    assert_true(0u < clean.size());
 
     const auto& best = clean.crbegin()->second;
-    log(OT_PRETTY_CLASS())(name_)(" received update: ")(best).Flush();
+    log()(name_)(" received update: ")(best).Flush();
     auto handle = parent_.progress_position_.lock();
     auto& last = *handle;
 
     if ((false == last.has_value()) || (last.value() != best)) {
         parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
-        log(OT_PRETTY_CLASS())(name_)(" progress saved to database").Flush();
+        log()(name_)(" progress saved to database").Flush();
         last = best;
         notify(best);
-        to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
+        to_scan_.SendDeferred(MakeWork(Work::statemachine));
     }
 
     parent_.match_cache_.lock()->Forget(best);
@@ -130,26 +127,23 @@ auto Progress::Imp::process_do_rescan(Message&& in) noexcept -> void
     parent_.db_.SubchainSetLastScanned(log_, parent_.db_key_, best, alloc);
     parent_.RescanFinished();
     notify(best);
-    to_scan_.SendDeferred(MakeWork(Work::statemachine), __FILE__, __LINE__);
+    to_scan_.SendDeferred(MakeWork(Work::statemachine));
 }
 }  // namespace opentxs::blockchain::node::wallet
 
 namespace opentxs::blockchain::node::wallet
 {
 Progress::Progress(
-    const boost::shared_ptr<const SubchainStateData>& parent) noexcept
+    const std::shared_ptr<const SubchainStateData>& parent) noexcept
     : imp_([&] {
         const auto& asio = parent->api_.Network().ZeroMQ().Internal();
         const auto batchID = asio.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{asio.Alloc(batchID)}, parent, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Progress::Init() noexcept -> void

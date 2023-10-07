@@ -13,10 +13,8 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <iterator>
 #include <optional>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/input/Imp.hpp"
@@ -119,10 +117,8 @@ auto BitcoinTransactionInput(
 
         auto keys = Set<blockchain::crypto::Key>{alloc.result_};
         keys.clear();
-        std::for_each(
-            std::begin(outputKeys), std::end(outputKeys), [&](const auto& key) {
-                keys.emplace(key);
-            });
+        std::ranges::for_each(
+            outputKeys, [&](const auto& key) { keys.emplace(key); });
 
         return pmr::construct<ReturnType>(
             alloc.result_,
@@ -135,7 +131,7 @@ auto BitcoinTransactionInput(
             prevOut,
             std::move(keys));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -194,7 +190,7 @@ auto BitcoinTransactionInput(
                 outpoint.size() + cs.Total() + sequence.size());
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -288,7 +284,7 @@ auto BitcoinTransactionInput(
                 std::move(spends));
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

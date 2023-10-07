@@ -7,8 +7,8 @@
 
 #include "blockchain/database/wallet/SubchainPrivate.hpp"
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -18,7 +18,7 @@ SubchainData::SubchainData(
     const blockchain::cfilter::Type filter) noexcept
     : imp_(std::make_shared<SubchainPrivate>(api, lmdb, filter))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 
     imp_->Init();
 }

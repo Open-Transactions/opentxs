@@ -5,11 +5,10 @@
 
 #include "network/blockchain/otdht/Actor.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
 #include <chrono>
 #include <compare>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -30,7 +29,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
 #include "network/blockchain/otdht/Server.hpp"
@@ -180,8 +178,7 @@ auto OTDHT::Actor::add_peers(Set<PeerID>&& peers) noexcept -> void
         const auto [endpoint, added] = known_peers_.emplace(id);
 
         if (added) {
-            log(OT_PRETTY_CLASS())(name_)(": discovered new peer ")(*endpoint)
-                .Flush();
+            log()(name_)(": discovered new peer ")(*endpoint).Flush();
         }
     }
 }
@@ -214,7 +211,7 @@ auto OTDHT::Actor::check_peers() noexcept -> bool
 auto OTDHT::Actor::check_request_timer() noexcept -> void
 {
     if (false == have_outstanding_request()) {
-        log_(OT_PRETTY_CLASS())(name_)(": no outstanding request").Flush();
+        log_()(name_)(": no outstanding request").Flush();
 
         return;
     }
@@ -222,7 +219,7 @@ auto OTDHT::Actor::check_request_timer() noexcept -> void
     const auto& [time, peer] = *last_request_;
 
     if ((sClock::now() - time) > request_timeout_) {
-        log_(OT_PRETTY_CLASS())(name_)(": request timeout").Flush();
+        log_()(name_)(": request timeout").Flush();
         finish_request(false);
     }
 }
@@ -248,17 +245,17 @@ auto OTDHT::Actor::choose_peer(
             map.emplace(range, id);
         }
 
-        OT_ASSERT(map.size() == count);
+        assert_true(map.size() == count);
 
         auto dist = std::uniform_int_distribution<Weight>{0_z, range - 1_z};
 
         const auto i = map.upper_bound(dist(rand_));
 
-        OT_ASSERT(map.end() != i);
+        assert_true(map.end() != i);
 
         return i->second;
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -289,40 +286,34 @@ auto OTDHT::Actor::Factory(
     network::zeromq::BatchID batchID) noexcept -> void
 {
     const auto& zmq = api->Network().ZeroMQ().Internal();
-    auto actor = [&]() -> boost::shared_ptr<Actor> {
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-
+    auto actor = [&]() -> std::shared_ptr<Actor> {
         switch (node->Internal().GetConfig().profile_) {
             case BlockchainProfile::mobile:
             case BlockchainProfile::desktop: {
                 using Type = blockchain::otdht::Client;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             case BlockchainProfile::desktop_native: {
                 using Type = Actor;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             case BlockchainProfile::server: {
                 using Type = blockchain::otdht::Server;
 
-                return boost::allocate_shared<Type>(
+                return std::allocate_shared<Type>(
                     alloc::PMR<Type>{zmq.Alloc(batchID)}, api, node, batchID);
             }
             default: {
-                LogAbort()(OT_PRETTY_STATIC(OTDHT::Actor))(
-                    "invalid profile type")
-                    .Abort();
+                LogAbort()()("invalid profile type").Abort();
             }
         }
     }();
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }
@@ -336,18 +327,18 @@ auto OTDHT::Actor::filter_peers(
     out.clear();
 
     for (const auto& [id, peer] : peers_) {
-        OT_ASSERT(false == id.empty());
+        assert_false(id.empty());
 
         if (PeerData::Type::incoming == peer.type_) { continue; }
 
         if (peer.position_.IsReplacedBy(target)) {
             const auto& val = out.emplace_back(id);
 
-            OT_ASSERT(false == val.empty());
+            assert_false(val.empty());
         }
     }
 
-    log(OT_PRETTY_CLASS())(name_)(": ")(out.size())(" of ")(peers_.size())(
+    log()(name_)(": ")(out.size())(" of ")(peers_.size())(
         " connected peers report chain data better than local position ")(
         target)
         .Flush();
@@ -364,17 +355,16 @@ auto OTDHT::Actor::finish_request(PeerID peer) noexcept -> void
 
 auto OTDHT::Actor::finish_request(bool success) noexcept -> void
 {
-    OT_ASSERT(have_outstanding_request());
+    assert_true(have_outstanding_request());
 
     const auto& log = log_;
 
     try {
         const auto& [start, id] = *last_request_;
-        // TODO c++20
-        const auto weight = [&](const auto& starttime) {
+        const auto weight = [&]() {
             if (success) {
                 const auto elapsed = std::chrono::duration_cast<ScoreInterval>(
-                    sClock::now() - starttime);
+                    sClock::now() - start);
                 const auto remaining =
                     std::chrono::duration_cast<ScoreInterval>(
                         request_timeout_ - elapsed);
@@ -385,14 +375,12 @@ auto OTDHT::Actor::finish_request(bool success) noexcept -> void
 
                 return min_weight_;
             }
-        }(start);
+        }();
         auto& peer = peers_.at(id);
         add_contribution(peer.samples_, peer.weight_, weight);
-        log(OT_PRETTY_CLASS())(name_)(": weight for ")(id)(" updated to ")(
-            peer.weight_)
-            .Flush();
+        log()(name_)(": weight for ")(id)(" updated to ")(peer.weight_).Flush();
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 
     last_request_.reset();
@@ -403,7 +391,7 @@ auto OTDHT::Actor::get_peer(const Message& message) noexcept -> PeerID
 {
     auto envelope = message.Envelope();
 
-    OT_ASSERT(envelope.IsValid());
+    assert_true(envelope.IsValid());
 
     return PeerID{envelope.get()[0].Bytes(), get_allocator()};
 }
@@ -493,12 +481,11 @@ auto OTDHT::Actor::pipeline_other(const Work work, Message&& msg) noexcept
         case Work::response:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -536,12 +523,11 @@ auto OTDHT::Actor::pipeline_router(
         case Work::init:
         case Work::cfilter:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -553,30 +539,25 @@ auto OTDHT::Actor::process_cfilter(Message&& msg) noexcept -> void
     const auto& log = log_;
     const auto body = msg.Payload();
 
-    if (3 >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
-    }
+    if (3 >= body.size()) { LogAbort()()(name_)(": invalid message").Abort(); }
 
     const auto type = body[1].as<opentxs::blockchain::cfilter::Type>();
 
     if (filter_type_ != type) {
-        log(OT_PRETTY_CLASS())(name_)(": ignoring update for filter type ")(
-            print(type))
-            .Flush();
+        log()(name_)(": ignoring update for filter type ")(print(type)).Flush();
 
         return;
     }
 
     auto position = opentxs::blockchain::block::Position{
         body[2].as<opentxs::blockchain::block::Height>(), body[3].Bytes()};
-    log(OT_PRETTY_CLASS())(name_)(": updated oracle position to ")(position)
-        .Flush();
+    log()(name_)(": updated oracle position to ")(position).Flush();
     update_oracle_position(std::move(position));
 }
 
 auto OTDHT::Actor::process_job_processed(Message&& msg) noexcept -> void
 {
-    LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+    LogAbort()()(name_)(": invalid message").Abort();
 }
 
 auto OTDHT::Actor::process_checksum_failure(Message&& msg) noexcept -> void {}
@@ -586,23 +567,15 @@ auto OTDHT::Actor::process_peer_list(Message&& msg) noexcept -> void
     auto newPeers = get_peers(msg.Payload(), 1_z);
     add_peers([&] {
         auto out = Set<PeerID>{get_allocator()};
-        std::set_difference(
-            newPeers.begin(),
-            newPeers.end(),
-            known_peers_.begin(),
-            known_peers_.end(),
-            std::inserter(out, out.end()));
+        std::ranges::set_difference(
+            newPeers, known_peers_, std::inserter(out, out.end()));
 
         return out;
     }());
     remove_peers([&] {
         auto out = Set<PeerID>{get_allocator()};
-        std::set_difference(
-            known_peers_.begin(),
-            known_peers_.end(),
-            newPeers.begin(),
-            newPeers.end(),
-            std::inserter(out, out.end()));
+        std::ranges::set_difference(
+            known_peers_, newPeers, std::inserter(out, out.end()));
 
         return out;
     }());
@@ -615,7 +588,7 @@ auto OTDHT::Actor::process_pushtx_external(
 {
     const auto pBase = api_.Factory().BlockchainSyncMessage(msg);
 
-    OT_ASSERT(pBase);
+    assert_false(nullptr == pBase);
 
     const auto& base = *pBase;
     const auto& pushtx = base.asPushTransaction();
@@ -632,36 +605,29 @@ auto OTDHT::Actor::process_pushtx_external(
 
         success = node_.Internal().BroadcastTransaction(tx);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         success = false;
     }
 
-    to_dht().SendExternal(
-        [&] {
-            auto out = zeromq::reply_to_message(std::move(msg));
-            const auto reply = factory::BlockchainSyncPushTransactionReply(
-                chain, pushtx.ID(), success);
-            reply.Serialize(out);
+    to_dht().SendExternal([&] {
+        auto out = zeromq::reply_to_message(std::move(msg));
+        const auto reply = factory::BlockchainSyncPushTransactionReply(
+            chain, pushtx.ID(), success);
+        reply.Serialize(out);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
-    // TODO c++20 capture structured binding
     for (const auto& [peerid, _] : peers_) {
-        to_dht().SendDeferred(
-            [&](const auto& id) {
-                auto out = make_envelope(id);
-                out.MoveFrames(msg.Payload());
+        to_dht().SendDeferred([&]() {
+            auto out = make_envelope(peerid);
+            out.MoveFrames(msg.Payload());
 
-                return out;
-            }(peerid),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     }
 }
 
@@ -676,36 +642,31 @@ auto OTDHT::Actor::process_registration_peer(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (1_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     const auto& log = log_;
     const auto peer = get_peer(msg);
-    log(OT_PRETTY_CLASS())(name_)(": received registration message from peer ")(
-        peer)
-        .Flush();
+    log()(name_)(": received registration message from peer ")(peer).Flush();
     known_peers_.emplace(peer);
 
     if (auto i = peers_.find(peer); peers_.end() == i) {
         auto [j, added] =
             peers_.try_emplace(peer, body[1].as<PeerData::Type>());
 
-        OT_ASSERT(added);
+        assert_true(added);
     } else {
 
         i->second.position_ = {};
     }
 
     using enum network::otdht::PeerJob;
-    to_dht().SendDeferred(
-        [&] {
-            auto out = tagged_reply_to_message(msg, registration);
-            out.AddFrame(chain_);
+    to_dht().SendDeferred([&] {
+        auto out = tagged_reply_to_message(msg, registration);
+        out.AddFrame(chain_);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto OTDHT::Actor::process_response_peer(Message&& msg) noexcept -> void
@@ -723,7 +684,7 @@ auto OTDHT::Actor::process_response_peer(Message&& msg) noexcept -> void
         switch (type) {
             case Type::pushtx_reply: {
                 const auto& reply = base->asPushTransactionReply();
-                log_(OT_PRETTY_CLASS())(name_)(": transaction ")
+                log_()(name_)(": transaction ")
                     .asHex(reply.ID())(" broadcast ")(
                         reply.Success() ? "successfully" : "unsuccessfully")
                     .Flush();
@@ -748,7 +709,7 @@ auto OTDHT::Actor::process_response_peer(Message&& msg) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
     }
 }
 
@@ -757,7 +718,7 @@ auto OTDHT::Actor::remove_peers(Set<PeerID>&& peers) noexcept -> void
     const auto& log = log_;
 
     for (const auto& id : peers) {
-        log(OT_PRETTY_CLASS())(name_)(": removing stale peer ")(id).Flush();
+        log()(name_)(": removing stale peer ")(id).Flush();
         known_peers_.erase(id);
         peers_.erase(id);
     }
@@ -784,7 +745,7 @@ auto OTDHT::Actor::send_registration() noexcept -> void
 
         for (const auto& endpoint : get_peers()) {
 
-            OT_ASSERT(false == endpoint.empty());
+            assert_false(endpoint.empty());
 
             out.AddFrame(endpoint);
         }
@@ -800,13 +761,11 @@ auto OTDHT::Actor::send_request(
     const auto peer = choose_peer(best);
 
     if (peer.has_value()) {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": requesting sync data starting from block ")(best.height_)(
-            " from peer (") (*peer)(")")
+        log()(name_)(": requesting sync data starting from block ")(
+            best.height_)(" from peer (") (*peer)(")")
             .Flush();
     } else {
-        log(OT_PRETTY_CLASS())(name_)(
-            ": no known peers with positions higher than ")(best)
+        log()(name_)(": no known peers with positions higher than ")(best)
             .Flush();
 
         return;
@@ -818,17 +777,14 @@ auto OTDHT::Actor::send_request(
 
         return out;
     }());
-    to_dht().SendDeferred(
-        [&] {
-            auto out = make_envelope(*peer);
-            const auto rc = message.Serialize(out);
+    to_dht().SendDeferred([&] {
+        auto out = make_envelope(*peer);
+        const auto rc = message.Serialize(out);
 
-            OT_ASSERT(rc);
+        assert_true(rc);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
     last_request_ = std::make_pair(sClock::now(), *peer);
     reset_request_timer();
 }
@@ -837,18 +793,14 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
 {
     for (auto& [peerid, peer] : peers_) {
         if (PeerData::Type::incoming == peer.type_) {
-            // TODO c++20
-            to_dht().SendDeferred(
-                [&](const auto& id) {
-                    auto out = make_envelope(id);
-                    auto body = msg.Payload();
+            to_dht().SendDeferred([&]() {
+                auto out = make_envelope(peerid);
+                auto body = msg.Payload();
 
-                    for (auto& frame : body) { out.AddFrame(std::move(frame)); }
+                for (auto& frame : body) { out.AddFrame(std::move(frame)); }
 
-                    return out;
-                }(peerid),
-                __FILE__,
-                __LINE__);
+                return out;
+            }());
         }
     }
 }
@@ -867,7 +819,7 @@ auto OTDHT::Actor::update_peer_position(
     try {
         peers_.at(peer).position_ = std::move(position);
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 

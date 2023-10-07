@@ -21,7 +21,6 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Category.hpp"
@@ -98,7 +97,7 @@ auto ProposalsPrivate::Add(
 
         return data.pending_.Add(id, std::move(promise));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -143,7 +142,7 @@ auto ProposalsPrivate::get_builder(Data& data) const noexcept -> Builder
         case unknown_category:
         case balance_based:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported chain").Flush();
+            LogError()()("Unsupported chain").Flush();
 
             return {};
         }
@@ -238,7 +237,7 @@ auto ProposalsPrivate::send(Data& data) noexcept -> void
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return;
     }

@@ -16,7 +16,6 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bloom/Filter.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -48,7 +47,7 @@ auto BloomFilter(const api::Session& api, const Data& serialized)
     blockchain::internal::SerializedBloomFilter raw{};
 
     if (sizeof(raw) > serialized.size()) {
-        LogError()("opentxs::factory::")(__func__)(": Input too short").Flush();
+        LogError()()("Input too short").Flush();
 
         return nullptr;
     }
@@ -158,7 +157,10 @@ auto Filter::AddElement(const Data& in) noexcept -> void
 auto Filter::hash(const Data& input, std::size_t hash_index) const noexcept
     -> std::uint32_t
 {
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= hash_index);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+    assert_true(std::numeric_limits<std::uint32_t>::max() >= hash_index);
+#pragma GCC diagnostic pop
 
     auto seed = seed_ * static_cast<std::uint32_t>(hash_index);
     seed += tweak_;
@@ -196,7 +198,7 @@ auto Filter::Serialize(Writer&& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

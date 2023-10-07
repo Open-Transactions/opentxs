@@ -9,7 +9,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -17,6 +16,7 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/key/HD.hpp"             // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
@@ -197,7 +197,7 @@ auto operator<=>(const PaymentCode& lhs, const PaymentCode& rhs) noexcept
 PaymentCode::PaymentCode(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 PaymentCode::PaymentCode() noexcept
@@ -220,7 +220,7 @@ auto PaymentCode::operator=(const PaymentCode& rhs) noexcept -> PaymentCode&
 {
     auto temp = std::unique_ptr<Imp>(imp_);
 
-    OT_ASSERT(temp);
+    assert_false(nullptr == temp);
 
     imp_ = rhs.imp_->clone();
 

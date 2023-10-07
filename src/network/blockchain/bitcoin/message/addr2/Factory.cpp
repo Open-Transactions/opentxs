@@ -35,15 +35,12 @@ auto BitcoinP2PAddr2(
                 auto vec = ReturnType::AddressVector{alloc};
                 vec.reserve(addresses.size());
                 vec.clear();
-                std::move(
-                    addresses.begin(),
-                    addresses.end(),
-                    std::back_inserter(vec));
+                std::ranges::move(addresses, std::back_inserter(vec));
 
                 return vec;
             }());
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

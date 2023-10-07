@@ -8,9 +8,7 @@
 #include <BlockchainTransactionOutput.pb.h>
 #include <BlockchainWalletKey.pb.h>
 #include <algorithm>
-#include <iterator>
 #include <stdexcept>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/output/Imp.hpp"
@@ -19,7 +17,6 @@
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -58,9 +55,8 @@ auto BitcoinTransactionOutput(
     try {
         auto keySet = Set<blockchain::crypto::Key>{alloc.result_};
         keySet.clear();
-        std::for_each(std::begin(keys), std::end(keys), [&](const auto& key) {
-            keySet.emplace(key);
-        });
+        std::ranges::for_each(
+            keys, [&](const auto& key) { keySet.emplace(key); });
 
         return pmr::construct<ReturnType>(
             alloc.result_,
@@ -72,7 +68,7 @@ auto BitcoinTransactionOutput(
             ReturnType::default_version_,
             std::move(cashtoken));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -105,7 +101,7 @@ auto BitcoinTransactionOutput(
             ReturnType::default_version_,
             std::move(cashtoken));
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }
@@ -145,13 +141,13 @@ auto BitcoinTransactionOutput(
                 key.index()};
 
             if (blockchain::crypto::Subchain::Outgoing == subchain) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": invalid key detected in transaction")
-                    .Flush();
+                LogError()()("invalid key detected in transaction").Flush();
                 auto sender = crypto.SenderContact(keyid);
                 auto recipient = crypto.RecipientContact(keyid);
 
-                if (sender.empty() || recipient.empty()) { OT_FAIL; }
+                if (sender.empty() || recipient.empty()) {
+                    LogAbort()().Abort();
+                }
 
                 corrections.emplace_back(
                     std::move(sender), std::move(recipient));
@@ -223,7 +219,7 @@ auto BitcoinTransactionOutput(
 
         return out;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc.result_);
     }

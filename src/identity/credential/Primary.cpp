@@ -28,7 +28,6 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -62,9 +61,7 @@ auto Factory::PrimaryCredential(
 
         return new ReturnType(api, parent, source, parameters, version, reason);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Failed to create credential: ")(e.what())
-            .Flush();
+        LogError()()("Failed to create credential: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -83,9 +80,7 @@ auto Factory::PrimaryCredential(
 
         return new ReturnType(api, parent, source, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Failed to deserialize credential: ")(e.what())
-            .Flush();
+        LogError()()("Failed to deserialize credential: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -164,7 +159,7 @@ auto Primary::Path(proto::HDPath& output) const -> bool
 
         return found;
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("No private key.").Flush();
+        LogError()()("No private key.").Flush();
 
         return false;
     }
@@ -182,7 +177,7 @@ auto Primary::serialize(
 {
     auto output = Key::serialize(asPrivate, asSigned);
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     auto& serialized = *output;
     serialized.set_role(
@@ -207,7 +202,7 @@ void Primary::sign(
     if (proto::SOURCEPROOFTYPE_SELF_SIGNATURE != source_proof_.type()) {
         auto sig = std::make_shared<proto::Signature>();
 
-        OT_ASSERT(sig);
+        assert_false(nullptr == sig);
 
         if (false == source_.Internal().Sign(*this, *sig, reason)) {
             throw std::runtime_error("Failed to obtain source signature");
@@ -274,7 +269,7 @@ auto Primary::Verify(
             opentxs::translate(crypto::asymmetric::Mode::Public),
             opentxs::translate(role),
             false)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid credential syntax.").Flush();
+        LogError()()("Invalid credential syntax.").Flush();
 
         return false;
     }
@@ -282,7 +277,7 @@ auto Primary::Verify(
     bool sameMaster = (ID() == masterID);
 
     if (!sameMaster) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Credential does not designate this credential as its master.")
             .Flush();
 
@@ -319,8 +314,7 @@ auto Primary::verify_against_source() const -> bool
     }
 
     if (false == bool(pSerialized)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to serialize credentials")
-            .Flush();
+        LogError()()("Failed to serialize credentials").Flush();
 
         return false;
     }
@@ -329,9 +323,7 @@ auto Primary::verify_against_source() const -> bool
     const auto pSig = hasSourceSignature ? SourceSignature() : SelfSignature();
 
     if (false == bool(pSig)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Master credential not signed by its source.")
-            .Flush();
+        LogError()()("Master credential not signed by its source.").Flush();
 
         return false;
     }
@@ -348,9 +340,8 @@ auto Primary::verify_internally() const -> bool
 
     // Check that the source validates this credential
     if (!verify_against_source()) {
-        LogConsole()(OT_PRETTY_CLASS())(
-            "Failed verifying master credential against "
-            "nym id source.")
+        LogConsole()()("Failed verifying master credential against "
+                       "nym id source.")
             .Flush();
 
         return false;

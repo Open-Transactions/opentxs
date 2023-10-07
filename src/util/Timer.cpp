@@ -19,7 +19,6 @@
 
 #include "BoostAsio.hpp"
 #include "api/network/asio/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -37,7 +36,7 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
 
                 return timer_.cancel();
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
 
                 return {};
             }
@@ -51,7 +50,7 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
 
                 return timer_.expires_at(boostTime);
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
 
                 return {};
             }
@@ -65,7 +64,7 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
 
                 return timer_.expires_from_now(boostTime);
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
 
                 return {};
             }
@@ -83,7 +82,7 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
                         if (cb) { std::invoke(cb, ec); }
                     });
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
             }
         }
         auto Wait() noexcept -> void final
@@ -95,7 +94,7 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
 
                 return timer_.wait();
             } catch (const std::exception& e) {
-                LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogError()()(e.what()).Flush();
             }
         }
 
@@ -105,8 +104,8 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
             , timer_(asio_->get())
             , is_active_(std::make_shared<std::atomic_bool>(false))
         {
-            OT_ASSERT(asio_);
-            OT_ASSERT(is_active_);
+            assert_false(nullptr == asio_);
+            assert_false(nullptr == is_active_);
         }
 
         ~DeadlineTimer() final = default;
@@ -165,7 +164,7 @@ namespace opentxs
 Timer::Timer(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Timer::Timer() noexcept

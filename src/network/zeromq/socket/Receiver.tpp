@@ -17,12 +17,10 @@
 
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation
@@ -52,7 +50,7 @@ auto Receiver<InterfaceType, MessageType>::add_task(
     Lock lock(task_lock_);
     auto [it, success] = socket_tasks_.emplace(++next_task_, std::move(cb));
 
-    OT_ASSERT(success);
+    assert_true(success);
 
     return it->first;
 }
@@ -119,7 +117,7 @@ auto Receiver<InterfaceType, MessageType>::task_result(
     Lock lock(task_lock_);
     const auto it = task_result_.find(id);
 
-    OT_ASSERT(task_result_.end() != it);
+    assert_true(task_result_.end() != it);
 
     auto output = it->second;
     task_result_.erase(it);
@@ -169,7 +167,7 @@ void Receiver<InterfaceType, MessageType>::thread() noexcept
 
         if (-1 == events) {
             const auto error = zmq_errno();
-            std::cerr << OT_PRETTY_CLASS()
+            std::cerr << std::source_location::current().function_name() << ": "
                       << "poll error: " << zmq_strerror(error) << std::endl;
 
             continue;
@@ -181,7 +179,7 @@ void Receiver<InterfaceType, MessageType>::thread() noexcept
         const auto received = Socket::receive_message(lock, socket_, reply);
 
         if (false == received) {
-            std::cerr << OT_PRETTY_CLASS()
+            std::cerr << std::source_location::current().function_name() << ": "
                       << "failed to receive incoming message." << std::endl;
 
             continue;

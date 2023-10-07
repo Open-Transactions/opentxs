@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -29,7 +28,7 @@ auto Server::SetDomain(const UnallocatedCString& domain) const noexcept -> bool
         zmq_setsockopt(parent_, ZMQ_ZAP_DOMAIN, domain.data(), domain.size());
 
     if (0 != set) {
-        LogError()(OT_PRETTY_CLASS())("Failed to set domain.").Flush();
+        LogError()()("Failed to set domain.").Flush();
 
         return false;
     }
@@ -40,7 +39,7 @@ auto Server::SetDomain(const UnallocatedCString& domain) const noexcept -> bool
 auto Server::SetPrivateKey(const Secret& key) const noexcept -> bool
 {
     if (CURVE_KEY_BYTES != key.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid private key.").Flush();
+        LogError()()("Invalid private key.").Flush();
 
         return false;
     }
@@ -51,9 +50,7 @@ auto Server::SetPrivateKey(const Secret& key) const noexcept -> bool
 auto Server::SetPrivateKey(const UnallocatedCString& z85) const noexcept -> bool
 {
     if (CURVE_KEY_Z85_BYTES > z85.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid private key size (")(z85.size())(
-            ").")
-            .Flush();
+        LogError()()("Invalid private key size (")(z85.size())(").").Flush();
 
         return false;
     }
@@ -67,7 +64,7 @@ auto Server::SetPrivateKey(const UnallocatedCString& z85) const noexcept -> bool
 auto Server::set_private_key(const void* key, const std::size_t keySize)
     const noexcept -> bool
 {
-    OT_ASSERT(nullptr != parent_);
+    assert_false(nullptr == parent_);
 
     socket::implementation::Socket::SocketCallback cb{[&](const Lock&) -> bool {
         const int server{1};
@@ -75,8 +72,7 @@ auto Server::set_private_key(const void* key, const std::size_t keySize)
             zmq_setsockopt(parent_, ZMQ_CURVE_SERVER, &server, sizeof(server));
 
         if (0 != set) {
-            LogError()(OT_PRETTY_CLASS())("Failed to set ZMQ_CURVE_SERVER")
-                .Flush();
+            LogError()()("Failed to set ZMQ_CURVE_SERVER").Flush();
 
             return false;
         }
@@ -84,7 +80,7 @@ auto Server::set_private_key(const void* key, const std::size_t keySize)
         set = zmq_setsockopt(parent_, ZMQ_CURVE_SECRETKEY, key, keySize);
 
         if (0 != set) {
-            LogError()(OT_PRETTY_CLASS())("Failed to set private key.").Flush();
+            LogError()()("Failed to set private key.").Flush();
 
             return false;
         }

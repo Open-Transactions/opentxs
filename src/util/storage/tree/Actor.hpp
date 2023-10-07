@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_plain_guarded.h>
 #include <chrono>
 #include <memory>
@@ -41,7 +40,7 @@ namespace opentxs::storage::tree
 class Actor final : public opentxs::Actor<tree::Actor, Job>
 {
 public:
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         self_ = self;
         signal_startup(self);
@@ -75,7 +74,7 @@ private:
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<api::session::imp::Storage> parent_p_;
-    boost::shared_ptr<Actor> self_;
+    std::shared_ptr<Actor> self_;
     const api::Session& api_;
     api::session::imp::Storage& parent_;
     const std::chrono::seconds interval_;
@@ -85,7 +84,7 @@ private:
     static auto run_gc(
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<api::session::imp::Storage> parent,
-        boost::shared_ptr<Actor> self,
+        std::shared_ptr<Actor> self,
         const GCParams& params) noexcept -> void;
 
     auto need_gc(std::chrono::microseconds elapsed) const noexcept -> bool;

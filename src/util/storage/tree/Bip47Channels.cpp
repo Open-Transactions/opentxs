@@ -12,6 +12,7 @@
 #include <StorageBip47Contexts.pb.h>
 #include <atomic>
 #include <mutex>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -22,7 +23,6 @@
 #include "internal/serialization/protobuf/verify/Bip47Channel.hpp"
 #include "internal/serialization/protobuf/verify/StorageBip47Contexts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -47,7 +47,13 @@ Bip47Channels::Bip47Channels(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), CHANNEL_VERSION)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          CHANNEL_VERSION)
     , index_lock_()
     , channel_data_()
     , chain_index_()
@@ -141,8 +147,8 @@ auto Bip47Channels::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -167,8 +173,8 @@ auto Bip47Channels::repair_indices() noexcept -> void
             using enum ErrorReporting;
             const auto loaded = Load(id, data, verbose);
 
-            OT_ASSERT(loaded);
-            OT_ASSERT(data);
+            assert_true(loaded);
+            assert_false(nullptr == data);
 
             index(lock, id, *data);
         }
@@ -178,8 +184,8 @@ auto Bip47Channels::repair_indices() noexcept -> void
 auto Bip47Channels::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
     if (!verify_write_lock(lock)) {
-        LogError()(OT_PRETTY_CLASS())("Lock failure.").Flush();
-        OT_FAIL;
+        LogError()()("Lock failure.").Flush();
+        LogAbort()().Abort();
     }
 
     auto serialized = serialize();

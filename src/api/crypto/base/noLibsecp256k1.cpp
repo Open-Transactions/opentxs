@@ -5,7 +5,7 @@
 
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::imp
 {
@@ -13,6 +13,6 @@ auto Crypto::Init_Libsecp256k1() noexcept -> void {}
 
 auto Crypto::Libsecp256k1() const noexcept -> const opentxs::crypto::Secp256k1&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 }  // namespace opentxs::api::imp

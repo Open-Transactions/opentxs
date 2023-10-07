@@ -11,7 +11,6 @@
 #include "internal/api/session/Crypto.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -52,7 +51,7 @@ Storage::Storage(
     , crypto_(*crypto_p_)
     , storage_encryption_key_()
 {
-    OT_ASSERT(storage_);
+    assert_false(nullptr == storage_);
 }
 
 auto Storage::cleanup() noexcept -> void
@@ -71,11 +70,9 @@ auto Storage::init(
         auto seed = seeds.DefaultSeed().first;
 
         if (seed.empty()) {
-            LogError()(OT_PRETTY_CLASS())("No default seed.").Flush();
+            LogError()()("No default seed.").Flush();
         } else {
-            LogError()(OT_PRETTY_CLASS())("Default seed is: ")(seed, crypto)(
-                ".")
-                .Flush();
+            LogError()()("Default seed is: ")(seed, crypto)(".").Flush();
         }
 
         auto reason =
@@ -83,12 +80,11 @@ auto Storage::init(
         storage_encryption_key_ = seeds.GetStorageKey(seed, reason);
 
         if (storage_encryption_key_) {
-            LogDetail()(OT_PRETTY_CLASS())("Obtained storage key ")(
+            LogDetail()()("Obtained storage key ")(
                 storage_encryption_key_.ID(reason), crypto_)
                 .Flush();
         } else {
-            LogError()(OT_PRETTY_CLASS())("Failed to load storage key ")(
-                seed, crypto)(".")
+            LogError()()("Failed to load storage key ")(seed, crypto)(".")
                 .Flush();
         }
     }
@@ -98,7 +94,7 @@ auto Storage::init(
 
 auto Storage::start() noexcept -> void
 {
-    OT_ASSERT(storage_);
+    assert_false(nullptr == storage_);
 
     auto& storage = storage_->Internal();
 

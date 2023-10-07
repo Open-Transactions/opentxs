@@ -8,10 +8,10 @@
 #include <functional>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::ReplyCallback>;
@@ -38,7 +38,7 @@ ReplyCallback::ReplyCallback(zeromq::ReplyCallback::ReceiveCallback callback)
     , callback_lock_()
     , callback_(callback)
 {
-    OT_ASSERT(callback_);
+    assert_false(nullptr == callback_);
 }
 
 auto ReplyCallback::clone() const -> ReplyCallback*

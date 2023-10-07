@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -61,7 +62,7 @@ struct GetAccountActivity final : public Base::Imp {
         , events_([&] {
             auto out = Events{};
             const auto& data = in.accountevent();
-            std::copy(data.begin(), data.end(), std::back_inserter(out));
+            std::ranges::copy(data, std::back_inserter(out));
 
             return out;
         }())

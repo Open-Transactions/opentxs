@@ -14,7 +14,6 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -63,7 +62,7 @@ SubchainStateData::PrehashData::PrehashData(
     , name_(name)
     , data_(alloc)
 {
-    OT_ASSERT(0 < job_count_);
+    assert_true(0 < job_count_);
 
     data_.reserve(targets_.size());
 
@@ -81,7 +80,7 @@ SubchainStateData::PrehashData::PrehashData(
         results[block::Position{height, block}];
     }
 
-    OT_ASSERT(targets_.size() == data_.size());
+    assert_true(targets_.size() == data_.size());
 }
 
 auto SubchainStateData::PrehashData::hash(
@@ -135,12 +134,9 @@ auto SubchainStateData::PrehashData::match(
     matched.modify([&](auto& out) {
         const auto& [iClean, iDirty, iSizes] = cache;
         auto& [oClean, oDirty, oSizes] = out;
-        std::copy(
-            iClean.begin(), iClean.end(), std::inserter(oClean, oClean.end()));
-        std::copy(
-            iDirty.begin(), iDirty.end(), std::inserter(oDirty, oDirty.end()));
-        std::copy(
-            iSizes.begin(), iSizes.end(), std::inserter(oSizes, oSizes.end()));
+        std::ranges::copy(iClean, std::inserter(oClean, oClean.end()));
+        std::ranges::copy(iDirty, std::inserter(oDirty, oDirty.end()));
+        std::ranges::copy(iSizes, std::inserter(oSizes, oSizes.end()));
     });
 }
 
@@ -165,7 +161,7 @@ auto SubchainStateData::PrehashData::match(
         for (const auto& match : matches) {
             const auto dist = std::distance(start, match);
 
-            OT_ASSERT(0 <= dist);
+            assert_true(0 <= dist);
 
             const auto& hash = hashes.at(static_cast<std::size_t>(dist));
 
@@ -184,7 +180,7 @@ auto SubchainStateData::PrehashData::match(
         for (const auto& match : matches) {
             const auto dist = std::distance(start, match);
 
-            OT_ASSERT(0 <= dist);
+            assert_true(0 <= dist);
 
             const auto& hash = hashes.at(static_cast<std::size_t>(dist));
 
@@ -259,8 +255,8 @@ auto SubchainStateData::PrehashData::match(
         results.confirmed_match_.match_txo_,
         output);
     const auto& [count, of] = output;
-    log(OT_PRETTY_CLASS())(name_)(" GCS ")(procedure)(" for block ")(
-        position)(" matched ")(count)(" of ")(of)(" target elements")
+    log()(name_)(" GCS ")(procedure)(" for block ")(position)(" matched ")(
+        count)(" of ")(of)(" target elements")
         .Flush();
     auto& [clean, dirty, sizes] = cache;
 

@@ -12,11 +12,11 @@
 #include <stdexcept>
 
 #include "internal/crypto/asymmetric/key/HD.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
@@ -39,8 +39,8 @@ HDNode::HDNode(const api::Factory& factory, const api::Crypto& crypto) noexcept
         a_.resize(size);
         b_.resize(size);
 
-        OT_ASSERT(size == a_.size());
-        OT_ASSERT(size == b_.size());
+        assert_true(size == a_.size());
+        assert_true(size == b_.size());
     }
 }
 

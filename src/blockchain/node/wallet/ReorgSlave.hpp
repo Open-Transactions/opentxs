@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
+#include <memory>
 #include <string_view>
 
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -46,8 +45,9 @@ class Log;
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 namespace opentxs::blockchain::node::wallet
 {
-class ReorgSlavePrivate final : public Allocated,
-                                public boost::enable_shared_from
+class ReorgSlavePrivate final
+    : public Allocated,
+      public std::enable_shared_from_this<ReorgSlavePrivate>
 {
 public:
     const Log& log_;
@@ -75,7 +75,7 @@ public:
 
     ReorgSlavePrivate(
         const network::zeromq::Pipeline& parent,
-        boost::shared_ptr<ReorgMasterPrivate> master,
+        std::shared_ptr<ReorgMasterPrivate> master,
         const int id,
         std::string_view name,
         allocator_type alloc) noexcept;
@@ -88,7 +88,7 @@ public:
 
 private:
     const network::zeromq::Pipeline& parent_;
-    boost::shared_ptr<ReorgMasterPrivate> master_;
+    std::shared_ptr<ReorgMasterPrivate> master_;
     allocator_type alloc_;
 };
 #pragma GCC diagnostic pop

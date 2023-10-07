@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
@@ -34,7 +33,7 @@ struct Group::Imp {
         for (const auto& it : items) {
             const auto& item = it.second;
 
-            OT_ASSERT(item);
+            assert_false(nullptr == item);
 
             if (item->isPrimary()) {
                 primary = item->ID();
@@ -56,7 +55,7 @@ struct Group::Imp {
         , primary_(get_primary_item(items))
         , items_(normalize_items(items))
     {
-        for (const auto& it : items_) { OT_ASSERT(it.second); }
+        for (const auto& it : items_) { assert_false(nullptr == it.second); }
     }
 
     Imp(const Imp& rhs)
@@ -81,7 +80,7 @@ struct Group::Imp {
         for (const auto& it : map) {
             const auto& item = it.second;
 
-            OT_ASSERT(item);
+            assert_false(nullptr == item);
 
             if (item->isPrimary()) {
                 if (primary.empty()) {
@@ -99,7 +98,7 @@ struct Group::Imp {
 
 static auto create_item(const std::shared_ptr<Item>& item) -> Group::ItemMap
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     Group::ItemMap output{};
     output[item->ID()] = item;
@@ -114,7 +113,7 @@ Group::Group(
     const ItemMap& items)
     : imp_(std::make_unique<Imp>(nym, section, type, items))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Group::Group(
@@ -123,24 +122,24 @@ Group::Group(
     const std::shared_ptr<Item>& item)
     : Group(nym, section, item->Type(), create_item(item))
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 }
 
 Group::Group(const Group& rhs) noexcept
     : imp_(std::make_unique<Imp>(*rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Group::Group(Group&& rhs) noexcept
     : imp_(std::move(rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Group::operator+(const Group& rhs) const -> Group
 {
-    OT_ASSERT(imp_->section_ == rhs.imp_->section_);
+    assert_true(imp_->section_ == rhs.imp_->section_);
 
     auto primary = identifier::Generic{};
 
@@ -151,7 +150,7 @@ auto Group::operator+(const Group& rhs) const -> Group
     for (const auto& it : rhs.imp_->items_) {
         const auto& item = it.second;
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
         const auto& id = item->ID();
         const bool exists = (1 == map.count(id));
 
@@ -166,7 +165,7 @@ auto Group::operator+(const Group& rhs) const -> Group
             map.emplace(id, item);
         }
 
-        OT_ASSERT(map[id]);
+        assert_false(nullptr == map[id]);
     }
 
     return {imp_->nym_, imp_->section_, imp_->type_, map};
@@ -174,7 +173,7 @@ auto Group::operator+(const Group& rhs) const -> Group
 
 auto Group::AddItem(const std::shared_ptr<Item>& item) const -> Group
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     if (item->isPrimary()) { return AddPrimary(item); }
 
@@ -202,16 +201,16 @@ auto Group::AddPrimary(const std::shared_ptr<Item>& item) const -> Group
     auto& newPrimary = map[incomingID];
     newPrimary.reset(new Item(item->SetPrimary(true)));
 
-    OT_ASSERT(newPrimary);
+    assert_false(nullptr == newPrimary);
 
     if (haveExistingPrimary) {
         auto& oldPrimary = map.at(imp_->primary_);
 
-        OT_ASSERT(oldPrimary);
+        assert_false(nullptr == oldPrimary);
 
         oldPrimary.reset(new Item(oldPrimary->SetPrimary(false)));
 
-        OT_ASSERT(oldPrimary);
+        assert_false(nullptr == oldPrimary);
     }
 
     return {imp_->nym_, imp_->section_, imp_->type_, map};
@@ -233,7 +232,7 @@ auto Group::Best() const -> std::shared_ptr<Item>
     for (const auto& it : imp_->items_) {
         const auto& claim = it.second;
 
-        OT_ASSERT(claim);
+        assert_false(nullptr == claim);
 
         if (claim->isActive()) { return claim; }
     }
@@ -282,9 +281,7 @@ auto Group::SerializeTo(proto::ContactSection& section, const bool withIDs)
     const -> bool
 {
     if (translate(section.name()) != imp_->section_) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Trying to serialize to incorrect section.")
-            .Flush();
+        LogError()()("Trying to serialize to incorrect section.").Flush();
 
         return false;
     }
@@ -292,7 +289,7 @@ auto Group::SerializeTo(proto::ContactSection& section, const bool withIDs)
     for (const auto& it : imp_->items_) {
         const auto& item = it.second;
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         item->Serialize(*section.add_item(), withIDs);
     }

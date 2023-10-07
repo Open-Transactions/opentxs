@@ -25,7 +25,6 @@
 #include "internal/core/Amount.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -200,12 +199,9 @@ auto Output::AssociatedRemoteContacts(
     Set<identifier::Generic>& output) const noexcept -> void
 {
     const auto hashes = script_.Internal().LikelyPubkeyHashes(api.Crypto());
-    std::for_each(std::begin(hashes), std::end(hashes), [&](const auto& hash) {
+    std::ranges::for_each(hashes, [&](const auto& hash) {
         auto contacts = api.Crypto().Blockchain().LookupContacts(hash);
-        std::move(
-            std::begin(contacts),
-            std::end(contacts),
-            std::inserter(output, output.end()));
+        std::ranges::move(contacts, std::inserter(output, output.end()));
     });
 
     auto payer = cache_.payer();
@@ -247,8 +243,7 @@ auto Output::ConfirmMatches(
 {
     const auto& [_, byKey] = candiates;
 
-    for (const auto& match : byKey) {
-        const auto& [txid, data1] = match;
+    for (const auto& [txid, data1] : byKey) {
         const auto& [index, data2] = data1;
         const auto& [subchain, subaccount] = data2;
         auto alloc = get_allocator();
@@ -258,10 +253,9 @@ auto Output::ConfirmMatches(
         const auto spendable = crypto::Subchain::Outgoing != subchain;
         auto post2 = ScopeGuard{[&] {
             if (haveMatch) {
-                // TODO llvm sucks
-                const auto confirmed = api.Confirm(keyID, match.first);
+                const auto confirmed = api.Confirm(keyID, txid);
 
-                OT_ASSERT(confirmed);
+                assert_true(confirmed);
             }
 
             if (haveKey) {
@@ -280,11 +274,11 @@ auto Output::ConfirmMatches(
             case PayToPubkey: {
                 const auto& key = element.Key();
 
-                OT_ASSERT(key.IsValid());
-                OT_ASSERT(script_.Pubkey().has_value());
+                assert_true(key.IsValid());
+                assert_true(script_.Pubkey().has_value());
 
                 if (key.PublicKey() == script_.Pubkey().value()) {
-                    log(OT_PRETTY_CLASS())("found P2PK match").Flush();
+                    log()("found P2PK match").Flush();
                     haveMatch = spendable;
                     haveKey = true;
 
@@ -294,10 +288,10 @@ auto Output::ConfirmMatches(
             case PayToPubkeyHash: {
                 const auto hash = element.PubkeyHash();
 
-                OT_ASSERT(script_.PubkeyHash().has_value());
+                assert_true(script_.PubkeyHash().has_value());
 
                 if (hash.Bytes() == script_.PubkeyHash().value()) {
-                    log(OT_PRETTY_CLASS())("found P2PKH match").Flush();
+                    log()("found P2PKH match").Flush();
                     haveMatch = spendable;
                     haveKey = true;
 
@@ -307,10 +301,10 @@ auto Output::ConfirmMatches(
             case PayToWitnessPubkeyHash: {
                 const auto hash = element.PubkeyHash();
 
-                OT_ASSERT(script_.PubkeyHash().has_value());
+                assert_true(script_.PubkeyHash().has_value());
 
                 if (hash.Bytes() == script_.PubkeyHash().value()) {
-                    log(OT_PRETTY_CLASS())("found P2WPKH match").Flush();
+                    log()("found P2WPKH match").Flush();
                     haveMatch = spendable;
                     haveKey = true;
 
@@ -321,8 +315,8 @@ auto Output::ConfirmMatches(
                 const auto required = script_.M();
                 const auto of = script_.N();
 
-                OT_ASSERT(required.has_value());
-                OT_ASSERT(of.has_value());
+                assert_true(required.has_value());
+                assert_true(of.has_value());
 
                 if (1u != required.value() || (3u != of.value())) {
                     // TODO handle non-payment code multisig eventually
@@ -332,11 +326,11 @@ auto Output::ConfirmMatches(
 
                 const auto& key = element.Key();
 
-                OT_ASSERT(key.IsValid());
+                assert_true(key.IsValid());
 
                 if (key.PublicKey() == script_.MultisigPubkey(0).value()) {
-                    log(OT_PRETTY_CLASS())(" found ")(required.value())(" of ")(
-                        of.value())(" P2MS match")
+                    log()(" found ")(required.value())(" of ")(of.value())(
+                        " P2MS match")
                         .Flush();
                     haveMatch = spendable;
                     haveKey = true;
@@ -373,7 +367,7 @@ auto Output::ExtractElements(const cfilter::Type style, alloc::Default alloc)
         out.emplace_back(start, end);
     }
 
-    std::sort(out.begin(), out.end());
+    std::ranges::sort(out);
 
     return out;
 }
@@ -397,7 +391,7 @@ auto Output::FindMatches(
             const auto& [index, subchainID] = element;
             const auto& [subchain, account] = subchainID;
             auto keyid = crypto::Key{account, subchain, index};
-            log(OT_PRETTY_CLASS())("output ")(index_)(" of transaction ")
+            log()("output ")(index_)(" of transaction ")
                 .asHex(tx)(" matches ")(print(keyid, api.Crypto()))
                 .Flush();
 
@@ -405,8 +399,8 @@ auto Output::FindMatches(
                 auto sender = crypto.SenderContact(keyid);
                 auto recipient = crypto.RecipientContact(keyid);
 
-                if (sender.empty()) { OT_FAIL; }
-                if (recipient.empty()) { OT_FAIL; }
+                if (sender.empty()) { LogAbort()().Abort(); }
+                if (recipient.empty()) { LogAbort()().Abort(); }
 
                 cache_.set_payer(sender);
                 cache_.set_payee(recipient);
@@ -465,7 +459,7 @@ auto Output::IndexElements(const api::Session& api, ElementHashes& out)
 {
     // TODO monotonic allocator
     const auto& keys = get_pubkeys(api, {});
-    std::copy(keys.begin(), keys.end(), std::inserter(out, out.end()));
+    std::ranges::copy(keys, std::inserter(out, out.end()));
 }
 
 auto Output::index_elements(
@@ -480,13 +474,11 @@ auto Output::index_elements(
 
         return out;
     }();
-    LogTrace()(OT_PRETTY_CLASS())(patterns.size())(" pubkey hashes found:")
-        .Flush();
-    std::for_each(
-        std::begin(patterns), std::end(patterns), [&](const auto& id) -> auto {
-            hashes.emplace(id);
-            LogTrace()("    * ")(id).Flush();
-        });
+    LogTrace()()(patterns.size())(" pubkey hashes found:").Flush();
+    std::ranges::for_each(patterns, [&](const auto& id) -> auto {
+        hashes.emplace(id);
+        LogTrace()("    * ")(id).Flush();
+    });
 }
 
 auto Output::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
@@ -528,10 +520,9 @@ auto Output::NetBalanceChange(
     });
 
     if (done) {
-        log(OT_PRETTY_CLASS())("output ")(index_)(" contributes ")(value_)
-            .Flush();
+        log()("output ")(index_)(" contributes ")(value_).Flush();
     } else {
-        log(OT_PRETTY_CLASS())("output ")(index_)(" contributes 0").Flush();
+        log()("output ")(index_)(" contributes 0").Flush();
     }
 
     return output;
@@ -650,7 +641,7 @@ auto Output::Serialize(Writer&& destination) const noexcept
 
         return size;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }

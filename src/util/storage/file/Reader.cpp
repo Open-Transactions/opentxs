@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "BoostIostreams.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/file/ReaderPrivate.hpp"
 
 namespace opentxs::storage::file
@@ -21,7 +21,7 @@ namespace opentxs::storage::file
 Reader::Reader(ReaderPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Reader::Reader(Reader&& rhs) noexcept

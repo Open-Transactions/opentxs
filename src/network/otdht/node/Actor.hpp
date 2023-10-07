@@ -6,7 +6,6 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <frozen/unordered_set.h>
 #include <array>
 #include <cstddef>
@@ -76,14 +75,14 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Actor> self) noexcept -> void
+    auto Init(std::shared_ptr<Actor> self) noexcept -> void
     {
         signal_startup(self);
     }
 
     Actor(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Shared> shared,
+        std::shared_ptr<Shared> shared,
         zeromq::BatchID batchID,
         allocator_type alloc) noexcept;
     Actor() = delete;
@@ -125,7 +124,7 @@ private:
         map<zeromq::SocketID, ExternalSocketIndex>;
 
     std::shared_ptr<const api::Session> api_p_;
-    boost::shared_ptr<Shared> shared_p_;
+    std::shared_ptr<Shared> shared_p_;
     const Shared& shared_;
     const api::Session& api_;
     Shared::Guarded& data_;
@@ -197,7 +196,7 @@ private:
 
     Actor(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Shared> shared,
+        std::shared_ptr<Shared> shared,
         zeromq::BatchID batchID,
         Vector<network::zeromq::socket::SocketRequest> extra,
         allocator_type alloc) noexcept;

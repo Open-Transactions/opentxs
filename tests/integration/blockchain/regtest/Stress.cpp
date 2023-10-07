@@ -18,7 +18,6 @@
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/interface/ui/BalanceItem.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
@@ -214,14 +213,14 @@ TEST_F(Regtest_stress, generate_transactions)
                 try {
                     auto [code, txid] = future.get();
 
-                    OT_ASSERT(false == txid.empty());
+                    opentxs::assert_true(false == txid.empty());
 
                     const auto rc = transactions.at(++f).Assign(txid);
 
                     EXPECT_TRUE(rc);
                 } catch (...) {
 
-                    OT_FAIL;
+                    opentxs::LogAbort()().Abort();
                 }
             }
         }

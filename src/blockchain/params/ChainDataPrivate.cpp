@@ -15,9 +15,9 @@
 #include "blockchain/params/Json.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
 
 namespace opentxs::blockchain::params
@@ -45,11 +45,8 @@ ChainDataPrivate::ChainDataPrivate(
     , genesis_cfheader_([&] {
         auto out = GenesisCfheader{};
         const auto& map = data.genesis_bip158_;
-        std::transform(
-            map.begin(),
-            map.end(),
-            std::inserter(out, out.end()),
-            [](const auto& value) {
+        std::ranges::transform(
+            map, std::inserter(out, out.end()), [](const auto& value) {
                 const auto& [type, bytes] = value;
                 const auto& [cfheader, _] = bytes;
 
@@ -60,9 +57,8 @@ ChainDataPrivate::ChainDataPrivate(
     }())
     , known_cfilter_types_([&] {
         auto out = Set<cfilter::Type>{};
-        std::transform(
-            genesis_cfheader_.begin(),
-            genesis_cfheader_.end(),
+        std::ranges::transform(
+            genesis_cfheader_,
             std::inserter(out, out.end()),
             [](const auto& value) { return value.first; });
 
@@ -97,7 +93,7 @@ ChainDataPrivate::ChainDataPrivate(
     , dns_seeds_([&] {
         auto out = Vector<std::string_view>{};
         const auto& in = data.dns_seeds_;
-        std::copy(in.begin(), in.end(), std::back_inserter(out));
+        std::ranges::copy(in, std::back_inserter(out));
 
         return out;
     }())
@@ -132,7 +128,7 @@ ChainDataPrivate::ChainDataPrivate(
                 const auto rc =
                     block.DecodeHex(checkpoint.at("block").as_string().c_str());
 
-                OT_ASSERT(rc);
+                assert_true(rc);
 
                 using enum cfilter::Type;
                 static const auto types = {Basic_BIP158, Basic_BCHVariant, ES};
@@ -154,7 +150,7 @@ ChainDataPrivate::ChainDataPrivate(
             auto& [block, map] = out[0];
             const auto rc = block.DecodeHex(data.genesis_hash_hex_);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             for (const auto& [type, genesis] : data.genesis_bip158_) {
                 const auto& [cfheader, cfilter] = genesis;
@@ -204,8 +200,8 @@ auto ChainDataPrivate::GenesisBlock(const api::Crypto& crypto) const noexcept
         block = factory::BlockchainBlock(
             crypto, chain_, serialized_genesis_block_.Bytes(), {});
 
-        OT_ASSERT(block.IsValid());
-        OT_ASSERT(0 == block.Header().Position().height_);
+        assert_true(block.IsValid());
+        assert_true(0 == block.Header().Position().height_);
     }
 
     return block;

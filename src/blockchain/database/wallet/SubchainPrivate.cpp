@@ -16,7 +16,6 @@
 #include "blockchain/database/wallet/SubchainID.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -62,11 +61,11 @@ SubchainPrivate::SubchainPrivate(
                         std::min(bytes.size(), sizeof(out)));
                 } else {
 
-                    OT_FAIL;
+                    LogAbort()().Abort();
                 }
             });
 
-        OT_ASSERT(version.has_value());
+        assert_true(version.has_value());
 
         return version.value();
     }())
@@ -146,7 +145,7 @@ auto SubchainPrivate::add_elements(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         cache.Clear();
 
         return false;
@@ -210,7 +209,7 @@ auto SubchainPrivate::GetPatterns(const SubchainID& id, alloc::Default alloc)
 
         return get_patterns(id, *cache_.lock_shared(), alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -274,10 +273,9 @@ auto SubchainPrivate::reorg(
     auto target = block::Height{};
 
     if (height < lastGoodHeight) {
-        LogTrace()(OT_PRETTY_CLASS())(
-            "no action required for this subchain since last scanned "
-            "height of ")(height)(" is below the reorg parent height ")(
-            lastGoodHeight)
+        LogTrace()()("no action required for this subchain since last scanned "
+                     "height of ")(
+            height)(" is below the reorg parent height ")(lastGoodHeight)
             .Flush();
 
         return true;
@@ -288,8 +286,7 @@ auto SubchainPrivate::reorg(
     }
 
     const auto position = headers.Internal().GetPosition(data, target);
-    LogTrace()(OT_PRETTY_CLASS())("resetting last scanned to ")(position)
-        .Flush();
+    LogTrace()()("resetting last scanned to ")(position).Flush();
 
     if (false == cache.SetLastScanned(subchain, position, tx)) {
         throw std::runtime_error{"database error"};

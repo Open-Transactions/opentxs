@@ -13,7 +13,6 @@
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -241,16 +240,16 @@ auto OTTransactionType::VerifyAccount(const identity::Nym& theNym) -> bool
     // Make sure that the supposed AcctID matches the one read from the file.
     //
     if (!VerifyContractID()) {
-        LogError()(OT_PRETTY_CLASS())("Error verifying account ID.").Flush();
+        LogError()()("Error verifying account ID.").Flush();
 
         return false;
     } else if (!VerifySignature(theNym)) {
-        LogError()(OT_PRETTY_CLASS())("Error verifying signature.").Flush();
+        LogError()()("Error verifying signature.").Flush();
 
         return false;
     }
 
-    LogTrace()(OT_PRETTY_CLASS())(
+    LogTrace()()(
         "We now know that...1) The expected Account ID matches the ID that "
         "was found on the object. 2) The SIGNATURE VERIFIED on the object.")
         .Flush();
@@ -275,7 +274,7 @@ auto OTTransactionType::VerifyContractID() const -> bool
              str2 = String::Factory(account_id_, api_.Crypto()),
              str3 = String::Factory(notary_id_, api_.Crypto()),
              str4 = String::Factory(account_notary_id_, api_.Crypto());
-        LogError()(OT_PRETTY_CLASS())("Identifiers mismatch").Flush();
+        LogError()()("Identifiers mismatch").Flush();
         LogError()("account_id_ actual: ")(account_id_, api_.Crypto())(
             " expected: ")(id_, api_.Crypto())
             .Flush();

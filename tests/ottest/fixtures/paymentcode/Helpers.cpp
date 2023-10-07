@@ -10,7 +10,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -35,7 +34,7 @@ auto PaymentCodeFixture::bip44_path(
 
         return true;
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -69,7 +68,7 @@ auto PaymentCodeFixture::blinding_key_public()
 
         return var;
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -107,7 +106,7 @@ auto PaymentCodeFixture::blinding_key_secret(
 
         return var;
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -144,7 +143,7 @@ auto PaymentCodeFixture::blinding_key_secret(
 
         return var;
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -176,7 +175,7 @@ auto PaymentCodeFixture::payment_code_public(
 
         return var.value();
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -205,7 +204,7 @@ auto PaymentCodeFixture::payment_code_secret(
 
         return var.value();
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }
@@ -236,7 +235,7 @@ auto PaymentCodeFixture::seed(
 
         return var.value();
     } catch (const std::exception& e) {
-        ot::LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        ot::LogError()()(e.what()).Flush();
 
         std::rethrow_exception(std::current_exception());
     }

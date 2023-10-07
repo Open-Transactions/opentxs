@@ -15,7 +15,6 @@
 #include "internal/blockchain/crypto/Factory.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -57,7 +56,7 @@ auto BlockchainNotificationSubaccount(
             }(),
             id);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -121,7 +120,7 @@ auto Notification::ScanProgress(Subchain type) const noexcept -> block::Position
     static const auto allowed = AllowedSubchains();
 
     if (0u == allowed.count(type)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid subchain ")(print(type)).Flush();
+        LogError()()("Invalid subchain ")(print(type)).Flush();
 
         return Subaccount::ScanProgress(type);
     }

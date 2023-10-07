@@ -8,10 +8,10 @@
 #include <utility>
 
 #include "identity/wot/claim/claim/ClaimPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot
@@ -35,7 +35,7 @@ namespace opentxs::identity::wot
 Claim::Claim(ClaimPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Claim::Claim(allocator_type alloc) noexcept

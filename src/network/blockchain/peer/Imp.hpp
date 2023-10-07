@@ -8,7 +8,6 @@
 #pragma once
 
 #include <ankerl/unordered_dense.h>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -114,7 +113,7 @@ using namespace std::literals;
 class Peer::Imp : public Actor<Imp, PeerJob>
 {
 public:
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void;
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void;
 
     Imp() = delete;
     Imp(const Imp&) = delete;

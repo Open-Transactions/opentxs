@@ -24,12 +24,6 @@
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
-namespace boost
-{
-template <class T>
-class shared_ptr;
-}  // namespace boost
-
 namespace opentxs
 {
 namespace api
@@ -108,7 +102,7 @@ private:
     auto CheckCache(const std::size_t outstanding, FinishedCallback cb)
         const noexcept -> void final;
     auto do_startup(allocator_type monotonic) noexcept -> bool final;
-    auto get_index(const boost::shared_ptr<const SubchainStateData>& me)
+    auto get_index(const std::shared_ptr<const SubchainStateData>& me)
         const noexcept -> void final;
     auto handle_block_matches(
         const block::Position& position,

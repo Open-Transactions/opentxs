@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/zap/Factory.hpp"
 #include "internal/network/zeromq/zap/Request.hpp"
 #include "internal/network/zeromq/zap/ZAP.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "network/zeromq/message/Message.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -110,7 +109,7 @@ namespace opentxs::network::zeromq::zap
 Request::Request(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Request::Request() noexcept
@@ -304,7 +303,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
 
     if (Imp::version_position_ >= size) {
         error = "Missing version";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -312,14 +311,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
     if (0 == Imp::accept_versions_.count(UnallocatedCString{Version()})) {
         error = UnallocatedCString{"Invalid version ("} +
                 UnallocatedCString{Version()} + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
 
     if (Imp::request_id_position_ >= size) {
         error = "Missing request ID";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -329,14 +328,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
     if (Imp::max_string_field_size_ < requestSize) {
         error = UnallocatedCString("Request ID too long (") +
                 std::to_string(requestSize) + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
 
     if (Imp::domain_position_ >= size) {
         error = "Missing domain";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -346,14 +345,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
     if (Imp::max_string_field_size_ < domainSize) {
         error = UnallocatedCString("Domain too long (") +
                 std::to_string(domainSize) + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
 
     if (Imp::address_position_ >= size) {
         error = "Missing address";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -363,14 +362,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
     if (Imp::max_string_field_size_ < addressSize) {
         error = UnallocatedCString("Address too long (") +
                 std::to_string(addressSize) + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
 
     if (Imp::identity_position_ >= size) {
         error = "Missing identity";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -380,14 +379,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
     if (Imp::max_string_field_size_ < identitySize) {
         error = UnallocatedCString("Identity too long (") +
                 std::to_string(identitySize) + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
 
     if (Imp::mechanism_position_ >= size) {
         error = "Missing mechanism";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -398,7 +397,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
 
     if (false == validMechanism) {
         error = UnallocatedCString("Unknown mechanism (") + mechanism + ")";
-        LogError()(OT_PRETTY_CLASS())(error).Flush();
+        LogError()()(error).Flush();
 
         return output;
     }
@@ -411,7 +410,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
             if (0 != count) {
                 error = UnallocatedCString("Too many credentials (") +
                         std::to_string(count) + ")";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
@@ -419,7 +418,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
         case Mechanism::Plain: {
             if (1 > count) {
                 error = "Missing username";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
@@ -429,14 +428,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
             if (Imp::max_string_field_size_ < username) {
                 error = UnallocatedCString("Username too long (") +
                         std::to_string(username) + ")";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
 
             if (2 > count) {
                 error = "Missing password";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
@@ -446,7 +445,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
             if (Imp::max_string_field_size_ < password) {
                 error = UnallocatedCString("Password too long (") +
                         std::to_string(password) + ")";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
@@ -455,7 +454,7 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
             if (1 != count) {
                 error = UnallocatedCString("Wrong number of credentials (") +
                         std::to_string(count) + ")";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
@@ -465,14 +464,14 @@ auto Request::Validate() const noexcept -> std::pair<bool, UnallocatedCString>
             if (Imp::pubkey_size_ != pubkey) {
                 error = UnallocatedCString("Wrong pubkey size (") +
                         std::to_string(pubkey) + ")";
-                LogError()(OT_PRETTY_CLASS())(error).Flush();
+                LogError()()(error).Flush();
 
                 return output;
             }
         } break;
         case Mechanism::Unknown:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid mechanism.").Flush();
+            LogError()()("Invalid mechanism.").Flush();
 
             return output;
         }

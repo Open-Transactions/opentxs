@@ -15,7 +15,6 @@
 #include "internal/otx/common/AccountVisitor.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -72,27 +71,26 @@ auto PayDividendVisitor::Trigger(
 
     if (lPayoutAmount <= 0) {
         {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Nothing to pay, "
-                "since this account owns no shares. (Returning "
-                "true.")
+            LogConsole()()("Nothing to pay, "
+                           "since this account owns no shares. (Returning "
+                           "true.")
                 .Flush();
         }
         return true;  // nothing to pay, since this account owns no shares.
                       // Success!
     }
-    OT_ASSERT(false == GetNotaryID().empty());
+    assert_false(GetNotaryID().empty());
     const auto& theNotaryID = GetNotaryID();
-    OT_ASSERT(!GetPayoutUnitTypeId().empty());
+    assert_false(GetPayoutUnitTypeId().empty());
     const auto& payoutUnitTypeId = GetPayoutUnitTypeId();
-    OT_ASSERT(!GetVoucherAcctID().empty());
+    assert_false(GetVoucherAcctID().empty());
     const auto& theVoucherAcctID = (GetVoucherAcctID());
     const auto& theServerNym = server_.GetServerNym();
     const auto& theServerNymID = theServerNym.ID();
     const auto& RECIPIENT_ID = theSharesAccount.GetNymID();
-    OT_ASSERT(!GetNymID().empty());
+    assert_false(GetNymID().empty());
     const auto& theSenderNymID = (GetNymID());
-    OT_ASSERT(!GetMemo()->empty());
+    assert_false(GetMemo()->empty());
     const auto strMemo = GetMemo();
     // Note: theSenderNymID is the originator of the Dividend Payout.
     // However, all the actual vouchers will be from "the server Nym" and
@@ -105,7 +103,7 @@ auto PayDividendVisitor::Trigger(
     auto theVoucher{server_.API().Factory().InternalSession().Cheque(
         theNotaryID, identifier::UnitDefinition{})};
 
-    OT_ASSERT(false != bool(theVoucher));
+    assert_true(false != bool(theVoucher));
 
     // 10 minutes ==    600 Seconds
     // 1 hour    ==     3600 Seconds
@@ -172,7 +170,7 @@ auto PayDividendVisitor::Trigger(
             auto thePayment{
                 server_.API().Factory().InternalSession().Payment(strVoucher)};
 
-            OT_ASSERT(false != bool(thePayment));
+            assert_true(false != bool(thePayment));
 
             // calls DropMessageToNymbox
             bSent = server_.SendInstrumentToNym(
@@ -197,10 +195,9 @@ auto PayDividendVisitor::Trigger(
             const auto unittype =
                 Wallet().Internal().CurrencyTypeBasedOnUnitType(
                     payoutUnitTypeId);
-            LogError()(OT_PRETTY_CLASS())(
-                "ERROR failed issuing "
-                "voucher (to send to dividend payout recipient). WAS "
-                "TRYING TO PAY ")(lPayoutAmount, unittype)(
+            LogError()()("ERROR failed issuing "
+                         "voucher (to send to dividend payout recipient). WAS "
+                         "TRYING TO PAY ")(lPayoutAmount, unittype)(
                 " of instrument definition ")(strPayoutUnitTypeId.get())(
                 " to Nym ")(strRecipientNymID.get())(".")
                 .Flush();
@@ -213,7 +210,7 @@ auto PayDividendVisitor::Trigger(
                 server_.API().Factory().InternalSession().Cheque(
                     theNotaryID, identifier::UnitDefinition{})};
 
-            OT_ASSERT(false != bool(theReturnVoucher));
+            assert_true(false != bool(theReturnVoucher));
 
             const bool bIssueReturnVoucher = theReturnVoucher->IssueCheque(
                 lPayoutAmount,          // The amount of the cheque.
@@ -250,7 +247,7 @@ auto PayDividendVisitor::Trigger(
                     server_.API().Factory().InternalSession().Payment(
                         strReturnVoucher)};
 
-                OT_ASSERT(false != bool(theReturnPayment));
+                assert_true(false != bool(theReturnPayment));
 
                 // calls DropMessageToNymbox
                 bSent = server_.SendInstrumentToNym(
@@ -274,7 +271,7 @@ auto PayDividendVisitor::Trigger(
                 const auto unittype =
                     Wallet().Internal().CurrencyTypeBasedOnUnitType(
                         payoutUnitTypeId);
-                LogError()(OT_PRETTY_CLASS())(
+                LogError()()(
                     "ERROR! Failed issuing voucher (to return back to the "
                     "dividend payout initiator, after a failed payment attempt "
                     "to the originally intended recipient). WAS TRYING TO "
@@ -292,7 +289,7 @@ auto PayDividendVisitor::Trigger(
                        String::Factory(RECIPIENT_ID, server_.API().Crypto());
         const auto unittype =
             Wallet().Internal().CurrencyTypeBasedOnUnitType(payoutUnitTypeId);
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "ERROR! Failed issuing next transaction number while trying to "
             "send a voucher (while paying dividends). WAS TRYING TO PAY ")(
             lPayoutAmount,

@@ -6,7 +6,6 @@
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"  // IWYU pragma: associated
 
 #include "internal/api/crypto/Encode.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -56,7 +55,7 @@ auto OTSignatureMetadata::SetMetadata(
         case 'S':
             break;
         default:
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Expected key type of A, E, or S, but instead found: ")(
                 metaKeyType)(" (bad data or error).")
                 .Flush();
@@ -71,8 +70,7 @@ auto OTSignatureMetadata::SetMetadata(
     str_verify_base64 += metaChildCredID;
 
     if (!api_.Crypto().Encode().InternalEncode().IsBase64(str_verify_base64)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Metadata for signature failed base64 validation: ")(
+        LogError()()("Metadata for signature failed base64 validation: ")(
             str_verify_base64)(".")
             .Flush();
         return false;

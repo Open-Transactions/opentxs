@@ -10,7 +10,6 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -37,16 +36,16 @@ ShutdownSender::ShutdownSender(
 {
     auto init = socket_->SetTimeouts(1s, 10s, 0s);
 
-    OT_ASSERT(init);
+    assert_true(init);
 
     init = socket_->Start(endpoint_);
 
-    OT_ASSERT(init);
+    assert_true(init);
 }
 
 auto ShutdownSender::Activate() noexcept -> void
 {
-    LogInsane()(OT_PRETTY_CLASS())(name_).Flush();
+    LogInsane()()(name_).Flush();
     activated_ = true;
     socket_->Send([&] {
         auto work = MakeWork(WorkType::Shutdown);

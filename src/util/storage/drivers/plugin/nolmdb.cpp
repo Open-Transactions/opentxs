@@ -5,12 +5,12 @@
 
 #include "util/storage/drivers/plugin/Plugin.hpp"  // IWYU pragma: associated
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
 auto Plugin::init_lmdb(std::unique_ptr<storage::Driver>& plugin) -> void
 {
-    LogError()(OT_PRETTY_CLASS())("lmdb driver not compiled in.").Flush();
+    LogError()()("lmdb driver not compiled in.").Flush();
 }
 }  // namespace opentxs::storage::driver::implementation

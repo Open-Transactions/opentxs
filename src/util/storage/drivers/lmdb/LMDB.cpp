@@ -12,7 +12,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
@@ -82,7 +81,7 @@ auto LMDB::Data::get_table(Bucket bucket) noexcept -> Table
             return Table::B;
         }
         default: {
-            LogAbort()(OT_PRETTY_STATIC(Data))("invalid bucket").Abort();
+            LogAbort()()("invalid bucket").Abort();
         }
     }
 }

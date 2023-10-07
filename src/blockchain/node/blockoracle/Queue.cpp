@@ -9,7 +9,6 @@
 #include <span>
 #include <tuple>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/Data.hpp"
@@ -49,8 +48,8 @@ auto Queue::Finish(JobID job) noexcept -> QueueData
     if (auto i = jobs_.find(job); jobs_.end() != i) {
         auto post = ScopeGuard{[&] { jobs_.erase(i); }};
         const auto& [_, remaining] = i->second;
-        log(OT_PRETTY_CLASS())(name_)(": job ")(job)(" finished with ")(
-            remaining.size())(" blocks still outstanding")
+        log()(name_)(": job ")(job)(" finished with ")(remaining.size())(
+            " blocks still outstanding")
             .Flush();
 
         for (const auto& hash : remaining) {
@@ -104,14 +103,13 @@ auto Queue::GetWork(allocator_type alloc) noexcept -> Work
         next_job(), Vector<block::Hash>{alloc}, Available(), Waiting());
     auto& [jobID, hashes, jobs, downloading] = out;
     hashes.reserve(target);
-    // TODO c++20
-    auto& [count, index] = [&, this](const auto& id) -> auto& {
-        auto [i, rc] = jobs_.try_emplace(id, target, Index{get_allocator()});
+    auto& [count, index] = [&, this]() -> auto& {
+        auto [i, rc] = jobs_.try_emplace(jobID, target, Index{get_allocator()});
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return i->second;
-    }(jobID);
+    }();
 
     while (hashes.size() < target) {
         const auto& hash = queue_.front();
@@ -119,7 +117,7 @@ auto Queue::GetWork(allocator_type alloc) noexcept -> Work
         index.emplace(hash);
         auto [_, rc] = block_to_job_.try_emplace(hash, jobID);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         queue_.pop_front();
     }
@@ -161,11 +159,11 @@ auto Queue::remove_from_job(const block::Hash& hash) noexcept -> void
         auto post = ScopeGuard{[&] { index.erase(i); }};
         auto count = jobs_.at(i->second).second.erase(hash);
 
-        OT_ASSERT(1_uz == count);
+        assert_true(1_uz == count);
 
         count = pending_.erase(hash);
 
-        OT_ASSERT(1_uz == count);
+        assert_true(1_uz == count);
     }
 }
 

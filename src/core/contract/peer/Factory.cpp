@@ -42,7 +42,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -64,7 +64,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -83,7 +83,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -104,7 +104,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -124,7 +124,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -151,7 +151,7 @@ auto PeerObject(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }
@@ -172,9 +172,7 @@ auto PeerObject(
 
         if (false ==
             input->Open(*recipientNym, contents->WriteInto(), reason)) {
-            LogError()("opentxs::factory::")(__func__)(
-                ": Unable to decrypt message")
-                .Flush();
+            LogError()()("Unable to decrypt message").Flush();
 
             return nullptr;
         }
@@ -184,7 +182,7 @@ auto PeerObject(
 
         return factory::PeerObject(api, notUsed, serialized);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return nullptr;
     }

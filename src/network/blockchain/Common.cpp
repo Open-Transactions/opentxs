@@ -156,8 +156,7 @@ auto decode(const zeromq::Message& in) noexcept -> opentxs::blockchain::Type
             throw std::runtime_error{error};
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::network::blockchain::")(__func__)(": ")(e.what())
-            .Flush();
+        LogError()()(e.what()).Flush();
 
         return UnknownBlockchain;
     }

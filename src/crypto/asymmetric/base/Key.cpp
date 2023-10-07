@@ -9,10 +9,9 @@
 #include <utility>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/Spaceship.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric
@@ -25,13 +24,13 @@ auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
 auto operator<=>(const Key& lhs, const Key& rhs) noexcept
     -> std::strong_ordering
 {
-    return llvm_sucks(lhs.PublicKey(), rhs.PublicKey());
+    return lhs.PublicKey() <=> rhs.PublicKey();
 }
 
 Key::Key(KeyPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Key::Key(allocator_type alloc) noexcept

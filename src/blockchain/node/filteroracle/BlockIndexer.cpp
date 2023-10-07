@@ -5,7 +5,6 @@
 
 #include "blockchain/node/filteroracle/BlockIndexer.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -34,11 +33,10 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/util/Future.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -145,11 +143,11 @@ BlockIndexer::Imp::Imp(
         auto rc = legacy.AppendFolder(
             out, api_.DataFolder(), legacy.BlockchainCheckpoints());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         rc = legacy.BuildFolderPath(out);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -182,13 +180,13 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 
         if (tip.height_ == existing.height_) {
             if (tip.hash_ == existing.hash_) {
-                log(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
+                log()(name_)(": ancestor block ")(
                     tip)(" matches existing tip ")(existing)
                     .Flush();
 
                 return false;
             } else {
-                log(OT_PRETTY_CLASS())(name_)(": ancestor block ")(
+                log()(name_)(": ancestor block ")(
                     tip)(" does not match existing tip ")(existing)
                     .Flush();
 
@@ -219,8 +217,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
         const auto clean = [&](auto& map, auto name, const auto& cleanup) {
             if (auto i = map.lower_bound(tip.height_); map.end() != i) {
                 if (const auto& pos = i->second->position_; pos == tip) {
-                    log(OT_PRETTY_CLASS())(name_)(": position ")(
-                        pos)(" in the ")(
+                    log()(name_)(": position ")(pos)(" in the ")(
                         name)(" queue matches incoming ancestor")
                         .Flush();
                     ++i;
@@ -229,15 +226,14 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
                 while (map.end() != i) {
                     const auto& stale = i->second->position_;
                     std::invoke(cleanup, i->second);
-                    log(OT_PRETTY_CLASS())(name_)(": erasing stale position ")(
-                        stale)(" from ")(name)(" queue")
+                    log()(name_)(": erasing stale position ")(stale)(" from ")(
+                        name)(" queue")
                         .Flush();
                     i = map.erase(i);
                 }
             } else {
-                log(OT_PRETTY_CLASS())(name_)(": all ")(map.size())(
-                    " blocks in the ")(name)(" queue are below height ")(
-                    tip.height_)
+                log()(name_)(": all ")(map.size())(" blocks in the ")(
+                    name)(" queue are below height ")(tip.height_)
                     .Flush();
             }
         };
@@ -249,7 +245,7 @@ auto BlockIndexer::Imp::adjust_tip(const block::Position& tip) noexcept -> void
 }
 
 auto BlockIndexer::Imp::background(
-    boost::shared_ptr<Imp> me,
+    std::shared_ptr<Imp> me,
     JobPointer job,
     std::shared_ptr<const ScopeGuard> post) noexcept -> void
 {
@@ -258,13 +254,13 @@ auto BlockIndexer::Imp::background(
     using enum Job::State;
 
     try {
-        OT_ASSERT(me);
-        OT_ASSERT(job);
-        OT_ASSERT(post);
+        assert_false(nullptr == me);
+        assert_false(nullptr == job);
+        assert_false(nullptr == post);
 
         auto parent = me->get_allocator();
         // WARNING this function must not be be called from a zmq thread
-        auto monotonic = alloc::Monotonic{parent.resource()};
+        auto monotonic = alloc::MonotonicSync{parent.resource()};
         auto alloc = alloc::Strategy{parent, std::addressof(monotonic)};
         auto block = block::Block{alloc.work_};
         const auto parsed = Parser::Construct(
@@ -284,7 +280,7 @@ auto BlockIndexer::Imp::background(
 
             if (cfilter.IsValid()) {
                 if (!job->state_.compare_exchange_strong(expected, finished)) {
-                    OT_FAIL;
+                    LogAbort()().Abort();
                 }
             } else {
                 const auto error =
@@ -294,16 +290,16 @@ auto BlockIndexer::Imp::background(
                 throw std::runtime_error{error};
             }
         } else {
-            LogError()(OT_PRETTY_STATIC(Imp))(me->name_)(
-                ": redownloading invalid block ")(job->position_)
+            LogError()()(me->name_)(": redownloading invalid block ")(
+                job->position_)
                 .Flush();
 
             if (!job->state_.compare_exchange_strong(expected, redownload)) {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_STATIC(Imp))(me->name_)(": ")(e.what()).Abort();
+        LogAbort()()(me->name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -312,30 +308,26 @@ auto BlockIndexer::Imp::calculate_cfilters() noexcept -> bool
     if (processing_.empty()) { return false; }
 
     const auto& log = log_;
-    log(OT_PRETTY_CLASS())(name_)(": processing ")(processing_.size())(
-        " downloaded jobs")
+    log()(name_)(": processing ")(processing_.size())(" downloaded jobs")
         .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": ")(running_.count())(
-        " jobs already running")
-        .Flush();
+    log()(name_)(": ")(running_.count())(" jobs already running").Flush();
 
     for (const auto& [_, job] : processing_) {
         if (running_.is_limited()) {
-            log(OT_PRETTY_CLASS())(name_)(": maximum job count of ")(
-                running_.limit())(" reached")
+            log()(name_)(": maximum job count of ")(running_.limit())(
+                " reached")
                 .Flush();
 
             return true;
         } else {
-            log(OT_PRETTY_CLASS())(name_)(": processing block ")(job->position_)
-                .Flush();
+            log()(name_)(": processing block ")(job->position_).Flush();
         }
 
         using enum Job::State;
         auto expected{downloaded};
 
         if (job->state_.compare_exchange_strong(expected, running)) {
-            auto me = boost::shared_from(this);
+            auto me = shared_from_this();
             auto post = std::make_shared<ScopeGuard>(
                 [me] { ++me->running_; },
                 [me] {
@@ -371,48 +363,46 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
             auto& job = *pJob;
 
             if (const auto target = tip.height_ + 1; height < target) {
-                LogAbort()(OT_PRETTY_CLASS())(name_)(": block at height ")(
+                LogAbort()()(name_)(": block at height ")(
                     height)(" is in the ready queue even though it should have "
                             "been processed already since the current tip "
                             "height is ")(tip.height_)
                     .Abort();
             } else if (height > target) {
                 if (queued_.contains(target)) {
-                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                    log()(name_)(": next block at height ")(
                         target)(" is queued for download")
                         .Flush();
 
                     break;
                 } else if (downloading_.contains(target)) {
-                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                    log()(name_)(": next block at height ")(
                         target)(" is downloading")
                         .Flush();
 
                     break;
                 } else if (processing_.contains(target)) {
-                    log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
+                    log()(name_)(": next block at height ")(
                         target)(" is processing")
                         .Flush();
 
                     break;
                 } else {
-                    LogAbort()(OT_PRETTY_CLASS())(
-                        name_)(": next block at height ")(
+                    LogAbort()()(name_)(": next block at height ")(
                         target)(" does not exist in any queue")
                         .Abort();
                 }
             } else {
-                log(OT_PRETTY_CLASS())(name_)(": next block at height ")(
-                    target)(" is processed")
+                log()(name_)(": next block at height ")(target)(" is processed")
                     .Flush();
             }
 
             const auto& previous = job.previous_cfheader_;
             auto& cfilter = job.cfilter_;
 
-            OT_ASSERT(finished == job.state_.load());
-            OT_ASSERT(IsReady(previous));
-            OT_ASSERT(cfilter.IsValid());
+            assert_true(finished == job.state_.load());
+            assert_true(IsReady(previous));
+            assert_true(cfilter.IsValid());
 
             const auto cachedBytes = cfilter.size();
             const auto& [ignore1, gcs] =
@@ -432,24 +422,21 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
                 const auto required = params::get(chain_).CfheaderAt(
                     shared_.default_type_, height);
 
-                OT_ASSERT(required.has_value());
+                assert_true(required.has_value());
 
                 if (*required == cfheader) {
-                    log(OT_PRETTY_CLASS())(name_)(
-                        ": calculated cfheader at height ")(
+                    log()(name_)(": calculated cfheader at height ")(
                         height)(" matches checkpoint value")
                         .Flush();
                     get_next_checkpoint(height);
 
                     if (next_checkpoint_.has_value()) {
-                        log(OT_PRETTY_CLASS())(name_)(
-                            ": next checkpoint comparison at height ")(
+                        log()(name_)(": next checkpoint comparison at height ")(
                             *next_checkpoint_)
                             .Flush();
                     } else {
-                        log(OT_PRETTY_CLASS())(name_)(
-                            ": all defined checkpoints have been "
-                            "verified")
+                        log()(name_)(": all defined checkpoints have been "
+                                     "verified")
                             .Flush();
                     }
                 } else {
@@ -499,7 +486,7 @@ auto BlockIndexer::Imp::calculate_cfheaders(allocator_type monotonic) noexcept
 
         return limited;
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -520,13 +507,13 @@ auto BlockIndexer::Imp::do_startup(allocator_type monotonic) noexcept -> bool
     auto [cfheaderTip, cfilterTip] = shared_.Tips();
 
     if (cfheaderTip.height_ > cfilterTip.height_) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": cfilter tip (")(
+        LogError()()(name_)(": cfilter tip (")(
             cfilterTip)(") is behind cfheader tip (")(cfheaderTip)(")")
             .Flush();
         cfheaderTip = cfilterTip;
         const auto rc = shared_.SetCfheaderTip(type, cfheaderTip);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
     }
 
     get_next_checkpoint(cfheaderTip.height_);
@@ -571,8 +558,7 @@ auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
 
         switch (job->state_.load()) {
             case waiting: {
-                LogAbort()(OT_PRETTY_CLASS())(
-                    name_)(": waiting job found in processing queue")
+                LogAbort()()(name_)(": waiting job found in processing queue")
                     .Abort();
             }
             case downloaded:
@@ -595,8 +581,7 @@ auto BlockIndexer::Imp::find_finished(allocator_type monotonic) noexcept -> void
                 i = j;
             } break;
             default: {
-                LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid job state")
-                    .Abort();
+                LogAbort()()(name_)(": invalid job state").Abort();
             }
         }
     }
@@ -610,7 +595,7 @@ auto BlockIndexer::Imp::get_next_checkpoint(block::Height tip) noexcept -> void
         params::get(chain_).CfheaderAfter(shared_.default_type_, tip);
 }
 
-auto BlockIndexer::Imp::Init(boost::shared_ptr<Imp> me) noexcept -> void
+auto BlockIndexer::Imp::Init(std::shared_ptr<Imp> me) noexcept -> void
 {
     signal_startup(me);
 }
@@ -624,8 +609,7 @@ auto BlockIndexer::Imp::load_tip(const block::Position& value) noexcept -> void
     promise.set_value(shared_.LoadCfheader(shared_.default_type_, tip.hash_));
 
     if (cfheader.get().empty()) {
-        LogAbort()(OT_PRETTY_CLASS())(
-            name_)(": failed to load cfheader for block ")(tip)
+        LogAbort()()(name_)(": failed to load cfheader for block ")(tip)
             .Abort();
     }
 }
@@ -662,12 +646,11 @@ auto BlockIndexer::Imp::pipeline(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -689,7 +672,7 @@ auto BlockIndexer::Imp::previous_cfheader(allocator_type monotonic)
                 auto [_, added] = out.try_emplace(i->first, i);
 
                 // NOTE the same block must never appear in multiple maps
-                OT_ASSERT(added);
+                assert_true(added);
             }
         };
         check(queued_);
@@ -768,20 +751,14 @@ auto BlockIndexer::Imp::process_block_ready(
             downloader_.ReceiveBlock(hash, block, cb);
         }
 
-        log(OT_PRETTY_CLASS())(name_)(": moved ")(
+        log()(name_)(": moved ")(
             count)(" blocks from download queue to process queue.")
             .Flush();
-        log(OT_PRETTY_CLASS())(name_)(": download queue size: ")(
-            downloading_.size())
-            .Flush();
-        log(OT_PRETTY_CLASS())(name_)(": process queue size: ")(
-            processing_.size())
-            .Flush();
-        log(OT_PRETTY_CLASS())(name_)(": finished queue size: ")(
-            finished_.size())
-            .Flush();
+        log()(name_)(": download queue size: ")(downloading_.size()).Flush();
+        log()(name_)(": process queue size: ")(processing_.size()).Flush();
+        log()(name_)(": finished queue size: ")(finished_.size()).Flush();
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -789,13 +766,9 @@ auto BlockIndexer::Imp::process_job_finished(Message&& in) noexcept -> void
 {
     const auto& log = log_;
     notified_.store(false);
-    log(OT_PRETTY_CLASS())(name_)(": download queue size: ")(
-        downloading_.size())
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": process queue size: ")(processing_.size())
-        .Flush();
-    log(OT_PRETTY_CLASS())(name_)(": finished queue size: ")(finished_.size())
-        .Flush();
+    log()(name_)(": download queue size: ")(downloading_.size()).Flush();
+    log()(name_)(": process queue size: ")(processing_.size()).Flush();
+    log()(name_)(": finished queue size: ")(finished_.size()).Flush();
 }
 
 auto BlockIndexer::Imp::process_reindex(Message&&) noexcept -> void
@@ -807,7 +780,7 @@ auto BlockIndexer::Imp::process_reorg(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(body.size() > 2_uz);
+    assert_true(body.size() > 2_uz);
 
     process_reorg(block::Position{
         body[2].as<block::Height>(),
@@ -839,17 +812,17 @@ auto BlockIndexer::Imp::queue_blocks(allocator_type monotonic) noexcept -> bool
                 index_[hash] = height;
                 auto& [prior, cfheader] = previous;
 
-                OT_ASSERT(prior + 1 == height);
+                assert_true(prior + 1 == height);
 
                 const auto [i, added] = queued_.try_emplace(
                     height,
-                    boost::allocate_shared<Job>(alloc, hash, cfheader, height));
+                    std::allocate_shared<Job>(alloc, hash, cfheader, height));
 
-                OT_ASSERT(added);
+                assert_true(added);
 
                 const auto& pJob = i->second;
 
-                OT_ASSERT(pJob);
+                assert_false(nullptr == pJob);
 
                 const auto& job = *pJob;
                 cfheader = job.future_;
@@ -859,7 +832,7 @@ auto BlockIndexer::Imp::queue_blocks(allocator_type monotonic) noexcept -> bool
 
         return more;
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Abort();
+        LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
@@ -903,11 +876,11 @@ auto BlockIndexer::Imp::reset_to_genesis() noexcept -> void
     const auto position = shared_.header_.GetPosition(0);
     auto rc = shared_.SetCfheaderTip(type, position);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     rc = shared_.SetCfilterTip(type, position);
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 }
 
 auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
@@ -922,7 +895,7 @@ auto BlockIndexer::Imp::update_checkpoint() noexcept -> void
             write_checkpoint(h);
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             name_)(": last checkpoint is not aligned to expected interval")
             .Flush();
     }
@@ -972,21 +945,18 @@ BlockIndexer::BlockIndexer(
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared) noexcept
     : imp_([&] {
-        OT_ASSERT(api);
-        OT_ASSERT(node);
-        OT_ASSERT(shared);
+        assert_false(nullptr == api);
+        assert_false(nullptr == node);
+        assert_false(nullptr == shared);
 
         const auto& zmq = shared->api_.Network().ZeroMQ().Internal();
         const auto batchID = zmq.PreallocateBatch();
-        // TODO the version of libc++ present in android ndk 23.0.7599858
-        // has a broken std::allocate_shared function so we're using
-        // boost::shared_ptr instead of std::shared_ptr
 
-        return boost::allocate_shared<Imp>(
+        return std::allocate_shared<Imp>(
             alloc::PMR<Imp>{zmq.Alloc(batchID)}, api, node, shared, batchID);
     }())
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto BlockIndexer::Start() noexcept -> void { imp_->Init(imp_); }

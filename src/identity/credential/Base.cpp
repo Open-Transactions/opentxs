@@ -23,7 +23,6 @@
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -145,7 +144,7 @@ auto Base::calculate_id() const -> identifier_type
 {
     auto idVersion = id_form();
 
-    OT_ASSERT(idVersion);
+    assert_false(nullptr == idVersion);
 
     return api_.Factory().InternalSession().IdentifierFromPreimage(*idVersion);
 }
@@ -264,9 +263,8 @@ auto Base::Save() const -> bool
     std::shared_ptr<SerializedType> serializedProto;
 
     if (!isValid(serializedProto)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Unable to save serialized credential. Type (")(value(role_))(
-            "), version ")(Version())
+        LogError()()("Unable to save serialized credential. Type (")(
+            value(role_))("), version ")(Version())
             .Flush();
 
         return false;
@@ -276,7 +274,7 @@ auto Base::Save() const -> bool
         api_.Wallet().Internal().SaveCredential(*serializedProto);
 
     if (!bSaved) {
-        LogError()(OT_PRETTY_CLASS())("Error saving credential.").Flush();
+        LogError()()("Error saving credential.").Flush();
 
         return false;
     }
@@ -313,7 +311,7 @@ auto Base::serialize(
         if (crypto::asymmetric::Mode::Private == mode_) {
             out->set_mode(translate(mode_));
         } else {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Can't serialize a public credential as a private credential.")
                 .Flush();
 
@@ -391,7 +389,7 @@ auto Base::SourceSignature() const -> contract::Signature
 /** Override this method for credentials capable of deriving transport keys */
 auto Base::TransportKey(Data&, Secret&, const PasswordPrompt&) const -> bool
 {
-    OT_ASSERT_MSG(false, "This method was called on the wrong credential.");
+    assert_true(false, "This method was called on the wrong credential.");
 
     return false;
 }
@@ -413,8 +411,7 @@ auto Base::Verify(
     const identifier_type& masterID,
     const proto::Signature& masterSig) const -> bool
 {
-    LogError()(OT_PRETTY_CLASS())(
-        "Non-key credentials are not able to verify signatures")
+    LogError()()("Non-key credentials are not able to verify signatures")
         .Flush();
 
     return false;
@@ -425,7 +422,7 @@ auto Base::Verify(
 auto Base::verify_internally() const -> bool
 {
     if (!check_id()) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Purported ID for this credential does not match its actual "
             "contents.")
             .Flush();
@@ -442,7 +439,7 @@ auto Base::verify_internally() const -> bool
     }
 
     if (!GoodMasterSignature) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "This credential hasn't been signed by its master credential.")
             .Flush();
 
@@ -458,7 +455,7 @@ auto Base::verify_master_signature() const -> bool
     auto masterSig = MasterSignature();
 
     if (!masterSig) {
-        LogError()(OT_PRETTY_CLASS())("Missing master signature.").Flush();
+        LogError()()("Missing master signature.").Flush();
 
         return false;
     }

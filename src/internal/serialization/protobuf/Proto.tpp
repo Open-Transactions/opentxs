@@ -15,7 +15,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
@@ -40,8 +39,8 @@ auto Factory(const void* input, const std::size_t size) -> Output
         static_cast<std::size_t>(std::numeric_limits<int>::max());
 
     if (size > max) {
-        LogAbort()("opentxs::proto::")(__func__)(
-            ": attempted to construct protobuf from ")(size)(" byte array")
+        LogAbort()()("attempted to construct protobuf from ")(
+            size)(" byte array")
             .Abort();
     }
 

@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include <boost/smart_ptr/enable_shared_from.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cs_plain_guarded.h>
+#include <memory>
 #include <optional>
 #include <string_view>
 
@@ -63,8 +62,9 @@ class Log;
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 namespace opentxs::blockchain::node::wallet
 {
-class ReorgMasterPrivate final : public Allocated,
-                                 public boost::enable_shared_from
+class ReorgMasterPrivate final
+    : public Allocated,
+      public std::enable_shared_from_this<ReorgMasterPrivate>
 {
 public:
     using SlaveID = int;
@@ -91,7 +91,7 @@ public:
         -> bool;
     [[nodiscard]] auto PrepareReorg(StateSequence id) noexcept -> bool;
     [[nodiscard]] auto PrepareShutdown() noexcept -> bool;
-    auto Register(boost::shared_ptr<ReorgSlavePrivate> slave) noexcept
+    auto Register(std::shared_ptr<ReorgSlavePrivate> slave) noexcept
         -> Reorg::State;
     auto Stop() noexcept -> void;
     auto Unregister(SlaveID id) noexcept -> void;
@@ -111,8 +111,8 @@ private:
         const network::zeromq::Pipeline& parent_;
         Reorg::State state_;
         SlaveID counter_;
-        Map<SlaveID, boost::shared_ptr<ReorgSlavePrivate>> shutdown_slaves_;
-        Map<SlaveID, boost::shared_ptr<ReorgSlavePrivate>> reorg_slaves_;
+        Map<SlaveID, std::shared_ptr<ReorgSlavePrivate>> shutdown_slaves_;
+        Map<SlaveID, std::shared_ptr<ReorgSlavePrivate>> reorg_slaves_;
         Map<SlaveID, Reorg::Job> actions_;
         Set<SlaveID> shutdown_acks_;
         Set<SlaveID> reorg_acks_;

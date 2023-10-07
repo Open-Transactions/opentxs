@@ -11,7 +11,6 @@
 #include "internal/network/zeromq/zap/Handler.hpp"
 #include "internal/network/zeromq/zap/Reply.hpp"
 #include "internal/network/zeromq/zap/Request.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.tpp"
@@ -62,9 +61,9 @@ auto Handler::init() noexcept -> void
     Receiver::init();
     const auto running = Receiver::Start(endpoint);
 
-    OT_ASSERT(running);
+    assert_true(running);
 
-    LogDetail()(OT_PRETTY_CLASS())("Listening on ")(endpoint).Flush();
+    LogDetail()()("Listening on ")(endpoint).Flush();
 }
 
 auto Handler::process_incoming(

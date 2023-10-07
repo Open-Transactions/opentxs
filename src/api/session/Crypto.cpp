@@ -8,10 +8,10 @@
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/session/Factory.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -58,7 +58,7 @@ Crypto::Crypto(
           zmq))
     , seed_(*seed_p_)
 {
-    OT_ASSERT(seed_p_);
+    assert_false(nullptr == seed_p_);
 }
 
 auto Crypto::Blockchain() const noexcept -> const crypto::Blockchain&

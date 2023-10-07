@@ -8,13 +8,13 @@
 #include <boost/program_options.hpp>
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
@@ -409,9 +409,8 @@ auto Options::Imp::import_value(
 auto Options::Imp::lower(std::string_view in) noexcept -> CString
 {
     auto out = CString{};
-    std::transform(in.begin(), in.end(), std::back_inserter(out), [](auto c) {
-        return std::tolower(c);
-    });
+    std::ranges::transform(
+        in, std::back_inserter(out), [](auto c) { return std::tolower(c); });
 
     return out;
 }
@@ -682,24 +681,20 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
     auto& l = *out.imp_;
     const auto& r = *rhs.imp_;
 
-    std::copy(
-        r.blockchain_disabled_chains_.begin(),
-        r.blockchain_disabled_chains_.end(),
+    std::ranges::copy(
+        r.blockchain_disabled_chains_,
         std::inserter(
             l.blockchain_disabled_chains_,
             l.blockchain_disabled_chains_.end()));
-    std::copy(
-        r.blockchain_reset_cfilter_.begin(),
-        r.blockchain_reset_cfilter_.end(),
+    std::ranges::copy(
+        r.blockchain_reset_cfilter_,
         std::inserter(
             l.blockchain_reset_cfilter_, l.blockchain_reset_cfilter_.end()));
-    std::copy(
-        r.blockchain_ipv4_bind_.begin(),
-        r.blockchain_ipv4_bind_.end(),
+    std::ranges::copy(
+        r.blockchain_ipv4_bind_,
         std::inserter(l.blockchain_ipv4_bind_, l.blockchain_ipv4_bind_.end()));
-    std::copy(
-        r.blockchain_ipv6_bind_.begin(),
-        r.blockchain_ipv6_bind_.end(),
+    std::ranges::copy(
+        r.blockchain_ipv6_bind_,
         std::inserter(l.blockchain_ipv6_bind_, l.blockchain_ipv6_bind_.end()));
 
     if (const auto& v = r.blockchain_profile_; v.has_value()) {
@@ -710,9 +705,8 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
         l.blockchain_sync_server_enabled_ = v.value();
     }
 
-    std::copy(
-        r.blockchain_sync_servers_.begin(),
-        r.blockchain_sync_servers_.end(),
+    std::ranges::copy(
+        r.blockchain_sync_servers_,
         std::inserter(
             l.blockchain_sync_servers_, l.blockchain_sync_servers_.end()));
 
@@ -772,21 +766,17 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
         l.notary_name_ = v.value();
     }
 
-    std::copy(
-        r.notary_public_eep_.begin(),
-        r.notary_public_eep_.end(),
+    std::ranges::copy(
+        r.notary_public_eep_,
         std::inserter(l.notary_public_eep_, l.notary_public_eep_.end()));
-    std::copy(
-        r.notary_public_ipv4_.begin(),
-        r.notary_public_ipv4_.end(),
+    std::ranges::copy(
+        r.notary_public_ipv4_,
         std::inserter(l.notary_public_ipv4_, l.notary_public_ipv4_.end()));
-    std::copy(
-        r.notary_public_ipv6_.begin(),
-        r.notary_public_ipv6_.end(),
+    std::ranges::copy(
+        r.notary_public_ipv6_,
         std::inserter(l.notary_public_ipv6_, l.notary_public_ipv6_.end()));
-    std::copy(
-        r.notary_public_onion_.begin(),
-        r.notary_public_onion_.end(),
+    std::ranges::copy(
+        r.notary_public_onion_,
         std::inserter(l.notary_public_onion_, l.notary_public_onion_.end()));
 
     if (const auto& v = r.notary_public_port_; v.has_value()) {
@@ -797,10 +787,8 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
         l.notary_terms_ = v.value();
     }
 
-    std::copy(
-        r.otdht_listeners_.begin(),
-        r.otdht_listeners_.end(),
-        std::back_inserter(l.otdht_listeners_));
+    std::ranges::copy(
+        r.otdht_listeners_, std::back_inserter(l.otdht_listeners_));
 
     if (const auto& v = r.qt_root_object_; v.has_value()) {
         l.qt_root_object_ = v.value();
@@ -820,7 +808,7 @@ auto operator+(const Options& lhs, const Options& rhs) noexcept -> Options
 Options::Options() noexcept
     : imp_(std::make_unique<Imp>().release())
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Options::Options(int argc, char** argv) noexcept
@@ -832,13 +820,13 @@ Options::Options(int argc, char** argv) noexcept
 Options::Options(const Options& rhs) noexcept
     : imp_(std::make_unique<Imp>(*rhs.imp_).release())
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Options::Options(Options&& rhs) noexcept
     : imp_(std::exchange(rhs.imp_, nullptr))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 auto Options::AddBlockchainIpv4Bind(std::string_view endpoint) noexcept
@@ -1069,7 +1057,7 @@ auto Options::ParseCommandLine(int argc, char** argv) noexcept -> Options&
     try {
         imp_->parse(argc, argv);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 
     return *this;

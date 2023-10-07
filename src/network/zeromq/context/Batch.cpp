@@ -6,6 +6,7 @@
 #include "internal/network/zeromq/Batch.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 
 #include "internal/network/zeromq/ListenCallback.hpp"
@@ -27,11 +28,9 @@ Batch::Batch(
     , toggle_(false)
 {
     sockets_.reserve(types.size());
-    std::transform(
-        types.begin(),
-        types.end(),
-        std::back_inserter(sockets_),
-        [&](auto type) { return factory::ZMQSocket(context, type); });
+    std::ranges::transform(types, std::back_inserter(sockets_), [&](auto type) {
+        return factory::ZMQSocket(context, type);
+    });
 }
 
 auto Batch::ClearCallbacks() noexcept -> void

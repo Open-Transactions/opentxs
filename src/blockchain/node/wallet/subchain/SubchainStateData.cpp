@@ -17,6 +17,7 @@
 #include <iterator>
 #include <memory>
 #include <numeric>
+#include <ranges>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -46,10 +47,9 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/OT.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -261,8 +261,8 @@ SubchainStateData::SubchainStateData(
     , reorg_(reorg.GetSlave(pipeline_, name_, alloc))
     , rescan_pending_(false)
 {
-    OT_ASSERT(false == owner_.empty());
-    OT_ASSERT(false == id_.empty());
+    assert_false(owner_.empty());
+    assert_false(id_.empty());
 }
 
 SubchainStateData::SubchainStateData(
@@ -348,7 +348,7 @@ auto SubchainStateData::do_reorg(
 {
     auto alloc = alloc::Strategy{get_allocator()};  // TODO
     auto& [position, tx] = params;
-    log_(OT_PRETTY_CLASS())(name_)(" processing reorg to ")(position).Flush();
+    log_()(name_)(" processing reorg to ")(position).Flush();
     const auto tip = db_.SubchainLastScanned(db_key_);
 
     try {
@@ -357,14 +357,12 @@ auto SubchainStateData::do_reorg(
             oracle.Internal().CalculateReorg(data, tip, get_allocator());
 
         if (reorg.empty()) {
-            log_(OT_PRETTY_CLASS())(name_)(
-                " no action required for this subchain")
-                .Flush();
+            log_()(name_)(" no action required for this subchain").Flush();
             need_reorg_ = false;
 
             return true;
         } else {
-            log_(OT_PRETTY_CLASS())(name_)(" ")(reorg.size())(
+            log_()(name_)(" ")(reorg.size())(
                 " previously mined blocks have been invalidated")
                 .Flush();
             need_reorg_ = true;
@@ -380,14 +378,14 @@ auto SubchainStateData::do_reorg(
                 reorg,
                 tx,
                 alloc)) {
-            LogError()(OT_PRETTY_CLASS())(name_)(" database error").Flush();
+            LogError()()(name_)(" database error").Flush();
         } else {
 
             return false;
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())(
-            name_)(" header oracle claims existing tip ")(tip)(" is invalid")
+        LogError()()(name_)(" header oracle claims existing tip ")(
+            tip)(" is invalid")
             .Flush();
 
         return false;
@@ -480,8 +478,7 @@ auto SubchainStateData::get_targets(const TXOs& utxos, Targets& targets)
         } break;
         case cfilter::Type::UnknownCfilter:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid cfilter type")
-                .Abort();
+            LogAbort()()(name_)(": invalid cfilter type").Abort();
         }
     }
 }
@@ -525,8 +522,7 @@ auto SubchainStateData::IndexElement(
     const Bip32Index index,
     database::ElementMap& output) const noexcept -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(" element ")(
-        index)(" extracting filter matching patterns")
+    log_()(name_)(" element ")(index)(" extracting filter matching patterns")
         .Flush();
     auto& list = output[index];
     const auto scripts = supported_scripts(input);
@@ -548,13 +544,12 @@ auto SubchainStateData::IndexElement(
         } break;
         case cfilter::Type::UnknownCfilter:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid cfilter type")
-                .Abort();
+            LogAbort()()(name_)(": invalid cfilter type").Abort();
         }
     }
 }
 
-auto SubchainStateData::Init(boost::shared_ptr<SubchainStateData> me) noexcept
+auto SubchainStateData::Init(std::shared_ptr<SubchainStateData> me) noexcept
     -> void
 {
     signal_startup(me);
@@ -579,7 +574,7 @@ auto SubchainStateData::pipeline(
             // NOTE do nothing
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid state").Abort();
+            LogAbort()()(name_)(": invalid state").Abort();
         }
     }
 }
@@ -588,7 +583,7 @@ auto SubchainStateData::process_prepare_reorg(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     transition_state_reorg(body[1].as<StateSequence>());
 }
@@ -602,7 +597,7 @@ auto SubchainStateData::process_watchdog_ack(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     child_activity_.at(body[1].as<JobType>()) = Clock::now();
 }
@@ -641,7 +636,7 @@ auto SubchainStateData::ProcessBlock(
         const auto cfilter =
             filters.LoadFilter(type, blockHash, {get_allocator(), monotonic});
 
-        OT_ASSERT(cfilter.IsValid());
+        assert_true(cfilter.IsValid());
 
         keyMatches = key.size();
         txoMatches = outpoint.size();
@@ -653,15 +648,15 @@ auto SubchainStateData::ProcessBlock(
     const auto& oracle = node.HeaderOracle();
     const auto header = oracle.LoadHeader(blockHash);
 
-    OT_ASSERT(header.IsValid());
-    OT_ASSERT(position == header.Position());
+    assert_true(header.IsValid());
+    assert_true(position == header.Position());
 
     handle_block_matches(position, confirmed, log, block, monotonic);
     LogConsole()(name)(" processed block ")(position).Flush();
-    log(OT_PRETTY_CLASS())(name)(" ")(general.size())(" of ")(
+    log()(name)(" ")(general.size())(" of ")(
         keyMatches)(" potential key matches confirmed.")
         .Flush();
-    log(OT_PRETTY_CLASS())(name)(" ")(utxo.size())(" of ")(
+    log()(name)(" ")(utxo.size())(" of ")(
         txoMatches)(" potential utxo matches confirmed.")
         .Flush();
 
@@ -685,8 +680,8 @@ auto SubchainStateData::ProcessTransaction(
             api_, filter_type_, outpoints, parsed, log, monotonic, monotonic);
     }();
     const auto& [utxo, general] = matches;
-    log(OT_PRETTY_CLASS())(name_)(" mempool transaction ")(tx.ID().asHex())(
-        " matches ")(utxo.size())(" utxos and ")(general.size())(" keys")
+    log()(name_)(" mempool transaction ")(tx.ID().asHex())(" matches ")(
+        utxo.size())(" utxos and ")(general.size())(" keys")
         .Flush();
     handle_mempool_match(matches, tx, monotonic);
 }
@@ -699,7 +694,7 @@ auto SubchainStateData::RescanFinished() const noexcept -> void
 auto SubchainStateData::ReportScan(const block::Position& pos) const noexcept
     -> void
 {
-    log_(OT_PRETTY_CLASS())(name_)(" progress updated to ")(pos).Flush();
+    log_()(name_)(" progress updated to ")(pos).Flush();
     subaccount_.Internal().SetScanProgress(pos, subchain_);
     api_.Crypto().Blockchain().Internal().ReportScan(
         chain_, owner_, account_type_, id_, subchain_, pos);
@@ -776,14 +771,13 @@ auto SubchainStateData::scan(
             }
 
             const auto count = out.size();
-            log(OT_PRETTY_CLASS())(name)(" ")(procedure)(" found ")(
+            log()(name)(" ")(procedure)(" found ")(
                 count)(" new potential matches between blocks ")(
                 startHeight)(" and ")(highestTested.height_)(" in ")(
                 std::chrono::nanoseconds{Clock::now() - start})
                 .Flush();
         } else {
-            log_(OT_PRETTY_CLASS())(name)(" ")(procedure)(" interrupted")
-                .Flush();
+            log_()(name)(" ")(procedure)(" interrupted").Flush();
         }
 
         return highestClean;
@@ -822,7 +816,7 @@ auto SubchainStateData::scan(
         }
     }();
 
-    OT_ASSERT(0_uz < elementsPerFilter);
+    assert_true(0_uz < elementsPerFilter);
 
     constexpr auto GetBatchSize = [](std::size_t cfilter, std::size_t user) {
         constexpr auto cfilterWeight = 1_uz;
@@ -861,29 +855,27 @@ auto SubchainStateData::scan(
     // subchain (known).
     const auto threads = choose_thread_count(elementCount);
 
-    OT_ASSERT(0_uz < threads);
+    assert_true(0_uz < threads);
 
     const auto scanBatch = std::min(
         maximum_scan_, GetBatchSize(elementsPerFilter, elementCount) * threads);
-    log(OT_PRETTY_CLASS())(name_)(" filter size: ")(
-        elementsPerFilter)(" wallet size: ")(elementCount)(" batch size: ")(
-        scanBatch)
+    log()(name_)(" filter size: ")(elementsPerFilter)(" wallet size: ")(
+        elementCount)(" batch size: ")(scanBatch)
         .Flush();
     const auto stopHeight = std::min(
         std::min<block::Height>(startHeight + scanBatch - 1, best.height_),
         stop);
 
     if (startHeight > stopHeight) {
-        log(OT_PRETTY_CLASS())(name_)(" attempted to ")(
-            procedure)(" filters from ")(startHeight)(" to ")(
-            stopHeight)(" but this is impossible")
+        log()(name_)(" attempted to ")(procedure)(" filters from ")(
+            startHeight)(" to ")(stopHeight)(" but this is impossible")
             .Flush();
 
         throw std::runtime_error{""};
     }
 
-    log(OT_PRETTY_CLASS())(name_)(" ")(procedure)("ning filters from ")(
-        startHeight)(" to ")(stopHeight)
+    log()(name_)(" ")(procedure)("ning filters from ")(startHeight)(" to ")(
+        stopHeight)
         .Flush();
     const auto target = static_cast<std::size_t>(stopHeight - startHeight + 1);
     const auto blocks =
@@ -895,7 +887,7 @@ auto SubchainStateData::scan(
     auto filterFuture = filterPromise.get_future();
     RunJob([me = shared_from_this(), &filterPromise, &blocks] {
         auto alloc = me->get_allocator();
-        auto mr = alloc::Monotonic{alloc.resource()};
+        auto mr = alloc::MonotonicSync{alloc.resource()};
         filterPromise.set_value(me->node_.FilterOracle().LoadFilters(
             me->filter_type_, blocks, {alloc, std::addressof(mr)}));
     });
@@ -903,7 +895,7 @@ auto SubchainStateData::scan(
     select_targets(*elementcache, blocks, elements, startHeight, selected);
     elementcache.reset();
 
-    OT_ASSERT(false == selected.empty());
+    assert_false(selected.empty());
 
     auto prehash = PrehashData{
         api_,
@@ -915,33 +907,32 @@ auto SubchainStateData::scan(
         monotonic};
     prehash.Prepare();
     const auto havePrehash = Clock::now();
-    log_(OT_PRETTY_CLASS())(name_)(" ")(
-        procedure)(" calculated target hashes for ")(blocks.size())(
-        " cfilters in ")(std::chrono::nanoseconds{havePrehash - start})
+    log_()(name_)(" ")(procedure)(" calculated target hashes for ")(
+        blocks.size())(" cfilters in ")(
+        std::chrono::nanoseconds{havePrehash - start})
         .Flush();
     const auto cfilters = [&] {
         auto output = filterFuture.get();
         output.erase(
-            std::find_if(
-                output.begin(),
-                output.end(),
+            std::ranges::find_if(
+                output,
                 [](const auto& filter) { return false == filter.IsValid(); }),
             output.end());
 
         return output;
     }();
     const auto haveCfilters = Clock::now();
-    log_(OT_PRETTY_CLASS())(name_)(" ")(procedure)(" loaded cfilters in ")(
+    log_()(name_)(" ")(procedure)(" loaded cfilters in ")(
         std::chrono::nanoseconds{haveCfilters - havePrehash})
         .Flush();
     const auto cfilterCount = cfilters.size();
 
-    OT_ASSERT(cfilterCount <= blocks.size());
+    assert_true(cfilterCount <= blocks.size());
 
     auto data = MatchResults{std::make_tuple(
         Positions{monotonic}, Positions{monotonic}, FilterMap{monotonic})};
 
-    OT_ASSERT(0_uz < selected.size());
+    assert_true(0_uz < selected.size());
 
     prehash.Match(
         procedure, log, cfilters, atLeastOnce, results, data, monotonic);
@@ -951,34 +942,29 @@ auto SubchainStateData::scan(
         const auto& [clean, dirty, sizes] = *handle;
 
         if (auto size = dirty.size(); 0 < size) {
-            log_(OT_PRETTY_CLASS())(name_)(" requesting ")(
+            log_()(name_)(" requesting ")(
                 size)(" block hashes from block oracle")
                 .Flush();
-            to_block_oracle_.SendDeferred(
-                [&](const auto& positions) {
-                    auto work =
-                        MakeWork(node::blockoracle::Job::request_blocks);
+            to_block_oracle_.SendDeferred([&](const auto& positions) {
+                auto work = MakeWork(node::blockoracle::Job::request_blocks);
 
-                    for (const auto& position : positions) {
-                        const auto& [height, hash] = position;
-                        work.AddFrame(hash);
-                        out.emplace_back(ScanState::dirty, position);
-                    }
+                for (const auto& position : positions) {
+                    const auto& [height, hash] = position;
+                    work.AddFrame(hash);
+                    out.emplace_back(ScanState::dirty, position);
+                }
 
-                    return work;
-                }(dirty),
-                __FILE__,
-                __LINE__);
+                return work;
+            }(dirty));
         }
 
         highestClean = highest_clean(*handle, highestTested);
 
         if (false == rescan) {
-            std::transform(
-                sizes.begin(),
-                sizes.end(),
-                std::back_inserter(filter_sizes_),
-                [](const auto& in) { return in.second; });
+            std::ranges::transform(
+                sizes, std::back_inserter(filter_sizes_), [](const auto& in) {
+                    return in.second;
+                });
 
             // NOTE these statements calculate a 1000 block (or whatever
             // cfilter_size_window_ is set to) simple moving average of
@@ -1093,8 +1079,7 @@ auto SubchainStateData::select_matches(
         // ElementCache::Forget, but that should never be called until there is
         // no possibility that blocks at or below that position will be
         // processed.
-        log_(OT_PRETTY_CLASS())(name_)(" existing matches for block ")(
-            block)(" not found")
+        log_()(name_)(" existing matches for block ")(block)(" not found")
             .Flush();
 
         return false;
@@ -1236,7 +1221,7 @@ auto SubchainStateData::select_targets(
 
 auto SubchainStateData::start_rescan() const noexcept -> void
 {
-    to_scan_.Send(MakeWork(Work::do_rescan), __FILE__, __LINE__);
+    to_scan_.Send(MakeWork(Work::do_rescan));
 }
 
 auto SubchainStateData::state_normal(const Work work, Message&& msg) noexcept
@@ -1259,8 +1244,7 @@ auto SubchainStateData::state_normal(const Work work, Message&& msg) noexcept
             transition_state_pre_shutdown();
         } break;
         case Work::finish_reorg: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
@@ -1298,8 +1282,7 @@ auto SubchainStateData::state_pre_shutdown(
         case Work::prepare_reorg:
         case Work::finish_reorg:
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(" wrong state for ")(
-                print(work))(" message")
+            LogAbort()()(name_)(" wrong state for ")(print(work))(" message")
                 .Abort();
         }
         case Work::shutdown:
@@ -1340,9 +1323,7 @@ auto SubchainStateData::state_reorg(const Work work, Message&& msg) noexcept
             // NOTE ignore message
         } break;
         case Work::prepare_shutdown: {
-            LogAbort()(OT_PRETTY_CLASS())("wrong state for ")(print(work))(
-                " message")
-                .Abort();
+            LogAbort()()("wrong state for ")(print(work))(" message").Abort();
         }
         case Work::shutdown:
         case Work::filter:
@@ -1412,7 +1393,7 @@ auto SubchainStateData::TriggerRescan() const noexcept -> void
 auto SubchainStateData::transition_state_normal() noexcept -> void
 {
     state_ = State::normal;
-    log_(OT_PRETTY_CLASS())(name_)(" transitioned to normal state ").Flush();
+    log_()(name_)(" transitioned to normal state ").Flush();
     trigger();
 }
 
@@ -1421,26 +1402,24 @@ auto SubchainStateData::transition_state_pre_shutdown() noexcept -> void
     watchdog_.Cancel();
     reorg_.AcknowledgeShutdown();
     state_ = State::pre_shutdown;
-    log_(OT_PRETTY_CLASS())(name_)(": transitioned to pre_shutdown state")
-        .Flush();
+    log_()(name_)(": transitioned to pre_shutdown state").Flush();
 }
 
 auto SubchainStateData::transition_state_reorg(StateSequence id) noexcept
     -> void
 {
-    OT_ASSERT(0_uz < id);
+    assert_true(0_uz < id);
 
     if (0_uz == reorgs_.count(id)) {
         reorgs_.emplace(id);
         state_ = State::reorg;
-        log_(OT_PRETTY_CLASS())(name_)(" ready to process reorg ")(id).Flush();
+        log_()(name_)(" ready to process reorg ")(id).Flush();
         reorg_.AcknowledgePrepareReorg(
             [this](const auto& header, const auto& lock, auto& params) {
                 return do_reorg(header, lock, params);
             });
     } else {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" reorg ")(id)(" already handled")
-            .Abort();
+        LogAbort()()(name_)(" reorg ")(id)(" already handled").Abort();
     }
 }
 
@@ -1454,18 +1433,18 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
     for (const auto& [outpoint, output] : utxos) {
         const auto keys = output.Keys({});  // TODO allocator
 
-        OT_ASSERT(0 < keys.size());
+        assert_true(0 < keys.size());
         // TODO the assertion below will not always be true in the future but
         // for now it will catch some bugs
-        OT_ASSERT(1 == keys.size());
+        assert_true(1 == keys.size());
 
         for (const auto& key : keys) {
             const auto& [account, subchain, index] = key;
 
-            OT_ASSERT(false == account.empty());
+            assert_false(account.empty());
             // TODO the assertion below will not always be true in the future
             // but for now it will catch some bugs
-            OT_ASSERT(account == id_);
+            assert_true(account == id_);
 
             outpoints.emplace_back(
                 block::ElementIndex{

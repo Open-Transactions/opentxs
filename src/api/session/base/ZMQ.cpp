@@ -6,7 +6,7 @@
 #include "api/session/base/ZMQ.hpp"  // IWYU pragma: associated
 
 #include "internal/api/session/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::session
 {
@@ -19,6 +19,6 @@ ZMQ::ZMQ(
     , endpoints_p_(factory::EndpointsAPI(crypto, instance_))
     , endpoints_(*endpoints_p_)
 {
-    OT_ASSERT(endpoints_p_);
+    assert_false(nullptr == endpoints_p_);
 }
 }  // namespace opentxs::api::session

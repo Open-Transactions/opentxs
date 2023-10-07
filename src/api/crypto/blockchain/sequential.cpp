@@ -6,6 +6,7 @@
 #include "api/crypto/blockchain/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>  // IWYU pragma: keep
+#include <ranges>
 
 #include "internal/blockchain/crypto/Account.hpp"  // IWYU pragma: keep
 
@@ -17,6 +18,6 @@ auto Blockchain::Imp::get(
         opentxs::blockchain::crypto::Notifications*>> in) const noexcept -> void
 {
     const auto cb = [](const auto& i) { i.first->Internal().Get(*i.second); };
-    std::for_each(in.begin(), in.end(), cb);
+    std::ranges::for_each(in, cb);
 }
 }  // namespace opentxs::api::crypto::imp

@@ -12,7 +12,6 @@
 #include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/util/Container.hpp"
@@ -48,9 +47,7 @@ auto ConfigLoader::load(
                 bIsNewKey);
             walletFilename.Set(strValue);
             {
-                LogDetail()(OT_PRETTY_STATIC(ConfigLoader))("Using Wallet: ")(
-                    strValue.get())(".")
-                    .Flush();
+                LogDetail()()("Using Wallet: ")(strValue.get())(".").Flush();
             }
         }
         // CRON
@@ -402,15 +399,13 @@ auto ConfigLoader::load(
             ServerSettings::_cmd_request_admin);
         // Done Loading... Lets save any changes...
         if (!config.Internal().Save()) {
-            LogError()(OT_PRETTY_STATIC(ConfigLoader))(
-                "Error! Unable to save updated Config!!!")
-                .Flush();
-            OT_FAIL;
+            LogError()()("Error! Unable to save updated Config!!!").Flush();
+            LogAbort()().Abort();
         }
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(ConfigLoader))(": ")(e.what()).Flush();
+        LogError()()(": ")(e.what()).Flush();
 
         return false;
     }

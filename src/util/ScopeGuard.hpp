@@ -7,7 +7,7 @@
 
 #include <functional>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs
@@ -23,7 +23,7 @@ public:
         try {
             std::invoke(pre);
         } catch (...) {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 

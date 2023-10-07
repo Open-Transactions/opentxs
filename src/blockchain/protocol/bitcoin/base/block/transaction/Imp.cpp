@@ -18,7 +18,6 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
-#include <tuple>
 #include <type_traits>  // IWYU pragma: keep
 #include <utility>
 
@@ -35,7 +34,6 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -127,14 +125,12 @@ auto Transaction::AssociatedLocalNyms(
 {
     auto output = Set<identifier::Nym>{alloc};
     output.clear();
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Internal().AssociatedLocalNyms(crypto, output);
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Internal().AssociatedLocalNyms(crypto, output);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) {
+        txin.Internal().AssociatedLocalNyms(crypto, output);
+    });
+    std::ranges::for_each(outputs_, [&](const auto& txout) {
+        txout.Internal().AssociatedLocalNyms(crypto, output);
+    });
 
     return output;
 }
@@ -144,7 +140,7 @@ auto Transaction::AssociatePreviousOutput(
     const block::Output& output) noexcept -> bool
 {
     if (index >= inputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return {};
     }
@@ -159,14 +155,12 @@ auto Transaction::AssociatedRemoteContacts(
 {
     auto output = Set<identifier::Generic>{alloc};
     output.clear();
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Internal().AssociatedRemoteContacts(api, output);
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Internal().AssociatedRemoteContacts(api, output);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) {
+        txin.Internal().AssociatedRemoteContacts(api, output);
+    });
+    std::ranges::for_each(outputs_, [&](const auto& txout) {
+        txout.Internal().AssociatedRemoteContacts(api, output);
+    });
     output.erase(api.Contacts().ContactID(nym));
 
     return output;
@@ -276,8 +270,7 @@ auto Transaction::ConfirmMatches(
 
     for (auto n = 0_uz; n < inputs_.size(); ++n) {
         if (inputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
-            log(OT_PRETTY_CLASS())("match found for input ")(
-                n)(" of transaction ")
+            log()("match found for input ")(n)(" of transaction ")
                 .asHex(id_)
                 .Flush();
             spent.emplace(n);
@@ -286,8 +279,7 @@ auto Transaction::ConfirmMatches(
 
     for (auto n = 0_uz; n < outputs_.size(); ++n) {
         if (outputs_[n].Internal().ConfirmMatches(log, api, candiates)) {
-            log(OT_PRETTY_CLASS())("match found for output ")(
-                n)(" of transaction ")
+            log()("match found for output ")(n)(" of transaction ")
                 .asHex(id_)
                 .Flush();
             created.emplace(n);
@@ -300,7 +292,7 @@ auto Transaction::ConfirmMatches(
     const auto transactionPaysMe = (0_uz < outCount);
 
     if (transactionSpendsMyMoney || transactionPaysMe) {
-        log(OT_PRETTY_CLASS())(inCount)(" input matches and ")(
+        log()(inCount)(" input matches and ")(
             outCount)(" output matches in transaction ")
             .asHex(id_)
             .Flush();
@@ -308,7 +300,7 @@ auto Transaction::ConfirmMatches(
         const auto [_, added] = out.try_emplace(
             id_, std::move(spent), std::move(created), clone(alloc.result_));
 
-        OT_ASSERT(added);
+        assert_true(added);
     }
 }
 
@@ -322,7 +314,7 @@ auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
         auto preimage = Space{};
         const auto serialized = serialize(writer(preimage), true, data);
 
-        OT_ASSERT(serialized);
+        assert_true(serialized.has_value());
 
         return factory.IdentifierFromPreimage(
             reader(preimage), identifier::Algorithm::sha256);
@@ -332,14 +324,12 @@ auto Transaction::IDNormalized(const api::Factory& factory) const noexcept
 auto Transaction::ExtractElements(const cfilter::Type style, Elements& out)
     const noexcept -> void
 {
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Internal().ExtractElements(style, out);
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Internal().ExtractElements(style, out);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) {
+        txin.Internal().ExtractElements(style, out);
+    });
+    std::ranges::for_each(outputs_, [&](const auto& txout) {
+        txout.Internal().ExtractElements(style, out);
+    });
 
     if (cfilter::Type::ES == style) {
         const auto* data = static_cast<const std::byte*>(id_.data());
@@ -374,20 +364,18 @@ auto Transaction::FindMatches(
     Matches& out,
     alloc::Default monotonic) const noexcept -> void
 {
-    log(OT_PRETTY_CLASS())("processing transaction ").asHex(ID()).Flush();
+    log()("processing transaction ").asHex(ID()).Flush();
 
     auto index = 0_uz;
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Internal().FindMatches(
-                api, id_, type, txos, elements, index, log, out, monotonic);
-            ++index;
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Internal().FindMatches(
-                api, id_, type, elements, log, out, monotonic);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) {
+        txin.Internal().FindMatches(
+            api, id_, type, txos, elements, index, log, out, monotonic);
+        ++index;
+    });
+    std::ranges::for_each(outputs_, [&](const auto& txout) {
+        txout.Internal().FindMatches(
+            api, id_, type, elements, log, out, monotonic);
+    });
 }
 
 auto Transaction::ForTestingOnlyAddKey(
@@ -395,7 +383,7 @@ auto Transaction::ForTestingOnlyAddKey(
     const blockchain::crypto::Key& key) noexcept -> bool
 {
     if (index >= outputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return false;
     }
@@ -412,7 +400,7 @@ auto Transaction::GetPreimageBTC(
 {
     if (SigHash::All != hashType.Type()) {
         // TODO
-        LogError()(OT_PRETTY_CLASS())("Mode not supported").Flush();
+        LogError()()("Mode not supported").Flush();
 
         return {};
     }
@@ -422,7 +410,7 @@ auto Transaction::GetPreimageBTC(
     copy.data_.lock()->reset_size();
 
     if (index >= inputs_.size()) {
-        LogError()(OT_PRETTY_CLASS())("invalid index").Flush();
+        LogError()()("invalid index").Flush();
 
         return {};
     }
@@ -431,8 +419,7 @@ auto Transaction::GetPreimageBTC(
     auto& input = base.Internal();
 
     if (false == input.ReplaceScript()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to initialize input script")
-            .Flush();
+        LogError()()("Failed to initialize input script").Flush();
 
         return {};
     }
@@ -454,14 +441,12 @@ auto Transaction::IndexElements(const api::Session& api, alloc::Default alloc)
     const noexcept -> ElementHashes
 {
     auto output = ElementHashes{alloc};
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Internal().IndexElements(api, output);
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Internal().IndexElements(api, output);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) {
+        txin.Internal().IndexElements(api, output);
+    });
+    std::ranges::for_each(outputs_, [&](const auto& txout) {
+        txout.Internal().IndexElements(api, output);
+    });
 
     return output;
 }
@@ -470,14 +455,9 @@ auto Transaction::Keys(alloc::Default alloc) const noexcept -> Set<crypto::Key>
 {
     auto out = Set<crypto::Key>{alloc};
     out.clear();
-    std::for_each(
-        std::begin(inputs_), std::end(inputs_), [&](const auto& txin) {
-            txin.Keys(out);
-        });
-    std::for_each(
-        std::begin(outputs_), std::end(outputs_), [&](const auto& txout) {
-            txout.Keys(out);
-        });
+    std::ranges::for_each(inputs_, [&](const auto& txin) { txin.Keys(out); });
+    std::ranges::for_each(
+        outputs_, [&](const auto& txout) { txout.Keys(out); });
 
     return out;
 }
@@ -517,10 +497,10 @@ auto Transaction::MergeMetadata(
     const internal::Transaction& rhs,
     const Log& log) noexcept -> void
 {
-    log(OT_PRETTY_CLASS())("merging transaction ").asHex(ID()).Flush();
+    log()("merging transaction ").asHex(ID()).Flush();
 
     if (id_ != rhs.ID()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong transaction").Flush();
+        LogError()()("Wrong transaction").Flush();
 
         return;
     }
@@ -531,13 +511,13 @@ auto Transaction::MergeMetadata(
     const auto rTxout = rhs.Outputs();
 
     if (iSize != rTxin.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number of inputs").Flush();
+        LogError()()("Wrong number of inputs").Flush();
 
         return;
     }
 
     if (oSize != rTxout.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number of outputs").Flush();
+        LogError()()("Wrong number of outputs").Flush();
 
         return;
     }
@@ -552,7 +532,7 @@ auto Transaction::NetBalanceChange(
     const identifier::Nym& nym) const noexcept -> opentxs::Amount
 {
     const auto& log = LogTrace();
-    log(OT_PRETTY_CLASS())("parsing transaction ")
+    log()("parsing transaction ")
         .asHex(ID())(" for balance change with respect to nym ")(
             nym, crypto.Internal().API())
         .Flush();
@@ -575,7 +555,7 @@ auto Transaction::NetBalanceChange(
             return prev + txout.Internal().NetBalanceChange(crypto, nym, log);
         });
     const auto total = spent + created;
-    log(OT_PRETTY_CLASS())
+    log()
         .asHex(ID())(" total input contribution is ")(
             spent)(" and total output contribution is ")(
             created)(" for a net balance change of ")(total)
@@ -625,8 +605,8 @@ auto Transaction::RefreshContacts(const api::crypto::Blockchain& api) noexcept
     const auto refresh = [&](auto&& item) {
         item.Internal().RefreshContacts(api);
     };
-    std::for_each(inputs_.begin(), inputs_.end(), refresh);
-    std::for_each(outputs_.begin(), outputs_.end(), refresh);
+    std::ranges::for_each(inputs_, refresh);
+    std::ranges::for_each(outputs_, refresh);
 }
 
 auto Transaction::serialize(
@@ -653,7 +633,7 @@ auto Transaction::serialize(
         const auto inCount =
             blockchain::protocol::bitcoin::base::CompactSize(inputs_.size());
         serialize_compact_size(inCount, buf, "input count");
-        std::for_each(std::begin(inputs_), std::end(inputs_), [&](auto& txin) {
+        std::ranges::for_each(inputs_, [&](auto& txin) {
             const auto& input = txin.Internal();
             const auto expected = input.CalculateSize(normalize);
             const auto wrote =
@@ -668,17 +648,16 @@ auto Transaction::serialize(
         const auto outCount =
             blockchain::protocol::bitcoin::base::CompactSize(outputs_.size());
         serialize_compact_size(outCount, buf, "input count");
-        std::for_each(
-            std::begin(outputs_), std::end(outputs_), [&](auto& txout) {
-                const auto& output = txout.Internal();
-                const auto expected = output.CalculateSize();
-                const auto wrote = output.Serialize(buf.Write(expected));
+        std::ranges::for_each(outputs_, [&](auto& txout) {
+            const auto& output = txout.Internal();
+            const auto expected = output.CalculateSize();
+            const auto wrote = output.Serialize(buf.Write(expected));
 
-                if ((false == wrote.has_value()) || (*wrote != expected)) {
+            if ((false == wrote.has_value()) || (*wrote != expected)) {
 
-                    throw std::runtime_error{"failed to serialize output"};
-                }
-            });
+                throw std::runtime_error{"failed to serialize output"};
+            }
+        });
 
         if (isSegwit) {
             for (const auto& input : inputs_) {
@@ -704,7 +683,7 @@ auto Transaction::serialize(
 
         return size;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -741,7 +720,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     auto index = std::uint32_t{0};
 
     try {
-        std::for_each(std::begin(inputs_), std::end(inputs_), [&](auto& txin) {
+        std::ranges::for_each(inputs_, [&](auto& txin) {
             auto& out = *output.add_input();
 
             if (false == txin.Internal().Serialize(api, index++, out)) {
@@ -754,12 +733,11 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     }
 
     try {
-        std::for_each(
-            std::begin(outputs_), std::end(outputs_), [&](auto& txout) {
-                auto& out = *output.add_output();
+        std::ranges::for_each(outputs_, [&](auto& txout) {
+            auto& out = *output.add_output();
 
-                if (false == txout.Internal().Serialize(api, out)) { throw; }
-            });
+            if (false == txout.Internal().Serialize(api, out)) { throw; }
+        });
     } catch (...) {
 
         return std::nullopt;
@@ -872,7 +850,7 @@ auto Transaction::Serialize(EncodedTransaction& out) const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -880,12 +858,10 @@ auto Transaction::Serialize(EncodedTransaction& out) const noexcept -> bool
 
 auto Transaction::SetKeyData(const KeyData& data) noexcept -> void
 {
-    std::for_each(std::begin(inputs_), std::end(inputs_), [&](auto& txin) {
-        txin.Internal().SetKeyData(data);
-    });
-    std::for_each(std::begin(outputs_), std::end(outputs_), [&](auto& txout) {
-        txout.Internal().SetKeyData(data);
-    });
+    std::ranges::for_each(
+        inputs_, [&](auto& txin) { txin.Internal().SetKeyData(data); });
+    std::ranges::for_each(
+        outputs_, [&](auto& txout) { txout.Internal().SetKeyData(data); });
 }
 
 auto Transaction::SetMemo(const std::string_view memo) noexcept -> void
@@ -895,7 +871,7 @@ auto Transaction::SetMemo(const std::string_view memo) noexcept -> void
 
 auto Transaction::SetMinedPosition(const block::Position& pos) noexcept -> void
 {
-    std::for_each(outputs_.begin(), outputs_.end(), [&](auto& output) {
+    std::ranges::for_each(outputs_, [&](auto& output) {
         output.Internal().SetMinedPosition(pos);
     });
 
@@ -915,7 +891,7 @@ auto Transaction::vBytes(blockchain::Type chain) const noexcept -> std::size_t
     if (data.SupportsSegwit()) {
         const auto& scale = data.SegwitScaleFactor();
 
-        OT_ASSERT(0 < scale);
+        assert_true(0 < scale);
 
         const auto weight = (base_size() * (scale - 1u)) + total;
         static constexpr auto ceil = [](const auto a, const auto b) {

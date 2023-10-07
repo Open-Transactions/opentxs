@@ -11,7 +11,6 @@
 #include "internal/api/Legacy.hpp"
 #include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/util/Log.hpp"
@@ -50,7 +49,7 @@ Config::Config(
         const auto& configFile = previous_primary_plugin_;
 
         if (false == cli.empty()) {
-            LogDetail()(OT_PRETTY_CLASS())("Using ")(
+            LogDetail()()("Using ")(
                 cli)(" as primary storage plugin based on initialization "
                      "arguments")
                 .Flush();
@@ -59,16 +58,14 @@ Config::Config(
         }
 
         if (false == configFile.empty()) {
-            LogDetail()(OT_PRETTY_CLASS())("Using ")(
+            LogDetail()()("Using ")(
                 cli)(" as primary storage plugin based saved configuration")
                 .Flush();
 
             return configFile;
         }
 
-        LogDetail()(OT_PRETTY_CLASS())("Using ")(
-            cli)(" as primary storage plugin")
-            .Flush();
+        LogDetail()()("Using ")(cli)(" as primary storage plugin").Flush();
 
         return default_plugin_;
     }())
@@ -86,9 +83,8 @@ Config::Config(
             const auto migrate = false == previous.empty();
 
             if (migrate) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Migrating primary storage plugin from ")(previous)(" to ")(
-                    current)
+                LogError()()("Migrating primary storage plugin from ")(
+                    previous)(" to ")(current)
                     .Flush();
             }
 
@@ -116,15 +112,13 @@ Config::Config(
         auto notUsed{false};
 
         if (!legacy.AppendFolder(output, dataFolder, legacy.Common())) {
-            LogError()(OT_PRETTY_CLASS())("Failed to calculate storage path")
-                .Flush();
+            LogError()()("Failed to calculate storage path").Flush();
 
             return {};
         }
 
         if (false == legacy.BuildFolderPath(output)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to construct storage path")
-                .Flush();
+            LogError()()("Failed to construct storage path").Flush();
 
             return {};
         }
@@ -135,17 +129,13 @@ Config::Config(
                 "_lmdb";
 
             if (false == legacy.AppendFolder(newPath, output, subdir)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to calculate lmdb storage path")
-                    .Flush();
+                LogError()()("Failed to calculate lmdb storage path").Flush();
 
                 return {};
             }
 
             if (false == legacy.BuildFolderPath(newPath)) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to construct lmdb storage path")
-                    .Flush();
+                LogError()()("Failed to construct lmdb storage path").Flush();
 
                 return {};
             }
@@ -332,10 +322,10 @@ Config::Config(
         return output;
     }())
 {
-    OT_ASSERT(false == dataFolder.empty());
+    assert_false(dataFolder.empty());
 
     if (false == config.Save()) {
-        LogAbort()(OT_PRETTY_CLASS())("failed to save config file").Abort();
+        LogAbort()()("failed to save config file").Abort();
     }
 }
 }  // namespace opentxs::storage

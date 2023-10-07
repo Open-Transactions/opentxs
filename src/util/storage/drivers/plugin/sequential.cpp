@@ -8,25 +8,26 @@
 #include <algorithm>
 #include <memory>
 #include <numeric>
+#include <ranges>
 
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::storage::driver::implementation
 {
 auto Plugin::empty_bucket(Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
-    auto store = [=, this](auto& row) {
+    auto store = [=](auto& row) {
         auto& [driver, result] = row;
         result = driver->EmptyBucket(bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error emptying bucket in ")(
-                driver->Description())(" driver")
+            LogError()()("error emptying bucket in ")(driver->Description())(
+                " driver")
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), store);
+    std::ranges::for_each(out, store);
 
     return out;
 }
@@ -72,7 +73,7 @@ auto Plugin::scan(const Log& log) const noexcept -> Results
 {
     auto out = make_results();
     auto check = [&log](auto& row) { check_revision(log, row); };
-    std::for_each(out.begin(), out.end(), check);
+    std::ranges::for_each(out, check);
 
     return out;
 }
@@ -86,12 +87,12 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
         result = driver->Commit(root, data, bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error committing to ")(
-                driver->Description())(" driver")
+            LogError()()("error committing to ")(driver->Description())(
+                " driver")
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), save);
+    std::ranges::for_each(out, save);
 
     return out;
 }
@@ -99,17 +100,16 @@ auto Plugin::commit(const Hash& root, Transaction data, Bucket bucket)
 auto Plugin::store(Transaction data, Bucket bucket) const noexcept -> Results
 {
     auto out = make_results();
-    auto save = [&, this](auto& row) {
+    auto save = [&](auto& row) {
         auto& [driver, result] = row;
         result = driver->Store(data, bucket);
 
         if (false == result) {
-            LogError()(OT_PRETTY_CLASS())("error storing to ")(
-                driver->Description())(" driver")
+            LogError()()("error storing to ")(driver->Description())(" driver")
                 .Flush();
         }
     };
-    std::for_each(out.begin(), out.end(), save);
+    std::ranges::for_each(out, save);
 
     return out;
 }
@@ -118,6 +118,6 @@ auto Plugin::synchronize_drivers(const Hash& hash, Bucket bucket) noexcept
     -> void
 {
     auto sync = [&, this](auto* driver) { synchronize(hash, bucket, *driver); };
-    std::for_each(drivers_.begin(), drivers_.end(), sync);
+    std::ranges::for_each(drivers_, sync);
 }
 }  // namespace opentxs::storage::driver::implementation

@@ -17,7 +17,6 @@
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -85,7 +84,7 @@ Profile::Profile(
     setup_listeners(api_, listeners_);
     startup_ = std::make_unique<std::thread>(&Profile::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto Profile::AddClaim(
@@ -708,17 +707,17 @@ void Profile::process_nym(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == nymID.empty());
+    assert_false(nymID.empty());
 
     if (nymID != primary_id_) { return; }
 
     const auto nym = api_.Wallet().Nym(nymID);
 
-    OT_ASSERT(nym);
+    assert_false(nullptr == nym);
 
     process_nym(*nym);
 }
@@ -779,11 +778,10 @@ auto Profile::sort_key(const identity::wot::claim::SectionType type) noexcept
 
 void Profile::startup() noexcept
 {
-    LogVerbose()(OT_PRETTY_CLASS())("Loading nym ")(primary_id_, api_.Crypto())
-        .Flush();
+    LogVerbose()()("Loading nym ")(primary_id_, api_.Crypto()).Flush();
     const auto nym = api_.Wallet().Nym(primary_id_);
 
-    OT_ASSERT(nym);
+    assert_false(nullptr == nym);
 
     process_nym(*nym);
     finish_startup();

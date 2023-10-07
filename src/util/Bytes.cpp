@@ -12,7 +12,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
@@ -125,12 +124,12 @@ auto copy(const ReadView in, Writer&& out, const std::size_t limit) noexcept
     auto write = out.Reserve(size);
 
     if (false == write.IsValid(size)) {
-        LogError()(__func__)(": failed to allocate space").Flush();
+        LogError()()("failed to allocate space").Flush();
 
         return false;
     }
 
-    OT_ASSERT(size == write.size());
+    assert_true(size == write.size());
 
     std::memcpy(write.data(), in.data(), size);
 

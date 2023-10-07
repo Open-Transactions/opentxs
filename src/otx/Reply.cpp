@@ -23,7 +23,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -71,7 +70,7 @@ auto Reply::Factory(
     const PasswordPrompt& reason,
     std::shared_ptr<const proto::OTXPush>&& push) -> Reply
 {
-    OT_ASSERT(signer);
+    assert_false(nullptr == signer);
 
     auto output{std::make_unique<Reply::Imp>(
         api,
@@ -83,11 +82,11 @@ auto Reply::Factory(
         success,
         std::move(push))};
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     output->update_signature(reason);
 
-    OT_ASSERT(false == output->ID().empty());
+    assert_false(output->ID().empty());
 
     return output.release();
 }
@@ -192,7 +191,7 @@ auto Reply::swap(Reply& rhs) noexcept -> void { std::swap(imp_, rhs.imp_); }
 Reply::Reply(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Reply::Reply(const Reply& rhs) noexcept
@@ -304,7 +303,7 @@ auto Reply::Imp::extract_nym(
     try {
         return api.Wallet().Internal().Server(serverID)->Signer();
     } catch (...) {
-        LogError()(OT_PRETTY_STATIC(Reply))("Invalid server id.").Flush();
+        LogError()()("Invalid server id.").Flush();
 
         return nullptr;
     }
@@ -383,7 +382,7 @@ auto Reply::Imp::update_signature(const PasswordPrompt& reason) -> bool
         sigs.emplace_back(new proto::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to create signature.").Flush();
+        LogError()()("Failed to create signature.").Flush();
     }
 
     return success;
@@ -396,7 +395,7 @@ auto Reply::Imp::validate() const -> bool
     if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
     if (false == validNym) {
-        LogError()(OT_PRETTY_CLASS())("Invalid nym.").Flush();
+        LogError()()("Invalid nym.").Flush();
 
         return false;
     }
@@ -404,7 +403,7 @@ auto Reply::Imp::validate() const -> bool
     const bool validSyntax = proto::Validate(full_version(), VERBOSE);
 
     if (false == validSyntax) {
-        LogError()(OT_PRETTY_CLASS())("Invalid syntax.").Flush();
+        LogError()()("Invalid syntax.").Flush();
 
         return false;
     }
@@ -412,7 +411,7 @@ auto Reply::Imp::validate() const -> bool
     const auto sigs = signatures();
 
     if (1_uz != sigs.size()) {
-        LogError()(OT_PRETTY_CLASS())("Wrong number signatures.").Flush();
+        LogError()()("Wrong number signatures.").Flush();
 
         return false;
     }
@@ -424,7 +423,7 @@ auto Reply::Imp::validate() const -> bool
     }
 
     if (false == validSig) {
-        LogError()(OT_PRETTY_CLASS())("Invalid signature.").Flush();
+        LogError()()("Invalid signature.").Flush();
 
         return false;
     }

@@ -10,12 +10,12 @@
 #include <Seed.pb.h>
 #include <StorageItemHash.pb.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <string_view>
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -58,11 +58,11 @@ auto Node::copy(const Log& log, const Index& in, Vector<Hash>& out)
     out.reserve(out.size() + in.size());
     const auto get_hash = [&, this](const auto& i) {
         const auto& hash = std::get<0>(i.second);
-        log(OT_PRETTY_CLASS())(name_)("adding item hash ")(hash).Flush();
+        log()(name_)("adding item hash ")(hash).Flush();
 
         return hash;
     };
-    std::transform(in.begin(), in.end(), std::back_inserter(out), get_hash);
+    std::ranges::transform(in, std::back_inserter(out), get_hash);
 }
 
 auto Node::delete_item(const identifier::Generic& id) -> bool
@@ -74,7 +74,7 @@ auto Node::delete_item(const identifier::Generic& id) -> bool
 
 auto Node::delete_item(const Lock& lock, const identifier::Generic& id) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     const auto items = item_map_.erase(id);
 
@@ -150,7 +150,7 @@ auto Node::init_map(
     const auto load_metadata = [this, &lock](const auto& proto) {
         init_map(lock, proto);
     };
-    std::for_each(items.begin(), items.end(), load_metadata);
+    std::ranges::for_each(items, load_metadata);
 }
 
 auto Node::init_map(
@@ -160,7 +160,7 @@ auto Node::init_map(
     const auto load_metadata = [this, &out](const auto& proto) {
         init_map(proto, out);
     };
-    std::for_each(in.begin(), in.end(), load_metadata);
+    std::ranges::for_each(in, load_metadata);
 }
 
 auto Node::init_map(const Lock&, const proto::StorageItemHash& item) noexcept
@@ -213,7 +213,7 @@ auto Node::load_raw(
         using enum ErrorReporting;
 
         if (verbose == checking) {
-            LogError()(OT_PRETTY_CLASS())("Error: item with id ")(id, crypto_)(
+            LogError()()("Error: item with id ")(id, crypto_)(
                 " does not exist.")
                 .Flush();
         }
@@ -266,7 +266,7 @@ auto Node::set_alias(const identifier::Generic& id, std::string_view value)
 
         if (false == save(lock)) {
             alias.swap(old);
-            LogError()(OT_PRETTY_CLASS())("Failed to save node").Flush();
+            LogError()()("Failed to save node").Flush();
 
             return false;
         }
@@ -274,8 +274,7 @@ auto Node::set_alias(const identifier::Generic& id, std::string_view value)
         return true;
     }
 
-    LogError()(OT_PRETTY_CLASS())("item ")(id, crypto_)(" does not exist")
-        .Flush();
+    LogError()()("item ")(id, crypto_)(" does not exist").Flush();
 
     return false;
 }
@@ -322,7 +321,7 @@ auto Node::store_raw(
     const identifier::Generic& id,
     std::string_view alias) -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     auto& metadata = item_map_[id];
     auto& hash = std::get<0>(metadata);
@@ -340,7 +339,7 @@ auto Node::Upgrade() noexcept -> bool
     const auto changed = upgrade(lock);
 
     if (changed && (false == save(lock))) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)("save failure").Abort();
+        LogAbort()()(name_)("save failure").Abort();
     }
 
     return changed;
@@ -358,13 +357,13 @@ auto Node::UpgradeLevel() const -> VersionNumber { return original_version_; }
 auto Node::verify_write_lock(const Lock& lock) const -> bool
 {
     if (lock.mutex() != &write_lock_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect mutex.").Flush();
+        LogError()()("Incorrect mutex.").Flush();
 
         return false;
     }
 
     if (false == lock.owns_lock()) {
-        LogError()(OT_PRETTY_CLASS())("Lock not owned.").Flush();
+        LogError()()("Lock not owned.").Flush();
 
         return false;
     }

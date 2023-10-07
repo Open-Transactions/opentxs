@@ -8,7 +8,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/json.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/system/error_code.hpp>
 #include <cs_plain_guarded.h>
 #include <algorithm>
@@ -38,7 +37,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/asio/Endpoint.hpp"
@@ -74,7 +72,7 @@ Shared::Shared(const opentxs::network::zeromq::Context& zmq, bool test) noexcept
 }
 
 auto Shared::Connect(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     internal::Asio::SocketImp socket) noexcept -> bool
 {
@@ -107,20 +105,20 @@ auto Shared::Connect(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
 }
 
 auto Shared::FetchJson(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const ReadView host,
     const ReadView path,
     const bool https,
     const ReadView notify) noexcept -> std::future<boost::json::value>
 {
-    OT_ASSERT(me);
+    assert_false(nullptr == me);
 
     auto promise = std::make_shared<std::promise<boost::json::value>>();
     auto future = promise->get_future();
@@ -167,7 +165,7 @@ auto Shared::IOContext() const noexcept -> boost::asio::io_context&
 auto Shared::post(const Data& data, internal::Asio::Callback cb) const noexcept
     -> bool
 {
-    OT_ASSERT(cb);
+    assert_false(nullptr == cb);
 
     if (false == running_) { return false; }
 
@@ -220,8 +218,7 @@ auto Shared::process_address_query(
             throw std::runtime_error{error.c_str()};
         }
 
-        LogVerbose()(OT_PRETTY_CLASS())("GET response: IP address: ")(string)
-            .Flush();
+        LogVerbose()()("GET response: IP address: ")(string).Flush();
 
         if (address->is_v4()) {
             const auto bytes = address->to_v4().to_bytes();
@@ -241,28 +238,23 @@ auto Shared::process_connect(
     ReadView address,
     opentxs::network::zeromq::Envelope&& connection) const noexcept -> void
 {
-    data_.lock()->to_actor_.SendDeferred(
-        [&] {
-            if (e) {
-                LogVerbose()(OT_PRETTY_STATIC(Shared))("asio connect error: ")(
-                    e.message())
-                    .Flush();
-                auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                    std::move(connection), WorkType::AsioDisconnect, true);
-                work.AddFrame(address.data(), address.size());
-                work.AddFrame(e.message());
+    data_.lock()->to_actor_.SendDeferred([&] {
+        if (e) {
+            LogVerbose()()("asio connect error: ")(e.message()).Flush();
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                std::move(connection), WorkType::AsioDisconnect, true);
+            work.AddFrame(address.data(), address.size());
+            work.AddFrame(e.message());
 
-                return work;
-            } else {
-                auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                    std::move(connection), WorkType::AsioConnect, true);
-                work.AddFrame(address.data(), address.size());
+            return work;
+        } else {
+            auto work = opentxs::network::zeromq::tagged_reply_to_message(
+                std::move(connection), WorkType::AsioConnect, true);
+            work.AddFrame(address.data(), address.size());
 
-                return work;
-            }
-        }(),
-        __FILE__,
-        __LINE__);
+            return work;
+        }
+    }());
 }
 
 auto Shared::process_json(
@@ -294,28 +286,25 @@ auto Shared::process_receive(
     std::size_t index,
     ReadView data) const noexcept -> void
 {
-    OT_ASSERT(socket);
+    assert_false(nullptr == socket);
 
-    data_.lock()->to_actor_.SendDeferred(
-        [&]() {
-            auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                std::move(connection),
-                (e ? value(WorkType::AsioDisconnect) : type),
-                true);
+    data_.lock()->to_actor_.SendDeferred([&]() {
+        auto work = opentxs::network::zeromq::tagged_reply_to_message(
+            std::move(connection),
+            (e ? value(WorkType::AsioDisconnect) : type),
+            true);
 
-            if (e) {
-                work.AddFrame(address.data(), address.size());
-                work.AddFrame(e.message());
-            } else {
-                work.AddFrame(data.data(), data.size());
-            }
+        if (e) {
+            work.AddFrame(address.data(), address.size());
+            work.AddFrame(e.message());
+        } else {
+            work.AddFrame(data.data(), data.size());
+        }
 
-            OT_ASSERT(1 < work.Payload().size());
+        assert_true(1 < work.Payload().size());
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
     socket->buffer_.lock()->Finish(index);
 }
 
@@ -327,40 +316,37 @@ auto Shared::process_resolve(
     std::uint16_t port,
     opentxs::network::zeromq::Envelope&& connection) const noexcept -> void
 {
-    data_.lock()->to_actor_.SendDeferred(
-        [&] {
-            static constexpr auto trueValue = std::byte{0x01};
-            static constexpr auto falseValue = std::byte{0x00};
-            auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                std::move(connection), value(WorkType::AsioResolve), true);
+    data_.lock()->to_actor_.SendDeferred([&] {
+        static constexpr auto trueValue = std::byte{0x01};
+        static constexpr auto falseValue = std::byte{0x00};
+        auto work = opentxs::network::zeromq::tagged_reply_to_message(
+            std::move(connection), value(WorkType::AsioResolve), true);
 
-            if (e) {
-                work.AddFrame(falseValue);
-                work.AddFrame(server.data(), server.size());
-                work.AddFrame(port);
-                work.AddFrame(e.message());
-            } else {
-                work.AddFrame(trueValue);
-                work.AddFrame(server.data(), server.size());
-                work.AddFrame(port);
+        if (e) {
+            work.AddFrame(falseValue);
+            work.AddFrame(server.data(), server.size());
+            work.AddFrame(port);
+            work.AddFrame(e.message());
+        } else {
+            work.AddFrame(trueValue);
+            work.AddFrame(server.data(), server.size());
+            work.AddFrame(port);
 
-                for (const auto& result : results) {
-                    const auto address = result.endpoint().address();
+            for (const auto& result : results) {
+                const auto address = result.endpoint().address();
 
-                    if (address.is_v4()) {
-                        const auto bytes = address.to_v4().to_bytes();
-                        work.AddFrame(bytes.data(), bytes.size());
-                    } else {
-                        const auto bytes = address.to_v6().to_bytes();
-                        work.AddFrame(bytes.data(), bytes.size());
-                    }
+                if (address.is_v4()) {
+                    const auto bytes = address.to_v4().to_bytes();
+                    work.AddFrame(bytes.data(), bytes.size());
+                } else {
+                    const auto bytes = address.to_v6().to_bytes();
+                    work.AddFrame(bytes.data(), bytes.size());
                 }
             }
+        }
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Shared::process_transmit(
@@ -370,32 +356,29 @@ auto Shared::process_transmit(
     opentxs::network::zeromq::Envelope&& connection,
     std::size_t index) const noexcept -> void
 {
-    OT_ASSERT(socket);
+    assert_false(nullptr == socket);
 
-    data_.lock()->to_actor_.SendDeferred(
-        [&] {
-            auto work = opentxs::network::zeromq::tagged_reply_to_message(
-                std::move(connection), value(WorkType::AsioSendResult), true);
-            work.AddFrame(bytes);
-            static constexpr auto trueValue = std::byte{0x01};
-            static constexpr auto falseValue = std::byte{0x00};
+    data_.lock()->to_actor_.SendDeferred([&] {
+        auto work = opentxs::network::zeromq::tagged_reply_to_message(
+            std::move(connection), value(WorkType::AsioSendResult), true);
+        work.AddFrame(bytes);
+        static constexpr auto trueValue = std::byte{0x01};
+        static constexpr auto falseValue = std::byte{0x00};
 
-            if (e) {
-                work.AddFrame(falseValue);
-                work.AddFrame(e.message());
-            } else {
-                work.AddFrame(trueValue);
-            }
+        if (e) {
+            work.AddFrame(falseValue);
+            work.AddFrame(e.message());
+        } else {
+            work.AddFrame(trueValue);
+        }
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
     socket->buffer_.lock()->Finish(index);
 }
 
 auto Shared::Receive(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     const OTZMQWorkType type,
     const std::size_t bytes,
@@ -423,9 +406,9 @@ auto Shared::Receive(
             socket->socket_,
             std::get<1>(*params),
             [me, socket, params](const auto& e, auto size) {
-                OT_ASSERT(me);
-                OT_ASSERT(socket);
-                OT_ASSERT(nullptr != params);
+                assert_false(nullptr == me);
+                assert_false(nullptr == socket);
+                assert_false(nullptr == params);
 
                 auto& [index, buffer, address, work, replyTo] = *params;
                 me->process_receive(
@@ -440,14 +423,14 @@ auto Shared::Receive(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
 }
 
 auto Shared::Resolve(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     std::string_view server,
     std::uint16_t port) noexcept -> void
@@ -476,7 +459,7 @@ auto Shared::Resolve(
                     p, e, results, query, port, std::move(connection));
             });
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
     }
 }
 
@@ -521,7 +504,7 @@ auto Shared::retrieve_address_async_ssl(
 }
 
 auto Shared::retrieve_json_http(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     opentxs::network::asio::TLS,
     const Data& data,
     const ReadView host,
@@ -553,7 +536,7 @@ auto Shared::retrieve_json_http(
 }
 
 auto Shared::retrieve_json_https(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     opentxs::network::asio::TLS tls,
     const Data& data,
     const ReadView host,
@@ -615,15 +598,15 @@ auto Shared::send_notification(const Data& data, const ReadView notify)
 
             return it->second;
         }();
-        LogTrace()(OT_PRETTY_CLASS())("notifying ")(endpoint).Flush();
-        const auto rc = socket.lock()->Send(
-            MakeWork(OT_ZMQ_STATE_MACHINE_SIGNAL), __FILE__, __LINE__);
+        LogTrace()()("notifying ")(endpoint).Flush();
+        const auto rc =
+            socket.lock()->Send(MakeWork(OT_ZMQ_STATE_MACHINE_SIGNAL));
 
         if (false == rc) {
             throw std::runtime_error{"Failed to send notification"};
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return;
     }
@@ -702,7 +685,7 @@ auto Shared::StateMachine() noexcept -> bool
 
                 if (eptr) { std::rethrow_exception(eptr); }
             } catch (const std::exception& e) {
-                LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogVerbose()()(e.what()).Flush();
             }
         }
     }
@@ -723,7 +706,7 @@ auto Shared::StateMachine() noexcept -> bool
 
                 if (eptr) { std::rethrow_exception(eptr); }
             } catch (const std::exception& e) {
-                LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+                LogVerbose()()(e.what()).Flush();
             }
         }
     }
@@ -737,13 +720,13 @@ auto Shared::StateMachine() noexcept -> bool
         data.ipv6_promise_.set_value(std::move(result6));
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("Finished checking ip addresses").Flush();
+    LogTrace()()("Finished checking ip addresses").Flush();
 
     return again;
 }
 
 auto Shared::Transmit(
-    boost::shared_ptr<const Shared> me,
+    std::shared_ptr<const Shared> me,
     const opentxs::network::zeromq::Envelope& id,
     const ReadView bytes,
     internal::Asio::SocketImp socket) noexcept -> bool
@@ -772,9 +755,9 @@ auto Shared::Transmit(
                 std::get<1>(*params),
                 [me, socket, params](
                     const boost::system::error_code& e, std::size_t count) {
-                    OT_ASSERT(me);
-                    OT_ASSERT(socket);
-                    OT_ASSERT(nullptr != params);
+                    assert_false(nullptr == me);
+                    assert_false(nullptr == socket);
+                    assert_false(nullptr == params);
 
                     auto& [index, buffer, replyTo] = *params;
                     me->process_transmit(
@@ -782,7 +765,7 @@ auto Shared::Transmit(
                 });
         });
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_STATIC(Shared))(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

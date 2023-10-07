@@ -18,7 +18,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/MinedBlocks.hpp"
@@ -97,13 +96,13 @@ auto SyncRequestor::check(
         const auto handle =
             imp_->api_.Network().Blockchain().GetChain(test_chain_);
 
-        OT_ASSERT(handle);
+        opentxs::assert_true(handle);
 
         const auto& chain = handle.get();
         auto header =
             chain.HeaderOracle().LoadHeader(imp_->cache_.get(index).get());
 
-        OT_ASSERT(header.IsValid());
+        opentxs::assert_true(header.IsValid());
 
         return header.Position();
     }();
@@ -118,13 +117,13 @@ auto SyncRequestor::check(
     constexpr auto filterType{ot::blockchain::cfilter::Type::ES};
     const auto handle = imp_->api_.Network().Blockchain().GetChain(test_chain_);
 
-    OT_ASSERT(handle);
+    opentxs::assert_true(handle);
 
     const auto& chain = handle.get();
     const auto header =
         chain.HeaderOracle().LoadHeader(imp_->cache_.get(index).get());
 
-    OT_ASSERT(header.IsValid());
+    opentxs::assert_true(header.IsValid());
 
     auto headerBytes = ot::Space{};
 

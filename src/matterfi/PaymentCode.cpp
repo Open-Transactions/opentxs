@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <random>
+#include <ranges>
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
@@ -37,10 +38,10 @@ auto paymentcode_extra_notifications(
     boost::container::flat_set<opentxs::PaymentCode>& out) noexcept -> void
 {
     if (0_uz == account.IncomingNotificationCount()) {
-        log(__func__)(": adding extra notification to self").Flush();
+        log()(": adding extra notification to self").Flush();
         out.emplace(account.Local());
     } else {
-        log(__func__)(": contact has already sent notification").Flush();
+        log()(": contact has already sent notification").Flush();
     }
 }
 
@@ -60,7 +61,7 @@ auto paymentcode_preemptive_notifications(
     auto notifiedOtherChains = opentxs::Set<opentxs::PaymentCode>{alloc.work_};
     const auto process = [&](const auto& item) {
         static constexpr auto copy = [](const auto& src, auto& dst) {
-            std::copy(src.begin(), src.end(), std::inserter(dst, dst.end()));
+            std::ranges::copy(src, std::inserter(dst, dst.end()));
         };
         const auto& [c, n] = item;
         copy(n.incoming_, all);
@@ -72,17 +73,13 @@ auto paymentcode_preemptive_notifications(
             copy(n.outgoing_, notifiedOtherChains);
         }
     };
-    std::for_each(notif.begin(), notif.end(), process);
+    std::ranges::for_each(notif, process);
     const auto temp = [&] {
         auto result = opentxs::Vector<opentxs::PaymentCode>{alloc.work_};
         result.reserve(all.size());
         result.clear();
-        std::set_difference(
-            all.begin(),
-            all.end(),
-            notifiedThisChain.begin(),
-            notifiedThisChain.end(),
-            std::back_inserter(result));
+        std::ranges::set_difference(
+            all, notifiedThisChain, std::back_inserter(result));
 
         return result;
     }();
@@ -90,12 +87,8 @@ auto paymentcode_preemptive_notifications(
         auto result = opentxs::Vector<opentxs::PaymentCode>{alloc.work_};
         result.reserve(all.size());
         result.clear();
-        std::set_difference(
-            temp.begin(),
-            temp.end(),
-            notifiedOtherChains.begin(),
-            notifiedOtherChains.end(),
-            std::back_inserter(result));
+        std::ranges::set_difference(
+            temp, notifiedOtherChains, std::back_inserter(result));
 
         return result;
     }();
@@ -103,53 +96,37 @@ auto paymentcode_preemptive_notifications(
         auto result = opentxs::Vector<opentxs::PaymentCode>{alloc.work_};
         result.reserve(all.size());
         result.clear();
-        std::set_intersection(
-            temp.begin(),
-            temp.end(),
-            notifiedOtherChains.begin(),
-            notifiedOtherChains.end(),
-            std::back_inserter(result));
+        std::ranges::set_intersection(
+            temp, notifiedOtherChains, std::back_inserter(result));
 
         return result;
     }();
-    log(__func__)(": out of ")(all.size())(" known payment codes, ")(
+    log()(": out of ")(all.size())(" known payment codes, ")(
         unnotifiedAnyChain.size())(
         " have never received a notification on any chain and ")(
         unnotifiedThisChain.size())(
         " have been notified on other chains but not on ")(print(chain))
         .Flush();
     auto rand = std::random_device{};
-    std::shuffle(
-        unnotifiedAnyChain.begin(),
-        unnotifiedAnyChain.end(),
-        std::mt19937{rand()});
-    std::shuffle(
-        unnotifiedThisChain.begin(),
-        unnotifiedThisChain.end(),
-        std::mt19937{rand()});
+    std::ranges::shuffle(unnotifiedAnyChain, std::mt19937{rand()});
+    std::ranges::shuffle(unnotifiedThisChain, std::mt19937{rand()});
     auto queue = [&] {
         auto result = opentxs::Deque<opentxs::PaymentCode>{alloc.work_};
         result.clear();
-        std::move(
-            unnotifiedAnyChain.begin(),
-            unnotifiedAnyChain.end(),
-            std::back_inserter(result));
-        std::move(
-            unnotifiedThisChain.begin(),
-            unnotifiedThisChain.end(),
-            std::back_inserter(result));
+        std::ranges::move(unnotifiedAnyChain, std::back_inserter(result));
+        std::ranges::move(unnotifiedThisChain, std::back_inserter(result));
 
         return result;
     }();
     const auto limit =
         opentxs::blockchain::params::get(chain).MaxNotifications();
-    log(__func__)(": notification list contains ")(out.size())(
+    log()(": notification list contains ")(out.size())(
         " payment codes out of a maximum of ")(limit)(" for ")(print(chain))
         .Flush();
 
     while ((out.size() < limit) && (false == queue.empty())) {
         auto& pc = queue.front();
-        log(__func__)(": adding ")(pc)(" to notification list").Flush();
+        log()(": adding ")(pc)(" to notification list").Flush();
         out.emplace(std::move(pc));
         queue.pop_front();
     }

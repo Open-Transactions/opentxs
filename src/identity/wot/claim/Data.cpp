@@ -14,6 +14,7 @@
 #include <ContactSectionName.pb.h>
 #include <ankerl/unordered_dense.h>
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <sstream>
 #include <string_view>
@@ -25,7 +26,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -88,8 +88,8 @@ struct Data::Imp {
         , sections_(sections)
     {
         if (0 == version) {
-            LogError()(OT_PRETTY_CLASS())("Warning: malformed version. "
-                                          "Setting to ")(targetVersion)(".")
+            LogError()()("Warning: malformed version. "
+                         "Setting to ")(targetVersion)(".")
                 .Flush();
         }
     }
@@ -106,7 +106,7 @@ struct Data::Imp {
             return {claim::ClaimType::Unknown, nullptr};
         }
 
-        OT_ASSERT(it->second);
+        assert_false(nullptr == it->second);
 
         const auto& section = *it->second;
 
@@ -124,13 +124,13 @@ Data::Data(
     const SectionMap& sections)
     : imp_(std::make_unique<Imp>(api, nym, version, targetVersion, sections))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Data::Data(const Data& rhs)
     : imp_(std::make_unique<Imp>(*rhs.imp_))
 {
-    OT_ASSERT(imp_);
+    assert_false(nullptr == imp_);
 }
 
 Data::Data(
@@ -168,7 +168,7 @@ auto Data::operator+(const Data& rhs) const -> Data
         const auto& rhsID = it.first;
         const auto& rhsSection = it.second;
 
-        OT_ASSERT(rhsSection);
+        assert_false(nullptr == rhsSection);
 
         auto lhs = map.find(rhsID);
         const bool exists = (map.end() != lhs);
@@ -176,15 +176,15 @@ auto Data::operator+(const Data& rhs) const -> Data
         if (exists) {
             auto& section = lhs->second;
 
-            OT_ASSERT(section);
+            assert_false(nullptr == section);
 
             section.reset(new claim::Section(*section + *rhsSection));
 
-            OT_ASSERT(section);
+            assert_false(nullptr == section);
         } else {
             const auto [i, inserted] = map.emplace(rhsID, rhsSection);
 
-            OT_ASSERT(inserted);
+            assert_true(inserted);
 
             [[maybe_unused]] const auto& notUsed = i;
         }
@@ -241,7 +241,7 @@ auto Data::AddContract(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -282,7 +282,7 @@ auto Data::AddEmail(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -299,7 +299,7 @@ auto Data::AddItem(const wot::Claim& claim) const -> Data
 
 auto Data::AddItem(const std::shared_ptr<Item>& item) const -> Data
 {
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     const auto& sectionID = item->Section();
     auto map{imp_->sections_};
@@ -313,15 +313,15 @@ auto Data::AddItem(const std::shared_ptr<Item>& item) const -> Data
         section.reset(new claim::Section(
             imp_->api_, imp_->nym_, version, version, sectionID, item));
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
     } else {
         auto& section = it->second;
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
 
         section.reset(new claim::Section(section->AddItem(item)));
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
     }
 
     return {imp_->api_, imp_->nym_, version, version, map};
@@ -354,9 +354,7 @@ auto Data::AddPaymentCode(
         translate(section), translate(UnitToClaim(currency)), imp_->version_);
 
     if (0 == version) {
-        LogError()(OT_PRETTY_CLASS())(
-            "This currency is not allowed to set a procedure")
-            .Flush();
+        LogError()()("This currency is not allowed to set a procedure").Flush();
 
         return *this;
     }
@@ -374,7 +372,7 @@ auto Data::AddPaymentCode(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -415,7 +413,7 @@ auto Data::AddPhoneNumber(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -451,7 +449,7 @@ auto Data::AddPreferredOTServer(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -499,7 +497,7 @@ auto Data::AddSocialMediaProfile(
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     if (section) {
         section.reset(new claim::Section(section->AddItem(item)));
@@ -513,7 +511,7 @@ auto Data::AddSocialMediaProfile(
             item));
     }
 
-    OT_ASSERT(section);
+    assert_false(nullptr == section);
 
     // Add the item to the communication section.
     auto commSectionTypes =
@@ -551,7 +549,7 @@ auto Data::AddSocialMediaProfile(
             Time{},
             "");
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         if (commSection) {
             commSection.reset(new claim::Section(commSection->AddItem(item)));
@@ -565,7 +563,7 @@ auto Data::AddSocialMediaProfile(
                 item));
         }
 
-        OT_ASSERT(commSection);
+        assert_false(nullptr == commSection);
     }
 
     // Add the item to the identifier section.
@@ -604,7 +602,7 @@ auto Data::AddSocialMediaProfile(
             Time{},
             "");
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         if (identifierSection) {
             identifierSection.reset(
@@ -619,7 +617,7 @@ auto Data::AddSocialMediaProfile(
                 item));
         }
 
-        OT_ASSERT(identifierSection);
+        assert_false(nullptr == identifierSection);
     }
 
     return {imp_->api_, imp_->nym_, version, version, map};
@@ -682,7 +680,7 @@ auto Data::Claim(const identifier::Generic& item) const -> std::shared_ptr<Item>
     for (const auto& it : imp_->sections_) {
         const auto& section = it.second;
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
 
         auto claim = section->Claim(item);
 
@@ -703,7 +701,7 @@ auto Data::Contracts(const UnitType currency, const bool onlyActive) const
         for (const auto& it : *group) {
             const auto& id = it.first;
 
-            OT_ASSERT(it.second);
+            assert_false(nullptr == it.second);
 
             const auto& claim = *it.second;
 
@@ -724,12 +722,12 @@ auto Data::Delete(const identifier::Generic& id) const -> Data
     for (auto& it : map) {
         auto& section = it.second;
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
 
         if (section->HaveClaim(id)) {
             section.reset(new claim::Section(section->Delete(id)));
 
-            OT_ASSERT(section);
+            assert_false(nullptr == section);
 
             deleted = true;
 
@@ -752,7 +750,7 @@ auto Data::EmailAddresses(bool active) const -> UnallocatedCString
         Group(claim::SectionType::Communication, claim::ClaimType::Email);
     if (group) {
         for (const auto& it : *group) {
-            OT_ASSERT(it.second);
+            assert_false(nullptr == it.second);
 
             const auto& claim = *it.second;
 
@@ -781,7 +779,7 @@ auto Data::Group(const claim::SectionType section, const claim::ClaimType type)
 
     if (imp_->sections_.end() == it) { return {}; }
 
-    OT_ASSERT(it->second);
+    assert_false(nullptr == it->second);
 
     return it->second->Group(type);
 }
@@ -789,7 +787,7 @@ auto Data::Group(const claim::SectionType section, const claim::ClaimType type)
 auto Data::HaveClaim(const identifier::Generic& item) const -> bool
 {
     for (const auto& section : imp_->sections_) {
-        OT_ASSERT(section.second);
+        assert_false(nullptr == section.second);
 
         if (section.second->HaveClaim(item)) { return true; }
     }
@@ -807,7 +805,7 @@ auto Data::HaveClaim(
     if (false == bool(group)) { return false; }
 
     for (const auto& it : *group) {
-        OT_ASSERT(it.second);
+        assert_false(nullptr == it.second);
 
         const auto& claim = *it.second;
 
@@ -838,7 +836,7 @@ auto Data::PhoneNumbers(bool active) const -> UnallocatedCString
         Group(claim::SectionType::Communication, claim::ClaimType::Phone);
     if (group) {
         for (const auto& it : *group) {
-            OT_ASSERT(it.second);
+            assert_false(nullptr == it.second);
 
             const auto& claim = *it.second;
 
@@ -932,7 +930,7 @@ auto Data::SetCommonName(const UnallocatedCString& name) const -> Data
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -942,7 +940,7 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
 {
     const Imp::Scope& scopeInfo = imp_->scope();
 
-    OT_ASSERT(scopeInfo.second);
+    assert_false(nullptr == scopeInfo.second);
 
     const claim::SectionType section{claim::SectionType::Scope};
     const claim::ClaimType type = scopeInfo.first;
@@ -964,7 +962,7 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
         Time{},
         "");
 
-    OT_ASSERT(item);
+    assert_false(nullptr == item);
 
     return AddItem(item);
 }
@@ -972,7 +970,7 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
 auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
     const -> Data
 {
-    OT_ASSERT(type);
+    assert_true(claim::ClaimType::Error != type);
 
     const claim::SectionType section{claim::SectionType::Scope};
 
@@ -998,18 +996,18 @@ auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
             Time{},
             "");
 
-        OT_ASSERT(item);
+        assert_false(nullptr == item);
 
         auto newSection = std::make_shared<claim::Section>(
             imp_->api_, imp_->nym_, version, version, section, item);
 
-        OT_ASSERT(newSection);
+        assert_false(nullptr == newSection);
 
         mapCopy[section] = newSection;
 
         return {imp_->api_, imp_->nym_, version, version, mapCopy};
     } else {
-        LogError()(OT_PRETTY_CLASS())("Scope already set.").Flush();
+        LogError()()("Scope already set.").Flush();
 
         return *this;
     }
@@ -1035,7 +1033,7 @@ auto Data::Serialize(proto::ContactData& output, const bool withID) const
     for (const auto& it : imp_->sections_) {
         const auto& section = it.second;
 
-        OT_ASSERT(section);
+        assert_false(nullptr == section);
 
         section->SerializeTo(output, withID);
     }
@@ -1051,7 +1049,7 @@ auto Data::SocialMediaProfiles(const claim::ClaimType type, bool active) const
     auto group = Group(claim::SectionType::Profile, type);
     if (group) {
         for (const auto& it : *group) {
-            OT_ASSERT(it.second);
+            assert_false(nullptr == it.second);
 
             const auto& claim = *it.second;
 
@@ -1077,9 +1075,8 @@ auto Data::SocialMediaProfileTypes() const
                 CONTACT_CONTACT_DATA_VERSION, proto::CONTACTSECTION_PROFILE));
 
         UnallocatedSet<claim::ClaimType> output;
-        std::transform(
-            profiletypes.begin(),
-            profiletypes.end(),
+        std::ranges::transform(
+            profiletypes,
             std::inserter(output, output.end()),
             [](proto::ContactItemType itemtype) -> claim::ClaimType {
                 return translate(itemtype);

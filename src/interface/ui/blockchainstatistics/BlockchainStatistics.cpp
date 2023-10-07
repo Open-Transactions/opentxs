@@ -19,7 +19,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -132,9 +131,9 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -143,7 +142,7 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -187,8 +186,7 @@ auto BlockchainStatistics::pipeline(const Message& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("Unhandled type: ")(
-                static_cast<OTZMQWorkType>(work))
+            LogAbort()()("Unhandled type: ")(static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
     }
@@ -199,7 +197,7 @@ auto BlockchainStatistics::process_activepeer(const Message& in) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -213,7 +211,7 @@ auto BlockchainStatistics::process_balance(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -226,7 +224,7 @@ auto BlockchainStatistics::process_block(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -240,7 +238,7 @@ auto BlockchainStatistics::process_block_header(const Message& in) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -258,7 +256,7 @@ auto BlockchainStatistics::process_chain(
     delete_inactive([&] {
         auto out = UnallocatedSet<blockchain::Type>{};
         const auto in = blockchain_.EnabledChains();
-        std::copy(in.begin(), in.end(), std::inserter(out, out.end()));
+        std::ranges::copy(in, std::inserter(out, out.end()));
 
         return out;
     }());
@@ -268,7 +266,7 @@ auto BlockchainStatistics::process_cfilter(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(3 < body.size());
+    assert_true(3 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -282,7 +280,7 @@ auto BlockchainStatistics::process_connectedpeer(const Message& in) noexcept
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -295,7 +293,7 @@ auto BlockchainStatistics::process_reorg(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(5 < body.size());
+    assert_true(5 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
     auto& [header, filter, connected, active, blocks, balance] =
@@ -308,7 +306,7 @@ auto BlockchainStatistics::process_state(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(2 < body.size());
+    assert_true(2 < body.size());
 
     process_chain(body[1].as<blockchain::Type>());
 }

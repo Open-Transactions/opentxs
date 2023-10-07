@@ -15,7 +15,6 @@
 #include "BoostAsio.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -404,6 +404,6 @@ Message::BitcoinFormat_209::BitcoinFormat_209(
     static_assert(4 == sizeof(BitcoinFormat_209));
     static_assert(sizeof(height_) == sizeof(std::uint32_t));
 
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= height);
+    assert_true(std::numeric_limits<std::uint32_t>::max() >= height);
 }
 }  // namespace opentxs::network::blockchain::bitcoin::message::version

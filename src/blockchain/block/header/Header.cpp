@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "blockchain/block/header/HeaderPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/Work.hpp"
@@ -17,6 +16,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::block
@@ -40,7 +40,7 @@ namespace opentxs::blockchain::block
 Header::Header(HeaderPrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Header::Header(allocator_type alloc) noexcept

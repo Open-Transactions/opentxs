@@ -37,7 +37,6 @@
 #include "internal/serialization/protobuf/verify/ContactData.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -89,8 +88,7 @@ auto Factory::Nym(
 
     if ((identity::CredentialType::Legacy == params.credentialType()) &&
         (identity::SourceType::Bip47 == params.SourceType())) {
-        LogError()("opentxs::Factory::")(__func__)(": Invalid parameters")
-            .Flush();
+        LogError()()("Invalid parameters").Flush();
 
         return nullptr;
     }
@@ -101,9 +99,7 @@ auto Factory::Nym(
             NymIDSource(api, revised, reason)};
 
         if (false == bool(pSource)) {
-            LogError()("opentxs::Factory::")(__func__)(
-                ": Failed to generate nym id source")
-                .Flush();
+            LogError()()("Failed to generate nym id source").Flush();
 
             return nullptr;
         }
@@ -130,9 +126,7 @@ auto Factory::Nym(
 
         return new ReturnType(api, revised, std::move(pSource), reason);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(": Failed to create nym: ")(
-            e.what())
-            .Flush();
+        LogError()()("Failed to create nym: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -146,9 +140,7 @@ auto Factory::Nym(
     try {
         return new identity::implementation::Nym(api, serialized, alias);
     } catch (const std::exception& e) {
-        LogError()("opentxs::Factory::")(__func__)(
-            ": Failed to instantiate nym: ")(e.what())
-            .Flush();
+        LogError()()("Failed to instantiate nym: ")(e.what()).Flush();
 
         return nullptr;
     }
@@ -212,7 +204,7 @@ Nym::Nym(
     , list_revoked_ids_()
     , seed_id_(std::nullopt)
 {
-    OT_ASSERT(id_.Type() == identifier::Type::nym);
+    assert_true(id_.Type() == identifier::Type::nym);
 
     if (false == bool(source_p_)) {
         throw std::runtime_error("Invalid nym id source");
@@ -239,7 +231,7 @@ Nym::Nym(
           load_revoked(api_, *this, source_, serialized, revoked_sets_))
     , seed_id_(std::nullopt)
 {
-    OT_ASSERT(id_.Type() == identifier::Type::nym);
+    assert_true(id_.Type() == identifier::Type::nym);
 
     if (false == bool(source_p_)) {
         throw std::runtime_error("Invalid nym id source");
@@ -251,7 +243,7 @@ auto Nym::add_contact_credential(
     const proto::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     bool added = false;
 
@@ -273,7 +265,7 @@ auto Nym::add_verification_credential(
     const proto::VerificationSet& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     bool added = false;
 
@@ -301,7 +293,7 @@ auto Nym::AddChildKeyCredential(
     const bool noMaster = (it == active_.end());
 
     if (noMaster) {
-        LogError()(OT_PRETTY_CLASS())("Master ID not found.").Flush();
+        LogError()()("Master ID not found.").Flush();
 
         return output;
     }
@@ -324,7 +316,7 @@ auto Nym::AddClaim(
     // NOLINTNEXTLINE(modernize-make-unique)
     contact_data_.reset(new wot::claim::Data(contact_data_->AddItem(claim)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -355,7 +347,7 @@ auto Nym::AddContract(
     contact_data_.reset(new wot::claim::Data(
         contact_data_->AddContract(id, currency, primary, active)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -383,7 +375,7 @@ auto Nym::AddEmail(
     contact_data_.reset(
         new wot::claim::Data(contact_data_->AddEmail(value, primary, active)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -414,7 +406,7 @@ auto Nym::AddPaymentCode(
     contact_data_.reset(new wot::claim::Data(
         contact_data_->AddPaymentCode(paymentCode, currency, primary, active)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -442,7 +434,7 @@ auto Nym::AddPhoneNumber(
     contact_data_.reset(new wot::claim::Data(
         contact_data_->AddPhoneNumber(value, primary, active)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -463,13 +455,13 @@ auto Nym::AddPreferredOTServer(
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     // NOLINTNEXTLINE(modernize-make-unique)
     contact_data_.reset(
         new wot::claim::Data(contact_data_->AddPreferredOTServer(id, primary)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -498,7 +490,7 @@ auto Nym::AddSocialMediaProfile(
     contact_data_.reset(new wot::claim::Data(
         contact_data_->AddSocialMediaProfile(value, type, primary, active)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -559,7 +551,7 @@ auto Nym::BestEmail() const -> UnallocatedCString
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->BestEmail();
 }
@@ -570,7 +562,7 @@ auto Nym::BestPhoneNumber() const -> UnallocatedCString
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->BestPhoneNumber();
 }
@@ -582,7 +574,7 @@ auto Nym::BestSocialMediaProfile(const wot::claim::ClaimType type) const
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->BestSocialMediaProfile(type);
 }
@@ -593,7 +585,7 @@ auto Nym::Claims() const -> const wot::claim::Data&
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return *contact_data_;
 }
@@ -615,7 +607,7 @@ auto Nym::CompareID(const identifier::Nym& rhs) const -> bool
 auto Nym::ContactCredentialVersion() const -> VersionNumber
 {
     // TODO support multiple authorities
-    OT_ASSERT(0 < active_.size());
+    assert_true(0 < active_.size());
 
     return active_.cbegin()->second->ContactCredentialVersion();
 }
@@ -627,7 +619,7 @@ auto Nym::Contracts(const UnitType currency, const bool onlyActive) const
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->Contracts(currency, onlyActive);
 }
@@ -667,7 +659,7 @@ auto Nym::DeleteClaim(
     // NOLINTNEXTLINE(modernize-make-unique)
     contact_data_.reset(new wot::claim::Data(contact_data_->Delete(id)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -685,7 +677,7 @@ auto Nym::EmailAddresses(bool active) const -> UnallocatedCString
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->EmailAddresses(active);
 }
@@ -727,9 +719,9 @@ auto Nym::get_private_auth_key(
     crypto::asymmetric::Algorithm keytype) const
     -> const crypto::asymmetric::Key&
 {
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
     const identity::Authority* pCredential{nullptr};
 
     for (const auto& it : active_) {
@@ -744,7 +736,7 @@ auto Nym::get_private_auth_key(
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPrivateAuthKey(
         keytype, &list_revoked_ids_);  // success
@@ -773,7 +765,7 @@ auto Nym::GetPrivateEncrKey(crypto::asymmetric::Algorithm keytype) const
 {
     auto lock = sLock{shared_lock_};
 
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
     const identity::Authority* pCredential{nullptr};
 
@@ -789,7 +781,7 @@ auto Nym::GetPrivateEncrKey(crypto::asymmetric::Algorithm keytype) const
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPrivateEncrKey(
         keytype,
@@ -815,9 +807,9 @@ auto Nym::get_private_sign_key(
     crypto::asymmetric::Algorithm keytype) const
     -> const crypto::asymmetric::Key&
 {
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const identity::Authority* pCredential{nullptr};
 
@@ -833,7 +825,7 @@ auto Nym::get_private_sign_key(
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPrivateSignKey(
         keytype,
@@ -846,9 +838,9 @@ auto Nym::get_public_sign_key(
     crypto::asymmetric::Algorithm keytype) const
     -> const crypto::asymmetric::Key&
 {
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const identity::Authority* pCredential{nullptr};
 
@@ -864,7 +856,7 @@ auto Nym::get_public_sign_key(
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPublicSignKey(
         keytype,
@@ -881,7 +873,7 @@ auto Nym::GetPublicAuthKey(crypto::asymmetric::Algorithm keytype) const
 {
     auto lock = sLock{shared_lock_};
 
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
     const identity::Authority* pCredential{nullptr};
 
@@ -897,7 +889,7 @@ auto Nym::GetPublicAuthKey(crypto::asymmetric::Algorithm keytype) const
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPublicAuthKey(
         keytype,
@@ -914,7 +906,7 @@ auto Nym::GetPublicEncrKey(crypto::asymmetric::Algorithm keytype) const
 {
     auto lock = sLock{shared_lock_};
 
-    OT_ASSERT(!active_.empty());
+    assert_false(active_.empty());
 
     const identity::Authority* pCredential{nullptr};
     for (const auto& it : active_) {
@@ -929,7 +921,7 @@ auto Nym::GetPublicEncrKey(crypto::asymmetric::Algorithm keytype) const
         pCredential = it.second.get();
         if (nullptr != pCredential) { break; }
     }
-    if (nullptr == pCredential) { OT_FAIL; }
+    if (nullptr == pCredential) { LogAbort()().Abort(); }
 
     return pCredential->Internal().GetPublicEncrKey(
         keytype,
@@ -960,7 +952,7 @@ auto Nym::GetPublicKeysBySignature(
 
     for (const auto& it : active_) {
         const identity::Authority* pCredential = it.second.get();
-        OT_ASSERT(nullptr != pCredential);
+        assert_false(nullptr == pCredential);
 
         const std::int32_t nTempCount =
             pCredential->Internal().GetPublicKeysBySignature(
@@ -987,10 +979,10 @@ auto Nym::GetPublicSignKey(crypto::asymmetric::Algorithm keytype) const
 auto Nym::has_capability(const eLock& lock, const NymCapability& capability)
     const -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     for (const auto& it : active_) {
-        OT_ASSERT(nullptr != it.second);
+        assert_false(nullptr == it.second);
 
         if (nullptr != it.second) {
             const identity::Authority& credSet = *it.second;
@@ -1020,22 +1012,22 @@ auto Nym::HasPath() const -> bool
 
 void Nym::init_claims(const eLock& lock) const
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const auto nymID{id_.asBase58(api_.Crypto())};
     const auto dataVersion = ContactDataVersion();
     contact_data_ = std::make_unique<wot::claim::Data>(
         api_, nymID, dataVersion, dataVersion, wot::claim::Data::SectionMap());
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     for (const auto& it : active_) {
-        OT_ASSERT(nullptr != it.second);
+        assert_false(nullptr == it.second);
 
         const auto& credSet = *it.second;
         auto serialized = proto::ContactData{};
         if (credSet.GetContactData(serialized)) {
-            OT_ASSERT(
+            assert_true(
                 proto::Validate(serialized, VERBOSE, proto::ClaimType::Normal));
 
             wot::claim::Data claimCred(api_, nymID, dataVersion, serialized);
@@ -1045,7 +1037,7 @@ void Nym::init_claims(const eLock& lock) const
         }
     }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 }
 
 auto Nym::load_authorities(
@@ -1118,7 +1110,7 @@ auto Nym::Name() const -> UnallocatedCString
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     UnallocatedCString output = contact_data_->Name();
 
@@ -1156,9 +1148,7 @@ auto Nym::normalize(
         const auto defaultIndex = in.UseAutoIndex();
 
         if (false == defaultIndex) {
-            LogDetail()(OT_PRETTY_STATIC(Nym))(
-                "Re-creating nym at specified path.")
-                .Flush();
+            LogDetail()()("Re-creating nym at specified path.").Flush();
 
             nymIndex = in.Nym();
         }
@@ -1184,7 +1174,7 @@ auto Nym::normalize(
 auto Nym::path(const sLock& lock, proto::HDPath& output) const -> bool
 {
     for (const auto& it : active_) {
-        OT_ASSERT(nullptr != it.second);
+        assert_false(nullptr == it.second);
         const auto& authority = *it.second;
 
         if (authority.Path(output)) {
@@ -1194,8 +1184,7 @@ auto Nym::path(const sLock& lock, proto::HDPath& output) const -> bool
         }
     }
 
-    LogError()(OT_PRETTY_CLASS())(": no authority in ")(id_, api_.Crypto())(
-        " contains a path")
+    LogError()()(": no authority in ")(id_, api_.Crypto())(" contains a path")
         .Flush();
 
     return false;
@@ -1273,8 +1262,7 @@ auto Nym::PaymentCodePath(Writer&& destination) const -> bool
 {
     auto path = proto::HDPath{};
     if (false == PaymentCodePath(path)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to serialize payment code path to HDPath.")
+        LogError()()("Failed to serialize payment code path to HDPath.")
             .Flush();
 
         return false;
@@ -1313,7 +1301,7 @@ auto Nym::PhoneNumbers(bool active) const -> UnallocatedCString
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->PhoneNumbers(active);
 }
@@ -1322,7 +1310,7 @@ auto Nym::Revision() const -> std::uint64_t { return revision_.load(); }
 
 void Nym::revoke_contact_credentials(const eLock& lock)
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     UnallocatedList<identifier::Generic> revokedIDs;
 
@@ -1339,7 +1327,7 @@ void Nym::revoke_contact_credentials(const eLock& lock)
 
 void Nym::revoke_verification_credentials(const eLock& lock)
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     UnallocatedList<identifier::Generic> revokedIDs;
 
@@ -1436,26 +1424,24 @@ auto Nym::set_contact_data(
     const proto::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     auto version = proto::NymRequiredVersion(data.version(), version_);
 
     if ((0 == version) || version > MaxVersion) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Contact data version not supported by this nym.")
-            .Flush();
+        LogError()()("Contact data version not supported by this nym.").Flush();
 
         return false;
     }
 
     if (false == has_capability(lock, NymCapability::SIGN_CHILDCRED)) {
-        LogError()(OT_PRETTY_CLASS())("This nym can not be modified.").Flush();
+        LogError()()("This nym can not be modified.").Flush();
 
         return false;
     }
 
     if (false == proto::Validate(data, VERBOSE, proto::ClaimType::Normal)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid contact data.").Flush();
+        LogError()()("Invalid contact data.").Flush();
 
         return false;
     }
@@ -1490,7 +1476,7 @@ auto Nym::SetCommonName(
     contact_data_.reset(
         new wot::claim::Data(contact_data_->SetCommonName(name)));
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -1540,7 +1526,7 @@ auto Nym::SetScope(
             new wot::claim::Data(contact_data_->SetScope(type, name)));
     }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return set_contact_data(
         lock,
@@ -1603,7 +1589,7 @@ auto Nym::SocialMediaProfiles(const wot::claim::ClaimType type, bool active)
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->SocialMediaProfiles(type, active);
 }
@@ -1615,7 +1601,7 @@ auto Nym::SocialMediaProfileTypes() const
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
-    OT_ASSERT(contact_data_);
+    assert_false(nullptr == contact_data_);
 
     return contact_data_->SocialMediaProfileTypes();
 }
@@ -1628,7 +1614,7 @@ auto Nym::TransportKey(Data& pubkey, const opentxs::PasswordPrompt& reason)
     auto lock = sLock{shared_lock_};
 
     for (const auto& it : active_) {
-        OT_ASSERT(nullptr != it.second);
+        assert_false(nullptr == it.second);
 
         if (nullptr != it.second) {
             const identity::Authority& credSet = *it.second;
@@ -1638,7 +1624,7 @@ auto Nym::TransportKey(Data& pubkey, const opentxs::PasswordPrompt& reason)
         }
     }
 
-    OT_ASSERT(found);
+    assert_true(found);
 
     return privateKey;
 }
@@ -1666,7 +1652,7 @@ auto Nym::update_nym(
     const std::int32_t version,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     if (verify_pseudonym(lock)) {
         // Upgrade version
@@ -1693,8 +1679,8 @@ auto Nym::Verify(const ProtobufType& input, proto::Signature& signature) const
         }
     }
 
-    LogError()(OT_PRETTY_CLASS())(active_.size())(" authorities on nym ")(
-        id_, api_.Crypto())(" failed to verify signature")
+    LogError()()(active_.size())(" authorities on nym ")(id_, api_.Crypto())(
+        " failed to verify signature")
         .Flush();
 
     return false;
@@ -1707,12 +1693,12 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
         // Verify Nym by his own credentials.
         for (const auto& it : active_) {
             const identity::Authority* pCredential = it.second.get();
-            OT_ASSERT(nullptr != pCredential);
+            assert_false(nullptr == pCredential);
 
             // Verify all Credentials in the Authority, including source
             // verification for the master credential.
             if (!pCredential->Internal().VerifyInternally()) {
-                LogConsole()(OT_PRETTY_CLASS())("Credential (")(
+                LogConsole()()("Credential (")(
                     pCredential->GetMasterCredID(),
                     api_.Crypto())(") failed its own internal verification.")
                     .Flush();
@@ -1721,7 +1707,7 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
         }
         return true;
     }
-    LogError()(OT_PRETTY_CLASS())("No credentials.").Flush();
+    LogError()()("No credentials.").Flush();
     return false;
 }
 
@@ -1738,8 +1724,7 @@ auto Nym::WriteCredentials() const -> bool
 
     for (const auto& it : active_) {
         if (!it.second->WriteCredentials()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save credentials.")
-                .Flush();
+            LogError()()("Failed to save credentials.").Flush();
 
             return false;
         }

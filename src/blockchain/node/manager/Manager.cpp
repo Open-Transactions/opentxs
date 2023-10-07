@@ -5,8 +5,6 @@
 
 #include "blockchain/node/manager/Manager.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <string_view>
 #include <utility>
 
@@ -15,7 +13,6 @@
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -26,6 +23,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::implementation
@@ -45,7 +43,7 @@ Base::Base(
           seednode,
           std::move(endpoints)))
 {
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 }
 
 Base::Base(
@@ -167,20 +165,17 @@ auto Base::Start(
     std::shared_ptr<const api::session::Client> api,
     std::shared_ptr<node::Manager> me) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(me);
-    OT_ASSERT(shared_);
+    assert_false(nullptr == api);
+    assert_false(nullptr == me);
+    assert_false(nullptr == shared_);
 
     const auto& zmq = api->Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
-    auto actor = boost::allocate_shared<manager::Actor>(
+    auto actor = std::allocate_shared<manager::Actor>(
         alloc::PMR<manager::Actor>{alloc}, api, me, shared_, batchID);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
     shared_->Init(me);

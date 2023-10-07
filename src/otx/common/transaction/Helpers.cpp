@@ -19,7 +19,6 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/otx/common/util/Common.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -161,8 +160,7 @@ auto LoadAbbreviatedRecord(
 
     if (!strTransNum->Exists() || !strInRefTo->Exists() ||
         !strInRefDisplay->Exists() || !strDateSigned->Exists()) {
-        LogConsole()(__func__)("Failure: missing "
-                               "strTransNum (")(strTransNum.get())(
+        LogConsole()()("Failure: missing strTransNum (")(strTransNum.get())(
             ") or strInRefTo (")(strInRefTo.get())(") or strInRefDisplay (")(
             strInRefDisplay.get())(") or strDateSigned(")(strDateSigned.get())(
             ") while loading abbreviated receipt.")
@@ -191,20 +189,18 @@ auto LoadAbbreviatedRecord(
         theType = OTTransaction::GetTypeFromString(strAbbrevType);
 
         if (transactionType::error_state == theType) {
-            LogError()(__func__)(
-                "Failure: Error_state was the found type (based on "
-                "string ")(strAbbrevType.get())(
-                "), when loading abbreviated receipt "
-                "for trans num: ")(lTransactionNum)(" (In Reference To: ")(
-                lInRefTo)(").")
+            LogError()()(
+                "Failure: Error_state was the found type (based on string ")(
+                strAbbrevType.get())(
+                "), when loading abbreviated receipt for trans num: ")(
+                lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
                 .Flush();
             return (-1);
         }
     } else {
-        LogConsole()(__func__)("Failure: unknown "
-                               "transaction type (")(strAbbrevType.get())(
-            ") when "
-            "loading abbreviated receipt for trans num: ")(
+        LogConsole()()("Failure: unknown transaction type (")(
+            strAbbrevType.get())(
+            ") when loading abbreviated receipt for trans num: ")(
             lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
             .Flush();
         return (-1);
@@ -214,9 +210,8 @@ auto LoadAbbreviatedRecord(
     //
     strHash.Set(xml->getAttributeValue("receiptHash"));
     if (!strHash.Exists()) {
-        LogConsole()(__func__)("Failure: Expected "
-                               "receiptHash while loading "
-                               "abbreviated receipt for trans num: ")(
+        LogConsole()()("Failure: Expected receiptHash while loading "
+                       "abbreviated receipt for trans num: ")(
             lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
             .Flush();
         return (-1);
@@ -243,10 +238,8 @@ auto LoadAbbreviatedRecord(
             String::Factory(xml->getAttributeValue("requestNumber"));
 
         if (!strRequestNum->Exists()) {
-            LogConsole()(__func__)(
-                "Failed loading "
-                "abbreviated receipt: "
-                "expected requestNumber on replyNotice trans num: ")(
+            LogConsole()()("Failed loading abbreviated receipt: expected "
+                           "requestNumber on replyNotice trans num: ")(
                 lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
                 .Flush();
             return (-1);
@@ -269,9 +262,8 @@ auto LoadAbbreviatedRecord(
             String::Factory(xml->getAttributeValue("closingNum"));
 
         if (!strAbbrevClosingNum->Exists()) {
-            LogConsole()(__func__)("Failed loading "
-                                   "abbreviated receipt: "
-                                   "expected closingNum on trans num: ")(
+            LogConsole()()("Failed loading abbreviated receipt: expected "
+                           "closingNum on trans num: ")(
                 lTransactionNum)(" (In Reference To: ")(lInRefTo)(").")
                 .Flush();
             return (-1);
@@ -348,7 +340,7 @@ auto VerifyBoxReceiptExists(
         strFolder3name->Get(),
         strFilename->Get());
 
-    LogDetail()(__func__)(
+    LogDetail()()(
         bExists ? "(Already have this one)"
                 : "(Need to download this one) : ")(strFolder1name.get())('/')(
         strFolder2name.get())('/')(strFolder3name.get())('/')(strFilename.get())
@@ -380,7 +372,7 @@ auto LoadBoxReceipt(
     // form.)
     //
     if (!theAbbrev.IsAbbreviated()) {
-        LogConsole()(__func__)("Unable to load box receipt ")(
+        LogConsole()()("Unable to load box receipt ")(
             theAbbrev.GetTransactionNum())(
             ": (Because argument 'theAbbrev' wasn't abbreviated).")
             .Flush();
@@ -414,9 +406,9 @@ auto LoadBoxReceipt(
             strFolder2name->Get(),
             strFolder3name->Get(),
             strFilename->Get())) {
-        LogDetail()(__func__)("Box receipt does not exist: ")(
-            strFolder1name.get())('/')(strFolder2name.get())('/')(
-            strFolder3name.get())('/')(strFilename.get())
+        LogDetail()()("Box receipt does not exist: ")(strFolder1name.get())(
+            '/')(strFolder2name.get())('/')(strFolder3name.get())('/')(
+            strFilename.get())
             .Flush();
         return nullptr;
     }
@@ -431,7 +423,7 @@ auto LoadBoxReceipt(
         strFolder3name->Get(),
         strFilename->Get()));
     if (strFileContents.length() < 2) {
-        LogError()(__func__)("Error reading file: ")(strFolder1name.get())('/')(
+        LogError()()("Error reading file: ")(strFolder1name.get())('/')(
             strFolder2name.get())('/')(strFolder3name.get())('/')(
             strFilename.get())
             .Flush();
@@ -441,8 +433,7 @@ auto LoadBoxReceipt(
     auto strRawFile = String::Factory(strFileContents.c_str());
 
     if (!strRawFile->Exists()) {
-        LogError()(__func__)(
-            "Error reading file (resulting output string is empty): ")(
+        LogError()()("Error reading file (resulting output string is empty): ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
             strFolder3name.get())('/')(strFilename.get())
             .Flush();
@@ -455,7 +446,7 @@ auto LoadBoxReceipt(
     auto pTransType = api.Factory().InternalSession().Transaction(strRawFile);
 
     if (false == bool(pTransType)) {
-        LogError()(__func__)(
+        LogError()()(
             "Error instantiating transaction type based on strRawFile: ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
             strFolder3name.get())('/')(strFilename.get())
@@ -467,10 +458,10 @@ auto LoadBoxReceipt(
         dynamic_cast<OTTransaction*>(pTransType.release())};
 
     if (false == bool(pBoxReceipt)) {
-        LogError()(__func__)("Error dynamic_cast from transaction type to "
-                             "transaction, based on strRawFile: ")(
-            strFolder1name.get())('/')(strFolder2name.get())('/')(
-            strFolder3name.get())('/')(strFilename.get())
+        LogError()()("Error dynamic_cast from transaction type to transaction, "
+                     "based on strRawFile: ")(strFolder1name.get())('/')(
+            strFolder2name.get())('/')(strFolder3name.get())('/')(
+            strFilename.get())
             .Flush();
         return nullptr;
     }
@@ -484,14 +475,14 @@ auto LoadBoxReceipt(
     bool bSuccess = theAbbrev.VerifyBoxReceipt(*pBoxReceipt);
 
     if (!bSuccess) {
-        LogError()(__func__)("Failed verifying Box Receipt: ")(
-            strFolder1name.get())('/')(strFolder2name.get())('/')(
-            strFolder3name.get())('/')(strFilename.get())
+        LogError()()("Failed verifying Box Receipt: ")(strFolder1name.get())(
+            '/')(strFolder2name.get())('/')(strFolder3name.get())('/')(
+            strFilename.get())
             .Flush();
 
         return nullptr;
     } else {
-        LogVerbose()(__func__)("Successfully loaded Box Receipt in: ")(
+        LogVerbose()()("Successfully loaded Box Receipt in: ")(
             strFolder1name.get())('/')(strFolder2name.get())('/')(
             strFolder3name.get())('/')(strFilename.get())
             .Flush();
@@ -527,7 +518,7 @@ auto SetupBoxReceiptFilename(
     String& strFolder3name,
     String& strFilename) -> bool
 {
-    OT_ASSERT(nullptr != szCaller);
+    assert_false(nullptr == szCaller);
 
     const char* pszFolder = nullptr;  // "nymbox" (or "inbox" or "outbox")
     switch (lLedgerType) {
@@ -551,7 +542,7 @@ auto SetupBoxReceiptFilename(
             pszFolder = api.Internal().Legacy().ExpiredBox();
             break;
         default:
-            LogError()(__func__)("Error: Unknown box type: ")(
+            LogError()()("Error: Unknown box type: ")(
                 lLedgerType)(". (This should never happen).")
                 .Flush();
             return false;
@@ -634,8 +625,7 @@ auto SetupBoxReceiptFilename(
         case ledgerType::message:
         case ledgerType::error_state:
         default: {
-            LogError()(__func__)("Error: unknown box type. "
-                                 "(This should never happen).")
+            LogError()()("Error: unknown box type. (This should never happen).")
                 .Flush();
             return false;
         }

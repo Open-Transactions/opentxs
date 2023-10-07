@@ -20,7 +20,6 @@
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NymFile.hpp"  // IWYU pragma: keep
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -143,9 +142,7 @@ auto Base<CRTP, DataType>::consume_available(
     Data& data,
     const TransactionNumber& number) -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())("(")(type())(") ")("Consuming number ")(
-        number)
-        .Flush();
+    LogVerbose()()("(")(type())(") ")("Consuming number ")(number).Flush();
     auto& available = data.available_transaction_numbers_;
 
     return 1 == available.erase(number);
@@ -156,15 +153,12 @@ auto Base<CRTP, DataType>::consume_issued(
     Data& data,
     const TransactionNumber& number) -> bool
 {
-    LogVerbose()(OT_PRETTY_CLASS())("(")(type())(") ")("Consuming number ")(
-        number)
-        .Flush();
+    LogVerbose()()("(")(type())(") ")("Consuming number ")(number).Flush();
     auto& available = data.available_transaction_numbers_;
     auto& issued = data.issued_transaction_numbers_;
 
     if (0 < available.count(number)) {
-        LogDetail()(OT_PRETTY_CLASS())(
-            "Consuming an issued number that was still available.")
+        LogDetail()()("Consuming an issued number that was still available.")
             .Flush();
         available.erase(number);
     }
@@ -200,7 +194,7 @@ auto Base<CRTP, DataType>::contract(const Data& data) const -> proto::Context
     if (data.sig_) {
         output.mutable_signature()->CopyFrom(*data.sig_);
     } else {
-        LogError()(OT_PRETTY_CLASS())("missing signature").Flush();
+        LogError()()("missing signature").Flush();
     }
 
     return output;
@@ -285,7 +279,7 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
         ownerNymID, server_nym_id(), server_id_)};
 
     if (false == bool(nymbox)) {
-        LogError()(OT_PRETTY_CLASS())("Unable to instantiate nymbox for ")(
+        LogError()()("Unable to instantiate nymbox for ")(
             ownerNymID, api_.Crypto())(".")
             .Flush();
 
@@ -296,9 +290,8 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
         ownerNymID, server_id_, ledgerType::nymbox, true);
 
     if (false == generated) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to generate nymbox "
-            "for ")(ownerNymID, api_.Crypto())(".")
+        LogError()()("(")(type())(") ")("Unable to generate nymbox "
+                                        "for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
@@ -306,28 +299,27 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
 
     nymbox->ReleaseSignatures();
 
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     if (false == nymbox->SignContract(*Signer(), reason)) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to sign nymbox for ")(ownerNymID, api_.Crypto())(".")
+        LogError()()("(")(type())(") ")("Unable to sign nymbox for ")(
+            ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
     }
 
     if (false == nymbox->SaveContract()) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to serialize nymbox "
-            "for ")(ownerNymID, api_.Crypto())(".")
+        LogError()()("(")(type())(") ")("Unable to serialize nymbox "
+                                        "for ")(ownerNymID, api_.Crypto())(".")
             .Flush();
 
         return false;
     }
 
     if (false == nymbox->SaveNymbox(data.local_nymbox_hash_)) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Unable to save nymbox for ")(ownerNymID, api_.Crypto())
+        LogError()()("(")(type())(") ")("Unable to save nymbox for ")(
+            ownerNymID, api_.Crypto())
             .Flush();
 
         return false;
@@ -368,8 +360,7 @@ auto Base<CRTP, DataType>::issue_number(
     const bool output = isIssued && isAvailable;
 
     if (!output) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Failed to issue number ")(number)(".")
+        LogError()()("(")(type())(") ")("Failed to issue number ")(number)(".")
             .Flush();
         issued.erase(number);
         available.erase(number);
@@ -401,7 +392,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::mutable_Nymfile(const PasswordPrompt& reason)
     -> Editor<opentxs::NymFile>
 {
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     return api_.Wallet().Internal().mutable_Nymfile(Signer()->ID(), reason);
 }
@@ -423,7 +414,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::Nymfile(const PasswordPrompt& reason) const
     -> std::unique_ptr<const opentxs::NymFile>
 {
-    OT_ASSERT(Signer());
+    assert_false(nullptr == Signer());
 
     return api_.Wallet().Internal().Nymfile(Signer()->ID(), reason);
 }
@@ -468,7 +459,7 @@ auto Base<CRTP, DataType>::Refresh(
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::RemoteNym() const -> const identity::Nym&
 {
-    OT_ASSERT(remote_nym_);
+    assert_false(nullptr == remote_nym_);
 
     return *remote_nym_;
 }
@@ -611,8 +602,7 @@ auto Base<CRTP, DataType>::set_local_nymbox_hash(
 {
     auto& hash = data.local_nymbox_hash_;
     hash = value;
-    LogVerbose()(OT_PRETTY_CLASS())("(")(type())(") ")(
-        "Set local nymbox hash to: ")
+    LogVerbose()()("(")(type())(") ")("Set local nymbox hash to: ")
         .asHex(hash)
         .Flush();
 }
@@ -624,8 +614,7 @@ auto Base<CRTP, DataType>::set_remote_nymbox_hash(
 {
     auto& hash = data.remote_nymbox_hash_;
     hash = value;
-    LogVerbose()(OT_PRETTY_CLASS())("(")(type())(") ")(
-        "Set remote nymbox hash to: ")
+    LogVerbose()()("(")(type())(") ")("Set remote nymbox hash to: ")
         .asHex(hash)
         .Flush();
 }
@@ -658,7 +647,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::signatures() const noexcept
     -> std::span<const contract::Signature>
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 template <typename CRTP, typename DataType>
@@ -681,7 +670,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::update_signature(const PasswordPrompt& reason)
     -> bool
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 template <typename CRTP, typename DataType>
@@ -702,9 +691,7 @@ auto Base<CRTP, DataType>::update_signature(
     if (success) {
         data.sig_ = std::make_shared<proto::Signature>(signature);
     } else {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Failed to create signature.")
-            .Flush();
+        LogError()()("(")(type())(") ")("Failed to create signature.").Flush();
     }
 
     return success;
@@ -727,7 +714,7 @@ auto Base<CRTP, DataType>::Validate() const noexcept -> bool
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::validate() const -> bool
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 template <typename CRTP, typename DataType>
@@ -736,7 +723,7 @@ auto Base<CRTP, DataType>::validate(const Data& data) const -> bool
     if (data.sig_) {
         return verify_signature(data, *data.sig_);
     } else {
-        LogError()(OT_PRETTY_CLASS())("contract is not signed").Flush();
+        LogError()()("contract is not signed").Flush();
 
         return false;
     }
@@ -791,7 +778,7 @@ template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::verify_signature(
     const proto::Signature& signature) const -> bool
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 template <typename CRTP, typename DataType>
@@ -800,9 +787,7 @@ auto Base<CRTP, DataType>::verify_signature(
     const proto::Signature& signature) const -> bool
 {
     if (!Signable::verify_signature(signature)) {
-        LogError()(OT_PRETTY_CLASS())("(")(type())(") ")(
-            "Error: invalid signature.")
-            .Flush();
+        LogError()()("(")(type())(") ")("Error: invalid signature.").Flush();
 
         return false;
     }

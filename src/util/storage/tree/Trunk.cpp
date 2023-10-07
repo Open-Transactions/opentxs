@@ -9,13 +9,13 @@
 #include <StorageItems.pb.h>
 #include <atomic>
 #include <functional>
+#include <source_location>
 #include <stdexcept>
 
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
@@ -42,7 +42,13 @@ Trunk::Trunk(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), TREE_VERSION)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          TREE_VERSION)
     , account_root_(NullHash{})
     , contact_root_(NullHash{})
     , credential_root_(NullHash{})
@@ -157,7 +163,7 @@ auto Trunk::get_child(
         pointer.reset(new T(crypto_, factory_, plugin_, hash, params...));
 
         if (false == bool(pointer)) {
-            LogAbort()(OT_PRETTY_CLASS())("Unable to instantiate.").Abort();
+            LogAbort()()("Unable to instantiate.").Abort();
         }
     }
 
@@ -213,8 +219,8 @@ auto Trunk::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -234,7 +240,7 @@ auto Trunk::Load(
         using enum ErrorReporting;
 
         if (verbose == checking) {
-            LogError()(OT_PRETTY_CLASS())("Master key does not exist.").Flush();
+            LogError()()("Master key does not exist.").Flush();
         }
     }
 
@@ -301,9 +307,7 @@ auto Trunk::nyms() const -> tree::Nyms*
 
 auto Trunk::save(const Lock& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("Lock failure.").Abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure.").Abort(); }
 
     auto serialized = serialize();
 
@@ -320,20 +324,16 @@ void Trunk::save_child(
     Hash& hash) const
 {
     if (false == verify_write_lock(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("Lock failure.").Abort();
+        LogAbort()()("Lock failure.").Abort();
     }
 
-    if (nullptr == input) {
-        LogAbort()(OT_PRETTY_CLASS())("Null target.").Abort();
-    }
+    if (nullptr == input) { LogAbort()()("Null target.").Abort(); }
 
     Lock rootLock(hashLock);
     hash = input->Root();
     rootLock.unlock();
 
-    if (false == save(lock)) {
-        LogAbort()(OT_PRETTY_CLASS())("Save error.").Abort();
-    }
+    if (false == save(lock)) { LogAbort()()("Save error.").Abort(); }
 }
 
 auto Trunk::Seeds() const -> const tree::Seeds& { return *seeds(); }

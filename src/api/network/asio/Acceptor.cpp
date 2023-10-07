@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "network/asio/Endpoint.hpp"
 #include "network/asio/Socket.hpp"
@@ -50,13 +49,12 @@ struct Acceptor::Imp {
         auto lock = Lock{lock_};
 
         if (running_) {
-            LogTrace()(OT_PRETTY_CLASS())("shutting down ")(endpoint_.str())
-                .Flush();
+            LogTrace()()("shutting down ")(endpoint_.str()).Flush();
             auto ec = boost::system::error_code{};
             acceptor_.cancel(ec);
             acceptor_.close(ec);
             running_ = false;
-            LogTrace()(OT_PRETTY_CLASS())(endpoint_.str())(" closed").Flush();
+            LogTrace()()(endpoint_.str())(" closed").Flush();
         }
     }
 
@@ -91,15 +89,13 @@ private:
     {
         if (ec) {
             if (unexpected_asio_error(ec)) {
-                LogError()(OT_PRETTY_CLASS())("received asio error (")(
-                    ec.value())(") :")(ec)
+                LogError()()("received asio error (")(ec.value())(") :")(ec)
                     .Flush();
             }
 
             return;
         } else {
-            LogVerbose()(OT_PRETTY_CLASS())("incoming connection request on ")(
-                endpoint_.str())
+            LogVerbose()()("incoming connection request on ")(endpoint_.str())
                 .Flush();
         }
 

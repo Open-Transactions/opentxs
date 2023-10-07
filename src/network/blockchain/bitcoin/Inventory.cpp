@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -193,7 +192,7 @@ auto Inventory::Serialize(Writer&& out) const noexcept -> bool
 
         return copy(reader(std::addressof(raw), sizeof(raw)), std::move(out));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

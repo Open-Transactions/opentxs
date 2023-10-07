@@ -30,7 +30,6 @@ extern "C" {
 #include "crypto/hasher/HasherPrivate.hpp"
 #include "internal/crypto/library/Factory.hpp"
 #include "internal/crypto/library/HashingProvider.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -74,8 +73,8 @@ OpenSSL::OpenSSL() noexcept
     : default_provider_(OSSL_PROVIDER_load(nullptr, "legacy"))
     , legacy_provider_(OSSL_PROVIDER_load(nullptr, "default"))
 {
-    OT_ASSERT(nullptr != default_provider_);
-    OT_ASSERT(nullptr != legacy_provider_);
+    assert_false(nullptr == default_provider_);
+    assert_false(nullptr == legacy_provider_);
 }
 #else
 OpenSSL::OpenSSL() noexcept = default;
@@ -88,7 +87,7 @@ OpenSSL::BIO::BIO(BIO_METHOD* type) noexcept
 #endif
     : bio_(::BIO_new(type), ::BIO_free)
 {
-    OT_ASSERT(bio_);
+    assert_false(nullptr == bio_);
 }
 
 OpenSSL::MD::MD() noexcept
@@ -100,7 +99,7 @@ OpenSSL::MD::MD() noexcept
     , hash_(nullptr)
     , key_(nullptr, ::EVP_PKEY_free)
 {
-    OT_ASSERT(md_);
+    assert_false(nullptr == md_);
 }
 
 OpenSSL::DH::DH() noexcept
@@ -116,8 +115,7 @@ auto OpenSSL::BIO::Export(Writer&& allocator) noexcept -> bool
     auto out = allocator.Reserve(bytes);
 
     if (false == out.IsValid(bytes)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate space for output")
-            .Flush();
+        LogError()()("Failed to allocate space for output").Flush();
 
         return false;
     }
@@ -125,7 +123,7 @@ auto OpenSSL::BIO::Export(Writer&& allocator) noexcept -> bool
     const auto size{static_cast<int>(out.size())};
 
     if (size != BIO_read(bio_.get(), out, size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed write output").Flush();
+        LogError()()("Failed write output").Flush();
 
         return false;
     }
@@ -138,7 +136,7 @@ auto OpenSSL::BIO::Import(const ReadView in) noexcept -> bool
     const auto size{static_cast<int>(in.size())};
 
     if (size != BIO_write(bio_.get(), in.data(), size)) {
-        LogError()(OT_PRETTY_CLASS())("Failed read input").Flush();
+        LogError()()("Failed read input").Flush();
 
         return false;
     }
@@ -156,8 +154,7 @@ auto OpenSSL::DH::init_keys(const ReadView prv, const ReadView pub) noexcept
                 return PEM_read_bio_PrivateKey(bio, nullptr, nullptr, nullptr);
             },
             local_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed initializing local private key")
-            .Flush();
+        LogError()()("Failed initializing local private key").Flush();
 
         return false;
     }
@@ -169,8 +166,7 @@ auto OpenSSL::DH::init_keys(const ReadView prv, const ReadView pub) noexcept
                 return PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
             },
             remote_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed initializing remote public key")
-            .Flush();
+        LogError()()("Failed initializing remote public key").Flush();
 
         return false;
     }
@@ -178,7 +174,7 @@ auto OpenSSL::DH::init_keys(const ReadView prv, const ReadView pub) noexcept
     dh_.reset(EVP_PKEY_CTX_new(local_.get(), nullptr));
 
     if (false == bool(dh_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed initializing dh context").Flush();
+        LogError()()("Failed initializing dh context").Flush();
 
         return false;
     }
@@ -191,7 +187,7 @@ auto OpenSSL::MD::init_digest(const crypto::HashType hash) noexcept -> bool
     hash_ = HashTypeToOpenSSLType(hash);
 
     if (nullptr == hash_) {
-        LogVerbose()(OT_PRETTY_CLASS())("Unsupported hash algorithm.").Flush();
+        LogVerbose()()("Unsupported hash algorithm.").Flush();
 
         return false;
     }
@@ -312,7 +308,7 @@ auto OpenSSL::Digest(
 
         const auto size = HashSize(type);
 
-        OT_ASSERT(size <= std::size_t{EVP_MAX_MD_SIZE});
+        assert_true(size <= std::size_t{EVP_MAX_MD_SIZE});
 
         auto buf = output.Reserve(size);
 
@@ -350,7 +346,7 @@ auto OpenSSL::Digest(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -378,7 +374,7 @@ auto OpenSSL::HMAC(
 
         const auto size = HashSize(hashType);
 
-        OT_ASSERT(size <= std::size_t{EVP_MAX_MD_SIZE});
+        assert_true(size <= std::size_t{EVP_MAX_MD_SIZE});
 
         auto buf = output.Reserve(size);
 
@@ -410,7 +406,7 @@ auto OpenSSL::HMAC(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -433,24 +429,22 @@ auto OpenSSL::init_key(
     auto pem = BIO{};
 
     if (false == pem.Import(bytes)) {
-        LogError()(OT_PRETTY_STATIC(OpenSSL))("Failed read private key")
-            .Flush();
+        LogError()()("Failed read private key").Flush();
 
         return false;
     }
 
-    OT_ASSERT(function);
+    assert_false(nullptr == function);
 
     output.reset(function(pem));
 
     if (false == bool(output)) {
-        LogError()(OT_PRETTY_STATIC(OpenSSL))("Failed to instantiate EVP_PKEY")
-            .Flush();
+        LogError()()("Failed to instantiate EVP_PKEY").Flush();
 
         return false;
     }
 
-    OT_ASSERT(output);
+    assert_false(nullptr == output);
 
     return true;
 }
@@ -468,25 +462,25 @@ auto OpenSSL::PKCS5_PBKDF2_HMAC(
     const auto max = static_cast<std::size_t>(std::numeric_limits<int>::max());
 
     if (inputSize > max) {
-        LogError()(OT_PRETTY_CLASS())("Invalid input size").Flush();
+        LogError()()("Invalid input size").Flush();
 
         return false;
     }
 
     if (saltSize > max) {
-        LogError()(OT_PRETTY_CLASS())("Invalid salt size").Flush();
+        LogError()()("Invalid salt size").Flush();
 
         return false;
     }
 
     if (iterations > max) {
-        LogError()(OT_PRETTY_CLASS())("Invalid iteration count").Flush();
+        LogError()()("Invalid iteration count").Flush();
 
         return false;
     }
 
     if (bytes > max) {
-        LogError()(OT_PRETTY_CLASS())("Invalid output size").Flush();
+        LogError()()("Invalid output size").Flush();
 
         return false;
     }
@@ -494,7 +488,7 @@ auto OpenSSL::PKCS5_PBKDF2_HMAC(
     const auto* algorithm = HashTypeToOpenSSLType(hashType);
 
     if (nullptr == algorithm) {
-        LogError()(OT_PRETTY_CLASS())("Error: invalid hash type: ")(
+        LogError()()("Error: invalid hash type: ")(
             HashingProvider::HashTypeToString(hashType).get())
             .Flush();
 

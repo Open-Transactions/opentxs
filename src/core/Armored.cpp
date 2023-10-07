@@ -19,7 +19,6 @@
 #include "core/String.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
@@ -227,7 +226,7 @@ auto Armored::GetData(opentxs::Data& theData, bool bLineBreaks) const -> bool
     const auto rc = crypto_.Encode().Base64Decode(Bytes(), writer(decoded));
 
     if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Base64Decode failed.").Flush();
+        LogError()()("Base64Decode failed.").Flush();
 
         return false;
     }
@@ -271,7 +270,7 @@ auto Armored::GetString(opentxs::String& strData, bool bLineBreaks) const
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -297,8 +296,7 @@ auto Armored::LoadFromExactPath(const UnallocatedCString& filename) -> bool
     std::ifstream fin(filename.c_str(), std::ios::binary);
 
     if (!fin.is_open()) {
-        LogDetail()(OT_PRETTY_CLASS())("Failed opening file: ")(filename)
-            .Flush();
+        LogDetail()()("Failed opening file: ")(filename).Flush();
         return false;
     }
 
@@ -416,14 +414,13 @@ auto Armored::LoadFromString(
     theStr.reset();
 
     if (!bHaveEnteredContentMode) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Error in Armored::LoadFromString: EOF before "
-            "ascii-armored "
-            "content found, in: ")(theStr)(".")
+        LogError()()("Error in Armored::LoadFromString: EOF before "
+                     "ascii-armored "
+                     "content found, in: ")(theStr)(".")
             .Flush();
         return false;
     } else if (bContentMode) {
-        LogError()(OT_PRETTY_CLASS())(
+        LogError()()(
             "Error in Armored::LoadFromString: EOF while still reading "
             "content, in: ")(theStr)(".")
             .Flush();
@@ -445,12 +442,15 @@ auto Armored::SetData(const opentxs::Data& theData, bool) -> bool
         crypto_.Encode().Base64Encode(theData.Bytes(), writer(string));
 
     if (false == rc) {
-        LogError()(OT_PRETTY_CLASS())("Base64Encode failed.").Flush();
+        LogError()()("Base64Encode failed.").Flush();
 
         return false;
     }
 
-    OT_ASSERT(std::numeric_limits<std::uint32_t>::max() >= string.size());
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+    assert_true(std::numeric_limits<std::uint32_t>::max() >= string.size());
+#pragma GCC diagnostic pop
 
     Set(string.data(), static_cast<std::uint32_t>(string.size()));
 
@@ -468,8 +468,8 @@ auto Armored::SaveTo_ofstream(std::ofstream& fout) -> bool
         fout << strOutput;
 
         if (fout.fail()) {
-            LogError()(OT_PRETTY_CLASS())("Failed saving to file. Contents: ")(
-                strOutput.get())(".")
+            LogError()()("Failed saving to file. Contents: ")(strOutput.get())(
+                ".")
                 .Flush();
             return false;
         }
@@ -485,8 +485,7 @@ auto Armored::SaveToExactPath(const UnallocatedCString& filename) -> bool
     std::ofstream fout(filename.c_str(), std::ios::out | std::ios::binary);
 
     if (!fout.is_open()) {
-        LogDetail()(OT_PRETTY_CLASS())("Failed opening file: ")(filename)
-            .Flush();
+        LogDetail()()("Failed opening file: ")(filename).Flush();
         return false;
     }
 
@@ -535,7 +534,7 @@ auto Armored::SetString(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

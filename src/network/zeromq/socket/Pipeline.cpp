@@ -20,7 +20,6 @@
 #include "internal/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/Gatekeeper.hpp"
 
 namespace opentxs::factory
@@ -116,7 +116,7 @@ Pipeline::Imp::Imp(
                 out.emplace_back(type);
             }
 
-            OT_ASSERT(out.size() == total_socket_count_);
+            assert_true(out.size() == total_socket_count_);
 
             return out;
         }();
@@ -136,7 +136,7 @@ Pipeline::Imp::Imp(
         batch.listen_callbacks_.emplace_back(
             ListenCallback::Factory(std::move(callback)));
 
-        OT_ASSERT(batch.sockets_.size() == total_socket_count_);
+        assert_true(batch.sockets_.size() == total_socket_count_);
 
         return batch;
     }())
@@ -144,7 +144,7 @@ Pipeline::Imp::Imp(
         auto& socket = batch_.sockets_.at(0);
         auto rc = socket.ClearSubscriptions();
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         apply(subscribe, socket, alloc);
 
@@ -160,7 +160,7 @@ Pipeline::Imp::Imp(
         auto& socket = batch_.sockets_.at(2);
         const auto rc = socket.Bind(outgoingEndpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -174,7 +174,7 @@ Pipeline::Imp::Imp(
         auto& socket = batch_.sockets_.at(4);
         const auto rc = socket.Bind(internalEndpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -182,7 +182,7 @@ Pipeline::Imp::Imp(
         auto socket = factory::ZMQSocket(context_, socket::Type::Pair);
         const auto rc = socket.Connect(outgoingEndpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -190,7 +190,7 @@ Pipeline::Imp::Imp(
         auto socket = factory::ZMQSocket(context_, socket::Type::Pair);
         const auto rc = socket.Connect(internalEndpoint.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return socket;
     }())
@@ -201,7 +201,7 @@ Pipeline::Imp::Imp(
                   {outgoing_.ID(),
                    &outgoing_,
                    [id = outgoing_.ID(), socket = &dealer_](auto&& m) {
-                       socket->SendDeferred(std::move(m), __FILE__, __LINE__);
+                       socket->SendDeferred(std::move(m));
                    }},
                   {internal_.ID(),
                    &internal_,
@@ -233,8 +233,8 @@ Pipeline::Imp::Imp(
                    }},
               };
 
-              OT_ASSERT(batch_.sockets_.size() == total_socket_count_);
-              OT_ASSERT(
+              assert_true(batch_.sockets_.size() == total_socket_count_);
+              assert_true(
                   (fixed_sockets_ + extra.get().size()) == total_socket_count_);
 
               // NOTE adjust to the last fixed socket because the iterator will
@@ -248,7 +248,7 @@ Pipeline::Imp::Imp(
                   if (External == policy) {
                       const auto rc = socket.SetExposedUntrusted();
 
-                      OT_ASSERT(rc);
+                      assert_true(rc);
                   }
 
                   apply(args, socket, alloc);
@@ -273,14 +273,14 @@ Pipeline::Imp::Imp(
 
             return {std::addressof(*first), count - fixed_sockets_};
         } else {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }())
     , external_([&, this] {
         const auto span = extra.get();
         const auto count = span.size();
 
-        OT_ASSERT(extra_.size() == count);
+        assert_true(extra_.size() == count);
 
         auto out = decltype(external_){alloc};
 
@@ -297,7 +297,7 @@ Pipeline::Imp::Imp(
         return out;
     }())
 {
-    OT_ASSERT(nullptr != thread_);
+    assert_false(nullptr == thread_);
 }
 
 auto Pipeline::Imp::apply(
@@ -311,11 +311,11 @@ auto Pipeline::Imp::apply(
         if (socket::Direction::Connect == direction) {
             const auto rc = socket.Connect(nullTerminated.c_str());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         } else {
             const auto rc = socket.Bind(nullTerminated.c_str());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         }
     }
 }
@@ -443,7 +443,7 @@ auto Pipeline::Imp::Push(zeromq::Message&& msg) const noexcept -> bool
     if (done) { return false; }
 
     to_internal_.modify_detach([data = std::move(msg)](auto& socket) mutable {
-        socket.SendDeferred(std::move(data), __FILE__, __LINE__);
+        socket.SendDeferred(std::move(data));
     });
 
     return true;
@@ -456,7 +456,7 @@ auto Pipeline::Imp::Send(zeromq::Message&& msg) const noexcept -> bool
     if (done) { return false; }
 
     to_dealer_.modify_detach([data = std::move(msg)](auto& socket) mutable {
-        socket.SendDeferred(std::move(data), __FILE__, __LINE__);
+        socket.SendDeferred(std::move(data));
     });
 
     return true;
@@ -464,7 +464,7 @@ auto Pipeline::Imp::Send(zeromq::Message&& msg) const noexcept -> bool
 
 auto Pipeline::Imp::SendFromThread(zeromq::Message&& msg) noexcept -> bool
 {
-    return dealer_.SendDeferred(std::move(msg), __FILE__, __LINE__);
+    return dealer_.SendDeferred(std::move(msg));
 }
 
 auto Pipeline::Imp::SetCallback(Callback&& cb) const noexcept -> void
@@ -494,7 +494,7 @@ namespace opentxs::network::zeromq
 Pipeline::Pipeline(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Pipeline::Pipeline(Pipeline&& rhs) noexcept

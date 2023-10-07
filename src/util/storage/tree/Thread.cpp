@@ -9,6 +9,7 @@
 #include <StorageThreadItem.pb.h>
 #include <atomic>
 #include <memory>
+#include <source_location>
 #include <stdexcept>
 #include <utility>
 
@@ -17,7 +18,6 @@
 #include "internal/serialization/protobuf/verify/StorageThread.hpp"
 #include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -40,7 +40,13 @@ Thread::Thread(
     std::string_view alias,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), 1)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          1)
     , id_(id)
     , alias_(alias)
     , index_(0)
@@ -64,7 +70,13 @@ Thread::Thread(
     const UnallocatedSet<identifier::Generic>& participants,
     Mailbox& mailInbox,
     Mailbox& mailOutbox)
-    : Node(crypto, factory, storage, NullHash{}, OT_PRETTY_CLASS(), 1)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          NullHash{},
+          std::source_location::current().function_name(),
+          1)
     , id_(id)
     , alias_()
     , index_(0)
@@ -109,12 +121,12 @@ auto Thread::Add(
         case otx::client::StorageBox::INCOMINGTRANSFER: {
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Warning: unknown box.").Flush();
+            LogError()()("Warning: unknown box.").Flush();
         }
     }
 
     if (false == saved) {
-        LogError()(OT_PRETTY_CLASS())("Unable to save item.").Flush();
+        LogError()()("Unable to save item.").Flush();
 
         return false;
     }
@@ -181,8 +193,8 @@ auto Thread::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -209,7 +221,7 @@ auto Thread::Read(const identifier::Generic& id, const bool unread) -> bool
     auto it = items_.find(id);
 
     if (items_.end() == it) {
-        LogError()(OT_PRETTY_CLASS())("Item does not exist.").Flush();
+        LogError()()("Item does not exist.").Flush();
 
         return false;
     }
@@ -243,7 +255,7 @@ auto Thread::Remove(const identifier::Generic& id) -> bool
         case otx::client::StorageBox::BLOCKCHAIN: {
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Warning: unknown box.").Flush();
+            LogError()()("Warning: unknown box.").Flush();
         }
     }
 
@@ -266,7 +278,7 @@ auto Thread::Rename(const identifier::Generic& newID) -> bool
 
 auto Thread::save(const Lock& lock) const -> bool
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     auto serialized = serialize(lock);
 
@@ -277,7 +289,7 @@ auto Thread::save(const Lock& lock) const -> bool
 
 auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     proto::StorageThread serialized;
     serialized.set_version(version_);
@@ -292,7 +304,7 @@ auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
     auto sorted = sort(lock);
 
     for (const auto& it : sorted) {
-        OT_ASSERT(nullptr != it.second);
+        assert_false(nullptr == it.second);
 
         const auto& item = *it.second;
         *serialized.add_item() = item;
@@ -312,7 +324,7 @@ auto Thread::SetAlias(std::string_view alias) -> bool
 
 auto Thread::sort(const Lock& lock) const -> Thread::SortedItems
 {
-    OT_ASSERT(verify_write_lock(lock));
+    assert_true(verify_write_lock(lock));
 
     SortedItems output;
 

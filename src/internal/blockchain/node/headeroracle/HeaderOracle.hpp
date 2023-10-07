@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -168,7 +167,7 @@ public:
         std::shared_ptr<const node::Manager> node) noexcept -> void;
     auto SubmitBlock(const ReadView in) noexcept -> void;
 
-    HeaderOracle(boost::shared_ptr<Shared> shared) noexcept;
+    HeaderOracle(std::shared_ptr<Shared> shared) noexcept;
     HeaderOracle() = delete;
     HeaderOracle(const HeaderOracle&) = delete;
     HeaderOracle(HeaderOracle&&) noexcept;
@@ -178,8 +177,6 @@ public:
     ~HeaderOracle() final;
 
 private:
-    // TODO switch to std::shared_ptr once the android ndk ships a version of
-    // libc++ with unfucked pmr / allocate_shared support
-    boost::shared_ptr<Shared> shared_;
+    std::shared_ptr<Shared> shared_;
 };
 }  // namespace opentxs::blockchain::node::internal

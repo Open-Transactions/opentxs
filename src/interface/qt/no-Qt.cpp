@@ -29,24 +29,24 @@
 #include "interface/ui/unitlist/UnitListItem.hpp"  // IWYU pragma: associated
 
 #include "interface/qt/SendMonitor.hpp"
-#include "internal/util/LogMacros.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::ui::implementation
 {
 auto AccountActivity::DisplayScaleQt() noexcept -> ui::DisplayScaleQt&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto AccountActivity::AmountValidator() noexcept -> ui::AmountValidator&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto AccountActivity::DestinationValidator() noexcept
     -> ui::DestinationValidator&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto AccountActivity::init_qt() noexcept -> void {}
@@ -56,12 +56,12 @@ auto AccountActivity::shutdown_qt() noexcept -> void {}
 auto AccountActivity::SendMonitor() const noexcept
     -> implementation::SendMonitor&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto AccountActivity::SendMonitor() noexcept -> implementation::SendMonitor&
 {
-    OT_FAIL;
+    LogAbort()().Abort();
 }
 
 auto AccountCurrency::qt_data(const int, const int, QVariant&) const noexcept

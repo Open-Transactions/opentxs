@@ -34,17 +34,17 @@
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Verack.hpp"
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {
 Message::Message(MessagePrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Message::Message(allocator_type alloc) noexcept

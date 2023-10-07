@@ -6,10 +6,11 @@
 #pragma once
 
 #include <cs_shared_guarded.h>
+#include <algorithm>
+#include <ranges>
 #include <shared_mutex>
 
 #include "blockchain/crypto/account/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -99,9 +100,8 @@ public:
     {
         auto handle = data_.lock_shared();
         const auto& items = handle->nodes_;
-        std::for_each(items.begin(), items.end(), [&](const auto& i) {
-            std::invoke(cb, *i);
-        });
+        std::ranges::for_each(
+            items, [&](const auto& i) { std::invoke(cb, *i); });
     }
     auto size() const noexcept -> std::size_t final
     {
@@ -188,13 +188,13 @@ private:
         std::unique_ptr<PayloadType> node) noexcept -> bool
     {
         if (false == bool(node)) {
-            LogError()(OT_PRETTY_CLASS())("Invalid node").Flush();
+            LogError()()("Invalid node").Flush();
 
             return false;
         }
 
         if (data.index_.contains(id)) {
-            LogError()(OT_PRETTY_CLASS())("Index already exists").Flush();
+            LogError()()("Index already exists").Flush();
 
             return false;
         }
@@ -203,7 +203,7 @@ private:
         const auto position = data.nodes_.size() - 1_uz;
         data.index_.emplace(id, position);
 
-        OT_ASSERT(data.index_.contains(id));
+        assert_true(data.index_.contains(id));
 
         return true;
     }
@@ -232,27 +232,23 @@ private:
 
         if (nullptr == node) {
             if (data.index_.contains(id)) {
-                LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(
-                    " already exists")
+                LogTrace()()("subaccount ")(id, crypto)(" already exists")
                     .Flush();
 
                 return true;
             } else {
-                LogError()(OT_PRETTY_CLASS())("failed to construct subaccount")
-                    .Flush();
+                LogError()()("failed to construct subaccount").Flush();
 
                 return false;
             }
         }
 
         if (data.index_.contains(id)) {
-            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(
-                " already exists")
-                .Flush();
+            LogTrace()()("subaccount ")(id, crypto)(" already exists").Flush();
 
             return true;
         } else {
-            LogTrace()(OT_PRETTY_CLASS())("subaccount ")(id, crypto)(" for ")(
+            LogTrace()()("subaccount ")(id, crypto)(" for ")(
                 parent_.NymID(),
                 crypto)(" on ")(print(parent_.Chain()))(" created or loaded")
                 .Flush();

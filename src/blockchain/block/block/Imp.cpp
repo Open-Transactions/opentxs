@@ -6,6 +6,7 @@
 #include "blockchain/block/block/Imp.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -78,7 +79,7 @@ auto Block::SetMinedPosition(block::Height height) noexcept -> void
     header_.Internal().SetHeight(height);
     const auto pos = block::Position{height, ID()};
     const auto set = [&](auto& tx) { tx.Internal().SetMinedPosition(pos); };
-    std::for_each(transactions_.begin(), transactions_.end(), set);
+    std::ranges::for_each(transactions_, set);
 }
 
 Block::~Block() = default;

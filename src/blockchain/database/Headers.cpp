@@ -23,7 +23,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -118,7 +117,7 @@ Headers::Headers(
         auto out = api.Network().ZeroMQ().Internal().RawSocket(Publish);
         const auto rc = out.Bind(endpoints.new_header_publish_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -128,7 +127,7 @@ Headers::Headers(
         const auto rc = out.Connect(
             api.Endpoints().Internal().BlockchainMessageRouter().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -139,15 +138,15 @@ Headers::Headers(
     {
         const auto best = this->best();
 
-        OT_ASSERT(HeaderExists(best.hash_));
-        OT_ASSERT(0 <= best.height_);
+        assert_true(HeaderExists(best.hash_));
+        assert_true(0 <= best.height_);
     }
 
     {
         const auto header = CurrentBest();
 
-        OT_ASSERT(header.IsValid());
-        OT_ASSERT(0 <= header.Position().height_);
+        assert_true(header.IsValid());
+        assert_true(0 <= header.Position().height_);
     }
 }
 
@@ -155,7 +154,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
     -> bool
 {
     if (false == common_.StoreBlockHeaders(update.UpdatedHeaders())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to save block headers").Flush();
+        LogError()()("Failed to save block headers").Flush();
 
         return false;
     }
@@ -175,8 +174,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                     tsv(static_cast<std::size_t>(checkpoint.height_)),
                     parentTxn)
                 .first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save checkpoint height")
-                .Flush();
+            LogError()()("Failed to save checkpoint height").Flush();
 
             return false;
         }
@@ -188,8 +186,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                              checkpoint.hash_.Bytes(),
                              parentTxn)
                          .first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save checkpoint hash")
-                .Flush();
+            LogError()()("Failed to save checkpoint hash").Flush();
 
             return false;
         }
@@ -207,8 +204,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                              child.Bytes(),
                              parentTxn)
                          .first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save disconnected hash")
-                .Flush();
+            LogError()()("Failed to save disconnected hash").Flush();
 
             return false;
         }
@@ -220,8 +216,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                          parent.Bytes(),
                          child.Bytes(),
                          parentTxn)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to delete disconnected hash")
-                .Flush();
+            LogError()()("Failed to delete disconnected hash").Flush();
 
             return false;
         }
@@ -233,8 +228,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                 .Store(
                     BlockHeaderSiblings, hash.Bytes(), hash.Bytes(), parentTxn)
                 .first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save sibling hash")
-                .Flush();
+            LogError()()("Failed to save sibling hash").Flush();
 
             return false;
         }
@@ -258,8 +252,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
             parentTxn);
 
         if (false == result.first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to save block metadata")
-                .Flush();
+            LogError()()("Failed to save block metadata").Flush();
 
             return false;
         }
@@ -268,8 +261,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
     if (update.HaveReorg()) {
         for (auto i = initialHeight; i > update.ReorgParent().height_; --i) {
             if (false == pop_best(i, parentTxn)) {
-                LogError()(OT_PRETTY_CLASS())("Failed to delete best hash")
-                    .Flush();
+                LogError()()("Failed to delete best hash").Flush();
 
                 return false;
             }
@@ -290,14 +282,14 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                              tsv(static_cast<std::size_t>(tip.first)),
                              parentTxn)
                          .first) {
-            LogError()(OT_PRETTY_CLASS())("Failed to store best hash").Flush();
+            LogError()()("Failed to store best hash").Flush();
 
             return false;
         }
     }
 
     if (false == parentTxn.Finalize(true)) {
-        LogError()(OT_PRETTY_CLASS())("Database error").Flush();
+        LogError()()("Database error").Flush();
 
         return false;
     }
@@ -313,31 +305,25 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
             LogConsole()(print(chain_))(
                 " reorg detected. Last common ancestor is ")(parent.print())
                 .Flush();
-            publish_tip_internal_.SendDeferred(
-                [&] {
-                    auto work = MakeWork(OT_ZMQ_REORG_SIGNAL);
-                    work.AddFrame(parent.hash_);
-                    work.AddFrame(parent.height_);
-                    work.AddFrame(tip.hash_);
-                    work.AddFrame(tip.height_);
+            publish_tip_internal_.SendDeferred([&] {
+                auto work = MakeWork(OT_ZMQ_REORG_SIGNAL);
+                work.AddFrame(parent.hash_);
+                work.AddFrame(parent.height_);
+                work.AddFrame(tip.hash_);
+                work.AddFrame(tip.height_);
 
-                    return work;
-                }(),
-                __FILE__,
-                __LINE__);
-            to_blockchain_api_.SendDeferred(
-                [&] {
-                    auto work = MakeWork(WorkType::BlockchainReorg);
-                    work.AddFrame(chain_);
-                    work.AddFrame(parent.hash_);
-                    work.AddFrame(parent.height_);
-                    work.AddFrame(tip.hash_);
-                    work.AddFrame(tip.height_);
+                return work;
+            }());
+            to_blockchain_api_.SendDeferred([&] {
+                auto work = MakeWork(WorkType::BlockchainReorg);
+                work.AddFrame(chain_);
+                work.AddFrame(parent.hash_);
+                work.AddFrame(parent.height_);
+                work.AddFrame(tip.hash_);
+                work.AddFrame(tip.height_);
 
-                    return work;
-                }(),
-                __FILE__,
-                __LINE__);
+                return work;
+            }());
             last_update_ = std::make_pair(parent, tip);
         }
     } else {
@@ -405,7 +391,7 @@ auto Headers::best(const Lock& lock) const noexcept -> block::Position
         lmdb_.Load(BlockHeaderBest, tsv(height), [&](const auto in) -> void {
             const auto rc = output.hash_.Assign(in.data(), in.size());
 
-            OT_ASSERT(rc);  // TODO exception
+            assert_true(rc);  // TODO exception
         })) {
 
         return block::Position{};
@@ -439,7 +425,7 @@ auto Headers::checkpoint(const Lock& lock) const noexcept -> block::Position
                          const auto rc =
                              output.hash_.Assign(in.data(), in.size());
 
-                         OT_ASSERT(rc);  // TODO exception
+                         assert_true(rc);  // TODO exception
                      })) {
 
         return block::Position{};
@@ -456,7 +442,7 @@ auto Headers::CurrentBest() const noexcept -> block::Header
 
         return load_header(best().hash_);
     } catch (const std::exception& e) {
-        LogAbort()(OT_PRETTY_CLASS())(e.what()).Abort();
+        LogAbort()()(e.what()).Abort();
     }
 }
 
@@ -526,7 +512,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
             auto header = api_.Factory().InternalSession().BlockHeader(
                 serialized, {});  // TODO allocator
 
-            OT_ASSERT(header.IsValid());
+            assert_true(header.IsValid());
 
             const auto result =
                 lmdb_.Store(BlockHeaderMetadata, hash.Bytes(), [&] {
@@ -536,7 +522,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
                     return proto::ToString(proto.local());
                 }());
 
-            OT_ASSERT(result.first);
+            assert_true(result.first);
         }
     } catch (...) {
         success = common_.StoreBlockHeaders([&] {
@@ -546,7 +532,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
             return out;
         }());
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         success = lmdb_
                       .Store(
@@ -561,28 +547,28 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
                           }())
                       .first;
 
-        OT_ASSERT(success);
+        assert_true(success);
     }
 
-    OT_ASSERT(HeaderExists(hash));
+    assert_true(HeaderExists(hash));
 
     if (0 > best().height_) {
         auto transaction = lmdb_.TransactionRW();
         success = push_best({0, hash}, true, transaction);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         success = transaction.Finalize(true);
 
-        OT_ASSERT(success);
+        assert_true(success);
 
         const auto best = this->best();
 
-        OT_ASSERT(0 == best.height_);
-        OT_ASSERT(hash == best.hash_);
+        assert_true(0 == best.height_);
+        assert_true(hash == best.hash_);
     }
 
-    OT_ASSERT(0 <= best().height_);
+    assert_true(0 <= best().height_);
 }
 
 auto Headers::IsSibling(const block::Hash& hash) const noexcept -> bool
@@ -609,7 +595,7 @@ auto Headers::load_header(const block::Hash& hash) const -> block::Header
     auto output = api_.Factory().InternalSession().BlockHeader(
         proto, {});  // TODO allocator
 
-    OT_ASSERT(output.IsValid());
+    assert_true(output.IsValid());
 
     return output;
 }
@@ -673,27 +659,21 @@ auto Headers::report(const Lock& lock) noexcept -> void
 
 auto Headers::report(const Lock&, const block::Position& tip) noexcept -> void
 {
-    publish_tip_internal_.SendDeferred(
-        [&] {
-            auto work = MakeWork(OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL);
-            work.AddFrame(tip.hash_);
-            work.AddFrame(tip.height_);
+    publish_tip_internal_.SendDeferred([&] {
+        auto work = MakeWork(OT_ZMQ_NEW_BLOCK_HEADER_SIGNAL);
+        work.AddFrame(tip.hash_);
+        work.AddFrame(tip.height_);
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
-    to_blockchain_api_.SendDeferred(
-        [&] {
-            auto work = MakeWork(WorkType::BlockchainNewHeader);
-            work.AddFrame(chain_);
-            work.AddFrame(tip.hash_);
-            work.AddFrame(tip.height_);
+        return work;
+    }());
+    to_blockchain_api_.SendDeferred([&] {
+        auto work = MakeWork(WorkType::BlockchainNewHeader);
+        work.AddFrame(chain_);
+        work.AddFrame(tip.hash_);
+        work.AddFrame(tip.height_);
 
-            return work;
-        }(),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 }
 
 auto Headers::ReportTip() noexcept -> void

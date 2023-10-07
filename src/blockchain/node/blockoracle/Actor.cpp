@@ -5,7 +5,6 @@
 
 #include "blockchain/node/blockoracle/Actor.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>
 #include <exception>
 #include <memory>
@@ -19,7 +18,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -48,7 +46,7 @@ using enum opentxs::network::zeromq::socket::Type;
 BlockOracle::Actor::Actor(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : BlockOracleActor(
@@ -109,27 +107,21 @@ BlockOracle::Actor::Actor(
 auto BlockOracle::Actor::broadcast_tip() noexcept -> void
 {
     const auto& tip = downloader_.Tip();
-    tip_updated_.SendDeferred(
-        [&] {
-            auto msg = MakeWork(OT_ZMQ_NEW_FULL_BLOCK_SIGNAL);
-            msg.AddFrame(tip.height_);
-            msg.AddFrame(tip.hash_);
+    tip_updated_.SendDeferred([&] {
+        auto msg = MakeWork(OT_ZMQ_NEW_FULL_BLOCK_SIGNAL);
+        msg.AddFrame(tip.height_);
+        msg.AddFrame(tip.hash_);
 
-            return msg;
-        }(),
-        __FILE__,
-        __LINE__);
-    to_blockchain_api_.SendDeferred(
-        [&] {
-            auto msg = MakeWork(WorkType::BlockchainBlockOracleProgress);
-            msg.AddFrame(chain_);
-            msg.AddFrame(tip.height_);
-            msg.AddFrame(tip.hash_);
+        return msg;
+    }());
+    to_blockchain_api_.SendDeferred([&] {
+        auto msg = MakeWork(WorkType::BlockchainBlockOracleProgress);
+        msg.AddFrame(chain_);
+        msg.AddFrame(tip.height_);
+        msg.AddFrame(tip.hash_);
 
-            return msg;
-        }(),
-        __FILE__,
-        __LINE__);
+        return msg;
+    }());
 }
 
 auto BlockOracle::Actor::do_shutdown() noexcept -> void
@@ -154,7 +146,7 @@ auto BlockOracle::Actor::do_startup(allocator_type monotonic) noexcept -> bool
     return false;
 }
 
-auto BlockOracle::Actor::Init(boost::shared_ptr<Actor> me) noexcept -> void
+auto BlockOracle::Actor::Init(std::shared_ptr<Actor> me) noexcept -> void
 {
     signal_startup(me);
 }
@@ -164,7 +156,7 @@ auto BlockOracle::Actor::notify_requestors(
     std::span<const BlockLocation> blocks,
     allocator_type monotonic) noexcept -> void
 {
-    OT_ASSERT(ids.size() == blocks.size());
+    assert_true(ids.size() == blocks.size());
 
     auto out = Notifications{monotonic};
 
@@ -198,14 +190,16 @@ auto BlockOracle::Actor::notify_requestors(
                         network::zeromq::tagged_reply_to_message(
                             connection, OT_ZMQ_BLOCK_ORACLE_BLOCK_READY, true));
 
-                    OT_ASSERT(added);
+                    assert_true(added);
 
                     return i->second;
                 }
             }();
             message.AddFrame(hash);
 
-            if (false == serialize(data, message.AppendBytes())) { OT_FAIL; }
+            if (false == serialize(data, message.AppendBytes())) {
+                LogAbort()().Abort();
+            }
         }
     }
 }
@@ -214,7 +208,7 @@ auto BlockOracle::Actor::notify_requestors(Notifications& messages) noexcept
     -> void
 {
     for (auto& [_, message] : messages) {
-        router_.SendDeferred(std::move(message), __FILE__, __LINE__);
+        router_.SendDeferred(std::move(message));
     }
 }
 
@@ -237,8 +231,8 @@ auto BlockOracle::Actor::pipeline(
             if (router_.ID() == socket) {
                 process_request_blocks(std::move(msg), monotonic);
             } else {
-                LogAbort()(OT_PRETTY_CLASS())(name_)(" received ")(
-                    print(work))()(" on pull socket")
+                LogAbort()()(name_)(" received ")(print(work))()(
+                    " on pull socket")
                     .Abort();
             }
         } break;
@@ -272,9 +266,7 @@ auto BlockOracle::Actor::process_block_ready(
     const auto count = body.size();
 
     if ((3_uz > count) || (0_uz == count % 2_uz)) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message frame count: ")(
-            count)
-            .Abort();
+        LogAbort()()(name_)(": invalid message frame count: ")(count).Abort();
     }
 
     auto done = Notifications{monotonic};
@@ -339,7 +331,7 @@ auto BlockOracle::Actor::process_submit_block(
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     shared_.Receive(body[1].Bytes(), monotonic);
 }
@@ -352,7 +344,7 @@ auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool
         const auto count = hashes.size();
         const auto blocks = shared_.GetBlocks(hashes, monotonic, monotonic);
 
-        OT_ASSERT(blocks.size() == count);
+        assert_true(blocks.size() == count);
 
         auto done = Notifications{monotonic};
         done.clear();
@@ -374,7 +366,7 @@ auto BlockOracle::Actor::queue_blocks(allocator_type monotonic) noexcept -> bool
 
         return more;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+        LogError()()(name_)(": ")(e.what()).Flush();
 
         return true;
     }
@@ -386,8 +378,7 @@ auto BlockOracle::Actor::set_tip(const block::Position& tip) noexcept -> void
         downloader_.SetTip(tip);
         broadcast_tip();
     } else {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": failed to update database")
-            .Abort();
+        LogAbort()()(name_)(": failed to update database").Abort();
     }
 }
 

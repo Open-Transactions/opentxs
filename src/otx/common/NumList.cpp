@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "internal/core/String.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -78,7 +77,7 @@ auto NumList::Add(const char* szNumbers) -> bool  // if false, means the numbers
                                                   // were already there. (At
                                                   // least one of them.)
 {
-    OT_ASSERT(nullptr != szNumbers);  // Should never happen.
+    assert_false(nullptr == szNumbers);  // Should never happen.
 
     bool bSuccess = true;
     std::int64_t lNum = 0;
@@ -126,7 +125,7 @@ auto NumList::Add(const char* szNumbers) -> bool  // if false, means the numbers
                        // comma-separated list.)
             bStartedANumber = false;  // reset
         } else {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Error: Unexpected character found in "
                 "erstwhile comma-separated list of longs: ") (*pChar)(".")
                 .Flush();
@@ -235,8 +234,7 @@ auto NumList::Verify(const UnallocatedSet<std::int64_t>& theNumbers) const
 auto NumList::Verify(const NumList& rhs) const -> bool
 {
     if (Count() != rhs.Count()) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect count ")(rhs.Count())(
-            " should be ")(Count())
+        LogError()()("Incorrect count ")(rhs.Count())(" should be ")(Count())
             .Flush();
 
         return false;
@@ -244,7 +242,7 @@ auto NumList::Verify(const NumList& rhs) const -> bool
 
     for (const auto& it : data_) {
         if (false == rhs.Verify(it)) {
-            LogError()(OT_PRETTY_CLASS())("Number ")(it)(" missing").Flush();
+            LogError()()("Number ")(it)(" missing").Flush();
 
             return false;
         }

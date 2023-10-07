@@ -5,8 +5,6 @@
 
 #include "api/session/notary/Notary.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -30,7 +28,6 @@
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Context.hpp"
@@ -102,9 +99,9 @@ auto NotarySession(
             try {
                 output->Init(output);
             } catch (const std::invalid_argument& e) {
-                LogError()("opentxs::factory::")(__func__)(
-                    ": There was a problem creating the server. The server "
-                    "contract will be deleted. Error: ")(e.what())
+                LogError()()(
+                    "There was a problem creating the server. The "
+                    "server contract will be deleted. Error: ")(e.what())
                     .Flush();
                 const UnallocatedCString datafolder =
                     output->DataFolder().string();
@@ -125,7 +122,7 @@ auto NotarySession(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -167,7 +164,7 @@ Notary::Notary(
           },
           factory::SessionFactoryAPI(*this, parent.Factory()))
     , reason_(factory_.PasswordPrompt("Notary operation"))
-    , shared_p_(boost::make_shared<notary::Shared>(context))
+    , shared_p_(std::make_shared<notary::Shared>(context))
     , server_p_(new opentxs::server::Server(*this, reason_))
     , message_processor_p_(
           new opentxs::server::MessageProcessor(*server_p_, reason_))
@@ -179,10 +176,10 @@ Notary::Notary(
 {
     wallet_ = factory::WalletAPI(*this);
 
-    OT_ASSERT(wallet_);
-    OT_ASSERT(shared_p_);
-    OT_ASSERT(server_p_);
-    OT_ASSERT(message_processor_p_);
+    assert_false(nullptr == wallet_);
+    assert_false(nullptr == shared_p_);
+    assert_false(nullptr == server_p_);
+    assert_false(nullptr == message_processor_p_);
 }
 
 auto Notary::CheckMint(const identifier::UnitDefinition& unitID) noexcept
@@ -205,8 +202,7 @@ auto Notary::CheckMint(const identifier::UnitDefinition& unitID) noexcept
     auto& mint = get_private_mint(data, unitID, last);
 
     if (!mint) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load existing series.")
-            .Flush();
+        LogError()()("Failed to load existing series.").Flush();
 
         return;
     }
@@ -220,15 +216,15 @@ auto Notary::CheckMint(const identifier::UnitDefinition& unitID) noexcept
     if (generate) {
         generate_mint(data, serverID, unitID, next);
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Existing mint file for ")(
-            unitID, crypto_)(" is still valid.")
+        LogDetail()()("Existing mint file for ")(unitID, crypto_)(
+            " is still valid.")
             .Flush();
     }
 }
 
 auto Notary::Cleanup() -> void
 {
-    LogDetail()(OT_PRETTY_CLASS())("Shutting down and cleaning up.").Flush();
+    LogDetail()()("Shutting down and cleaning up.").Flush();
     message_processor_.cleanup();
     message_processor_p_.reset();
     server_p_.reset();
@@ -255,7 +251,7 @@ auto Notary::generate_mint(
     auto& mint = get_private_mint(data, unitID, series);
 
     if (mint) {
-        LogError()(OT_PRETTY_CLASS())("Mint already exists.").Flush();
+        LogError()()("Mint already exists.").Flush();
 
         return;
     }
@@ -264,7 +260,7 @@ auto Notary::generate_mint(
         notary::MintSeriesID{SERIES_DIVIDER}.append(std::to_string(series));
     mint = factory_.Mint(serverID, nym.ID(), unitID);
 
-    OT_ASSERT(mint);
+    assert_true(mint);
 
     const auto now = Clock::now();
     const std::chrono::seconds expireInterval(
@@ -275,8 +271,7 @@ auto Notary::generate_mint(
     const auto validTo = now + validInterval;
 
     if (false == verify_mint_directory(data, serverID)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to create mint directory.")
-            .Flush();
+        LogError()()("Failed to create mint directory.").Flush();
 
         return;
     }
@@ -383,7 +378,7 @@ auto Notary::get_private_mint(
 
         auto [it, added] = seriesMap.emplace(seriesID, *this);
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         return it->second;
     }();
@@ -409,7 +404,7 @@ auto Notary::GetPublicMint(const identifier::UnitDefinition& unitID)
 
         auto [it, added] = map.emplace(seriesID, *this);
 
-        OT_ASSERT(added);
+        assert_true(added);
 
         return it->second;
     }();
@@ -424,7 +419,7 @@ auto Notary::GetShared() const noexcept -> std::shared_ptr<const api::Session>
     wait_for_init();
     auto out = me_.lock();
 
-    OT_ASSERT(out);
+    assert_false(nullptr == out);
 
     return out;
 }
@@ -502,7 +497,7 @@ auto Notary::Start(std::shared_ptr<session::Notary> api) noexcept -> void
     me_ = api;
     auto me = me_.lock();
 
-    OT_ASSERT(me);
+    assert_false(nullptr == me);
 
     Session::start(api);
     network_->Internal().Start(
@@ -522,7 +517,7 @@ auto Notary::start(std::shared_ptr<session::Notary> me) -> void
     AddressType type{AddressType::Inproc};
     const auto connectInfo = server_.GetConnectInfo(type, hostname, port);
 
-    OT_ASSERT(connectInfo);
+    assert_true(connectInfo);
 
     auto pubkey = ByteArray{};
     auto privateKey = server_.TransportKey(pubkey);
@@ -530,13 +525,10 @@ auto Notary::start(std::shared_ptr<session::Notary> me) -> void
     message_processor_.Start();
 
     if (opentxs::server::ServerSettings::_cmd_get_mint) {
-        // TODO the version of libc++ present in android ndk 23.0.7599858 has a
-        // broken std::allocate_shared function so we're using boost::shared_ptr
-        // instead of std::shared_ptr
-        auto actor = boost::allocate_shared<notary::Actor>(
+        auto actor = std::allocate_shared<notary::Actor>(
             alloc::PMR<notary::Actor>{shared_.get_allocator()}, me, shared_p_);
 
-        OT_ASSERT(actor);
+        assert_false(nullptr == actor);
 
         actor->Init(actor);
     }
@@ -544,15 +536,12 @@ auto Notary::start(std::shared_ptr<session::Notary> me) -> void
 
 auto Notary::UpdateMint(const identifier::UnitDefinition& unitID) const -> void
 {
-    shared_.to_actor_.lock()->SendDeferred(
-        [&] {
-            auto out = MakeWork(notary::Job::queue_unitid);
-            out.AddFrame(unitID);
+    shared_.to_actor_.lock()->SendDeferred([&] {
+        auto out = MakeWork(notary::Job::queue_unitid);
+        out.AddFrame(unitID);
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto Notary::verify_mint(
@@ -571,14 +560,12 @@ auto Notary::verify_mint(
         }
 
         if (false == internal.VerifyMint(server_.GetServerNym())) {
-            LogError()(OT_PRETTY_CLASS())("Invalid mint for ")(unitID, crypto_)
-                .Flush();
+            LogError()()("Invalid mint for ")(unitID, crypto_).Flush();
 
             return otx::blind::Mint{*this};
         }
     } else {
-        LogError()(OT_PRETTY_CLASS())("Missing mint for ")(unitID, crypto_)
-            .Flush();
+        LogError()()("Missing mint for ")(unitID, crypto_).Flush();
     }
 
     return std::move(mint);
@@ -595,8 +582,8 @@ auto Notary::verify_mint_directory(
     const auto haveServer = parent_.Internal().Legacy().AppendFolder(
         serverDir, mintDir, serverID.asBase58(crypto_).c_str());
 
-    OT_ASSERT(haveMint);
-    OT_ASSERT(haveServer);
+    assert_true(haveMint);
+    assert_true(haveServer);
 
     return parent_.Internal().Legacy().BuildFolderPath(serverDir);
 }

@@ -113,11 +113,8 @@ auto translate(const proto::UnitType in) noexcept -> contract::UnitType
         const auto& unittypes = contract::unit_type_map_;
         auto out =
             ankerl::unordered_dense::map<proto::UnitType, contract::UnitType>{};
-        std::transform(
-            unittypes.begin(),
-            unittypes.end(),
-            std::inserter(out, out.end()),
-            [](const auto& data) {
+        std::ranges::transform(
+            unittypes, std::inserter(out, out.end()), [](const auto& data) {
                 const auto& [key, value] = data;
 
                 return std::make_pair(value, key);

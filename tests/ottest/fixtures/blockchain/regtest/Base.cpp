@@ -17,7 +17,6 @@
 
 #include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/BlockListener.hpp"
@@ -407,7 +406,7 @@ auto Regtest_fixture_base::Connect(
     const auto status = connection_.done_.wait_for(5min);
     const auto future = (std::future_status::ready == status);
 
-    OT_ASSERT(future);
+    opentxs::assert_true(future);
 
     return future && check_miner() && check_sync_server() && check_client_1() &&
            check_client_2();
@@ -452,7 +451,7 @@ auto Regtest_fixture_base::init_address(const ot::api::Session& api) noexcept
             api.Network().OTDHT().CurvePublicKey());
     }
 
-    OT_ASSERT(listen_address_.IsValid());
+    opentxs::assert_true(listen_address_.IsValid());
 
     return listen_address_;
 }
@@ -466,7 +465,7 @@ auto Regtest_fixture_base::init_block(
 
     if (false == bool(p)) { p = std::make_unique<BlockListener>(api, name); }
 
-    OT_ASSERT(p);
+    opentxs::assert_false(nullptr == p);
 
     return *p;
 }
@@ -480,7 +479,7 @@ auto Regtest_fixture_base::init_cfilter(
 
     if (false == bool(p)) { p = std::make_unique<CfilterListener>(api, name); }
 
-    OT_ASSERT(p);
+    opentxs::assert_false(nullptr == p);
 
     return *p;
 }
@@ -496,7 +495,7 @@ auto Regtest_fixture_base::init_header(
         p = std::make_unique<BlockHeaderListener>(api, name);
     }
 
-    OT_ASSERT(p);
+    opentxs::assert_false(nullptr == p);
 
     return *p;
 }
@@ -507,7 +506,7 @@ auto Regtest_fixture_base::init_mined() noexcept -> MinedBlocks&
         mined_block_cache_ = std::make_unique<MinedBlocks>();
     }
 
-    OT_ASSERT(mined_block_cache_);
+    opentxs::assert_false(nullptr == mined_block_cache_);
 
     return *mined_block_cache_;
 }
@@ -525,7 +524,7 @@ auto Regtest_fixture_base::init_peer(
             waitForHandshake, clientCount, miner, syncServer, client1, client2);
     }
 
-    OT_ASSERT(peer_listener_);
+    opentxs::assert_false(nullptr == peer_listener_);
 
     return *peer_listener_;
 }
@@ -539,7 +538,7 @@ auto Regtest_fixture_base::init_sync_client(
 
     if (false == bool(p)) { p = std::make_unique<SyncListener>(api, name); }
 
-    OT_ASSERT(p);
+    opentxs::assert_false(nullptr == p);
 
     return *p;
 }
@@ -613,8 +612,8 @@ auto Regtest_fixture_base::Mine(
     for (auto i = 0_uz; i < count; ++i) {
         auto promise = mined_blocks_.allocate();
 
-        OT_ASSERT(gen);
-        OT_ASSERT(mineHeight > 0);
+        opentxs::assert_false(nullptr == gen);
+        opentxs::assert_true(mineHeight > 0);
 
         auto tx = gen(mineHeight);
         const auto block = miner_.Factory().InternalSession().BitcoinBlock(

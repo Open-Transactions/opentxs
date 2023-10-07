@@ -8,18 +8,18 @@
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/script/ScriptPrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::protocol::bitcoin::base::block
 {
 Script::Script(ScriptPrivate* imp) noexcept
     : imp_(std::move(imp))
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Script::Script(allocator_type alloc) noexcept

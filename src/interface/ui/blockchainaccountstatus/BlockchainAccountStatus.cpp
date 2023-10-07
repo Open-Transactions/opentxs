@@ -19,7 +19,6 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -152,7 +151,7 @@ auto BlockchainAccountStatus::load() noexcept -> void
         }();
         add_children(std::move(map));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -163,9 +162,9 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -174,7 +173,7 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -207,9 +206,9 @@ auto BlockchainAccountStatus::pipeline(Message&& in) noexcept -> void
             do_work();
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -267,7 +266,7 @@ auto BlockchainAccountStatus::populate(
         case Type::Error:
         default: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -296,13 +295,13 @@ auto BlockchainAccountStatus::populate(
                 return custom.emplace_back(
                     std::make_unique<Subaccounts>().release());
             } else {
-                OT_ASSERT(1u == custom.size());
+                assert_true(1u == custom.size());
 
                 return custom.front();
             }
         }();
 
-        OT_ASSERT(nullptr != ptr);
+        assert_false(nullptr == ptr);
 
         return *reinterpret_cast<Subaccounts*>(ptr);
     }();
@@ -312,13 +311,13 @@ auto BlockchainAccountStatus::populate(
     auto& subchainData = [&]() -> auto& {
         auto& children = subaccount.children_;
 
-        OT_ASSERT(0u == children.size());
+        assert_true(0u == children.size());
 
         auto& ptr =
             children.emplace_back(std::make_unique<Subchains>().release());
 
-        OT_ASSERT(1u == children.size());
-        OT_ASSERT(nullptr != ptr);
+        assert_true(1u == children.size());
+        assert_false(nullptr == ptr);
 
         return *reinterpret_cast<Subchains*>(ptr);
     }();
@@ -345,7 +344,7 @@ auto BlockchainAccountStatus::process_account(const Message& in) noexcept
     const auto& api = api_;
     auto body = in.Payload();
 
-    OT_ASSERT(4 < body.size());
+    assert_true(4 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -374,7 +373,7 @@ auto BlockchainAccountStatus::process_account(const Message& in) noexcept
         }();
         add_children(std::move(map));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -384,7 +383,7 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
     const auto& api = api_;
     auto body = in.Payload();
 
-    OT_ASSERT(5 < body.size());
+    assert_true(5 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 
@@ -409,7 +408,7 @@ auto BlockchainAccountStatus::process_progress(const Message& in) noexcept
         }();
         add_children(std::move(map));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -417,7 +416,7 @@ auto BlockchainAccountStatus::process_reorg(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto chain = body[1].as<blockchain::Type>();
 

@@ -10,7 +10,6 @@
 
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -70,7 +69,7 @@ auto Data::merge(
 {
     if (auto m = rhs.Memo(crypto); memo_.empty() || (false == m.empty())) {
         memo_ = m;
-        log(OT_PRETTY_CLASS())("memo set to: \"")(memo_)("\"").Flush();
+        log()("memo set to: \"")(memo_)("\"").Flush();
     }
 
     // TODO monotonic allocator

@@ -7,10 +7,10 @@
 
 #include <memory>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/core/Contact.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -71,7 +71,7 @@ auto PayableListItem::reindex(
 
     const auto contact = api_.Contacts().Contact(row_id_);
 
-    OT_ASSERT(contact);
+    assert_false(nullptr == contact);
 
     auto paymentCode = contact->PaymentCode(currency_);
 

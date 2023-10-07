@@ -19,7 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -156,12 +155,11 @@ auto Actor::pipeline(const Work work, Message&& msg, allocator_type) noexcept
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -173,7 +171,7 @@ auto Actor::process_block(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockTip(
@@ -185,7 +183,7 @@ auto Actor::process_block_header(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockHeaderTip(
@@ -197,7 +195,7 @@ auto Actor::process_cfilter(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (4_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetCfilterTip(
@@ -209,7 +207,7 @@ auto Actor::process_peer(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetPeerCount(body[1].as<Type>(), body[3].as<std::size_t>());
@@ -220,7 +218,7 @@ auto Actor::process_reorg(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (5_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetBlockHeaderTip(
@@ -232,7 +230,7 @@ auto Actor::process_sync_server(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
 
     if (3_uz >= body.size()) {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(": invalid message").Abort();
+        LogAbort()()(name_)(": invalid message").Abort();
     }
 
     data_.SetSyncTip(
@@ -242,8 +240,7 @@ auto Actor::process_sync_server(Message&& msg) noexcept -> void
 auto Actor::work(allocator_type monotonic) noexcept -> bool
 {
     using Job = api::network::BlockchainJob;
-    to_blockchain_api_.SendDeferred(
-        MakeWork(Job::report_status), __FILE__, __LINE__);
+    to_blockchain_api_.SendDeferred(MakeWork(Job::report_status));
 
     return false;
 }

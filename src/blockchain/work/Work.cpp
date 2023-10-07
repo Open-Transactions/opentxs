@@ -11,7 +11,6 @@
 
 #include "blockchain/work/WorkPrivate.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
@@ -30,7 +29,7 @@ namespace opentxs::blockchain
 Work::Work(WorkPrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp_);
+    assert_false(nullptr == imp_);
 }
 
 Work::Work(allocator_type alloc) noexcept
@@ -61,8 +60,7 @@ Work::Work(
 
             return pmr::construct<WorkPrivate>(alloc, std::move(value));
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("failed to calculate difficulty for")(
-                print(chain))
+            LogError()()("failed to calculate difficulty for")(print(chain))
                 .Flush();
 
             return pmr::default_construct<WorkPrivate>(alloc);
@@ -90,7 +88,7 @@ Work::Work(const HexType&, std::string_view hex, allocator_type alloc) noexcept
 
             return pmr::construct<WorkPrivate>(alloc, std::move(value));
         } catch (...) {
-            LogError()(OT_PRETTY_CLASS())("failed to decode work").Flush();
+            LogError()()("failed to decode work").Flush();
 
             return pmr::default_construct<WorkPrivate>(alloc);
         }

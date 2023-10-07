@@ -31,7 +31,6 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -81,7 +80,7 @@ Shared::Shared(
                 return blockchain::internal::DefaultFilter(chain_);
             }
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     }())
@@ -118,16 +117,15 @@ Shared::Shared(
     , shutdown_()
     , data_(api, endpoints_)
 {
-    OT_ASSERT(database_);
-    OT_ASSERT(mempool_);
-    OT_ASSERT(filter_);
+    assert_false(nullptr == database_);
+    assert_false(nullptr == mempool_);
+    assert_false(nullptr == filter_);
 }
 
 auto Shared::AddBlock(const block::Block& block) const noexcept -> bool
 {
     if (false == block.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("invalid ")(print(chain_))(" block")
-            .Flush();
+        LogError()()("invalid ")(print(chain_))(" block").Flush();
 
         return false;
     }
@@ -135,8 +133,7 @@ auto Shared::AddBlock(const block::Block& block) const noexcept -> bool
     const auto& id = block.ID();
 
     if (false == block_.SubmitBlock(block, {})) {  // TODO monotonic allocator
-        LogError()(OT_PRETTY_CLASS())("failed to save ")(print(chain_))(
-            " block ")
+        LogError()()("failed to save ")(print(chain_))(" block ")
             .asHex(id)
             .Flush();
 
@@ -145,17 +142,13 @@ auto Shared::AddBlock(const block::Block& block) const noexcept -> bool
 
     // TODO monotonic allocator
     if (false == filter_->Internal().ProcessBlock(block, {})) {
-        LogError()(OT_PRETTY_CLASS())("failed to index ")(print(chain_))(
-            " block")
-            .Flush();
+        LogError()()("failed to index ")(print(chain_))(" block").Flush();
 
         return false;
     }
 
     if (false == header_.Internal().AddHeader(block.Header())) {
-        LogError()(OT_PRETTY_CLASS())("failed to process ")(print(chain_))(
-            " header")
-            .Flush();
+        LogError()()("failed to process ")(print(chain_))(" header").Flush();
 
         return false;
     }
@@ -184,10 +177,9 @@ auto Shared::AddPeer(const network::blockchain::Address& address) const noexcept
             throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
 
-        return data_.lock()->to_peer_manager_.SendDeferred(
-            std::move(work), __FILE__, __LINE__);
+        return data_.lock()->to_peer_manager_.SendDeferred(std::move(work));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -207,17 +199,14 @@ auto Shared::BroadcastTransaction(
     auto& data = *handle;
 
     if (pushtx) {
-        data.to_dht_.SendDeferred(
-            [&] {
-                auto out = network::zeromq::Message{};
-                const auto command =
-                    factory::BlockchainSyncPushTransaction(chain_, tx);
-                command.Serialize(out);
+        data.to_dht_.SendDeferred([&] {
+            auto out = network::zeromq::Message{};
+            const auto command =
+                factory::BlockchainSyncPushTransaction(chain_, tx);
+            command.Serialize(out);
 
-                return out;
-            }(),
-            __FILE__,
-            __LINE__);
+            return out;
+        }());
     }
 
     // TODO upgrade mempool logic so this becomes unnecessary
@@ -233,8 +222,7 @@ auto Shared::BroadcastTransaction(
         return false;
     }
 
-    return data.to_peer_manager_.SendDeferred(
-        std::move(message), __FILE__, __LINE__);
+    return data.to_peer_manager_.SendDeferred(std::move(message));
 }
 
 auto Shared::Chain() const noexcept -> Type { return chain_; }
@@ -320,7 +308,7 @@ auto Shared::HeaderOracle() noexcept -> node::HeaderOracle& { return header_; }
 
 auto Shared::Init(std::shared_ptr<node::Manager> self) noexcept -> void
 {
-    OT_ASSERT(self);
+    assert_false(nullptr == self);
 
     header_.Internal().Init();
     auto api = api_.InternalClient().SharedClient();
@@ -353,10 +341,9 @@ auto Shared::Listen(const network::blockchain::Address& address) const noexcept
             throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
 
-        return data_.lock()->to_peer_manager_.SendDeferred(
-            std::move(work), __FILE__, __LINE__);
+        return data_.lock()->to_peer_manager_.SendDeferred(std::move(work));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -393,7 +380,7 @@ auto Shared::StartWallet() noexcept -> void
 {
     if (false == config_.disable_wallet_) {
         data_.lock()->to_actor_.SendDeferred(
-            MakeWork(ManagerJobs::start_wallet), __FILE__, __LINE__);
+            MakeWork(ManagerJobs::start_wallet));
     }
 }
 

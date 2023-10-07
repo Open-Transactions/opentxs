@@ -33,7 +33,6 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerRequest.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
@@ -84,7 +83,7 @@ auto print(Jobs job) noexcept -> std::string_view
             static_cast<OTZMQWorkType>(job))
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 }  // namespace opentxs::server
@@ -109,7 +108,7 @@ MessageProcessor::Imp::Imp(
         auto& out = zmq_batch_.sockets_.at(0);
         const auto rc = out.SetExposedUntrusted();
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -128,7 +127,7 @@ MessageProcessor::Imp::Imp(
     auto rc = notification_.Bind(
         api_.Endpoints().Internal().PushNotification().data());
 
-    OT_ASSERT(rc);
+    assert_true(rc);
 
     zmq_thread_ = api_.Network().ZeroMQ().Internal().Start(
         zmq_batch_.id_,
@@ -149,9 +148,9 @@ MessageProcessor::Imp::Imp(
              }},
         });
 
-    OT_ASSERT(nullptr != zmq_thread_);
+    assert_false(nullptr == zmq_thread_);
 
-    LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(zmq_batch_.id_).Flush();
+    LogTrace()()("using ZMQ batch ")(zmq_batch_.id_).Flush();
 }
 
 auto MessageProcessor::Imp::associate_connection(
@@ -188,7 +187,7 @@ auto MessageProcessor::Imp::associate_connection(
     }();
 
     if (changed) {
-        LogDetail()(OT_PRETTY_CLASS())("Nym ")(nym, api_.Crypto())(
+        LogDetail()()("Nym ")(nym, api_.Crypto())(
             " is available via connection ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
@@ -224,18 +223,18 @@ auto MessageProcessor::Imp::init(
     const int port,
     const Secret& privkey) noexcept(false) -> void
 {
-    if (port == 0) { OT_FAIL; }
+    if (port == 0) { LogAbort()().Abort(); }
 
     api_.Network().ZeroMQ().Internal().Modify(
         frontend_id_,
         [this, inproc, port, key = Secret{privkey}](auto& socket) {
             auto set = socket.SetPrivateKey(key.Bytes());
 
-            OT_ASSERT(set);
+            assert_true(set);
 
             set = socket.SetZAPDomain(zap_domain_);
 
-            OT_ASSERT(set);
+            assert_true(set);
 
             auto endpoint = std::stringstream{};
 
@@ -263,7 +262,7 @@ auto MessageProcessor::Imp::old_pipeline(zmq::Message&& message) noexcept
     const auto isFrontend = [&] {
         const auto header = message.Envelope();
 
-        OT_ASSERT(header.IsValid());
+        assert_true(header.IsValid());
 
         const auto socket = message.Internal().ExtractFront();
         const auto output = (frontend_id_ == socket.as<zmq::SocketID>());
@@ -317,7 +316,7 @@ auto MessageProcessor::Imp::process_command(
     const auto nym = api_.Wallet().Nym(allegedNymID);
 
     if (false == bool(nym)) {
-        LogError()(OT_PRETTY_CLASS())("Nym is not yet registered.").Flush();
+        LogError()()("Nym is not yet registered.").Flush();
 
         return true;
     }
@@ -327,7 +326,7 @@ auto MessageProcessor::Imp::process_command(
     if (request.Validate()) {
         nymID.Assign(request.Initiator());
     } else {
-        LogError()(OT_PRETTY_CLASS())("Invalid request.").Flush();
+        LogError()()("Invalid request.").Flush();
 
         return false;
     }
@@ -344,9 +343,7 @@ auto MessageProcessor::Imp::process_frontend(zmq::Message&& message) noexcept
         auto lock = Lock{counter_lock_};
 
         if (0 < drop_incoming_) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Dropping incoming message for testing.")
-                .Flush();
+            LogConsole()()("Dropping incoming message for testing.").Flush();
             --drop_incoming_;
 
             return true;
@@ -407,9 +404,7 @@ auto MessageProcessor::Imp::process_internal(zmq::Message&& message) noexcept
         auto lock = Lock{counter_lock_};
 
         if (0 < drop_outgoing_) {
-            LogConsole()(OT_PRETTY_CLASS())(
-                "Dropping outgoing message for testing.")
-                .Flush();
+            LogConsole()()("Dropping outgoing message for testing.").Flush();
             --drop_outgoing_;
 
             return true;
@@ -421,13 +416,12 @@ auto MessageProcessor::Imp::process_internal(zmq::Message&& message) noexcept
 
     if (drop) { return; }
 
-    const auto sent =
-        frontend_.SendExternal(std::move(message), __FILE__, __LINE__);
+    const auto sent = frontend_.SendExternal(std::move(message));
 
     if (sent) {
-        LogTrace()(OT_PRETTY_CLASS())("Reply message delivered.").Flush();
+        LogTrace()()("Reply message delivered.").Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to send reply message.").Flush();
+        LogError()()("Failed to send reply message.").Flush();
     }
 }
 
@@ -436,9 +430,7 @@ auto MessageProcessor::Imp::process_legacy(
     const bool tagged,
     network::zeromq::Message&& incoming) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")
-        .asHex(id.get()[0].Bytes())
-        .Flush();
+    LogTrace()()("Processing request via ").asHex(id.get()[0].Bytes()).Flush();
     process_internal(process_backend(tagged, std::move(incoming)));
 }
 
@@ -456,41 +448,39 @@ auto MessageProcessor::Imp::process_message(
         auto request{api_.Factory().InternalSession().Message()};
 
         if (false == serialized->Exists()) {
-            LogError()(OT_PRETTY_CLASS())("Empty serialized request.").Flush();
+            LogError()()("Empty serialized request.").Flush();
 
             return true;
         }
 
         if (false == request->LoadContractFromString(serialized)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to deserialized request.")
-                .Flush();
+            LogError()()("Failed to deserialized request.").Flush();
 
             return true;
         }
 
         auto replymsg{api_.Factory().InternalSession().Message()};
 
-        OT_ASSERT(false != bool(replymsg));
+        assert_true(false != bool(replymsg));
 
         const bool processed =
             server_.CommandProcessor().ProcessUserCommand(*request, *replymsg);
 
         if (false == processed) {
-            LogDetail()(OT_PRETTY_CLASS())("Failed to process user command ")(
+            LogDetail()()("Failed to process user command ")(
                 request->command_.get())
                 .Flush();
-            LogVerbose()(OT_PRETTY_CLASS())(String::Factory(*request).get())
-                .Flush();
+            LogVerbose()()(String::Factory(*request).get()).Flush();
         } else {
-            LogDetail()(OT_PRETTY_CLASS())(
-                "Successfully processed user command ")(request->command_.get())
+            LogDetail()()("Successfully processed user command ")(
+                request->command_.get())
                 .Flush();
         }
 
         auto serializedReply = String::Factory(*replymsg);
 
         if (false == serializedReply->Exists()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
+            LogError()()("Failed to serialize reply.").Flush();
 
             return true;
         }
@@ -498,7 +488,7 @@ auto MessageProcessor::Imp::process_message(
         auto armoredReply = Armored::Factory(api_.Crypto(), serializedReply);
 
         if (false == armoredReply->Exists()) {
-            LogError()(OT_PRETTY_CLASS())("Failed to armor reply.").Flush();
+            LogError()()("Failed to armor reply.").Flush();
 
             return true;
         }
@@ -516,7 +506,7 @@ auto MessageProcessor::Imp::process_notification(
     zmq::Message&& incoming) noexcept -> void
 {
     if (2 != incoming.Payload().size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message.").Flush();
+        LogError()()("Invalid message.").Flush();
 
         return;
     }
@@ -527,7 +517,7 @@ auto MessageProcessor::Imp::process_notification(
     const auto& [connection, oldFormat] = data;
 
     if (false == connection.IsValid()) {
-        LogDebug()(OT_PRETTY_CLASS())("No notification channel available for ")(
+        LogDebug()()("No notification channel available for ")(
             nymID, api_.Crypto())(".")
             .Flush();
 
@@ -536,7 +526,7 @@ auto MessageProcessor::Imp::process_notification(
 
     const auto nym = api_.Wallet().Nym(server_.GetServerNym().ID());
 
-    OT_ASSERT(nym);
+    assert_false(nullptr == nym);
 
     const auto& payload = body[1];
     auto message = otx::Reply::Factory(
@@ -550,42 +540,39 @@ auto MessageProcessor::Imp::process_notification(
         reason_,
         proto::DynamicFactory<proto::OTXPush>(payload));
 
-    OT_ASSERT(message.Validate());
+    assert_true(message.Validate());
 
     auto serialized = proto::ServerReply{};
 
     if (false == message.Serialize(serialized)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize reply.").Flush();
+        LogVerbose()()("Failed to serialize reply.").Flush();
 
         return;
     }
 
     const auto reply = api_.Factory().Internal().Data(serialized);
-    const auto sent = frontend_.SendExternal(
-        [&] {
-            auto out = reply_to_message(data.first, true);
+    const auto sent = frontend_.SendExternal([&] {
+        auto out = reply_to_message(data.first, true);
 
-            if (data.second) {
-                out.AddFrame(reply);
-                out.AddFrame();
-            } else {
-                out.AddFrame(WorkType::OTXPush);
-                out.AddFrame(reply);
-            }
+        if (data.second) {
+            out.AddFrame(reply);
+            out.AddFrame();
+        } else {
+            out.AddFrame(WorkType::OTXPush);
+            out.AddFrame(reply);
+        }
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 
     if (sent) {
-        LogVerbose()(OT_PRETTY_CLASS())("Push notification for ")(
-            nymID, api_.Crypto())(" delivered via ")
+        LogVerbose()()("Push notification for ")(nymID, api_.Crypto())(
+            " delivered via ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("Failed to deliver push notifcation "
-                                      "for ")(nymID, api_.Crypto())(" via ")
+        LogError()()("Failed to deliver push notifcation "
+                     "for ")(nymID, api_.Crypto())(" via ")
             .asHex(connection.get()[0].Bytes())
             .Flush();
     }
@@ -596,9 +583,7 @@ auto MessageProcessor::Imp::process_proto(
     const bool oldFormat,
     network::zeromq::Message&& incoming) noexcept -> void
 {
-    LogTrace()(OT_PRETTY_CLASS())("Processing request via ")
-        .asHex(id.get()[0].Bytes())
-        .Flush();
+    LogTrace()()("Processing request via ").asHex(id.get()[0].Bytes()).Flush();
     const auto body = incoming.Payload();
     const auto& payload = [&]() -> auto& {
         if (oldFormat) {
@@ -612,7 +597,7 @@ auto MessageProcessor::Imp::process_proto(
     const auto command = extract_proto(payload);
 
     if (false == proto::Validate(command, VERBOSE)) {
-        LogError()(OT_PRETTY_CLASS())("Invalid otx request.").Flush();
+        LogError()()("Invalid otx request.").Flush();
 
         return;
     }
@@ -676,7 +661,7 @@ MessageProcessor::MessageProcessor(
     const PasswordPrompt& reason) noexcept
     : imp_(std::make_unique<Imp>(server, reason).release())
 {
-    OT_ASSERT(imp_);
+    assert_true(imp_);
 }
 
 auto MessageProcessor::cleanup() noexcept -> void { imp_->cleanup(); }

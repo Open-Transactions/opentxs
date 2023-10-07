@@ -14,7 +14,6 @@
 #include "internal/api/session/Session.hpp"
 #include "internal/api/session/notary/Notary.hpp"
 #include "internal/api/session/notary/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -58,7 +57,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 
 Actor::Actor(
     std::shared_ptr<api::session::Notary> api,
-    boost::shared_ptr<Shared> shared,
+    std::shared_ptr<Shared> shared,
     allocator_type alloc) noexcept
     : opentxs::Actor<notary::Actor, Job>(
           *api,
@@ -111,12 +110,11 @@ auto Actor::pipeline(
         case Work::shutdown:
         case Work::init:
         case Work::statemachine: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
-                print(work))
+            LogAbort()()(name_)(": unhandled message type ")(print(work))
                 .Abort();
         }
         default: {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": unhandled message type ")(
+            LogAbort()()(name_)(": unhandled message type ")(
                 static_cast<OTZMQWorkType>(work))
                 .Abort();
         }
@@ -129,7 +127,7 @@ auto Actor::process_queue_unitid(
 {
     const auto body = msg.Payload();
 
-    OT_ASSERT(1_uz < body.size());
+    assert_true(1_uz < body.size());
 
     auto& id = queue_.emplace_back();
     id.Assign(body[1].Bytes());

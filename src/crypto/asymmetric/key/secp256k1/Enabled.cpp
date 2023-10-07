@@ -13,7 +13,6 @@
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/alloc/Boost.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -37,7 +36,7 @@ auto Secp256k1Key(
 
         return pmr::construct<ReturnType>(alloc, api, ecdsa, serializedKey);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -57,14 +56,14 @@ auto Secp256k1Key(
     try {
         // TODO use alloc::Strategy::work_
         std::byte b[512_uz];  // NOLINT(modernize-avoid-c-arrays)
-        auto mono = alloc::BoostMonotonic{std::addressof(b), sizeof(b)};
+        auto mono = alloc::MonotonicUnsync{std::addressof(b), sizeof(b)};
         auto sessionKey =
             api.Crypto().Symmetric().Key(reason, {std::addressof(mono)});
 
         return pmr::construct<ReturnType>(
             alloc, api, ecdsa, role, version, sessionKey, reason);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }
@@ -86,7 +85,7 @@ auto Secp256k1Key(
     try {
         // TODO use alloc::Strategy::work_
         std::byte b[512_uz];  // NOLINT(modernize-avoid-c-arrays)
-        auto mono = alloc::BoostMonotonic{std::addressof(b), sizeof(b)};
+        auto mono = alloc::MonotonicUnsync{std::addressof(b), sizeof(b)};
         auto sessionKey =
             api.Crypto().Symmetric().Key(reason, {std::addressof(mono)});
 
@@ -101,7 +100,7 @@ auto Secp256k1Key(
             sessionKey,
             reason);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return pmr::default_construct<BlankType>(alloc);
     }

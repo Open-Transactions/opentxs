@@ -8,8 +8,7 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Allocated.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/alloc/AllocatesChildren.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Boost.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Logging.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/alloc/Monotonic.hpp"
+    "${opentxs_SOURCE_DIR}/src/internal/util/alloc/MonotonicSync.hpp"
     "Logging.cpp"
 )

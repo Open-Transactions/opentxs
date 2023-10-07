@@ -11,7 +11,6 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -45,7 +44,7 @@ Futures::Futures(
         const auto rc = out.Connect(
             api.Endpoints().Internal().BlockchainMessageRouter().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -60,7 +59,7 @@ auto Futures::get_allocator() const noexcept -> allocator_type
 auto Futures::Queue(const block::Hash& hash, BlockResult& out) noexcept -> void
 {
     if (auto i = requests_.find(hash); requests_.end() != i) {
-        log_(OT_PRETTY_CLASS())(name_)(": promise for block ")
+        log_()(name_)(": promise for block ")
             .asHex(hash)(" already exists")
             .Flush();
         out = i->second.second;
@@ -68,9 +67,7 @@ auto Futures::Queue(const block::Hash& hash, BlockResult& out) noexcept -> void
         auto& [promise, future] = requests_[hash];
         future = promise.get_future();
         pending_.emplace(hash);
-        log_(OT_PRETTY_CLASS())(name_)(": promise for block ")
-            .asHex(hash)(" created")
-            .Flush();
+        log_()(name_)(": promise for block ").asHex(hash)(" created").Flush();
         out = future;
     }
 }
@@ -90,24 +87,19 @@ auto Futures::Receive(
         const auto rc =
             block::Parser::Construct(crypto, chain, hash, bytes, block, alloc);
 
-        OT_ASSERT(rc && block.IsValid());
+        assert_true(rc && block.IsValid());
 
         promise.set_value(block);
         requests_.erase(i);
-        log_(OT_PRETTY_CLASS())(name_)(": promise for block ")
-            .asHex(hash)(" satisfied")
-            .Flush();
-        to_blockchain_api_.SendDeferred(
-            [&] {
-                auto work = network::zeromq::tagged_message(
-                    WorkType::BlockchainBlockAvailable, true);
-                work.AddFrame(chain_);
-                work.AddFrame(hash);
+        log_()(name_)(": promise for block ").asHex(hash)(" satisfied").Flush();
+        to_blockchain_api_.SendDeferred([&] {
+            auto work = network::zeromq::tagged_message(
+                WorkType::BlockchainBlockAvailable, true);
+            work.AddFrame(chain_);
+            work.AddFrame(hash);
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
     }
 }
 

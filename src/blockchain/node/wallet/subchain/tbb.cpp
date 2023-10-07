@@ -11,7 +11,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
-#include "internal/util/alloc/Boost.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -29,7 +29,7 @@ auto SubchainStateData::PrehashData::Match(
         tbb::blocked_range<std::size_t>{0_uz, job_count_},
         [&, this](const auto& r) {
             auto resource =
-                alloc::BoostMonotonic(convert_to_size(thread_pool_monotonic_));
+                alloc::MonotonicUnsync(convert_to_size(thread_pool_monotonic_));
             auto temp = allocator_type{std::addressof(resource)};
 
             for (auto i = r.begin(); i != r.end(); ++i) {

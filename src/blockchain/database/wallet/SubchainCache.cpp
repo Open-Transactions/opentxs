@@ -15,7 +15,6 @@
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "blockchain/database/wallet/Position.hpp"
 #include "blockchain/database/wallet/SubchainID.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
@@ -66,7 +65,7 @@ auto SubchainCache::AddPattern(
         auto [it, added] = patterns.emplace(index, data);
 
         if (false == added) {
-            LogTrace()(OT_PRETTY_CLASS())("Pattern already exists").Flush();
+            LogTrace()()("Pattern already exists").Flush();
 
             return true;
         }
@@ -83,7 +82,7 @@ auto SubchainCache::AddPattern(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -101,8 +100,7 @@ auto SubchainCache::AddPatternIndex(
         auto [it, added] = index.emplace(value);
 
         if (false == added) {
-            LogTrace()(OT_PRETTY_CLASS())("Pattern index already exists")
-                .Flush();
+            LogTrace()()("Pattern index already exists").Flush();
 
             return true;
         }
@@ -119,7 +117,7 @@ auto SubchainCache::AddPatternIndex(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -179,9 +177,9 @@ auto SubchainCache::GetIndex(
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return index;
@@ -196,7 +194,7 @@ auto SubchainCache::GetLastIndexed(const SubchainID& subchain) const noexcept
 
         return load_last_indexed(subchain, map);
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return std::nullopt;
     }
@@ -212,7 +210,7 @@ auto SubchainCache::GetLastScanned(const SubchainID& subchain) const noexcept
 
         return serialized.Decode(api_);
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
 
         return {};
     }
@@ -275,7 +273,7 @@ auto SubchainCache::load_last_indexed(
             std::memcpy(&value, bytes.data(), bytes.size());
             auto [i, added] = map.try_emplace(key, value);
 
-            OT_ASSERT(added);
+            assert_true(added);
 
             it = i;
         } else {
@@ -376,7 +374,7 @@ auto SubchainCache::SetLastIndexed(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -414,7 +412,7 @@ auto SubchainCache::SetLastScanned(
 
         return output;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

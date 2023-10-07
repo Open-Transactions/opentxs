@@ -7,7 +7,6 @@
 
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
@@ -18,6 +17,7 @@
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -160,7 +160,7 @@ auto Message::ExtractAddress(AddressByteField in) noexcept
             AddressVersion::ipv4_prefix().size());
         bytes = prefix;
 
-        OT_ASSERT(4 == bytes.size());
+        assert_true(4 == bytes.size());
     } else if (
         bytes.Extract(AddressVersion::onion_prefix().size(), prefix) &&
         AddressVersion::onion_prefix() == prefix) {
@@ -171,7 +171,7 @@ auto Message::ExtractAddress(AddressByteField in) noexcept
             AddressVersion::onion_prefix().size());
         bytes = prefix;
 
-        OT_ASSERT(10 == bytes.size());
+        assert_true(10 == bytes.size());
     }
 
     return output;

@@ -9,7 +9,6 @@
 #include <iterator>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -42,7 +41,7 @@ auto WorkPrivate::asHex(allocator_type alloc) const noexcept -> CString
         bmp::export_bits(
             bmp::cpp_int(data_), std::back_inserter(bytes), 8, true);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to encode number").Flush();
+        LogError()()("Failed to encode number").Flush();
 
         return {};
     }

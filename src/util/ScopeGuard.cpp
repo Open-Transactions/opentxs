@@ -17,7 +17,7 @@ ScopeGuard::~ScopeGuard()
     try {
         if (post_) { std::invoke(post_); }
     } catch (...) {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 }  // namespace opentxs

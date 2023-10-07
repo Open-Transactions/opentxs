@@ -10,8 +10,8 @@
 #include <utility>
 
 #include "core/display/ScalePrivate.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 namespace opentxs::display
@@ -19,7 +19,7 @@ namespace opentxs::display
 Scale::Scale(ScalePrivate* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 Scale::Scale() noexcept

@@ -14,7 +14,6 @@
 #include "internal/api/session/Types.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -84,9 +83,7 @@ auto BalanceItemCustodial(
         case otx::client::PaymentWorkflowType::OutgoingCash:
         case otx::client::PaymentWorkflowType::IncomingCash:
         default: {
-            LogAbort()("opentxs::factory::")(__func__)(
-                "Unhandled workflow type (")(type)(")")
-                .Abort();
+            LogAbort()()("Unhandled workflow type (")(type)(")").Abort();
         }
     }
 }
@@ -199,11 +196,11 @@ auto BalanceItem::get_contact_name(const identifier::Nym& nymID) const noexcept
 auto BalanceItem::recover_workflow(CustomData& custom) noexcept
     -> const proto::PaymentWorkflow&
 {
-    OT_ASSERT(2 <= custom.size());
+    assert_true(2 <= custom.size());
 
     const auto& input = custom.at(0);
 
-    OT_ASSERT(nullptr != input);
+    assert_false(nullptr == input);
 
     return *static_cast<const proto::PaymentWorkflow*>(input);
 }

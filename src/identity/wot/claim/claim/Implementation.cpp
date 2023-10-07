@@ -127,7 +127,7 @@ auto Claim::Attributes() const noexcept -> UnallocatedSet<claim::Attribute>
 {
     auto out = UnallocatedSet<claim::Attribute>{};
     auto handle = attributes_.lock_shared();
-    std::copy(handle->begin(), handle->end(), std::inserter(out, out.end()));
+    std::ranges::copy(*handle, std::inserter(out, out.end()));
 
     return out;
 }

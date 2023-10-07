@@ -61,9 +61,8 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto accountids =
                 session.Storage().Internal().AccountsByOwner(nym);
-            std::transform(
-                accountids.begin(),
-                accountids.end(),
+            std::ranges::transform(
+                accountids,
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -88,7 +87,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byNym = [&] {
             auto out = byNymOTX();
             auto bc = byNymBlockchain();
-            std::move(bc.begin(), bc.end(), std::inserter(out, out.end()));
+            std::ranges::move(bc, std::inserter(out, out.end()));
 
             return out;
         };
@@ -96,9 +95,8 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto accountids =
                 session.Storage().Internal().AccountsByServer(notary);
-            std::transform(
-                accountids.begin(),
-                accountids.end(),
+            std::ranges::transform(
+                accountids,
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -124,7 +122,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byServer = [&] {
             auto out = byServerOTX();
             auto bc = byServerBlockchain();
-            std::move(bc.begin(), bc.end(), std::inserter(out, out.end()));
+            std::ranges::move(bc, std::inserter(out, out.end()));
 
             return out;
         };
@@ -132,9 +130,8 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             auto out = UnallocatedSet<UnallocatedCString>{};
             const auto accountids =
                 session.Storage().Internal().AccountsByContract(unitID);
-            std::transform(
-                accountids.begin(),
-                accountids.end(),
+            std::ranges::transform(
+                accountids,
                 std::inserter(out, out.end()),
                 [this](const auto& item) {
                     return item.asBase58(ot_.Crypto());
@@ -160,7 +157,7 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
         const auto byUnit = [&] {
             auto out = byUnitOTX();
             auto bc = byUnitBlockchain();
-            std::move(bc.begin(), bc.end(), std::inserter(out, out.end()));
+            std::ranges::move(bc, std::inserter(out, out.end()));
 
             return out;
         };
@@ -170,62 +167,39 @@ auto RPC::list_accounts(const request::Base& base) const noexcept
             const auto server = byServer();
             const auto unit = byUnit();
             auto temp = UnallocatedSet<UnallocatedCString>{};
-            std::set_intersection(
-                bynym.begin(),
-                bynym.end(),
-                server.begin(),
-                server.end(),
-                std::inserter(temp, temp.end()));
-            std::set_intersection(
-                temp.begin(),
-                temp.end(),
-                unit.begin(),
-                unit.end(),
-                std::back_inserter(ids));
+            std::ranges::set_intersection(
+                bynym, server, std::inserter(temp, temp.end()));
+            std::ranges::set_intersection(temp, unit, std::back_inserter(ids));
         } else if (nymAndServer) {
             const auto bynym = byNym();
             const auto server = byServer();
-            std::set_intersection(
-                bynym.begin(),
-                bynym.end(),
-                server.begin(),
-                server.end(),
-                std::back_inserter(ids));
+            std::ranges::set_intersection(
+                bynym, server, std::back_inserter(ids));
         } else if (nymAndUnit) {
             const auto bynym = byNym();
             const auto unit = byUnit();
-            std::set_intersection(
-                bynym.begin(),
-                bynym.end(),
-                unit.begin(),
-                unit.end(),
-                std::back_inserter(ids));
+            std::ranges::set_intersection(bynym, unit, std::back_inserter(ids));
         } else if (serverAndUnit) {
             const auto server = byServer();
             const auto unit = byUnit();
-            std::set_intersection(
-                server.begin(),
-                server.end(),
-                unit.begin(),
-                unit.end(),
-                std::back_inserter(ids));
+            std::ranges::set_intersection(
+                server, unit, std::back_inserter(ids));
         } else if (nymOnly) {
             auto data = byNym();
-            std::move(data.begin(), data.end(), std::back_inserter(ids));
+            std::ranges::move(data, std::back_inserter(ids));
         } else if (serverOnly) {
             auto data = byServer();
-            std::move(data.begin(), data.end(), std::back_inserter(ids));
+            std::ranges::move(data, std::back_inserter(ids));
         } else if (unitOnly) {
             auto data = byUnit();
-            std::move(data.begin(), data.end(), std::back_inserter(ids));
+            std::ranges::move(data, std::back_inserter(ids));
         } else {
             const auto otx = session.Storage().Internal().AccountList();
             const auto bc = blockchain.AccountList();
-            std::transform(
-                otx.begin(),
-                otx.end(),
-                std::back_inserter(ids),
-                [](const auto& item) { return item.first; });
+            std::ranges::transform(
+                otx, std::back_inserter(ids), [](const auto& item) {
+                    return item.first;
+                });
 
             for (const auto& id : blockchain.AccountList()) {
                 const auto [chain, owner] = blockchain.LookupAccount(id);

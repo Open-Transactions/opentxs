@@ -29,12 +29,10 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Future.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
-#include "internal/util/alloc/Boost.hpp"
-#include "internal/util/alloc/Monotonic.hpp"
+#include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -48,6 +46,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -96,7 +95,7 @@ protected:
     static auto connection_id(Message& msg) noexcept
         -> network::zeromq::SocketID
     {
-        OT_ASSERT(0_uz < msg.get().size());
+        assert_false(msg.get().empty());
 
         return msg.Internal().ExtractFront().as<network::zeromq::SocketID>();
     }
@@ -123,8 +122,7 @@ protected:
         const Work work,
         std::string_view message = {}) const noexcept
     {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" unhandled message type (")(
-            print(work))(")");
+        LogAbort()()(name_)(" unhandled message type (")(print(work))(")");
 
         if (false == message.empty()) { LogAbort()(" ")(message); }
 
@@ -133,7 +131,7 @@ protected:
     // TODO std::source_location
     [[noreturn]] auto unknown_type(const Work work) const noexcept
     {
-        LogAbort()(OT_PRETTY_CLASS())(name_)(" unknown message type (")(
+        LogAbort()()(name_)(" unknown message type (")(
             static_cast<OTZMQWorkType>(work))(")")
             .Abort();
     }
@@ -145,16 +143,14 @@ protected:
     auto do_init(allocator_type monotonic) noexcept -> void
     {
         if (init_complete_) {
-            LogAbort()(OT_PRETTY_CLASS())(
-                name_)(": init message received twice")
-                .Abort();
+            LogAbort()()(name_)(": init message received twice").Abort();
         } else {
-            log_(OT_PRETTY_CLASS())(name_)(": initializing").Flush();
+            log_()(name_)(": initializing").Flush();
         }
 
         const auto shutdown = downcast().do_startup(monotonic);
         init_complete_ = true;
-        log_(OT_PRETTY_CLASS())(name_)(": initialization complete").Flush();
+        log_()(name_)(": initialization complete").Flush();
 
         if (shutdown) {
             shutdown_actor();
@@ -170,7 +166,7 @@ protected:
             const auto wait =
                 std::chrono::duration_cast<std::chrono::nanoseconds>(
                     next_state_machine_ - now);
-            log_(OT_PRETTY_CLASS())(name_)(": rate limited for ")(wait).Flush();
+            log_()(name_)(": rate limited for ")(wait).Flush();
             reset_timer(
                 std::chrono::duration_cast<std::chrono::microseconds>(wait),
                 rate_limit_timer_,
@@ -255,7 +251,7 @@ protected:
         , state_machine_queued_(false)
         , rate_limit_timer_(asio.Internal().GetTimer())
     {
-        log_(OT_PRETTY_CLASS())(name_)(": using ZMQ batch ")(batch).Flush();
+        log_()(name_)(": using ZMQ batch ")(batch).Flush();
         zmq.Internal().Alloc(batch)->set_name(name_);
     }
     Actor(
@@ -355,7 +351,7 @@ private:
             }
         }();
         const auto type = print(work);
-        log_(OT_PRETTY_CLASS())(name_)(": message type is: ")(type).Flush();
+        log_()(name_)(": message type is: ")(type).Flush();
         const auto isInit = (init_signal_ == work);
         const auto canDrop = (0u == never_drop_.count(work));
 
@@ -368,8 +364,7 @@ private:
     auto flush_cache(allocator_type monotonic) noexcept -> void
     {
         if (false == cache_.empty()) {
-            log_(OT_PRETTY_CLASS())(name_)(": flushing ")(cache_.size())(
-                " cached messages")
+            log_()(name_)(": flushing ")(cache_.size())(" cached messages")
                 .Flush();
         }
 
@@ -386,12 +381,12 @@ private:
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
 
-            OT_ASSERT(init_complete_);
+            assert_true(init_complete_);
 
             handle_message(
                 false, isInit, canDrop, type, work, std::move(in), monotonic);
         } catch (const std::exception& e) {
-            log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+            log_()(name_)(": ")(e.what()).Flush();
         }
     }
     auto handle_message(
@@ -412,16 +407,15 @@ private:
                     do_init(monotonic);
                     flush_cache(monotonic);
                 } else {
-                    log_(OT_PRETTY_CLASS())(name_)(
-                        ": received init message on external socket")
+                    log_()(name_)(": received init message on external socket")
                         .Flush();
                 }
             } else if (canDrop) {
-                log_(OT_PRETTY_CLASS())(name_)(": dropping message of type ")(
+                log_()(name_)(": dropping message of type ")(
                     type)(" until init is processed")
                     .Flush();
             } else {
-                log_(OT_PRETTY_CLASS())(name_)(": queueing message of type ")(
+                log_()(name_)(": queueing message of type ")(
                     type)(" until init is processed")
                     .Flush();
                 defer(std::move(in));
@@ -434,31 +428,27 @@ private:
             switch (work) {
                 case terminate_signal_: {
                     if (false == external) {
-                        log_(OT_PRETTY_CLASS())(name_)(": shutting down")
-                            .Flush();
+                        log_()(name_)(": shutting down").Flush();
                         shutdown_actor();
                     } else {
-                        log_(OT_PRETTY_CLASS())(name_)(
+                        log_()(name_)(
                             ": received shutdown message on external socket")
                             .Flush();
                     }
                 } break;
                 case state_machine_signal_: {
                     if (false == external) {
-                        log_(OT_PRETTY_CLASS())(name_)(
-                            ": executing state machine")
-                            .Flush();
+                        log_()(name_)(": executing state machine").Flush();
                         do_work(monotonic);
                     } else {
-                        log_(OT_PRETTY_CLASS())(name_)(
+                        log_()(name_)(
                             ": received state machine message on external "
                             "socket")
                             .Flush();
                     }
                 } break;
                 default: {
-                    log_(OT_PRETTY_CLASS())(name_)(": processing ")(type)
-                        .Flush();
+                    log_()(name_)(": processing ")(type).Flush();
                     handle_message(work, std::move(in), monotonic);
                 }
             }
@@ -473,16 +463,16 @@ private:
         try {
             downcast().pipeline(work, std::move(msg), monotonic);
         } catch (const std::exception& e) {
-            log_(OT_PRETTY_CLASS())(name_)(": error processing ")(print(work))(
-                " message: ")(e.what())
+            log_()(name_)(": error processing ")(print(work))(" message: ")(
+                e.what())
                 .Abort();
         }
     }
     auto log_asio_error(boost::system::error_code ec) noexcept -> void
     {
         if (unexpected_asio_error(ec)) {
-            LogError()(OT_PRETTY_CLASS())(name_)(": received asio error (")(
-                ec.value())(") :")(ec)
+            LogError()()(name_)(": received asio error (")(ec.value())(") :")(
+                ec)
                 .Flush();
         }
     }
@@ -502,8 +492,8 @@ private:
     }
     auto worker(network::zeromq::Message&& in) noexcept -> void
     {
-        log_(OT_PRETTY_CLASS())(name_)(": Message received").Flush();
-        auto alloc = alloc::Monotonic{get_allocator().resource()};
+        log_()(name_)(": Message received").Flush();
+        auto alloc = alloc::MonotonicSync{get_allocator().resource()};
 
         try {
             const auto [work, type, isInit, canDrop] = decode_message_type(in);
@@ -516,10 +506,10 @@ private:
                 std::move(in),
                 std::addressof(alloc));
         } catch (const std::exception& e) {
-            log_(OT_PRETTY_CLASS())(name_)(": ")(e.what()).Flush();
+            log_()(name_)(": ")(e.what()).Flush();
         }
 
-        log_(OT_PRETTY_CLASS())(name_)(": message processing complete").Flush();
+        log_()(name_)(": message processing complete").Flush();
     }
 };
 }  // namespace opentxs

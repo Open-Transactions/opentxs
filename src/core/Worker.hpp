@@ -14,7 +14,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -119,8 +118,7 @@ protected:
         , last_executed_(Clock::now())
         , state_machine_queued_(false)
     {
-        LogTrace()(OT_PRETTY_CLASS())("using ZMQ batch ")(pipeline_.BatchID())
-            .Flush();
+        LogTrace()()("using ZMQ batch ")(pipeline_.BatchID()).Flush();
     }
 
     ~Worker() { stop_worker().get(); }

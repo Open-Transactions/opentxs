@@ -12,12 +12,12 @@
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/util/Log.hpp"
 #include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::internal
@@ -36,7 +36,7 @@ HeaderJob::Imp::Imp(
             auto out = api->Network().ZeroMQ().Internal().RawSocket(Type::Push);
             const auto rc = out.Connect(endpoint.data());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         } else {
@@ -56,8 +56,7 @@ HeaderJob::Imp::~Imp()
 {
     if (to_parent_.has_value()) {
         using Job = headeroracle::Job;
-        to_parent_->SendDeferred(
-            MakeWork(Job::job_finished), __FILE__, __LINE__);
+        to_parent_->SendDeferred(MakeWork(Job::job_finished));
     }
 }
 }  // namespace opentxs::blockchain::node::internal

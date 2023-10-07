@@ -34,7 +34,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "matterfi/PaymentCode.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -135,14 +134,11 @@ SpendPrivate::SpendPrivate(
 {
     memo_.assign(proto.memo());
     const auto& outputs = proto.output();
-    std::for_each(outputs.begin(), outputs.end(), [this](const auto& i) {
-        deserialize_output(i);
-    });
+    std::ranges::for_each(
+        outputs, [this](const auto& i) { deserialize_output(i); });
     const auto& notifications = proto.notification();
-    std::for_each(
-        notifications.begin(), notifications.end(), [this](const auto& i) {
-            deserialize_notification(i);
-        });
+    std::ranges::for_each(
+        notifications, [this](const auto& i) { deserialize_notification(i); });
 
     if (proto.has_finished()) { transaction_.emplace(proto.finished()); }
 
@@ -156,8 +152,7 @@ auto SpendPrivate::account(const PaymentCode& recipient) const noexcept(false)
     -> const crypto::PaymentCode&
 {
     if (nym().PaymentCodePublic() == recipient) {
-        LogAbort()(OT_PRETTY_CLASS())(
-            "attempted to create loopback payment code account")
+        LogAbort()()("attempted to create loopback payment code account")
             .Abort();
     }
 
@@ -189,7 +184,7 @@ auto SpendPrivate::AddNotification(
                 account(recipient).InternalPaymentCode().AddNotification(txid);
             }
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "unable to record outgoing notification transaction for ")(
                 recipient.asBase58())(": ")(e.what())
                 .Flush();
@@ -265,9 +260,7 @@ auto SpendPrivate::Check() noexcept -> std::optional<SendResult>
             return check_funding_sweep();
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("invalid funding policy: ")(
-                print(policy_))
-                .Flush();
+            LogError()()("invalid funding policy: ")(print(policy_)).Flush();
 
             return SendResult::UnspecifiedError;
         }
@@ -278,7 +271,7 @@ auto SpendPrivate::check_funding_default() const noexcept
     -> std::optional<SendResult>
 {
     if (address_recipients_.empty() && pc_recipients_.empty()) {
-        LogError()(OT_PRETTY_CLASS())("no recipients specified").Flush();
+        LogError()()("no recipients specified").Flush();
 
         return SendResult::MissingRecipients;
     } else {
@@ -300,7 +293,7 @@ auto SpendPrivate::check_funding_sweep() noexcept -> std::optional<SendResult>
 
         return std::nullopt;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return SendResult::InvalidSweep;
     }
@@ -339,7 +332,7 @@ auto SpendPrivate::check_sender() const noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -464,30 +457,30 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
             matterfi::paymentcode_extra_notifications(
                 LogTrace(), account, notifications_);
         };
-        std::for_each(pc_recipients_.begin(), pc_recipients_.end(), check);
+        std::ranges::for_each(pc_recipients_, check);
         const auto self = notifications_.size();
         matterfi::paymentcode_preemptive_notifications(
             log, api_, spender_, chain_, notifications_, alloc);
-        log(OT_PRETTY_CLASS())("added ")(self - before)(
-            " self notifications for ")(pc_recipients_.size())(" recipients")
+        log()("added ")(self - before)(" self notifications for ")(
+            pc_recipients_.size())(" recipients")
             .Flush();
-        log(OT_PRETTY_CLASS())("added ")(notifications_.size() - self)(
+        log()("added ")(notifications_.size() - self)(
             " preemptive notifications")
             .Flush();
     } else {
-        log(OT_PRETTY_CLASS())("skipping enhanced notifications").Flush();
+        log()("skipping enhanced notifications").Flush();
     }
 
     const auto self = nym().PaymentCodePublic();
     const auto check = [&, this](const auto& recipient) {
         if (self != recipient) {
             const auto& account = this->account(recipient);
-            log(OT_PRETTY_CLASS())("verifying payment code subaccount ")(
+            log()("verifying payment code subaccount ")(
                 account.ID(), api_.Crypto())
                 .Flush();
         }
     };
-    std::for_each(notifications_.begin(), notifications_.end(), check);
+    std::ranges::for_each(notifications_, check);
 }
 
 auto SpendPrivate::Funding() const noexcept -> node::Funding { return policy_; }
@@ -551,11 +544,11 @@ auto SpendPrivate::Notify(std::span<const PaymentCode> recipients) noexcept
             validate_payment_code(pc);
             notifications_.emplace(pc);
         };
-        std::for_each(recipients.begin(), recipients.end(), process);
+        std::ranges::for_each(recipients, process);
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -580,7 +573,7 @@ auto SpendPrivate::OutgoingKeys() const noexcept -> Set<crypto::Key>
 
         return keyID;
     };
-    std::transform(in.begin(), in.end(), std::inserter(out, out.end()), key);
+    std::ranges::transform(in, std::inserter(out, out.end()), key);
 
     return out;
 }
@@ -639,7 +632,7 @@ auto SpendPrivate::SendToAddress(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -679,7 +672,7 @@ auto SpendPrivate::SendToPaymentCode(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -699,14 +692,14 @@ auto SpendPrivate::Serialize(
         auto make_output = [&, this](const auto& in) {
             this->serialize_output(in, *out.add_output());
         };
-        std::for_each(addr.begin(), addr.end(), make_output);
-        std::for_each(pc.begin(), pc.end(), make_output);
+        std::ranges::for_each(addr, make_output);
+        std::ranges::for_each(pc, make_output);
         const auto& notif = notifications_;
         auto make_notif = [&](const auto& in) {
             serialize_notification(
                 sender_payment_code(), path(), in, *out.add_notification());
         };
-        std::for_each(notif.begin(), notif.end(), make_notif);
+        std::ranges::for_each(notif, make_notif);
 
         if (is_sweep()) { serialize_sweep(*out.mutable_sweep()); }
 
@@ -721,7 +714,7 @@ auto SpendPrivate::Serialize(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -771,8 +764,7 @@ auto SpendPrivate::serialize_address(
         case Unknown:
         case P2TR:
         default: {
-            LogAbort()(OT_PRETTY_CLASS())("invalid type: ")(print(type))
-                .Abort();
+            LogAbort()()("invalid type: ")(print(type)).Abort();
         }
     }
 }
@@ -895,7 +887,7 @@ auto SpendPrivate::SetSweepFromKey(const crypto::Key& key) noexcept -> bool
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("key is not owned by the spending nym ")(
+        LogError()()("key is not owned by the spending nym ")(
             spender_, api_.Crypto())
             .Flush();
 
@@ -917,7 +909,7 @@ auto SpendPrivate::SetSweepFromSubaccount(
 
         return true;
     } else {
-        LogError()(OT_PRETTY_CLASS())("subaccount ")(aubaccount, api_.Crypto())(
+        LogError()()("subaccount ")(aubaccount, api_.Crypto())(
             " is not owned by the spending nym ")(spender_, api_.Crypto())
             .Flush();
 
@@ -934,7 +926,7 @@ auto SpendPrivate::SetSweepToAddress(std::string_view address) noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

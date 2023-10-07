@@ -3,9 +3,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/intrusive/list.hpp>
+
 #pragma once
 
-#include <boost/intrusive/list.hpp>
 #include <functional>
 #include <future>
 #include <memory>

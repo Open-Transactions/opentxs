@@ -5,8 +5,8 @@
 
 #include "blockchain/node/blockoracle/Shared.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <algorithm>
+#include <functional>
 #include <future>
 #include <iterator>
 #include <memory>
@@ -31,7 +31,6 @@
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -99,7 +98,7 @@ BlockOracle::Shared::Shared(
         const auto rc = out.Connect(
             api_.Endpoints().Internal().BlockchainMessageRouter().data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -109,7 +108,7 @@ BlockOracle::Shared::Shared(
         const auto rc = out.Connect(
             node_.Internal().Endpoints().header_oracle_pull_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -119,7 +118,7 @@ BlockOracle::Shared::Shared(
         const auto rc = out.Bind(
             node_.Internal().Endpoints().block_oracle_publish_.c_str());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -206,16 +205,13 @@ auto BlockOracle::Shared::check_header(
     const ReadView header) const noexcept -> void
 {
     if (false == node_.HeaderOracle().Exists(id)) {
-        to_header_oracle_.lock()->SendDeferred(
-            [&] {
-                using enum headeroracle::Job;
-                auto work = MakeWork(submit_block_header);
-                work.AddFrame(header.data(), header.size());
+        to_header_oracle_.lock()->SendDeferred([&] {
+            using enum headeroracle::Job;
+            auto work = MakeWork(submit_block_header);
+            work.AddFrame(header.data(), header.size());
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
     }
 }
 
@@ -270,9 +266,9 @@ auto BlockOracle::Shared::GetBlocks(
         return out;
     }();
 
-    OT_ASSERT(blocks.size() == count);
-    OT_ASSERT(results.size() == count);
-    OT_ASSERT(view.size() == count);
+    assert_true(blocks.size() == count);
+    assert_true(results.size() == count);
+    assert_true(view.size() == count);
 
     check_blocks(view);
 
@@ -283,7 +279,7 @@ auto BlockOracle::Shared::GetBlocks(
 
         switch (result) {
             case 1: {
-                LogError()(OT_PRETTY_CLASS())(name_)(": block ")
+                LogError()()(name_)(": block ")
                     .asHex(id)(" does not pass validation checks and must be "
                                "re-downloaded")
                     .Flush();
@@ -404,7 +400,7 @@ auto BlockOracle::Shared::GetTip(allocator_type monotonic) noexcept
         if (best != pos) {
             const auto rc = db_.SetBlockTip(best);
 
-            OT_ASSERT(rc);
+            assert_true(rc);
         }
 
         return best;
@@ -419,28 +415,24 @@ auto BlockOracle::Shared::GetWork(alloc::Default alloc) const noexcept
 {
     const auto& log = log_;
     auto work = queue_.lock()->GetWork(alloc);
-    // TODO c++20
-    auto post = ScopeGuard{[&] {
-        auto& [id, hashes, jobs, downloading] = work;
-        publish_queue(std::make_pair(jobs, downloading));
-    }};
     auto& [id, hashes, jobs, downloading] = work;
+    auto post =
+        ScopeGuard{[&] { publish_queue(std::make_pair(jobs, downloading)); }};
 
     if (hashes.empty()) {
-        OT_ASSERT(0 > id);
+        assert_true(0 > id);
 
-        log(OT_PRETTY_CLASS())(name_)(": no work").Flush();
+        log()(name_)(": no work").Flush();
 
         return {};
     } else {
-        OT_ASSERT(0 <= id);
+        assert_true(0 <= id);
 
-        log(OT_PRETTY_CLASS())(name_)(": issuing job ")(id)(" for ")(
-            hashes.size())(" blocks")
+        log()(name_)(": issuing job ")(id)(" for ")(hashes.size())(" blocks")
             .Flush();
-        auto me = boost::shared_from(this);
+        auto me = shared_from_this();
 
-        OT_ASSERT(me);
+        assert_false(nullptr == me);
 
         auto* imp = pmr::construct<node::internal::BlockBatch::Imp>(
             alloc,
@@ -486,7 +478,7 @@ auto BlockOracle::Shared::Load(
     auto output =
         Load(Hashes{std::addressof(block), 1_uz}, monotonic, monotonic);
 
-    OT_ASSERT(false == output.empty());
+    assert_false(output.empty());
 
     return std::move(output.front());
 }
@@ -508,7 +500,7 @@ auto BlockOracle::Shared::Load(
         const auto& crypto = api_.Crypto();
         const auto blocks = load_blocks(hashes, monotonic, monotonic);
 
-        OT_ASSERT(blocks.size() == hashes.size());
+        assert_true(blocks.size() == hashes.size());
 
         auto h = hashes.begin();
         auto b = blocks.cbegin();
@@ -535,19 +527,16 @@ auto BlockOracle::Shared::Load(
                 auto promise = Promise{};
                 result = promise.get_future();
                 promise.set_value(std::move(p));
-                to_blockchain_api_.lock()->SendDeferred(
-                    [&] {
-                        auto work = network::zeromq::tagged_message(
-                            WorkType::BlockchainBlockAvailable, true);
-                        work.AddFrame(chain_);
-                        work.AddFrame(hash);
+                to_blockchain_api_.lock()->SendDeferred([&] {
+                    auto work = network::zeromq::tagged_message(
+                        WorkType::BlockchainBlockAvailable, true);
+                    work.AddFrame(chain_);
+                    work.AddFrame(hash);
 
-                        return work;
-                    }(),
-                    __FILE__,
-                    __LINE__);
+                    return work;
+                }());
             } else {
-                LogError()(OT_PRETTY_CLASS())(name_)(": block ")
+                LogError()()(name_)(": block ")
                     .asHex(hash)(" does not pass validation checks and must be "
                                  "re-downloaded")
                     .Flush();
@@ -557,7 +546,7 @@ auto BlockOracle::Shared::Load(
             }
         }
 
-        OT_ASSERT(out.size() == count);
+        assert_true(out.size() == count);
     }
 
     publish_queue(queue_.lock()->Add(download));
@@ -579,14 +568,13 @@ auto BlockOracle::Shared::load_blocks(
         const auto result = db_.BlockLoad(blocks, monotonic, monotonic);
 
         if (const auto size = result.size(); size != count) {
-            LogAbort()(OT_PRETTY_CLASS())(name_)(": expected ")(
+            LogAbort()()(name_)(": expected ")(
                 count)(" blocks from database but received ")(size)
                 .Abort();
         }
 
-        std::transform(
-            result.begin(),
-            result.end(),
+        std::ranges::transform(
+            result,
             std::back_inserter(out),
             [](const auto& position) -> BlockLocation {
                 if (valid(position)) {
@@ -600,9 +588,8 @@ auto BlockOracle::Shared::load_blocks(
     } else {
         auto handle = cache_.lock();
         auto& cache = *handle;
-        std::transform(
-            blocks.begin(),
-            blocks.end(),
+        std::ranges::transform(
+            blocks,
             std::back_inserter(out),
             [&](const auto& id) -> BlockLocation {
                 auto block = cache.Load(id);
@@ -617,7 +604,7 @@ auto BlockOracle::Shared::load_blocks(
             });
     }
 
-    OT_ASSERT(out.size() == count);
+    assert_true(out.size() == count);
 
     return out;
 }
@@ -625,18 +612,14 @@ auto BlockOracle::Shared::load_blocks(
 auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 {
     const auto& [jobs, downloading] = queue;
-    // TODO c++20
-    to_blockchain_api_.lock()->SendDeferred(
-        [&](const auto& value) {
-            auto work = network::zeromq::tagged_message(
-                WorkType::BlockchainBlockDownloadQueue, true);
-            work.AddFrame(chain_);
-            work.AddFrame(value);
+    to_blockchain_api_.lock()->SendDeferred([&]() {
+        auto work = network::zeromq::tagged_message(
+            WorkType::BlockchainBlockDownloadQueue, true);
+        work.AddFrame(chain_);
+        work.AddFrame(downloading);
 
-            return work;
-        }(downloading),
-        __FILE__,
-        __LINE__);
+        return work;
+    }());
 
     if (0_uz < jobs) { work_available(); }
 }
@@ -654,13 +637,12 @@ auto BlockOracle::Shared::Receive(
     const auto& id = block.ID();
 
     if (valid) {
-        log(OT_PRETTY_CLASS())(name_)(": validated block ").asHex(id).Flush();
+        log()(name_)(": validated block ").asHex(id).Flush();
         check_header(block.Header());
 
         return receive(block, serialized, monotonic);
     } else {
-        LogError()(OT_PRETTY_CLASS())(
-            name_)(": received an invalid block with apparent hash ")
+        LogError()()(name_)(": received an invalid block with apparent hash ")
             .asHex(id)
             .Flush();
 
@@ -687,12 +669,12 @@ auto BlockOracle::Shared::receive(
     const auto saved = save_block(id, block, monotonic);
 
     if (is_valid(saved)) {
-        log(OT_PRETTY_CLASS())("saved block ").asHex(id).Flush();
+        log()("saved block ").asHex(id).Flush();
         block_is_ready(id, saved, monotonic);
 
         return true;
     } else {
-        log(OT_PRETTY_CLASS())("failed to save block ").asHex(id).Flush();
+        log()("failed to save block ").asHex(id).Flush();
 
         return false;
     }
@@ -756,7 +738,7 @@ auto BlockOracle::Shared::SubmitBlock(
 
         return receive(in, serialized.Bytes(), monotonic);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -769,8 +751,7 @@ auto BlockOracle::Shared::Tip() const noexcept -> block::Position
 
 auto BlockOracle::Shared::work_available() const noexcept -> void
 {
-    publish_.lock()->SendDeferred(
-        MakeWork(OT_ZMQ_BLOCK_ORACLE_JOB_AVAILABLE), __FILE__, __LINE__);
+    publish_.lock()->SendDeferred(MakeWork(OT_ZMQ_BLOCK_ORACLE_JOB_AVAILABLE));
 }
 
 BlockOracle::Shared::~Shared() = default;

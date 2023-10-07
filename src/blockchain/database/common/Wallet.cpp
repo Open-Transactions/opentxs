@@ -12,7 +12,6 @@
 #include <span>
 #include <stdexcept>
 #include <string_view>
-#include <tuple>
 #include <utility>
 
 #include "blockchain/database/common/Bulk.hpp"
@@ -24,7 +23,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
@@ -70,13 +68,12 @@ auto Wallet::AssociateTransaction(
     const block::TransactionHash& txid,
     const ElementHashes& in) const noexcept -> bool
 {
-    LogTrace()(OT_PRETTY_CLASS())("Transaction ")(txid.asHex())(
-        " is associated with patterns:")
+    LogTrace()()("Transaction ")(txid.asHex())(" is associated with patterns:")
         .Flush();
     // TODO transaction data never changes so indexing should only happen
     // once.
     auto incoming = UnallocatedSet<ElementHash>{};
-    std::for_each(std::begin(in), std::end(in), [&](auto& pattern) {
+    std::ranges::for_each(in, [&](auto& pattern) {
         incoming.emplace(pattern);
         LogTrace()("    * ")(pattern).Flush();
     });
@@ -84,42 +81,26 @@ auto Wallet::AssociateTransaction(
     auto& existing = transaction_to_patterns_[txid];
     auto newElements = UnallocatedVector<ElementHash>{};
     auto removedElements = UnallocatedVector<ElementHash>{};
-    std::set_difference(
-        std::begin(incoming),
-        std::end(incoming),
-        std::begin(existing),
-        std::end(existing),
-        std::back_inserter(newElements));
-    std::set_difference(
-        std::begin(existing),
-        std::end(existing),
-        std::begin(incoming),
-        std::end(incoming),
-        std::back_inserter(removedElements));
+    std::ranges::set_difference(
+        incoming, existing, std::back_inserter(newElements));
+    std::ranges::set_difference(
+        existing, incoming, std::back_inserter(removedElements));
 
-    if (0 < newElements.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("New patterns:").Flush();
-    }
+    if (0 < newElements.size()) { LogTrace()()("New patterns:").Flush(); }
 
-    std::for_each(
-        std::begin(newElements),
-        std::end(newElements),
-        [&](const auto& element) {
-            pattern_to_transactions_[element].insert(txid);
-            LogTrace()("    * ")(element).Flush();
-        });
+    std::ranges::for_each(newElements, [&](const auto& element) {
+        pattern_to_transactions_[element].insert(txid);
+        LogTrace()("    * ")(element).Flush();
+    });
 
     if (0 < removedElements.size()) {
-        LogTrace()(OT_PRETTY_CLASS())("Obsolete patterns:").Flush();
+        LogTrace()()("Obsolete patterns:").Flush();
     }
 
-    std::for_each(
-        std::begin(removedElements),
-        std::end(removedElements),
-        [&](const auto& element) {
-            pattern_to_transactions_[element].erase(txid);
-            LogTrace()("    * ")(element).Flush();
-        });
+    std::ranges::for_each(removedElements, [&](const auto& element) {
+        pattern_to_transactions_[element].erase(txid);
+        LogTrace()("    * ")(element).Flush();
+    });
     existing.swap(incoming);
     // TODO retain this information
 
@@ -167,7 +148,7 @@ auto Wallet::LoadTransaction(
             }();
             const auto files = bulk_.Read(indices, monotonic);
 
-            OT_ASSERT(false == files.empty());
+            assert_false(files.empty());
 
             const auto bytes = files.front();
 
@@ -184,7 +165,7 @@ auto Wallet::LoadTransaction(
         return factory::BitcoinTransaction(
             api_.Crypto().Blockchain(), api_.Factory(), proto, alloc);
     } catch (const std::exception& e) {
-        LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogTrace()()(e.what()).Flush();
 
         return {};
     }
@@ -205,11 +186,10 @@ auto Wallet::LookupTransactions(const ElementHash pattern) const noexcept
 
     try {
         const auto& data = pattern_to_transactions_.at(pattern);
-        std::transform(
-            std::begin(data),
-            std::end(data),
-            std::back_inserter(output),
-            [](const auto& txid) -> auto { return txid; });
+        std::ranges::transform(
+            data, std::back_inserter(output), [](const auto& txid) -> auto {
+                return txid;
+            });
 
     } catch (...) {
     }
@@ -269,9 +249,8 @@ auto Wallet::StoreTransaction(
             lmdb_.Store(transaction_table_, hash, sIndex.Bytes(), tx);
 
         if (result.first) {
-            LogTrace()(OT_PRETTY_CLASS())("saved ")(
-                bytes)(" bytes at position ")(index.MemoryPosition())(
-                " for transaction ")
+            LogTrace()()("saved ")(bytes)(" bytes at position ")(
+                index.MemoryPosition())(" for transaction ")
                 .asHex(hash)
                 .Flush();
         } else {
@@ -284,7 +263,7 @@ auto Wallet::StoreTransaction(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -300,52 +279,30 @@ auto Wallet::update_contact(
     auto newAddresses = UnallocatedVector<ByteArray>{};
     auto removedAddresses = UnallocatedVector<ByteArray>{};
     auto output = UnallocatedVector<block::TransactionHash>{};
-    std::set_difference(
-        std::begin(incoming),
-        std::end(incoming),
-        std::begin(existing),
-        std::end(existing),
-        std::back_inserter(newAddresses));
-    std::set_difference(
-        std::begin(existing),
-        std::end(existing),
-        std::begin(incoming),
-        std::end(incoming),
-        std::back_inserter(removedAddresses));
-    std::for_each(
-        std::begin(removedAddresses),
-        std::end(removedAddresses),
-        [&](const auto& element) {
-            element_to_contact_[element].erase(contactID);
-            const auto pattern =
-                blockchain_.Internal().IndexItem(element.Bytes());
+    std::ranges::set_difference(
+        incoming, existing, std::back_inserter(newAddresses));
+    std::ranges::set_difference(
+        existing, incoming, std::back_inserter(removedAddresses));
+    std::ranges::for_each(removedAddresses, [&](const auto& element) {
+        element_to_contact_[element].erase(contactID);
+        const auto pattern = blockchain_.Internal().IndexItem(element.Bytes());
 
-            try {
-                const auto& transactions = pattern_to_transactions_.at(pattern);
-                std::copy(
-                    std::begin(transactions),
-                    std::end(transactions),
-                    std::back_inserter(output));
-            } catch (...) {
-            }
-        });
-    std::for_each(
-        std::begin(newAddresses),
-        std::end(newAddresses),
-        [&](const auto& element) {
-            element_to_contact_[element].insert(contactID);
-            const auto pattern =
-                blockchain_.Internal().IndexItem(element.Bytes());
+        try {
+            const auto& transactions = pattern_to_transactions_.at(pattern);
+            std::ranges::copy(transactions, std::back_inserter(output));
+        } catch (...) {
+        }
+    });
+    std::ranges::for_each(newAddresses, [&](const auto& element) {
+        element_to_contact_[element].insert(contactID);
+        const auto pattern = blockchain_.Internal().IndexItem(element.Bytes());
 
-            try {
-                const auto& transactions = pattern_to_transactions_.at(pattern);
-                std::copy(
-                    std::begin(transactions),
-                    std::end(transactions),
-                    std::back_inserter(output));
-            } catch (...) {
-            }
-        });
+        try {
+            const auto& transactions = pattern_to_transactions_.at(pattern);
+            std::ranges::copy(transactions, std::back_inserter(output));
+        } catch (...) {
+        }
+    });
     dedup(output);
 
     return output;
@@ -358,7 +315,7 @@ auto Wallet::UpdateContact(const opentxs::Contact& contact) const noexcept
 
     {
         auto data = contact.BlockchainAddresses();
-        std::for_each(std::begin(data), std::end(data), [&](auto& in) {
+        std::ranges::for_each(data, [&](auto& in) {
             auto& [bytes, style, type] = in;
             incoming.emplace(std::move(bytes));
         });
@@ -383,7 +340,7 @@ auto Wallet::UpdateMergedContact(
 
     {
         auto data = child.BlockchainAddresses();
-        std::for_each(std::begin(data), std::end(data), [&](auto& in) {
+        std::ranges::for_each(data, [&](auto& in) {
             auto& [bytes, style, type] = in;
             deleted.emplace(std::move(bytes));
         });
@@ -391,7 +348,7 @@ auto Wallet::UpdateMergedContact(
 
     {
         auto data = parent.BlockchainAddresses();
-        std::for_each(std::begin(data), std::end(data), [&](auto& in) {
+        std::ranges::for_each(data, [&](auto& in) {
             auto& [bytes, style, type] = in;
             incoming.emplace(std::move(bytes));
         });
@@ -403,21 +360,16 @@ auto Wallet::UpdateMergedContact(
     auto& existing = contact_to_element_[contactID];
     contact_to_element_.erase(deletedID);
     auto output = update_contact(lock, existing, incoming, contactID);
-    std::for_each(
-        std::begin(deleted), std::end(deleted), [&](const auto& element) {
-            element_to_contact_[element].erase(deletedID);
-            const auto pattern =
-                blockchain_.Internal().IndexItem(element.Bytes());
+    std::ranges::for_each(deleted, [&](const auto& element) {
+        element_to_contact_[element].erase(deletedID);
+        const auto pattern = blockchain_.Internal().IndexItem(element.Bytes());
 
-            try {
-                const auto& transactions = pattern_to_transactions_.at(pattern);
-                std::copy(
-                    std::begin(transactions),
-                    std::end(transactions),
-                    std::back_inserter(output));
-            } catch (...) {
-            }
-        });
+        try {
+            const auto& transactions = pattern_to_transactions_.at(pattern);
+            std::ranges::copy(transactions, std::back_inserter(output));
+        } catch (...) {
+        }
+    });
     dedup(output);
     existing.swap(incoming);
 

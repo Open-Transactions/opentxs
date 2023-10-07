@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <string_view>
 
@@ -36,7 +35,7 @@ public:
 
     Listener(
         std::shared_ptr<const api::Session> api,
-        boost::shared_ptr<Node::Shared> shared,
+        std::shared_ptr<Node::Shared> shared,
         std::string_view routerBind,
         std::string_view routerAdvertise,
         std::string_view publishBind,
@@ -52,6 +51,6 @@ public:
     ~Listener();
 
 private:
-    boost::shared_ptr<Actor> actor_;
+    std::shared_ptr<Actor> actor_;
 };
 }  // namespace opentxs::network::otdht

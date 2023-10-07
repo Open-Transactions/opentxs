@@ -20,7 +20,6 @@
 
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
@@ -193,8 +192,8 @@ auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
 
     if (const auto len = size(); len != required) {
         if (0_uz != len) {
-            LogError()(OT_PRETTY_CLASS())("Incorrect hash size (")(
-                len)(") vs required (")(required)(")")
+            LogError()()("Incorrect hash size (")(len)(") vs required (")(
+                required)(")")
                 .Flush();
         }
 
@@ -216,7 +215,7 @@ auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
                            (haveSubtype ? sizeof(subtype) : 0_uz);
         out.resize(bytes);
 
-        OT_ASSERT(out.size() == bytes);
+        assert_true(out.size() == bytes);
 
         auto* i = static_cast<std::byte*>(out.data());
         std::memcpy(i, &algorithm_, sizeof(algorithm_));

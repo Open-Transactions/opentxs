@@ -9,11 +9,11 @@
 
 #include "api/network/asio/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::api::network::asio
 {
@@ -28,7 +28,7 @@ Data::Data(
         auto out = zmq.Internal().RawSocket(SocketType::Push);
         const auto rc = out.Connect(endpoint.data());
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -40,8 +40,8 @@ Data::Data(
     , notify_()
     , resolver_(std::make_shared<Resolver>(io_context_->get()))
 {
-    OT_ASSERT(io_context_);
-    OT_ASSERT(resolver_);
+    assert_false(nullptr == io_context_);
+    assert_false(nullptr == resolver_);
 
     if (test) {
         ipv4_promise_.set_value({IsHex, "0x7f000001"sv});

@@ -25,7 +25,6 @@
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -107,8 +106,8 @@ auto HeaderOracle::Shared::ancestors(
             output.pop_back();
         }
 
-        OT_ASSERT(0 < output.size());
-        OT_ASSERT(output.front().height_ <= check);
+        assert_true(0 < output.size());
+        assert_true(output.front().height_ <= check);
 
         return output;
     }
@@ -125,13 +124,13 @@ auto HeaderOracle::Shared::ancestors(
             sibling = data.database_.TryLoadHeader(
                 params::get(data.chain_).GenesisHash());
 
-            OT_ASSERT(sibling.IsValid());
+            assert_true(sibling.IsValid());
 
             break;
         }
     }
 
-    OT_ASSERT(sibling.Height() <= current.Height());
+    assert_true(sibling.Height() <= current.Height());
 
     while (current.Height() >= 0) {
         cache.emplace_front(current.Position());
@@ -145,7 +144,7 @@ auto HeaderOracle::Shared::ancestors(
                 sibling = data.database_.TryLoadHeader(
                     params::get(data.chain_).GenesisHash());
 
-                OT_ASSERT(sibling.IsValid());
+                assert_true(sibling.IsValid());
             }
         }
 
@@ -154,12 +153,12 @@ auto HeaderOracle::Shared::ancestors(
         if (false == current.IsValid()) { break; }
     }
 
-    OT_ASSERT(0 < cache.size());
+    assert_true(0 < cache.size());
 
     auto output = Positions{alloc};
-    std::move(cache.begin(), cache.end(), std::back_inserter(output));
+    std::ranges::move(cache, std::back_inserter(output));
 
-    OT_ASSERT(output.front().height_ <= check);
+    assert_true(output.front().height_ <= check);
 
     return output;
 }
@@ -182,13 +181,13 @@ auto HeaderOracle::Shared::add_checkpoint(
     auto update = UpdateTransaction{data.api_, data.database_};
 
     if (update.EffectiveCheckpoint()) {
-        LogError()(OT_PRETTY_CLASS())("Checkpoint already exists").Flush();
+        LogError()()("Checkpoint already exists").Flush();
 
         return false;
     }
 
     if (2 > position) {
-        LogError()(OT_PRETTY_CLASS())("Invalid position").Flush();
+        LogError()()("Invalid position").Flush();
 
         return false;
     }
@@ -220,7 +219,7 @@ auto HeaderOracle::Shared::AddHeaders(std::span<block::Header> headers) noexcept
 
     for (auto& header : headers) {
         if (false == header.IsValid()) {
-            LogError()(OT_PRETTY_CLASS())("Invalid header").Flush();
+            LogError()()("Invalid header").Flush();
 
             return false;
         }
@@ -240,7 +239,7 @@ auto HeaderOracle::Shared::add_header(
     block::Header pHeader) noexcept -> bool
 {
     if (update.EffectiveHeaderExists(pHeader.Hash())) {
-        LogVerbose()(OT_PRETTY_CLASS())("Header already processed").Flush();
+        LogVerbose()()("Header already processed").Flush();
 
         return true;
     }
@@ -250,14 +249,14 @@ auto HeaderOracle::Shared::add_header(
     const auto* pParent = is_disconnected(header.ParentHash(), update);
 
     if (nullptr == pParent) {
-        LogVerbose()(OT_PRETTY_CLASS())("Adding disconnected header").Flush();
+        LogVerbose()()("Adding disconnected header").Flush();
         header.Internal().SetDisconnectedState();
         update.DisconnectBlock(header);
 
         return true;
     }
 
-    OT_ASSERT(nullptr != pParent);
+    assert_false(nullptr == pParent);
 
     const auto& parent = *pParent;
 
@@ -272,7 +271,7 @@ auto HeaderOracle::Shared::add_header(
             data, current, parent, update, candidates, header);
         connect_children(data, header, candidates, candidate, update);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to connect children").Flush();
+        LogError()()("Failed to connect children").Flush();
 
         return false;
     }
@@ -330,8 +329,7 @@ auto HeaderOracle::Shared::apply_checkpoint(
 
         return true;
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to process sibling chains")
-            .Flush();
+        LogError()()("Failed to process sibling chains").Flush();
 
         return false;
     }
@@ -347,27 +345,21 @@ auto HeaderOracle::Shared::apply_update(
     data.PruneKnownHashes();
 
     if (before != data.best_) {
-        LogVerbose()(OT_PRETTY_CLASS())(print(data.chain_))(
-            " block header chain updated to ")(best_chain(data))
+        LogVerbose()()(print(data.chain_))(" block header chain updated to ")(
+            best_chain(data))
             .Flush();
-        data.to_parent_.SendDeferred(
-            [&] {
-                using Job = ManagerJobs;
-                auto work = MakeWork(Job::statemachine);
+        data.to_parent_.SendDeferred([&] {
+            using Job = ManagerJobs;
+            auto work = MakeWork(Job::statemachine);
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
-        data.to_actor_.SendDeferred(
-            [&] {
-                using Job = headeroracle::Job;
-                auto work = MakeWork(Job::statemachine);
+            return work;
+        }());
+        data.to_actor_.SendDeferred([&] {
+            using Job = headeroracle::Job;
+            auto work = MakeWork(Job::statemachine);
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
     }
 
     return out;
@@ -413,7 +405,7 @@ auto HeaderOracle::Shared::best_chain(
         if ((0_uz < limit) && (output.size() == limit)) { break; }
     }
 
-    OT_ASSERT(0 < output.size());
+    assert_true(0 < output.size());
 
     return output;
 }
@@ -544,7 +536,7 @@ auto HeaderOracle::Shared::blank_hash() const noexcept -> const block::Hash&
 {
     static const auto blank = block::Hash{};
 
-    OT_ASSERT(blank.IsNull());
+    assert_true(blank.IsNull());
 
     return blank;
 }
@@ -627,7 +619,7 @@ auto HeaderOracle::Shared::choose_candidate(
         for (const auto& candidate : candidates) {
             if (candidate.blacklisted_) { continue; }
 
-            OT_ASSERT(0 < candidate.chain_.size());
+            assert_true(0 < candidate.chain_.size());
 
             const auto& position = *candidate.chain_.crbegin();
             const auto& tip = update.Header(position.hash_);
@@ -635,12 +627,12 @@ auto HeaderOracle::Shared::choose_candidate(
             if (evaluate_candidate(*pBest, tip)) { pBest = &tip; }
         }
 
-        OT_ASSERT(nullptr != pBest);
+        assert_false(nullptr == pBest);
 
         const auto& best = *pBest;
 
         for (const auto& candidate : candidates) {
-            OT_ASSERT(0 < candidate.chain_.size());
+            assert_true(0 < candidate.chain_.size());
 
             const auto& position = *candidate.chain_.crbegin();
             const auto& tip = update.Header(position.hash_);
@@ -663,15 +655,15 @@ auto HeaderOracle::Shared::choose_candidate(
                             update.SetReorgParent(parent);
                             update.AddToBestChain(segment);
                             update.AddSibling(current.Position());
-                            LogVerbose()(OT_PRETTY_CLASS())("Block ")(
-                                hash.asHex())(" at position ")(
+                            LogVerbose()()("Block ")(hash.asHex())(
+                                " at position ")(
                                 height)(" causes a chain reorg.")
                                 .Flush();
                         }
                     } else {
                         update.AddToBestChain(segment);
-                        LogVerbose()(OT_PRETTY_CLASS())("Adding block ")(
-                            hash.asHex())(" to best chain at position ")(height)
+                        LogVerbose()()("Adding block ")(hash.asHex())(
+                            " to best chain at position ")(height)
                             .Flush();
                     }
                 }
@@ -679,13 +671,13 @@ auto HeaderOracle::Shared::choose_candidate(
                 const auto orphan = tip.Position();
                 update.AddSibling(orphan);
                 const auto& [height, hash] = orphan;
-                LogVerbose()(OT_PRETTY_CLASS())("Adding block ")(hash.asHex())(
+                LogVerbose()()("Adding block ")(hash.asHex())(
                     " as an orphan at position ")(height)
                     .Flush();
             }
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Error evaluating candidates").Flush();
+        LogError()()("Error evaluating candidates").Flush();
 
         return output;
     }
@@ -747,7 +739,7 @@ auto HeaderOracle::Shared::connect_children(
     auto& chain = candidate.chain_;
     const auto& end = *chain.crbegin();
 
-    OT_ASSERT(end.height_ + 1 == parent.Position().height_);
+    assert_true(end.height_ + 1 == parent.Position().height_);
 
     chain.emplace_back(parent.Position());
 
@@ -801,7 +793,7 @@ auto HeaderOracle::Shared::delete_checkpoint(HeaderOraclePrivate& data) noexcept
     auto update = UpdateTransaction{data.api_, data.database_};
 
     if (false == update.EffectiveCheckpoint()) {
-        LogError()(OT_PRETTY_CLASS())("No checkpoint").Flush();
+        LogError()()("No checkpoint").Flush();
 
         return false;
     }
@@ -967,7 +959,7 @@ auto HeaderOracle::Shared::Init() noexcept -> void
             .Flush();
         const auto deleted = delete_checkpoint(data);
 
-        OT_ASSERT(deleted);
+        assert_true(deleted);
     }
 
     if (1 < defaultHeight) {
@@ -978,7 +970,7 @@ auto HeaderOracle::Shared::Init() noexcept -> void
         const auto added =
             add_checkpoint(data, defaultHeight, defaultBlockhash);
 
-        OT_ASSERT(added);
+        assert_true(added);
     }
 }
 
@@ -1006,8 +998,8 @@ auto HeaderOracle::Shared::initialize_candidate(
                             }};
 
     while (run(position)) {
-        OT_ASSERT(0 <= position.height_);
-        OT_ASSERT(grandparent);
+        assert_true(0 <= position.height_);
+        assert_true(grandparent);
 
         chain.insert(chain.begin(), position);
         grandparent = &update.Stage(grandparent->ParentHash());
@@ -1016,7 +1008,7 @@ auto HeaderOracle::Shared::initialize_candidate(
 
     if (0 == chain.size()) { chain.emplace_back(position); }
 
-    OT_ASSERT(0 < chain.size());
+    assert_true(0 < chain.size());
 
     return output;
 }
@@ -1141,7 +1133,7 @@ auto HeaderOracle::Shared::ProcessSyncData(
                 const auto rc =
                     prior.Assign(data.database_.BestBlock(height - 1));
 
-                OT_ASSERT(rc);
+                assert_true(rc);
 
                 return prior;
             }
@@ -1172,11 +1164,11 @@ auto HeaderOracle::Shared::ProcessSyncData(
             previous = std::move(hash);
         }
     } catch (const std::exception& e) {
-        LogVerbose()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogVerbose()()(e.what()).Flush();
     }
 
     if ((0_uz < output) && apply_update(data, update)) {
-        OT_ASSERT(output == hashes.size());
+        assert_true(output == hashes.size());
 
         return output;
     } else {
@@ -1241,7 +1233,7 @@ auto HeaderOracle::Shared::stage_candidate(
         candidate.chain_.emplace_back(child.Position());
         const auto first = candidate.chain_.cbegin()->height_;
 
-        OT_ASSERT(position == first);
+        assert_true(position == first);
     }
 }
 

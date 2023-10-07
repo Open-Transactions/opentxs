@@ -15,7 +15,6 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/Editor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -55,7 +54,7 @@ ContactList::ContactList(
     , Worker(api, {}, "ui::ContactList")
     , owner_contact_id_(api_.Contacts().ContactID(nymID))
 {
-    OT_ASSERT(false == owner_contact_id_.empty());
+    assert_false(owner_contact_id_.empty());
 
     process_contact(owner_contact_id_);
     init_executor({UnallocatedCString{api.Endpoints().ContactUpdate()}});
@@ -154,7 +153,7 @@ auto ContactList::SetContactName(
 
     const auto contact = api_.Contacts().Internal().mutable_Contact(id);
 
-    OT_ASSERT(nullptr != contact);
+    assert_false(nullptr == contact);
 
     contact->get().SetLabel(name);
 
@@ -176,9 +175,9 @@ auto ContactList::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -187,7 +186,7 @@ auto ContactList::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -207,9 +206,9 @@ auto ContactList::pipeline(const Message& in) noexcept -> void
             }
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -218,12 +217,12 @@ auto ContactList::process_contact(const Message& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromProtobuf(id.Bytes());
 
-    OT_ASSERT(false == contactID.empty());
+    assert_false(contactID.empty());
 
     process_contact(contactID);
 }
@@ -233,7 +232,7 @@ auto ContactList::process_contact(const identifier::Generic& contactID) noexcept
 {
     auto name = api_.Contacts().ContactName(contactID);
 
-    OT_ASSERT(false == name.empty());
+    assert_false(name.empty());
 
     auto custom = CustomData{};
     add_item(
@@ -243,8 +242,7 @@ auto ContactList::process_contact(const identifier::Generic& contactID) noexcept
 auto ContactList::startup() noexcept -> void
 {
     const auto contacts = api_.Contacts().ContactList();
-    LogVerbose()(OT_PRETTY_CLASS())("Loading ")(contacts.size())(" contacts.")
-        .Flush();
+    LogVerbose()()("Loading ")(contacts.size())(" contacts.").Flush();
 
     for (const auto& [id, alias] : contacts) {
         auto custom = CustomData{};

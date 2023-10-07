@@ -8,8 +8,8 @@
 #include <memory>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
@@ -47,8 +47,8 @@ auto BlockchainSelectionItem::reindex(
     const BlockchainSelectionSortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    OT_ASSERT(testnet_ == key.second);
-    OT_ASSERT(name_ == key.first);
+    assert_true(testnet_ == key.second);
+    assert_true(name_ == key.first);
 
     Lock lock{lock_};
 

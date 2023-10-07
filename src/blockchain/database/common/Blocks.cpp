@@ -10,7 +10,6 @@
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -62,18 +61,18 @@ struct Blocks::Imp {
                         throw std::runtime_error{error.c_str()};
                     }
                 } catch (const std::exception& e) {
-                    LogTrace()(OT_PRETTY_CLASS())(e.what()).Flush();
+                    LogTrace()()(e.what()).Flush();
                 }
             }
 
             return out;
         }();
 
-        OT_ASSERT(indices.size() == count);
+        assert_true(indices.size() == count);
 
         auto views = bulk_.Read(indices, alloc);
 
-        OT_ASSERT(views.size() == count);
+        assert_true(views.size() == count);
 
         return views;
     }
@@ -88,7 +87,7 @@ struct Blocks::Imp {
             auto tx = lmdb_.TransactionRW();
             auto data = bulk_.Write(tx, {size});
 
-            OT_ASSERT(false == data.empty());
+            assert_false(data.empty());
 
             auto& [index, location] = data.front();
             const auto& [_, view] = location;
@@ -110,9 +109,8 @@ struct Blocks::Imp {
                 lmdb_.Store(table_, id.Bytes(), sIndex.Bytes(), tx);
 
             if (result.first) {
-                LogDebug()(OT_PRETTY_CLASS())("saved ")(index.ItemSize())(
-                    " bytes at position ")(index.MemoryPosition())(
-                    " for block ")
+                LogDebug()()("saved ")(index.ItemSize())(" bytes at position ")(
+                    index.MemoryPosition())(" for block ")
                     .asHex(id)
                     .Flush();
             } else {
@@ -125,7 +123,7 @@ struct Blocks::Imp {
 
             return {view.data(), view.size()};
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return {};
         }

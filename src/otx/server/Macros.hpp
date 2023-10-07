@@ -25,7 +25,7 @@ namespace opentxs::server
         const char* pActionNameStr = msgIn.command_->Get();                    \
                                                                                \
         if (false == NYM_IS_ALLOWED(pNymAllowedIDStr, BOOL_VAR_NAME)) {        \
-            LogConsole()(OT_PRETTY_CLASS())("Nym ")(                           \
+            LogConsole()()("Nym ")(                                            \
                 pNymAllowedIDStr)(" attempted an action (")(                   \
                 pActionNameStr)("), but based on server configuration, he's "  \
                                 "not allowed.")                                \

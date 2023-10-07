@@ -8,10 +8,10 @@
 #include <sstream>
 #include <string_view>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::internal
@@ -37,7 +37,7 @@ auto Config::PeerTarget(const blockchain::Type chain) const noexcept
         }
         default: {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }

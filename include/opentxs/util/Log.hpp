@@ -6,8 +6,8 @@
 #pragma once
 
 #include <chrono>
-#include <cstddef>
 #include <filesystem>
+#include <source_location>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
@@ -77,25 +77,28 @@ public:
     class Imp;
 
     [[noreturn]] static auto Assert(
-        const char* file,
-        const std::size_t line,
-        const char* message) noexcept -> void;
+        std::string_view message,
+        const std::source_location& loc =
+            std::source_location::current()) noexcept -> void;
     [[noreturn]] static auto Assert(
-        const char* file,
-        const std::size_t line) noexcept -> void;
-    static auto Trace(const char* file, const std::size_t line) noexcept
-        -> void;
+        const std::source_location& loc =
+            std::source_location::current()) noexcept -> void;
     static auto Trace(
-        const char* file,
-        const std::size_t line,
-        const char* message) noexcept -> void;
+        const std::source_location& loc =
+            std::source_location::current()) noexcept -> void;
+    static auto Trace(
+        std::string_view message,
+        const std::source_location& loc =
+            std::source_location::current()) noexcept -> void;
 
     [[noreturn]] auto Abort() const noexcept -> void;
     auto asHex(const Data& in) const noexcept -> const Log&;
     auto asHex(std::string_view in) const noexcept -> const Log&;
     auto Flush() const noexcept -> void;
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Log&;
-    auto operator()() const noexcept -> const Log&;
+    auto operator()(
+        const std::source_location& loc =
+            std::source_location::current()) const noexcept -> const Log&;
     auto operator()(char* in) const noexcept -> const Log&;
     auto operator()(const Amount& in) const noexcept -> const Log&;
     auto operator()(const Amount& in, UnitType currency) const noexcept
@@ -153,6 +156,25 @@ public:
 private:
     Imp* imp_;
 };
+
+OPENTXS_EXPORT auto assert_true(
+    bool expression,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void;
+OPENTXS_EXPORT auto assert_true(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void;
+OPENTXS_EXPORT auto assert_false(
+    bool expression,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void;
+OPENTXS_EXPORT auto assert_false(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void;
 
 OPENTXS_EXPORT auto LogAbort() noexcept -> Log&;
 OPENTXS_EXPORT auto LogConsole() noexcept -> Log&;

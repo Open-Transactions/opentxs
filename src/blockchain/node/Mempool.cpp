@@ -16,7 +16,6 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -95,7 +94,7 @@ struct Mempool::Imp {
             }
         }
 
-        OT_ASSERT(output.size() == txids.size());
+        assert_true(output.size() == txids.size());
 
         return output;
     }
@@ -115,7 +114,7 @@ struct Mempool::Imp {
 
         for (auto& tx : txns) {
             if (false == tx.IsValid()) {
-                LogError()(OT_PRETTY_CLASS())("invalid transaction").Flush();
+                LogError()()("invalid transaction").Flush();
 
                 continue;
             }
@@ -180,7 +179,7 @@ struct Mempool::Imp {
                 api.Endpoints().Internal().BlockchainMessageRouter()};
             const auto rc = out.Connect(endpoint.c_str());
 
-            OT_ASSERT(rc);
+            assert_true(rc);
 
             return out;
         }())
@@ -225,17 +224,14 @@ private:
     auto notify(const eLock&, const block::TransactionHash& txid) const noexcept
         -> void
     {
-        to_blockchain_api_.SendDeferred(
-            [&] {
-                auto work = network::zeromq::tagged_message(
-                    WorkType::BlockchainMempoolUpdated, true);
-                work.AddFrame(chain_);
-                work.AddFrame(txid.data(), txid.size());
+        to_blockchain_api_.SendDeferred([&] {
+            auto work = network::zeromq::tagged_message(
+                WorkType::BlockchainMempoolUpdated, true);
+            work.AddFrame(chain_);
+            work.AddFrame(txid.data(), txid.size());
 
-                return work;
-            }(),
-            __FILE__,
-            __LINE__);
+            return work;
+        }());
     }
 
     auto init() noexcept -> void
@@ -244,15 +240,12 @@ private:
 
         for (const auto& txid : wallet_.GetUnconfirmedTransactions()) {
             if (auto tx = crypto_.LoadTransaction(txid); tx.IsValid()) {
-                LogVerbose()(OT_PRETTY_CLASS())(
-                    "adding unconfirmed transaction ")
+                LogVerbose()()("adding unconfirmed transaction ")
                     .asHex(txid)(" to mempool")
                     .Flush();
                 transactions.emplace_back(std::move(tx));
             } else {
-                LogError()(OT_PRETTY_CLASS())("failed to load transaction ")
-                    .asHex(txid)
-                    .Flush();
+                LogError()()("failed to load transaction ").asHex(txid).Flush();
             }
         }
 

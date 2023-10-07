@@ -5,14 +5,13 @@
 
 #include "network/blockchain/bitcoin/message/tx/Imp.hpp"  // IWYU pragma: associated
 
+#include <chrono>
 #include <limits>
-#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -82,7 +81,7 @@ auto Message::Transaction(alloc::Default alloc) const noexcept
         {alloc, {}});  // TODO alloc::Strategy
 
     if (false == result) {
-        LogError()(OT_PRETTY_CLASS())("failed to parse transaction").Flush();
+        LogError()()("failed to parse transaction").Flush();
     }
 
     return out;

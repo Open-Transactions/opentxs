@@ -10,7 +10,6 @@
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
@@ -110,10 +109,10 @@ auto AccountTreeItem::reindex(
     const auto notary = extract_custom<identifier::Notary>(custom, 2);
     const auto balance = extract_custom<Amount>(custom, 3);
 
-    OT_ASSERT(type_ == type);
-    OT_ASSERT(unit_ == unit);
-    OT_ASSERT(unit_id_ == contract);
-    OT_ASSERT(notary_id_ == notary);
+    assert_true(type_ == type);
+    assert_true(unit_ == unit);
+    assert_true(unit_id_ == contract);
+    assert_true(notary_id_ == notary);
 
     auto lock = Lock{lock_};
     auto changed{false};

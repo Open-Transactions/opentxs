@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -107,7 +106,7 @@ auto BlockchainAccountActivity::Send(
 
         return SendMonitor().watch(wallet.Execute(spend), std::move(cb));
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return -1;
     }

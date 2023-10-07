@@ -14,7 +14,6 @@
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/addr/Imp.hpp"
@@ -71,8 +70,8 @@ auto BitcoinP2PMessage(
         case 1:
         case 2:
         case 4: {
-            LogError()("opentxs::factory::")(__func__)(": invalid ")(
-                print(chain))(" message (")(frames)(" payload frames)")
+            LogError()()("invalid ")(print(chain))(" message (")(
+                frames)(" payload frames)")
                 .Flush();
 
             return {alloc};
@@ -152,7 +151,7 @@ auto BitcoinP2PMessage(
             payloadBytes,
             alloc);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }
@@ -324,8 +323,8 @@ auto BitcoinP2PMessage(
             }
         }
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what())(
-            " while processing ")(print(chain))(" ")(commandText)
+        LogError()()(e.what())(" while processing ")(print(chain))(" ")(
+            commandText)
             .Flush();
 
         return blank();
@@ -355,7 +354,7 @@ auto BitcoinP2PMessageZMQ(
 
         const auto data = incoming.Payload();
 
-        OT_ASSERT(data.size() >= 5_uz);
+        assert_true(data.size() >= 5_uz);
 
         const auto command = data[3].Bytes();
         constexpr auto maxCommand = 16_uz;
@@ -385,7 +384,7 @@ auto BitcoinP2PMessageZMQ(
             payload,
             alloc);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {alloc};
     }

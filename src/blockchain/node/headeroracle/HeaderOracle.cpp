@@ -8,8 +8,6 @@
 
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"  // IWYU pragma: associated
 
-#include <boost/smart_ptr/make_shared.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <atomic>
 #include <string_view>
 
@@ -20,7 +18,6 @@
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Session.hpp"
@@ -46,11 +43,8 @@ auto HeaderOracle(
     const auto& zmq = api.Network().ZeroMQ().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
-    // TODO the version of libc++ present in android ndk 23.0.7599858
-    // has a broken std::allocate_shared function so we're using
-    // boost::shared_ptr instead of std::shared_ptr
 
-    return boost::allocate_shared<ReturnType>(
+    return std::allocate_shared<ReturnType>(
         alloc::PMR<ReturnType>{alloc},
         api,
         chain,
@@ -89,10 +83,10 @@ auto print(Job job) noexcept -> std::string_view
 
 namespace opentxs::blockchain::node::internal
 {
-HeaderOracle::HeaderOracle(boost::shared_ptr<Shared> shared) noexcept
+HeaderOracle::HeaderOracle(std::shared_ptr<Shared> shared) noexcept
     : shared_(std::move(shared))
 {
-    OT_ASSERT(shared_);
+    assert_false(nullptr == shared_);
 
     shared_->parent_.store(this);
 }
@@ -299,18 +293,18 @@ auto HeaderOracle::Start(
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
-    OT_ASSERT(api);
-    OT_ASSERT(node);
-    OT_ASSERT(shared_);
+    assert_false(nullptr == api);
+    assert_false(nullptr == node);
+    assert_false(nullptr == shared_);
 
-    auto actor = boost::allocate_shared<HeaderOracle::Actor>(
+    auto actor = std::allocate_shared<HeaderOracle::Actor>(
         alloc::PMR<HeaderOracle::Actor>{shared_->get_allocator()},
         api,
         node,
         shared_,
         shared_->batch_);
 
-    OT_ASSERT(actor);
+    assert_false(nullptr == actor);
 
     actor->Init(actor);
 }

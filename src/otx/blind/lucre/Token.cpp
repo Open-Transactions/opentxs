@@ -15,6 +15,7 @@ extern "C" {
 #include <Token.pb.h>
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <limits>
 #include <regex>
 #include <stdexcept>
@@ -30,7 +31,6 @@ extern "C" {
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/blind/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -60,8 +60,7 @@ auto TokenLucre(
     const auto* lucre = dynamic_cast<const ReturnType*>(&(token.Internal()));
 
     if (nullptr == lucre) {
-        LogError()("opentxs::factory::")(__func__)(": wrong token type")
-            .Flush();
+        LogError()()("wrong token type").Flush();
 
         return {};
     }
@@ -179,48 +178,41 @@ Lucre::Lucre(
           nullptr)
 {
     const auto& lucre = in.lucre();
-    OT_ASSERT(
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtautological-type-limit-compare"
+    assert_true(
         std::numeric_limits<std::uint32_t>::max() >= lucre.signature().size());
+#pragma GCC diagnostic pop
 
     if (lucre.has_signature()) {
-        LogInsane()(OT_PRETTY_CLASS())("This token has a signature").Flush();
+        LogInsane()()("This token has a signature").Flush();
         signature_->Set(
             lucre.signature().data(),
             static_cast<std::uint32_t>(lucre.signature().size()));
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("This token does not have a signature")
-            .Flush();
+        LogInsane()()("This token does not have a signature").Flush();
     }
 
     if (lucre.has_privateprototoken()) {
-        LogInsane()(OT_PRETTY_CLASS())("This token has a private prototoken")
-            .Flush();
+        LogInsane()()("This token has a private prototoken").Flush();
         private_ =
             std::make_shared<proto::Ciphertext>(lucre.privateprototoken());
     } else {
-        LogInsane()(OT_PRETTY_CLASS())(
-            "This token does not have a private prototoken")
-            .Flush();
+        LogInsane()()("This token does not have a private prototoken").Flush();
     }
 
     if (lucre.has_publicprototoken()) {
-        LogInsane()(OT_PRETTY_CLASS())("This token has a public prototoken")
-            .Flush();
+        LogInsane()()("This token has a public prototoken").Flush();
         public_ = std::make_shared<proto::Ciphertext>(lucre.publicprototoken());
     } else {
-        LogInsane()(OT_PRETTY_CLASS())(
-            "This token does not have a public prototoken")
-            .Flush();
+        LogInsane()()("This token does not have a public prototoken").Flush();
     }
 
     if (lucre.has_spendable()) {
-        LogInsane()(OT_PRETTY_CLASS())("This token has a spendable string")
-            .Flush();
+        LogInsane()()("This token has a spendable string").Flush();
         spend_ = std::make_shared<proto::Ciphertext>(lucre.spendable());
     } else {
-        LogInsane()(OT_PRETTY_CLASS())(
-            "This token does not have a spendable string")
-            .Flush();
+        LogInsane()()("This token does not have a spendable string").Flush();
     }
 }
 
@@ -255,7 +247,7 @@ Lucre::Lucre(
 auto Lucre::AddSignature(const String& signature) -> bool
 {
     if (signature.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Missing signature").Flush();
+        LogError()()("Missing signature").Flush();
 
         return false;
     }
@@ -280,9 +272,7 @@ auto Lucre::ChangeOwner(
 
     if (public_) {
         if (false == reencrypt(oldKey, oldPass, newKey, newPass, *public_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to re-encrypt public prototoken")
-                .Flush();
+            LogError()()("Failed to re-encrypt public prototoken").Flush();
 
             return false;
         }
@@ -290,9 +280,7 @@ auto Lucre::ChangeOwner(
 
     if (spend_) {
         if (false == reencrypt(oldKey, oldPass, newKey, newPass, *spend_)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to re-encrypt spendable token")
-                .Flush();
+            LogError()()("Failed to re-encrypt spendable token").Flush();
 
             return false;
         }
@@ -313,16 +301,14 @@ auto Lucre::GenerateTokenRequest(
     auto serializedMint = String::Factory(armoredMint);
 
     if (serializedMint->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to get public mint for series ")(
-            denomination_)
+        LogError()()("Failed to get public mint for series ")(denomination_)
             .Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Begin mint series ")(denomination_)
-            .Flush();
+        LogInsane()()("Begin mint series ")(denomination_).Flush();
         LogInsane()(serializedMint.get()).Flush();
-        LogInsane()(OT_PRETTY_CLASS())("End mint").Flush();
+        LogInsane()()("End mint").Flush();
     }
 
     ::BIO_puts(bioBank, serializedMint->Get());
@@ -337,15 +323,13 @@ auto Lucre::GenerateTokenRequest(
     const auto strPublicCoin = bioPublicCoin.ToString();
 
     if (strPrivateCoin->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to generate private prototoken")
-            .Flush();
+        LogError()()("Failed to generate private prototoken").Flush();
 
         return false;
     }
 
     if (strPublicCoin->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to generate public prototoken")
-            .Flush();
+        LogError()()("Failed to generate public prototoken").Flush();
 
         return false;
     }
@@ -354,16 +338,13 @@ auto Lucre::GenerateTokenRequest(
     public_ = std::make_shared<proto::Ciphertext>();
 
     if (false == bool(private_)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to instantiate private prototoken")
-            .Flush();
+        LogError()()("Failed to instantiate private prototoken").Flush();
 
         return false;
     }
 
     if (false == bool(public_)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to instantiate public prototoken")
-            .Flush();
+        LogError()()("Failed to instantiate public prototoken").Flush();
 
         return false;
     }
@@ -377,9 +358,7 @@ auto Lucre::GenerateTokenRequest(
                     strPrivateCoin->Bytes(), mode_, *private_, password, false);
 
         if (false == bool(encryptedPrivate)) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Failed to encrypt private prototoken")
-                .Flush();
+            LogError()()("Failed to encrypt private prototoken").Flush();
 
             return false;
         }
@@ -392,8 +371,7 @@ auto Lucre::GenerateTokenRequest(
                 strPublicCoin->Bytes(), mode_, *public_, password, false);
 
         if (false == bool(encryptedPublic)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to encrypt public prototoken")
-                .Flush();
+            LogError()()("Failed to encrypt public prototoken").Flush();
 
             return false;
         }
@@ -406,7 +384,7 @@ auto Lucre::GetPublicPrototoken(String& output, const PasswordPrompt& reason)
     -> bool
 {
     if (false == bool(public_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing public prototoken").Flush();
+        LogError()()("Missing public prototoken").Flush();
 
         return false;
     }
@@ -419,13 +397,13 @@ auto Lucre::GetPublicPrototoken(String& output, const PasswordPrompt& reason)
         decrypted = purse_.PrimaryKey(password).Internal().Decrypt(
             ciphertext, output.WriteInto(), password);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
+        LogError()()("Missing primary key").Flush();
 
         return false;
     }
 
     if (false == decrypted) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decrypt prototoken").Flush();
+        LogError()()("Failed to decrypt prototoken").Flush();
     }
 
     return decrypted;
@@ -435,7 +413,7 @@ auto Lucre::GetSpendable(String& output, const PasswordPrompt& reason) const
     -> bool
 {
     if (false == bool(spend_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing spendable token").Flush();
+        LogError()()("Missing spendable token").Flush();
 
         return false;
     }
@@ -448,14 +426,13 @@ auto Lucre::GetSpendable(String& output, const PasswordPrompt& reason) const
         decrypted = purse_.PrimaryKey(password).Internal().Decrypt(
             ciphertext, output.WriteInto(), password);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Missing primary key").Flush();
+        LogError()()("Missing primary key").Flush();
 
         return false;
     }
 
     if (false == decrypted) {
-        LogError()(OT_PRETTY_CLASS())("Failed to decrypt spendable token")
-            .Flush();
+        LogError()()("Failed to decrypt spendable token").Flush();
     }
 
     return decrypted;
@@ -466,7 +443,7 @@ auto Lucre::ID(const PasswordPrompt& reason) const -> UnallocatedCString
     auto spendable = String::Factory();
 
     if (false == GetSpendable(spendable, reason)) {
-        LogError()(OT_PRETTY_CLASS())("Missing spendable string").Flush();
+        LogError()()("Missing spendable string").Flush();
 
         return {};
     }
@@ -477,9 +454,8 @@ auto Lucre::ID(const PasswordPrompt& reason) const -> UnallocatedCString
 
     if (std::regex_search(spendable->Get(), match, reg)) { output = match[1]; }
 
-    std::transform(output.begin(), output.end(), output.begin(), [](char c) {
-        return (std::toupper(c));
-    });
+    std::ranges::transform(
+        output, output.begin(), [](char c) { return (std::toupper(c)); });
 
     return output;
 }
@@ -531,7 +507,7 @@ auto Lucre::MarkSpent(const PasswordPrompt& reason) -> bool
         output = api_.Storage().Internal().MarkTokenSpent(
             notary_, unit_, series_, id);
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to load spendable token").Flush();
+        LogError()()("Failed to load spendable token").Flush();
     }
 
     if (output) { state_ = blind::TokenState::Spent; }
@@ -545,27 +521,27 @@ auto Lucre::Process(
     const PasswordPrompt& reason) -> bool
 {
     if (blind::TokenState::Signed != state_) {
-        LogError()(OT_PRETTY_CLASS())("Incorrect token state.").Flush();
+        LogError()()("Incorrect token state.").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Processing signed token").Flush();
+        LogInsane()()("Processing signed token").Flush();
     }
 
     if (signature_->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Missing signature").Flush();
+        LogError()()("Missing signature").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Loaded signature").Flush();
+        LogInsane()()("Loaded signature").Flush();
     }
 
     if (false == bool(private_)) {
-        LogError()(OT_PRETTY_CLASS())("Missing encrypted prototoken").Flush();
+        LogError()()("Missing encrypted prototoken").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Loaded encrypted prototoken").Flush();
+        LogInsane()()("Loaded encrypted prototoken").Flush();
     }
 
     auto setDumper = LucreDumper{};
@@ -580,16 +556,14 @@ auto Lucre::Process(
     auto serializedMint = String::Factory(armoredMint);
 
     if (serializedMint->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to get public mint for series ")(
-            denomination_)
+        LogError()()("Failed to get public mint for series ")(denomination_)
             .Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Begin mint series ")(denomination_)
-            .Flush();
+        LogInsane()()("Begin mint series ")(denomination_).Flush();
         LogInsane()(serializedMint.get()).Flush();
-        LogInsane()(OT_PRETTY_CLASS())("End mint").Flush();
+        LogInsane()()("End mint").Flush();
     }
 
     ::BIO_puts(bioBank.get(), serializedMint->Get());
@@ -603,25 +577,24 @@ auto Lucre::Process(
             *private_, prototoken->WriteInto(), password);
 
         if (false == decrypted) {
-            LogError()(OT_PRETTY_CLASS())("Failed to decrypt prototoken")
-                .Flush();
+            LogError()()("Failed to decrypt prototoken").Flush();
 
             return false;
         } else {
-            LogInsane()(OT_PRETTY_CLASS())("Prototoken decrypted").Flush();
+            LogInsane()()("Prototoken decrypted").Flush();
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to get secondary key.").Flush();
+        LogError()()("Failed to get secondary key.").Flush();
 
         return false;
     }
 
     if (prototoken->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Missing prototoken").Flush();
+        LogError()()("Missing prototoken").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Prototoken ready:").Flush();
+        LogInsane()()("Prototoken ready:").Flush();
     }
 
     ::BIO_puts(bioPrivateRequest.get(), prototoken->Get());
@@ -639,19 +612,17 @@ auto Lucre::Process(
     const auto spend = bioCoin.ToString();
 
     if (spend->empty()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to read token").Flush();
+        LogError()()("Failed to read token").Flush();
 
         return false;
     } else {
-        LogInsane()(OT_PRETTY_CLASS())("Obtained spendable token").Flush();
+        LogInsane()()("Obtained spendable token").Flush();
     }
 
     spend_ = std::make_shared<proto::Ciphertext>();
 
     if (false == bool(spend_)) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed to instantiate spendable ciphertext")
-            .Flush();
+        LogError()()("Failed to instantiate spendable ciphertext").Flush();
 
         return false;
     }
@@ -663,13 +634,12 @@ auto Lucre::Process(
             spend->Bytes(), mode_, *spend_, password, false);
 
         if (false == encrypted) {
-            LogError()(OT_PRETTY_CLASS())("Failed to encrypt spendable token")
-                .Flush();
+            LogError()()("Failed to encrypt spendable token").Flush();
 
             return false;
         }
     } catch (...) {
-        LogError()(OT_PRETTY_CLASS())("Failed to get primary key.").Flush();
+        LogError()()("Failed to get primary key.").Flush();
 
         return false;
     }
@@ -720,7 +690,7 @@ auto Lucre::Serialize(proto::Token& output) const noexcept -> bool
             }
         }
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

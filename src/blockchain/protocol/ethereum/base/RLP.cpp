@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -152,7 +151,7 @@ struct Node::Decoder {
             throw std::invalid_argument{"empty input"};
         }
 
-        log_(OT_PRETTY_CLASS())("decoding ")(remaining_)(" bytes").Flush();
+        log_()("decoding ")(remaining_)(" bytes").Flush();
         auto out = decode(classify(*in_));
 
         if ((0u == substring_.size()) && (0u < remaining_)) {
@@ -194,14 +193,12 @@ private:
     auto check_read(std::size_t expected) const noexcept -> bool
     {
         if (expected > remaining_) {
-            log_(OT_PRETTY_CLASS())("remaining size of ")(
-                remaining_)(" less than ")(expected)
+            log_()("remaining size of ")(remaining_)(" less than ")(expected)
                 .Flush();
 
             return false;
         } else if ((0u < substring_.size()) && (expected > substring_.back())) {
-            log_(OT_PRETTY_CLASS())("substring size of ")(
-                remaining_)(" less than ")(expected)
+            log_()("substring size of ")(remaining_)(" less than ")(expected)
                 .Flush();
 
             return false;
@@ -213,30 +210,30 @@ private:
     auto classify(const std::byte& in) const noexcept -> Const::Type
     {
         const auto val = Const::to_int(in);
-        log_(OT_PRETTY_CLASS())("classifying byte ")(val).Flush();
+        log_()("classifying byte ")(val).Flush();
 
         if (val <= Const::to_int(Const::direct_encode_)) {
-            log_(OT_PRETTY_CLASS())("found direct encode marker byte").Flush();
+            log_()("found direct encode marker byte").Flush();
 
             return Const::Type::byte;
         } else if (val == Const::to_int(Const::null_)) {
-            log_(OT_PRETTY_CLASS())("found null marker byte").Flush();
+            log_()("found null marker byte").Flush();
 
             return Const::Type::null;
         } else if (val < Const::to_int(Const::long_string_)) {
-            log_(OT_PRETTY_CLASS())("found short string marker byte").Flush();
+            log_()("found short string marker byte").Flush();
 
             return Const::Type::short_string;
         } else if (val < Const::to_int(Const::short_list_)) {
-            log_(OT_PRETTY_CLASS())("found long string marker byte").Flush();
+            log_()("found long string marker byte").Flush();
 
             return Const::Type::long_string;
         } else if (val <= Const::to_int(Const::long_list_)) {
-            log_(OT_PRETTY_CLASS())("found short list marker byte").Flush();
+            log_()("found short list marker byte").Flush();
 
             return Const::Type::short_list;
         } else {
-            log_(OT_PRETTY_CLASS())("found long list marker byte").Flush();
+            log_()("found long list marker byte").Flush();
 
             return Const::Type::long_list;
         }
@@ -247,11 +244,10 @@ private:
         const auto lhs = Const::to_int(in);
         const auto rhs = Const::to_int(base);
 
-        OT_ASSERT(lhs >= rhs);
+        assert_true(lhs >= rhs);
 
         auto out = (lhs - rhs);
-        log_(OT_PRETTY_CLASS())("marker byte (")(lhs)(") encodes size of ")(out)
-            .Flush();
+        log_()("marker byte (")(lhs)(") encodes size of ")(out).Flush();
 
         return out;
     }
@@ -286,7 +282,7 @@ private:
                 return decode_long_list();
             }
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     }
@@ -315,11 +311,11 @@ private:
     }
     auto decode_byte() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         auto bytes = ReadView{reinterpret_cast<const char*>(in_), prefix_};
         finish_read(prefix_);
-        log_(OT_PRETTY_CLASS())("decoded raw byte").Flush();
+        log_()("decoded raw byte").Flush();
 
         return api_.Factory().DataFromBytes(bytes);
     }
@@ -361,15 +357,14 @@ private:
                 return decode_big_endian<be::big_uint64_buf_t>();
             }
             default: {
-                OT_FAIL;
+                LogAbort()().Abort();
             }
         }
     }
     auto decode_list(std::size_t length) noexcept(false) -> Node
     {
         const auto level = substring_.size();
-        log_(OT_PRETTY_CLASS())("level ")(level)(": decoding list of ")(
-            length)(" bytes")
+        log_()("level ")(level)(": decoding list of ")(length)(" bytes")
             .Flush();
         auto out = Sequence{};
         auto& substring = substring_.emplace_back(length);
@@ -377,27 +372,23 @@ private:
 
         while (0u < substring) {
             const auto index = count++;
-            log_(OT_PRETTY_CLASS())("level ")(level)(": decoding item ")(index)
-                .Flush();
+            log_()("level ")(level)(": decoding item ")(index).Flush();
             out.emplace_back(operator()());
-            log_(OT_PRETTY_CLASS())("level ")(level)(": item ")(
-                index)(" decoded")
-                .Flush();
-            log_(OT_PRETTY_CLASS())("level ")(level)(": ")(
-                substring)(" bytes remain in list")
+            log_()("level ")(level)(": item ")(index)(" decoded").Flush();
+            log_()("level ")(level)(": ")(substring)(" bytes remain in list")
                 .Flush();
         }
 
         substring_.pop_back();
-        log_(OT_PRETTY_CLASS())("level ")(
-            level)(": finished decoding list of ")(length)(" bytes")
+        log_()("level ")(level)(": finished decoding list of ")(
+            length)(" bytes")
             .Flush();
 
         return out;
     }
     auto decode_long_list() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         const auto bytes = extract(*in_, Const::long_list_);
         finish_read(prefix_);
@@ -406,7 +397,7 @@ private:
     }
     auto decode_long_string() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         const auto bytes = extract(*in_, Const::short_string_);
         finish_read(prefix_);
@@ -415,16 +406,16 @@ private:
     }
     auto decode_null() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         finish_read(prefix_);
-        log_(OT_PRETTY_CLASS())("decoded null byte").Flush();
+        log_()("decoded null byte").Flush();
 
         return Null{};
     }
     auto decode_short_list() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         const auto length = extract(*in_, Const::short_list_);
         finish_read(prefix_);
@@ -433,7 +424,7 @@ private:
     }
     auto decode_short_string() noexcept(false) -> Node
     {
-        OT_ASSERT(check_read(prefix_));
+        assert_true(check_read(prefix_));
 
         const auto length = extract(*in_, Const::null_);
         finish_read(prefix_);
@@ -442,7 +433,7 @@ private:
     }
     auto decode_string(std::size_t length) noexcept(false) -> Node
     {
-        OT_ASSERT(0u < length);
+        assert_true(0u < length);
 
         if (false == check_read(length)) {
             const auto error =
@@ -458,7 +449,7 @@ private:
 
         auto bytes = ReadView{reinterpret_cast<const char*>(in_), length};
         finish_read(length);
-        log_(OT_PRETTY_CLASS())("decoded ")(length)(" byte string").Flush();
+        log_()("decoded ")(length)(" byte string").Flush();
 
         return api_.Factory().DataFromBytes(bytes);
     }
@@ -498,10 +489,8 @@ struct Node::Encoder {
         std::memcpy(out_, prefix.data(), pBytes);
         std::advance(out_, pBytes);
         written_ += pBytes;
-        log_(OT_PRETTY_CLASS())("wrote ")(pBytes)(" prefix bytes to output")
-            .Flush();
-        log_(OT_PRETTY_CLASS())(written_)(" of ")(reserved_bytes_)(" written")
-            .Flush();
+        log_()("wrote ")(pBytes)(" prefix bytes to output").Flush();
+        log_()(written_)(" of ")(reserved_bytes_)(" written").Flush();
 
         for (const auto& node : in) {
             if (false == node.Encode(*this)) { return false; }
@@ -522,22 +511,15 @@ struct Node::Encoder {
             std::memcpy(out_, prefix.data(), pBytes);
             std::advance(out_, pBytes);
             written_ += pBytes;
-            log_(OT_PRETTY_CLASS())("wrote ")(pBytes)(" prefix bytes to output")
-                .Flush();
-            log_(OT_PRETTY_CLASS())(written_)(" of ")(
-                reserved_bytes_)(" written")
-                .Flush();
+            log_()("wrote ")(pBytes)(" prefix bytes to output").Flush();
+            log_()(written_)(" of ")(reserved_bytes_)(" written").Flush();
 
             if (0u < bytes) {
                 std::memcpy(out_, in.data(), bytes);
                 std::advance(out_, bytes);
                 written_ += bytes;
-                log_(OT_PRETTY_CLASS())("wrote ")(
-                    bytes)(" payload bytes to output")
-                    .Flush();
-                log_(OT_PRETTY_CLASS())(written_)(" of ")(
-                    reserved_bytes_)(" written")
-                    .Flush();
+                log_()("wrote ")(bytes)(" payload bytes to output").Flush();
+                log_()(written_)(" of ")(reserved_bytes_)(" written").Flush();
             }
         }
 
@@ -605,11 +587,8 @@ private:
             std::memcpy(out_, in.data(), bytes);
             std::advance(out_, bytes);
             written_ += bytes;
-            log_(OT_PRETTY_CLASS())("wrote ")(bytes)(" payload bytes to output")
-                .Flush();
-            log_(OT_PRETTY_CLASS())(written_)(" of ")(
-                reserved_bytes_)(" written")
-                .Flush();
+            log_()("wrote ")(bytes)(" payload bytes to output").Flush();
+            log_()(written_)(" of ")(reserved_bytes_)(" written").Flush();
         }
     }
     auto encode_null() noexcept -> void
@@ -619,10 +598,8 @@ private:
         std::memcpy(out_, &payload, bytes);
         std::advance(out_, bytes);
         written_ += bytes;
-        log_(OT_PRETTY_CLASS())("wrote ")(bytes)(" payload bytes to output")
-            .Flush();
-        log_(OT_PRETTY_CLASS())(written_)(" of ")(reserved_bytes_)(" written")
-            .Flush();
+        log_()("wrote ")(bytes)(" payload bytes to output").Flush();
+        log_()(written_)(" of ")(reserved_bytes_)(" written").Flush();
     }
     auto encode_size(std::byte longVal, std::size_t in) const noexcept -> String
     {
@@ -636,7 +613,7 @@ private:
         }();
         const auto payload = api_.Factory().DataFromHex(hex);
 
-        OT_ASSERT(9 > payload.size());
+        assert_true(9 > payload.size());
 
         const auto size = static_cast<std::uint8_t>(payload.size());
         const auto prefix = std::byte(Const::to_int(longVal) + size);
@@ -716,11 +693,9 @@ auto Node::Encode(const api::Session& api, Writer&& out) const noexcept -> bool
     const auto bytes = EncodedSize(api);
 
     if (0u < bytes) {
-        log(OT_PRETTY_CLASS())("calculated output buffer: ")(bytes)(" bytes")
-            .Flush();
+        log()("calculated output buffer: ")(bytes)(" bytes").Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("unable to serialize invalid node")
-            .Flush();
+        LogError()()("unable to serialize invalid node").Flush();
 
         return false;
     }
@@ -728,11 +703,9 @@ auto Node::Encode(const api::Session& api, Writer&& out) const noexcept -> bool
     auto buffer = out.Reserve(bytes);
 
     if (buffer.IsValid(bytes)) {
-        log(OT_PRETTY_CLASS())(bytes)(" bytes allocated in output buffer")
-            .Flush();
+        log()(bytes)(" bytes allocated in output buffer").Flush();
     } else {
-        LogError()(OT_PRETTY_CLASS())("failed to allocate output buffer")
-            .Flush();
+        LogError()()("failed to allocate output buffer").Flush();
 
         return false;
     }

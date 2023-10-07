@@ -7,11 +7,11 @@
 
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::blockoracle
 {
@@ -32,15 +32,15 @@ auto Cache::add(const block::Hash& id, ReadView bytes) noexcept -> CachedBlock
         auto i = data_.insert(data_.end(), std::make_shared<ByteArray>(bytes));
         auto [j, rc1] = index_.try_emplace(id, i);
 
-        OT_ASSERT(rc1);
+        assert_true(rc1);
 
         auto [_, rc2] = reverse_.try_emplace(i, j);
 
-        OT_ASSERT(rc2);
+        assert_true(rc2);
 
         auto out = *i;
 
-        OT_ASSERT(out);
+        assert_false(nullptr == out);
         size_ += out->size();
 
         return *i;
@@ -79,7 +79,7 @@ auto Cache::remove(Data::iterator i) noexcept -> Data::iterator
 
         return data_.erase(i);
     } else {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 

@@ -15,7 +15,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/ZAP.hpp"
@@ -63,7 +62,7 @@ ZAP::ZAP(const opentxs::network::zeromq::Context& context)
         constexpr auto endpoint = "inproc://zeromq.zap.01";
         const auto rc = out.Bind(endpoint);
 
-        OT_ASSERT(rc);
+        assert_true(rc);
 
         return out;
     }())
@@ -77,7 +76,7 @@ ZAP::ZAP(const opentxs::network::zeromq::Context& context)
                }},
           }))
 {
-    OT_ASSERT(nullptr != thread_);
+    assert_false(nullptr == thread_);
 }
 
 auto ZAP::process(opentxs::network::zeromq::Message&& msg) const noexcept
@@ -87,31 +86,28 @@ auto ZAP::process(opentxs::network::zeromq::Message&& msg) const noexcept
     auto envelope = std::move(msg).Envelope();
 
     if (payload.size() < 6_uz) {
-        LogError()(OT_PRETTY_CLASS())("received invalid ZAP message");
+        LogError()()("received invalid ZAP message");
 
         return;
     }
 
     if (payload[0].Bytes() != "1.0") {
-        LogError()(OT_PRETTY_CLASS())("invalid ZAP version");
+        LogError()()("invalid ZAP version");
 
         return;
     }
 
-    socket_.SendDeferred(
-        [&] {
-            auto out = reply_to_message(std::move(envelope), true);
-            out.AddFrame(std::move(payload[0]));
-            out.AddFrame(std::move(payload[1]));
-            out.AddFrame("200");
-            out.AddFrame();
-            out.AddFrame();
-            out.AddFrame();
+    socket_.SendDeferred([&] {
+        auto out = reply_to_message(std::move(envelope), true);
+        out.AddFrame(std::move(payload[0]));
+        out.AddFrame(std::move(payload[1]));
+        out.AddFrame("200");
+        out.AddFrame();
+        out.AddFrame();
+        out.AddFrame();
 
-            return out;
-        }(),
-        __FILE__,
-        __LINE__);
+        return out;
+    }());
 }
 
 auto ZAP::RegisterDomain(

@@ -21,7 +21,6 @@
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -187,10 +186,7 @@ auto Element::Confirmed() const noexcept -> Txids
     auto output = Txids{};
     auto handle = data_.lock_shared();
     const auto& data = *handle;
-    std::copy(
-        data.confirmed_.begin(),
-        data.confirmed_.end(),
-        std::back_inserter(output));
+    std::ranges::copy(data.confirmed_, std::back_inserter(output));
 
     return output;
 }
@@ -198,7 +194,7 @@ auto Element::Confirmed() const noexcept -> Txids
 auto Element::Confirm(const block::TransactionHash& tx) noexcept -> bool
 {
     if (tx.empty()) {
-        LogError()(OT_PRETTY_CLASS())("invalid txid").Flush();
+        LogError()()("invalid txid").Flush();
 
         return false;
     }
@@ -226,7 +222,7 @@ auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
     try {
         output.emplace(blockchain_.Internal().PubkeyHash(chain_, pubkey));
     } catch (...) {
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     return output;
@@ -461,10 +457,7 @@ auto Element::Unconfirmed() const noexcept -> Txids
     auto handle = data_.lock_shared();
     const auto& data = *handle;
     auto output = Txids{};
-    std::copy(
-        data.unconfirmed_.begin(),
-        data.unconfirmed_.end(),
-        std::back_inserter(output));
+    std::ranges::copy(data.unconfirmed_, std::back_inserter(output));
 
     return output;
 }
@@ -475,8 +468,7 @@ auto Element::Unreserve() noexcept -> bool
     auto& data = *handle;
 
     if ((0u < data.confirmed_.size()) || (0u < data.confirmed_.size())) {
-        LogVerbose()(OT_PRETTY_CLASS())(
-            "element is already associated with transactions")
+        LogVerbose()()("element is already associated with transactions")
             .Flush();
 
         return false;
@@ -494,11 +486,10 @@ auto Element::update_element() const noexcept -> void
 {
     const auto elements = Elements();
     auto hashes = UnallocatedVector<ReadView>{};
-    std::transform(
-        std::begin(elements),
-        std::end(elements),
-        std::back_inserter(hashes),
-        [](const auto& in) -> auto { return in.Bytes(); });
+    std::ranges::transform(
+        elements, std::back_inserter(hashes), [](const auto& in) -> auto {
+            return in.Bytes();
+        });
     parent_.Internal().UpdateElement(hashes);
 }
 }  // namespace opentxs::blockchain::crypto::implementation

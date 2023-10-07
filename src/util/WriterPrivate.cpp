@@ -8,7 +8,6 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 
@@ -38,8 +37,7 @@ WriterPrivate::WriterPrivate(
 auto WriterPrivate::Reserve(std::size_t val) noexcept -> WriteBuffer
 {
     if (size_.has_value()) {
-        LogError()(OT_PRETTY_CLASS())("already reserved ") (*size_)(" bytes")
-            .Flush();
+        LogError()()("already reserved ") (*size_)(" bytes").Flush();
 
         return std::span<std::byte>{};
     } else {
@@ -47,11 +45,11 @@ auto WriterPrivate::Reserve(std::size_t val) noexcept -> WriteBuffer
     }
 
     if (reserve_.operator bool()) {
-        LogInsane()(OT_PRETTY_CLASS())("reserving ")(val)(" bytes").Flush();
+        LogInsane()()("reserving ")(val)(" bytes").Flush();
 
         return std::invoke(reserve_, val);
     } else {
-        LogError()(OT_PRETTY_CLASS())("empty writer").Flush();
+        LogError()()("empty writer").Flush();
 
         return std::span<std::byte>{};
     }
@@ -60,8 +58,8 @@ auto WriterPrivate::Reserve(std::size_t val) noexcept -> WriteBuffer
 auto WriterPrivate::Truncate(std::size_t val) noexcept -> bool
 {
     if (false == size_.has_value() || (val > *size_)) {
-        LogError()(OT_PRETTY_CLASS())("requesting truncation to ")(
-            val)(" bytes but only ")(size_.value_or(0))(" bytes are reserved")
+        LogError()()("requesting truncation to ")(val)(" bytes but only ")(
+            size_.value_or(0))(" bytes are reserved")
             .Flush();
 
         return false;
@@ -71,7 +69,7 @@ auto WriterPrivate::Truncate(std::size_t val) noexcept -> bool
 
         return std::invoke(truncate_, val);
     } else {
-        LogError()(OT_PRETTY_CLASS())("no truncation method available").Flush();
+        LogError()()("no truncation method available").Flush();
 
         return false;
     }

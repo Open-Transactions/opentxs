@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <boost/smart_ptr/shared_ptr.hpp>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -77,10 +76,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(boost::shared_ptr<Imp> me) noexcept -> void
-    {
-        signal_startup(me);
-    }
+    auto Init(std::shared_ptr<Imp> me) noexcept -> void { signal_startup(me); }
 
     Imp(std::shared_ptr<const api::session::Client> api,
         std::shared_ptr<const node::Manager> node,

@@ -31,7 +31,6 @@
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"
 #include "internal/otx/client/obsolete/OT_API.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -77,7 +76,7 @@ auto ClientSession(
             dataFolder,
             instance);
     } catch (const std::exception& e) {
-        LogError()("opentxs::factory::")(__func__)(": ")(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return {};
     }
@@ -153,30 +152,30 @@ Client::Client(
 {
     wallet_ = factory::WalletAPI(*this);
 
-    OT_ASSERT(wallet_);
-    OT_ASSERT(zeromq_);
-    OT_ASSERT(contacts_);
-    OT_ASSERT(activity_);
-    OT_ASSERT(blockchain_);
-    OT_ASSERT(workflow_);
-    OT_ASSERT(ot_api_);
-    OT_ASSERT(otapi_exec_);
-    OT_ASSERT(server_action_);
-    OT_ASSERT(otx_);
-    OT_ASSERT(ui_);
-    OT_ASSERT(pair_);
+    assert_false(nullptr == wallet_);
+    assert_false(nullptr == zeromq_);
+    assert_false(nullptr == contacts_);
+    assert_false(nullptr == activity_);
+    assert_false(nullptr == blockchain_);
+    assert_false(nullptr == workflow_);
+    assert_false(nullptr == ot_api_);
+    assert_false(nullptr == otapi_exec_);
+    assert_false(nullptr == server_action_);
+    assert_false(nullptr == otx_);
+    assert_false(nullptr == ui_);
+    assert_false(nullptr == pair_);
 }
 
 auto Client::Activity() const -> const session::Activity&
 {
-    OT_ASSERT(activity_);
+    assert_false(nullptr == activity_);
 
     return *activity_;
 }
 
 auto Client::Cleanup() -> void
 {
-    LogDetail()(OT_PRETTY_CLASS())("Shutting down and cleaning up.").Flush();
+    LogDetail()()("Shutting down and cleaning up.").Flush();
     ui_->Internal().Shutdown();
     ui_.reset();
     pair_.reset();
@@ -197,7 +196,7 @@ auto Client::Cleanup() -> void
 
 auto Client::Contacts() const -> const api::session::Contacts&
 {
-    OT_ASSERT(contacts_);
+    assert_false(nullptr == contacts_);
 
     return *contacts_;
 }
@@ -211,7 +210,7 @@ auto Client::get_lock(const ContextID context) const -> std::recursive_mutex&
 
 auto Client::Exec(const UnallocatedCString&) const -> const OTAPI_Exec&
 {
-    OT_ASSERT(otapi_exec_);
+    assert_false(nullptr == otapi_exec_);
 
     return *otapi_exec_;
 }
@@ -247,28 +246,28 @@ auto Client::NewNym(const identifier::Nym& id) const noexcept -> void
 
 auto Client::OTAPI(const UnallocatedCString&) const -> const OT_API&
 {
-    OT_ASSERT(ot_api_);
+    assert_false(nullptr == ot_api_);
 
     return *ot_api_;
 }
 
 auto Client::OTX() const -> const api::session::OTX&
 {
-    OT_ASSERT(otx_);
+    assert_false(nullptr == otx_);
 
     return *otx_;
 }
 
 auto Client::Pair() const -> const otx::client::Pair&
 {
-    OT_ASSERT(pair_);
+    assert_false(nullptr == pair_);
 
     return *pair_;
 }
 
 auto Client::ServerAction() const -> const otx::client::ServerAction&
 {
-    OT_ASSERT(server_action_);
+    assert_false(nullptr == server_action_);
 
     return *server_action_;
 }
@@ -279,7 +278,7 @@ auto Client::SharedClient() const noexcept
     wait_for_init();
     auto out = me_.lock();
 
-    OT_ASSERT(out);
+    assert_false(nullptr == out);
 
     return out;
 }
@@ -289,7 +288,7 @@ auto Client::Start(std::shared_ptr<session::Client> api) noexcept -> void
     me_ = api;
     auto me = me_.lock();
 
-    OT_ASSERT(me);
+    assert_false(nullptr == me);
 
     Session::start(api);
     network_->Internal().Start(
@@ -313,28 +312,28 @@ auto Client::StartBlockchain() noexcept -> void
 
 auto Client::StartContacts() -> void
 {
-    OT_ASSERT(contacts_);
+    assert_false(nullptr == contacts_);
 
     contacts_->Internal().start();
 }
 
 auto Client::UI() const -> const api::session::UI&
 {
-    OT_ASSERT(ui_);
+    assert_false(nullptr == ui_);
 
     return *ui_;
 }
 
 auto Client::Workflow() const -> const session::Workflow&
 {
-    OT_ASSERT(workflow_);
+    assert_false(nullptr == workflow_);
 
     return *workflow_;
 }
 
 auto Client::ZMQ() const -> const api::network::ZMQ&
 {
-    OT_ASSERT(zeromq_);
+    assert_false(nullptr == zeromq_);
 
     return *zeromq_;
 }

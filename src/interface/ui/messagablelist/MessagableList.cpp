@@ -11,7 +11,6 @@
 #include <span>
 
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -70,9 +69,9 @@ auto MessagableList::pipeline(const Message& in) noexcept -> void
     const auto body = in.Payload();
 
     if (1 > body.size()) {
-        LogError()(OT_PRETTY_CLASS())("Invalid message").Flush();
+        LogError()()("Invalid message").Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto work = [&] {
@@ -81,7 +80,7 @@ auto MessagableList::pipeline(const Message& in) noexcept -> void
             return body[0].as<Work>();
         } catch (...) {
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }();
 
@@ -104,9 +103,9 @@ auto MessagableList::pipeline(const Message& in) noexcept -> void
             }
         } break;
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unhandled type").Flush();
+            LogError()()("Unhandled type").Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -116,15 +115,14 @@ auto MessagableList::process_contact(
     const MessagableListSortKey& key) noexcept -> void
 {
     if (owner_contact_id_ == id) {
-        LogDetail()(OT_PRETTY_CLASS())("Skipping owner contact ")(
-            id, api_.Crypto())(" (")(key.second)(")")
+        LogDetail()()("Skipping owner contact ")(id, api_.Crypto())(" (")(
+            key.second)(")")
             .Flush();
 
         return;
     } else {
-        LogDetail()(OT_PRETTY_CLASS())("Incoming contact ")(id, api_.Crypto())(
-            " (")(key.second)(") is not owner contact: (")(
-            owner_contact_id_, api_.Crypto())(")")
+        LogDetail()()("Incoming contact ")(id, api_.Crypto())(" (")(key.second)(
+            ") is not owner contact: (")(owner_contact_id_, api_.Crypto())(")")
             .Flush();
     }
 
@@ -132,8 +130,8 @@ auto MessagableList::process_contact(
         case otx::client::Messagability::READY:
         case otx::client::Messagability::MISSING_RECIPIENT:
         case otx::client::Messagability::UNREGISTERED: {
-            LogDetail()(OT_PRETTY_CLASS())("Messagable contact ")(
-                id, api_.Crypto())(" (")(key.second)(")")
+            LogDetail()()("Messagable contact ")(id, api_.Crypto())(" (")(
+                key.second)(")")
                 .Flush();
             auto custom = CustomData{};
             add_item(id, key, custom);
@@ -144,7 +142,7 @@ auto MessagableList::process_contact(
         case otx::client::Messagability::CONTACT_LACKS_NYM:
         case otx::client::Messagability::MISSING_CONTACT:
         default: {
-            LogDetail()(OT_PRETTY_CLASS())("Skipping non-messagable contact ")(
+            LogDetail()()("Skipping non-messagable contact ")(
                 id, api_.Crypto())(" (")(key.second)(")")
                 .Flush();
             delete_item(id);
@@ -156,12 +154,12 @@ auto MessagableList::process_contact(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto contactID = api_.Factory().IdentifierFromProtobuf(id.Bytes());
 
-    OT_ASSERT(false == contactID.empty());
+    assert_false(contactID.empty());
 
     const auto name = api_.Contacts().ContactName(contactID);
     process_contact(contactID, {false, name});
@@ -171,12 +169,12 @@ auto MessagableList::process_nym(const Message& message) noexcept -> void
 {
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto& id = body[1];
     const auto nymID = api_.Factory().NymIDFromHash(id.Bytes());
 
-    OT_ASSERT(false == nymID.empty());
+    assert_false(nymID.empty());
 
     const auto contactID = api_.Contacts().ContactID(nymID);
     const auto name = api_.Contacts().ContactName(contactID);
@@ -186,8 +184,7 @@ auto MessagableList::process_nym(const Message& message) noexcept -> void
 auto MessagableList::startup() noexcept -> void
 {
     const auto contacts = api_.Contacts().ContactList();
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(contacts.size())(" contacts.")
-        .Flush();
+    LogDetail()()("Loading ")(contacts.size())(" contacts.").Flush();
 
     for (const auto& [id, alias] : contacts) {
         process_contact(

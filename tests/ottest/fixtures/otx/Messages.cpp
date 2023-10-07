@@ -11,7 +11,6 @@
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -64,7 +63,7 @@ void Messages::init()
     const_cast<ot::UnallocatedCString&>(Alice_) =
         alice_nym_id_.asBase58(client_.Crypto());
 
-    OT_ASSERT(false == server_id_.empty());
+    opentxs::assert_true(false == server_id_.empty());
 
     import_server_contract(server_contract_, client_);
 

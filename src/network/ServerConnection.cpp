@@ -41,7 +41,6 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/Flag.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -82,7 +81,7 @@ auto ServerConnection::Factory(
 ServerConnection::ServerConnection(Imp* imp) noexcept
     : imp_(imp)
 {
-    OT_ASSERT(nullptr != imp);
+    assert_false(nullptr == imp);
 }
 
 ServerConnection::ServerConnection(ServerConnection&& rhs) noexcept
@@ -165,7 +164,7 @@ ServerConnection::Imp::Imp(
     const auto started = notification_socket_->Start(
         api_.Endpoints().Internal().ProcessPushNotification().data());
 
-    OT_ASSERT(started);
+    assert_true(started);
 }
 
 ServerConnection::Imp::~Imp()
@@ -254,11 +253,10 @@ auto ServerConnection::Imp::endpoint() const -> UnallocatedCString
         remote_contract_->ConnectInfo(hostname, port, type, address_type_);
 
     if (false == have) {
-        LogError()(OT_PRETTY_CLASS())(
-            "Failed retrieving connection info from server contract.")
+        LogError()()("Failed retrieving connection info from server contract.")
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 
     const auto endpoint = form_endpoint(type, hostname, port);
@@ -290,7 +288,7 @@ auto ServerConnection::Imp::form_endpoint(
 auto ServerConnection::Imp::get_async(const Lock& lock)
     -> zeromq::socket::Dealer&
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     if (false == sockets_ready_.get()) {
         registration_socket_ = async_socket(lock);
@@ -304,7 +302,7 @@ auto ServerConnection::Imp::get_async(const Lock& lock)
 auto ServerConnection::Imp::get_sync(const Lock& lock)
     -> zeromq::socket::Request&
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     if (false == sockets_ready_.get()) {
         registration_socket_ = async_socket(lock);
@@ -375,7 +373,7 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
             return out;
         }());
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
     }
 }
 
@@ -398,7 +396,7 @@ auto ServerConnection::Imp::register_for_push(
     const PasswordPrompt& reason) -> void
 {
     if (2 > context.Request(data)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Nym is not yet registered").Flush();
+        LogVerbose()()("Nym is not yet registered").Flush();
 
         return;
     }
@@ -421,7 +419,7 @@ auto ServerConnection::Imp::register_for_push(
     message.AddFrame();
     auto serialized = proto::ServerRequest{};
     if (false == request.Serialize(serialized)) {
-        LogVerbose()(OT_PRETTY_CLASS())("Failed to serialize request.").Flush();
+        LogVerbose()()("Failed to serialize request.").Flush();
 
         return;
     }
@@ -433,7 +431,7 @@ auto ServerConnection::Imp::register_for_push(
 
 auto ServerConnection::Imp::reset_socket(const Lock& lock) -> void
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     sockets_ready_->Off();
 }
@@ -486,10 +484,10 @@ auto ServerConnection::Imp::Send(
     };
 
     if (Push::Enable == push) {
-        LogTrace()(OT_PRETTY_CLASS())("Registering for push").Flush();
+        LogTrace()()("Registering for push").Flush();
         register_for_push(context, data, reason);
     } else {
-        LogTrace()(OT_PRETTY_CLASS())("Skipping push").Flush();
+        LogTrace()()("Skipping push").Flush();
         disable_push(context.Signer()->ID());
     }
 
@@ -499,14 +497,14 @@ auto ServerConnection::Imp::Send(
     auto& reply = output.second;
     reply.reset(api_.Factory().InternalSession().Message().release());
 
-    OT_ASSERT(false != bool(reply));
+    assert_true(false != bool(reply));
 
     auto raw = String::Factory();
     message.SaveContractRaw(raw);
     auto envelope = Armored::Factory(api_.Crypto(), raw);
 
     if (false == envelope->Exists()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to armor message").Flush();
+        LogError()()("Failed to armor message").Flush();
 
         return output;
     }
@@ -526,10 +524,10 @@ auto ServerConnection::Imp::Send(
     auto in = sendresult.second;
     auto replymessage{api_.Factory().InternalSession().Message()};
 
-    OT_ASSERT(false != bool(replymessage));
+    assert_true(false != bool(replymessage));
 
     if (otx::client::SendResult::TIMEOUT == status) {
-        LogError()(OT_PRETTY_CLASS())("Reply timeout.").Flush();
+        LogError()()("Reply timeout.").Flush();
         cleanup.SetStatus(otx::client::SendResult::TIMEOUT);
 
         return output;
@@ -589,7 +587,7 @@ auto ServerConnection::Imp::Send(
         if (loaded) {
             reply = std::move(replymessage);
         } else {
-            LogError()(OT_PRETTY_CLASS())(
+            LogError()()(
                 "Received server reply, but unable to instantiate it as a "
                 "Message.")
                 .Flush();
@@ -598,7 +596,7 @@ auto ServerConnection::Imp::Send(
 
         cleanup.SetStatus(otx::client::SendResult::VALID_REPLY);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         cleanup.SetStatus(otx::client::SendResult::INVALID_REPLY);
     }
 
@@ -609,28 +607,28 @@ auto ServerConnection::Imp::set_curve(
     const Lock& lock,
     zeromq::curve::Client& socket) const -> void
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const auto set = socket.SetServerPubkey(remote_contract_);
 
-    OT_ASSERT(set);
+    assert_true(set);
 }
 
 auto ServerConnection::Imp::set_proxy(
     const Lock& lock,
     zeromq::socket::Dealer& socket) const -> void
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     if (false == use_proxy_.get()) { return; }
 
     auto proxy = zmq_.SocksProxy();
 
     if (false == proxy.empty()) {
-        LogError()(OT_PRETTY_CLASS())("Setting proxy to ")(proxy).Flush();
+        LogError()()("Setting proxy to ")(proxy).Flush();
         const auto set = socket.SetSocksProxy(proxy);
 
-        OT_ASSERT(set);
+        assert_true(set);
     }
 }
 
@@ -638,12 +636,12 @@ auto ServerConnection::Imp::set_timeouts(
     const Lock& lock,
     zeromq::socket::Socket& socket) const -> void
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
     const auto set = socket.SetTimeouts(
         zmq_.Linger(), zmq_.SendTimeout(), zmq_.ReceiveTimeout());
 
-    OT_ASSERT(set);
+    assert_true(set);
 }
 
 auto ServerConnection::Imp::sync_socket(const Lock& lock) const

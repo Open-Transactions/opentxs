@@ -15,7 +15,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/core/String.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -134,7 +133,7 @@ auto TransferBalanceItem::startup(
             api::session::Workflow::InstantiateTransfer(api_, workflow).second;
     }
 
-    OT_ASSERT(transfer_);
+    assert_false(nullptr == transfer_);
 
     lock.unlock();
     auto text = UnallocatedCString{};
@@ -159,8 +158,7 @@ auto TransferBalanceItem::startup(
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Invalid event state (")(
-                        event.type())(")")
+                    LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
                 }
             }
@@ -183,8 +181,7 @@ auto TransferBalanceItem::startup(
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Invalid event state (")(
-                        event.type())(")")
+                    LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
                 }
             }
@@ -212,8 +209,7 @@ auto TransferBalanceItem::startup(
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {
-                    LogError()(OT_PRETTY_CLASS())("Invalid event state (")(
-                        event.type())(")")
+                    LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
                 }
             }
@@ -236,7 +232,7 @@ auto TransferBalanceItem::startup(
         case otx::client::StorageBox::RESERVED_1:
         case otx::client::StorageBox::PENDING_SEND:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Invalid item type (")(
+            LogError()()("Invalid item type (")(
                 static_cast<std::uint8_t>(type_))(")")
                 .Flush();
         }

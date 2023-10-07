@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "api/network/asio/Acceptor.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/util/Container.hpp"
@@ -42,7 +41,7 @@ struct Acceptors::Imp {
 
             return added;
         } catch (const std::exception& e) {
-            LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+            LogError()()(e.what()).Flush();
 
             return false;
         }

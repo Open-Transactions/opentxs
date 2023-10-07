@@ -10,7 +10,6 @@
 #include <string_view>
 
 #include "internal/network/otdht/Types.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -53,7 +52,7 @@ auto print(Job job) noexcept -> std::string_view
             static_cast<OTZMQWorkType>(job))
             .Flush();
 
-        OT_FAIL;
+        LogAbort()().Abort();
     }
 }
 

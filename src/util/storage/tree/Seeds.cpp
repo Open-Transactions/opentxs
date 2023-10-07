@@ -8,8 +8,7 @@
 #include <Seed.pb.h>
 #include <StorageSeeds.pb.h>
 #include <atomic>
-#include <cstdlib>
-#include <iostream>
+#include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
@@ -19,13 +18,13 @@
 #include "internal/serialization/protobuf/verify/Seed.hpp"
 #include "internal/serialization/protobuf/verify/StorageSeeds.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 
 namespace opentxs::storage::tree
@@ -37,7 +36,13 @@ Seeds::Seeds(
     const api::session::Factory& factory,
     const driver::Plugin& storage,
     const Hash& hash)
-    : Node(crypto, factory, storage, hash, OT_PRETTY_CLASS(), current_version_)
+    : Node(
+          crypto,
+          factory,
+          storage,
+          hash,
+          std::source_location::current().function_name(),
+          current_version_)
     , default_seed_()
 {
     if (is_valid(hash)) {
@@ -82,8 +87,8 @@ auto Seeds::init(const Hash& hash) noexcept(false) -> void
             }
         }
     } else {
-        throw std::runtime_error{
-            "failed to load root object file in "s.append(OT_PRETTY_CLASS())};
+        throw std::runtime_error{"failed to load root object file in "s.append(
+            std::source_location::current().function_name())};
     }
 }
 
@@ -98,10 +103,7 @@ auto Seeds::Load(
 
 auto Seeds::save(const std::unique_lock<std::mutex>& lock) const -> bool
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     auto serialized = serialize();
 
@@ -138,10 +140,7 @@ auto Seeds::set_default(
     const std::unique_lock<std::mutex>& lock,
     const opentxs::crypto::SeedID& id) -> void
 {
-    if (!verify_write_lock(lock)) {
-        std::cerr << __func__ << ": Lock failure." << std::endl;
-        abort();
-    }
+    if (!verify_write_lock(lock)) { LogAbort()()("Lock failure").Abort(); }
 
     default_seed_ = id;
 }
@@ -164,8 +163,8 @@ auto Seeds::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
     auto& hash = std::get<0>(metadata);
 
     if (existingKey) {
-        const bool revisionCheck = check_revision<proto::Seed>(
-            (OT_PRETTY_CLASS()), incomingRevision, metadata);
+        const bool revisionCheck =
+            check_revision<proto::Seed>(incomingRevision, metadata);
 
         if (false == revisionCheck) {
             // We're trying to save a seed with a lower index than has already

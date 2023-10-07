@@ -8,9 +8,10 @@
 #include <boost/container/vector.hpp>
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iterator>
+#include <ranges>
 
-#include "internal/util/LogMacros.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
@@ -26,16 +27,15 @@ ElementCache::ElementCache(
     , data_(alloc)
     , elements_(alloc)
 {
-    log_(OT_PRETTY_CLASS())("caching ")(data.size())(" patterns").Flush();
+    log_()("caching ")(data.size())(" patterns").Flush();
     Add(convert(std::move(data), alloc));
-    std::transform(
-        txos.begin(),
-        txos.end(),
+    std::ranges::transform(
+        txos,
         std::inserter(elements_.txos_, elements_.txos_.end()),
         [](auto& utxo) {
             return std::make_pair(utxo.first, std::move(utxo.second));
         });
-    log_(OT_PRETTY_CLASS())("cache contains:").Flush();
+    log_()("cache contains:").Flush();
     log_("  * ")(elements_.elements_20_.size())(" 20 byte elements").Flush();
     log_("  * ")(elements_.elements_32_.size())(" 32 byte elements").Flush();
     log_("  * ")(elements_.elements_33_.size())(" 33 byte elements").Flush();
@@ -56,10 +56,8 @@ auto ElementCache::Add(database::ElementMap&& data) noexcept -> void
             auto& [existingKey, existingValues] = *j;
 
             for (auto& value : incomingValues) {
-                const auto exists =
-                    std::find(
-                        existingValues.begin(), existingValues.end(), value) !=
-                    existingValues.end();
+                const auto exists = std::ranges::find(existingValues, value) !=
+                                    existingValues.end();
 
                 if (exists) {
 
@@ -158,7 +156,7 @@ auto ElementCache::index(
             std::memcpy(data.second.data(), element.data(), 64);
         } break;
         default: {
-            OT_FAIL;
+            LogAbort()().Abort();
         }
     }
 }
@@ -379,30 +377,13 @@ auto MatchCache::Matches::get_allocator() const noexcept -> allocator_type
 
 auto MatchCache::Matches::Merge(Matches&& rhs) noexcept -> void
 {
-    std::move(
-        rhs.match_20_.begin(),
-        rhs.match_20_.end(),
-        std::inserter(match_20_, match_20_.end()));
-    std::move(
-        rhs.match_32_.begin(),
-        rhs.match_32_.end(),
-        std::inserter(match_32_, match_32_.end()));
-    std::move(
-        rhs.match_33_.begin(),
-        rhs.match_33_.end(),
-        std::inserter(match_33_, match_33_.end()));
-    std::move(
-        rhs.match_64_.begin(),
-        rhs.match_64_.end(),
-        std::inserter(match_64_, match_64_.end()));
-    std::move(
-        rhs.match_65_.begin(),
-        rhs.match_65_.end(),
-        std::inserter(match_65_, match_65_.end()));
-    std::move(
-        rhs.match_txo_.begin(),
-        rhs.match_txo_.end(),
-        std::inserter(match_txo_, match_txo_.end()));
+    std::ranges::move(rhs.match_20_, std::inserter(match_20_, match_20_.end()));
+    std::ranges::move(rhs.match_32_, std::inserter(match_32_, match_32_.end()));
+    std::ranges::move(rhs.match_33_, std::inserter(match_33_, match_33_.end()));
+    std::ranges::move(rhs.match_64_, std::inserter(match_64_, match_64_.end()));
+    std::ranges::move(rhs.match_65_, std::inserter(match_65_, match_65_.end()));
+    std::ranges::move(
+        rhs.match_txo_, std::inserter(match_txo_, match_txo_.end()));
 }
 
 auto MatchCache::Matches::operator=(const Matches& rhs) noexcept -> Matches&

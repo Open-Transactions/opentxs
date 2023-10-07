@@ -12,7 +12,6 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Router.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/curve/Server.hpp"
@@ -73,17 +72,15 @@ auto Router::clone() const noexcept -> Router*
 
 void Router::process_incoming(const Lock& lock, Message&& message) noexcept
 {
-    OT_ASSERT(verify_lock(lock));
+    assert_true(verify_lock(lock));
 
-    LogTrace()(OT_PRETTY_CLASS())(
-        "Incoming messaged received. Triggering callback.")
-        .Flush();
+    LogTrace()()("Incoming messaged received. Triggering callback.").Flush();
     // Router prepends an identity frame to the message.  This makes sure
     // there is an empty frame between the identity frame(s) and the frames that
     // make up the rest of the message.
     message.Internal().EnsureDelimiter();
     callback_.Process(std::move(message));
-    LogTrace()(OT_PRETTY_CLASS())("Done.").Flush();
+    LogTrace()()("Done.").Flush();
 }
 
 Router::~Router() SHUTDOWN_SOCKET

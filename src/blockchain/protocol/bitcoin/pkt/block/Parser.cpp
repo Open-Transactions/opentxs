@@ -15,7 +15,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/pkt/block/Factory.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -110,7 +109,7 @@ auto Parser::find_payload() noexcept -> bool
         return blockchain::protocol::bitcoin::base::block::ParserBase::
             find_payload();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }

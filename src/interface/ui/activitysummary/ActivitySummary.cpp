@@ -15,7 +15,6 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -62,7 +61,7 @@ ActivitySummary::ActivitySummary(
     setup_listeners(api_, listeners_);
     startup_ = std::make_unique<std::thread>(&ActivitySummary::startup, this);
 
-    OT_ASSERT(startup_);
+    assert_false(nullptr == startup_);
 }
 
 auto ActivitySummary::construct_row(
@@ -105,7 +104,7 @@ auto ActivitySummary::newest_item(
     const proto::StorageThreadItem* output{nullptr};
     auto* time = new Time;
 
-    OT_ASSERT(nullptr != time);
+    assert_false(nullptr == time);
 
     for (const auto& item : thread.item()) {
         if (nullptr == output) {
@@ -123,7 +122,7 @@ auto ActivitySummary::newest_item(
         }
     }
 
-    OT_ASSERT(nullptr != output);
+    assert_false(nullptr == output);
 
     custom.emplace_back(new UnallocatedCString(output->id()));
     custom.emplace_back(new otx::client::StorageBox(
@@ -141,7 +140,7 @@ void ActivitySummary::process_thread(const UnallocatedCString& id) noexcept
     auto thread = proto::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, threadID, thread);
 
-    OT_ASSERT(loaded);
+    assert_true(loaded);
 
     auto custom = CustomData{};
     const auto name = display_name(thread);
@@ -156,11 +155,11 @@ void ActivitySummary::process_thread(const Message& message) noexcept
     wait_for_startup();
     const auto body = message.Payload();
 
-    OT_ASSERT(1 < body.size());
+    assert_true(1 < body.size());
 
     const auto threadID = api_.Factory().IdentifierFromHash(body[1].Bytes());
 
-    OT_ASSERT(false == threadID.empty());
+    assert_false(threadID.empty());
 
     delete_item(threadID);
     process_thread(threadID.asBase58(api_.Crypto()));
@@ -169,8 +168,7 @@ void ActivitySummary::process_thread(const Message& message) noexcept
 void ActivitySummary::startup() noexcept
 {
     const auto threads = api_.Activity().Threads(primary_id_, false);
-    LogDetail()(OT_PRETTY_CLASS())("Loading ")(threads.size())(" threads.")
-        .Flush();
+    LogDetail()()("Loading ")(threads.size())(" threads.").Flush();
     for (const auto& [id, alias] : threads) {
         [[maybe_unused]] const auto& notUsed = alias;
         process_thread(id);

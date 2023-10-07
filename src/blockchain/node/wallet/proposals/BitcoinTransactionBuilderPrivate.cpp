@@ -38,7 +38,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/core/Amount.hpp"
-#include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -175,7 +174,7 @@ BitcoinTransactionBuilderPrivate::BitcoinTransactionBuilderPrivate(
     , change_keys_()
     , outgoing_keys_(proposal_.Internal().OutgoingKeys())
 {
-    OT_ASSERT(sender_);
+    assert_false(nullptr == sender_);
 }
 
 auto BitcoinTransactionBuilderPrivate::add_change() noexcept -> bool
@@ -191,7 +190,7 @@ auto BitcoinTransactionBuilderPrivate::add_change() noexcept -> bool
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -225,7 +224,7 @@ auto BitcoinTransactionBuilderPrivate::add_existing_inputs(
             throw std::runtime_error{"failed to add input"};
         }
     };
-    std::for_each(existing.begin(), existing.end(), add_existing);
+    std::ranges::for_each(existing, add_existing);
 }
 
 auto BitcoinTransactionBuilderPrivate::add_input(const UTXO& utxo) noexcept
@@ -236,13 +235,12 @@ auto BitcoinTransactionBuilderPrivate::add_input(const UTXO& utxo) noexcept
     );
 
     if (false == input.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to construct input").Flush();
+        LogError()()("Failed to construct input").Flush();
 
         return false;
     }
 
-    LogTrace()(OT_PRETTY_CLASS())("adding previous output ")(utxo.first.str())(
-        " to transaction")
+    LogTrace()()("adding previous output ")(utxo.first.str())(" to transaction")
         .Flush();
     input_count_ = inputs_.size();
     input.Internal().GetBytes(input_total_, witness_total_);
@@ -357,7 +355,7 @@ auto BitcoinTransactionBuilderPrivate::add_signatures(
                 preimage, sigHash, reason, output, input);
         }
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported input type").Flush();
+            LogError()()("Unsupported input type").Flush();
 
             return false;
         }
@@ -374,7 +372,7 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2ms(
     const auto& script = spends.Script();
 
     if ((1u != script.M().value()) || (3u != script.N().value())) {
-        LogError()(OT_PRETTY_CLASS())("Unsupported multisig pattern").Flush();
+        LogError()()("Unsupported multisig pattern").Flush();
 
         return false;
     }
@@ -385,32 +383,28 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2ms(
     const auto& api = api_.Crypto().Blockchain();
 
     for (const auto& id : input.Keys({})) {  // TODO allocator
-        LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
-            crypto::print(id, api_.Crypto()))(" to sign previous output ")(
-            input.PreviousOutput().str())
+        LogVerbose()()("Loading element ")(crypto::print(id, api_.Crypto()))(
+            " to sign previous output ")(input.PreviousOutput().str())
             .Flush();
         const auto& node = api.GetKey(id);
 
         if (const auto got = node.KeyID(); got != id) {
-            LogError()(OT_PRETTY_CLASS())(
-                "api::Blockchain::GetKey returned the wrong key")
+            LogError()()("api::Blockchain::GetKey returned the wrong key")
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("requested: ")(
-                crypto::print(id, api_.Crypto()))
+            LogError()()("requested: ")(crypto::print(id, api_.Crypto()))
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("      got: ")(
-                crypto::print(got, api_.Crypto()))
+            LogError()()("      got: ")(crypto::print(got, api_.Crypto()))
                 .Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
         const auto& key = node.PrivateKey(reason);
 
-        OT_ASSERT(key.IsValid());
+        assert_true(key.IsValid());
 
         if (key.PublicKey() != script.MultisigPubkey(0).value()) {
-            LogError()(OT_PRETTY_CLASS())("Pubkey mismatch").Flush();
+            LogError()()("Pubkey mismatch").Flush();
 
             continue;
         }
@@ -421,20 +415,20 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2ms(
             key.SignDER(preimage, hash_type(), writer(sig), reason);
 
         if (false == haveSig) {
-            LogError()(OT_PRETTY_CLASS())("Failed to obtain signature").Flush();
+            LogError()()("Failed to obtain signature").Flush();
 
             return false;
         }
 
         sig.emplace_back(sigHash.flags_);
 
-        OT_ASSERT(0 < key.PublicKey().size());
+        assert_true(0 < key.PublicKey().size());
 
         views.emplace_back(reader(sig), ReadView{});
     }
 
     if (0 == views.size()) {
-        LogError()(OT_PRETTY_CLASS())("No keys available for signing ")(
+        LogError()()("No keys available for signing ")(
             input.PreviousOutput().str())
             .Flush();
 
@@ -442,7 +436,7 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2ms(
     }
 
     if (false == input.Internal().AddMultisigSignatures(views)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to apply signature").Flush();
+        LogError()()("Failed to apply signature").Flush();
 
         return false;
     }
@@ -463,24 +457,20 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pk(
     const auto& api = api_.Crypto().Blockchain();
 
     for (const auto& id : input.Keys({})) {  // TODO allocator
-        LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
-            crypto::print(id, api_.Crypto()))(" to sign previous output ")(
-            input.PreviousOutput().str())
+        LogVerbose()()("Loading element ")(crypto::print(id, api_.Crypto()))(
+            " to sign previous output ")(input.PreviousOutput().str())
             .Flush();
         const auto& node = api.GetKey(id);
 
         if (const auto got = node.KeyID(); got != id) {
-            LogError()(OT_PRETTY_CLASS())(
-                "api::Blockchain::GetKey returned the wrong key")
+            LogError()()("api::Blockchain::GetKey returned the wrong key")
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("requested: ")(
-                crypto::print(id, api_.Crypto()))
+            LogError()()("requested: ")(crypto::print(id, api_.Crypto()))
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("      got: ")(
-                crypto::print(got, api_.Crypto()))
+            LogError()()("      got: ")(crypto::print(got, api_.Crypto()))
                 .Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
         const auto& pub =
@@ -498,20 +488,20 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pk(
             key.SignDER(preimage, hash_type(), writer(sig), reason);
 
         if (false == haveSig) {
-            LogError()(OT_PRETTY_CLASS())("Failed to obtain signature").Flush();
+            LogError()()("Failed to obtain signature").Flush();
 
             return false;
         }
 
         sig.emplace_back(sigHash.flags_);
 
-        OT_ASSERT(0 < key.PublicKey().size());
+        assert_true(0 < key.PublicKey().size());
 
         views.emplace_back(reader(sig), ReadView{});
     }
 
     if (0 == views.size()) {
-        LogError()(OT_PRETTY_CLASS())("No keys available for signing ")(
+        LogError()()("No keys available for signing ")(
             input.PreviousOutput().str())
             .Flush();
 
@@ -519,7 +509,7 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pk(
     }
 
     if (false == input.Internal().AddSignatures(views)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to apply signature").Flush();
+        LogError()()("Failed to apply signature").Flush();
 
         return false;
     }
@@ -540,24 +530,20 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pkh(
     const auto& api = api_.Crypto().Blockchain();
 
     for (const auto& id : input.Keys({})) {
-        LogVerbose()(OT_PRETTY_CLASS())("Loading element ")(
-            crypto::print(id, api_.Crypto()))(" to sign previous output ")(
-            input.PreviousOutput().str())
+        LogVerbose()()("Loading element ")(crypto::print(id, api_.Crypto()))(
+            " to sign previous output ")(input.PreviousOutput().str())
             .Flush();
         const auto& node = api.GetKey(id);
 
         if (const auto got = node.KeyID(); got != id) {
-            LogError()(OT_PRETTY_CLASS())(
-                "api::Blockchain::GetKey returned the wrong key")
+            LogError()()("api::Blockchain::GetKey returned the wrong key")
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("requested: ")(
-                crypto::print(id, api_.Crypto()))
+            LogError()()("requested: ")(crypto::print(id, api_.Crypto()))
                 .Flush();
-            LogError()(OT_PRETTY_CLASS())("      got: ")(
-                crypto::print(got, api_.Crypto()))
+            LogError()()("      got: ")(crypto::print(got, api_.Crypto()))
                 .Flush();
 
-            OT_FAIL;
+            LogAbort()().Abort();
         }
 
         const auto& pub =
@@ -577,20 +563,20 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pkh(
             key.SignDER(preimage, hash_type(), writer(sig), reason);
 
         if (false == haveSig) {
-            LogError()(OT_PRETTY_CLASS())("Failed to obtain signature").Flush();
+            LogError()()("Failed to obtain signature").Flush();
 
             return false;
         }
 
         sig.emplace_back(sigHash.flags_);
 
-        OT_ASSERT(0 < key.PublicKey().size());
+        assert_true(0 < key.PublicKey().size());
 
         views.emplace_back(reader(sig), pubkey.Bytes());
     }
 
     if (0 == views.size()) {
-        LogError()(OT_PRETTY_CLASS())("No keys available for signing ")(
+        LogError()()("No keys available for signing ")(
             input.PreviousOutput().str())
             .Flush();
 
@@ -598,7 +584,7 @@ auto BitcoinTransactionBuilderPrivate::add_signatures_p2pkh(
     }
 
     if (false == input.Internal().AddSignatures(views)) {
-        LogError()(OT_PRETTY_CLASS())("Failed to apply signature").Flush();
+        LogError()()("Failed to apply signature").Flush();
 
         return false;
     }
@@ -633,8 +619,7 @@ auto BitcoinTransactionBuilderPrivate::add_sweep_inputs(
                     }
                     case Default:
                     default: {
-                        LogAbort()(OT_PRETTY_CLASS())(
-                            "proposal is not a sweep transaction")
+                        LogAbort()()("proposal is not a sweep transaction")
                             .Abort();
                     }
                 }
@@ -665,8 +650,7 @@ auto BitcoinTransactionBuilderPrivate::add_sweep_inputs(
                     throw std::runtime_error{"failed to add input"};
                 }
             } else {
-                LogError()(OT_PRETTY_CLASS())("unable to reserve ")(
-                    outpoint)(" for sweep")
+                LogError()()("unable to reserve ")(outpoint)(" for sweep")
                     .Flush();
             }
         }
@@ -680,7 +664,7 @@ auto BitcoinTransactionBuilderPrivate::add_sweep_inputs(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -709,8 +693,8 @@ auto BitcoinTransactionBuilderPrivate::bip_69() noexcept -> void
         }
     };
 
-    std::sort(std::begin(inputs_), std::end(inputs_), inputSort);
-    std::sort(std::begin(outputs_), std::end(outputs_), outputSort);
+    std::ranges::sort(inputs_, inputSort);
+    std::ranges::sort(outputs_, outputSort);
     auto index{-1};
 
     for (auto& output : outputs_) { output.Internal().SetIndex(++index); }
@@ -742,7 +726,7 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
     }};
 
     if (false == create_outputs()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to create outputs").Flush();
+        LogError()()("Failed to create outputs").Flush();
         output = PermanentFailure;
         rc = OutputCreationError;
 
@@ -750,7 +734,7 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
     }
 
     if (false == create_notifications(2u * dust())) {
-        LogError()(OT_PRETTY_CLASS())("Failed to create notifications").Flush();
+        LogError()()("Failed to create notifications").Flush();
         output = PermanentFailure;
         rc = OutputCreationError;
 
@@ -758,8 +742,7 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
     }
 
     if (false == add_change()) {
-        LogError()(OT_PRETTY_CLASS())("Failed to allocate change output")
-            .Flush();
+        LogError()()("Failed to allocate change output").Flush();
         output = PermanentFailure;
         rc = ChangeError;
 
@@ -769,20 +752,18 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
     while (false == is_funded()) {
         using node::internal::SpendPolicy;
         const auto policy = proposal_.Internal().Policy();
-        log(OT_PRETTY_CLASS())("asking database for outputs to fund proposal ")(
-            id_, crypto)
+        log()("asking database for outputs to fund proposal ")(id_, crypto)
             .Flush();
         auto candidate = db_.ReserveUTXO(log, spender(), id_, policy, alloc);
         auto [utxo, haveMore] = candidate;
 
         if (false == utxo.has_value()) {
             if (haveMore) {
-                LogError()(OT_PRETTY_CLASS())("Insufficient confirmed funds")
-                    .Flush();
+                LogError()()("Insufficient confirmed funds").Flush();
                 output = PermanentFailure;
                 rc = InsufficientConfirmedFunds;
             } else {
-                LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+                LogError()()("Insufficient funds").Flush();
                 output = PermanentFailure;
                 rc = InsufficientFunds;
             }
@@ -791,7 +772,7 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
         }
 
         if (false == add_input(utxo.value())) {
-            LogError()(OT_PRETTY_CLASS())("Failed to add input").Flush();
+            LogError()()("Failed to add input").Flush();
             output = PermanentFailure;
             rc = InputCreationError;
 
@@ -799,7 +780,7 @@ auto BitcoinTransactionBuilderPrivate::BuildNormalTransaction() noexcept
         }
     }
 
-    OT_ASSERT(is_funded());
+    assert_true(is_funded());
 
     finalize_outputs();
 
@@ -831,11 +812,10 @@ auto BitcoinTransactionBuilderPrivate::BuildSweepTransaction() noexcept
     if (false == add_sweep_inputs(output, rc)) { return output; }
 
     if (has_notification()) {
-        OT_ASSERT(false == has_output());
+        assert_false(has_output());
 
         if (false == create_notifications(0u)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to create notifications")
-                .Flush();
+            LogError()()("Failed to create notifications").Flush();
             output = PermanentFailure;
             rc = OutputCreationError;
 
@@ -843,7 +823,7 @@ auto BitcoinTransactionBuilderPrivate::BuildSweepTransaction() noexcept
         }
 
         if (false == is_funded()) {
-            LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+            LogError()()("Insufficient funds").Flush();
             output = PermanentFailure;
             rc = InsufficientFunds;
 
@@ -854,9 +834,7 @@ auto BitcoinTransactionBuilderPrivate::BuildSweepTransaction() noexcept
     } else {
         if (has_output()) {
             if (false == create_outputs()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to create destination output")
-                    .Flush();
+                LogError()()("Failed to create destination output").Flush();
                 output = PermanentFailure;
                 rc = OutputCreationError;
 
@@ -864,31 +842,28 @@ auto BitcoinTransactionBuilderPrivate::BuildSweepTransaction() noexcept
             }
         } else {
             if (false == add_change()) {
-                LogError()(OT_PRETTY_CLASS())(
-                    "Failed to allocate change output")
-                    .Flush();
+                LogError()()("Failed to allocate change output").Flush();
                 output = PermanentFailure;
                 rc = ChangeError;
 
                 return output;
             }
 
-            std::move(
-                change_.begin(), change_.end(), std::back_inserter(outputs_));
+            std::ranges::move(change_, std::back_inserter(outputs_));
             change_.clear();
         }
 
         const auto amount = excess_value();
 
         if (amount < dust()) {
-            LogError()(OT_PRETTY_CLASS())("Insufficient funds").Flush();
+            LogError()()("Insufficient funds").Flush();
             output = PermanentFailure;
             rc = InsufficientFunds;
 
             return output;
         }
 
-        OT_ASSERT(1_uz == outputs_.size());
+        assert_true(1_uz == outputs_.size());
 
         auto& txout = outputs_[0];
         txout.Internal().SetValue(amount);
@@ -913,7 +888,7 @@ auto BitcoinTransactionBuilderPrivate::bytes() const noexcept -> std::size_t
     const auto total = base + segwit;
     const auto scale = params::get(chain_).SegwitScaleFactor();
 
-    OT_ASSERT(0 < scale);
+    assert_true(0 < scale);
 
     const auto factor = scale - 1u;
     // TODO check for std::size_t overflow?
@@ -939,13 +914,13 @@ auto BitcoinTransactionBuilderPrivate::create_outputs() noexcept -> bool
         };
         const auto addr = proposal_.Internal().AddressRecipients();
         const auto pc = proposal_.Internal().PaymentCodeRecipients();
-        std::for_each(addr.begin(), addr.end(), make_addr);
-        std::for_each(pc.begin(), pc.end(), make_pc);
+        std::ranges::for_each(addr, make_addr);
+        std::ranges::for_each(pc, make_pc);
         output_count_ = outputs_.size() + change_.size();
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -971,7 +946,7 @@ auto BitcoinTransactionBuilderPrivate::create_notifications(
 
         return true;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return false;
     }
@@ -982,12 +957,12 @@ auto BitcoinTransactionBuilderPrivate::distribute_change_amounts() noexcept
 {
     const auto count = change_.size();
 
-    OT_ASSERT(0_uz < count);
+    assert_true(0_uz < count);
 
     auto remaining{excess_value().Internal().ExtractUInt64()};
     const auto share = remaining / count;
 
-    OT_ASSERT(share >= dust());
+    assert_true(share >= dust());
 
     for (auto& change : change_) {
         change.Internal().SetValue(share);
@@ -1007,9 +982,9 @@ auto BitcoinTransactionBuilderPrivate::distribute_change_amounts() noexcept
         }
     }
 
-    OT_ASSERT(0 == remaining);
+    assert_true(0 == remaining);
 
-    std::move(change_.begin(), change_.end(), std::back_inserter(outputs_));
+    std::ranges::move(change_, std::back_inserter(outputs_));
     change_.clear();
 }
 
@@ -1049,8 +1024,7 @@ auto BitcoinTransactionBuilderPrivate::dust() const noexcept -> std::uint64_t
     try {
         dust = amount.Internal().ExtractUInt64();
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())("error calculating dust: ")(e.what())
-            .Flush();
+        LogError()()("error calculating dust: ")(e.what()).Flush();
     }
 
     return dust;
@@ -1138,7 +1112,7 @@ auto BitcoinTransactionBuilderPrivate::finalize(
 
         return Success;
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
 
         return PermanentFailure;
     }
@@ -1146,8 +1120,8 @@ auto BitcoinTransactionBuilderPrivate::finalize(
 
 auto BitcoinTransactionBuilderPrivate::finalize_outputs() noexcept -> void
 {
-    OT_ASSERT(is_funded());
-    OT_ASSERT(false == change_.empty());
+    assert_true(is_funded());
+    assert_false(change_.empty());
 
     if (excess_value() < dust()) { drop_unnecessary_change(); }
 
@@ -1163,11 +1137,10 @@ auto BitcoinTransactionBuilderPrivate::finalize_transaction() noexcept
         auto output = Vector<Input>{};  // TODO allocator
         output.reserve(inputs_.size());
         output.clear();
-        std::transform(
-            std::begin(inputs_),
-            std::end(inputs_),
-            std::back_inserter(output),
-            [](auto& input) -> auto { return std::move(input.first); });
+        std::ranges::transform(
+            inputs_, std::back_inserter(output), [](auto& input) -> auto {
+                return std::move(input.first);
+            });
 
         return output;
     }();
@@ -1194,22 +1167,22 @@ auto BitcoinTransactionBuilderPrivate::get_private_key(
     const auto& key = element.PrivateKey(reason);
 
     if (false == key.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("failed to obtain private key ")(
+        LogError()()("failed to obtain private key ")(
             crypto::print(element.KeyID(), api_.Crypto()))
             .Flush();
 
         return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
     }
 
-    OT_ASSERT(key.HasPrivate());
+    assert_true(key.HasPrivate());
 
     if (key.PublicKey() != pubkey.PublicKey()) {
         const auto got = api_.Factory().DataFromBytes(key.PublicKey());
         const auto expected = api_.Factory().DataFromBytes(pubkey.PublicKey());
         const auto [account, subchain, index] = element.KeyID();
-        LogAbort()(OT_PRETTY_CLASS())("Derived private key for "
-                                      "account ")(account, api_.Crypto())(
-            " subchain ")(static_cast<std::uint32_t>(subchain))(" index ")(
+        LogAbort()()("Derived private key for "
+                     "account ")(account, api_.Crypto())(" subchain ")(
+            static_cast<std::uint32_t>(subchain))(" index ")(
             index)(" does not correspond to the expected public key. Got ")
             .asHex(got)(" expected ")
             .asHex(expected)
@@ -1246,7 +1219,7 @@ auto BitcoinTransactionBuilderPrivate::init_bip143(
     }};
     bip143.emplace();
 
-    OT_ASSERT(bip143.has_value());
+    assert_true(bip143.has_value());
 
     auto& hashes = bip143.value();
     auto cb = [&](const auto& preimage, auto& dest) -> bool {
@@ -1267,7 +1240,7 @@ auto BitcoinTransactionBuilderPrivate::init_bip143(
         }
 
         if (false == cb(preimage, hashes.outpoints_)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to hash outpoints").Flush();
+            LogError()()("Failed to hash outpoints").Flush();
 
             return false;
         }
@@ -1284,7 +1257,7 @@ auto BitcoinTransactionBuilderPrivate::init_bip143(
         }
 
         if (false == cb(preimage, hashes.sequences_)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to hash sequences").Flush();
+            LogError()()("Failed to hash sequences").Flush();
 
             return false;
         }
@@ -1299,8 +1272,7 @@ auto BitcoinTransactionBuilderPrivate::init_bip143(
             const auto size = internal.CalculateSize();
 
             if (!internal.Serialize(preallocated(size, it)).has_value()) {
-                LogError()(OT_PRETTY_CLASS())("Failed to serialize output")
-                    .Flush();
+                LogError()()("Failed to serialize output").Flush();
 
                 return false;
             }
@@ -1309,7 +1281,7 @@ auto BitcoinTransactionBuilderPrivate::init_bip143(
         }
 
         if (false == cb(preimage, hashes.outputs_)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to hash outputs").Flush();
+            LogError()()("Failed to hash outputs").Flush();
 
             return false;
         }
@@ -1328,19 +1300,16 @@ auto BitcoinTransactionBuilderPrivate::init_txcopy(
     auto inputs = Vector<Input>{};  // TODO allocator
     inputs.reserve(inputs_.size());
     inputs.clear();
-    std::transform(
-        std::begin(inputs_),
-        std::end(inputs_),
+    std::ranges::transform(
+        inputs_,
         std::back_inserter(inputs),
-        [](const auto& input) -> auto {
-            // TODO allocator
+        [](const auto& input) -> auto {  // TODO allocator
             return input.first.Internal().SignatureVersion({});
         });
     auto outputs = Vector<Output>{};  // TODO allocator
     outputs.reserve(outputs_.size());
     outputs.clear();
-    std::copy(
-        std::begin(outputs_), std::end(outputs_), std::back_inserter(outputs));
+    std::ranges::copy(outputs_, std::back_inserter(outputs));
 
     txcopy = factory::BitcoinTransaction(
         api_.Crypto(),
@@ -1494,7 +1463,7 @@ auto BitcoinTransactionBuilderPrivate::operator()() noexcept -> BuildResult
     try {
         add_existing_inputs(alloc);
     } catch (const std::exception& e) {
-        LogError()(OT_PRETTY_CLASS())(e.what()).Flush();
+        LogError()()(e.what()).Flush();
         promise_.set_value({InputCreationError, {}});
 
         return PermanentFailure;
@@ -1582,8 +1551,7 @@ auto BitcoinTransactionBuilderPrivate::sign_input(
         case unknown_category:
         case balance_based:
         default: {
-            LogError()(OT_PRETTY_CLASS())("Unsupported chain: ")(
-                blockchain::print(chain_))
+            LogError()()("Unsupported chain: ")(blockchain::print(chain_))
                 .Flush();
 
             return false;
@@ -1597,7 +1565,7 @@ auto BitcoinTransactionBuilderPrivate::sign_input_bch(
     Bip143& bip143) const noexcept -> bool
 {
     if (false == init_bip143(bip143)) {
-        LogError()(OT_PRETTY_CLASS())("Error instantiating bip143").Flush();
+        LogError()()("Error instantiating bip143").Flush();
 
         return false;
     }
@@ -1615,7 +1583,7 @@ auto BitcoinTransactionBuilderPrivate::sign_input_btc(
     Transaction& txcopy) const noexcept -> bool
 {
     if (false == init_txcopy(txcopy)) {
-        LogError()(OT_PRETTY_CLASS())("Error instantiating txcopy").Flush();
+        LogError()()("Error instantiating txcopy").Flush();
 
         return false;
     }
@@ -1625,13 +1593,12 @@ auto BitcoinTransactionBuilderPrivate::sign_input_btc(
         txcopy.Internal().asBitcoin().GetPreimageBTC(index, sigHash);
 
     if (0 == preimage.size()) {
-        LogError()(OT_PRETTY_CLASS())("Error obtaining signing preimage")
-            .Flush();
+        LogError()()("Error obtaining signing preimage").Flush();
 
         return false;
     }
 
-    std::copy(sigHash.begin(), sigHash.end(), std::back_inserter(preimage));
+    std::ranges::copy(sigHash, std::back_inserter(preimage));
 
     return add_signatures(reader(preimage), sigHash, input);
 }
@@ -1642,7 +1609,7 @@ auto BitcoinTransactionBuilderPrivate::sign_input_segwit(
     Bip143& bip143) const noexcept -> bool
 {
     if (false == init_bip143(bip143)) {
-        LogError()(OT_PRETTY_CLASS())("Error instantiating bip143").Flush();
+        LogError()()("Error instantiating bip143").Flush();
 
         return false;
     }
@@ -1663,8 +1630,7 @@ auto BitcoinTransactionBuilderPrivate::sign_inputs() noexcept -> bool
 
     for (auto& [input, value] : inputs_) {
         if (false == sign_input(++index, input, txcopy, bip143)) {
-            LogError()(OT_PRETTY_CLASS())("Failed to sign input ")(index)
-                .Flush();
+            LogError()()("Failed to sign input ")(index).Flush();
 
             return false;
         }
@@ -1687,16 +1653,15 @@ auto BitcoinTransactionBuilderPrivate::validate(
     -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
     const auto [account, subchain, index] = element.KeyID();
-    LogTrace()(OT_PRETTY_CLASS())("considering spend key ")(
-        index)(" from subchain ")(static_cast<std::uint32_t>(subchain))(
-        " of account ")(account, api_.Crypto())(" for previous output ")(
-        outpoint.str())
+    LogTrace()()("considering spend key ")(index)(" from subchain ")(
+        static_cast<std::uint32_t>(subchain))(" of account ")(
+        account, api_.Crypto())(" for previous output ")(outpoint.str())
         .Flush();
 
     const auto& key = element.Key();
 
     if (false == key.IsValid()) {
-        LogError()(OT_PRETTY_CLASS())("missing public key").Flush();
+        LogError()()("missing public key").Flush();
 
         return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
     }
@@ -1705,14 +1670,13 @@ auto BitcoinTransactionBuilderPrivate::validate(
         const auto expected = output.Script().Pubkey();
 
         if (false == expected.has_value()) {
-            LogError()(OT_PRETTY_CLASS())("wrong output script type").Flush();
+            LogError()()("wrong output script type").Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
 
         if (key.PublicKey() != expected.value()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Provided public key does not match expected value")
+            LogError()()("Provided public key does not match expected value")
                 .Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
@@ -1721,14 +1685,13 @@ auto BitcoinTransactionBuilderPrivate::validate(
         const auto expected = output.Script().PubkeyHash();
 
         if (false == expected.has_value()) {
-            LogError()(OT_PRETTY_CLASS())("wrong output script type").Flush();
+            LogError()()("wrong output script type").Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
         }
 
         if (element.PubkeyHash().Bytes() != expected.value()) {
-            LogError()(OT_PRETTY_CLASS())(
-                "Provided public key does not match expected hash")
+            LogError()()("Provided public key does not match expected hash")
                 .Flush();
 
             return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
