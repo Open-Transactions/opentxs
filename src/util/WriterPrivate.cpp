@@ -34,6 +34,11 @@ WriterPrivate::WriterPrivate(
 {
 }
 
+auto WriterPrivate::CanTruncate() const noexcept -> bool
+{
+    return truncate_.operator bool();
+}
+
 auto WriterPrivate::Reserve(std::size_t val) noexcept -> WriteBuffer
 {
     if (size_.has_value()) {

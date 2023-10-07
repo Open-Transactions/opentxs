@@ -3,16 +3,4 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(
-  opentxs-testlib
-  PRIVATE
-    "Bip32.cpp"
-    "Bip32.hpp"
-    "Hashes.cpp"
-    "Hashes.hpp"
-    "PaymentCodeV1.cpp"
-    "PaymentCodeV1.hpp"
-    "PaymentCodeV3.cpp"
-    "PaymentCodeV3.hpp"
-    "Z85.hpp"
-)
+add_opentx_low_level_test(ottest-unit-crypto-encode Encode.cpp)

@@ -32,6 +32,7 @@ namespace opentxs
 class WriterPrivate final : public pmr::Allocated
 {
 public:
+    auto CanTruncate() const noexcept -> bool;
     auto clone(allocator_type alloc) const noexcept -> WriterPrivate*
     {
         return pmr::clone(this, {alloc});
