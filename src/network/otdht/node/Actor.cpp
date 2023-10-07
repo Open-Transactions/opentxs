@@ -293,11 +293,8 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
 
                 return out;
             }();
-            LogConsole()("OTDHT listening on ")(
-                endpoint)(" using local pubkey ")(pubkey)
-                .Flush();
             const auto& [transport, bytes] = external;
-            external_endpoints_.emplace_back(
+            const auto& addr = external_endpoints_.emplace_back(
                 api_.Factory().BlockchainAddressZMQ(
                     blockchain::Protocol::opentxs,
                     transport,
@@ -306,6 +303,10 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
                     {},
                     {},
                     shared_.public_key_.Bytes()));
+            LogConsole()("OTDHT listening on ")(
+                endpoint)(" using local pubkey ")(
+                pubkey)(", reachable by external nodes via ")(addr.Display())
+                .Flush();
         } else {
             LogConsole()("OTDHT unable to bind to ")(endpoint).Flush();
         }
@@ -404,7 +405,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
 
                 return ParsedListener{
                     CString{"tcp://", alloc}
-                        .append(external->to_string())
+                        .append(local->to_string())
                         .append(":")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
@@ -438,7 +439,7 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
 
                 return ParsedListener{
                     CString{"tcp://[", alloc}
-                        .append(external->to_string())
+                        .append(local->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
