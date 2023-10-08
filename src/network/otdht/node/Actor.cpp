@@ -395,12 +395,16 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv4 address"};
                 }
 
-                return ParsedListener{
+                auto out = ParsedListener{
                     CString{"tcp://", alloc}
                         .append(local->to_string())
                         .append(":")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                const auto bytes = external->to_v4().to_bytes();
+                std::get<1>(out).second.Assign(bytes.data(), bytes.size());
+
+                return out;
             }
             case ipv6: {
                 if (val.local_type_ != ipv6) {
@@ -429,12 +433,16 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv6 address"};
                 }
 
-                return ParsedListener{
+                auto out = ParsedListener{
                     CString{"tcp://[", alloc}
                         .append(local->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                const auto bytes = external->to_v6().to_bytes();
+                std::get<1>(out).second.Assign(bytes.data(), bytes.size());
+
+                return out;
             }
             default: {
                 LogError()()(name_)(": unsupported listener type: ")(
