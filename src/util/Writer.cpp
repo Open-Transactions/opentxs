@@ -48,6 +48,11 @@ Writer::Writer(Writer&& rhs, allocator_type alloc) noexcept
     pmr::move_construct(imp_, rhs.imp_, alloc);
 }
 
+auto Writer::CanTruncate() const noexcept -> bool
+{
+    return imp_->CanTruncate();
+}
+
 auto Writer::get_allocator() const noexcept -> allocator_type
 {
     return imp_->get_allocator();

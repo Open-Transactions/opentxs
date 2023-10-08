@@ -5,11 +5,12 @@
 
 #include "network/blockchain/bitcoin/message/addr/Imp.hpp"  // IWYU pragma: associated
 
-#include "internal/network/blockchain/Factory.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
@@ -70,11 +71,9 @@ Message::Message(
                       deserialize_object(payload, raw, "address");
                       const auto [network, bytearray] =
                           ExtractAddress(raw.data_.address_);
-                      out.emplace_back(factory::BlockchainAddress(
-                          api,
+                      out.emplace_back(api.Factory().BlockchainAddress(
                           network::blockchain::Protocol::bitcoin,
                           network,
-                          invalid,
                           bytearray.Bytes(),
                           raw.data_.port_.value(),
                           chain,
@@ -82,19 +81,15 @@ Message::Message(
                           TranslateServices(
                               chain,
                               version,
-                              GetServices(raw.data_.services_.value())),
-                          false,
-                          {}));
+                              GetServices(raw.data_.services_.value()))));
                   } else {
                       auto raw = AddressVersion{};
                       deserialize_object(payload, raw, "address");
                       const auto [network, bytearray] =
                           ExtractAddress(raw.address_);
-                      out.emplace_back(factory::BlockchainAddress(
-                          api,
+                      out.emplace_back(api.Factory().BlockchainAddress(
                           network::blockchain::Protocol::bitcoin,
                           network,
-                          invalid,
                           bytearray.Bytes(),
                           raw.port_.value(),
                           chain,
@@ -102,9 +97,7 @@ Message::Message(
                           TranslateServices(
                               chain,
                               version,
-                              GetServices(raw.services_.value())),
-                          false,
-                          {}));
+                              GetServices(raw.services_.value()))));
                   }
               }
 

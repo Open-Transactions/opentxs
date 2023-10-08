@@ -95,6 +95,17 @@
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace boost
+{
+namespace asio
+{
+namespace ip
+{
+class address;
+}  // namespace ip
+}  // namespace asio
+}  // namespace boost
+
 namespace opentxs
 {
 namespace api
@@ -454,18 +465,76 @@ public:
         const blockchain::Type chain,
         const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services)
-        const -> opentxs::network::blockchain::Address final;
-    auto BlockchainAddressZMQ(
+        const noexcept -> opentxs::network::blockchain::Address final
+    {
+        return parent_.BlockchainAddress(
+            protocol, network, bytes, port, chain, lastConnected, services);
+    }
+    auto BlockchainAddress(
+        const opentxs::network::blockchain::Protocol protocol,
+        const boost::asio::ip::address& address,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services)
+        const noexcept -> opentxs::network::blockchain::Address final
+    {
+        return parent_.Internal().BlockchainAddress(
+            protocol, address, port, chain, lastConnected, services);
+    }
+    auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+        const noexcept -> opentxs::network::blockchain::Address final
+    {
+        return parent_.Internal().BlockchainAddress(serialized);
+    }
+    auto BlockchainAddressIncoming(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,
+        const opentxs::network::blockchain::Transport subtype,
+        const ReadView bytes,
+        const std::uint16_t port,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView cookie) const noexcept
+        -> opentxs::network::blockchain::Address final
+    {
+        return parent_.Internal().BlockchainAddressIncoming(
+            protocol,
+            network,
+            subtype,
+            bytes,
+            port,
+            chain,
+            lastConnected,
+            services,
+            cookie);
+    }
+    auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const opentxs::network::blockchain::Transport subtype,
         const ReadView bytes,
         const blockchain::Type chain,
         const Time lastConnected,
         const Set<opentxs::network::blockchain::bitcoin::Service>& services,
-        const ReadView key) const
-        -> opentxs::network::blockchain::Address final;
-    auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized) const
-        -> opentxs::network::blockchain::Address final;
+        const ReadView key) const noexcept
+        -> opentxs::network::blockchain::Address final
+    {
+        return parent_.BlockchainAddressZMQ(
+            protocol, subtype, bytes, chain, lastConnected, services, key);
+    }
+    auto BlockchainAddressZMQ(
+        const opentxs::network::blockchain::Protocol protocol,
+        const boost::asio::ip::address& address,
+        const blockchain::Type chain,
+        const Time lastConnected,
+        const Set<opentxs::network::blockchain::bitcoin::Service>& services,
+        const ReadView key) const noexcept
+        -> opentxs::network::blockchain::Address final
+    {
+        return parent_.BlockchainAddressZMQ(
+            protocol, address, chain, lastConnected, services, key);
+    }
     auto BlockchainBlock(
         const blockchain::Type chain,
         const ReadView bytes,

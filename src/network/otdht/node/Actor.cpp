@@ -286,11 +286,8 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
 
                 return out;
             }();
-            LogConsole()("OTDHT listening on ")(
-                endpoint)(" using local pubkey ")(pubkey)
-                .Flush();
             const auto& [transport, bytes] = external;
-            external_endpoints_.emplace_back(
+            const auto& addr = external_endpoints_.emplace_back(
                 api_.Factory().BlockchainAddressZMQ(
                     blockchain::Protocol::opentxs,
                     transport,
@@ -299,6 +296,10 @@ auto Node::Actor::listen(allocator_type monotonic) noexcept -> void
                     {},
                     {},
                     shared_.public_key_.Bytes()));
+            LogConsole()("OTDHT listening on ")(
+                endpoint)(" using local pubkey ")(
+                pubkey)(", reachable by external nodes via ")(addr.Display())
+                .Flush();
         } else {
             LogConsole()("OTDHT unable to bind to ")(endpoint).Flush();
         }
@@ -394,12 +395,16 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv4 address"};
                 }
 
-                return ParsedListener{
+                auto out = ParsedListener{
                     CString{"tcp://", alloc}
-                        .append(external->to_string())
+                        .append(local->to_string())
                         .append(":")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                const auto bytes = external->to_v4().to_bytes();
+                std::get<1>(out).second.Assign(bytes.data(), bytes.size());
+
+                return out;
             }
             case ipv6: {
                 if (val.local_type_ != ipv6) {
@@ -428,12 +433,16 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv6 address"};
                 }
 
-                return ParsedListener{
+                auto out = ParsedListener{
                     CString{"tcp://[", alloc}
-                        .append(external->to_string())
+                        .append(local->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                const auto bytes = external->to_v6().to_bytes();
+                std::get<1>(out).second.Assign(bytes.data(), bytes.size());
+
+                return out;
             }
             default: {
                 LogError()()(name_)(": unsupported listener type: ")(

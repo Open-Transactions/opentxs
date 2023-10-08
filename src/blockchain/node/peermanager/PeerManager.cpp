@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
+#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
@@ -37,7 +38,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/blockchain/bitcoin/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
@@ -338,18 +338,15 @@ Actor::Actor(
 
             if (const auto a = address_from_string(host); a.has_value()) {
                 const auto serialized = serialize(*a);
-                const auto& addr = out.emplace_back(factory::BlockchainAddress(
-                    api_,
-                    params.P2PDefaultProtocol(),
-                    type(*a),
-                    invalid,
-                    serialized.Bytes(),
-                    params.P2PDefaultPort(),
-                    chain_,
-                    {},
-                    {},
-                    false,
-                    {}));
+                const auto& addr =
+                    out.emplace_back(api_.Factory().BlockchainAddress(
+                        params.P2PDefaultProtocol(),
+                        type(*a),
+                        serialized.Bytes(),
+                        params.P2PDefaultPort(),
+                        chain_,
+                        {},
+                        {}));
 
                 if (addr.IsValid()) {
                     LogConsole()("Adding ")(print(chain_))(" peer ")(
@@ -477,8 +474,7 @@ auto Actor::accept(
 {
     assert_false(nullptr == me);
 
-    auto address = factory::BlockchainAddress(
-        me->api_,
+    auto address = me->api_.Factory().Internal().BlockchainAddressIncoming(
         params::get(me->chain_).P2PDefaultProtocol(),
         type,
         network::blockchain::Transport::invalid,
@@ -487,7 +483,6 @@ auto Actor::accept(
         me->chain_,
         {},
         {},
-        true,
         {});
 
     if (address.IsValid()) {
@@ -793,17 +788,13 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
             }
 
             const auto addr = serialize(*boost);
-            auto address = opentxs::factory::BlockchainAddress(
-                api_,
+            auto address = api_.Factory().BlockchainAddress(
                 params.P2PDefaultProtocol(),
                 type(*boost),
-                network::blockchain::Transport::invalid,
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},
-                {},
-                false,
                 {});
             listen(address, monotonic);
         } catch (const std::exception& e) {
@@ -832,17 +823,13 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
             }
 
             const auto addr = serialize(*boost);
-            auto address = opentxs::factory::BlockchainAddress(
-                api_,
+            auto address = api_.Factory().BlockchainAddress(
                 params.P2PDefaultProtocol(),
                 type(*boost),
-                network::blockchain::Transport::invalid,
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
                 {},
-                {},
-                false,
                 {});
             listen(address, monotonic);
         } catch (const std::exception& e) {
@@ -1441,8 +1428,7 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
             CString{monotonic}.append(endpoint).append(" #").append(
                 std::to_string(payload[1].as<std::uint64_t>()));
         const auto peer = add_peer(
-            factory::BlockchainAddress(
-                api_,
+            api_.Factory().Internal().BlockchainAddressIncoming(
                 params::get(chain_).P2PDefaultProtocol(),
                 network::blockchain::Transport::zmq,
                 subtype,
@@ -1451,7 +1437,6 @@ auto Actor::process_spawn_peer(Message&& msg, allocator_type monotonic) noexcept
                 chain_,
                 {},
                 {},
-                true,
                 cookie),
             true,
             std::nullopt,
