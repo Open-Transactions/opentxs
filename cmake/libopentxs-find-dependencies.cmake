@@ -149,7 +149,31 @@ if(OT_WITH_QT)
       Qt6
       Qt5
     )
+  elseif(
+    QT_VERSION_MAJOR
+    MATCHES
+    6
+  )
+    find_package(
+      QT
+      REQUIRED
+      NAMES
+      Qt6
+    )
+  elseif(
+    QT_VERSION_MAJOR
+    MATCHES
+    5
+  )
+    find_package(
+      QT
+      REQUIRED
+      NAMES
+      Qt5
+    )
   endif()
+
+  message(STATUS "Using Qt${QT_VERSION_MAJOR}")
 
   find_package(
     Qt${QT_VERSION_MAJOR}
