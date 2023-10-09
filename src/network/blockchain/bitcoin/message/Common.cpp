@@ -29,6 +29,7 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
@@ -268,14 +269,26 @@ Bip155::Bip155(
                     return 0;
                 }
             }();
-            const auto key = address.Key();
+            const auto key = [&] {
+                auto out = FixedByteArray<32_uz>{};
+                const auto view = address.Key();
+
+                if (view.size() != out.size()) {
+                    LogError()()("invalid curve zmq key: ").asHex(view).Flush();
+                }
+
+                std::memcpy(
+                    out.data(), view.data(), std::min(view.size(), out.size()));
+
+                return out;
+            }();
             const auto addr = address.Bytes();
             auto out = ByteArray{};
             auto buf = reserve(
                 out.WriteInto(),
                 key.size() + sizeof(subtype) + addr.size(),
                 "zmq endpoint data");
-            copy(key, buf, "key");
+            copy(key.Bytes(), buf, "key");
             serialize_object(subtype, buf, "subtype");
             copy(addr.Bytes(), buf, "addr");
 
@@ -370,15 +383,16 @@ auto Bip155::ToAddress(
         try {
             auto addr = addr_.Bytes();
             auto key = std::array<char, 32_uz>{};
-            const auto keyView = ReadView{key.data(), key.size()};
-            auto subtype = std::uint8_t{};
             deserialize(
                 addr, preallocated(key.size(), key.data()), key.size(), "key");
+            const auto keyView = ReadView{key.data(), key.size()};
+            auto subtype = std::uint8_t{};
             deserialize_object(addr, subtype, "subtype");
+            const auto network = GetNetwork(subtype, addr.size());
 
             return api.Factory().BlockchainAddressZMQ(
                 bitcoin,
-                GetNetwork(subtype, addr.size()),
+                network,
                 addr,
                 chain,
                 convert_time(time_.value()),
