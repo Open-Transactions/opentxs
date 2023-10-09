@@ -265,6 +265,8 @@ Peer::Peer(
 
 auto Peer::can_gossip(const blockchain::Address& address) const noexcept -> bool
 {
+    if (address.Internal().Incoming()) { return false; }
+
     using enum blockchain::Transport;
 
     if (addr_v2_) {

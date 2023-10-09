@@ -719,7 +719,7 @@ auto Node::Actor::process_blockchain_external(
                     auto out =
                         zeromq::tagged_reply_to_message(p, spawn_peer, true);
                     out.AddFrame(c);
-                    out.AddFrame(endpoint.Subtype());
+                    out.AddFrame(blockchain::Transport::zmq);
                     out.AddFrame(endpoint.Display());
 
                     return out;
