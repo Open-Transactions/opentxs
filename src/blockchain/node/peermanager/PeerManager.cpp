@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <future>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <optional>
 #include <span>
@@ -396,22 +397,24 @@ Actor::Actor(
             log_(OT_PRETTY_CLASS())(name_)(": loaded seed node ")(
                 hostname.c_str())(" with pubkey ")(key.c_str())
                 .Flush();
-            const auto& [_, pubkey] = out.emplace_back(hostname.c_str(), [&] {
-                auto pub = CString{alloc};
+            auto pubkey = [&] {
+                auto pk = CString{alloc};
                 const auto view = std::string_view{key.c_str(), key.size()};
                 const auto rc =
-                    api_.Crypto().Encode().Z85Decode(view, writer(pub));
+                    api_.Crypto().Encode().Z85Decode(view, writer(pk));
 
                 OT_ASSERT(rc);
 
-                return pub;
-            }());
+                return pk;
+            }();
 
             if (pubkey == api_.Network().OTDHT().CurvePublicKey()) {
                 log_(OT_PRETTY_CLASS())(name_)(": skipping connection to self")
                     .Flush();
-                out.pop_back();
+                continue;
             }
+
+            out.emplace_back(hostname.c_str(), std::move(pubkey));
         }
 
         return out;
@@ -420,8 +423,21 @@ Actor::Actor(
         auto out = decltype(seeds_){alloc};
         out.clear();
 
-        for (const auto& [host, _] : seed_nodes_) {
-            out.try_emplace(host, Seed{});
+        for (const auto& [host, key] : seed_nodes_) {
+            auto& seed = out.try_emplace(host, Seed{}).first->second;
+            auto address = network::asio::address_from_string(host);
+
+            if (address.has_value()) {
+                seed.address_ = api_.Factory().BlockchainAddressZMQ(
+                    params::get(chain_).P2PDefaultProtocol(),
+                    *address,
+                    chain_,
+                    Time{},
+                    {},
+                    key);
+            }
+
+            seed.last_dns_query_.emplace(std::numeric_limits<sTime>::max());
         }
 
         return out;
