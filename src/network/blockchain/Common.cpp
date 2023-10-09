@@ -30,6 +30,28 @@ namespace opentxs::network::blockchain
 {
 using namespace std::literals;
 
+auto expected_address_size(Transport in) noexcept -> std::optional<std::size_t>
+{
+    using enum Transport;
+    static constexpr auto map =
+        frozen::make_unordered_map<Transport, std::size_t>({
+            {ipv4, 4_uz},
+            {ipv6, 16_uz},
+            {onion2, 10_uz},
+            {onion3, 32_uz},
+            {eep, 32_uz},
+            {cjdns, 16_uz},
+        });
+
+    if (const auto* i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
+
+        return std::nullopt;
+    }
+}
+
 auto print(Protocol in) noexcept -> std::string_view
 {
     using enum Protocol;
