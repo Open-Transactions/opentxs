@@ -154,6 +154,8 @@ auto deserialize(
     std::size_t bytes,
     const std::string_view msg) noexcept(false) -> void
 {
+    check_at_least(in, bytes, msg);
+
     if (copy(in, std::move(out), bytes)) {
         in.remove_prefix(bytes);
     } else {
