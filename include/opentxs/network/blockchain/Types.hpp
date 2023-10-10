@@ -5,7 +5,9 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
@@ -30,6 +32,8 @@ enum class Transport : std::uint8_t;  // IWYU pragma: keep
 
 using AddressID = identifier::Generic;
 
+OPENTXS_EXPORT auto expected_address_size(Transport) noexcept
+    -> std::optional<std::size_t>;
 OPENTXS_EXPORT auto print(Protocol) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Transport) noexcept -> std::string_view;

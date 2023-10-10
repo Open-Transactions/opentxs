@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "2_Factory.hpp"
-#include "BoostAsio.hpp"
 #include "core/identifier/IdentifierPrivate.hpp"
 #include "internal/api/Factory.hpp"
 #include "internal/core/Core.hpp"
@@ -26,6 +25,7 @@
 #include "internal/core/String.hpp"
 #include "internal/core/identifier/Factory.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -54,7 +54,7 @@
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Address.hpp"
-#include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Transport.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -632,23 +632,14 @@ auto Factory::BlockchainAddress(
     const Set<opentxs::network::blockchain::bitcoin::Service>& services)
     const noexcept -> opentxs::network::blockchain::Address
 {
-    using enum opentxs::network::blockchain::Transport;
-
-    if (address.is_v6()) {
-        const auto bytes = address.to_v6().to_bytes();
-        const auto view =
-            ReadView{reinterpret_cast<const char*>(bytes.data()), bytes.size()};
-
-        return BlockchainAddress(
-            protocol, ipv6, view, port, chain, lastConnected, services);
-    } else {
-        const auto bytes = address.to_v4().to_bytes();
-        const auto view =
-            ReadView{reinterpret_cast<const char*>(bytes.data()), bytes.size()};
-
-        return BlockchainAddress(
-            protocol, ipv4, view, port, chain, lastConnected, services);
-    }
+    return BlockchainAddress(
+        protocol,
+        opentxs::network::asio::type(address),
+        opentxs::network::asio::serialize(address).Bytes(),
+        port,
+        chain,
+        lastConnected,
+        services);
 }
 
 auto Factory::BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
@@ -746,23 +737,14 @@ auto Factory::BlockchainAddressZMQ(
     const Set<opentxs::network::blockchain::bitcoin::Service>& services,
     const ReadView key) const noexcept -> opentxs::network::blockchain::Address
 {
-    using enum opentxs::network::blockchain::Transport;
-
-    if (address.is_v6()) {
-        const auto bytes = address.to_v6().to_bytes();
-        const auto view =
-            ReadView{reinterpret_cast<const char*>(bytes.data()), bytes.size()};
-
-        return BlockchainAddressZMQ(
-            protocol, ipv6, view, chain, lastConnected, services, key);
-    } else {
-        const auto bytes = address.to_v4().to_bytes();
-        const auto view =
-            ReadView{reinterpret_cast<const char*>(bytes.data()), bytes.size()};
-
-        return BlockchainAddressZMQ(
-            protocol, ipv4, view, chain, lastConnected, services, key);
-    }
+    return BlockchainAddressZMQ(
+        protocol,
+        opentxs::network::asio::type(address),
+        opentxs::network::asio::serialize(address).Bytes(),
+        chain,
+        lastConnected,
+        services,
+        key);
 }
 
 auto Factory::Data() const -> ByteArray { return {}; }

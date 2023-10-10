@@ -111,7 +111,7 @@ auto Message::get_payload(Transport type, WriteBuffer& buf) const
     for (const auto& addr2 : *cached_items_) {
         if (false == addr2.Serialize(buf)) {
 
-            throw std::runtime_error{"failed to serialize addresst"};
+            throw std::runtime_error{"failed to serialize address"};
         }
     }
 }

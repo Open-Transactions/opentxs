@@ -27,7 +27,6 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -35,6 +34,8 @@
 
 namespace opentxs::network::blockchain
 {
+using namespace std::literals;
+
 AddressPrivate::AddressPrivate(
     const api::Crypto& crypto,
     const api::Factory& factory,
@@ -80,70 +81,69 @@ AddressPrivate::AddressPrivate(
     using enum Transport;
 
     switch (type_) {
-        case ipv4: {
-            if (sizeof(ip::address_v4::bytes_type) != size) {
-                const auto error = UnallocatedCString{"expected "}
-                                       .append(std::to_string(
-                                           sizeof(ip::address_v4::bytes_type)))
-                                       .append(" bytes for ipv4 but received ")
-                                       .append(std::to_string(size))
-                                       .append(" bytes");
-
-                throw std::runtime_error(error);
-            }
-        } break;
+        case ipv4:
         case ipv6:
+        case onion2:
+        case onion3:
+        case eep:
         case cjdns: {
-            if (sizeof(ip::address_v6::bytes_type) != size) {
-                const auto error = UnallocatedCString{"expected "}
-                                       .append(std::to_string(
-                                           sizeof(ip::address_v6::bytes_type)))
-                                       .append(" bytes for ipv4 but received ")
-                                       .append(std::to_string(size))
-                                       .append(" bytes");
+            const auto expected = expected_address_size(type_);
 
-                throw std::runtime_error(error);
-            }
-        } break;
-        case onion2: {
-            if (10_uz != size) {
-                const auto error =
-                    UnallocatedCString{"expected "}
-                        .append(std::to_string(10_uz))
-                        .append(" bytes for onion2 but received ")
-                        .append(std::to_string(size))
-                        .append(" bytes");
+            if (expected.value() != size) {
 
-                throw std::runtime_error(error);
-            }
-        } break;
-        case onion3: {
-            if (32_uz != size) {
-                const auto error =
-                    UnallocatedCString{"expected "}
-                        .append(std::to_string(32_uz))
-                        .append(" bytes for onion3 but received ")
-                        .append(std::to_string(size))
-                        .append(" bytes");
-
-                throw std::runtime_error(error);
-            }
-        } break;
-        case eep: {
-            if (32_uz != size) {
-                const auto error = UnallocatedCString{"expected "}
-                                       .append(std::to_string(32_uz))
-                                       .append(" bytes for eep but received ")
-                                       .append(std::to_string(size))
-                                       .append(" bytes");
-
-                throw std::runtime_error(error);
+                throw std::runtime_error{
+                    "expected "s.append(std::to_string(*expected))
+                        .append(" bytes for type ")
+                        .append(print(type_))
+                        .append(" but have ")
+                        .append(std::to_string(size))};
             }
         } break;
         case zmq: {
+            switch (subtype_) {
+                case ipv4:
+                case ipv6: {
+                    if (false == incoming_) {
+                        static constexpr auto curve = 32_uz;
+
+                        if (const auto keySize = key.size(); curve != keySize) {
+
+                            throw std::runtime_error{
+                                "expected "s.append(std::to_string(curve))
+                                    .append(" bytes for CurveZMQ key but have ")
+                                    .append(std::to_string(keySize))};
+                        }
+                    }
+
+                    [[fallthrough]];
+                }
+                case onion2:
+                case onion3:
+                case eep:
+                case cjdns: {
+                    const auto payload = expected_address_size(subtype_);
+
+                    if (payload.value() != size) {
+
+                        throw std::runtime_error{
+                            "expected "s.append(std::to_string(*payload))
+                                .append(" bytes for subtype ")
+                                .append(print(type_))
+                                .append(" but have ")
+                                .append(std::to_string(size))};
+                    }
+                } break;
+                case zmq: {
+                    // NOTE no specific length requirements for inproc transport
+                    // and the curve zmq key is not used
+                } break;
+                default: {
+                    throw std::runtime_error{"unhandled subtype"};
+                }
+            }
         } break;
         default: {
-            LogAbort()()("unhandled transport type ")(print(type_)).Abort();
+            throw std::runtime_error{"unhandled type"};
         }
     }
 }
