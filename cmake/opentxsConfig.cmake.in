@@ -18,21 +18,4 @@ set(OT_WITH_QML @OT_WITH_QML@)
 set(OT_USE_PSTL @OT_USE_PSTL@)
 set(OT_WITH_TBB @OT_WITH_TBB@)
 set(OT_PSTL_NEEDS_TBB @OT_PSTL_NEEDS_TBB@)
-
-if(OT_WITH_QT)
-  if(DEFINED QT_VERSION_MAJOR
-     AND NOT
-         (QT_VERSION_MAJOR
-          MATCHES
-          @QT_VERSION_MAJOR@)
-  )
-    message(
-      FATAL_ERROR
-        "libopentxs is linked against Qt@QT_VERSION_MAJOR@ however ${PROJECT_NAME} is attempting to link to Qt${QT_VERSION_MAJOR}"
-    )
-  endif()
-
-  set(QT_VERSION_MAJOR @QT_VERSION_MAJOR@)
-endif()
-
 include(libopentxs-find-dependencies)
