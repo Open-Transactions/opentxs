@@ -20,6 +20,8 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/Elements.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/MatchCache.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -90,6 +92,7 @@ class Job;
 }  // namespace statemachine
 
 class ScriptForm;
+struct MatchIndex;
 }  // namespace wallet
 
 class Manager;
@@ -241,7 +244,6 @@ private:
     using Patterns = block::Patterns;
     using Targets = cfilter::Targets;
     using Tested = database::MatchingIndices;
-    using Elements = wallet::ElementCache::Elements;
     using HandledReorgs = Set<StateSequence>;
     using SelectedKeyElement = std::pair<Vector<Bip32Index>, Targets>;
     using SelectedTxoElement = std::pair<Vector<block::Outpoint>, Targets>;
@@ -339,7 +341,7 @@ private:
         const Elements& in,
         MatchesToTest& matched) const noexcept -> void;
     auto select_matches(
-        const std::optional<wallet::MatchCache::Index>& matches,
+        const std::optional<wallet::MatchIndex>& matches,
         const block::Position& block,
         const Elements& in,
         MatchesToTest& matched) const noexcept -> bool;

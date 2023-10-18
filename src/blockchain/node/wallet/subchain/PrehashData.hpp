@@ -16,7 +16,7 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/MatchCache.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -40,6 +40,14 @@ namespace block
 {
 class Outpoint;
 }  // namespace block
+
+namespace node
+{
+namespace wallet
+{
+struct MatchIndex;
+}  // namespace wallet
+}  // namespace node
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -115,7 +123,7 @@ private:
         const BlockTarget& targets,
         const BlockData& prehashed,
         AsyncResults& cache,
-        wallet::MatchCache::Index& results,
+        wallet::MatchIndex& results,
         alloc::Default monotonic) const noexcept -> void;
     auto prepare(const std::size_t job) noexcept -> void;
 };
