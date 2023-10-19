@@ -6,11 +6,13 @@
 #include <boost/endian/buffers.hpp>
 #include <algorithm>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "blockchain/database/wallet/Pattern.hpp"
@@ -18,6 +20,7 @@
 #include "internal/crypto/Parameters.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -159,6 +162,24 @@ auto hash<opentxs::blockchain::crypto::Key>::operator()(
     static const auto key = opentxs::crypto::sodium::SiphashKey{};
 
     return opentxs::crypto::sodium::Siphash(key, opentxs::reader(preimage));
+}
+
+auto hash<opentxs::blockchain::crypto::Target>::operator()(
+    const opentxs::blockchain::crypto::Target& in) const noexcept -> std::size_t
+{
+    struct Visitor {
+        auto operator()(opentxs::blockchain::Type in) const noexcept
+        {
+            return hash<opentxs::blockchain::Type>{}(in);
+        }
+        auto operator()(
+            const opentxs::blockchain::token::Descriptor& in) const noexcept
+        {
+            return hash<opentxs::blockchain::token::Descriptor>{}(in);
+        }
+    };
+
+    return std::visit(Visitor{}, in);
 }
 
 auto hash<opentxs::blockchain::database::wallet::db::Pattern>::operator()(

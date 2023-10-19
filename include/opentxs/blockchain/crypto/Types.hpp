@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -18,6 +19,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/token/Descriptor.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -64,16 +66,31 @@ enum class Subchain : std::uint8_t;         // IWYU pragma: export
 
 /// subaccount id, chain, index
 using Key = std::tuple<identifier::Account, Subchain, Bip32Index>;
+using Target = std::variant<blockchain::Type, token::Descriptor>;
 
+OPENTXS_EXPORT auto base_chain(const Target&) noexcept -> blockchain::Type;
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;
-OPENTXS_EXPORT auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool;
+OPENTXS_EXPORT auto is_token(const Target&) noexcept -> bool;
 OPENTXS_EXPORT auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool;
+OPENTXS_EXPORT auto operator<=>(const Key& lhs, const Key& rhs) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto operator==(const Target& lhs, const Target& rhs) noexcept
+    -> bool;
+OPENTXS_EXPORT auto operator<=>(const Target& lhs, const Target& rhs) noexcept
+    -> std::strong_ordering;
 OPENTXS_EXPORT auto print(AddressStyle) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(HDProtocol) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SubaccountType) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Subchain) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(const Key& key, const api::Crypto& api) noexcept
     -> UnallocatedCString;
+OPENTXS_EXPORT auto print(
+    const Key& key,
+    const api::Crypto& api,
+    alloc::Strategy alloc) noexcept -> CString;
+OPENTXS_EXPORT auto print(const Target& target) noexcept -> UnallocatedCString;
+OPENTXS_EXPORT auto print(const Target& target, alloc::Strategy alloc) noexcept
+    -> CString;
 }  // namespace opentxs::blockchain::crypto
 
 namespace opentxs::blockchain
@@ -91,6 +108,11 @@ template <>
 struct hash<opentxs::blockchain::crypto::Key> {
     auto operator()(const opentxs::blockchain::crypto::Key& data) const noexcept
         -> std::size_t;
+};
+template <>
+struct hash<opentxs::blockchain::crypto::Target> {
+    auto operator()(const opentxs::blockchain::crypto::Target& data)
+        const noexcept -> std::size_t;
 };
 // NOLINTEND(cert-dcl58-cpp)
 }  // namespace std
