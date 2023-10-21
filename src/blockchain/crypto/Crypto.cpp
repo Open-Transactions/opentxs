@@ -7,11 +7,13 @@
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <compare>
 #include <cstring>
 #include <iterator>
 #include <sstream>
 #include <string_view>
 #include <utility>
+#include <variant>
 
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -22,11 +24,16 @@
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/token/Descriptor.hpp"
+#include "opentxs/blockchain/token/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
@@ -35,6 +42,19 @@
 namespace opentxs::blockchain::crypto
 {
 using namespace std::literals;
+
+auto base_chain(const Target& in) noexcept -> blockchain::Type
+{
+    struct Visitor {
+        auto operator()(blockchain::Type in) const noexcept { return in; }
+        auto operator()(const token::Descriptor& in) const noexcept
+        {
+            return in.host_;
+        }
+    };
+
+    return std::visit(Visitor{}, in);
+}
 
 auto is_notification(Subchain in) noexcept -> bool
 {
@@ -53,6 +73,11 @@ auto is_notification(Subchain in) noexcept -> bool
     }
 }
 
+auto is_token(const Target& in) noexcept -> bool
+{
+    return std::holds_alternative<token::Descriptor>(in);
+}
+
 auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
 {
     const auto& [lAccount, lSubchain, lIndex] = lhs;
@@ -65,16 +90,98 @@ auto operator==(const Key& lhs, const Key& rhs) noexcept -> bool
     return lIndex == rIndex;
 }
 
-auto operator!=(const Key& lhs, const Key& rhs) noexcept -> bool
+auto operator==(const Target& lhs, const Target& rhs) noexcept -> bool
+{
+    struct Visitor {
+        auto operator()(blockchain::Type lhs, blockchain::Type rhs)
+            const noexcept
+        {
+            return lhs == rhs;
+        }
+        auto operator()(blockchain::Type lhs, const token::Descriptor& rhs)
+            const noexcept
+        {
+            return false;
+        }
+        auto operator()(
+            const token::Descriptor& lhs,
+            const token::Descriptor& rhs) const noexcept
+        {
+            return lhs == rhs;
+        }
+        auto operator()(const token::Descriptor& lhs, blockchain::Type rhs)
+            const noexcept
+        {
+            return false;
+        }
+    };
+
+    return std::visit(Visitor{}, lhs, rhs);
+}
+
+auto operator<=>(const Key& lhs, const Key& rhs) noexcept
+    -> std::strong_ordering
 {
     const auto& [lAccount, lSubchain, lIndex] = lhs;
     const auto& [rAccount, rSubchain, rIndex] = rhs;
+    constexpr auto equal = std::strong_ordering::equal;
 
-    if (lAccount != rAccount) { return true; }
+    if (auto out = lAccount <=> rAccount; equal != out) {
 
-    if (lSubchain != rSubchain) { return true; }
+        return out;
+    } else if (out = lSubchain <=> rSubchain; equal != out) {
 
-    return lIndex != rIndex;
+        return out;
+    } else {
+
+        return lIndex <=> rIndex;
+    }
+}
+
+auto operator<=>(const Target& lhs, const Target& rhs) noexcept
+    -> std::strong_ordering
+{
+    static constexpr auto equal = std::strong_ordering::equal;
+    static constexpr auto greater = std::strong_ordering::greater;
+    static constexpr auto less = std::strong_ordering::less;
+
+    struct Visitor {
+        auto operator()(blockchain::Type lhs, blockchain::Type rhs)
+            const noexcept
+        {
+            return lhs <=> rhs;
+        }
+        auto operator()(blockchain::Type lhs, const token::Descriptor& rhs)
+            const noexcept
+        {
+            if (auto out = lhs <=> rhs.host_; equal != out) {
+
+                return out;
+            } else {
+
+                return less;
+            }
+        }
+        auto operator()(
+            const token::Descriptor& lhs,
+            const token::Descriptor& rhs) const noexcept
+        {
+            return lhs <=> rhs;
+        }
+        auto operator()(const token::Descriptor& lhs, blockchain::Type rhs)
+            const noexcept
+        {
+            if (auto out = lhs.host_ <=> rhs; equal != out) {
+
+                return out;
+            } else {
+
+                return greater;
+            }
+        }
+    };
+
+    return std::visit(Visitor{}, lhs, rhs);
 }
 
 auto print(AddressStyle value) noexcept -> std::string_view
@@ -166,16 +273,93 @@ auto print(Subchain value) noexcept -> std::string_view
     }
 }
 
-auto print(const Key& key, const api::Crypto& api) noexcept
-    -> UnallocatedCString
+static auto print_key(
+    const Key& key,
+    const api::Crypto& api,
+    alloc::Strategy alloc) noexcept -> std::stringstream
 {
     const auto& [account, subchain, index] = key;
-    auto out = std::stringstream{};
+    auto out = std::stringstream{};  // TODO c++20
     out << account.asBase58(api);
     out << " / ";
     out << print(subchain);
     out << " / ";
     out << std::to_string(index);
+
+    return out;
+}
+
+auto print(
+    const Key& key,
+    const api::Crypto& api,
+    alloc::Strategy alloc) noexcept -> CString
+{
+    const auto out = print_key(key, api, alloc.WorkOnly());
+
+    return CString{out.str().c_str(), alloc.result_};  // TODO c++20
+}
+
+auto print(const Key& key, const api::Crypto& api) noexcept
+    -> UnallocatedCString
+{
+    const auto out = print_key(key, api, {});
+
+    return out.str();
+}
+
+static auto print_target(const Target& target, alloc::Strategy alloc) noexcept
+    -> std::stringstream
+{
+    auto out = std::stringstream{};  // TODO c++20
+
+    struct Visitor {
+        std::stringstream& out_;
+        alloc::Strategy& alloc_;
+
+        auto operator()(blockchain::Type in) noexcept { out_ << print(in); }
+        auto operator()(const token::Descriptor& in) noexcept
+        {
+            const auto id = [&] {
+                auto hex = in.id_.asHex(alloc_.work_);
+                const auto before = hex.size();
+
+                while ((false == hex.empty()) && (hex.back() == '0')) {
+                    hex.pop_back();
+                }
+
+                if ((before > hex.size()) && (0 != hex.size() % 2)) {
+                    hex.push_back('0');
+                }
+
+                return hex;
+            }();
+
+            out_ << print(token_to_unit(in));
+            out_ << " on ";
+            out_ << print(in.host_);
+            out_ << " (";
+            out_ << print(in.type_);
+            out_ << " 0x";
+            out_ << in.id_.asHex();
+            out_ << ")";
+        }
+    };
+
+    std::visit(Visitor{out, alloc}, target);
+
+    return out;
+}
+
+auto print(const Target& target, alloc::Strategy alloc) noexcept -> CString
+{
+    const auto out = print_target(target, alloc.WorkOnly());
+
+    return CString{out.str().c_str(), alloc.result_};  // TODO c++20
+}
+
+auto print(const Target& target) noexcept -> UnallocatedCString
+{
+    const auto out = print_target(target, {});
 
     return out.str();
 }

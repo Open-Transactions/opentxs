@@ -25,6 +25,8 @@
 
 #include "blockchain/node/wallet/subchain/PrehashData.hpp"
 #include "blockchain/node/wallet/subchain/ScriptForm.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/MatchIndex.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/Matches.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/blockchain/block/Block.hpp"
@@ -1020,7 +1022,7 @@ auto SubchainStateData::select_all(
 }
 
 auto SubchainStateData::select_matches(
-    const std::optional<wallet::MatchCache::Index>& matches,
+    const std::optional<wallet::MatchIndex>& matches,
     const block::Position& block,
     const Elements& in,
     MatchesToTest& matched) const noexcept -> bool

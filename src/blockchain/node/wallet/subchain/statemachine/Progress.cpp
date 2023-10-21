@@ -11,7 +11,7 @@
 #include <utility>
 
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
-#include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/MatchCache.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"

@@ -5,16 +5,10 @@
 
 #pragma once
 
-#include <array>
-#include <cstddef>
-#include <optional>
-#include <utility>
-
+#include "blockchain/node/wallet/subchain/statemachine/Elements.hpp"
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/blockchain/block/Outpoint.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -33,31 +27,6 @@ namespace opentxs::blockchain::node::wallet
 class ElementCache final : public Allocated
 {
 public:
-    struct Elements final : public Allocated {
-        Vector<std::pair<Bip32Index, std::array<std::byte, 20>>> elements_20_;
-        Vector<std::pair<Bip32Index, std::array<std::byte, 32>>> elements_32_;
-        Vector<std::pair<Bip32Index, std::array<std::byte, 33>>> elements_33_;
-        Vector<std::pair<Bip32Index, std::array<std::byte, 64>>> elements_64_;
-        Vector<std::pair<Bip32Index, std::array<std::byte, 65>>> elements_65_;
-        database::TXOs txos_;
-
-        auto get_allocator() const noexcept -> allocator_type final;
-        auto size() const noexcept -> std::size_t;
-
-        auto get_deleter() noexcept -> delete_function final
-        {
-            return pmr::make_deleter(this);
-        }
-        Elements(allocator_type alloc = {}) noexcept;
-        Elements(const Elements& rhs, allocator_type alloc = {}) noexcept;
-        Elements(Elements&& rhs) noexcept;
-        Elements(Elements&& rhs, allocator_type alloc) noexcept;
-        auto operator=(const Elements& rhs) noexcept -> Elements&;
-        auto operator=(Elements&& rhs) noexcept -> Elements&;
-
-        ~Elements() final = default;
-    };
-
     auto GetElements() const noexcept -> const Elements&;
     auto get_allocator() const noexcept -> allocator_type final;
 
@@ -90,77 +59,5 @@ private:
     auto index(const database::ElementMap::value_type& data) noexcept -> void;
     auto index(const Bip32Index index, const block::Element& element) noexcept
         -> void;
-};
-
-class MatchCache final : public Allocated
-{
-public:
-    struct Matches final : public Allocated {
-        Set<Bip32Index> match_20_;
-        Set<Bip32Index> match_32_;
-        Set<Bip32Index> match_33_;
-        Set<Bip32Index> match_64_;
-        Set<Bip32Index> match_65_;
-        Set<block::Outpoint> match_txo_;
-
-        auto get_allocator() const noexcept -> allocator_type final;
-
-        auto get_deleter() noexcept -> delete_function final
-        {
-            return pmr::make_deleter(this);
-        }
-        auto Merge(Matches&& rhs) noexcept -> void;
-
-        Matches(allocator_type alloc = {}) noexcept;
-        Matches(const Matches& rhs, allocator_type alloc = {}) noexcept;
-        Matches(Matches&& rhs) noexcept;
-        Matches(Matches&& rhs, allocator_type alloc) noexcept;
-        auto operator=(const Matches& rhs) noexcept -> Matches&;
-        auto operator=(Matches&& rhs) noexcept -> Matches&;
-
-        ~Matches() final = default;
-    };
-
-    struct Index final : public Allocated {
-        Matches confirmed_no_match_;
-        Matches confirmed_match_;
-
-        auto get_allocator() const noexcept -> allocator_type final;
-
-        auto get_deleter() noexcept -> delete_function final
-        {
-            return pmr::make_deleter(this);
-        }
-        auto Merge(Index&& rhs) noexcept -> void;
-
-        Index(allocator_type alloc = {}) noexcept;
-        Index(const Index& rhs, allocator_type alloc = {}) noexcept;
-        Index(Index&& rhs) noexcept;
-        Index(Index&& rhs, allocator_type alloc) noexcept;
-        auto operator=(const Index& rhs) noexcept -> Index&;
-        auto operator=(Index&& rhs) noexcept -> Index&;
-
-        ~Index() final = default;
-    };
-    using Results = opentxs::Map<block::Position, Index>;
-
-    auto GetMatches(const block::Position& block) const noexcept
-        -> std::optional<Index>;
-    auto get_allocator() const noexcept -> allocator_type final;
-
-    auto Add(Results&& results) noexcept -> void;
-    auto get_deleter() noexcept -> delete_function final
-    {
-        return pmr::make_deleter(this);
-    }
-    auto Forget(const block::Position& last) noexcept -> void;
-    auto Reset() noexcept -> void;
-
-    MatchCache(allocator_type alloc) noexcept;
-
-    ~MatchCache() final = default;
-
-private:
-    Results results_;
 };
 }  // namespace opentxs::blockchain::node::wallet

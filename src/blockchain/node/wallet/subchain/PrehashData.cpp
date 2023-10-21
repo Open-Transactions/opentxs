@@ -12,6 +12,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "blockchain/node/wallet/subchain/statemachine/MatchIndex.hpp"
+#include "blockchain/node/wallet/subchain/statemachine/Matches.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
 #include "internal/util/P0330.hpp"
@@ -148,7 +150,7 @@ auto SubchainStateData::PrehashData::match(
     const BlockTarget& targets,
     const BlockData& prehashed,
     AsyncResults& cache,
-    wallet::MatchCache::Index& results,
+    wallet::MatchIndex& results,
     alloc::Default monotonic) const noexcept -> void
 {
     const auto GetKeys = [&](const auto& data) {
