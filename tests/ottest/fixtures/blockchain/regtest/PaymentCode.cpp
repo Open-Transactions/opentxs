@@ -221,7 +221,8 @@ auto Regtest_payment_code::CheckContactID(
     const auto& api = *local.api_;
     const auto n2c = api.Contacts().ContactID(remote.nym_id_);
     const auto p2c = api.Contacts().PaymentCodeToContact(
-        api.Factory().PaymentCodeFromBase58(paymentcode), test_chain_);
+        api.Factory().PaymentCodeFromBase58(paymentcode),
+        blockchain_to_unit(test_chain_));
 
     EXPECT_EQ(n2c, p2c);
     EXPECT_EQ(

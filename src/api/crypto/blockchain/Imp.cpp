@@ -852,7 +852,7 @@ auto Blockchain::Imp::KeyEndpoint() const noexcept -> std::string_view
 }
 
 auto Blockchain::Imp::KeyGenerated(
-    const opentxs::blockchain::Type,
+    const opentxs::blockchain::crypto::Target target,
     const identifier::Nym&,
     const identifier::Account&,
     const opentxs::blockchain::crypto::SubaccountType,

@@ -1209,21 +1209,19 @@ auto Contacts::obtain_contact(const rLock& lock, const identifier::Generic& id)
     return load_contact(lock, id);
 }
 
-auto Contacts::PaymentCodeToContact(
-    const UnallocatedCString& serialized,
-    const opentxs::blockchain::Type currency) const -> identifier::Generic
+auto Contacts::PaymentCodeToContact(ReadView base58, UnitType currency)
+    const noexcept -> identifier::Generic
 {
     static const auto blank = identifier::Generic{};
-    const auto code = api_.Factory().PaymentCodeFromBase58(serialized);
+    const auto code = api_.Factory().PaymentCodeFromBase58(base58);
 
     if (0 == code.Version()) { return blank; }
 
     return PaymentCodeToContact(code, currency);
 }
 
-auto Contacts::PaymentCodeToContact(
-    const PaymentCode& code,
-    const opentxs::blockchain::Type currency) const -> identifier::Generic
+auto Contacts::PaymentCodeToContact(const PaymentCode& code, UnitType currency)
+    const noexcept -> identifier::Generic
 {
     // NOTE for now we assume that payment codes are always nym id sources. This
     // won't always be true.
@@ -1261,9 +1259,8 @@ auto Contacts::PaymentCodeToContact(
         {
             auto contactE = mutable_contact(lock, contactID);
             auto& c = contactE->get();
-            const auto chain = blockchain_to_unit(currency);
-            const auto existing = c.PaymentCode(chain);
-            c.AddPaymentCode(code, existing.empty(), chain);
+            const auto existing = c.PaymentCode(currency);
+            c.AddPaymentCode(code, existing.empty(), currency);
         }
 
         return contactID;

@@ -61,7 +61,7 @@ public:
         -> opentxs::blockchain::crypto::NotificationStatus = 0;
     virtual auto KeyEndpoint() const noexcept -> std::string_view = 0;
     virtual auto KeyGenerated(
-        const Chain chain,
+        const opentxs::blockchain::crypto::Target target,
         const identifier::Nym& account,
         const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,

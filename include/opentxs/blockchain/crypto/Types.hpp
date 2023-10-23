@@ -8,20 +8,17 @@
 #include <compare>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
-#include <iosfwd>
-#include <memory>
 #include <string_view>
 #include <tuple>
-#include <typeindex>
-#include <utility>
 #include <variant>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/token/Descriptor.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -49,11 +46,6 @@ class Script;
 }  // namespace bitcoin
 }  // namespace protocol
 }  // namespace blockchain
-
-namespace identifier
-{
-class Account;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -91,6 +83,7 @@ OPENTXS_EXPORT auto print(
 OPENTXS_EXPORT auto print(const Target& target) noexcept -> UnallocatedCString;
 OPENTXS_EXPORT auto print(const Target& target, alloc::Strategy alloc) noexcept
     -> CString;
+OPENTXS_EXPORT auto target_to_unit(const Target&) noexcept -> opentxs::UnitType;
 }  // namespace opentxs::blockchain::crypto
 
 namespace opentxs::blockchain

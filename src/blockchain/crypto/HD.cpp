@@ -34,7 +34,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
@@ -110,7 +109,7 @@ HD::HD(
           parent,
           SubaccountType::HD,
           api.Factory().Internal().AccountID(
-              UnitToClaim(blockchain_to_unit(parent.Chain())),
+              UnitToClaim(target_to_unit(parent.Target())),
               path),
           path,
           {api, internal_type_, false, external_type_, true},
@@ -151,7 +150,7 @@ HD::HD(
                               api,
                               parent.Parent().Parent(),
                               *this,
-                              parent.Chain(),
+                              base_chain(parent.Target()),
                               internal_type_,
                               address)));
               }
@@ -165,7 +164,7 @@ HD::HD(
                               api,
                               parent.Parent().Parent(),
                               *this,
-                              parent.Chain(),
+                              base_chain(parent.Target()),
                               external_type_,
                               address)));
               }
@@ -212,7 +211,7 @@ HD::HD(
 auto HD::account_already_exists(const rLock&) const noexcept -> bool
 {
     const auto existing = api_.Storage().Internal().BlockchainAccountList(
-        parent_.NymID(), blockchain_to_unit(chain_));
+        parent_.NymID(), target_to_unit(target_));
 
     return existing.contains(id_);
 }
@@ -282,7 +281,7 @@ auto HD::PrivateKey(
 
 auto HD::save(const rLock& lock) const noexcept -> bool
 {
-    const auto type = blockchain_to_unit(chain_);
+    const auto type = target_to_unit(target_);
     auto serialized = SerializedType{};
     serialized.set_version(version_);
     serialize_deterministic(lock, *serialized.mutable_deterministic());

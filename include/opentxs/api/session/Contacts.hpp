@@ -77,12 +77,9 @@ public:
     /** Returns an existing contact ID if it exists, or creates a new one */
     virtual auto PaymentCodeToContact(
         const PaymentCode& code,
-        const opentxs::blockchain::Type currency) const
-        -> identifier::Generic = 0;
-    virtual auto PaymentCodeToContact(
-        const UnallocatedCString& code,
-        const opentxs::blockchain::Type currency) const
-        -> identifier::Generic = 0;
+        UnitType currency) const noexcept -> identifier::Generic = 0;
+    virtual auto PaymentCodeToContact(ReadView base58, UnitType currency)
+        const noexcept -> identifier::Generic = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Contacts& = 0;

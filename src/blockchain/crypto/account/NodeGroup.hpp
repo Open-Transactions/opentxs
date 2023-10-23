@@ -250,7 +250,7 @@ private:
         } else {
             LogTrace()()("subaccount ")(id, crypto)(" for ")(
                 parent_.NymID(),
-                crypto)(" on ")(print(parent_.Chain()))(" created or loaded")
+                crypto)(" on ")(print(parent_.Target()))(" created or loaded")
                 .Flush();
         }
 

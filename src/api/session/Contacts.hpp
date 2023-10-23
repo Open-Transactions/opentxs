@@ -101,13 +101,9 @@ public:
         -> std::shared_ptr<const opentxs::Contact> final;
     auto NymToContact(const identifier::Nym& nymID) const
         -> identifier::Generic final;
-    auto PaymentCodeToContact(
-        const PaymentCode& code,
-        const opentxs::blockchain::Type currency) const
-        -> identifier::Generic final;
-    auto PaymentCodeToContact(
-        const UnallocatedCString& code,
-        const opentxs::blockchain::Type currency) const
+    auto PaymentCodeToContact(const PaymentCode& code, UnitType currency)
+        const noexcept -> identifier::Generic final;
+    auto PaymentCodeToContact(ReadView base58, UnitType currency) const noexcept
         -> identifier::Generic final;
 
     Contacts(const api::session::Client& api);

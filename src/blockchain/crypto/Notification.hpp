@@ -14,7 +14,6 @@
 #include "blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/crypto/Notification.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -89,7 +88,7 @@ private:
 
     static auto calculate_id(
         const api::Session& api,
-        const blockchain::Type chain,
+        const crypto::Target& target,
         const opentxs::PaymentCode& code) noexcept -> identifier::Account;
 
     auto account_already_exists(const rLock&) const noexcept -> bool final

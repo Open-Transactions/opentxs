@@ -5,8 +5,10 @@
 
 #pragma once
 
-#include "opentxs/blockchain/Types.hpp"
+#include <span>
 
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
@@ -27,6 +29,17 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
+
+namespace network
+{
+namespace zeromq
+{
+class Frame;
+class Message;
+}  // namespace zeromq
+}  // namespace network
+
+class Data;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -49,4 +62,9 @@ struct Notifications {
 };
 
 using NotificationStatus = Map<blockchain::Type, Notifications>;
+
+auto deserialize(std::span<const network::zeromq::Frame> in) noexcept -> Target;
+auto serialize(const Target& target, Data& out) noexcept -> void;
+auto serialize(const Target& target, network::zeromq::Message& out) noexcept
+    -> void;
 }  // namespace opentxs::blockchain::crypto

@@ -165,7 +165,7 @@ public:
         return null;
     }
     auto KeyGenerated(
-        const opentxs::blockchain::Type chain,
+        const opentxs::blockchain::crypto::Target,
         const identifier::Nym& account,
         const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,

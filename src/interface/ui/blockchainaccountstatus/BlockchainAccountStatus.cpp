@@ -447,8 +447,8 @@ auto BlockchainAccountStatus::subchain_display_name(
     const auto target = [&]() -> std::optional<Height> {
         try {
             const auto& api = api_;
-            const auto handle =
-                api.Network().Blockchain().GetChain(node.Parent().Chain());
+            const auto handle = api.Network().Blockchain().GetChain(
+                blockchain::crypto::base_chain(node.Parent().Target()));
 
             if (false == handle.IsValid()) {
                 throw std::runtime_error{"invalid chain"};

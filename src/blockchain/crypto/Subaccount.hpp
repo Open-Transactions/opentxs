@@ -17,7 +17,6 @@
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -142,7 +141,7 @@ protected:
 
     const api::Session& api_;
     const crypto::Account& parent_;
-    const opentxs::blockchain::Type chain_;
+    const crypto::Target target_;
     const SubaccountType type_;
     const identifier::Account id_;
     const CString description_;
@@ -155,7 +154,7 @@ protected:
 
     static auto describe(
         const api::Session& api,
-        const opentxs::blockchain::Type chain,
+        const crypto::Target target,
         const SubaccountType type,
         const identifier::Generic& id) noexcept -> CString;
 

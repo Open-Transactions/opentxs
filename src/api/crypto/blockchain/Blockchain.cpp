@@ -241,13 +241,13 @@ auto Blockchain::KeyEndpoint() const noexcept -> std::string_view
 }
 
 auto Blockchain::KeyGenerated(
-    const Chain chain,
+    const opentxs::blockchain::crypto::Target target,
     const identifier::Nym& account,
     const identifier::Account& subaccount,
     const opentxs::blockchain::crypto::SubaccountType type,
     const opentxs::blockchain::crypto::Subchain subchain) const noexcept -> void
 {
-    imp_->KeyGenerated(chain, account, subaccount, type, subchain);
+    imp_->KeyGenerated(target, account, subaccount, type, subchain);
 }
 
 auto Blockchain::LoadOrCreateSubaccount(

@@ -95,7 +95,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         -> opentxs::blockchain::block::ElementHash final;
     auto KeyEndpoint() const noexcept -> std::string_view final;
     auto KeyGenerated(
-        const opentxs::blockchain::Type chain,
+        const opentxs::blockchain::crypto::Target target,
         const identifier::Nym& account,
         const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,

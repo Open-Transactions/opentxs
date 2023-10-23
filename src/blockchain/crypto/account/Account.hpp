@@ -67,10 +67,6 @@ public:
     {
         return account_id_;
     }
-    auto Chain() const noexcept -> opentxs::blockchain::Type final
-    {
-        return chain_;
-    }
     [[nodiscard]] auto ClaimAccountID(
         const identifier::Account& id,
         bool existing,
@@ -119,6 +115,7 @@ public:
     }
     auto Subaccount(const identifier::Account& id) const noexcept(false)
         -> const crypto::Subaccount& final;
+    auto Target() const noexcept -> crypto::Target final { return chain_; }
 
     auto AddHDNode(
         const proto::HDPath& path,

@@ -17,6 +17,7 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Wallet.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
@@ -396,19 +397,20 @@ auto Account::Imp::process_key(Message&& in) noexcept -> void
 {
     const auto body = in.Payload();
 
-    assert_true(5u < body.size());
+    assert_true(7_uz < body.size());
 
-    const auto chain = body[1].as<blockchain::Type>();
+    using namespace crypto;
+    const auto target = deserialize(body.subspan(1_uz, 3_uz));
 
-    if (chain != chain_) { return; }
+    if (base_chain(target) != chain_) { return; }  // TODO
 
-    const auto owner = api_.Factory().NymIDFromHash(body[2].Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body[4].Bytes());
 
     if (owner != account_.NymID()) { return; }
 
     const auto id = api_.Factory().AccountIDFromHash(
-        body[3].Bytes(), identifier::AccountSubtype::blockchain_subaccount);
-    const auto type = body[5].as<crypto::SubaccountType>();
+        body[5].Bytes(), identifier::AccountSubtype::blockchain_subaccount);
+    const auto type = body[7].as<crypto::SubaccountType>();
     process_subaccount(id, type);
 }
 

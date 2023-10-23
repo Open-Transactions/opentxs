@@ -12,6 +12,7 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
@@ -19,11 +20,11 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -167,21 +168,22 @@ auto Index::Imp::process_key(Message&& in, allocator_type monotonic) noexcept
 {
     const auto body = in.Payload();
 
-    assert_true(4u < body.size());
+    assert_true(7_uz < body.size());
 
-    const auto chain = body[1].as<blockchain::Type>();
+    using namespace crypto;
+    const auto target = deserialize(body.subspan(1_uz, 3_uz));
 
-    if (chain != parent_.chain_) { return; }
+    if (base_chain(target) != parent_.chain_) { return; }  // TODO
 
-    const auto owner = api_.Factory().NymIDFromHash(body[2].Bytes());
+    const auto owner = api_.Factory().NymIDFromHash(body[4].Bytes());
 
     if (owner != parent_.owner_) { return; }
 
-    const auto id = api_.Factory().IdentifierFromHash(body[3].Bytes());
+    const auto id = api_.Factory().IdentifierFromHash(body[5].Bytes());
 
     if (id != parent_.id_) { return; }
 
-    const auto subchain = body[4].as<crypto::Subchain>();
+    const auto subchain = body[6].as<crypto::Subchain>();
 
     if (subchain != parent_.subchain_) { return; }
 
