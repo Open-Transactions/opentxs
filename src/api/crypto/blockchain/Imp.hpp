@@ -176,7 +176,7 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         -> opentxs::blockchain::block::ElementHash;
     virtual auto KeyEndpoint() const noexcept -> std::string_view;
     virtual auto KeyGenerated(
-        const opentxs::blockchain::Type chain,
+        const opentxs::blockchain::crypto::Target target,
         const identifier::Nym& account,
         const identifier::Account& subaccount,
         const opentxs::blockchain::crypto::SubaccountType type,

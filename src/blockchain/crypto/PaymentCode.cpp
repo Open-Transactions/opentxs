@@ -32,7 +32,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
@@ -85,7 +84,7 @@ auto BlockchainPCSubaccount(
     using ReturnType = blockchain::crypto::implementation::PaymentCode;
     auto contact = contacts.PaymentCodeToContact(
         api.Factory().InternalSession().PaymentCode(serialized.remote()),
-        parent.Chain());
+        blockchain::crypto::target_to_unit(parent.Target()));
 
     assert_false(contact.empty());
 
@@ -116,7 +115,7 @@ PaymentCode::PaymentCode(
           api,
           parent,
           SubaccountType::PaymentCode,
-          internal::PaymentCode::GetID(api, parent.Chain(), local, remote),
+          internal::PaymentCode::GetID(api, parent.Target(), local, remote),
           path,
           {api, internal_type_, false, external_type_, false},
           id)
@@ -125,7 +124,8 @@ PaymentCode::PaymentCode(
     , incoming_notifications_()
     , local_(local, compare_)
     , remote_(remote, compare_)
-    , contact_id_(contacts.PaymentCodeToContact(remote_, chain_))
+    , contact_id_(
+          contacts.PaymentCodeToContact(remote_, target_to_unit(target_)))
 {
     const auto test_path = local_.get().Internal().AddPrivateKeys(
         seed_id_, *path_.child().rbegin(), reason);
@@ -174,7 +174,7 @@ PaymentCode::PaymentCode(
                               api,
                               parent.Parent().Parent(),
                               *this,
-                              parent.Chain(),
+                              base_chain(parent.Target()),
                               internal_type_,
                               address,
                               identifier::Generic{fallback})));
@@ -189,7 +189,7 @@ PaymentCode::PaymentCode(
                               api,
                               parent.Parent().Parent(),
                               *this,
-                              parent.Chain(),
+                              base_chain(parent.Target()),
                               external_type_,
                               address,
                               identifier::Generic{fallback})));
@@ -229,7 +229,8 @@ PaymentCode::PaymentCode(
     , remote_(
           api_.Factory().InternalSession().PaymentCode(serialized.remote()),
           compare_)
-    , contact_id_(contacts.PaymentCodeToContact(remote_, chain_))
+    , contact_id_(
+          contacts.PaymentCodeToContact(remote_, target_to_unit(target_)))
 {
     if (contact_id_.empty()) { throw std::runtime_error("Missing contact"); }
 
@@ -240,7 +241,7 @@ PaymentCode::PaymentCode(
 auto PaymentCode::account_already_exists(const rLock&) const noexcept -> bool
 {
     const auto existing = api_.Storage().Internal().Bip47ChannelsByChain(
-        parent_.NymID(), blockchain_to_unit(chain_));
+        parent_.NymID(), target_to_unit(target_));
 
     return 0 < existing.count(id_);
 }
@@ -330,11 +331,13 @@ auto PaymentCode::PrivateKey(
     switch (type) {
         case internal_type_: {
 
-            return local_.get().Outgoing(remote_.get(), index, chain_, reason);
+            return local_.get().Outgoing(
+                remote_.get(), index, base_chain(target_), reason);
         }
         case external_type_: {
 
-            return local_.get().Incoming(remote_.get(), index, chain_, reason);
+            return local_.get().Incoming(
+                remote_.get(), index, base_chain(target_), reason);
         }
         default: {
             LogError()()("Invalid subchain").Flush();

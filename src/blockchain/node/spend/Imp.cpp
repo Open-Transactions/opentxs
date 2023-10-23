@@ -234,7 +234,8 @@ auto SpendPrivate::add_payment_code(
     }
 
     data.emplace_back(
-        api_.Contacts().PaymentCodeToContact(recipient, chain_),
+        api_.Contacts().PaymentCodeToContact(
+            recipient, blockchain_to_unit(chain_)),
         amount,
         recipient,
         crypto::Key{subaccount, crypto::Subchain::Outgoing, index},

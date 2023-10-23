@@ -5,9 +5,9 @@
 
 #include "internal/blockchain/crypto/PaymentCode.hpp"  // IWYU pragma: associated
 
+#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -31,13 +31,13 @@ auto PaymentCode::AddNotification(const block::TransactionHash&) const noexcept
 
 auto PaymentCode::GetID(
     const api::Session& api,
-    const blockchain::Type chain,
+    const crypto::Target target,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote) noexcept -> identifier::Account
 {
     auto out = identifier::Account{};
     auto preimage = api.Factory().Data();
-    preimage.Assign(&chain, sizeof(chain));
+    serialize(target, preimage);
     preimage.Concatenate(local.ID().Bytes());
     preimage.Concatenate(remote.ID().Bytes());
     using enum identifier::AccountSubtype;

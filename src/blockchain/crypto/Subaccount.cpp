@@ -40,10 +40,10 @@ Subaccount::Subaccount(
     identifier::Account& out) noexcept
     : api_(api)
     , parent_(parent)
-    , chain_(parent_.Chain())
+    , target_(parent_.Target())
     , type_(type)
     , id_(std::move(id))
-    , description_(describe(api_, chain_, type_, id_))
+    , description_(describe(api_, target_, type_, id_))
     , lock_()
     , revision_(revision)
 {
@@ -74,8 +74,9 @@ Subaccount::Subaccount(
           serialized.revision(),
           out)
 {
-    if (unit_to_blockchain(ClaimToUnit(translate(serialized.chain()))) !=
-        chain_) {
+    const auto expected = target_to_unit(target_);
+
+    if (ClaimToUnit(translate(serialized.chain())) != expected) {
         throw std::runtime_error("Wrong account type");
     }
 }
@@ -134,13 +135,13 @@ auto Subaccount::Confirm(
 
 auto Subaccount::describe(
     const api::Session& api,
-    const opentxs::blockchain::Type chain,
+    const crypto::Target target,
     const SubaccountType type,
     const identifier::Generic& id) noexcept -> CString
 {
     // TODO c++20 use allocator
     auto out = std::stringstream{};
-    out << print(chain) << ' ';
+    out << print(target) << ' ';
     out << print(type);
     out << " account ";
     out << id.asBase58(api.Crypto());
@@ -152,7 +153,9 @@ auto Subaccount::init(bool existing) noexcept(false) -> void
 {
     using opentxs::blockchain::is_supported;
 
-    if (existing && (false == is_supported(chain_))) { existing = false; }
+    if (existing && (false == is_supported(base_chain(target_)))) {
+        existing = false;
+    }
 
     if (false == parent_.Internal().ClaimAccountID(id_, existing, this)) {
         throw std::runtime_error{
@@ -188,7 +191,7 @@ auto Subaccount::serialize_common(
     out.set_version(BlockchainAccountDataVersion);
     out.set_id(id_.asBase58(api_.Crypto()));
     out.set_revision(revision_.load());
-    out.set_chain(translate(UnitToClaim(blockchain_to_unit(chain_))));
+    out.set_chain(translate(UnitToClaim(target_to_unit(target_))));
 }
 
 auto Subaccount::SetContact(

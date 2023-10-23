@@ -9,9 +9,10 @@
 #include <utility>
 
 #include "internal/blockchain/crypto/Deterministic.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -28,11 +29,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-namespace identifier
-{
-class Account;
-}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -42,7 +38,7 @@ struct PaymentCode : virtual public crypto::PaymentCode,
                      virtual public Deterministic {
     static auto GetID(
         const api::Session& api,
-        const opentxs::blockchain::Type chain,
+        const crypto::Target target,
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote) noexcept -> identifier::Account;
 

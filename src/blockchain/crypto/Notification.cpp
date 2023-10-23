@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "internal/blockchain/crypto/Factory.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/identity/Nym.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -75,7 +76,7 @@ Notification::Notification(
           api,
           parent,
           SubaccountType::Notification,
-          calculate_id(api, parent.Chain(), code),
+          calculate_id(api, parent.Target(), code),
           out)
     , code_(code)
     , path_(std::move(path))
@@ -94,11 +95,11 @@ auto Notification::AllowedSubchains() const noexcept -> UnallocatedSet<Subchain>
 
 auto Notification::calculate_id(
     const api::Session& api,
-    const blockchain::Type chain,
+    const crypto::Target& target,
     const opentxs::PaymentCode& code) noexcept -> identifier::Account
 {
     auto preimage = api.Factory().DataFromBytes(code.ID().Bytes());
-    preimage.Concatenate(&chain, sizeof(chain));
+    serialize(target, preimage);
 
     return api.Factory().AccountIDFromPreimage(
         preimage.Bytes(), identifier::AccountSubtype::blockchain_subaccount);
@@ -108,7 +109,7 @@ auto Notification::init(bool existing) noexcept(false) -> void
 {
     Subaccount::init(existing);
     auto handle = progress_.lock();
-    const auto& hash = params::get(chain_).GenesisHash();
+    const auto& hash = params::get(base_chain(target_)).GenesisHash();
 
     for (const auto& subchain : AllowedSubchains()) {
         handle->emplace(subchain, block::Position{0, hash});

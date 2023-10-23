@@ -20,6 +20,7 @@
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
@@ -290,19 +291,20 @@ auto BlockchainImp::KeyEndpoint() const noexcept -> std::string_view
 }
 
 auto BlockchainImp::KeyGenerated(
-    const opentxs::blockchain::Type chain,
+    const opentxs::blockchain::crypto::Target target,
     const identifier::Nym& account,
     const identifier::Account& subaccount,
     const opentxs::blockchain::crypto::SubaccountType type,
     const opentxs::blockchain::crypto::Subchain subchain) const noexcept -> void
 {
     key_updates_->Send([&] {
+        using namespace opentxs::blockchain::crypto;
         auto work = MakeWork(OT_ZMQ_NEW_BLOCKCHAIN_WALLET_KEY_SIGNAL);
-        work.AddFrame(chain);
-        work.AddFrame(account);
-        work.AddFrame(subaccount);
-        work.AddFrame(subchain);
-        work.AddFrame(type);
+        serialize(target, work);    // NOTE index 1, 2, 3
+        work.AddFrame(account);     // NOTE index 4
+        work.AddFrame(subaccount);  // NOTE index 5
+        work.AddFrame(subchain);    // NOTE index 6
+        work.AddFrame(type);        // NOTE index 7
 
         return work;
     }());

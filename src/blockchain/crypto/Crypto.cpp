@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/blockchain/crypto/Types.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: associated
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
@@ -15,29 +15,19 @@
 #include <utility>
 #include <variant>
 
-#include "opentxs/api/Factory.hpp"
-#include "opentxs/api/crypto/Crypto.hpp"
-#include "opentxs/api/crypto/Hash.hpp"
-#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"    // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
-#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/token/Descriptor.hpp"
 #include "opentxs/blockchain/token/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::crypto
 {
@@ -363,29 +353,26 @@ auto print(const Target& target) noexcept -> UnallocatedCString
 
     return out.str();
 }
+
+auto target_to_unit(const Target& target) noexcept -> opentxs::UnitType
+{
+    struct Visitor {
+        auto operator()(blockchain::Type in) const noexcept
+        {
+            return blockchain_to_unit(in);
+        }
+        auto operator()(const token::Descriptor& in) const noexcept
+        {
+            return token_to_unit(in);
+        }
+    };
+
+    return std::visit(Visitor{}, target);
+}
 }  // namespace opentxs::blockchain::crypto
 
 namespace opentxs
 {
-auto blockchain_thread_item_id(
-    const api::Crypto& crypto,
-    const api::Factory& factory,
-    const blockchain::Type chain,
-    const blockchain::block::TransactionHash& txid) noexcept
-    -> identifier::Generic
-{
-    auto preimage = UnallocatedCString{};
-    const auto hashed = crypto.Hash().HMAC(
-        crypto::HashType::Sha256,
-        ReadView{reinterpret_cast<const char*>(&chain), sizeof(chain)},
-        txid.Bytes(),
-        writer(preimage));
-
-    assert_true(hashed);
-
-    return factory.IdentifierFromPreimage(preimage);
-}
-
 auto deserialize(const ReadView in) noexcept -> blockchain::crypto::Key
 {
     auto out = blockchain::crypto::Key{};

@@ -51,9 +51,11 @@ TEST_F(Regtest_payment_code, init_opentxs) {}
 TEST_F(Regtest_payment_code, add_contacts)
 {
     client_1_.Contacts().PaymentCodeToContact(
-        client_1_.Factory().PaymentCodeFromBase58(contact1), test_chain_);
+        client_1_.Factory().PaymentCodeFromBase58(contact1),
+        blockchain_to_unit(test_chain_));
     client_1_.Contacts().PaymentCodeToContact(
-        client_1_.Factory().PaymentCodeFromBase58(contact2), test_chain_);
+        client_1_.Factory().PaymentCodeFromBase58(contact2),
+        blockchain_to_unit(test_chain_));
 }
 
 TEST_F(Regtest_payment_code, start_chains) { EXPECT_TRUE(Start()); }

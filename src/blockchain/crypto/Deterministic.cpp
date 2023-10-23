@@ -350,12 +350,12 @@ auto Deterministic::finish_allocation(
 {
     if (0u < internal.size()) {
         parent_.Parent().Parent().Internal().KeyGenerated(
-            chain_, parent_.NymID(), id_, type_, data_.internal_.type_);
+            target_, parent_.NymID(), id_, type_, data_.internal_.type_);
     }
 
     if (0u < external.size()) {
         parent_.Parent().Parent().Internal().KeyGenerated(
-            chain_, parent_.NymID(), id_, type_, data_.external_.type_);
+            target_, parent_.NymID(), id_, type_, data_.external_.type_);
     }
 
     return save(lock);
@@ -427,7 +427,14 @@ auto Deterministic::generate(
         std::piecewise_construct,
         std::forward_as_tuple(index),
         std::forward_as_tuple(std::make_unique<implementation::Element>(
-            api_, blockchain, *this, chain_, type, index, key, get_contact())));
+            api_,
+            blockchain,
+            *this,
+            base_chain(target_),
+            type,
+            index,
+            key,
+            get_contact())));
 
     if (false == added) { throw std::runtime_error("Failed to add key"); }
 

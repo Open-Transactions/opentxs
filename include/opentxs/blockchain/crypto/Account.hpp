@@ -140,7 +140,6 @@ public:
     };
 
     virtual auto AccountID() const noexcept -> const identifier::Account& = 0;
-    virtual auto Chain() const noexcept -> blockchain::Type = 0;
     virtual auto GetHD() const noexcept -> const HDAccounts& = 0;
     /// Throws std::out_of_range if no keys are available
     virtual auto GetNextChangeKey(const PasswordPrompt& reason) const
@@ -170,6 +169,7 @@ public:
     virtual auto Parent() const noexcept -> const Wallet& = 0;
     virtual auto Subaccount(const identifier::Account& id) const noexcept(false)
         -> const crypto::Subaccount& = 0;
+    virtual auto Target() const noexcept -> crypto::Target = 0;
 
     Account(const Account&) = delete;
     Account(Account&&) = delete;
