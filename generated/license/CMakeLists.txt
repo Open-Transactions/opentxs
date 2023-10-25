@@ -78,6 +78,7 @@ include(otcommon-file-to-hex)
 otcommon_file_to_hex(
   "${CMAKE_CURRENT_SOURCE_DIR}/apache-2.0.txt" "APACHE_2_0_HEX"
 )
+otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/cc0.txt" "CC0_HEX")
 otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
@@ -106,19 +107,28 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/util/license/apache.cpp"
   @ONLY
 )
+
 configure_file(
   "base58.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/base58.cpp"
   @ONLY
 )
+
 configure_file(
   "base64.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/base64.cpp"
   @ONLY
 )
+
 configure_file(
   "bech32.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/bech32.cpp"
+  @ONLY
+)
+
+configure_file(
+  "cc0.cpp.in"
+  "${opentxs_BINARY_DIR}/src/util/license/cc0.cpp"
   @ONLY
 )
 
@@ -207,6 +217,7 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/util/license/mpl.cpp"
   @ONLY
 )
+
 configure_file(
   "opentxs.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/opentxs.cpp"

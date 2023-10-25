@@ -28,6 +28,10 @@ auto HashingProvider::StringToHashType(const String& inputString) noexcept
         return crypto::HashType::Blake2b256;
     } else if (inputString.Compare("BLAKE2B512")) {
         return crypto::HashType::Blake2b512;
+    } else if (inputString.Compare("X11")) {
+        return crypto::HashType::X11;
+    } else if (inputString.Compare("KECCAK256")) {
+        return crypto::HashType::Keccak256;
     }
 
     return crypto::HashType::Error;
@@ -61,6 +65,9 @@ auto HashingProvider::HashTypeToString(const crypto::HashType hashType) noexcept
         case X11: {
             hashTypeString = String::Factory("X11");
         } break;
+        case Keccak256: {
+            hashTypeString = String::Factory("KECCAK256");
+        } break;
         case Error:
         case Ripemd160:
         case Sha1:
@@ -68,6 +75,7 @@ auto HashingProvider::HashTypeToString(const crypto::HashType hashType) noexcept
         case Sha256DC:
         case Bitcoin:
         case SipHash24:
+        case Ethereum:
         default: {
             hashTypeString = String::Factory("ERROR");
         }
@@ -117,6 +125,12 @@ auto HashingProvider::HashSize(const crypto::HashType hashType) noexcept
         }
         case X11: {
             return 32;
+        }
+        case Keccak256: {
+            return 32;
+        }
+        case Ethereum: {
+            return 20;
         }
         case Error:
         case None:

@@ -603,6 +603,8 @@ auto Key::hashtype_map() noexcept -> const HashTypeMap&
         {Bitcoin, HASHTYPE_BITCOIN},
         {SipHash24, HASHTYPE_SIPHASH24},
         {X11, HASHTYPE_X11},
+        {Keccak256, HASHTYPE_KECCAK256},
+        {Ethereum, HASHTYPE_ETHEREUM},
     };
 
     return map;

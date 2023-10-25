@@ -5,6 +5,8 @@
 
 #include "ottest/data/crypto/Hashes.hpp"  // IWYU pragma: associated
 
+#include <initializer_list>
+
 #include "opentxs/util/Container.hpp"
 
 namespace ottest
@@ -141,6 +143,78 @@ auto Argon2id() noexcept -> std::span<const ArgonVector>
             "diffsaltdiffsalt"sv,
             "c22e7f0935f83ed7a0163bfd4f09a2014b94c9aa19dc681e7e781170dcfd1659"sv,
         },
+    };
+
+    return data;
+}
+
+auto EthHashes() noexcept -> std::span<const EthereumVector>
+{
+    // Generated using https://www.rfctools.com/ethereum-address-test-tool/
+    static constexpr auto data = std::initializer_list<EthereumVector>{
+        {
+            "1247328147577841EDAB7CE43A31D49C722152C28229D84C28722594D16B8A29"sv,
+            "1be26e236e77da12843aa641c806be6cde6977dec790c86bfe84ec3fa4535826f6288d62fd77fdd61061052f82959211059547bfdb44cab932f682aff4a89918"sv,
+            "997d2b9fb17bed5422bcd616e14a6a8bf2f28a1a8fda205232084c74faa19531"sv,
+            "e14a6a8bf2f28a1a8fda205232084c74faa19531"sv,
+            "7b8f26e84c37225b697d9719545e03e7546ecf69cce647b9c1d0ea68810d8721"sv,
+            "e14A6a8Bf2f28a1A8FdA205232084c74faa19531"sv,
+        },
+        {
+            "E9613EB5DE38D4B8763813913C8493E20D9BB725744A89132B777897AD2E6110"sv,
+            "ec55462bb46842e5c9aa3bc49f15bcb714a128d8dbffffc4a60106e385bc3bc466ccaa3b0a767afe2c66a66221449cc7e7482944e13a17a755a4dde0801e03fc"sv,
+            "697c4ee0537b3f74290fb32faa9c7e21d31712cc8a23314ce550052c96b62eea"sv,
+            "aa9c7e21d31712cc8a23314ce550052c96b62eea"sv,
+            "a87372e8d9b4304edcb623931884843ac28cc9c941f0a5c357d18a87bd2a0d47"sv,
+            "AA9c7e21D31712cC8A23314ce550052C96B62EEA"sv,
+        },
+        {
+            "622CCEC9DC0E38CCEC65099CEE973BD0DB209263C39DCEA31410B0E9952D0A1E"sv,
+            "3493c1baea56ea6979ae0ba3eebff66e72433016872b49895dcb6b3ca192a2019315c8f42d8f6108b2166bc1cac5cc7a02cd54d5dfe6409d1c0735b93fa86f0d"sv,
+            "da3b5b385dba4ad8a06bdf25191fd4aa32edd0a6a199079b3c32c979dbc72980"sv,
+            "191fd4aa32edd0a6a199079b3c32c979dbc72980"sv,
+            "140b32f3ab1a9f3ecc8b75e4738201f6042e1a73a25219fd243367e058cefe16"sv,
+            "191Fd4Aa32eDD0a6A199079b3c32c979dbc72980"sv,
+        },
+        {
+            "DD665AE694722A3813C42155B888DD367047EA121138542D94EDD00293CC3271"sv,
+            "d307e35ef9ef4c5efd66d9039f399994b2c909ac9cf026934d678019d7db2d9ecd1c163dfad20504d790ddad3ec7c19031169e9e4d40d89cf540d92d1320d7bc"sv,
+            "fdcc5b29a0408b069d4ccdde10330c7f31d50ef2193802d8664f7285527a260f"sv,
+            "10330c7f31d50ef2193802d8664f7285527a260f"sv,
+            "bb1b734623b9e391cc5f4759a0d84a3c04f671616721cf356c7d0fce75ed18da"sv,
+            "10330c7f31D50eF2193802d8664F7285527a260f"sv,
+        },
+        {
+            "BC149CAA45A9E84A2E29AD9010092C3082620ACA378282B8E741B68D5CCEC017"sv,
+            "714fe34e719331594d980385a62b8b509d3112e1090184c9b02d5158b832284335c53001b70bc51abfb17e467316b196cd5f261ed5595c8afb486a442f8ffa74"sv,
+            "b96d34881ada92c2edd09df2b4bb730813fe4a3be56c6665f836a73cefba6eba"sv,
+            "b4bb730813fe4a3be56c6665f836a73cefba6eba"sv,
+            "74d9c07348b3b8f8a6150ce8e2a37655c20e4a6ebff73da8e375f28febb5afb1"sv,
+            "b4BB730813Fe4A3BE56c6665F836a73cEfbA6EbA"sv,
+        },
+    };
+
+    return data;
+}
+
+auto Keccak256() noexcept -> std::span<const KeccakVector>
+{
+    // https://github.com/mighty-gerbils/gerbil-crypto/blob/master/t/keccak-test.ss
+    static constexpr auto data = std::initializer_list<KeccakVector>{
+        {""sv,
+         "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"sv},
+        {"arsttsra"sv,
+         "b1f354b28ff28452d6b9d61f41061bbe82beb1fc98f33364a8058d1a5d164d05"sv},
+        {"arst"sv,
+         "c3305bc9de1244e48050962ced50b75934c37006e99e8b7a62213e945c3dfcd7"sv},
+        {"abc"sv,
+         "4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45"sv},
+        {"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"sv,
+         "45d3b367a6904e6e8d502ee04999a7c27647f91fa845d456525fd352ae3d7371"sv},
+        {"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu"sv,
+         "f519747ed599024f3882238e5ab43960132572b7345fbeb9a90769dafd21ad67"sv},
+        {"this is a test"sv,
+         "9fd09c38c2a5ae0a0bcd617872b735e37909ccc05c956460be7d3d03d881a0dc"sv},
     };
 
     return data;

@@ -20,6 +20,7 @@ auto license_chaiscript(LicenseMap& out) noexcept -> void;
 auto license_dash(LicenseMap& out) noexcept -> void;
 auto license_frozen(LicenseMap& out) noexcept -> void;
 auto license_irrxml(LicenseMap& out) noexcept -> void;
+auto license_keccak_tiny(LicenseMap& out) noexcept -> void;
 auto license_libguarded(LicenseMap& out) noexcept -> void;
 auto license_lucre(LicenseMap& out) noexcept -> void;
 auto license_matterfi(LicenseMap& out) noexcept -> void;
@@ -31,6 +32,7 @@ auto license_secp256k1(LicenseMap& out) noexcept -> void;
 auto license_simpleini(LicenseMap& out) noexcept -> void;
 auto license_tbb(LicenseMap& out) noexcept -> void;
 auto text_apache_v2() noexcept -> std::string_view;
+auto text_cc0() noexcept -> std::string_view;
 auto text_lgpl_v2_1() noexcept -> std::string_view;
 auto text_mpl_v2() noexcept -> std::string_view;
 }  // namespace opentxs

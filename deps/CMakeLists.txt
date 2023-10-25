@@ -82,6 +82,30 @@ endif()
 libopentxs_add_sources($<TARGET_OBJECTS:opentxs-external-hashes>)
 
 add_library(
+  opentxs-keccak OBJECT "keccack/keccak-tiny.c" "keccack/keccak-tiny.h"
+)
+libopentxs_configure_c_target(opentxs-keccak)
+set_target_properties(
+  opentxs-keccak
+  PROPERTIES
+    C_STANDARD 11
+    C_INCLUDE_WHAT_YOU_USE ""
+    CXX_INCLUDE_WHAT_YOU_USE ""
+)
+
+if(NOT MSVC)
+  target_compile_options(
+    opentxs-keccak
+    PRIVATE
+      -Wno-declaration-after-statement
+      -Wno-extra-semi-stmt
+      -Wno-reserved-macro-identifier
+  )
+endif()
+
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-keccak>)
+
+add_library(
   opentxs-bech32 OBJECT
   "bech32/ref/c++/bech32.cpp"
   "bech32/ref/c++/bech32.h"

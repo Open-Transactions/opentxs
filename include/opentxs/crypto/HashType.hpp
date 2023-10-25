@@ -27,11 +27,12 @@ enum class HashType : std::uint8_t {
     Bitcoin = 11,
     SipHash24 = 12,
     X11 = 13,
+    Keccak256 = 14,
+    Ethereum = 15,
 };
 
 constexpr auto value(const HashType in) noexcept
 {
     return static_cast<std::uint8_t>(in);
 }
-
 }  // namespace opentxs::crypto

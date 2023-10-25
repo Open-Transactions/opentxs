@@ -103,6 +103,8 @@ enum HashType {
     HASHTYPE_BITCOIN = 11;
     HASHTYPE_SIPHASH24 = 12;
     HASHTYPE_X11 = 13;
+    HASHTYPE_KECCAK256 = 14;
+    HASHTYPE_ETHEREUM = 15;
 }
 
 enum NymMode {

@@ -466,10 +466,6 @@ TEST_F(Test_Hash, argon2id)
 
 TEST_F(Test_Hash, X11)
 {
-    const auto& ot = OTTestEnvironment::GetOT();
-    const auto& api = ot.StartClientSession(0);
-    const auto reason = api.Factory().PasswordPrompt(__func__);
-
     for (const auto& [preimage, val] : X11Vectors()) {
         const auto expected = ot::ByteArray{ot::IsHex, val};
         auto output = ot::ByteArray{};
@@ -478,6 +474,60 @@ TEST_F(Test_Hash, X11)
             ot::crypto::HashType::X11, preimage, output.WriteInto()));
         EXPECT_EQ(output.asHex(), expected.asHex())
             << "Failed input: " << preimage;
+    }
+}
+
+TEST_F(Test_Hash, Keccak256)
+{
+    for (const auto& [preimage, val] : Keccak256()) {
+        const auto expected = ot::ByteArray{ot::IsHex, val};
+        auto output = ot::ByteArray{};
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            ot::crypto::HashType::Keccak256, preimage, output.WriteInto()));
+        EXPECT_EQ(output.asHex(), expected.asHex())
+            << "Failed input: " << preimage;
+    }
+
+    for (const auto& [sec, pub, pkh, last20, cs, addr] : EthHashes()) {
+        const auto preimage = ot::ByteArray{ot::IsHex, pub};
+        const auto expected = ot::ByteArray{ot::IsHex, pkh};
+        auto output = ot::ByteArray{};
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            ot::crypto::HashType::Keccak256,
+            preimage.Bytes(),
+            output.WriteInto()));
+        EXPECT_EQ(output.asHex(), expected.asHex())
+            << "Failed input: " << preimage.asHex();
+    }
+
+    for (const auto& [sec, pub, pkh, last20, cs, addr] : EthHashes()) {
+        const auto expected = ot::ByteArray{ot::IsHex, cs};
+        auto output = ot::ByteArray{};
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            ot::crypto::HashType::Keccak256,
+            last20,  // NOTE wtf was Ethereum thinking?
+            output.WriteInto()));
+        EXPECT_EQ(output.asHex(), expected.asHex())
+            << "Failed input: " << last20;
+    }
+}
+
+TEST_F(Test_Hash, Ethereum)
+{
+    for (const auto& [sec, pub, pkh, last20, cs, addr] : EthHashes()) {
+        const auto preimage = ot::ByteArray{ot::IsHex, pub};
+        const auto expected = ot::ByteArray{ot::IsHex, last20};
+        auto output = ot::ByteArray{};
+
+        EXPECT_TRUE(crypto_.Hash().Digest(
+            ot::crypto::HashType::Ethereum,
+            preimage.Bytes(),
+            output.WriteInto()));
+        EXPECT_EQ(output.asHex(), expected.asHex())
+            << "Failed input: " << preimage.asHex();
     }
 }
 }  // namespace ottest

@@ -5,6 +5,7 @@ deps/bech32
 deps/cs_libguarded
 deps/frozen
 deps/irrxml
+deps/keccack
 deps/lucre
 deps/opentxs-cmake
 deps/packetcrypt/packetcrypt_rs

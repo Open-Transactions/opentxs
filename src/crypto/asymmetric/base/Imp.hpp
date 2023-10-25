@@ -244,7 +244,7 @@ protected:
         allocator_type alloc) noexcept;
 
 private:
-    static constexpr auto HashTypeMapSize = std::size_t{14};
+    static constexpr auto HashTypeMapSize = std::size_t{16};
     using HashTypeMap = frozen::
         unordered_map<crypto::HashType, proto::HashType, HashTypeMapSize>;
     using HashTypeReverseMap = frozen::

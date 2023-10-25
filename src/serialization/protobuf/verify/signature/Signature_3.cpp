@@ -61,7 +61,7 @@ auto CheckProto_3(
 
     CHECK_EXISTS(hashtype);
 
-    if (input.hashtype() > proto::HASHTYPE_X11) {
+    if (input.hashtype() > proto::HASHTYPE_ETHEREUM) {
         FAIL_2("invalid hash type", input.hashtype());
     }
 
