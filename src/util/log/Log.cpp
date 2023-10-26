@@ -257,34 +257,6 @@ Log::~Log()
 
 namespace opentxs
 {
-auto assert_true(bool expression, const std::source_location& loc) noexcept
-    -> void
-{
-    assert_true(expression, "assertion failure", loc);
-}
-
-auto assert_true(
-    bool expression,
-    std::string_view message,
-    const std::source_location& loc) noexcept -> void
-{
-    if (false == expression) { LogAbort()(loc)(message).Abort(); }
-}
-
-auto assert_false(bool expression, const std::source_location& loc) noexcept
-    -> void
-{
-    assert_false(expression, "assertion failure", loc);
-}
-
-auto assert_false(
-    bool expression,
-    std::string_view message,
-    const std::source_location& loc) noexcept -> void
-{
-    if (expression) { LogAbort()(loc)(message).Abort(); }
-}
-
 auto LogAbort() noexcept -> Log&
 {
     static auto logger = Log{std::make_unique<Log::Imp>(-2).release()};
