@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include "crypto/asymmetric/key/hd/Imp.hpp"
+#include <optional>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
+#include "crypto/asymmetric/key/hd/Imp.hpp"
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
@@ -38,7 +39,6 @@ namespace implementation
 class EllipticCurve;
 }  // namespace implementation
 }  // namespace key
-
 }  // namespace asymmetric
 
 namespace symmetric
@@ -55,6 +55,7 @@ class AsymmetricKey;
 class HDPath;
 }  // namespace proto
 
+class ByteArray;
 class Data;
 class PasswordPrompt;
 }  // namespace opentxs
@@ -80,6 +81,11 @@ public:
     {
         return this;
     }
+    auto asSecp256k1Public() const noexcept
+        -> const asymmetric::key::Secp256k1& final
+    {
+        return self_;
+    }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> asymmetric::KeyPrivate* final
     {
@@ -90,6 +96,7 @@ public:
     {
         return pmr::make_deleter(this);
     }
+    auto UncompressedPubkey() const noexcept -> ReadView final;
 
     [[nodiscard]] auto asEllipticCurvePublic() noexcept
         -> key::EllipticCurve& final
@@ -104,6 +111,10 @@ public:
         -> key::Secp256k1Private* override
     {
         return this;
+    }
+    auto asSecp256k1Public() noexcept -> asymmetric::key::Secp256k1& final
+    {
+        return self_;
     }
 
     Secp256k1(
@@ -172,6 +183,7 @@ public:
 
 private:
     key::Secp256k1 self_;
+    mutable std::optional<ByteArray> uncompressed_;
 
     auto replace_public_key(const ReadView newPubkey, allocator_type alloc)
         const noexcept -> EllipticCurve* final;

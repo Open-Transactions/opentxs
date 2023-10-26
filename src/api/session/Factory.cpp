@@ -27,6 +27,7 @@
 
 #include "2_Factory.hpp"
 #include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"
+#include "internal/api/Crypto.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
@@ -39,8 +40,10 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/reply/Factory.hpp"
 #include "internal/core/contract/peer/request/Factory.hpp"
+#include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/key/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
 #include "internal/identity/wot/claim/Factory.hpp"
 #include "internal/identity/wot/verification/Factory.hpp"
@@ -115,10 +118,12 @@
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
@@ -133,6 +138,7 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
+#include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"
 #include "util/PasswordPromptPrivate.hpp"
 
@@ -155,7 +161,7 @@ Factory::Factory(const api::Session& api, const api::Factory& parent)
 
 auto Factory::AsymmetricKey(
     const opentxs::crypto::Parameters& params,
-    const opentxs::PasswordPrompt& reason) const
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> opentxs::crypto::asymmetric::Key
 {
     return AsymmetricKey(
@@ -168,7 +174,7 @@ auto Factory::AsymmetricKey(
 auto Factory::AsymmetricKey(
     VersionNumber version,
     const opentxs::crypto::Parameters& params,
-    const opentxs::PasswordPrompt& reason) const
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> opentxs::crypto::asymmetric::Key
 {
     return AsymmetricKey(
@@ -178,7 +184,7 @@ auto Factory::AsymmetricKey(
 auto Factory::AsymmetricKey(
     opentxs::crypto::asymmetric::Role role,
     const opentxs::crypto::Parameters& params,
-    const opentxs::PasswordPrompt& reason) const
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> opentxs::crypto::asymmetric::Key
 {
     return AsymmetricKey(
@@ -192,7 +198,7 @@ auto Factory::AsymmetricKey(
     VersionNumber version,
     opentxs::crypto::asymmetric::Role role,
     const opentxs::crypto::Parameters& params,
-    const opentxs::PasswordPrompt& reason) const
+    const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> opentxs::crypto::asymmetric::Key
 {
     auto output = asymmetric_.NewKey(params, role, version, reason);
@@ -205,8 +211,8 @@ auto Factory::AsymmetricKey(
     }
 }
 
-auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized) const
-    -> opentxs::crypto::asymmetric::Key
+auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized)
+    const noexcept -> opentxs::crypto::asymmetric::Key
 {
     auto output = asymmetric_.Internal().InstantiateKey(serialized);
 
@@ -215,6 +221,101 @@ auto Factory::AsymmetricKey(const proto::AsymmetricKey& serialized) const
         return opentxs::crypto::asymmetric::Key{std::move(output)};
     } else {
         LogError()()("Failed to instantiate asymmetric key").Flush();
+
+        return {};
+    }
+}
+
+auto Factory::AsymmetricKey(
+    opentxs::crypto::asymmetric::Algorithm type,
+    const opentxs::Secret& key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::asymmetric::Key
+{
+    return AsymmetricKey(
+        opentxs::crypto::asymmetric::Key::DefaultVersion(),
+        opentxs::crypto::asymmetric::Role::Sign,
+        type,
+        key,
+        reason,
+        alloc);
+}
+
+auto Factory::AsymmetricKey(
+    VersionNumber version,
+    opentxs::crypto::asymmetric::Algorithm type,
+    const opentxs::Secret& key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::asymmetric::Key
+{
+    return AsymmetricKey(
+        version,
+        opentxs::crypto::asymmetric::Role::Sign,
+        type,
+        key,
+        reason,
+        alloc);
+}
+
+auto Factory::AsymmetricKey(
+    opentxs::crypto::asymmetric::Role role,
+    opentxs::crypto::asymmetric::Algorithm type,
+    const opentxs::Secret& key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::asymmetric::Key
+{
+    return AsymmetricKey(
+        opentxs::crypto::asymmetric::Key::DefaultVersion(),
+        role,
+        type,
+        key,
+        reason,
+        alloc);
+}
+
+auto Factory::AsymmetricKey(
+    VersionNumber version,
+    opentxs::crypto::asymmetric::Role role,
+    opentxs::crypto::asymmetric::Algorithm type,
+    const opentxs::Secret& key,
+    const opentxs::PasswordPrompt& reason,
+    alloc::Strategy alloc) const noexcept -> opentxs::crypto::asymmetric::Key
+{
+    try {
+        auto pubkey = ByteArray{};
+
+        switch (type) {
+            using enum opentxs::crypto::asymmetric::Algorithm;
+
+            case Secp256k1: {
+                const auto& ecdsa = api_.Crypto().Internal().Libsecp256k1();
+
+                if (false ==
+                    ecdsa.ScalarMultiplyBase(key.Bytes(), pubkey.WriteInto())) {
+                    throw std::runtime_error{"failed to calculate pubkey"};
+                }
+
+                return factory::Secp256k1Key(
+                    api_,
+                    ecdsa,
+                    key,
+                    pubkey,
+                    role,
+                    version,
+                    reason,
+                    alloc.result_);
+            }
+            case ED25519:
+            case Error:
+            case Null:
+            case Legacy:
+            default: {
+                throw std::runtime_error{
+                    "unsupported key type: "s.append(print(type))};
+            }
+        }
+    } catch (const std::exception& e) {
+        LogError()()(e.what())(print(type)).Flush();
 
         return {};
     }

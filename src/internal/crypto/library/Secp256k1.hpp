@@ -7,12 +7,23 @@
 
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
+#include "opentxs/util/Types.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Writer;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::crypto
 {
 class Secp256k1 : virtual public EcdsaProvider
 {
 public:
+    virtual auto Uncompress(ReadView pubkey, Writer&& out) const noexcept
+        -> bool = 0;
+
     using AsymmetricProvider::Init;
     virtual void Init() = 0;
 

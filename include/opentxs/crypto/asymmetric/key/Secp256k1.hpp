@@ -7,6 +7,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -27,6 +28,8 @@ class OPENTXS_EXPORT Secp256k1 : public HD
 {
 public:
     OPENTXS_NO_EXPORT static auto Blank() noexcept -> Secp256k1&;
+
+    auto UncompressedPubkey() const noexcept -> ReadView;
 
     OPENTXS_NO_EXPORT Secp256k1(KeyPrivate* imp) noexcept;
     Secp256k1(allocator_type alloc = {}) noexcept;

@@ -10,6 +10,11 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
+#include "internal/api/Crypto.hpp"
+#include "internal/crypto/library/Secp256k1.hpp"
+#include "opentxs/api/session/Crypto.hpp"
+#include "opentxs/api/session/Session.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -18,6 +23,7 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric::key::implementation
 {
@@ -32,6 +38,7 @@ Secp256k1::Secp256k1(
     , Secp256k1Private(alloc)
     , HD(api, ecdsa, serializedKey, alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -56,6 +63,7 @@ Secp256k1::Secp256k1(
          reason,
          alloc)
     , self_(this)
+    , uncompressed_()
 {
     assert_false(plaintext_key_.empty());
 }
@@ -85,6 +93,7 @@ Secp256k1::Secp256k1(
          reason,
          alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -119,6 +128,7 @@ Secp256k1::Secp256k1(
          reason,
          alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -149,6 +159,7 @@ Secp256k1::Secp256k1(
          version,
          alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -159,6 +170,16 @@ Secp256k1::Secp256k1(const Secp256k1& rhs, allocator_type alloc) noexcept
     , Secp256k1Private(alloc)
     , HD(rhs, alloc)
     , self_(this)
+    , uncompressed_([&]() -> decltype(uncompressed_) {
+        if (rhs.uncompressed_.has_value()) {
+
+            return ByteArray{*rhs.uncompressed_, alloc};
+
+        } else {
+
+            return std::nullopt;
+        }
+    }())
 {
 }
 
@@ -172,6 +193,7 @@ Secp256k1::Secp256k1(
     , Secp256k1Private(alloc)
     , HD(rhs, newPublic, alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -185,6 +207,7 @@ Secp256k1::Secp256k1(
     , Secp256k1Private(alloc)
     , HD(rhs, std::move(newSecretKey), alloc)
     , self_(this)
+    , uncompressed_()
 {
 }
 
@@ -204,6 +227,20 @@ auto Secp256k1::replace_secret_key(Secret&& newSecretKey, allocator_type alloc)
     const noexcept -> EllipticCurve*
 {
     return pmr::construct<Secp256k1>(alloc, *this, std::move(newSecretKey));
+}
+
+auto Secp256k1::UncompressedPubkey() const noexcept -> ReadView
+{
+    if (false == uncompressed_.has_value()) {
+        const auto& api = api_.Crypto().Internal().Libsecp256k1();
+        auto& key = uncompressed_.emplace();
+
+        if (false == api.Uncompress(PublicKey(), key.WriteInto())) {
+            key.clear();
+        }
+    }
+
+    return uncompressed_->Bytes();
 }
 
 Secp256k1::~Secp256k1() { Reset(self_); }

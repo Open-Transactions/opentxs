@@ -140,8 +140,8 @@ class Factory : virtual public api::session::Factory,
 public:
     virtual auto Asymmetric() const -> const api::crypto::Asymmetric& = 0;
     using session::Factory::AsymmetricKey;
-    virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
-        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized)
+        const noexcept -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto Basket() const -> std::unique_ptr<opentxs::Basket> = 0;
     virtual auto Basket(
         std::int32_t nCount,

@@ -24,6 +24,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -188,23 +189,51 @@ class OPENTXS_EXPORT Factory : virtual public api::Factory
 public:
     virtual auto AsymmetricKey(
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto AsymmetricKey(
         VersionNumber version,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto AsymmetricKey(
         opentxs::crypto::asymmetric::Role role,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto AsymmetricKey(
         VersionNumber version,
         opentxs::crypto::asymmetric::Role role,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Role role,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key = 0;
+    virtual auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Role role,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto BailmentNoticeReply(
         const Nym_p& responder,
