@@ -24,11 +24,25 @@ struct OPENTXS_EXPORT ArgonVector {
     std::string_view expected_{};
 };
 
+struct OPENTXS_EXPORT EthereumVector {
+    std::string_view secret_{};
+    std::string_view uncompressed_public_{};
+    std::string_view pubkey_hash_{};
+    std::string_view last_20_{};
+    std::string_view checksum_{};
+    std::string_view address_{};
+};
+
 struct OPENTXS_EXPORT HMACVector {
     std::string_view key_{};
     std::string_view data_{};
     std::string_view sha256_{};
     std::string_view sha512_{};
+};
+
+struct OPENTXS_EXPORT KeccakVector {
+    std::string_view input_{};
+    std::string_view expected_{};
 };
 
 struct OPENTXS_EXPORT MurmurVector {
@@ -69,6 +83,8 @@ struct OPENTXS_EXPORT X11Vector {
 
 OPENTXS_EXPORT auto Argon2i() noexcept -> std::span<const ArgonVector>;
 OPENTXS_EXPORT auto Argon2id() noexcept -> std::span<const ArgonVector>;
+OPENTXS_EXPORT auto EthHashes() noexcept -> std::span<const EthereumVector>;
+OPENTXS_EXPORT auto Keccak256() noexcept -> std::span<const KeccakVector>;
 OPENTXS_EXPORT auto Murmur() noexcept -> std::span<const MurmurVector>;
 OPENTXS_EXPORT auto NistBasic() noexcept -> std::span<const NistHashVector>;
 OPENTXS_EXPORT auto NistMillion() noexcept -> const NistHashVector&;

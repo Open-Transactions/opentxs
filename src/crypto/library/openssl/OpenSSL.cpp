@@ -289,6 +289,8 @@ auto OpenSSL::HashTypeToOpenSSLTypeStage2(
         case Sha256DC:
         case SipHash24:
         case X11:
+        case Keccak256:
+        case Ethereum:
         default: {
             return nullptr;
         }

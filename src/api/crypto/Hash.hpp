@@ -102,6 +102,10 @@ private:
 
     auto bitcoin_hash_160(const ReadView data, Writer&& destination)
         const noexcept -> bool;
+    auto ethereum_hash_160(const ReadView data, Writer&& destination)
+        const noexcept -> bool;
+    auto keccack_256(const ReadView data, Writer&& destination) const noexcept
+        -> bool;
     auto sha_256_double(const ReadView data, Writer&& destination)
         const noexcept -> bool;
     auto sha_256_double_checksum(const ReadView data, Writer&& destination)

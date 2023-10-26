@@ -7,6 +7,10 @@
 
 #include "api/crypto/Hash.hpp"  // IWYU pragma: associated
 
+extern "C" {
+#include <keccack/keccak-tiny.h>
+}
+
 #include <smhasher/src/MurmurHash3.h>
 #include <limits>
 #include <memory>
@@ -23,6 +27,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -131,6 +136,14 @@ auto Hash::Digest(
 
             return dash_->Digest(type, data, std::move(destination));
         }
+        case Keccak256: {
+
+            return keccack_256(data, std::move(destination));
+        }
+        case Ethereum: {
+
+            return ethereum_hash_160(data, std::move(destination));
+        }
         case Error:
         case None:
         case SipHash24:
@@ -148,6 +161,16 @@ auto Hash::Digest(
     Writer&& destination) const noexcept -> bool
 {
     return Digest(type, data.Bytes(), std::move(destination));
+}
+
+auto Hash::ethereum_hash_160(const ReadView data, Writer&& destination)
+    const noexcept -> bool
+{
+    auto hash = FixedByteArray<32>{};
+
+    if (false == keccack_256(data, hash.WriteInto())) { return false; }
+
+    return copy(hash.Bytes().substr(12_uz, 20_uz), std::move(destination));
 }
 
 auto Hash::HMAC(
@@ -194,6 +217,29 @@ auto Hash::Hasher(const opentxs::crypto::HashType hashType) const noexcept
     -> opentxs::crypto::Hasher
 {
     return sha_.Hasher(hashType);
+}
+
+auto Hash::keccack_256(const ReadView data, Writer&& destination) const noexcept
+    -> bool
+{
+    try {
+        constexpr auto bytes = 32_uz;
+        auto buf = destination.Reserve(bytes);
+
+        if (false == buf.IsValid(bytes)) {
+            throw std::runtime_error{"failed to reserve space for hash"};
+        }
+
+        return -1 != ::keccack_256(
+                         buf.as<std::uint8_t>(),
+                         buf.size(),
+                         reinterpret_cast<const std::uint8_t*>(data.data()),
+                         data.size());
+    } catch (const std::exception& e) {
+        LogError()()(e.what()).Flush();
+
+        return false;
+    }
 }
 
 auto Hash::MurmurHash3_32(

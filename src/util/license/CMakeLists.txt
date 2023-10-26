@@ -12,6 +12,7 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/base58.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/base64.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/bech32.cpp"
+    "${CMAKE_CURRENT_BINARY_DIR}/cc0.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/chai.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/dash.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/frozen.cpp"
@@ -30,4 +31,5 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/tbb.cpp"
     "License.cpp"
     "License.hpp"
+    "keccak-tiny.cpp"
 )
