@@ -3,8 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-target_sources(opentxs-testlib PRIVATE "Address.cpp" "Address.hpp")
-
 if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(regtest)
 
@@ -13,8 +11,6 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE
       "Activity.cpp"
       "Activity.hpp"
-      "Address.cpp"
-      "Address.hpp"
       "BIP158.cpp"
       "BIP158.hpp"
       "BIP44.cpp"

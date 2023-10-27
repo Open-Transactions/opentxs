@@ -205,6 +205,15 @@ auto Blockchain::EncodeAddress(
     return imp_->EncodeAddress(style, chain, data);
 }
 
+auto Blockchain::EncodeAddress(
+    const Style style,
+    const Chain chain,
+    const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey)
+    const noexcept -> UnallocatedCString
+{
+    return imp_->EncodeAddress(style, chain, pubkey);
+}
+
 auto Blockchain::GetNotificationStatus(
     const identifier::Nym& nym,
     alloc::Strategy alloc) const noexcept

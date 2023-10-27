@@ -21,7 +21,7 @@ auto PaymentCode_v1::KeyToAddress(
     const ot::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     -> ot::UnallocatedCString
 {
-    constexpr auto style = ot::blockchain::crypto::AddressStyle::P2PKH;
+    constexpr auto style = ot::blockchain::crypto::AddressStyle::p2pkh;
 
     return api_.Crypto().Blockchain().CalculateAddress(
         chain_, style, api_.Factory().DataFromBytes(key.PublicKey()));

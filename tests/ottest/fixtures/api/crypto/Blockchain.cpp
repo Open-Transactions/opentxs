@@ -176,7 +176,7 @@ auto ApiCryptoBlockchain::check_hd_index(
     const auto locator = ot::blockchain::crypto::Key{accountID, subchain, i};
     const auto& element = account.BalanceElement(subchain, i);
 
-    EXPECT_EQ(element.Address(AddressStyle::P2PKH), target);
+    EXPECT_EQ(element.Address(AddressStyle::p2pkh), target);
     EXPECT_EQ(element.Confirmed().size(), 0);
     EXPECT_EQ(element.Index(), i);
     EXPECT_TRUE(element.Key().IsValid());
@@ -188,7 +188,7 @@ auto ApiCryptoBlockchain::check_hd_index(
     EXPECT_EQ(element.Subchain(), subchain);
     EXPECT_EQ(element.Unconfirmed().size(), 0);
 
-    output &= (element.Address(AddressStyle::P2PKH) == target);
+    output &= (element.Address(AddressStyle::p2pkh) == target);
     output &= (element.Confirmed().size() == 0);
     output &= (element.Index() == i);
     output &= element.Key().IsValid();

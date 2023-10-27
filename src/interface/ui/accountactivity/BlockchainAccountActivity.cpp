@@ -617,12 +617,12 @@ auto BlockchainAccountActivity::ValidateAddress(
         if (0 < code.Version()) { return true; }
     }
 
-    using Style = blockchain::crypto::AddressStyle;
+    using enum blockchain::crypto::AddressStyle;
 
     const auto [data, style, chains, supported] =
         api_.Crypto().Blockchain().DecodeAddress(in);
 
-    if (Style::Unknown == style) { return false; }
+    if (unknown_address_style == style) { return false; }
 
     if (0 == chains.count(chain_)) { return false; }
 

@@ -7,8 +7,11 @@
 
 #include <HDPath.pb.h>
 #include <bech32.h>
+#include <frozen/bits/algorithms.h>
+#include <frozen/unordered_set.h>
 #include <segwit_addr.h>
 #include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -25,6 +28,7 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
+#include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -34,6 +38,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -51,6 +56,7 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
@@ -60,6 +66,9 @@
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
+#include "opentxs/crypto/HashType.hpp"
+#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -136,66 +145,66 @@ const AddressReverseMap address_prefix_reverse_map_{
 };
 const AddressMap address_prefix_map_{reverse_map(address_prefix_reverse_map_)};
 const StyleMap address_style_map_{
-    {{Style::P2PKH, opentxs::blockchain::Type::UnitTest},
+    {{Style::p2pkh, opentxs::blockchain::Type::UnitTest},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash_testnet3},
+    {{Style::p2pkh, opentxs::blockchain::Type::BitcoinCash_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash_testnet4},
+    {{Style::p2pkh, opentxs::blockchain::Type::BitcoinCash_testnet4},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinCash},
+    {{Style::p2pkh, opentxs::blockchain::Type::BitcoinCash},
      {Prefix::BitcoinP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::eCash_testnet3},
+    {{Style::p2pkh, opentxs::blockchain::Type::eCash_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::eCash},
+    {{Style::p2pkh, opentxs::blockchain::Type::eCash},
      {Prefix::BitcoinP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Bitcoin_testnet3},
+    {{Style::p2pkh, opentxs::blockchain::Type::Bitcoin_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Bitcoin},
+    {{Style::p2pkh, opentxs::blockchain::Type::Bitcoin},
      {Prefix::BitcoinP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Litecoin_testnet4},
+    {{Style::p2pkh, opentxs::blockchain::Type::Litecoin_testnet4},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Litecoin},
+    {{Style::p2pkh, opentxs::blockchain::Type::Litecoin},
      {Prefix::LitecoinP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::PKT_testnet},
+    {{Style::p2pkh, opentxs::blockchain::Type::PKT_testnet},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinSV_testnet3},
+    {{Style::p2pkh, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2PKH, {}}},
+    {{Style::p2pkh, opentxs::blockchain::Type::BitcoinSV_testnet3},
      {Prefix::BitcoinTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::BitcoinSV},
+    {{Style::p2pkh, opentxs::blockchain::Type::BitcoinSV},
      {Prefix::BitcoinP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Dash_testnet3},
+    {{Style::p2pkh, opentxs::blockchain::Type::Dash_testnet3},
      {Prefix::DashTestnetP2PKH, {}}},
-    {{Style::P2PKH, opentxs::blockchain::Type::Dash}, {Prefix::DashP2PKH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::UnitTest},
+    {{Style::p2pkh, opentxs::blockchain::Type::Dash}, {Prefix::DashP2PKH, {}}},
+    {{Style::p2sh, opentxs::blockchain::Type::UnitTest},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet3},
+    {{Style::p2sh, opentxs::blockchain::Type::BitcoinCash_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash_testnet4},
+    {{Style::p2sh, opentxs::blockchain::Type::BitcoinCash_testnet4},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::BitcoinCash},
+    {{Style::p2sh, opentxs::blockchain::Type::BitcoinCash},
      {Prefix::BitcoinP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::eCash_testnet3},
+    {{Style::p2sh, opentxs::blockchain::Type::eCash_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::eCash},
+    {{Style::p2sh, opentxs::blockchain::Type::eCash},
      {Prefix::BitcoinP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Bitcoin_testnet3},
+    {{Style::p2sh, opentxs::blockchain::Type::Bitcoin_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Bitcoin},
+    {{Style::p2sh, opentxs::blockchain::Type::Bitcoin},
      {Prefix::BitcoinP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Litecoin_testnet4},
+    {{Style::p2sh, opentxs::blockchain::Type::Litecoin_testnet4},
      {Prefix::LitecoinTestnetP2SH, {Prefix::BitcoinTestnetP2SH}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Litecoin},
+    {{Style::p2sh, opentxs::blockchain::Type::Litecoin},
      {Prefix::LitecoinP2SH, {Prefix::BitcoinP2SH}}},
-    {{Style::P2SH, opentxs::blockchain::Type::PKT_testnet},
+    {{Style::p2sh, opentxs::blockchain::Type::PKT_testnet},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::BitcoinSV_testnet3},
+    {{Style::p2sh, opentxs::blockchain::Type::PKT}, {Prefix::PKTP2SH, {}}},
+    {{Style::p2sh, opentxs::blockchain::Type::BitcoinSV_testnet3},
      {Prefix::BitcoinTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::BitcoinSV},
+    {{Style::p2sh, opentxs::blockchain::Type::BitcoinSV},
      {Prefix::BitcoinP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Dash_testnet3},
+    {{Style::p2sh, opentxs::blockchain::Type::Dash_testnet3},
      {Prefix::DashTestnetP2SH, {}}},
-    {{Style::P2SH, opentxs::blockchain::Type::Dash}, {Prefix::DashP2SH, {}}},
+    {{Style::p2sh, opentxs::blockchain::Type::Dash}, {Prefix::DashP2SH, {}}},
 };
 const StyleReverseMap address_style_reverse_map_{reverse(address_style_map_)};
 const HrpMap hrp_map_{
@@ -224,7 +233,7 @@ Blockchain::Imp::Imp(
     , parent_(parent)
     , balance_oracle_endpoint_(
           opentxs::network::zeromq::MakeArbitraryInproc(child_alloc_))
-    , blank_(child_alloc_, Style::Unknown, child_alloc_, false)
+    , blank_(child_alloc_, Style::unknown_address_style, child_alloc_, false)
     , accounts_(api_, child_alloc_)
     , wallets_(child_alloc_)
 {
@@ -432,8 +441,8 @@ auto Blockchain::Imp::CalculateAddress(
     auto data = api_.Factory().Data();
 
     switch (format) {
-        case Style::P2WPKH:
-        case Style::P2PKH: {
+        case Style::p2wpkh:
+        case Style::p2pkh: {
             try {
                 data = PubkeyHash(chain, pubkey);
             } catch (...) {
@@ -442,10 +451,10 @@ auto Blockchain::Imp::CalculateAddress(
                 return {};
             }
         } break;
-        case Style::Unknown:
-        case Style::P2SH:
-        case Style::P2WSH:
-        case Style::P2TR:
+        case Style::unknown_address_style:
+        case Style::p2sh:
+        case Style::p2wsh:
+        case Style::p2tr:
         default: {
             LogError()()("Unsupported address style (")(
                 static_cast<std::uint16_t>(format))(")")
@@ -483,7 +492,7 @@ auto Blockchain::Imp::DecodeAddress(
         supported = false;
 
         if (0 == data.size()) { return output; }
-        if (Style::Unknown == style) { return output; }
+        if (Style::unknown_address_style == style) { return output; }
         if (0 == chains.size()) { return output; }
 
         for (const auto& chain : chains) {
@@ -499,7 +508,11 @@ auto Blockchain::Imp::DecodeAddress(
 
         return output;
     };
-    auto output = decode_bech23(encoded);
+    auto output = decode_ethereum(encoded);
+
+    if (output.has_value()) { return check(output.value()); }
+
+    output = decode_bech23(encoded);
 
     if (output.has_value()) { return check(output.value()); }
 
@@ -510,8 +523,8 @@ auto Blockchain::Imp::DecodeAddress(
     return blank_;
 }
 
-auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
-    const noexcept -> std::optional<DecodedAddress>
+auto Blockchain::Imp::decode_bech23(std::string_view encoded) const noexcept
+    -> std::optional<DecodedAddress>
 {
     auto output{blank_};
     auto& [data, style, chains, supported] = output;
@@ -539,10 +552,10 @@ auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
                 case 0: {
                     switch (bytes.size()) {
                         case 20: {
-                            style = Style::P2WPKH;
+                            style = Style::p2wpkh;
                         } break;
                         case 32: {
-                            style = Style::P2WSH;
+                            style = Style::p2wsh;
                         } break;
                         default: {
                             throw std::runtime_error{
@@ -553,7 +566,7 @@ auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
                 case 1: {
                     switch (bytes.size()) {
                         case 32: {
-                            style = Style::P2TR;
+                            style = Style::p2tr;
                         } break;
                         default: {
                             throw std::runtime_error{
@@ -583,8 +596,50 @@ auto Blockchain::Imp::decode_bech23(const std::string_view encoded)
     }
 }
 
-auto Blockchain::Imp::decode_legacy(const std::string_view encoded)
-    const noexcept -> std::optional<DecodedAddress>
+auto Blockchain::Imp::decode_ethereum(std::string_view encoded) const noexcept
+    -> std::optional<DecodedAddress>
+{
+    using enum opentxs::blockchain::crypto::AddressStyle;
+    auto output{blank_};
+    auto& [data, style, chains, supported] = output;
+
+    try {
+        if (false == data.DecodeHex(encoded)) {
+            throw std::runtime_error{"not valid hex"};
+        }
+
+        if (const auto size = data.size(); 20_uz != size) {
+            throw std::runtime_error{
+                "not a pubkey hash: expected 20 bytes, got "s.append(
+                    std::to_string(size))};
+        }
+
+        if (42_uz == encoded.size()) { encoded.remove_prefix(2_uz); }
+
+        if (has_uppercase(encoded)) {
+            const auto checksum = make_checksum(data);
+
+            if (checksum != encoded) {
+                throw std::runtime_error{
+                    "invalid checksum: got "s.append(encoded)
+                        .append(", expected ")
+                        .append(checksum)};
+            }
+        }
+
+        style = ethereum_account;
+        chains = get_ethereum_chains();
+
+        return output;
+    } catch (const std::exception& e) {
+        LogTrace()()(e.what()).Flush();
+
+        return std::nullopt;
+    }
+}
+
+auto Blockchain::Imp::decode_legacy(std::string_view encoded) const noexcept
+    -> std::optional<DecodedAddress>
 {
     auto output{blank_};
     auto& [data, style, chains, supported] = output;
@@ -649,21 +704,26 @@ auto Blockchain::Imp::EncodeAddress(
     const Data& data) const noexcept -> UnallocatedCString
 {
     switch (style) {
-        case Style::P2WPKH: {
+        using enum opentxs::blockchain::crypto::AddressStyle;
+        case p2wpkh: {
 
-            return p2wpkh(chain, data);
+            return this->p2wpkh(chain, data);
         }
-        case Style::P2PKH: {
+        case p2pkh: {
 
-            return p2pkh(chain, data);
+            return this->p2pkh(chain, data);
         }
-        case Style::P2SH: {
+        case p2sh: {
 
-            return p2sh(chain, data);
+            return this->p2sh(chain, data);
         }
-        case Style::Unknown:
-        case Style::P2WSH:
-        case Style::P2TR:
+        case ethereum_account: {
+
+            return this->ethereum(chain, data);
+        }
+        case unknown_address_style:
+        case p2wsh:
+        case p2tr:
         default: {
             LogError()()("Unsupported address style (")(
                 static_cast<std::uint16_t>(style))(")")
@@ -671,6 +731,72 @@ auto Blockchain::Imp::EncodeAddress(
 
             return {};
         }
+    }
+}
+
+auto Blockchain::Imp::EncodeAddress(
+    const Style style,
+    const Chain chain,
+    const opentxs::crypto::asymmetric::key::EllipticCurve& key) const noexcept
+    -> UnallocatedCString
+{
+    try {
+        using opentxs::blockchain::PubkeyHash;
+        auto hash = ByteArray{};
+        const auto view = [&]() -> ReadView {
+            switch (style) {
+                using enum opentxs::blockchain::crypto::AddressStyle;
+                case p2wpkh:
+                case p2pkh: {
+
+                    return key.PublicKey();
+                }
+                case ethereum_account: {
+                    auto out = key.asSecp256k1().UncompressedPubkey();
+
+                    if (65_uz != out.size()) {
+                        throw std::runtime_error{"invalid uncompressed pubkey"};
+                    }
+
+                    out.remove_prefix(1_uz);
+
+                    return out;
+                }
+                case unknown_address_style:
+                case p2sh:
+                case p2wsh:
+                case p2tr:
+                default: {
+
+                    throw std::runtime_error{"invalid address style"};
+                }
+            }
+        }();
+
+        if (PubkeyHash(api_.Crypto(), chain, view, hash.WriteInto())) {
+
+            return EncodeAddress(style, chain, hash);
+        } else {
+
+            throw std::runtime_error{"hash failure"};
+        }
+    } catch (const std::exception& e) {
+        LogError()()(e.what()).Flush();
+
+        return {};
+    }
+}
+
+auto Blockchain::Imp::ethereum(
+    const opentxs::blockchain::Type chain,
+    const Data& pubkeyHash) const noexcept -> UnallocatedCString
+{
+    if (20_uz == pubkeyHash.size()) {
+
+        return "0x"s + make_checksum(pubkeyHash);
+    } else {
+
+        return {};
     }
 }
 
@@ -727,6 +853,26 @@ auto Blockchain::Imp::GetKey(const Key& id) const noexcept(false)
     }
 }
 
+auto Blockchain::Imp::get_ethereum_chains() noexcept
+    -> const Set<opentxs::blockchain::Type>&
+{
+    static const auto chains = [&] {
+        using namespace opentxs::blockchain;
+        using enum opentxs::blockchain::crypto::AddressStyle;
+        auto out = Set<Type>{};
+
+        for (const auto& chain : params::chains()) {
+            if (params::get(chain).IsAllowed(ethereum_account)) {
+                out.emplace(chain);
+            }
+        }
+
+        return out;
+    }();
+
+    return chains;
+}
+
 auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
@@ -774,6 +920,15 @@ auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     }();
 
     return subaccount.Internal();
+}
+
+auto Blockchain::Imp::has_uppercase(std::string_view input) noexcept -> bool
+{
+    for (auto c : input) {
+        if (std::isupper(c)) { return true; }
+    }
+
+    return false;
 }
 
 auto Blockchain::Imp::HDSubaccount(
@@ -992,6 +1147,34 @@ auto Blockchain::Imp::LookupContacts(const Data&) const noexcept -> ContactList
     return {};
 }
 
+auto Blockchain::Imp::make_checksum(const Data& hash) const noexcept
+    -> UnallocatedCString
+{
+    assert_true(hash.size() == 20_uz);
+    auto out = hash.asHex();
+    auto view = std::string_view{out};
+    assert_true(view.size() == 40_uz);
+    auto check = FixedByteArray<32_uz>{};
+    using enum opentxs::crypto::HashType;
+    api_.Crypto().Hash().Digest(Keccak256, view, check.WriteInto());
+    const auto checksum = check.asHex();
+    assert_true(checksum.size() == 64_uz);
+    static constexpr auto high = frozen::make_unordered_set<std::uint8_t>(
+        {56, 57, 65, 66, 67, 68, 69, 70, 97, 98, 99, 100, 101, 102});
+
+    for (auto n = 0_uz; n < 40_uz; ++n) {
+        auto& outChar = out[n];
+
+        if (std::isdigit(outChar)) { continue; }
+
+        const auto checkChar = static_cast<std::uint8_t>(checksum[n]);
+
+        if (high.contains(checkChar)) { outChar = std::toupper(outChar); }
+    }
+
+    return out;
+}
+
 auto Blockchain::Imp::NewHDSubaccount(
     const identifier::Nym& nymID,
     const opentxs::blockchain::crypto::HDProtocol standard,
@@ -1103,7 +1286,7 @@ auto Blockchain::Imp::p2pkh(
     const Data& pubkeyHash) const noexcept -> UnallocatedCString
 {
     try {
-        auto preimage = address_prefix(Style::P2PKH, chain);
+        auto preimage = address_prefix(Style::p2pkh, chain);
 
         assert_true(1 == preimage.size());
 
@@ -1130,7 +1313,7 @@ auto Blockchain::Imp::p2sh(
     const Data& pubkeyHash) const noexcept -> UnallocatedCString
 {
     try {
-        auto preimage = address_prefix(Style::P2SH, chain);
+        auto preimage = address_prefix(Style::p2sh, chain);
 
         assert_true(1 == preimage.size());
 

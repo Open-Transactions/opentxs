@@ -60,6 +60,17 @@ class Manager;
 }  // namespace node
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace identifier
 {
 class Account;
@@ -151,6 +162,11 @@ public:
         const Style style,
         const Chain chain,
         const Data& data) const noexcept -> UnallocatedCString = 0;
+    virtual auto EncodeAddress(
+        const Style style,
+        const Chain chain,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey)
+        const noexcept -> UnallocatedCString = 0;
     /// Throws std::out_of_range if the specified key does not exist
     virtual auto GetKey(const Key& id) const noexcept(false)
         -> const opentxs::blockchain::crypto::Element& = 0;

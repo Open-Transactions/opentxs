@@ -49,7 +49,7 @@ auto Regtest_stress::GetAddresses() noexcept
         const auto& element = bob.BalanceElement(Subchain::External, index);
         using Style = ot::blockchain::crypto::AddressStyle;
         const auto& address =
-            output.emplace_back(element.Address(Style::P2PKH));
+            output.emplace_back(element.Address(Style::p2pkh));
 
         opentxs::assert_true(false == address.empty());
     }

@@ -1393,7 +1393,7 @@ auto BitcoinTransactionBuilderPrivate::make_p2pkh_change(
     const auto pkh = element.PubkeyHash();
     using enum crypto::AddressStyle;
 
-    return make_script(P2PKH, pkh.Bytes());
+    return make_script(p2pkh, pkh.Bytes());
 }
 
 auto BitcoinTransactionBuilderPrivate::make_script(
@@ -1409,31 +1409,32 @@ auto BitcoinTransactionBuilderPrivate::make_script(
     auto elements = protocol::bitcoin::base::block::ScriptElements{};
 
     switch (type) {
-        case P2PKH: {
+        case p2pkh: {
             elements.emplace_back(Opcode(DUP));
             elements.emplace_back(Opcode(HASH160));
             elements.emplace_back(PushData(bytes));
             elements.emplace_back(Opcode(EQUALVERIFY));
             elements.emplace_back(Opcode(CHECKSIG));
         } break;
-        case P2WPKH: {
+        case p2wpkh: {
             elements.emplace_back(Opcode(ZERO));
             elements.emplace_back(PushData(bytes));
         } break;
-        case P2SH: {
+        case p2sh: {
             elements.emplace_back(Opcode(HASH160));
             elements.emplace_back(PushData(bytes));
             elements.emplace_back(Opcode(EQUAL));
         } break;
-        case P2WSH: {
+        case p2wsh: {
             elements.emplace_back(Opcode(ZERO));
             elements.emplace_back(PushData(bytes));
         } break;
-        case P2TR: {
+        case p2tr: {
             elements.emplace_back(Opcode(ONE));
             elements.emplace_back(PushData(bytes));
         } break;
-        case Unknown:
+        case unknown_address_style:
+        case ethereum_account:
         default: {
 
             throw std::runtime_error{

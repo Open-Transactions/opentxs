@@ -11,11 +11,12 @@
 namespace opentxs::blockchain::crypto
 {
 enum class AddressStyle : std::uint16_t {
-    Unknown = 0,
-    P2PKH = 1,
-    P2SH = 2,
-    P2WPKH = 3,
-    P2WSH = 4,
-    P2TR = 5,
+    unknown_address_style = 0,
+    p2pkh = 1,
+    p2sh = 2,
+    p2wpkh = 3,
+    p2wsh = 4,
+    p2tr = 5,
+    ethereum_account = 6,
 };
 }  // namespace opentxs::blockchain::crypto
