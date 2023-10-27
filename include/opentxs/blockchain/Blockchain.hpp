@@ -75,9 +75,6 @@ OPENTXS_EXPORT auto PubkeyHash(
     const Type chain,
     const ReadView input,
     Writer&& output) noexcept -> bool;
-OPENTXS_EXPORT auto PubkeyHasher(
-    const api::Crypto& crypto,
-    const Type chain) noexcept -> opentxs::crypto::Hasher;
 OPENTXS_EXPORT auto ScriptHash(
     const api::Crypto& crypto,
     const Type chain,

@@ -69,15 +69,15 @@ namespace opentxs
 const ankerl::unordered_dense::
     map<blockchain::crypto::AddressStyle, UnallocatedCString>
         address_style_map_{
-            {blockchain::crypto::AddressStyle::P2PKH,
+            {blockchain::crypto::AddressStyle::p2pkh,
              std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::P2PKH))},
-            {blockchain::crypto::AddressStyle::P2SH,
+                 static_cast<int>(blockchain::crypto::AddressStyle::p2pkh))},
+            {blockchain::crypto::AddressStyle::p2sh,
              std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::P2SH))},
-            {blockchain::crypto::AddressStyle::P2WPKH,
+                 static_cast<int>(blockchain::crypto::AddressStyle::p2sh))},
+            {blockchain::crypto::AddressStyle::p2wpkh,
              std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::P2WPKH))},
+                 static_cast<int>(blockchain::crypto::AddressStyle::p2wpkh))},
         };
 const ankerl::unordered_dense::
     map<UnallocatedCString, blockchain::crypto::AddressStyle>
@@ -93,7 +93,7 @@ auto translate_style(const UnallocatedCString& in) noexcept
         return address_style_reverse_map_.at(in);
     } catch (...) {
 
-        return blockchain::crypto::AddressStyle::Unknown;
+        return blockchain::crypto::AddressStyle::unknown_address_style;
     }
 }
 
@@ -107,8 +107,8 @@ auto translate_style(const blockchain::crypto::AddressStyle& in) noexcept
         return address_style_map_.at(in);
     } catch (...) {
 
-        return std::to_string(
-            static_cast<int>(blockchain::crypto::AddressStyle::Unknown));
+        return std::to_string(static_cast<int>(
+            blockchain::crypto::AddressStyle::unknown_address_style));
     }
 }
 
@@ -162,7 +162,8 @@ struct Contact::Imp {
         auto& [outBytes, outStyle, outChain] = output;
         const auto bad =
             outBytes.empty() ||
-            (blockchain::crypto::AddressStyle::Unknown == outStyle) ||
+            (blockchain::crypto::AddressStyle::unknown_address_style ==
+             outStyle) ||
             (blockchain::Type::UnknownBlockchain == outChain);
 
         if (bad) { throw std::runtime_error("Invalid address"); }
@@ -542,9 +543,10 @@ auto Contact::AddBlockchainAddress(
     const auto& api = imp_->api_;
     auto [bytes, style, chains, supported] =
         api.Crypto().Blockchain().DecodeAddress(address);
-    const auto bad = bytes.empty() ||
-                     (blockchain::crypto::AddressStyle::Unknown == style) ||
-                     chains.empty();
+    const auto bad =
+        bytes.empty() ||
+        (blockchain::crypto::AddressStyle::unknown_address_style == style) ||
+        chains.empty();
 
     if (bad) {
         LogError()()("Failed to decode address").Flush();

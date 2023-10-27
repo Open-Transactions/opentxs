@@ -386,7 +386,7 @@ auto Regtest_fixture_simple::GetNextBlockchainAddress(const User& user)
     const auto& element =
         account.BalanceElement(Subchain::External, index.value_or(0));
 
-    return element.Address(opentxs::blockchain::crypto::AddressStyle::P2PKH);
+    return element.Address(opentxs::blockchain::crypto::AddressStyle::p2pkh);
 }
 
 auto Regtest_fixture_simple::WaitForSynchro(

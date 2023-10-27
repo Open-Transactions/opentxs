@@ -64,6 +64,17 @@ class PaymentCode;  // IWYU pragma: keep
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace identity
 {
 class Nym;
@@ -132,6 +143,11 @@ public:
     auto DecodeAddress(std::string_view encoded) const noexcept
         -> DecodedAddress final;
     auto EncodeAddress(const Style style, const Chain chain, const Data& data)
+        const noexcept -> UnallocatedCString final;
+    auto EncodeAddress(
+        const Style style,
+        const Chain chain,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey)
         const noexcept -> UnallocatedCString final;
     auto GetNotificationStatus(
         const identifier::Nym& nym,

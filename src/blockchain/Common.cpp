@@ -421,27 +421,27 @@ auto PubkeyHash(
     const ReadView input,
     Writer&& output) noexcept -> bool
 {
-    return run_hasher(input, std::move(output), PubkeyHasher(crypto, chain));
-}
-
-auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
-    -> opentxs::crypto::Hasher
-{
-    using enum opentxs::blockchain::Type;
     using opentxs::crypto::HashType;
 
     switch (chain) {
+        using enum opentxs::blockchain::Type;
+        case Ethereum:
+        case Ethereum_ropsten:
+        case Ethereum_goerli:
+        case Ethereum_sepolia:
+        case Ethereum_holesovice:
+        case Casper:
+        case Casper_testnet: {
+
+            return crypto.Hash().Digest(
+                HashType::Ethereum, input, std::move(output));
+        }
         case UnknownBlockchain:
         case Bitcoin:
         case Bitcoin_testnet3:
         case BitcoinCash:
         case BitcoinCash_testnet3:
         case BitcoinCash_testnet4:
-        case Ethereum:
-        case Ethereum_ropsten:
-        case Ethereum_goerli:
-        case Ethereum_sepolia:
-        case Ethereum_holesovice:
         case Litecoin:
         case Litecoin_testnet4:
         case PKT:
@@ -450,14 +450,13 @@ auto PubkeyHasher(const api::Crypto& crypto, const Type chain) noexcept
         case BitcoinSV_testnet3:
         case eCash:
         case eCash_testnet3:
-        case Casper:
-        case Casper_testnet:
         case Dash:
         case Dash_testnet3:
         case UnitTest:
         default: {
 
-            return crypto.Hash().Hasher(HashType::Bitcoin);
+            return crypto.Hash().Digest(
+                HashType::Bitcoin, input, std::move(output));
         }
     }
 }

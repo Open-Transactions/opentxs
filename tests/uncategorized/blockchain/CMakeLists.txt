@@ -9,8 +9,6 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(startstop)
 endif()
 
-add_opentx_test(ottest-blockchain-address Test_Address.cpp)
-
 if(BIP32_EXPORT)
   add_opentx_test(ottest-blockchain-api Test_BlockchainAPI.cpp)
 endif()

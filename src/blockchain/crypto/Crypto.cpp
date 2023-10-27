@@ -179,12 +179,13 @@ auto print(AddressStyle value) noexcept -> std::string_view
     using enum AddressStyle;
     static constexpr auto map =
         frozen::make_unordered_map<AddressStyle, std::string_view>({
-            {Unknown, "Unknown"sv},
-            {P2PKH, "P2PKH"sv},
-            {P2SH, "P2SH"sv},
-            {P2WPKH, "P2WPKH"sv},
-            {P2WSH, "P2WSH"sv},
-            {P2TR, "P2TR"sv},
+            {unknown_address_style, "Unknown"sv},
+            {p2pkh, "P2PKH"sv},
+            {p2sh, "P2SH"sv},
+            {p2wpkh, "P2WPKH"sv},
+            {p2wsh, "P2WSH"sv},
+            {p2tr, "P2TR"sv},
+            {ethereum_account, "Ethereum"sv},
         });
 
     if (const auto* i = map.find(value); map.end() != i) {
@@ -192,7 +193,7 @@ auto print(AddressStyle value) noexcept -> std::string_view
         return i->second;
     } else {
 
-        return map.at(Unknown);
+        return map.at(unknown_address_style);
     }
 }
 

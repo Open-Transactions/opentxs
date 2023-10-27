@@ -73,25 +73,28 @@ struct BlockchainDestinationValidator final : public Super {
         const auto type = *chains.begin();
         const auto chain = print(type);
         const auto validChain = (0u < chains.count(chain_));
-        using Style = blockchain::crypto::AddressStyle;
 
         switch (style) {
-            case Style::P2PKH: {
+            using enum blockchain::crypto::AddressStyle;
+            case p2pkh: {
                 text << "P2PKH";
             } break;
-            case Style::P2SH: {
+            case p2sh: {
                 text << "P2SH";
             } break;
-            case Style::P2WPKH: {
+            case p2wpkh: {
                 text << "P2WPKH";
             } break;
-            case Style::P2WSH: {
+            case p2wsh: {
                 text << "P2WSH";
             } break;
-            case Style::P2TR: {
+            case p2tr: {
                 text << "P2TR";
             } break;
-            case Style::Unknown:
+            case ethereum_account: {
+                text << "Ethereum";
+            } break;
+            case unknown_address_style:
             default: {
                 text << "unsupported";
                 reset(text.str());

@@ -6,3 +6,4 @@
 add_subdirectory(asymmetric)
 
 add_opentx_low_level_test(ottest-unit-crypto-encode Encode.cpp)
+add_opentx_test(ottest-unit-crypto-hash Hash.cpp)

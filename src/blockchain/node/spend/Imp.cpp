@@ -374,11 +374,11 @@ auto SpendPrivate::deserialize_output(
             if (in.has_pubkeyhash()) {
 
                 return std::make_pair(
-                    isSegwit ? P2WPKH : P2PKH, ByteArray{in.pubkeyhash()});
+                    isSegwit ? p2wpkh : p2pkh, ByteArray{in.pubkeyhash()});
             } else {
 
                 return std::make_pair(
-                    isSegwit ? P2WSH : P2SH, ByteArray{in.scripthash()});
+                    isSegwit ? p2wsh : p2sh, ByteArray{in.scripthash()});
             }
         }();
         const auto address =
@@ -745,25 +745,25 @@ auto SpendPrivate::serialize_address(
     crypto::AddressStyle type,
     proto::BlockchainTransactionProposedOutput& out) const noexcept -> void
 {
-    using enum crypto::AddressStyle;
-
     switch (type) {
-        case P2WPKH: {
+        using enum crypto::AddressStyle;
+        case p2wpkh: {
             out.set_segwit(true);
             [[fallthrough]];
         }
-        case P2PKH: {
+        case p2pkh:
+        case ethereum_account: {
             out.set_pubkeyhash(address.data(), address.size());
         } break;
-        case P2WSH: {
+        case p2wsh: {
             out.set_segwit(true);
             [[fallthrough]];
         }
-        case P2SH: {
+        case p2sh: {
             out.set_scripthash(address.data(), address.size());
         } break;
-        case Unknown:
-        case P2TR:
+        case unknown_address_style:
+        case p2tr:
         default: {
             LogAbort()()("invalid type: ")(print(type)).Abort();
         }
@@ -1015,18 +1015,18 @@ auto SpendPrivate::validate_address(std::string_view address) const
                                      .append(blockchain::print(chain_))};
     }
 
-    using enum crypto::AddressStyle;
-
     switch (style) {
-        case P2WPKH:
-        case P2PKH:
-        case P2WSH:
-        case P2SH: {
+        using enum crypto::AddressStyle;
+        case p2wpkh:
+        case p2pkh:
+        case p2wsh:
+        case p2sh:
+        case ethereum_account: {
 
             return std::make_pair(style, std::move(data));
         }
-        case Unknown:
-        case P2TR:
+        case unknown_address_style:
+        case p2tr:
         default: {
 
             throw std::runtime_error{

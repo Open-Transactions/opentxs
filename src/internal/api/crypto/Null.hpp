@@ -37,6 +37,17 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -134,6 +145,14 @@ public:
         return {data, {}, {}, {}};
     }
     auto EncodeAddress(const Style, const Chain, const Data&) const noexcept
+        -> UnallocatedCString final
+    {
+        return {};
+    }
+    auto EncodeAddress(
+        const Style,
+        const Chain,
+        const opentxs::crypto::asymmetric::key::EllipticCurve&) const noexcept
         -> UnallocatedCString final
     {
         return {};

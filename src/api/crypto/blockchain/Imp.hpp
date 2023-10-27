@@ -72,6 +72,17 @@ class Subaccount;
 }  // namespace crypto
 }  // namespace blockchain
 
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+
 namespace identifier
 {
 class Nym;
@@ -161,6 +172,11 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         const Style style,
         const opentxs::blockchain::Type chain,
         const Data& data) const noexcept -> UnallocatedCString;
+    auto EncodeAddress(
+        const Style style,
+        const Chain chain,
+        const opentxs::crypto::asymmetric::key::EllipticCurve& pubkey)
+        const noexcept -> UnallocatedCString;
     auto GetNotificationStatus(
         const identifier::Nym& nym,
         alloc::Strategy alloc) const noexcept
@@ -296,10 +312,14 @@ protected:
     const CString balance_oracle_endpoint_;
 
     auto bip44_type(const UnitType type) const noexcept -> Bip44Type;
-    auto decode_bech23(const std::string_view encoded) const noexcept
+    auto decode_bech23(std::string_view encoded) const noexcept
         -> std::optional<DecodedAddress>;
-    auto decode_legacy(const std::string_view encoded) const noexcept
+    auto decode_ethereum(std::string_view encoded) const noexcept
         -> std::optional<DecodedAddress>;
+    auto decode_legacy(std::string_view encoded) const noexcept
+        -> std::optional<DecodedAddress>;
+    auto ethereum(const opentxs::blockchain::Type chain, const Data& pubkeyHash)
+        const noexcept -> UnallocatedCString;
     auto get_node(const identifier::Account& accountID) const noexcept(false)
         -> opentxs::blockchain::crypto::Subaccount&;
     auto init_path(
@@ -329,6 +349,10 @@ private:
     mutable AccountCache accounts_;
     mutable GuardedWallets wallets_;
 
+    static auto get_ethereum_chains() noexcept
+        -> const Set<opentxs::blockchain::Type>&;
+    static auto has_uppercase(std::string_view input) noexcept -> bool;
+
     auto account(
         const opentxs::blockchain::Type chain,
         const identifier::Nym& owner) const noexcept(false)
@@ -341,6 +365,7 @@ private:
                  const opentxs::blockchain::crypto::Account*,
                  opentxs::blockchain::crypto::Notifications*>>) const noexcept
         -> void;
+    auto make_checksum(const Data& hash) const noexcept -> UnallocatedCString;
     auto subaccount(
         const opentxs::blockchain::Type chain,
         const identifier::Nym& owner,
