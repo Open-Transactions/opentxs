@@ -338,25 +338,53 @@ public:
     }
     auto AsymmetricKey(
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(
         VersionNumber version,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(
         opentxs::crypto::asymmetric::Role role,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(
         VersionNumber version,
         opentxs::crypto::asymmetric::Role role,
         const opentxs::crypto::Parameters& params,
-        const opentxs::PasswordPrompt& reason) const
+        const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key final;
-    auto AsymmetricKey(const proto::AsymmetricKey& serialized) const
+    auto AsymmetricKey(const proto::AsymmetricKey& serialized) const noexcept
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        opentxs::crypto::asymmetric::Role role,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
+        -> opentxs::crypto::asymmetric::Key final;
+    auto AsymmetricKey(
+        VersionNumber version,
+        opentxs::crypto::asymmetric::Role role,
+        opentxs::crypto::asymmetric::Algorithm type,
+        const opentxs::Secret& key,
+        const opentxs::PasswordPrompt& reason,
+        alloc::Strategy alloc) const noexcept
         -> opentxs::crypto::asymmetric::Key final;
     auto BailmentNoticeReply(
         const Nym_p& responder,

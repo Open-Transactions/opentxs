@@ -157,25 +157,6 @@ private:
     Imp* imp_;
 };
 
-OPENTXS_EXPORT auto assert_true(
-    bool expression,
-    const std::source_location& loc = std::source_location::current()) noexcept
-    -> void;
-OPENTXS_EXPORT auto assert_true(
-    bool expression,
-    std::string_view message,
-    const std::source_location& loc = std::source_location::current()) noexcept
-    -> void;
-OPENTXS_EXPORT auto assert_false(
-    bool expression,
-    const std::source_location& loc = std::source_location::current()) noexcept
-    -> void;
-OPENTXS_EXPORT auto assert_false(
-    bool expression,
-    std::string_view message,
-    const std::source_location& loc = std::source_location::current()) noexcept
-    -> void;
-
 OPENTXS_EXPORT auto LogAbort() noexcept -> Log&;
 OPENTXS_EXPORT auto LogConsole() noexcept -> Log&;
 OPENTXS_EXPORT auto LogDebug() noexcept -> Log&;
@@ -185,4 +166,38 @@ OPENTXS_EXPORT auto LogInsane() noexcept -> Log&;
 OPENTXS_EXPORT auto LogTrace() noexcept -> Log&;
 OPENTXS_EXPORT auto LogVerbose() noexcept -> Log&;
 OPENTXS_EXPORT auto PrintStackTrace() noexcept -> UnallocatedCString;
+
+OPENTXS_EXPORT inline auto assert_true(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void
+{
+    if (false == expression) { LogAbort()(loc)(message).Abort(); }
+}
+
+OPENTXS_EXPORT inline auto assert_true(
+    bool expression,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void
+{
+    assert_true(expression, "assertion failure", loc);
+}
+
+OPENTXS_EXPORT inline auto assert_false(
+    bool expression,
+    std::string_view message,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void
+{
+    if (expression) { LogAbort()(loc)(message).Abort(); }
+}
+
+OPENTXS_EXPORT inline auto assert_false(
+    bool expression,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> void
+{
+    assert_false(expression, "assertion failure", loc);
+}
 }  // namespace opentxs

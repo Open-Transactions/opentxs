@@ -75,6 +75,7 @@ public:
         ReadView key,
         crypto::HashType hash,
         Writer&& signature) const noexcept -> bool final;
+    auto Uncompress(ReadView pubkey, Writer&& out) const noexcept -> bool final;
     auto Verify(
         const ReadView plaintext,
         const ReadView theKey,
@@ -96,6 +97,7 @@ public:
 private:
     static constexpr auto secret_key_size_ = 32_uz;
     static constexpr auto public_key_size_ = 33_uz;
+    static constexpr auto uncompressed_public_key_size_ = 65_uz;
     static constexpr auto hash_size_ = 32_uz;
     static bool Initialized_;
 

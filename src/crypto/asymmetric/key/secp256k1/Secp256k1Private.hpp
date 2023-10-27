@@ -11,6 +11,7 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {
@@ -38,10 +39,7 @@ public:
     {
         return pmr::clone_as<asymmetric::KeyPrivate>(this, {alloc});
     }
-    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
-    {
-        return pmr::make_deleter(this);
-    }
+    virtual auto UncompressedPubkey() const noexcept -> ReadView;
 
     auto asSecp256k1() noexcept -> internal::key::Secp256k1& override
     {
@@ -51,6 +49,10 @@ public:
         -> key::Secp256k1Private* override
     {
         return this;
+    }
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
+    {
+        return pmr::make_deleter(this);
     }
 
     Secp256k1Private(allocator_type alloc) noexcept;

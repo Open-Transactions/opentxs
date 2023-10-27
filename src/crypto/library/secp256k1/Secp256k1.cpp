@@ -86,6 +86,76 @@ auto Secp256k1::blank_private() noexcept -> ReadView
     return reader(blank);
 }
 
+auto Secp256k1::hash(const crypto::HashType type, const ReadView data) const
+    noexcept(false) -> FixedByteArray<hash_size_>
+{
+    const auto temp = [&] {
+        auto out = ByteArray{};
+
+        if (false == crypto_.Hash().Digest(type, data, out.WriteInto())) {
+            throw std::runtime_error("Failed to obtain contract hash");
+        }
+
+        if (out.empty()) { throw std::runtime_error("Invalid hash"); }
+
+        return out;
+    }();
+    auto out = FixedByteArray<hash_size_>{};
+    std::memcpy(out.data(), temp.data(), std::min(out.size(), temp.size()));
+
+    return out;
+}
+
+auto Secp256k1::Init() -> void
+{
+    assert_false(Initialized_);
+
+    auto seed = std::array<std::uint8_t, 32>{};
+    ssl_.RandomizeMemory(seed.data(), seed.size());
+
+    assert_false(nullptr == context_);
+
+    const auto randomize = secp256k1_context_randomize(context_, seed.data());
+
+    assert_true(1 == randomize);
+
+    Initialized_ = true;
+}
+
+auto Secp256k1::parsed_public_key(const ReadView bytes) const noexcept(false)
+    -> ::secp256k1_pubkey
+{
+    if (nullptr == bytes.data() || 0 == bytes.size()) {
+        throw std::runtime_error("Missing public key");
+    }
+
+    auto output = ::secp256k1_pubkey{};
+
+    if (1 != ::secp256k1_ec_pubkey_parse(
+                 context_,
+                 &output,
+                 reinterpret_cast<const unsigned char*>(bytes.data()),
+                 bytes.size())) {
+        throw std::runtime_error("Invalid public key");
+    }
+
+    return output;
+}
+
+auto Secp256k1::parsed_signature(const ReadView bytes) const noexcept(false)
+    -> ::secp256k1_ecdsa_signature
+{
+    auto output = ::secp256k1_ecdsa_signature{};
+
+    if (sizeof(output.data) != bytes.size()) {
+        throw std::runtime_error("Invalid signature");
+    }
+
+    std::memcpy(&output.data, bytes.data(), sizeof(output.data));
+
+    return output;
+}
+
 auto Secp256k1::PubkeyAdd(ReadView pubkey, ReadView scalar, Writer&& result)
     const noexcept -> bool
 {
@@ -431,6 +501,43 @@ auto Secp256k1::SignDER(
     }
 }
 
+auto Secp256k1::Uncompress(ReadView pubkey, Writer&& out) const noexcept -> bool
+{
+    try {
+        if (!valid(pubkey)) { throw std::runtime_error{"empty pubkey"}; }
+
+        auto parsed = ::secp256k1_pubkey{};
+        auto rc =
+            1 == ::secp256k1_ec_pubkey_parse(
+                     context_,
+                     &parsed,
+                     reinterpret_cast<const unsigned char*>(pubkey.data()),
+                     pubkey.size());
+
+        if (false == rc) { throw std::runtime_error{"invalid pubkey"}; }
+
+        auto buf = out.Reserve(uncompressed_public_key_size_);
+
+        if (false == buf.IsValid(uncompressed_public_key_size_)) {
+            throw std::runtime_error{"failed to allocate result"};
+        }
+
+        auto size = buf.size();
+        ::secp256k1_ec_pubkey_serialize(
+            context_,
+            buf.as<unsigned char>(),
+            std::addressof(size),
+            std::addressof(parsed),
+            SECP256K1_EC_UNCOMPRESSED);
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()()(e.what()).Flush();
+
+        return false;
+    }
+}
+
 auto Secp256k1::Verify(
     const ReadView plaintext,
     const ReadView key,
@@ -452,76 +559,6 @@ auto Secp256k1::Verify(
 
         return false;
     }
-}
-
-auto Secp256k1::hash(const crypto::HashType type, const ReadView data) const
-    noexcept(false) -> FixedByteArray<hash_size_>
-{
-    const auto temp = [&] {
-        auto out = ByteArray{};
-
-        if (false == crypto_.Hash().Digest(type, data, out.WriteInto())) {
-            throw std::runtime_error("Failed to obtain contract hash");
-        }
-
-        if (out.empty()) { throw std::runtime_error("Invalid hash"); }
-
-        return out;
-    }();
-    auto out = FixedByteArray<hash_size_>{};
-    std::memcpy(out.data(), temp.data(), std::min(out.size(), temp.size()));
-
-    return out;
-}
-
-void Secp256k1::Init()
-{
-    assert_false(Initialized_);
-
-    auto seed = std::array<std::uint8_t, 32>{};
-    ssl_.RandomizeMemory(seed.data(), seed.size());
-
-    assert_false(nullptr == context_);
-
-    const auto randomize = secp256k1_context_randomize(context_, seed.data());
-
-    assert_true(1 == randomize);
-
-    Initialized_ = true;
-}
-
-auto Secp256k1::parsed_public_key(const ReadView bytes) const noexcept(false)
-    -> ::secp256k1_pubkey
-{
-    if (nullptr == bytes.data() || 0 == bytes.size()) {
-        throw std::runtime_error("Missing public key");
-    }
-
-    auto output = ::secp256k1_pubkey{};
-
-    if (1 != ::secp256k1_ec_pubkey_parse(
-                 context_,
-                 &output,
-                 reinterpret_cast<const unsigned char*>(bytes.data()),
-                 bytes.size())) {
-        throw std::runtime_error("Invalid public key");
-    }
-
-    return output;
-}
-
-auto Secp256k1::parsed_signature(const ReadView bytes) const noexcept(false)
-    -> ::secp256k1_ecdsa_signature
-{
-    auto output = ::secp256k1_ecdsa_signature{};
-
-    if (sizeof(output.data) != bytes.size()) {
-        throw std::runtime_error("Invalid signature");
-    }
-
-    std::memcpy(&output.data, bytes.data(), sizeof(output.data));
-
-    return output;
 }
 
 Secp256k1::~Secp256k1()

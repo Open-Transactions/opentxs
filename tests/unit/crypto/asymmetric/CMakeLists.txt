@@ -3,6 +3,4 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-add_subdirectory(asymmetric)
-
-add_opentx_low_level_test(ottest-unit-crypto-encode Encode.cpp)
+add_opentx_test(ottest-unit-crypto-asymmetric-secp256k1 Secp256k1.cpp)

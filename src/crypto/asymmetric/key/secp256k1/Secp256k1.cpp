@@ -9,6 +9,7 @@
 
 #include <utility>
 
+#include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
@@ -56,6 +57,11 @@ auto Secp256k1::operator=(const Secp256k1& rhs) noexcept -> Secp256k1&
 auto Secp256k1::operator=(Secp256k1&& rhs) noexcept -> Secp256k1&
 {
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
+}
+
+auto Secp256k1::UncompressedPubkey() const noexcept -> ReadView
+{
+    return imp_->asSecp256k1Private()->UncompressedPubkey();
 }
 
 Secp256k1::~Secp256k1() = default;

@@ -36,5 +36,10 @@ Secp256k1Private::Secp256k1Private(
 {
 }
 
+auto Secp256k1Private::UncompressedPubkey() const noexcept -> ReadView
+{
+    return {};
+}
+
 Secp256k1Private::~Secp256k1Private() = default;
 }  // namespace opentxs::crypto::asymmetric::key
