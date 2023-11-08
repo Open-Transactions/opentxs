@@ -31,9 +31,10 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Imp_blockchain.hpp"
       "NonNull.cpp"
   )
-  libopentxs_link_internal(lmdb)
+  libopentxs_link_internal("${OT_LMDB_TARGET}")
   libopentxs_link_internal("${OT_ZMQ_TARGET}")
-  libopentxs_link_external(lmdb "${OT_ZMQ_TARGET}")
+  libopentxs_link_external("${OT_LMDB_TARGET}")
+  libopentxs_link_external("${OT_ZMQ_TARGET}")
 else()
   target_sources(opentxs-common PRIVATE "Null.cpp")
 endif()
