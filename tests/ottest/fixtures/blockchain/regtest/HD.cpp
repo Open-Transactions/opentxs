@@ -153,14 +153,17 @@ auto Regtest_fixture_hd::CheckTXODB() const noexcept -> bool
     return TestWallet(client_1_, state);
 }
 
-auto Regtest_fixture_hd::SendHD() const noexcept
-    -> const ot::blockchain::crypto::HD&
+auto Regtest_fixture_hd::SendHD() const noexcept -> ot::blockchain::crypto::HD
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
+
     return client_1_.Crypto()
         .Blockchain()
         .Account(alex_.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+        .GetSubaccounts(HD)
+        .at(0)
+        .asDeterministic()
+        .asHD();
 }
 
 auto Regtest_fixture_hd::Shutdown() noexcept -> void

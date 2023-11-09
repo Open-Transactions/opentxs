@@ -26,7 +26,7 @@ protected:
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;
     const ot::identifier::Nym& nym_id_;
-    const ot::blockchain::crypto::HD& account_;
+    const ot::blockchain::crypto::HD account_;
     const ot::identifier::Generic account_id_;
 
     static bool init_;

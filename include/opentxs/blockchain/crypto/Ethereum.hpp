@@ -5,28 +5,57 @@
 
 #pragma once
 
+#include <memory>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Imported.hpp"
+#include "opentxs/blockchain/protocol/ethereum/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Container.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace crypto
+{
+namespace internal
+{
+class Subaccount;
+}  // namespace internal
+}  // namespace crypto
+}  // namespace blockchain
+
+class Amount;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT Ethereum : virtual public Imported
+class OPENTXS_EXPORT Ethereum : public Imported
 {
 public:
-    virtual auto GetBalance() const noexcept -> Amount = 0;
-    virtual auto GetNonce() const noexcept -> Amount = 0;
-    virtual auto IncrementNonce() const noexcept -> Amount = 0;
-    virtual auto SetBalance(const Amount balance) const noexcept -> void = 0;
-    virtual auto SetNonce(const Amount nonce) const noexcept -> void = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Ethereum&;
 
-    Ethereum(const Ethereum&) = delete;
-    Ethereum(Ethereum&&) = delete;
+    auto Balance() const noexcept -> Amount;
+    auto KnownTransactions(alloc::Strategy alloc) const noexcept
+        -> Set<protocol::ethereum::AccountNonce>;
+    auto MissingTransactions(alloc::Strategy alloc) const noexcept
+        -> Set<protocol::ethereum::AccountNonce>;
+    auto NextNonce() const noexcept -> protocol::ethereum::AccountNonce;
+    auto UpdateBalance(
+        const Amount& balance,
+        protocol::ethereum::AccountNonce nonce) const noexcept -> bool;
+
+    OPENTXS_NO_EXPORT Ethereum(
+        std::shared_ptr<internal::Subaccount> imp) noexcept;
+    Ethereum() = delete;
+    Ethereum(const Ethereum& rhs) noexcept;
+    Ethereum(Ethereum&& rhs) noexcept;
     auto operator=(const Ethereum&) -> Ethereum& = delete;
     auto operator=(Ethereum&&) -> Ethereum& = delete;
 
-    OPENTXS_NO_EXPORT ~Ethereum() override = default;
-
-protected:
-    Ethereum() noexcept = default;
+    ~Ethereum() override;
 };
 }  // namespace opentxs::blockchain::crypto

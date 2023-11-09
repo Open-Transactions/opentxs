@@ -34,6 +34,7 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 RegtestListener::RegtestListener(const ot::api::session::Client& client)
     : block_listener_(std::make_unique<BlockHeaderListener>(client, "client"))
@@ -368,13 +369,15 @@ auto Regtest_fixture_simple::GetSyncPercentage(const User& user) -> double
 }
 
 auto Regtest_fixture_simple::GetHDAccount(const User& user) const noexcept
-    -> const ot::blockchain::crypto::HD&
+    -> ot::blockchain::crypto::HD
 {
     return user.api_->Crypto()
         .Blockchain()
         .Account(user.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+        .GetSubaccounts(HD)
+        .at(0)
+        .asDeterministic()
+        .asHD();
 }
 
 auto Regtest_fixture_simple::GetNextBlockchainAddress(const User& user)

@@ -7,12 +7,65 @@
 
 #include <HDPath.pb.h>
 
+#include "internal/blockchain/crypto/HD.hpp"
+#include "internal/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/HD.hpp"
+#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {
+auto Deterministic::asHD() const noexcept -> const internal::HD&
+{
+    return const_cast<Deterministic*>(this)->asHD();
+}
+
+auto Deterministic::asHD() noexcept -> internal::HD&
+{
+    return internal::HD::Blank();
+}
+
+auto Deterministic::asHDPublic() const noexcept -> const crypto::HD&
+{
+    return const_cast<Deterministic*>(this)->asHDPublic();
+}
+
+auto Deterministic::asHDPublic() noexcept -> crypto::HD&
+{
+    return crypto::HD::Blank();
+}
+
+auto Deterministic::asPaymentCode() const noexcept
+    -> const internal::PaymentCode&
+{
+    return const_cast<Deterministic*>(this)->asPaymentCode();
+}
+
+auto Deterministic::asPaymentCode() noexcept -> internal::PaymentCode&
+{
+    return internal::PaymentCode::Blank();
+}
+
+auto Deterministic::asPaymentCodePublic() const noexcept
+    -> const crypto::PaymentCode&
+{
+    return const_cast<Deterministic*>(this)->asPaymentCodePublic();
+}
+
+auto Deterministic::asPaymentCodePublic() noexcept -> crypto::PaymentCode&
+{
+    return crypto::PaymentCode::Blank();
+}
+
+auto Deterministic::Blank() noexcept -> Deterministic&
+{
+    static auto blank = Deterministic{};
+
+    return blank;
+}
+
 auto Deterministic::Floor(const Subchain) const noexcept
     -> std::optional<Bip32Index>
 {

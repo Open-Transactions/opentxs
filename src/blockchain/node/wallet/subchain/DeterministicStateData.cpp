@@ -44,7 +44,7 @@ namespace opentxs::blockchain::node::wallet
 {
 DeterministicStateData::DeterministicStateData(
     Reorg& reorg,
-    const crypto::Deterministic& subaccount,
+    crypto::Deterministic& subaccount,
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,

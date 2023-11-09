@@ -58,11 +58,14 @@ BIP44::BIP44()
 
         return nym_.get()->ID();
     }())
-    , account_(api_.Crypto()
-                   .Blockchain()
-                   .Account(nym_id_, ot::blockchain::Type::UnitTest)
-                   .GetHD()
-                   .at(0))
+    , account_(
+          api_.Crypto()
+              .Blockchain()
+              .Account(nym_id_, ot::blockchain::Type::UnitTest)
+              .GetSubaccounts(opentxs::blockchain::crypto::SubaccountType::HD)
+              .at(0)
+              .asDeterministic()
+              .asHD())
     , account_id_(api_.Factory().IdentifierFromBase58(account_id_base58_))
 {
 }

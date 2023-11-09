@@ -165,7 +165,7 @@ using enum opentxs::network::zeromq::socket::Type;
 
 SubchainStateData::SubchainStateData(
     Reorg& reorg,
-    const crypto::Subaccount& subaccount,
+    crypto::Subaccount& subaccount,
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,
@@ -269,7 +269,7 @@ SubchainStateData::SubchainStateData(
 
 SubchainStateData::SubchainStateData(
     Reorg& reorg,
-    const crypto::Subaccount& subaccount,
+    crypto::Subaccount& subaccount,
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,

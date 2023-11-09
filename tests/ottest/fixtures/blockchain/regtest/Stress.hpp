@@ -42,8 +42,8 @@ protected:
 
     const ot::identity::Nym& alex_;
     const ot::identity::Nym& bob_;
-    const ot::blockchain::crypto::HD& alex_account_;
-    const ot::blockchain::crypto::HD& bob_account_;
+    const ot::blockchain::crypto::HD alex_account_;
+    const ot::blockchain::crypto::HD bob_account_;
     const ot::identifier::Account& expected_account_alex_;
     const ot::identifier::Account& expected_account_bob_;
     const ot::identifier::Notary& expected_notary_;

@@ -62,14 +62,18 @@ class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto
 {
-class Subaccount : virtual public internal::Subaccount
+class SubaccountPrivate : virtual public internal::Subaccount
 {
 public:
     auto Describe() const noexcept -> std::string_view final
     {
         return description_;
+    }
+    auto DisplayName() const noexcept -> std::string_view final
+    {
+        return display_name_;
     }
     auto ID() const noexcept -> const identifier::Account& final { return id_; }
     auto IsValid() const noexcept -> bool final { return true; }
@@ -84,6 +88,14 @@ public:
         const PasswordPrompt& reason) const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve& override;
     auto ScanProgress(Subchain type) const noexcept -> block::Position override;
+    auto Source() const noexcept -> const identifier::Generic& final
+    {
+        return source_;
+    }
+    auto SourceDescription() const noexcept -> std::string_view final
+    {
+        return source_description_;
+    }
 
     auto Confirm(
         const Subchain type,
@@ -113,13 +125,13 @@ public:
     auto UpdateElement(UnallocatedVector<ReadView>& pubkeyHashes) const noexcept
         -> void final;
 
-    Subaccount() = delete;
-    Subaccount(const Subaccount&) = delete;
-    Subaccount(Subaccount&&) = delete;
-    auto operator=(const Subaccount&) -> Subaccount& = delete;
-    auto operator=(Subaccount&&) -> Subaccount& = delete;
+    SubaccountPrivate() = delete;
+    SubaccountPrivate(const SubaccountPrivate&) = delete;
+    SubaccountPrivate(SubaccountPrivate&&) = delete;
+    auto operator=(const SubaccountPrivate&) -> SubaccountPrivate& = delete;
+    auto operator=(SubaccountPrivate&&) -> SubaccountPrivate& = delete;
 
-    ~Subaccount() override;
+    ~SubaccountPrivate() override;
 
 protected:
     using AddressMap = Map<Bip32Index, std::unique_ptr<crypto::Element>>;
@@ -144,6 +156,9 @@ protected:
     const crypto::Target target_;
     const SubaccountType type_;
     const identifier::Account id_;
+    const identifier::Generic source_;
+    const CString source_description_;
+    const CString display_name_;
     const CString description_;
     mutable std::recursive_mutex lock_;
     mutable std::atomic<Revision> revision_;
@@ -171,18 +186,23 @@ protected:
         const Subchain type,
         const Bip32Index index) noexcept(false) -> crypto::Element& = 0;
 
-    Subaccount(
+    SubaccountPrivate(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Account&& id,
-        identifier::Account& out) noexcept;
-    Subaccount(
+        const identifier::Account& id,
+        identifier::Generic source,
+        std::string_view sourceName,
+        std::string_view name) noexcept;
+    SubaccountPrivate(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        const SerializedType& serialized,
-        identifier::Account& out) noexcept(false);
+        const identifier::Account& id,
+        identifier::Generic source,
+        std::string_view sourceName,
+        std::string_view name,
+        const SerializedType& serialized) noexcept(false);
 
 private:
     static constexpr auto ActivityVersion = VersionNumber{1};
@@ -201,12 +221,14 @@ private:
     {
     }
 
-    Subaccount(
+    SubaccountPrivate(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Account&& id,
+        const identifier::Account& id,
         const Revision revision,
-        identifier::Account& out) noexcept;
+        identifier::Generic source,
+        std::string_view sourceName,
+        std::string_view name) noexcept;
 };
-}  // namespace opentxs::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto

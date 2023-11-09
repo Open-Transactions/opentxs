@@ -136,6 +136,7 @@ TEST_F(Regtest_fixture_hd, account_list_initial)
 
 TEST_F(Regtest_fixture_hd, account_status_initial)
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
     const auto expected = BlockchainAccountStatusData{
         alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
@@ -159,7 +160,7 @@ TEST_F(Regtest_fixture_hd, account_status_initial)
              {
                  {"Notification transactions",
                   Account(alex_, test_chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(ot_.Crypto()),
@@ -293,6 +294,7 @@ TEST_F(Regtest_fixture_hd, account_list_immature)
 
 TEST_F(Regtest_fixture_hd, account_status_immature)
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
     const auto expected = BlockchainAccountStatusData{
         alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
@@ -316,7 +318,7 @@ TEST_F(Regtest_fixture_hd, account_status_immature)
              {
                  {"Notification transactions",
                   Account(alex_, test_chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(ot_.Crypto()),
@@ -424,6 +426,7 @@ TEST_F(Regtest_fixture_hd, account_list_one_block_before_maturation)
 
 TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
     const auto expected = BlockchainAccountStatusData{
         alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
@@ -447,7 +450,7 @@ TEST_F(Regtest_fixture_hd, account_status_one_block_before_maturation)
              {
                  {"Notification transactions",
                   Account(alex_, test_chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(ot_.Crypto()),
@@ -596,6 +599,7 @@ TEST_F(Regtest_fixture_hd, account_list_mature)
 
 TEST_F(Regtest_fixture_hd, account_status_mature)
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
     const auto expected = BlockchainAccountStatusData{
         alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
@@ -619,7 +623,7 @@ TEST_F(Regtest_fixture_hd, account_status_mature)
              {
                  {"Notification transactions",
                   Account(alex_, test_chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(ot_.Crypto()),
@@ -764,7 +768,8 @@ TEST_F(Regtest_fixture_hd, spend)
 
     EXPECT_FALSE(txid.IsNull());
 
-    const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
+    const auto subaccount = SendHD();
+    const auto& element = subaccount.BalanceElement(Subchain::Internal, 0);
     const auto amount = ot::Amount{99997807};
     expected_.emplace(
         std::piecewise_construct,
@@ -1012,6 +1017,7 @@ TEST_F(Regtest_fixture_hd, account_list_confirmed_spend)
 
 TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
 {
+    using enum opentxs::blockchain::crypto::SubaccountType;
     const auto expected = BlockchainAccountStatusData{
         alex_.nym_id_.asBase58(ot_.Crypto()),
         test_chain_,
@@ -1035,7 +1041,7 @@ TEST_F(Regtest_fixture_hd, account_status_confirmed_spend)
              {
                  {"Notification transactions",
                   Account(alex_, test_chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(ot_.Crypto()),

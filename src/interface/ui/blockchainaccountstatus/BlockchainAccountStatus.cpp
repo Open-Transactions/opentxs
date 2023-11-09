@@ -5,7 +5,6 @@
 
 #include "interface/ui/blockchainaccountstatus/BlockchainAccountStatus.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
 #include <atomic>
 #include <chrono>
 #include <functional>
@@ -17,10 +16,9 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -31,17 +29,12 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/Notification.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
-#include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -118,31 +111,12 @@ auto BlockchainAccountStatus::load() noexcept -> void
             const auto& api = api_;
             const auto& account =
                 api.Crypto().Blockchain().Account(primary_id_, chain_);
-            // TODO imported accounts
 
-            for (const auto& subaccountID : account.GetHD().all()) {
+            for (const auto& subaccount : account.GetSubaccounts()) {
                 populate(
                     account,
-                    subaccountID,
-                    blockchain::crypto::SubaccountType::HD,
-                    blockchain::crypto::Subchain::Error,  // NOTE: all subchains
-                    out);
-            }
-
-            for (const auto& subaccountID : account.GetPaymentCode().all()) {
-                populate(
-                    account,
-                    subaccountID,
-                    blockchain::crypto::SubaccountType::PaymentCode,
-                    blockchain::crypto::Subchain::Error,  // NOTE: all subchains
-                    out);
-            }
-
-            for (const auto& subaccountID : account.GetNotification().all()) {
-                populate(
-                    account,
-                    subaccountID,
-                    blockchain::crypto::SubaccountType::Notification,
+                    subaccount.ID(),
+                    subaccount.Type(),
                     blockchain::crypto::Subchain::Error,  // NOTE: all subchains
                     out);
             }
@@ -220,63 +194,23 @@ auto BlockchainAccountStatus::populate(
     const blockchain::crypto::Subchain subchain,
     ChildMap& out) const noexcept -> void
 {
-    const auto& api = api_;
-    using Type = blockchain::crypto::SubaccountType;
-
-    switch (type) {
-        case Type::HD: {
-            const auto& hd = account.GetHD();
-            const auto& subaccount = hd.at(subaccountID);
-            const auto path = subaccount.Path();
-            const auto id = api.Factory().Internal().SeedID(path.seed());
-            populate(
-                subaccount,
-                id,
-                api.Crypto().Seed().SeedDescription(id),
-                subaccount.Name(),
-                subchain,
-                out[type]);
-        } break;
-        case Type::PaymentCode: {
-            const auto& pc = account.GetPaymentCode();
-            const auto& subaccount = pc.at(subaccountID);
-            populate(
-                subaccount,
-                subaccount.Local().ID(),
-                subaccount.Local().asBase58() + " (local)",
-                subaccount.Remote().asBase58() + " (remote)",
-                subchain,
-                out[type]);
-        } break;
-        case Type::Imported: {
-            // TODO
-        } break;
-        case Type::Notification: {
-            const auto& notif = account.GetNotification();
-            const auto& subaccount = notif.at(subaccountID);
-            const auto& pc = subaccount.LocalPaymentCode();
-            populate(
-                subaccount,
-                pc.ID(),
-                pc.asBase58() + " (local)",
-                "Notification transactions",
-                subchain,
-                out[Type::PaymentCode]);
-        } break;
-        case Type::Error:
-        default: {
-
-            LogAbort()().Abort();
-        }
-    }
+    const auto& subaccount = account.Subaccount(subaccountID);
+    const auto& internal = subaccount.Internal();
+    populate(
+        subaccount,
+        internal.Source(),
+        internal.SourceDescription(),
+        internal.DisplayName(),
+        subchain,
+        out[internal.DisplayType()]);
 }
 
 auto BlockchainAccountStatus::populate(
     const blockchain::crypto::Subaccount& node,
     const identifier::Generic& sourceID,
-    const UnallocatedCString& sourceDescription,
-    const UnallocatedCString& subaccountName,
-    const blockchain::crypto::Subchain subchain,
+    std::string_view sourceDescription,
+    std::string_view subaccountName,
+    blockchain::crypto::Subchain subchain,
     SubaccountMap& out) const noexcept -> void
 {
     auto& data = out[sourceID];
@@ -307,7 +241,10 @@ auto BlockchainAccountStatus::populate(
     }();
     using Subchains = UnallocatedVector<BlockchainSubaccountRowData>;
     auto& subaccount = subaccounts.emplace_back(
-        node.ID(), subaccountName, CustomData{}, CustomData{});
+        node.ID(),
+        UnallocatedCString{subaccountName},
+        CustomData{},
+        CustomData{});
     auto& subchainData = [&]() -> auto& {
         auto& children = subaccount.children_;
 
@@ -321,8 +258,7 @@ auto BlockchainAccountStatus::populate(
 
         return *reinterpret_cast<Subchains*>(ptr);
     }();
-    const auto subchainList =
-        [&]() -> UnallocatedSet<blockchain::crypto::Subchain> {
+    const auto subchainList = [&]() -> Set<blockchain::crypto::Subchain> {
         if (blockchain::crypto::Subchain::Error == subchain) {
 
             return node.AllowedSubchains();

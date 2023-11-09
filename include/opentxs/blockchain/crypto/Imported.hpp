@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 
@@ -17,8 +19,10 @@ namespace crypto
 {
 namespace internal
 {
-struct Imported;
+class Subaccount;
 }  // namespace internal
+
+class Ethereum;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -32,28 +36,30 @@ class EllipticCurve;
 }  // namespace key
 }  // namespace asymmetric
 }  // namespace crypto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT Imported : virtual public Subaccount
+class OPENTXS_EXPORT Imported : public Subaccount
 {
 public:
-    OPENTXS_NO_EXPORT virtual auto InternalImported() const noexcept
-        -> internal::Imported& = 0;
-    virtual auto Key() const
-        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Imported&;
 
-    Imported(const Imported&) = delete;
-    Imported(Imported&&) = delete;
+    auto asEthereum() const noexcept -> const crypto::Ethereum&;
+    auto Key() const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
+
+    auto asEthereum() noexcept -> crypto::Ethereum&;
+
+    OPENTXS_NO_EXPORT Imported(
+        std::shared_ptr<internal::Subaccount> imp) noexcept;
+    Imported() = delete;
+    Imported(const Imported& rhs) noexcept;
+    Imported(Imported&& rhs) noexcept;
     auto operator=(const Imported&) -> Imported& = delete;
     auto operator=(Imported&&) -> Imported& = delete;
 
-    OPENTXS_NO_EXPORT ~Imported() override = default;
-
-protected:
-    Imported() noexcept = default;
+    ~Imported() override;
 };
 }  // namespace opentxs::blockchain::crypto

@@ -29,6 +29,13 @@ auto PaymentCode::AddNotification(const block::TransactionHash&) const noexcept
     return {};
 }
 
+auto PaymentCode::Blank() noexcept -> PaymentCode&
+{
+    static auto blank = PaymentCode{};
+
+    return blank;
+}
+
 auto PaymentCode::GetID(
     const api::Session& api,
     const crypto::Target target,

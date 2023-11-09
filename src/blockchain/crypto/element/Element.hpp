@@ -47,10 +47,7 @@ namespace blockchain
 {
 namespace crypto
 {
-namespace implementation
-{
-class Deterministic;
-}  // namespace implementation
+class DeterministicPrivate;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -168,7 +165,7 @@ public:
     ~Element() final = default;
 
 private:
-    friend implementation::Deterministic;
+    friend DeterministicPrivate;
 
     using Data = libguarded::shared_guarded<ElementPrivate, std::shared_mutex>;
 

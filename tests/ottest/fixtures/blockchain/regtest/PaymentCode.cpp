@@ -29,6 +29,7 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 bool Regtest_payment_code::init_payment_code_{false};
 Server Regtest_payment_code::server_1_{};
@@ -287,43 +288,54 @@ auto Regtest_payment_code::ExtractElements(
 }
 
 auto Regtest_payment_code::ReceiveHD() const noexcept
-    -> const ot::blockchain::crypto::HD&
+    -> ot::blockchain::crypto::HD
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(bob_.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+    auto accounts = client_2_.Crypto()
+                        .Blockchain()
+                        .Account(bob_.nym_id_, test_chain_)
+                        .GetSubaccounts(HD);
+
+    EXPECT_GE(accounts.size(), 1);
+
+    return accounts.at(0).asDeterministic().asHD();
 }
 
 auto Regtest_payment_code::ReceivePC() const noexcept
-    -> const ot::blockchain::crypto::PaymentCode&
+    -> ot::blockchain::crypto::PaymentCode
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(bob_.nym_id_, test_chain_)
-        .GetPaymentCode()
-        .at(0);
+    auto accounts = client_2_.Crypto()
+                        .Blockchain()
+                        .Account(bob_.nym_id_, test_chain_)
+                        .GetSubaccounts(PaymentCode);
+
+    EXPECT_GE(accounts.size(), 1);
+
+    return accounts.at(0).asDeterministic().asPaymentCode();
 }
 
-auto Regtest_payment_code::SendHD() const noexcept
-    -> const ot::blockchain::crypto::HD&
+auto Regtest_payment_code::SendHD() const noexcept -> ot::blockchain::crypto::HD
 {
-    return client_1_.Crypto()
-        .Blockchain()
-        .Account(alex_.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+    auto accounts = client_1_.Crypto()
+                        .Blockchain()
+                        .Account(alex_.nym_id_, test_chain_)
+                        .GetSubaccounts(HD);
+
+    EXPECT_GE(accounts.size(), 1);
+
+    return accounts.at(0).asDeterministic().asHD();
 }
 
 auto Regtest_payment_code::SendPC() const noexcept
-    -> const ot::blockchain::crypto::PaymentCode&
+    -> ot::blockchain::crypto::PaymentCode
 {
-    return client_1_.Crypto()
-        .Blockchain()
-        .Account(alex_.nym_id_, test_chain_)
-        .GetPaymentCode()
-        .at(0);
+    auto accounts = client_1_.Crypto()
+                        .Blockchain()
+                        .Account(alex_.nym_id_, test_chain_)
+                        .GetSubaccounts(PaymentCode);
+
+    EXPECT_GE(accounts.size(), 1);
+
+    return accounts.at(0).asDeterministic().asPaymentCode();
 }
 
 auto Regtest_payment_code::Shutdown() noexcept -> void

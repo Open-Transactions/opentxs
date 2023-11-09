@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <utility>
 
 #include "core/Worker.hpp"
@@ -115,9 +116,9 @@ private:
     auto populate(
         const blockchain::crypto::Subaccount& node,
         const identifier::Generic& sourceID,
-        const UnallocatedCString& sourceDescription,
-        const UnallocatedCString& subaccountName,
-        const blockchain::crypto::Subchain subchain,
+        std::string_view sourceDescription,
+        std::string_view subaccountName,
+        blockchain::crypto::Subchain subchain,
         SubaccountMap& out) const noexcept -> void;
     auto subchain_display_name(
         const blockchain::crypto::Subaccount& node,

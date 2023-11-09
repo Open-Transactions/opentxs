@@ -19,8 +19,10 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Session.hpp"
+#include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/Notification.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/util/P0330.hpp"
@@ -54,7 +56,7 @@ namespace opentxs::blockchain::node::wallet
 {
 NotificationStateData::NotificationStateData(
     Reorg& reorg,
-    const crypto::Notification& subaccount,
+    crypto::Notification& subaccount,
     const opentxs::PaymentCode& code,
     std::shared_ptr<const api::Session> api,
     std::shared_ptr<const node::Manager> node,
@@ -71,7 +73,7 @@ NotificationStateData::NotificationStateData(
           std::move(fromParent),
           std::move(batch),
           std::move(alloc))
-    , path_(subaccount.InternalNotification().Path())
+    , path_(subaccount.Internal().asNotification().Path())
     , pc_(code)
     , pc_display_(pc_.asBase58(), get_allocator())
     , pc_secret_(pc_)
@@ -292,7 +294,10 @@ auto NotificationStateData::process(
         owner_, remote, chain_, reason);
 
     if (confirmed) {
-        account.InternalPaymentCode().AddIncomingNotification(tx);
+        account.Internal()
+            .asDeterministic()
+            .asPaymentCode()
+            .AddIncomingNotification(tx);
     }
 
     log()("Created or verified account ")(account.ID(), api_.Crypto())(" for ")(

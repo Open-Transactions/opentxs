@@ -7,7 +7,6 @@
 #include <opentxs/opentxs.hpp>
 #include <atomic>
 #include <functional>
-#include <memory>
 
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -15,6 +14,8 @@
 
 namespace ottest
 {
+using enum opentxs::blockchain::crypto::SubaccountType;
+
 Counter counter_alice_{};
 Counter counter_bob_{};
 Counter counter_chris_{};
@@ -69,7 +70,7 @@ TEST_F(BlockchainAccountStatus, alice_initial)
              {
                  {"Notification transactions",
                   Account(alice_, chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(alice_.api_->Crypto()),
@@ -134,7 +135,7 @@ TEST_F(BlockchainAccountStatus, bob_initial)
              {
                  {"Notification transactions",
                   Account(bob_, chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(alice_.api_->Crypto()),
@@ -175,7 +176,7 @@ TEST_F(BlockchainAccountStatus, chris_initial)
              {
                  {"Notification transactions",
                   Account(chris_, chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(alice_.api_->Crypto()),
@@ -223,7 +224,7 @@ TEST_F(BlockchainAccountStatus, chris_final)
              {
                  {"Notification transactions",
                   Account(chris_, chain_)
-                      .GetNotification()
+                      .GetSubaccounts(Notification)
                       .at(0)
                       .ID()
                       .asBase58(alice_.api_->Crypto()),

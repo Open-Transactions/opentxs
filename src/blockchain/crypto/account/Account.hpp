@@ -7,16 +7,15 @@
 
 #pragma once
 
-#include "blockchain/crypto/account/NodeGroup.hpp"
-#include "blockchain/crypto/account/NodeIndex.hpp"
+#include <cs_shared_guarded.h>
+#include <memory>
+#include <shared_mutex>
+
 #include "internal/blockchain/crypto/Account.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
-#include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/Imported.hpp"
-#include "opentxs/blockchain/crypto/Notification.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
@@ -67,10 +66,6 @@ public:
     {
         return account_id_;
     }
-    [[nodiscard]] auto ClaimAccountID(
-        const identifier::Account& id,
-        bool existing,
-        crypto::Subaccount* node) const noexcept -> bool final;
     auto FindNym(const identifier::Nym& id) const noexcept -> void final;
     auto GetDepositAddress(
         const blockchain::crypto::AddressStyle style,
@@ -84,23 +79,14 @@ public:
         const UnallocatedCString& memo) const noexcept
         -> UnallocatedCString final;
     auto Get(Notifications& out) const noexcept -> void final;
-    auto GetHD() const noexcept -> const HDAccounts& final { return hd_; }
-    auto GetImported() const noexcept -> const ImportedAccounts& final
-    {
-        return imported_;
-    }
-    auto GetNotification() const noexcept -> const NotificationAccounts& final
-    {
-        return notification_;
-    }
     auto GetNextChangeKey(const PasswordPrompt& reason) const noexcept(false)
         -> const crypto::Element& final;
     auto GetNextDepositKey(const PasswordPrompt& reason) const noexcept(false)
         -> const crypto::Element& final;
-    auto GetPaymentCode() const noexcept -> const PaymentCodeAccounts& final
-    {
-        return payment_code_;
-    }
+    auto GetSubaccounts() const noexcept
+        -> UnallocatedVector<crypto::Subaccount> final;
+    auto GetSubaccounts(SubaccountType type) const noexcept
+        -> UnallocatedVector<crypto::Subaccount> final;
     auto Internal() const noexcept -> Account& final
     {
         return const_cast<Account&>(*this);
@@ -114,21 +100,19 @@ public:
         return parent_;
     }
     auto Subaccount(const identifier::Account& id) const noexcept(false)
-        -> const crypto::Subaccount& final;
+        -> crypto::Subaccount& final;
     auto Target() const noexcept -> crypto::Target final { return chain_; }
 
-    auto AddHDNode(
+    auto AddHD(
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool final;
-    auto AddOrUpdatePaymentCode(
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
+    auto AddPaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const PasswordPrompt& reason,
-        identifier::Account& out) noexcept -> bool final;
-    auto Startup() noexcept -> void final { init_notification(); }
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
+    auto Startup() noexcept -> void final {}
     auto Subaccount(const identifier::Account& id) noexcept(false)
         -> crypto::Subaccount& final;
 
@@ -149,13 +133,16 @@ public:
     ~Account() final = default;
 
 private:
-    using HDNodes = account::NodeGroup<HDAccounts, crypto::HD>;
-    using ImportedNodes =
-        account::NodeGroup<ImportedAccounts, crypto::Imported>;
-    using NotificationNodes =
-        account::NodeGroup<NotificationAccounts, crypto::Notification>;
-    using PaymentCodeNodes =
-        account::NodeGroup<PaymentCodeAccounts, crypto::PaymentCode>;
+    struct Data {
+        using Pointer = std::shared_ptr<internal::Subaccount>;
+        using Map = UnorderedMultimap<SubaccountType, Pointer>;
+        using Index = UnorderedMap<identifier::Account, Pointer>;
+
+        Map map_{};
+        Index index_{};
+    };
+
+    using Subaccounts = libguarded::shared_guarded<Data, std::shared_mutex>;
 
     const api::Session& api_;
     const api::session::Contacts& contacts_;
@@ -163,29 +150,8 @@ private:
     const opentxs::blockchain::Type chain_;
     const identifier::Nym nym_id_;
     const identifier::Account account_id_;
-    HDNodes hd_;
-    ImportedNodes imported_;
-    NotificationNodes notification_;
-    PaymentCodeNodes payment_code_;
-    mutable account::NodeIndex node_index_;
+    mutable Subaccounts subaccounts_;
     OTZMQPushSocket find_nym_;
-
-    auto init_hd(const Accounts& HDAccounts) noexcept -> void;
-    auto init_hd(identifier::Account& id) noexcept -> bool;
-    auto init_hd(
-        const proto::HDPath& path,
-        const crypto::HDProtocol standard,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool;
-    auto init_notification() noexcept -> void;
-    auto init_payment_code(const Accounts& HDAccounts) noexcept -> void;
-    auto init_payment_code(identifier::Account& id) noexcept -> bool;
-    auto init_payment_code(
-        const opentxs::PaymentCode& local,
-        const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool;
 
     auto find_next_element(
         Subchain subchain,
@@ -193,5 +159,31 @@ private:
         const UnallocatedCString& label,
         const PasswordPrompt& reason) const noexcept(false)
         -> const crypto::Element&;
+    auto get_subaccounts(Data& map) const noexcept
+        -> UnallocatedVector<crypto::Subaccount>;
+    auto get_subaccounts(SubaccountType type, Data& map) const noexcept
+        -> UnallocatedVector<crypto::Subaccount>;
+
+    auto init_hd(const Accounts& HDAccounts, Data& data) noexcept -> void;
+    auto init_hd(
+        const identifier::Account& id,
+        Data& data,
+        bool checking) noexcept -> crypto::Subaccount&;
+    auto init_hd(
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
+    auto init_notification(Data& data) noexcept -> void;
+    auto init_payment_code(const Accounts& HDAccounts, Data& data) noexcept
+        -> void;
+    auto init_payment_code(
+        const identifier::Account& id,
+        Data& data,
+        bool checking) noexcept -> crypto::Subaccount&;
+    auto init_payment_code(
+        const opentxs::PaymentCode& local,
+        const opentxs::PaymentCode& remote,
+        const proto::HDPath& path,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
 };
 }  // namespace opentxs::blockchain::crypto::implementation

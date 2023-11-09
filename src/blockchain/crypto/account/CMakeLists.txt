@@ -11,8 +11,4 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Account.hpp"
     "Account.cpp"
     "Account.hpp"
-    "Factory.hpp"
-    "NodeGroup.hpp"
-    "NodeIndex.cpp"
-    "NodeIndex.hpp"
 )

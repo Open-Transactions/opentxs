@@ -23,8 +23,8 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
-#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
+#include "internal/blockchain/crypto/Wallet.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
@@ -44,6 +44,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"  // IWYU pragma: keep
@@ -362,7 +363,7 @@ auto Blockchain::Imp::AssignContact(
     assert_true(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
-        const auto& subaccount = this->subaccount(chain, nymID, accountID);
+        auto& subaccount = subaccount_mutable(chain, nymID, accountID);
 
         try {
 
@@ -397,7 +398,7 @@ auto Blockchain::Imp::AssignLabel(
     assert_true(opentxs::blockchain::Type::UnknownBlockchain != chain);
 
     try {
-        const auto& subaccount = this->subaccount(chain, nymID, accountID);
+        auto& subaccount = subaccount_mutable(chain, nymID, accountID);
 
         try {
 
@@ -876,10 +877,9 @@ auto Blockchain::Imp::get_ethereum_chains() noexcept
 auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
     noexcept(false) -> opentxs::blockchain::crypto::Subaccount&
 {
-    const auto clangWorkaround =
+    const auto [type, owner] =
         accounts_.lock_shared()->SubaccountType(accountID);
-    const auto& wallet = [&]() -> auto& {
-        const auto [type, owner] = clangWorkaround;
+    auto& wallet = [&]() -> auto& {
         const auto chain =
             api_.Storage().Internal().BlockchainSubaccountAccountType(
                 owner, accountID);
@@ -894,32 +894,10 @@ auto Blockchain::Imp::get_node(const identifier::Account& accountID) const
             throw std::out_of_range(error);
         }
 
-        return this->wallet(unit_to_blockchain(chain));
-    }();
-    const auto& account = wallet.Account(clangWorkaround.second);
-    const auto& subaccount =
-        [&]() -> const opentxs::blockchain::crypto::Subaccount& {
-        const auto [type, owner] = clangWorkaround;
-        switch (type) {
-            using enum opentxs::blockchain::crypto::SubaccountType;
-            case HD: {
-
-                return account.GetHD().at(accountID);
-            }
-            case PaymentCode: {
-
-                return account.GetPaymentCode().at(accountID);
-            }
-            case Imported:
-            case Error:
-            case Notification:
-            default: {
-                throw std::out_of_range("subaccount type not supported");
-            }
-        }
+        return wallet_mutable(unit_to_blockchain(chain));
     }();
 
-    return subaccount.Internal();
+    return wallet.Account(owner).Subaccount(accountID);
 }
 
 auto Blockchain::Imp::has_uppercase(std::string_view input) noexcept -> bool
@@ -947,9 +925,8 @@ auto Blockchain::Imp::HDSubaccount(
     }
 
     const auto& wallet = this->wallet(unit_to_blockchain(type));
-    auto& account = wallet.Account(nymID);
 
-    return account.GetHD().at(accountID);
+    return wallet.Account(nymID).Subaccount(accountID).asDeterministic().asHD();
 }
 
 auto Blockchain::Imp::IndexItem(const ReadView bytes) const noexcept
@@ -1022,9 +999,6 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
     const PasswordPrompt& reason) const noexcept
     -> const opentxs::blockchain::crypto::PaymentCode&
 {
-    static const auto blank =
-        opentxs::blockchain::crypto::internal::PaymentCode{};
-
     try {
         if (false == validate_nym(id)) {
             throw std::runtime_error{
@@ -1042,7 +1016,7 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
     } catch (const std::exception& e) {
         LogError()()(e.what()).Flush();
 
-        return blank;
+        return opentxs::blockchain::crypto::PaymentCode::Blank();
     }
 }
 
@@ -1053,9 +1027,6 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
     const PasswordPrompt& reason) const noexcept
     -> const opentxs::blockchain::crypto::PaymentCode&
 {
-    static const auto blank =
-        opentxs::blockchain::crypto::internal::PaymentCode{};
-
     try {
         if (opentxs::blockchain::Type::UnknownBlockchain == chain) {
             throw std::runtime_error{"invalid chain: "s.append(print(chain))};
@@ -1097,26 +1068,25 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
                     .append(" does not contain a valid HD path")};
         }
 
-        auto accountID = identifier::Account{};
-        auto& account = this->account_mutable(chain, nymID);
-        const auto got = account.Internal().AddOrUpdatePaymentCode(
-            nym.PaymentCodeSecret(reason), remote, path, reason, accountID);
+        auto& subaccount = wallet_mutable(chain).Internal().AddPaymentCode(
+            nym.PaymentCodeSecret(reason), remote, path, reason);
 
-        if ((false == got) || accountID.empty()) {
+        if (subaccount.IsValid()) {
+            const auto& id = subaccount.ID();
+            LogVerbose()()("Loaded or created new payment code subaccount ")(
+                id, api)(" on ")(print(chain))(" for ")(nymID, api)(
+                " in reference to remote payment code ")(remote)
+                .Flush();
+
+            return subaccount.asDeterministic().asPaymentCode();
+        } else {
+
             throw std::runtime_error{"failed to create or load subaccount"};
         }
-
-        LogVerbose()()("Loaded or created new payment code subaccount ")(
-            accountID, api)(" for ")(print(chain))(" account ")(
-            account.AccountID(), api)(" owned by ")(nymID, api)(
-            " in reference to remote payment code ")(remote)
-            .Flush();
-
-        return account.GetPaymentCode().at(accountID);
     } catch (const std::exception& e) {
         LogError()()(e.what()).Flush();
 
-        return blank;
+        return opentxs::blockchain::crypto::PaymentCode::Blank();
     }
 }
 
@@ -1235,21 +1205,26 @@ auto Blockchain::Imp::NewHDSubaccount(
         accountPath);
 
     try {
-        auto accountID{blank};
-        auto& account = account_mutable(targetChain, nymID);
-        account.Internal().AddHDNode(accountPath, standard, reason, accountID);
+        const auto& subaccount =
+            wallet_mutable(targetChain)
+                .Internal()
+                .AddHD(nymID, accountPath, standard, reason);
 
-        assert_false(accountID.empty());
+        if (subaccount.IsValid()) {
+            const auto& id = subaccount.ID();
+            LogVerbose()()("Created new HD subaccount ")(id, api_.Crypto())(
+                " for ")(print(targetChain))(" account for ")(
+                nymID.asBase58(api_.Crypto()))(" using path ")(
+                opentxs::crypto::Print(accountPath))
+                .Flush();
 
-        LogVerbose()()("Created new HD subaccount ")(accountID, api_.Crypto())(
-            " for ")(print(targetChain))(" account ")(
-            account.AccountID(), api_.Crypto())(" owned by ")(nymID.asBase58(
-            api_.Crypto()))(" using path ")(opentxs::crypto::Print(accountPath))
-            .Flush();
+            return id;
+        } else {
 
-        return accountID;
+            throw std::runtime_error{"failed to create account"};
+        }
     } catch (const std::exception& e) {
-        LogVerbose()()(e.what()).Flush();
+        LogConsole()()(e.what()).Flush();
 
         return blank;
     }
@@ -1376,9 +1351,11 @@ auto Blockchain::Imp::PaymentCodeSubaccount(
     }
 
     const auto& wallet = this->wallet(unit_to_blockchain(type));
-    auto& account = wallet.Account(nymID);
 
-    return account.GetPaymentCode().at(accountID);
+    return wallet.Account(nymID)
+        .Subaccount(accountID)
+        .asDeterministic()
+        .asPaymentCode();
 }
 
 auto Blockchain::Imp::ProcessContact(const Contact&, alloc::Default)

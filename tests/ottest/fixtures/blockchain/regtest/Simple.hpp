@@ -110,6 +110,6 @@ protected:
         -> const ot::UnallocatedCString;
 
     auto GetHDAccount(const User& user) const noexcept
-        -> const ot::blockchain::crypto::HD&;
+        -> ot::blockchain::crypto::HD;
 };
 }  // namespace ottest

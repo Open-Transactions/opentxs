@@ -12,6 +12,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace blockchain
+{
+namespace crypto
+{
+class Subaccount;
+}  // namespace crypto
+}  // namespace blockchain
+
 namespace identifier
 {
 class Account;
@@ -22,6 +30,7 @@ namespace proto
 class HDPath;
 }  // namespace proto
 
+class PaymentCode;
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -29,12 +38,16 @@ class PasswordPrompt;
 namespace opentxs::blockchain::crypto::internal
 {
 struct Wallet : virtual public crypto::Wallet {
-    virtual auto AddHDNode(
+    virtual auto AddHD(
         const identifier::Nym& nym,
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool = 0;
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
+    virtual auto AddPaymentCode(
+        const opentxs::PaymentCode& local,
+        const opentxs::PaymentCode& remote,
+        const proto::HDPath& path,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
 
     ~Wallet() override = default;
 };

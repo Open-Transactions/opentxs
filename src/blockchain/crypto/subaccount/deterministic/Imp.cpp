@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Deterministic.hpp"  // IWYU pragma: associated
+#include "blockchain/crypto/subaccount/deterministic/Imp.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
@@ -16,10 +16,11 @@
 #include <tuple>
 #include <utility>
 
-#include "blockchain/crypto/Element.hpp"
-#include "blockchain/crypto/Subaccount.hpp"
+#include "blockchain/crypto/element/Element.hpp"
+#include "blockchain/crypto/subaccount/base/Imp.hpp"
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -39,20 +40,29 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto
 {
 using namespace std::literals;
 
-Deterministic::Deterministic(
+DeterministicPrivate::DeterministicPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Account&& id,
-    const proto::HDPath path,
-    ChainData&& data,
-    identifier::Account& out) noexcept
-    : Subaccount(api, parent, type, std::move(id), out)
-    , path_(path)
+    const identifier::Account& id,
+    identifier::Generic source,
+    std::string_view sourceName,
+    std::string_view name,
+    proto::HDPath path,
+    ChainData&& data) noexcept
+    : SubaccountPrivate(
+          api,
+          parent,
+          type,
+          id,
+          std::move(source),
+          sourceName,
+          name)
+    , path_(std::move(path))
     , seed_id_(api_.Factory().Internal().SeedID(path_.seed()))
     , data_(std::move(data))
     , generated_({{data_.internal_.type_, 0}, {data_.external_.type_, 0}})
@@ -62,16 +72,27 @@ Deterministic::Deterministic(
 {
 }
 
-Deterministic::Deterministic(
+DeterministicPrivate::DeterministicPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
+    const identifier::Account& id,
     const SerializedType& serialized,
-    const Bip32Index internal,
-    const Bip32Index external,
-    ChainData&& data,
-    identifier::Account& out) noexcept(false)
-    : Subaccount(api, parent, type, serialized.common(), out)
+    identifier::Generic source,
+    std::string_view sourceName,
+    std::string_view name,
+    Bip32Index internal,
+    Bip32Index external,
+    ChainData&& data) noexcept(false)
+    : SubaccountPrivate(
+          api,
+          parent,
+          type,
+          id,
+          std::move(source),
+          sourceName,
+          name,
+          serialized.common())
     , path_(serialized.path())
     , seed_id_(api_.Factory().Internal().SeedID(path_.seed()))
     , data_(std::move(data))
@@ -86,7 +107,7 @@ Deterministic::Deterministic(
 {
 }
 
-Deterministic::ChainData::ChainData(
+DeterministicPrivate::ChainData::ChainData(
     const api::Session& api,
     Subchain internalType,
     bool internalContact,
@@ -97,7 +118,7 @@ Deterministic::ChainData::ChainData(
 {
 }
 
-auto Deterministic::ChainData::Get(Subchain type) noexcept(false)
+auto DeterministicPrivate::ChainData::Get(Subchain type) noexcept(false)
     -> AddressData&
 {
     if (type == internal_.type_) {
@@ -112,7 +133,7 @@ auto Deterministic::ChainData::Get(Subchain type) noexcept(false)
     }
 }
 
-auto Deterministic::accept(
+auto DeterministicPrivate::accept(
     const rLock& lock,
     const Subchain type,
     const identifier::Generic& contact,
@@ -125,28 +146,28 @@ auto Deterministic::accept(
     check_lookahead(lock, type, generated, reason);
     set_metadata(lock, type, index, contact, label);
     auto& element =
-        const_cast<Deterministic&>(*this).element(lock, type, index);
+        const_cast<DeterministicPrivate&>(*this).element(lock, type, index);
     element.Internal().Reserve(time);
     LogTrace()()("Accepted index ")(index).Flush();
 
     return index;
 }
 
-auto Deterministic::AllowedSubchains() const noexcept
-    -> UnallocatedSet<Subchain>
+auto DeterministicPrivate::AllowedSubchains() const noexcept -> Set<Subchain>
 {
     return {data_.internal_.type_, data_.external_.type_};
 }
 
-auto Deterministic::BalanceElement(const Subchain type, const Bip32Index index)
-    const noexcept(false) -> const crypto::Element&
+auto DeterministicPrivate::BalanceElement(
+    const Subchain type,
+    const Bip32Index index) const noexcept(false) -> const crypto::Element&
 {
     auto lock = rLock{lock_};
 
     return element(lock, type, index);
 }
 
-auto Deterministic::check(
+auto DeterministicPrivate::check(
     const rLock& lock,
     const Subchain type,
     const identifier::Generic& contact,
@@ -220,7 +241,7 @@ auto Deterministic::check(
     }
 }
 
-void Deterministic::check_lookahead(
+void DeterministicPrivate::check_lookahead(
     const rLock& lock,
     Batch& internal,
     Batch& external,
@@ -230,7 +251,7 @@ void Deterministic::check_lookahead(
     check_lookahead(lock, data_.external_.type_, external, reason);
 }
 
-auto Deterministic::check_lookahead(
+auto DeterministicPrivate::check_lookahead(
     const rLock& lock,
     const Subchain type,
     Batch& generated,
@@ -244,7 +265,7 @@ auto Deterministic::check_lookahead(
     }
 }
 
-auto Deterministic::confirm(
+auto DeterministicPrivate::confirm(
     const rLock& lock,
     const Subchain type,
     const Bip32Index index) noexcept -> void
@@ -286,7 +307,7 @@ auto Deterministic::confirm(
     check_lookahead(lock, type, generated, reason);
 }
 
-auto Deterministic::element(
+auto DeterministicPrivate::element(
     const rLock&,
     const Subchain type,
     const Bip32Index index) noexcept(false) -> crypto::Element&
@@ -325,7 +346,7 @@ auto Deterministic::element(
     }
 }
 
-auto Deterministic::finish_allocation(
+auto DeterministicPrivate::finish_allocation(
     const rLock& lock,
     const Subchain subchain,
     const Batch& generated) const noexcept -> bool
@@ -343,7 +364,7 @@ auto Deterministic::finish_allocation(
     }
 }
 
-auto Deterministic::finish_allocation(
+auto DeterministicPrivate::finish_allocation(
     const rLock& lock,
     const Batch& internal,
     const Batch& external) const noexcept -> bool
@@ -361,7 +382,7 @@ auto Deterministic::finish_allocation(
     return save(lock);
 }
 
-auto Deterministic::Floor(const Subchain type) const noexcept
+auto DeterministicPrivate::Floor(const Subchain type) const noexcept
     -> std::optional<Bip32Index>
 {
     auto lock = rLock{lock_};
@@ -375,7 +396,7 @@ auto Deterministic::Floor(const Subchain type) const noexcept
     }
 }
 
-auto Deterministic::GenerateNext(
+auto DeterministicPrivate::GenerateNext(
     const Subchain type,
     const PasswordPrompt& reason) const noexcept -> std::optional<Bip32Index>
 {
@@ -402,7 +423,7 @@ auto Deterministic::GenerateNext(
     }
 }
 
-auto Deterministic::generate(
+auto DeterministicPrivate::generate(
     const rLock& lock,
     const Subchain type,
     const Bip32Index desired,
@@ -429,7 +450,7 @@ auto Deterministic::generate(
         std::forward_as_tuple(std::make_unique<implementation::Element>(
             api_,
             blockchain,
-            *this,
+            Self(),
             base_chain(target_),
             type,
             index,
@@ -441,7 +462,7 @@ auto Deterministic::generate(
     return index++;
 }
 
-auto Deterministic::generate_next(
+auto DeterministicPrivate::generate_next(
     const rLock& lock,
     const Subchain type,
     const PasswordPrompt& reason) const noexcept(false) -> Bip32Index
@@ -449,14 +470,14 @@ auto Deterministic::generate_next(
     return generate(lock, type, generated_.at(type), reason);
 }
 
-auto Deterministic::get_contact() const noexcept -> identifier::Generic
+auto DeterministicPrivate::get_contact() const noexcept -> identifier::Generic
 {
     static const auto blank = identifier::Generic{};
 
     return blank;
 }
 
-auto Deterministic::init(bool existing) noexcept(false) -> void
+auto DeterministicPrivate::init(bool existing) noexcept(false) -> void
 {
     const auto& log = LogTrace();
     const auto cb = [&](const auto& data) {
@@ -493,11 +514,12 @@ auto Deterministic::init(bool existing) noexcept(false) -> void
             "Generate keys to repair inconsistent blockchain account");
         init(reason);
     } else {
-        Subaccount::init(existing);
+        SubaccountPrivate::init(existing);
     }
 }
 
-auto Deterministic::init(const PasswordPrompt& reason) noexcept(false) -> void
+auto DeterministicPrivate::init(const PasswordPrompt& reason) noexcept(false)
+    -> void
 {
     {
         auto lock = rLock{lock_};
@@ -518,10 +540,10 @@ auto Deterministic::init(const PasswordPrompt& reason) noexcept(false) -> void
         }
     }
 
-    Subaccount::init(false);
+    SubaccountPrivate::init(false);
 }
 
-auto Deterministic::Key(const Subchain type, const Bip32Index index)
+auto DeterministicPrivate::Key(const Subchain type, const Bip32Index index)
     const noexcept -> const opentxs::crypto::asymmetric::key::EllipticCurve&
 {
     try {
@@ -533,7 +555,7 @@ auto Deterministic::Key(const Subchain type, const Bip32Index index)
     }
 }
 
-auto Deterministic::LastGenerated(const Subchain type) const noexcept
+auto DeterministicPrivate::LastGenerated(const Subchain type) const noexcept
     -> std::optional<Bip32Index>
 {
     auto lock = rLock{lock_};
@@ -548,7 +570,7 @@ auto Deterministic::LastGenerated(const Subchain type) const noexcept
     }
 }
 
-auto Deterministic::mutable_element(
+auto DeterministicPrivate::mutable_element(
     const rLock& lock,
     const Subchain type,
     const Bip32Index index) noexcept(false) -> crypto::Element&
@@ -578,8 +600,9 @@ auto Deterministic::mutable_element(
     }
 }
 
-auto Deterministic::need_lookahead(const rLock& lock, const Subchain type)
-    const noexcept -> Bip32Index
+auto DeterministicPrivate::need_lookahead(
+    const rLock& lock,
+    const Subchain type) const noexcept -> Bip32Index
 {
     const auto capacity = (generated_.at(type) - used_.at(type));
 
@@ -602,12 +625,13 @@ auto Deterministic::need_lookahead(const rLock& lock, const Subchain type)
     return effective - capacity;
 }
 
-auto Deterministic::PathRoot() const noexcept -> const opentxs::crypto::SeedID&
+auto DeterministicPrivate::PathRoot() const noexcept
+    -> const opentxs::crypto::SeedID&
 {
     return seed_id_;
 }
 
-auto Deterministic::PrivateKey(
+auto DeterministicPrivate::PrivateKey(
     const implementation::Element& element,
     const Subchain type,
     const Bip32Index index,
@@ -638,7 +662,7 @@ auto Deterministic::PrivateKey(
     return *data.private_key_;
 }
 
-auto Deterministic::Reserve(
+auto DeterministicPrivate::Reserve(
     const Subchain type,
     const PasswordPrompt& reason,
     const std::string_view label,
@@ -647,7 +671,7 @@ auto Deterministic::Reserve(
     return Reserve(type, identifier::Generic{}, reason, label, time);
 }
 
-auto Deterministic::Reserve(
+auto DeterministicPrivate::Reserve(
     const Subchain type,
     const identifier::Generic& contact,
     const PasswordPrompt& reason,
@@ -661,7 +685,7 @@ auto Deterministic::Reserve(
     return batch.front();
 }
 
-auto Deterministic::Reserve(
+auto DeterministicPrivate::Reserve(
     const Subchain type,
     const std::size_t batch,
     const PasswordPrompt& reason,
@@ -671,7 +695,18 @@ auto Deterministic::Reserve(
     return Reserve(type, batch, identifier::Generic{}, reason, label, time);
 }
 
-auto Deterministic::Reserve(
+auto DeterministicPrivate::Reserve(
+    const Subchain type,
+    const std::size_t batch,
+    const identifier::Generic& contact,
+    const PasswordPrompt& reason,
+    const std::string_view label,
+    const Time time) const noexcept -> Batch
+{
+    return reserve(type, batch, contact, reason, label, time);
+}
+
+auto DeterministicPrivate::reserve(
     const Subchain type,
     const std::size_t batch,
     const identifier::Generic& contact,
@@ -700,7 +735,7 @@ auto Deterministic::Reserve(
     return output;
 }
 
-auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
+auto DeterministicPrivate::RootNode(const PasswordPrompt& reason) const noexcept
     -> const opentxs::crypto::asymmetric::key::HD&
 {
     auto& [mutex, key] = cached_key_;
@@ -724,7 +759,7 @@ auto Deterministic::RootNode(const PasswordPrompt& reason) const noexcept
     return key;
 }
 
-auto Deterministic::ScanProgress(Subchain type) const noexcept
+auto DeterministicPrivate::ScanProgress(Subchain type) const noexcept
     -> block::Position
 {
     try {
@@ -738,7 +773,7 @@ auto Deterministic::ScanProgress(Subchain type) const noexcept
     }
 }
 
-auto Deterministic::serialize_deterministic(
+auto DeterministicPrivate::serialize_deterministic(
     const rLock& lock,
     SerializedType& out) const noexcept -> void
 {
@@ -749,7 +784,7 @@ auto Deterministic::serialize_deterministic(
     out.set_externalindex(used_.at(data_.external_.type_));
 }
 
-auto Deterministic::set_metadata(
+auto DeterministicPrivate::set_metadata(
     const rLock& lock,
     const Subchain subchain,
     const Bip32Index index,
@@ -766,7 +801,7 @@ auto Deterministic::set_metadata(
     }
 }
 
-auto Deterministic::SetScanProgress(
+auto DeterministicPrivate::SetScanProgress(
     const block::Position& progress,
     Subchain type) noexcept -> void
 {
@@ -779,7 +814,7 @@ auto Deterministic::SetScanProgress(
     }
 }
 
-auto Deterministic::unconfirm(
+auto DeterministicPrivate::unconfirm(
     const rLock& lock,
     const Subchain type,
     const Bip32Index index) noexcept -> void
@@ -793,7 +828,7 @@ auto Deterministic::unconfirm(
     }
 }
 
-auto Deterministic::use_next(
+auto DeterministicPrivate::use_next(
     const rLock& lock,
     const Subchain type,
     const PasswordPrompt& reason,
@@ -875,4 +910,4 @@ auto Deterministic::use_next(
         return {};
     }
 }
-}  // namespace opentxs::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto

@@ -15,6 +15,8 @@
 
 namespace ottest
 {
+using enum opentxs::blockchain::crypto::SubaccountType;
+
 ApiCryptoBlockchain::ApiCryptoBlockchain()
     : api_(init())
     , reason_(reason_p_.get())
@@ -76,8 +78,12 @@ auto ApiCryptoBlockchain::check_deterministic_account(
     const ot::UnallocatedCString label2) const noexcept -> bool
 {
     auto output = true;
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nym, chain)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
 
     EXPECT_EQ(account.ID(), accountID);
 

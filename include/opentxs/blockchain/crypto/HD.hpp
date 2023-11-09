@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -18,7 +20,7 @@ namespace crypto
 {
 namespace internal
 {
-struct HD;
+class Subaccount;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace blockchain
@@ -27,22 +29,20 @@ struct HD;
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT HD : virtual public Deterministic
+class OPENTXS_EXPORT HD : public Deterministic
 {
 public:
-    OPENTXS_NO_EXPORT virtual auto InternalHD() const noexcept
-        -> internal::HD& = 0;
-    virtual auto Name() const noexcept -> UnallocatedCString = 0;
-    virtual auto Standard() const noexcept -> HDProtocol = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> HD&;
 
-    HD(const HD&) = delete;
-    HD(HD&&) = delete;
+    auto Standard() const noexcept -> HDProtocol;
+
+    OPENTXS_NO_EXPORT HD(std::shared_ptr<internal::Subaccount> imp) noexcept;
+    HD() = delete;
+    HD(const HD& rhs) noexcept;
+    HD(HD&& rhs) noexcept;
     auto operator=(const HD&) -> HD& = delete;
     auto operator=(HD&&) -> HD& = delete;
 
-    OPENTXS_NO_EXPORT ~HD() override = default;
-
-protected:
-    HD() noexcept = default;
+    ~HD() override;
 };
 }  // namespace opentxs::blockchain::crypto

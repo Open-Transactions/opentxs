@@ -42,7 +42,7 @@ protected:
     ScanListener& listener_;
 
     auto CheckTXODB() const noexcept -> bool;
-    auto SendHD() const noexcept -> const ot::blockchain::crypto::HD&;
+    auto SendHD() const noexcept -> ot::blockchain::crypto::HD;
 
     auto Shutdown() noexcept -> void final;
 

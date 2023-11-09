@@ -5,7 +5,11 @@
 
 #pragma once
 
+#include <memory>
+
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -28,30 +32,25 @@ class Session;
 
 namespace blockchain
 {
-namespace block
-{
-class TransactionHash;
-}  // namespace block
-
 namespace crypto
 {
+namespace internal
+{
+class Subaccount;
+}  // namespace internal
+
 class Account;
-class HD;
-class Notification;
-class PaymentCode;
 class Wallet;
 }  // namespace crypto
 }  // namespace blockchain
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 
 namespace identity
 {
-class Account;
 class Nym;
 }  // namespace identity
 
@@ -62,7 +61,6 @@ class HDAccount;
 class HDPath;
 }  // namespace proto
 
-class Data;
 class PasswordPrompt;
 class PaymentCode;
 }  // namespace opentxs
@@ -82,41 +80,41 @@ auto BlockchainAccountKeys(
 auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
+    const identifier::Account& id,
     const proto::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
-    const PasswordPrompt& reason,
-    identifier::Account& id) noexcept
-    -> std::unique_ptr<blockchain::crypto::HD>;
+    const PasswordPrompt& reason) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
-    const proto::HDAccount& serialized,
-    identifier::Account& id) noexcept
-    -> std::unique_ptr<blockchain::crypto::HD>;
+    const identifier::Account& id,
+    const proto::HDAccount& serialized) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainNotificationSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
+    const identifier::Account& id,
     const opentxs::PaymentCode& code,
-    const identity::Nym& nym,
-    identifier::Account& id) noexcept
-    -> std::unique_ptr<blockchain::crypto::Notification>;
+    const identity::Nym& nym) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainPCSubaccount(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
+    const identifier::Account& id,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
     const proto::HDPath& path,
-    const PasswordPrompt& reason,
-    identifier::Account& id) noexcept
-    -> std::unique_ptr<blockchain::crypto::PaymentCode>;
+    const PasswordPrompt& reason) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainPCSubaccount(
     const api::Session& api,
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
-    const proto::Bip47Channel& serialized,
-    identifier::Account& id) noexcept
-    -> std::unique_ptr<blockchain::crypto::PaymentCode>;
+    const identifier::Account& id,
+    const proto::Bip47Channel& serialized) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainWalletKeys(
     const api::Session& api,
     const api::session::Contacts& contacts,

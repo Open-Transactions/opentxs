@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "internal/blockchain/crypto/Deterministic.hpp"
-#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -34,8 +33,10 @@ class TransactionHash;
 
 namespace opentxs::blockchain::crypto::internal
 {
-struct PaymentCode : virtual public crypto::PaymentCode,
-                     virtual public Deterministic {
+class PaymentCode : virtual public Deterministic
+{
+public:
+    static auto Blank() noexcept -> PaymentCode&;
     static auto GetID(
         const api::Session& api,
         const crypto::Target target,
@@ -46,17 +47,21 @@ struct PaymentCode : virtual public crypto::PaymentCode,
         const block::TransactionHash& tx) const noexcept -> bool;
     virtual auto AddNotification(
         const block::TransactionHash& tx) const noexcept -> bool;
-    auto IncomingNotificationCount() const noexcept -> std::size_t override;
-    auto InternalPaymentCode() const noexcept -> internal::PaymentCode& final
-    {
-        return const_cast<PaymentCode&>(*this);
-    }
-    auto Local() const noexcept -> const opentxs::PaymentCode& override;
-    auto NotificationCount() const noexcept
-        -> std::pair<std::size_t, std::size_t> override;
-    auto OutgoingNotificationCount() const noexcept -> std::size_t override;
-    auto Remote() const noexcept -> const opentxs::PaymentCode& override;
+    virtual auto IncomingNotificationCount() const noexcept -> std::size_t;
+    virtual auto Local() const noexcept -> const opentxs::PaymentCode&;
+    virtual auto NotificationCount() const noexcept
+        -> std::pair<std::size_t, std::size_t>;
+    virtual auto OutgoingNotificationCount() const noexcept -> std::size_t;
+    virtual auto Remote() const noexcept -> const opentxs::PaymentCode&;
     virtual auto ReorgNotification(
         const block::TransactionHash& tx) const noexcept -> bool;
+
+    PaymentCode() = default;
+    PaymentCode(const PaymentCode&) = delete;
+    PaymentCode(PaymentCode&&) = delete;
+    auto operator=(const PaymentCode&) -> PaymentCode& = delete;
+    auto operator=(PaymentCode&&) -> PaymentCode& = delete;
+
+    ~PaymentCode() override = default;
 };
 }  // namespace opentxs::blockchain::crypto::internal
