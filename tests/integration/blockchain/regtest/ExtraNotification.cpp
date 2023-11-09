@@ -36,6 +36,7 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 Counter account_activity_alex_{};
 Counter account_activity_bob_{};
@@ -464,7 +465,8 @@ TEST_F(Regtest_payment_code, send_to_unrelated_notify_bob)
     }
 
     {
-        const auto& element = SendPC().BalanceElement(Subchain::Outgoing, 0);
+        const auto subaccount = SendPC().asDeterministic().asPaymentCode();
+        const auto& element = subaccount.BalanceElement(Subchain::Outgoing, 0);
         const auto amount = ot::Amount{1000000000};
         expected_.emplace(
             std::piecewise_construct,
@@ -475,7 +477,8 @@ TEST_F(Regtest_payment_code, send_to_unrelated_notify_bob)
                 Pattern::PayToPubkey));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 0);
         const auto amount = ot::Amount{8999999694};
         expected_.emplace(
             std::piecewise_construct,
@@ -1008,11 +1011,11 @@ TEST_F(Regtest_payment_code, alex_account_activity_first_spend_confirmed)
 
     const auto& tree =
         client_1_.Crypto().Blockchain().Account(alex_.nym_id_, test_chain_);
-    const auto& pc = tree.GetPaymentCode();
+    const auto pc = tree.GetSubaccounts(PaymentCode);
 
     ASSERT_EQ(pc.size(), 1);
 
-    const auto& account = pc.at(0);
+    const auto& account = pc.at(0).asDeterministic().asPaymentCode();
     const auto lookahead = account.Lookahead() - 1;
 
     EXPECT_EQ(

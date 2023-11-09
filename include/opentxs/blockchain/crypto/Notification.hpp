@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 
@@ -17,7 +19,7 @@ namespace crypto
 {
 namespace internal
 {
-struct Notification;
+class Subaccount;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace blockchain
@@ -28,25 +30,21 @@ class PaymentCode;
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT Notification : virtual public Subaccount
+class OPENTXS_EXPORT Notification : public Subaccount
 {
 public:
-    OPENTXS_NO_EXPORT virtual auto InternalNotification() const noexcept
-        -> const internal::Notification& = 0;
-    virtual auto LocalPaymentCode() const noexcept
-        -> const opentxs::PaymentCode& = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Notification&;
 
-    OPENTXS_NO_EXPORT virtual auto InternalNotification() noexcept
-        -> internal::Notification& = 0;
+    auto LocalPaymentCode() const noexcept -> const opentxs::PaymentCode&;
 
-    Notification(const Notification&) = delete;
-    Notification(Notification&&) = delete;
+    OPENTXS_NO_EXPORT Notification(
+        std::shared_ptr<internal::Subaccount> imp) noexcept;
+    Notification() = delete;
+    Notification(const Notification& rhs) noexcept;
+    Notification(Notification&& rhs) noexcept;
     auto operator=(const Notification&) -> Notification& = delete;
     auto operator=(Notification&&) -> Notification& = delete;
 
-    OPENTXS_NO_EXPORT ~Notification() override = default;
-
-protected:
-    Notification() noexcept = default;
+    ~Notification() override;
 };
 }  // namespace opentxs::blockchain::crypto

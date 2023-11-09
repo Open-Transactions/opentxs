@@ -5,13 +5,16 @@
 
 #pragma once
 
+#include <cstddef>
+#include <memory>
 #include <optional>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -23,8 +26,11 @@ namespace crypto
 {
 namespace internal
 {
-struct Deterministic;
+class Subaccount;
 }  // namespace internal
+
+class HD;
+class PaymentCode;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -40,76 +46,68 @@ class HD;
 }  // namespace asymmetric
 }  // namespace crypto
 
-namespace proto
-{
-class HDPath;
-}  // namespace proto
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
+class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT Deterministic : virtual public Subaccount
+class OPENTXS_EXPORT Deterministic : public Subaccount
 {
 public:
-    using Batch = UnallocatedVector<Bip32Index>;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> Deterministic&;
 
-    virtual auto Floor(const Subchain type) const noexcept
-        -> std::optional<Bip32Index> = 0;
-    virtual auto GenerateNext(const Subchain type, const PasswordPrompt& reason)
-        const noexcept -> std::optional<Bip32Index> = 0;
-    OPENTXS_NO_EXPORT virtual auto InternalDeterministic() const noexcept
-        -> internal::Deterministic& = 0;
-    virtual auto Key(const Subchain type, const Bip32Index index) const noexcept
-        -> const opentxs::crypto::asymmetric::key::EllipticCurve& = 0;
-    virtual auto LastGenerated(const Subchain type) const noexcept
-        -> std::optional<Bip32Index> = 0;
-    virtual auto Lookahead() const noexcept -> std::size_t = 0;
-    OPENTXS_NO_EXPORT virtual auto Path() const noexcept -> proto::HDPath = 0;
-    virtual auto PathRoot() const noexcept
-        -> const opentxs::crypto::SeedID& = 0;
-    virtual auto Reserve(
+    auto asHD() const noexcept -> const crypto::HD&;
+    auto asPaymentCode() const noexcept -> const crypto::PaymentCode&;
+    auto Floor(const Subchain type) const noexcept -> std::optional<Bip32Index>;
+    auto GenerateNext(const Subchain type, const PasswordPrompt& reason)
+        const noexcept -> std::optional<Bip32Index>;
+    auto Key(const Subchain type, const Bip32Index index) const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
+    auto LastGenerated(const Subchain type) const noexcept
+        -> std::optional<Bip32Index>;
+    auto Lookahead() const noexcept -> std::size_t;
+    auto PathRoot() const noexcept -> const opentxs::crypto::SeedID&;
+    auto Reserve(
         const Subchain type,
         const identifier::Generic& contact,
         const PasswordPrompt& reason,
         const std::string_view label = {},
         const Time time = Clock::now()) const noexcept
-        -> std::optional<Bip32Index> = 0;
-    virtual auto Reserve(
+        -> std::optional<Bip32Index>;
+    auto Reserve(
         const Subchain type,
         const PasswordPrompt& reason,
         const std::string_view label = {},
         const Time time = Clock::now()) const noexcept
-        -> std::optional<Bip32Index> = 0;
-    virtual auto Reserve(
+        -> std::optional<Bip32Index>;
+    auto Reserve(
         const Subchain type,
         const std::size_t batch,
         const identifier::Generic& contact,
         const PasswordPrompt& reason,
         const std::string_view label = {},
-        const Time time = Clock::now()) const noexcept -> Batch = 0;
-    virtual auto Reserve(
+        const Time time = Clock::now()) const noexcept -> Batch;
+    auto Reserve(
         const Subchain type,
         const std::size_t batch,
         const PasswordPrompt& reason,
         const std::string_view label = {},
-        const Time time = Clock::now()) const noexcept -> Batch = 0;
-    virtual auto RootNode(const PasswordPrompt& reason) const noexcept
-        -> const opentxs::crypto::asymmetric::key::HD& = 0;
+        const Time time = Clock::now()) const noexcept -> Batch;
+    auto RootNode(const PasswordPrompt& reason) const noexcept
+        -> const opentxs::crypto::asymmetric::key::HD&;
 
-    Deterministic(const Deterministic&) = delete;
-    Deterministic(Deterministic&&) = delete;
+    auto asHD() noexcept -> crypto::HD&;
+    auto asPaymentCode() noexcept -> crypto::PaymentCode&;
+
+    OPENTXS_NO_EXPORT Deterministic(
+        std::shared_ptr<internal::Subaccount> imp) noexcept;
+    Deterministic() noexcept = delete;
+    Deterministic(const Deterministic& rhs) noexcept;
+    Deterministic(Deterministic&& rhs) noexcept;
     auto operator=(const Deterministic&) -> Deterministic& = delete;
     auto operator=(Deterministic&&) -> Deterministic& = delete;
 
-    OPENTXS_NO_EXPORT ~Deterministic() override = default;
-
-protected:
-    Deterministic() noexcept = default;
+    ~Deterministic() override;
 };
 }  // namespace opentxs::blockchain::crypto

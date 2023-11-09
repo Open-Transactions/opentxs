@@ -42,6 +42,7 @@
 #include "opentxs/blockchain/crypto/HDProtocol.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
@@ -62,7 +63,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -184,7 +184,7 @@ Account::Imp::Imp(
 }
 
 auto Account::Imp::check(
-    const crypto::Deterministic& subaccount,
+    crypto::Deterministic& subaccount,
     const crypto::Subchain subchain,
     SubchainsIDs& set) noexcept -> void
 {
@@ -216,10 +216,10 @@ auto Account::Imp::check(
 
 auto Account::Imp::check_hd(const identifier::Account& id) noexcept -> void
 {
-    check_hd(account_.GetHD().at(id));
+    check_hd(account_.Subaccount(id).asDeterministic().asHD());
 }
 
-auto Account::Imp::check_hd(const crypto::HD& subaccount) noexcept -> void
+auto Account::Imp::check_hd(crypto::HD& subaccount) noexcept -> void
 {
     check(subaccount, crypto::Subchain::Internal, internal_);
     check(subaccount, crypto::Subchain::External, external_);
@@ -228,11 +228,11 @@ auto Account::Imp::check_hd(const crypto::HD& subaccount) noexcept -> void
 auto Account::Imp::check_notification(const identifier::Account& id) noexcept
     -> void
 {
-    check_notification(account_.GetNotification().at(id));
+    check_notification(account_.Subaccount(id).asNotification());
 }
 
-auto Account::Imp::check_notification(
-    const crypto::Notification& subaccount) noexcept -> void
+auto Account::Imp::check_notification(crypto::Notification& subaccount) noexcept
+    -> void
 {
     const auto [it, added] = notification_.emplace(subaccount.ID());
 
@@ -262,14 +262,13 @@ auto Account::Imp::check_notification(
 auto Account::Imp::check_pc(const identifier::Account& id) noexcept -> void
 {
     try {
-        check_pc(account_.GetPaymentCode().at(id));
+        check_pc(account_.Subaccount(id).asDeterministic().asPaymentCode());
     } catch (const std::exception& e) {
         LogAbort()()(name_)(": ")(e.what()).Abort();
     }
 }
 
-auto Account::Imp::check_pc(const crypto::PaymentCode& subaccount) noexcept
-    -> void
+auto Account::Imp::check_pc(crypto::PaymentCode& subaccount) noexcept -> void
 {
     check(subaccount, crypto::Subchain::Outgoing, outgoing_);
     check(subaccount, crypto::Subchain::Incoming, incoming_);
@@ -307,8 +306,11 @@ auto Account::Imp::do_startup(allocator_type monotonic) noexcept -> bool
 
 auto Account::Imp::index_nym(const identifier::Nym& id) noexcept -> void
 {
-    for (const auto& subaccount : account_.GetNotification()) {
-        check_notification(subaccount);
+    using enum crypto::SubaccountType;
+    const auto subaccounts = account_.GetSubaccounts(Notification);
+
+    for (const auto& subaccount : subaccounts) {
+        check_notification(subaccount.ID());
     }
 }
 
@@ -452,15 +454,18 @@ auto Account::Imp::process_subaccount(
     const crypto::SubaccountType type) noexcept -> void
 {
     switch (type) {
-        case crypto::SubaccountType::HD: {
+        using enum crypto::SubaccountType;
+        case HD: {
             check_hd(id);
         } break;
-        case crypto::SubaccountType::PaymentCode: {
+        case PaymentCode: {
             check_pc(id);
         } break;
-        case crypto::SubaccountType::Error:
-        case crypto::SubaccountType::Imported:
-        case crypto::SubaccountType::Notification:
+        case Imported: {
+            // TODO not yet implemented
+        } break;
+        case Error:
+        case Notification:
         default: {
             LogAbort()()(name_)(": invalid subaccount type").Abort();
         }
@@ -469,10 +474,14 @@ auto Account::Imp::process_subaccount(
 
 auto Account::Imp::scan_subchains() noexcept -> void
 {
-    for (const auto& subaccount : account_.GetHD()) { check_hd(subaccount); }
+    using enum crypto::SubaccountType;
 
-    for (const auto& subaccount : account_.GetPaymentCode()) {
-        check_pc(subaccount);
+    for (auto& subaccount : account_.GetSubaccounts(HD)) {
+        check_hd(subaccount.asDeterministic().asHD());
+    }
+
+    for (auto& subaccount : account_.GetSubaccounts(PaymentCode)) {
+        check_pc(subaccount.asDeterministic().asPaymentCode());
     }
 }
 

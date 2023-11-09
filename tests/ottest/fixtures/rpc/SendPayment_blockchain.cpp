@@ -19,6 +19,7 @@
 namespace ottest
 {
 namespace ot = opentxs;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 ot::Nym_p RPC_BC::alex_p_{};
 ot::UnallocatedDeque<ot::blockchain::block::TransactionHash>
@@ -60,8 +61,10 @@ RPC_BC::RPC_BC()
     , account_(client_1_.Crypto()
                    .Blockchain()
                    .Account(alex_.ID(), test_chain_)
-                   .GetHD()
-                   .at(0))
+                   .GetSubaccounts(HD)
+                   .at(0)
+                   .asDeterministic()
+                   .asHD())
     , mine_to_alex_([&](Height height) -> Transaction {
         using OutputBuilder = ot::blockchain::OutputBuilder;
         static const auto baseAmount = ot::Amount{10000000000};

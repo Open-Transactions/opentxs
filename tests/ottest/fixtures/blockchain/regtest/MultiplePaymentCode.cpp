@@ -84,43 +84,51 @@ Regtest_multiple_payment_code::Regtest_multiple_payment_code()
 }
 
 auto Regtest_multiple_payment_code::ChrisHD() const noexcept
-    -> const ot::blockchain::crypto::HD&
+    -> ot::blockchain::crypto::HD
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(chris_.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    auto hd = client_2_.Crypto()
+                  .Blockchain()
+                  .Account(chris_.nym_id_, test_chain_)
+                  .GetSubaccounts(HD);
+
+    return hd[0].asDeterministic().asHD();
 }
 
 auto Regtest_multiple_payment_code::ChrisPC() const noexcept
-    -> const ot::blockchain::crypto::PaymentCode&
+    -> ot::blockchain::crypto::PaymentCode
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(chris_.nym_id_, test_chain_)
-        .GetPaymentCode()
-        .at(0);
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    auto pc = client_2_.Crypto()
+                  .Blockchain()
+                  .Account(chris_.nym_id_, test_chain_)
+                  .GetSubaccounts(PaymentCode);
+
+    return pc[0].asDeterministic().asPaymentCode();
 }
 
 auto Regtest_multiple_payment_code::DanielHD() const noexcept
-    -> const ot::blockchain::crypto::HD&
+    -> ot::blockchain::crypto::HD
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(daniel_.nym_id_, test_chain_)
-        .GetHD()
-        .at(0);
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    auto hd = client_2_.Crypto()
+                  .Blockchain()
+                  .Account(daniel_.nym_id_, test_chain_)
+                  .GetSubaccounts(HD);
+
+    return hd[0].asDeterministic().asHD();
 }
 
 auto Regtest_multiple_payment_code::DanielPC() const noexcept
-    -> const ot::blockchain::crypto::PaymentCode&
+    -> ot::blockchain::crypto::PaymentCode
 {
-    return client_2_.Crypto()
-        .Blockchain()
-        .Account(daniel_.nym_id_, test_chain_)
-        .GetPaymentCode()
-        .at(0);
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    auto pc = client_2_.Crypto()
+                  .Blockchain()
+                  .Account(daniel_.nym_id_, test_chain_)
+                  .GetSubaccounts(PaymentCode);
+
+    return pc[0].asDeterministic().asPaymentCode();
 }
 
 auto Regtest_multiple_payment_code::Shutdown() noexcept -> void

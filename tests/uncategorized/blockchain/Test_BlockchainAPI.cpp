@@ -19,6 +19,8 @@
 
 namespace ottest
 {
+using enum opentxs::blockchain::crypto::SubaccountType;
+
 TEST_F(ApiCryptoBlockchain, init)
 {
     EXPECT_TRUE(invalid_nym_.empty());
@@ -161,8 +163,7 @@ TEST_F(ApiCryptoBlockchain, TestNym_AccountIdempotence)
     const auto& before = api_.Crypto()
                              .Blockchain()
                              .Account(chris_, btc_chain_)
-                             .GetHD()
-                             .at(account_4_id_.get());
+                             .Subaccount(account_4_id_.get());
 
     EXPECT_EQ(before.ID(), account_4_id_.get());
 
@@ -177,8 +178,7 @@ TEST_F(ApiCryptoBlockchain, TestNym_AccountIdempotence)
     const auto& after = api_.Crypto()
                             .Blockchain()
                             .Account(chris_, btc_chain_)
-                            .GetHD()
-                            .at(account_4_id_.get());
+                            .Subaccount(account_4_id_.get());
 
     EXPECT_EQ(after.ID(), account_4_id_.get());
 
@@ -229,8 +229,12 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_1)
 
     ASSERT_FALSE(accountID.empty());
 
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nymID, btc_chain_).GetHD().at(0);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nymID, btc_chain_)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
 
     EXPECT_EQ(account.ID(), accountID);
 
@@ -274,8 +278,12 @@ TEST_F(ApiCryptoBlockchain, TestBip32_standard_3)
 
     ASSERT_FALSE(accountID.empty());
 
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nymID, btc_chain_).GetHD().at(0);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nymID, btc_chain_)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
 
     EXPECT_EQ(account.ID(), accountID);
 
@@ -409,8 +417,12 @@ TEST_F(ApiCryptoBlockchain, reserve_addresses)
 
     EXPECT_TRUE(list.contains(accountID));
 
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nym, chain)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
 
     ASSERT_EQ(account.ID(), accountID);
     ASSERT_EQ(account.Lookahead(), 20u);
@@ -487,8 +499,12 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
     const auto& nym = alex_;
     const auto chain = btc_chain_;
     const auto& accountID = account_8_id_.get();
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nym, chain)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
     const auto subchain = Subchain::External;
     const auto setContact =
         ot::UnallocatedVector<ot::Bip32Index>{0, 1, 6, 8, 9, 14, 16, 17, 22};
@@ -576,8 +592,12 @@ TEST_F(ApiCryptoBlockchain, reserve)
     const auto& nym = alex_;
     const auto chain = btc_chain_;
     const auto& accountID = account_8_id_.get();
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
+    const auto account = api_.Crypto()
+                             .Blockchain()
+                             .Account(nym, chain)
+                             .Subaccount(accountID)
+                             .asDeterministic()
+                             .asHD();
     const auto subchain = Subchain::External;
 
     {
@@ -644,7 +664,8 @@ TEST_F(ApiCryptoBlockchain, release)
     const auto chain = btc_chain_;
     const auto& accountID = account_8_id_.get();
     const auto& bc = api_.Crypto().Blockchain();
-    const auto& account = bc.Account(nym, chain).GetHD().at(accountID);
+    const auto account =
+        bc.Account(nym, chain).Subaccount(accountID).asDeterministic().asHD();
     const auto subchain = Subchain::External;
 
     EXPECT_FALSE(bc.Release({accountID, subchain, 7}));
@@ -728,7 +749,8 @@ TEST_F(ApiCryptoBlockchain, floor)
     const auto chain = btc_chain_;
     const auto& accountID = account_8_id_.get();
     const auto& bc = api_.Crypto().Blockchain();
-    const auto& account = bc.Account(nym, chain).GetHD().at(accountID);
+    const auto account =
+        bc.Account(nym, chain).Subaccount(accountID).asDeterministic().asHD();
     const auto subchain = Subchain::External;
     auto& txids = address_data_.txids_;
 
@@ -802,6 +824,7 @@ TEST_F(ApiCryptoBlockchain, paymentcode)
         chain,
         reason_);
 
+    EXPECT_TRUE(account.IsValid());
     EXPECT_TRUE(check_initial_state(account, Subchain::Outgoing));
     EXPECT_TRUE(check_initial_state(account, Subchain::Incoming));
 
@@ -825,8 +848,12 @@ TEST_F(ApiCryptoBlockchain, batch)
 
     EXPECT_TRUE(list.contains(accountID));
 
-    const auto& account =
-        api_.Crypto().Blockchain().Account(nym, chain).GetHD().at(accountID);
+    auto& account = api_.Crypto()
+                        .Blockchain()
+                        .Account(nym, chain)
+                        .Subaccount(accountID)
+                        .asDeterministic()
+                        .asHD();
 
     ASSERT_EQ(account.ID(), accountID);
 

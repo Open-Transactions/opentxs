@@ -33,7 +33,7 @@ protected:
     static std::unique_ptr<ScanListener> listener_p_;
 
     const ot::identity::Nym& alex_;
-    const ot::blockchain::crypto::HD& account_;
+    const ot::blockchain::crypto::HD account_;
     const Generator mine_to_alex_;
     ScanListener& listener_;
 

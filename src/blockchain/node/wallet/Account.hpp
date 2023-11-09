@@ -129,17 +129,16 @@ private:
     ReorgSlave reorg_;
 
     auto check(
-        const crypto::Deterministic& subaccount,
+        crypto::Deterministic& subaccount,
         const crypto::Subchain subchain,
         SubchainsIDs& set) noexcept -> void;
     auto check_hd(const identifier::Account& subaccount) noexcept -> void;
-    auto check_hd(const crypto::HD& subaccount) noexcept -> void;
+    auto check_hd(crypto::HD& subaccount) noexcept -> void;
     auto check_notification(const identifier::Account& subaccount) noexcept
         -> void;
-    auto check_notification(const crypto::Notification& subaccount) noexcept
-        -> void;
+    auto check_notification(crypto::Notification& subaccount) noexcept -> void;
     auto check_pc(const identifier::Account& subaccount) noexcept -> void;
-    auto check_pc(const crypto::PaymentCode& subaccount) noexcept -> void;
+    auto check_pc(crypto::PaymentCode& subaccount) noexcept -> void;
     auto do_shutdown() noexcept -> void;
     auto do_reorg(
         const node::HeaderOracle& oracle,

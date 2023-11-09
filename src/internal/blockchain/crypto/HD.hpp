@@ -6,10 +6,23 @@
 #pragma once
 
 #include "internal/blockchain/crypto/Deterministic.hpp"
-#include "opentxs/blockchain/crypto/HD.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {
-struct HD : virtual public crypto::HD, virtual public Deterministic {
+class HD : virtual public Deterministic
+{
+public:
+    static auto Blank() noexcept -> HD&;
+
+    virtual auto Standard() const noexcept -> HDProtocol;
+
+    HD() = default;
+    HD(const HD&) = delete;
+    HD(HD&&) = delete;
+    auto operator=(const HD&) -> HD& = delete;
+    auto operator=(HD&&) -> HD& = delete;
+
+    ~HD() override = default;
 };
 }  // namespace opentxs::blockchain::crypto::internal

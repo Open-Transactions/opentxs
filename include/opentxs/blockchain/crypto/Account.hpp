@@ -50,103 +50,7 @@ namespace opentxs::blockchain::crypto
 class OPENTXS_EXPORT Account
 {
 public:
-    struct OPENTXS_EXPORT HDAccounts {
-        using value_type = HD;
-        using const_iterator = opentxs::iterator::
-            Bidirectional<const HDAccounts, const value_type>;
-
-        virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Account> = 0;
-        /// Throws std::out_of_range for invalid position
-        virtual auto at(const std::size_t position) const noexcept(false)
-            -> const value_type& = 0;
-        /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Account& id) const noexcept(false)
-            -> const value_type& = 0;
-        virtual auto begin() const noexcept -> const_iterator = 0;
-        virtual auto cbegin() const noexcept -> const_iterator = 0;
-        virtual auto cend() const noexcept -> const_iterator = 0;
-        virtual auto end() const noexcept -> const_iterator = 0;
-        virtual auto size() const noexcept -> std::size_t = 0;
-        virtual auto Type() const noexcept -> SubaccountType = 0;
-
-        OPENTXS_NO_EXPORT virtual ~HDAccounts() = default;
-    };
-    struct OPENTXS_EXPORT ImportedAccounts {
-        using value_type = Imported;
-        using const_iterator = opentxs::iterator::
-            Bidirectional<const ImportedAccounts, const value_type>;
-
-        virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Account> = 0;
-        /// Throws std::out_of_range for invalid position
-        virtual auto at(const std::size_t position) const noexcept(false)
-            -> const value_type& = 0;
-        /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Account& id) const noexcept(false)
-            -> const value_type& = 0;
-        virtual auto begin() const noexcept -> const_iterator = 0;
-        virtual auto cbegin() const noexcept -> const_iterator = 0;
-        virtual auto cend() const noexcept -> const_iterator = 0;
-        virtual auto end() const noexcept -> const_iterator = 0;
-        virtual auto size() const noexcept -> std::size_t = 0;
-        virtual auto Type() const noexcept -> SubaccountType = 0;
-
-        OPENTXS_NO_EXPORT virtual ~ImportedAccounts() = default;
-    };
-    struct OPENTXS_EXPORT NotificationAccounts {
-        using value_type = Notification;
-        using const_iterator = opentxs::iterator::
-            Bidirectional<const NotificationAccounts, const value_type>;
-
-        virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Account> = 0;
-        /// Throws std::out_of_range for invalid position
-        virtual auto at(const std::size_t position) const noexcept(false)
-            -> const value_type& = 0;
-        /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Account& id) const noexcept(false)
-            -> const value_type& = 0;
-        virtual auto begin() const noexcept -> const_iterator = 0;
-        virtual auto cbegin() const noexcept -> const_iterator = 0;
-        virtual auto cend() const noexcept -> const_iterator = 0;
-        virtual auto end() const noexcept -> const_iterator = 0;
-        virtual auto size() const noexcept -> std::size_t = 0;
-        virtual auto Type() const noexcept -> SubaccountType = 0;
-
-        OPENTXS_NO_EXPORT virtual ~NotificationAccounts() = default;
-    };
-    struct OPENTXS_EXPORT PaymentCodeAccounts {
-        using value_type = PaymentCode;
-        using const_iterator = opentxs::iterator::
-            Bidirectional<const PaymentCodeAccounts, const value_type>;
-
-        virtual auto all() const noexcept
-            -> UnallocatedSet<identifier::Account> = 0;
-        /// Throws std::out_of_range for invalid position
-        virtual auto at(const std::size_t position) const noexcept(false)
-            -> const value_type& = 0;
-        /// Throws std::out_of_range for invalid id
-        virtual auto at(const identifier::Account& id) const noexcept(false)
-            -> const value_type& = 0;
-        virtual auto begin() const noexcept -> const_iterator = 0;
-        virtual auto cbegin() const noexcept -> const_iterator = 0;
-        virtual auto cend() const noexcept -> const_iterator = 0;
-        virtual auto end() const noexcept -> const_iterator = 0;
-        virtual auto size() const noexcept -> std::size_t = 0;
-        virtual auto Type() const noexcept -> SubaccountType = 0;
-
-        OPENTXS_NO_EXPORT virtual ~PaymentCodeAccounts() = default;
-    };
-
     virtual auto AccountID() const noexcept -> const identifier::Account& = 0;
-    virtual auto GetHD() const noexcept -> const HDAccounts& = 0;
-    /// Throws std::out_of_range if no keys are available
-    virtual auto GetNextChangeKey(const PasswordPrompt& reason) const
-        noexcept(false) -> const Element& = 0;
-    /// Throws std::out_of_range if no keys are available
-    virtual auto GetNextDepositKey(const PasswordPrompt& reason) const
-        noexcept(false) -> const Element& = 0;
     virtual auto GetDepositAddress(
         const AddressStyle style,
         const PasswordPrompt& reason,
@@ -158,17 +62,22 @@ public:
         const PasswordPrompt& reason,
         const UnallocatedCString& memo = "") const noexcept
         -> UnallocatedCString = 0;
-    virtual auto GetImported() const noexcept -> const ImportedAccounts& = 0;
-    virtual auto GetNotification() const noexcept
-        -> const NotificationAccounts& = 0;
-    virtual auto GetPaymentCode() const noexcept
-        -> const PaymentCodeAccounts& = 0;
+    /// Throws std::out_of_range if no keys are available
+    virtual auto GetNextChangeKey(const PasswordPrompt& reason) const
+        noexcept(false) -> const Element& = 0;
+    /// Throws std::out_of_range if no keys are available
+    virtual auto GetNextDepositKey(const PasswordPrompt& reason) const
+        noexcept(false) -> const Element& = 0;
+    virtual auto GetSubaccounts() const noexcept
+        -> UnallocatedVector<opentxs::blockchain::crypto::Subaccount> = 0;
+    virtual auto GetSubaccounts(SubaccountType type) const noexcept
+        -> UnallocatedVector<opentxs::blockchain::crypto::Subaccount> = 0;
     OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
         -> internal::Account& = 0;
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
     virtual auto Parent() const noexcept -> const Wallet& = 0;
     virtual auto Subaccount(const identifier::Account& id) const noexcept(false)
-        -> const crypto::Subaccount& = 0;
+        -> crypto::Subaccount& = 0;
     virtual auto Target() const noexcept -> crypto::Target = 0;
 
     Account(const Account&) = delete;

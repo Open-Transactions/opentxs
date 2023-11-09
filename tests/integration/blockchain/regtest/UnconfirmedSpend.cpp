@@ -34,6 +34,7 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 Counter account_activity_alex_{};
 Counter account_activity_bob_{};
@@ -461,7 +462,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
     }
 
     {
-        const auto& element = SendPC().BalanceElement(Subchain::Outgoing, 0);
+        const auto subaccount = SendPC().asDeterministic().asPaymentCode();
+        const auto& element = subaccount.BalanceElement(Subchain::Outgoing, 0);
         const auto amount = ot::Amount{1000000000};
         expected_.emplace(
             std::piecewise_construct,
@@ -472,7 +474,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
                 Pattern::PayToPubkey));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 0);
         const auto amount = ot::Amount{8999999684};
         expected_.emplace(
             std::piecewise_construct,
@@ -561,11 +564,11 @@ TEST_F(Regtest_payment_code, check_notification_transactions_sender)
 {
     const auto& account =
         client_1_.Crypto().Blockchain().Account(alex_.nym_id_, test_chain_);
-    const auto& pc = account.GetPaymentCode();
+    const auto pc = account.GetSubaccounts(PaymentCode);
 
     ASSERT_TRUE(0_uz < pc.size());
 
-    const auto& subaccount = pc.at(0_uz);
+    const auto& subaccount = pc.at(0_uz).asDeterministic().asPaymentCode();
     const auto [incoming, outgoing] = subaccount.NotificationCount();
 
     EXPECT_EQ(subaccount.IncomingNotificationCount(), 0_uz);

@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Element.hpp"  // IWYU pragma: associated
+#include "blockchain/crypto/element/Element.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
 #include <BlockchainAddress.pb.h>

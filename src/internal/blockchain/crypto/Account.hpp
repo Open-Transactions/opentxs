@@ -28,6 +28,7 @@ class TransactionHash;
 
 namespace crypto
 {
+class Subaccount;
 struct Notifications;
 }  // namespace crypto
 }  // namespace blockchain
@@ -53,24 +54,18 @@ struct Account : virtual public crypto::Account {
         const identifier::Nym& owner,
         blockchain::Type chain) noexcept -> identifier::Account;
 
-    [[nodiscard]] virtual auto ClaimAccountID(
-        const identifier::Account& id,
-        bool existing,
-        crypto::Subaccount* node) const noexcept -> bool = 0;
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
 
-    virtual auto AddHDNode(
+    virtual auto AddHD(
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool = 0;
-    virtual auto AddOrUpdatePaymentCode(
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
+    virtual auto AddPaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
         const proto::HDPath& path,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool = 0;
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto Startup() noexcept -> void = 0;
     using crypto::Account::Subaccount;
     virtual auto Subaccount(const identifier::Account& id) noexcept(false)

@@ -71,7 +71,7 @@ public:
 
     NotificationStateData(
         Reorg& reorg,
-        const crypto::Notification& subaccount,
+        crypto::Notification& subaccount,
         const opentxs::PaymentCode& code,
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,

@@ -142,7 +142,7 @@ public:
     const node::Manager& node_;
     database::Wallet& db_;
     const node::internal::Mempool& mempool_oracle_;
-    const crypto::Subaccount& subaccount_;
+    crypto::Subaccount& subaccount_;
     const identifier::Nym owner_;
     const crypto::SubaccountType account_type_;
     const identifier::Account id_;
@@ -228,7 +228,7 @@ protected:
 
     SubchainStateData(
         Reorg& reorg,
-        const crypto::Subaccount& subaccount,
+        crypto::Subaccount& subaccount,
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,
@@ -381,7 +381,7 @@ private:
 
     SubchainStateData(
         Reorg& reorg,
-        const crypto::Subaccount& subaccount,
+        crypto::Subaccount& subaccount,
         std::shared_ptr<const api::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,

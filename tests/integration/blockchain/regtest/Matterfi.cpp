@@ -38,6 +38,7 @@ namespace ottest
 {
 using namespace opentxs::literals;
 using namespace std::literals;
+using enum opentxs::blockchain::crypto::SubaccountType;
 
 static constexpr auto contact1 =
     "PD1icC1WChenjc2WEw52oKR127qCzLRFyo7DFdo6yJrZ5DKsrp42v";
@@ -179,7 +180,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
     }
 
     {
-        const auto& element = SendPC().BalanceElement(Subchain::Outgoing, 0);
+        const auto subaccount = SendPC().asDeterministic().asPaymentCode();
+        const auto& element = subaccount.BalanceElement(Subchain::Outgoing, 0);
         const auto amount = ot::Amount{1000000000};
         expected_.emplace(
             std::piecewise_construct,
@@ -190,7 +192,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
                 Pattern::PayToPubkey));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 3);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 3);
         const auto amount = ot::Amount{2249999835};
         expected_.emplace(
             std::piecewise_construct,
@@ -201,7 +204,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
                 Pattern::PayToMultisig));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 2);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 2);
         const auto amount = ot::Amount{2249999835};
         expected_.emplace(
             std::piecewise_construct,
@@ -212,7 +216,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
                 Pattern::PayToMultisig));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 1);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 1);
         const auto amount = ot::Amount{2249999836};
         expected_.emplace(
             std::piecewise_construct,
@@ -223,7 +228,8 @@ TEST_F(Regtest_payment_code, send_to_bob)
                 Pattern::PayToMultisig));
     }
     {
-        const auto& element = SendHD().BalanceElement(Subchain::Internal, 0);
+        const auto subaccount = SendHD().asDeterministic().asHD();
+        const auto& element = subaccount.BalanceElement(Subchain::Internal, 0);
         const auto amount = ot::Amount{2249999836};
         expected_.emplace(
             std::piecewise_construct,
@@ -318,11 +324,13 @@ TEST_F(Regtest_payment_code, check_notification_transactions_sender)
 {
     const auto& account =
         client_1_.Crypto().Blockchain().Account(alex_.nym_id_, test_chain_);
-    const auto& pc = account.GetPaymentCode();
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    const auto pc = account.GetSubaccounts(PaymentCode);
 
     EXPECT_EQ(pc.size(), 3_uz);
 
-    const auto check_notifications = [&](const auto& subaccount) {
+    const auto check_notifications = [&](const auto& in) {
+        const auto& subaccount = in.asDeterministic().asPaymentCode();
         const auto [incoming, outgoing] = subaccount.NotificationCount();
 
         EXPECT_EQ(subaccount.IncomingNotificationCount(), 0_uz);

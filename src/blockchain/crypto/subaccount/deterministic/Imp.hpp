@@ -14,13 +14,14 @@
 #include <string_view>
 #include <utility>
 
-#include "blockchain/crypto/Subaccount.hpp"
+#include "blockchain/crypto/subaccount/base/Imp.hpp"
 #include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -51,21 +52,22 @@ class Account;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace identifier
-{
-class Account;
-}  // namespace identifier
-
 class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto
 {
-class Deterministic : virtual public internal::Deterministic, public Subaccount
+class DeterministicPrivate : virtual public internal::Deterministic,
+                             public SubaccountPrivate
 {
 public:
-    auto AllowedSubchains() const noexcept -> UnallocatedSet<Subchain> final;
+    auto AllowedSubchains() const noexcept -> Set<Subchain> final;
+    auto asDeterministic() const noexcept
+        -> const internal::Deterministic& final
+    {
+        return *this;
+    }
     auto Floor(const Subchain type) const noexcept
         -> std::optional<Bip32Index> final;
     auto BalanceElement(const Subchain type, const Bip32Index index) const
@@ -77,7 +79,7 @@ public:
     auto LastGenerated(const Subchain type) const noexcept
         -> std::optional<Bip32Index> final;
     auto Lookahead() const noexcept -> std::size_t final { return window_; }
-    using Subaccount::PrivateKey;
+    using SubaccountPrivate::PrivateKey;
     auto PrivateKey(
         const implementation::Element& element,
         const Subchain type,
@@ -119,17 +121,22 @@ public:
         -> const opentxs::crypto::asymmetric::key::HD& override;
     auto ScanProgress(Subchain type) const noexcept -> block::Position final;
 
+    auto asDeterministic() noexcept -> internal::Deterministic& final
+    {
+        return *this;
+    }
     auto SetScanProgress(
         const block::Position& progress,
         Subchain type) noexcept -> void final;
 
-    Deterministic() = delete;
-    Deterministic(const Deterministic&) = delete;
-    Deterministic(Deterministic&&) = delete;
-    auto operator=(const Deterministic&) -> Deterministic& = delete;
-    auto operator=(Deterministic&&) -> Deterministic& = delete;
+    DeterministicPrivate() = delete;
+    DeterministicPrivate(const DeterministicPrivate&) = delete;
+    DeterministicPrivate(DeterministicPrivate&&) = delete;
+    auto operator=(const DeterministicPrivate&)
+        -> DeterministicPrivate& = delete;
+    auto operator=(DeterministicPrivate&&) -> DeterministicPrivate& = delete;
 
-    ~Deterministic() override = default;
+    ~DeterministicPrivate() override = default;
 
 protected:
     using IndexMap = UnallocatedMap<Subchain, Bip32Index>;
@@ -174,7 +181,8 @@ protected:
     auto element(const rLock& lock, const Subchain type, const Bip32Index index)
         const noexcept(false) -> const crypto::Element&
     {
-        return const_cast<Deterministic*>(this)->element(lock, type, index);
+        return const_cast<DeterministicPrivate*>(this)->element(
+            lock, type, index);
     }
     virtual auto get_contact() const noexcept -> identifier::Generic;
     auto is_generated(const rLock&, const Subchain type, Bip32Index index)
@@ -184,6 +192,13 @@ protected:
     }
     auto need_lookahead(const rLock& lock, const Subchain type) const noexcept
         -> Bip32Index;
+    auto reserve(
+        const Subchain type,
+        const std::size_t batch,
+        const identifier::Generic& contact,
+        const PasswordPrompt& reason,
+        const std::string_view label,
+        const Time time) const noexcept -> Batch;
     auto serialize_deterministic(const rLock& lock, SerializedType& out)
         const noexcept -> void;
     auto use_next(
@@ -202,23 +217,28 @@ protected:
     auto init(bool existing) noexcept(false) -> void final;
     auto init(const PasswordPrompt& reason) noexcept(false) -> void;
 
-    Deterministic(
+    DeterministicPrivate(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
-        identifier::Account&& id,
-        const proto::HDPath path,
-        ChainData&& data,
-        identifier::Account& out) noexcept;
-    Deterministic(
+        const identifier::Account& id,
+        identifier::Generic source,
+        std::string_view sourceName,
+        std::string_view name,
+        proto::HDPath path,
+        ChainData&& data) noexcept;
+    DeterministicPrivate(
         const api::Session& api,
         const crypto::Account& parent,
         const SubaccountType type,
+        const identifier::Account& id,
         const SerializedType& serialized,
-        const Bip32Index internal,
-        const Bip32Index external,
-        ChainData&& data,
-        identifier::Account& out) noexcept(false);
+        identifier::Generic source,
+        std::string_view sourceName,
+        std::string_view name,
+        Bip32Index internal,
+        Bip32Index external,
+        ChainData&& data) noexcept(false);
 
 private:
     using Status = internal::Element::Availability;
@@ -294,4 +314,4 @@ private:
         const Subchain type,
         const Bip32Index index) noexcept -> void final;
 };
-}  // namespace opentxs::blockchain::crypto::implementation
+}  // namespace opentxs::blockchain::crypto

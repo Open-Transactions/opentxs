@@ -6,10 +6,57 @@
 #pragma once
 
 #include "internal/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Imported.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace blockchain
+{
+namespace crypto
+{
+namespace internal
+{
+class Ethereum;
+}  // namespace internal
+
+class Ethereum;
+}  // namespace crypto
+}  // namespace blockchain
+
+namespace crypto
+{
+namespace asymmetric
+{
+namespace key
+{
+class EllipticCurve;
+}  // namespace key
+}  // namespace asymmetric
+}  // namespace crypto
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto::internal
 {
-struct Imported : virtual public crypto::Imported, virtual public Subaccount {
+class Imported : virtual public Subaccount
+{
+public:
+    static auto Blank() noexcept -> Imported&;
+
+    virtual auto asEthereum() const noexcept -> const internal::Ethereum&;
+    virtual auto asEthereumPublic() const noexcept -> const crypto::Ethereum&;
+    virtual auto Key() const noexcept
+        -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
+
+    virtual auto asEthereum() noexcept -> internal::Ethereum&;
+    virtual auto asEthereumPublic() noexcept -> crypto::Ethereum&;
+
+    Imported() = default;
+    Imported(const Imported&) = delete;
+    Imported(Imported&&) = delete;
+    auto operator=(const Imported&) -> Imported& = delete;
+    auto operator=(Imported&&) -> Imported& = delete;
+
+    ~Imported() override = default;
 };
 }  // namespace opentxs::blockchain::crypto::internal

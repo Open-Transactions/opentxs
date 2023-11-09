@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Wallet.hpp"  // IWYU pragma: associated
+#include "blockchain/crypto/wallet/Wallet.hpp"  // IWYU pragma: associated
 
 #include <utility>
 
@@ -16,6 +16,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -73,16 +74,26 @@ auto Wallet::add(
     return true;
 }
 
-auto Wallet::AddHDNode(
+auto Wallet::AddHD(
     const identifier::Nym& nym,
     const proto::HDPath& path,
     const crypto::HDProtocol standard,
-    const PasswordPrompt& reason,
-    identifier::Account& id) noexcept -> bool
+    const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
     return get_or_create(*data_.lock(), nym)
         .Internal()
-        .AddHDNode(path, standard, reason, id);
+        .AddHD(path, standard, reason);
+}
+
+auto Wallet::AddPaymentCode(
+    const opentxs::PaymentCode& local,
+    const opentxs::PaymentCode& remote,
+    const proto::HDPath& path,
+    const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
+{
+    return get_or_create(*data_.lock(), local.ID())
+        .Internal()
+        .AddPaymentCode(local, remote, path, reason);
 }
 
 auto Wallet::at(const std::size_t position) const noexcept(false)

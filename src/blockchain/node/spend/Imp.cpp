@@ -25,7 +25,9 @@
 
 #include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/FactoryAPI.hpp"
+#include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
+#include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/Factory.hpp"
@@ -45,8 +47,10 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/blockchain/node/Funding.hpp"     // IWYU pragma: keep
@@ -181,7 +185,11 @@ auto SpendPrivate::AddNotification(
     for (const auto& recipient : notifications_) {
         try {
             if (self != recipient) {
-                account(recipient).InternalPaymentCode().AddNotification(txid);
+                account(recipient)
+                    .Internal()
+                    .asDeterministic()
+                    .asPaymentCode()
+                    .AddNotification(txid);
             }
         } catch (const std::exception& e) {
             LogError()()(
@@ -394,8 +402,9 @@ auto SpendPrivate::deserialize_output(
                                      .Blockchain()
                                      .Wallet(chain_)
                                      .Account(spender_)
-                                     .GetPaymentCode()
-                                     .at(subaccountID);
+                                     .Subaccount(subaccountID)
+                                     .asDeterministic()
+                                     .asPaymentCode();
         add_payment_code(
             subaccount.Remote(),
             amount,
@@ -453,8 +462,9 @@ auto SpendPrivate::Finalize(const Log& log, alloc::Strategy alloc) noexcept(
                                       .Blockchain()
                                       .Wallet(chain_)
                                       .Account(spender_)
-                                      .GetPaymentCode()
-                                      .at(accountID);
+                                      .Subaccount(accountID)
+                                      .asDeterministic()
+                                      .asPaymentCode();
             matterfi::paymentcode_extra_notifications(
                 LogTrace(), account, notifications_);
         };

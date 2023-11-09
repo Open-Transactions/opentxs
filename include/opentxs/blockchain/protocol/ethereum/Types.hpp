@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <string_view>
 
@@ -26,6 +27,8 @@ class Writer;
 
 namespace opentxs::blockchain::protocol::ethereum
 {
+using AccountNonce = std::uint64_t;
+
 OPENTXS_EXPORT auto amount_to_native(const Amount&) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto amount_to_native(const Amount&, alloc::Strategy) noexcept

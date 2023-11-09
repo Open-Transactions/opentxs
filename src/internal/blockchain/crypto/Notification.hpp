@@ -6,32 +6,47 @@
 #pragma once
 
 #include "internal/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/blockchain/crypto/Notification.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/identifier/Account.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+class Session;
+}  // namespace api
+
 namespace proto
 {
 class HDPath;
 }  // namespace proto
+
+class PaymentCode;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto::internal
 {
-struct Notification : virtual public crypto::Notification,
-                      virtual public Subaccount {
-    auto InternalNotification() const noexcept
-        -> const internal::Notification& final
-    {
-        return *this;
-    }
-    virtual auto Path() const noexcept -> proto::HDPath = 0;
+class Notification : virtual public Subaccount
+{
+public:
+    static auto Blank() noexcept -> Notification&;
+    static auto CalculateID(
+        const api::Session& api,
+        const crypto::Target& target,
+        const opentxs::PaymentCode& code) noexcept -> identifier::Account;
 
-    auto InternalNotification() noexcept -> internal::Notification& final
-    {
-        return *this;
-    }
+    virtual auto LocalPaymentCode() const noexcept
+        -> const opentxs::PaymentCode&;
+    virtual auto Path() const noexcept -> proto::HDPath;
+
+    Notification() = default;
+    Notification(const Notification&) = delete;
+    Notification(Notification&&) = delete;
+    auto operator=(const Notification&) -> Notification& = delete;
+    auto operator=(Notification&&) -> Notification& = delete;
+
+    ~Notification() override = default;
 };
 }  // namespace opentxs::blockchain::crypto::internal

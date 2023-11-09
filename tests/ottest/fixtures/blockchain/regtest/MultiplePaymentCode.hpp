@@ -35,11 +35,10 @@ protected:
     ScanListener& listener_chris_;
     ScanListener& listener_daniel_;
 
-    auto ChrisHD() const noexcept -> const ot::blockchain::crypto::HD&;
-    auto ChrisPC() const noexcept -> const ot::blockchain::crypto::PaymentCode&;
-    auto DanielHD() const noexcept -> const ot::blockchain::crypto::HD&;
-    auto DanielPC() const noexcept
-        -> const ot::blockchain::crypto::PaymentCode&;
+    auto ChrisHD() const noexcept -> ot::blockchain::crypto::HD;
+    auto ChrisPC() const noexcept -> ot::blockchain::crypto::PaymentCode;
+    auto DanielHD() const noexcept -> ot::blockchain::crypto::HD;
+    auto DanielPC() const noexcept -> ot::blockchain::crypto::PaymentCode;
 
     auto Shutdown() noexcept -> void final;
 

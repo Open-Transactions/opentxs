@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include "opentxs/blockchain/crypto/Subaccount.hpp"
-
+#include <memory>
 #include <string_view>
 
 #include "opentxs/blockchain/block/Position.hpp"
@@ -37,8 +36,19 @@ namespace implementation
 class Element;
 }  // namespace implementation
 
+namespace internal
+{
+class Deterministic;
+class Imported;
+class Notification;
+}  // namespace internal
+
 class Account;
+class Deterministic;
 class Element;
+class Imported;
+class Notification;
+class Subaccount;
 }  // namespace crypto
 }  // namespace blockchain
 
@@ -59,32 +69,58 @@ class PasswordPrompt;
 
 namespace opentxs::blockchain::crypto::internal
 {
-struct Subaccount : virtual public crypto::Subaccount {
-    auto AllowedSubchains() const noexcept -> UnallocatedSet<Subchain> override;
-    auto BalanceElement(const Subchain type, const Bip32Index index) const
-        noexcept(false) -> const crypto::Element& override;
-    auto Describe() const noexcept -> std::string_view override;
-    auto ID() const noexcept -> const identifier::Account& override;
-    auto Internal() const noexcept -> internal::Subaccount& final
+class Subaccount
+{
+public:
+    static auto Blank() noexcept -> Subaccount&;
+
+    virtual auto AllowedSubchains() const noexcept -> Set<Subchain>;
+    virtual auto asDeterministic() const noexcept
+        -> const internal::Deterministic&;
+    virtual auto asDeterministicPublic() const noexcept
+        -> const crypto::Deterministic&;
+    virtual auto asNotification() const noexcept
+        -> const internal::Notification&;
+    virtual auto asNotificationPublic() const noexcept
+        -> const crypto::Notification&;
+    virtual auto asImported() const noexcept -> const internal::Imported&;
+    virtual auto asImportedPublic() const noexcept -> const crypto::Imported&;
+    virtual auto BalanceElement(const Subchain type, const Bip32Index index)
+        const noexcept(false) -> const crypto::Element&;
+    virtual auto DisplayName() const noexcept -> std::string_view;
+    virtual auto DisplayType() const noexcept -> SubaccountType
     {
-        return const_cast<Subaccount&>(*this);
+        return Type();
     }
-    auto IsValid() const noexcept -> bool override;
-    auto Parent() const noexcept -> const crypto::Account& override;
+    virtual auto Describe() const noexcept -> std::string_view;
+    virtual auto ID() const noexcept -> const identifier::Account&;
+    virtual auto IsValid() const noexcept -> bool;
+    virtual auto Parent() const noexcept -> const crypto::Account&;
     virtual auto PrivateKey(
         const implementation::Element& element,
         const Subchain type,
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
-    auto ScanProgress(Subchain subchain) const noexcept
-        -> block::Position override;
-    auto Type() const noexcept -> SubaccountType override;
+    virtual auto Self() const noexcept -> const crypto::Subaccount&;
+    virtual auto ScanProgress(Subchain subchain) const noexcept
+        -> block::Position;
+    virtual auto Source() const noexcept -> const identifier::Generic&;
+    virtual auto SourceDescription() const noexcept -> std::string_view;
+    virtual auto Type() const noexcept -> SubaccountType;
 
+    virtual auto asDeterministic() noexcept -> internal::Deterministic&;
+    virtual auto asDeterministicPublic() noexcept -> crypto::Deterministic&;
+    virtual auto asNotification() noexcept -> internal::Notification&;
+    virtual auto asNotificationPublic() noexcept -> crypto::Notification&;
+    virtual auto asImported() noexcept -> internal::Imported&;
+    virtual auto asImportedPublic() noexcept -> crypto::Imported&;
     virtual auto Confirm(
         const Subchain type,
         const Bip32Index index,
         const block::TransactionHash& tx) noexcept -> bool;
+    virtual auto InitSelf(std::shared_ptr<Subaccount> me) noexcept -> void;
+    virtual auto Self() noexcept -> crypto::Subaccount&;
     virtual auto SetContact(
         const Subchain type,
         const Bip32Index index,
@@ -105,5 +141,13 @@ struct Subaccount : virtual public crypto::Subaccount {
         const Time time) noexcept -> bool;
     virtual auto Unreserve(const Subchain type, const Bip32Index index) noexcept
         -> bool;
+
+    Subaccount() = default;
+    Subaccount(const Subaccount&) = delete;
+    Subaccount(Subaccount&&) = delete;
+    auto operator=(const Subaccount&) -> Subaccount& = delete;
+    auto operator=(Subaccount&&) -> Subaccount& = delete;
+
+    virtual ~Subaccount() = default;
 };
 }  // namespace opentxs::blockchain::crypto::internal

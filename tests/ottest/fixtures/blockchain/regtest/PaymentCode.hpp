@@ -66,11 +66,10 @@ protected:
     auto CheckTXODBAlex() const noexcept -> bool;
     auto CheckTXODBBob() const noexcept -> bool;
 
-    auto ReceiveHD() const noexcept -> const ot::blockchain::crypto::HD&;
-    auto ReceivePC() const noexcept
-        -> const ot::blockchain::crypto::PaymentCode&;
-    auto SendHD() const noexcept -> const ot::blockchain::crypto::HD&;
-    auto SendPC() const noexcept -> const ot::blockchain::crypto::PaymentCode&;
+    auto ReceiveHD() const noexcept -> ot::blockchain::crypto::HD;
+    auto ReceivePC() const noexcept -> ot::blockchain::crypto::PaymentCode;
+    auto SendHD() const noexcept -> ot::blockchain::crypto::HD;
+    auto SendPC() const noexcept -> ot::blockchain::crypto::PaymentCode;
 
     auto Shutdown() noexcept -> void override;
 

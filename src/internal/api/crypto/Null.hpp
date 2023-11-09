@@ -6,8 +6,8 @@
 #pragma once
 
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -199,10 +199,7 @@ public:
         const PasswordPrompt&) const noexcept
         -> const opentxs::blockchain::crypto::PaymentCode& final
     {
-        static const auto blank =
-            opentxs::blockchain::crypto::internal::PaymentCode{};
-
-        return blank;
+        return opentxs::blockchain::crypto::PaymentCode::Blank();
     }
     auto LoadOrCreateSubaccount(
         const identity::Nym&,
@@ -211,10 +208,7 @@ public:
         const PasswordPrompt&) const noexcept
         -> const opentxs::blockchain::crypto::PaymentCode& final
     {
-        static const auto blank =
-            opentxs::blockchain::crypto::internal::PaymentCode{};
-
-        return blank;
+        return opentxs::blockchain::crypto::PaymentCode::Blank();
     }
     auto LoadTransaction(const Txid&) const noexcept
         -> opentxs::blockchain::block::Transaction final

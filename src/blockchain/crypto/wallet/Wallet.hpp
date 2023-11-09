@@ -14,8 +14,10 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
+#include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
+#include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
@@ -69,12 +71,16 @@ public:
     }
     auto size() const noexcept -> std::size_t final;
 
-    auto AddHDNode(
+    auto AddHD(
         const identifier::Nym& nym,
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
-        const PasswordPrompt& reason,
-        identifier::Account& id) noexcept -> bool final;
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
+    auto AddPaymentCode(
+        const opentxs::PaymentCode& local,
+        const opentxs::PaymentCode& remote,
+        const proto::HDPath& path,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
 
     Wallet(
         const api::Session& api,

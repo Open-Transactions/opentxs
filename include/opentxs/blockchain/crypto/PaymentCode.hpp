@@ -6,7 +6,8 @@
 #pragma once
 
 #include <cstddef>
-#include <tuple>
+#include <memory>
+#include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
@@ -20,7 +21,7 @@ namespace crypto
 {
 namespace internal
 {
-struct PaymentCode;
+class Subaccount;
 }  // namespace internal
 }  // namespace crypto
 }  // namespace blockchain
@@ -31,27 +32,27 @@ class PaymentCode;
 
 namespace opentxs::blockchain::crypto
 {
-class OPENTXS_EXPORT PaymentCode : virtual public Deterministic
+class OPENTXS_EXPORT PaymentCode : public Deterministic
 {
 public:
-    virtual auto IncomingNotificationCount() const noexcept -> std::size_t = 0;
-    OPENTXS_NO_EXPORT virtual auto InternalPaymentCode() const noexcept
-        -> internal::PaymentCode& = 0;
-    virtual auto Local() const noexcept -> const opentxs::PaymentCode& = 0;
-    /// returns incoming count, outgoing count
-    virtual auto NotificationCount() const noexcept
-        -> std::pair<std::size_t, std::size_t> = 0;
-    virtual auto OutgoingNotificationCount() const noexcept -> std::size_t = 0;
-    virtual auto Remote() const noexcept -> const opentxs::PaymentCode& = 0;
+    OPENTXS_NO_EXPORT static auto Blank() noexcept -> PaymentCode&;
 
-    PaymentCode(const PaymentCode&) = delete;
-    PaymentCode(PaymentCode&&) = delete;
+    auto IncomingNotificationCount() const noexcept -> std::size_t;
+    auto Local() const noexcept -> const opentxs::PaymentCode&;
+    /// returns incoming count, outgoing count
+    auto NotificationCount() const noexcept
+        -> std::pair<std::size_t, std::size_t>;
+    auto OutgoingNotificationCount() const noexcept -> std::size_t;
+    auto Remote() const noexcept -> const opentxs::PaymentCode&;
+
+    OPENTXS_NO_EXPORT PaymentCode(
+        std::shared_ptr<internal::Subaccount> imp) noexcept;
+    PaymentCode() = delete;
+    PaymentCode(const PaymentCode& rhs) noexcept;
+    PaymentCode(PaymentCode&& rhs) noexcept;
     auto operator=(const PaymentCode&) -> PaymentCode& = delete;
     auto operator=(PaymentCode&&) -> PaymentCode& = delete;
 
-    OPENTXS_NO_EXPORT ~PaymentCode() override = default;
-
-protected:
-    PaymentCode() noexcept = default;
+    ~PaymentCode() override;
 };
 }  // namespace opentxs::blockchain::crypto

@@ -59,6 +59,7 @@ enum class Subchain : std::uint8_t;         // IWYU pragma: export
 /// subaccount id, chain, index
 using Key = std::tuple<identifier::Account, Subchain, Bip32Index>;
 using Target = std::variant<blockchain::Type, token::Descriptor>;
+using Batch = Vector<Bip32Index>;
 
 OPENTXS_EXPORT auto base_chain(const Target&) noexcept -> blockchain::Type;
 OPENTXS_EXPORT auto is_notification(Subchain) noexcept -> bool;

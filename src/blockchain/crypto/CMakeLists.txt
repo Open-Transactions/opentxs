@@ -4,51 +4,20 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(account)
+add_subdirectory(element)
+add_subdirectory(subaccount)
+add_subdirectory(wallet)
 
 libopentxs_add_public_header("blockchain/crypto" "AddressStyle.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Deterministic.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Element.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Ethereum.hpp")
-libopentxs_add_public_header("blockchain/crypto" "HD.hpp")
 libopentxs_add_public_header("blockchain/crypto" "HDProtocol.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Imported.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Notification.hpp")
-libopentxs_add_public_header("blockchain/crypto" "PaymentCode.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Subaccount.hpp")
 libopentxs_add_public_header("blockchain/crypto" "SubaccountType.hpp")
 libopentxs_add_public_header("blockchain/crypto" "Subchain.hpp")
 libopentxs_add_public_header("blockchain/crypto" "Types.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Wallet.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Deterministic.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Element.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/HD.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Imported.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Notification.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/PaymentCode.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Subaccount.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Wallet.hpp"
     "Crypto.cpp"
-    "Deterministic.cpp"
-    "Deterministic.hpp"
-    "DeterministicInternal.cpp"
-    "Element.cpp"
-    "Element.hpp"
-    "HD.cpp"
-    "HD.hpp"
     "Internal.cpp"
-    "Notification.cpp"
-    "Notification.hpp"
-    "PaymentCode.cpp"
-    "PaymentCode.hpp"
-    "PaymentCodeInternal.cpp"
-    "Subaccount.cpp"
-    "Subaccount.hpp"
-    "SubaccountInternal.cpp"
-    "Wallet.cpp"
-    "Wallet.hpp"
 )

@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "blockchain/crypto/Subaccount.hpp"  // IWYU pragma: associated
+#include "blockchain/crypto/subaccount/base/Imp.hpp"  // IWYU pragma: associated
 
 #include <BlockchainAccountData.pb.h>
 #include <sstream>
@@ -11,12 +11,10 @@
 #include <utility>
 
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -27,52 +25,78 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::blockchain::crypto::implementation
+namespace opentxs::blockchain::crypto
 {
 using namespace std::literals;
 
-Subaccount::Subaccount(
+SubaccountPrivate::SubaccountPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Account&& id,
+    const identifier::Account& id,
     const Revision revision,
-    identifier::Account& out) noexcept
+    identifier::Generic source,
+    std::string_view sourceName,
+    std::string_view name) noexcept
     : api_(api)
     , parent_(parent)
     , target_(parent_.Target())
     , type_(type)
-    , id_(std::move(id))
+    , id_(id)
+    , source_(std::move(source))
+    , source_description_(sourceName)
+    , display_name_(name)
     , description_(describe(api_, target_, type_, id_))
     , lock_()
     , revision_(revision)
 {
-    out = id_;
+    const auto rc = api_.Crypto().Blockchain().Internal().RegisterSubaccount(
+        type_,
+        base_chain(target_),  // TODO
+        parent_.NymID(),
+        parent_.AccountID(),
+        id_);
+    assert_true(rc);
 }
 
-Subaccount::Subaccount(
+SubaccountPrivate::SubaccountPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const SubaccountType type,
-    identifier::Account&& id,
-    identifier::Account& out) noexcept
-    : Subaccount(api, parent, type, std::move(id), 0, out)
-{
-}
-
-Subaccount::Subaccount(
-    const api::Session& api,
-    const crypto::Account& parent,
-    const SubaccountType type,
-    const SerializedType& serialized,
-    identifier::Account& out) noexcept(false)
-    : Subaccount(
+    const identifier::Account& id,
+    identifier::Generic source,
+    std::string_view sourceName,
+    std::string_view name) noexcept
+    : SubaccountPrivate(
           api,
           parent,
           type,
-          api.Factory().AccountIDFromBase58(serialized.id()),
+          id,
+          0,
+          std::move(source),
+          sourceName,
+          name)
+{
+}
+
+SubaccountPrivate::SubaccountPrivate(
+    const api::Session& api,
+    const crypto::Account& parent,
+    const SubaccountType type,
+    const identifier::Account& id,
+    identifier::Generic source,
+    std::string_view sourceName,
+    std::string_view name,
+    const SerializedType& serialized) noexcept(false)
+    : SubaccountPrivate(
+          api,
+          parent,
+          type,
+          id,
           serialized.revision(),
-          out)
+          std::move(source),
+          sourceName,
+          name)
 {
     const auto expected = target_to_unit(target_);
 
@@ -81,7 +105,7 @@ Subaccount::Subaccount(
     }
 }
 
-Subaccount::AddressData::AddressData(
+SubaccountPrivate::AddressData::AddressData(
     const api::Session& api,
     Subchain type,
     bool contact) noexcept
@@ -92,7 +116,7 @@ Subaccount::AddressData::AddressData(
 {
 }
 
-auto Subaccount::AddressData::check_keys() const noexcept -> bool
+auto SubaccountPrivate::AddressData::check_keys() const noexcept -> bool
 {
     auto counter{-1};
 
@@ -108,7 +132,7 @@ auto Subaccount::AddressData::check_keys() const noexcept -> bool
     return true;
 }
 
-auto Subaccount::Confirm(
+auto SubaccountPrivate::Confirm(
     const Subchain type,
     const Bip32Index index,
     const block::TransactionHash& tx) noexcept -> bool
@@ -133,7 +157,7 @@ auto Subaccount::Confirm(
     }
 }
 
-auto Subaccount::describe(
+auto SubaccountPrivate::describe(
     const api::Session& api,
     const crypto::Target target,
     const SubaccountType type,
@@ -149,23 +173,16 @@ auto Subaccount::describe(
     return CString{} + out.str().c_str();
 }
 
-auto Subaccount::init(bool existing) noexcept(false) -> void
+auto SubaccountPrivate::init(bool existing) noexcept(false) -> void
 {
     using opentxs::blockchain::is_supported;
 
     if (existing && (false == is_supported(base_chain(target_)))) {
         existing = false;
     }
-
-    if (false == parent_.Internal().ClaimAccountID(id_, existing, this)) {
-        throw std::runtime_error{
-            "unable to claim subaccount id "s
-                .append(id_.asBase58(api_.Crypto()))
-                .append(" apparently due to an id collision")};
-    }
 }
 
-auto Subaccount::PrivateKey(
+auto SubaccountPrivate::PrivateKey(
     const implementation::Element& element,
     const Subchain type,
     const Bip32Index index,
@@ -177,14 +194,15 @@ auto Subaccount::PrivateKey(
     return blank;
 }
 
-auto Subaccount::ScanProgress(Subchain type) const noexcept -> block::Position
+auto SubaccountPrivate::ScanProgress(Subchain type) const noexcept
+    -> block::Position
 {
     static const auto blank = block::Position{-1, block::Hash{}};
 
     return blank;
 }
 
-auto Subaccount::serialize_common(
+auto SubaccountPrivate::serialize_common(
     const rLock&,
     proto::BlockchainAccountData& out) const noexcept -> void
 {
@@ -194,7 +212,7 @@ auto Subaccount::serialize_common(
     out.set_chain(translate(UnitToClaim(target_to_unit(target_))));
 }
 
-auto Subaccount::SetContact(
+auto SubaccountPrivate::SetContact(
     const Subchain type,
     const Bip32Index index,
     const identifier::Generic& id) noexcept(false) -> bool
@@ -211,7 +229,7 @@ auto Subaccount::SetContact(
     }
 }
 
-auto Subaccount::SetLabel(
+auto SubaccountPrivate::SetLabel(
     const Subchain type,
     const Bip32Index index,
     const std::string_view label) noexcept(false) -> bool
@@ -228,7 +246,7 @@ auto Subaccount::SetLabel(
     }
 }
 
-auto Subaccount::Unconfirm(
+auto SubaccountPrivate::Unconfirm(
     const Subchain type,
     const Bip32Index index,
     const block::TransactionHash& tx,
@@ -252,8 +270,9 @@ auto Subaccount::Unconfirm(
     }
 }
 
-auto Subaccount::Unreserve(const Subchain type, const Bip32Index index) noexcept
-    -> bool
+auto SubaccountPrivate::Unreserve(
+    const Subchain type,
+    const Bip32Index index) noexcept -> bool
 {
     auto lock = rLock{lock_};
 
@@ -272,11 +291,11 @@ auto Subaccount::Unreserve(const Subchain type, const Bip32Index index) noexcept
     }
 }
 
-auto Subaccount::UpdateElement(
+auto SubaccountPrivate::UpdateElement(
     UnallocatedVector<ReadView>& pubkeyHashes) const noexcept -> void
 {
     parent_.Parent().Parent().Internal().UpdateElement(pubkeyHashes);
 }
 
-Subaccount::~Subaccount() = default;
-}  // namespace opentxs::blockchain::crypto::implementation
+SubaccountPrivate::~SubaccountPrivate() = default;
+}  // namespace opentxs::blockchain::crypto

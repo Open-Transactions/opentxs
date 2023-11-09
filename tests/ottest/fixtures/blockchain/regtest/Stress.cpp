@@ -36,11 +36,12 @@ auto Regtest_stress::GetAddresses() noexcept
     auto output = ot::UnallocatedVector<ot::UnallocatedCString>{};
     output.reserve(tx_per_block_);
     const auto reason = client_2_.Factory().PasswordPrompt(__func__);
-    const auto& bob = client_2_.Crypto()
-                          .Blockchain()
-                          .Account(bob_.ID(), test_chain_)
-                          .GetHD()
-                          .at(0);
+    using enum opentxs::blockchain::crypto::SubaccountType;
+    auto hd = client_2_.Crypto()
+                  .Blockchain()
+                  .Account(bob_.ID(), test_chain_)
+                  .GetSubaccounts(HD);
+    auto& bob = hd[0].asDeterministic().asHD();
     const auto indices = bob.Reserve(Subchain::External, tx_per_block_, reason);
 
     opentxs::assert_true(indices.size() == tx_per_block_);
@@ -143,13 +144,17 @@ Regtest_stress::Regtest_stress()
     , alex_account_(client_1_.Crypto()
                         .Blockchain()
                         .Account(alex_.ID(), test_chain_)
-                        .GetHD()
-                        .at(0))
+                        .GetSubaccounts(
+                            opentxs::blockchain::crypto::SubaccountType::HD)[0]
+                        .asDeterministic()
+                        .asHD())
     , bob_account_(client_2_.Crypto()
                        .Blockchain()
                        .Account(bob_.ID(), test_chain_)
-                       .GetHD()
-                       .at(0))
+                       .GetSubaccounts(
+                           opentxs::blockchain::crypto::SubaccountType::HD)[0]
+                       .asDeterministic()
+                       .asHD())
     , expected_account_alex_(alex_account_.Parent().AccountID())
     , expected_account_bob_(bob_account_.Parent().AccountID())
     , expected_notary_(client_1_.UI().BlockchainNotaryID(test_chain_))
