@@ -122,7 +122,7 @@ endif()
 if(OT_STORAGE_LMDB)
   if(OT_USE_VCPKG_TARGETS)
     find_package(
-      lmdb
+      unofficial-lmdb
       CONFIG
       REQUIRED
     )
