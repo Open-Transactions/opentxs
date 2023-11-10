@@ -4,9 +4,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 
 #include <ContactItemType.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
@@ -480,7 +481,7 @@ TEST_F(NymData, SocialMediaProfiles)
 
 TEST_F(NymData, SocialMediaProfileTypes)
 {
-    ankerl::unordered_dense::set<ot::proto::ContactItemType> profileTypes =
+    auto profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
             opentxs::CONTACT_CONTACT_DATA_VERSION,
             translate(ot::identity::wot::claim::SectionType::Profile)));

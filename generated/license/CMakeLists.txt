@@ -83,15 +83,6 @@ otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/frozen/LICENSE" "FROZEN_HEX")
-otcommon_file_to_hex(
-  "${opentxs_SOURCE_DIR}/deps/unordered_dense/LICENSE" "ANKERL_HEX"
-)
-
-configure_file(
-  "ankerl.cpp.in"
-  "${opentxs_BINARY_DIR}/src/util/license/ankerl.cpp"
-  @ONLY
-)
 
 configure_file(
   "argon.cpp.in"

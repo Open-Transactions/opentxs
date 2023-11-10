@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -63,8 +63,12 @@ using InputMatches = Vector<InputMatch>;
 using OutputMatches = Vector<Match>;
 using Matches = std::pair<InputMatches, OutputMatches>;
 using KeyData = Map<crypto::Key, std::pair<ContactID, ContactID>>;
-using TxidIndex =
-    ankerl::unordered_dense::pmr::map<TransactionHash, std::size_t>;
+using TxidIndex = boost::unordered_flat_map<
+    TransactionHash,
+    std::size_t,
+    std::hash<TransactionHash>,
+    std::equal_to<TransactionHash>,
+    alloc::PMR<std::pair<const TransactionHash, std::size_t>>>;
 using TransactionMap = Vector<Transaction>;
 
 struct ParsedPatterns final : Allocated {

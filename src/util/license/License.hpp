@@ -11,7 +11,6 @@
 
 namespace opentxs
 {
-auto license_ankerl(LicenseMap& out) noexcept -> void;
 auto license_argon(LicenseMap& out) noexcept -> void;
 auto license_base58(LicenseMap& out) noexcept -> void;
 auto license_base64(LicenseMap& out) noexcept -> void;

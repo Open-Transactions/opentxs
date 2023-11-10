@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_node_map.hpp>
 #include <boost/unordered/unordered_node_set.hpp>
 #include <cs_plain_guarded.h>
@@ -121,7 +121,8 @@ private:
 
     using SubchainIDMap = boost::
         unordered_node_map<SubchainID, db::SubchainID, std::hash<SubchainID>>;
-    using LastIndexedMap = ankerl::unordered_dense::map<SubchainID, Bip32Index>;
+    using LastIndexedMap = boost::
+        unordered_flat_map<SubchainID, Bip32Index, std::hash<SubchainID>>;
     using LastScannedMap = boost::
         unordered_node_map<SubchainID, db::Position, std::hash<SubchainID>>;
     using PatternsMap =

@@ -7,7 +7,7 @@
 
 #include <ContactSectionName.pb.h>
 #include <CreateInstrumentDefinition.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

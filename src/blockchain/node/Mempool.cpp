@@ -3,9 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "blockchain/node/Mempool.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <chrono>
 #include <compare>
 #include <queue>
@@ -188,8 +190,10 @@ struct Mempool::Imp {
     }
 
 private:
-    using TransactionMap = ankerl::unordered_dense::
-        map<block::TransactionHash, block::Transaction>;
+    using TransactionMap = boost::unordered_flat_map<
+        block::TransactionHash,
+        block::Transaction,
+        std::hash<block::TransactionHash>>;
     using Data = std::pair<sTime, block::TransactionHash>;
     using Cache = std::queue<Data>;
 

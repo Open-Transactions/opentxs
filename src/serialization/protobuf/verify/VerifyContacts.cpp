@@ -4,12 +4,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"  // IWYU pragma: associated
 
 #include <ContactItemAttribute.pb.h>
 #include <ContactItemType.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <functional>
 #include <iterator>
 #include <ranges>
@@ -196,10 +198,9 @@ auto ValidContactSectionName(
     const std::uint32_t version,
     const ContactSectionName name) -> bool
 {
-    ankerl::unordered_dense::set<ContactSectionName> allowedNames =
-        AllowedSectionNames().at(version);
-
     try {
+        const auto& allowedNames = AllowedSectionNames().at(version);
+
         return (std::ranges::find(allowedNames, name) != allowedNames.end());
     } catch (const std::out_of_range&) {
         return false;
@@ -210,10 +211,9 @@ auto ValidContactItemType(
     const ContactSectionVersion version,
     const ContactItemType itemType) -> bool
 {
-    ankerl::unordered_dense::set<ContactItemType> allowedTypes =
-        AllowedItemTypes().at(version);
-
     try {
+        const auto& allowedTypes = AllowedItemTypes().at(version);
+
         return (
             std::ranges::find(allowedTypes, itemType) != allowedTypes.end());
     } catch (const std::out_of_range&) {

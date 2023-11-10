@@ -9,9 +9,10 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
+#include <boost/unordered/unordered_node_map.hpp>
+#include <boost/unordered/unordered_node_set.hpp>
 #include <functional>
 #include <utility>
 
@@ -78,9 +79,9 @@ template <typename Value>
 using FlatSet =
     boost::container::flat_set<Value, std::less<Value>, alloc::PMR<Value>>;
 template <typename Key, typename Value>
-using MapType = ankerl::unordered_dense::map<Key, Value>;
+using MapType = boost::unordered_node_map<Key, Value, std::hash<Key>>;
 template <typename Value>
-using SetType = ankerl::unordered_dense::set<Value>;
+using SetType = boost::unordered_node_set<Value, std::hash<Value>>;
 using States = UnallocatedVector<node::TxoState>;
 using Matches = UnallocatedVector<block::Outpoint>;
 using Outpoints = Set<block::Outpoint>;

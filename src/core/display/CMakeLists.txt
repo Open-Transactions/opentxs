@@ -26,6 +26,5 @@ target_link_libraries(opentxs-core-display PRIVATE Boost::headers)
 target_include_directories(
   opentxs-core-display SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
-          "${opentxs_SOURCE_DIR}/deps/unordered_dense/include"
 )
 libopentxs_configure_constexpr_target(opentxs-core-display)

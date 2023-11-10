@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 
 #include "opentxs/identity/wot/claim/Data.hpp"  // IWYU pragma: associated
 
@@ -12,7 +13,7 @@
 #include <ContactItemType.pb.h>
 #include <ContactSection.pb.h>
 #include <ContactSectionName.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <algorithm>
 #include <functional>
 #include <iterator>

@@ -6,7 +6,6 @@
 target_sources(
   opentxs-common
   PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}/ankerl.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/apache.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/argon.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/base58.cpp"

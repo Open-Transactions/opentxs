@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <span>
@@ -27,7 +28,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
@@ -230,10 +230,15 @@ private:
     friend UpdateBlockJob;
     friend UpdateGetHeadersJob;
 
-    using KnownAddresses = ankerl::unordered_dense::pmr::set<std::uint64_t>;
-    using KnownHashes = ankerl::unordered_dense::pmr::set<Txid>;
-    using KnownBlocks =
-        ankerl::unordered_dense::pmr::set<opentxs::blockchain::block::Hash>;
+    template <typename Key>
+    using FlatSet = boost::unordered_flat_set<
+        Key,
+        std::hash<Key>,
+        std::equal_to<Key>,
+        alloc::PMR<Key>>;
+    using KnownAddresses = FlatSet<std::uint64_t>;
+    using KnownHashes = FlatSet<Txid>;
+    using KnownBlocks = FlatSet<opentxs::blockchain::block::Hash>;
     using Job = std::variant<
         std::monostate,
         opentxs::blockchain::node::internal::HeaderJob,

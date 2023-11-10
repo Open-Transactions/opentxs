@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <cs_deferred_guarded.h>
 #include <atomic>
 #include <cstddef>
@@ -139,7 +139,12 @@ private:
     mutable GuardedSocket to_internal_;  // NOTE activated by Push()
     internal::Thread* thread_;
     std::span<socket::Raw> extra_;
-    const ankerl::unordered_dense::pmr::set<std::size_t> external_;
+    const boost::unordered_flat_set<
+        std::size_t,
+        std::hash<std::size_t>,
+        std::equal_to<std::size_t>,
+        alloc::PMR<std::size_t>>
+        external_;
 
     static auto apply(
         const socket::EndpointRequests& endpoint,

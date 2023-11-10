@@ -3,11 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "opentxs/core/Contact.hpp"  // IWYU pragma: associated
 
 #include <Contact.pb.h>
 #include <ContactItem.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <frozen/bits/algorithms.h>
+#include <frozen/unordered_map.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -55,7 +60,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "util/Container.hpp"
 
 #define ID_BYTES 32
 
@@ -66,49 +70,59 @@ constexpr auto OT_CONTACT_VERSION = 3;
 
 namespace opentxs
 {
-const ankerl::unordered_dense::
-    map<blockchain::crypto::AddressStyle, UnallocatedCString>
-        address_style_map_{
-            {blockchain::crypto::AddressStyle::p2pkh,
-             std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::p2pkh))},
-            {blockchain::crypto::AddressStyle::p2sh,
-             std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::p2sh))},
-            {blockchain::crypto::AddressStyle::p2wpkh,
-             std::to_string(
-                 static_cast<int>(blockchain::crypto::AddressStyle::p2wpkh))},
-        };
-const ankerl::unordered_dense::
-    map<UnallocatedCString, blockchain::crypto::AddressStyle>
-        address_style_reverse_map_{opentxs::reverse_map(address_style_map_)};
+using namespace std::literals;
 
-auto translate_style(const UnallocatedCString& in) noexcept
-    -> blockchain::crypto::AddressStyle;
-auto translate_style(const UnallocatedCString& in) noexcept
+static constexpr auto style_to_string_ = [] {
+    using enum blockchain::crypto::AddressStyle;
+
+    return frozen::
+        make_unordered_map<blockchain::crypto::AddressStyle, std::string_view>({
+            {p2pkh, "1"sv},
+            {p2sh, "2"sv},
+            {p2wpkh, "3"sv},
+            {p2wsh, "4"sv},
+            {p2tr, "5"sv},
+            {ethereum_account, "6"sv},
+        });
+}();
+static const auto string_to_style_ = [] {
+    auto out = boost::unordered_flat_map<
+        std::string_view,
+        blockchain::crypto::AddressStyle>{};
+    out.reserve(style_to_string_.size());
+
+    for (const auto& [key, value] : style_to_string_) {
+        out.try_emplace(value, key);
+    }
+
+    return out;
+}();
+
+static auto translate_style(std::string_view in) noexcept
     -> blockchain::crypto::AddressStyle
 {
-    try {
+    const auto& map = string_to_style_;
 
-        return address_style_reverse_map_.at(in);
-    } catch (...) {
+    if (const auto i = map.find(in); map.end() != i) {
+
+        return i->second;
+    } else {
 
         return blockchain::crypto::AddressStyle::unknown_address_style;
     }
 }
 
-auto translate_style(const blockchain::crypto::AddressStyle& in) noexcept
-    -> UnallocatedCString;
-auto translate_style(const blockchain::crypto::AddressStyle& in) noexcept
-    -> UnallocatedCString
+static auto translate_style(const blockchain::crypto::AddressStyle& in) noexcept
+    -> std::string_view
 {
-    try {
+    const auto& map = style_to_string_;
 
-        return address_style_map_.at(in);
-    } catch (...) {
+    if (const auto* i = map.find(in); map.end() != i) {
 
-        return std::to_string(static_cast<int>(
-            blockchain::crypto::AddressStyle::unknown_address_style));
+        return i->second;
+    } else {
+
+        return "0"sv;
     }
 }
 
@@ -583,7 +597,7 @@ auto Contact::AddBlockchainAddress(
          identity::wot::claim::Attribute::Active},
         {},
         {},
-        translate_style(style)));
+        UnallocatedCString{translate_style(style)}));
 
     return imp_->add_claim(lock, claim);
 }

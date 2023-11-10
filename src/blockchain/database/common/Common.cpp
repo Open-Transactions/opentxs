@@ -3,9 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "internal/blockchain/database/common/Common.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <span>
 
 #include "opentxs/blockchain/Types.hpp"
@@ -15,7 +18,7 @@ namespace opentxs::blockchain::database::common
 {
 constexpr auto sync_map_ = [] {
     constexpr auto offset{65536};
-    auto map = ankerl::unordered_dense::map<Chain, SyncTableData>{};
+    auto map = boost::unordered_flat_map<Chain, SyncTableData>{};
 
     for (const auto& chain : opentxs::blockchain::defined_chains()) {
         auto& [table, name] = map[chain];

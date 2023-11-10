@@ -13,7 +13,6 @@ auto LicenseData() noexcept -> const LicenseMap&
 {
     static const auto map = [] {
         auto out = LicenseMap{};
-        license_ankerl(out);
         license_argon(out);
         license_base58(out);
         license_base64(out);

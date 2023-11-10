@@ -5,7 +5,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
@@ -459,7 +459,7 @@ auto GetCommand(const ReadView bytes) noexcept -> Command
     static const auto map = reverse_arbitrary_map<
         Command,
         std::string_view,
-        ankerl::unordered_dense::map<std::string_view, Command>>(command_map_);
+        boost::unordered_flat_map<std::string_view, Command>>(command_map_);
 
     try {
         const UnallocatedCString raw{

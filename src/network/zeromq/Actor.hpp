@@ -7,16 +7,19 @@
 
 #include "util/Actor.hpp"
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <span>
 #include <string_view>
+#include <utility>
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -83,8 +86,12 @@ public:
 private:
     friend opentxs::Actor<zeromq::Actor, OTZMQWorkType>;
 
-    using IDMap =
-        ankerl::unordered_dense::pmr::map<SocketID, actor::SocketIndex>;
+    using IDMap = boost::unordered_flat_map<
+        SocketID,
+        actor::SocketIndex,
+        std::hash<SocketID>,
+        std::equal_to<SocketID>,
+        alloc::PMR<std::pair<const SocketID, actor::SocketIndex>>>;
 
     static constexpr auto fixed_ = 4_uz;
 
