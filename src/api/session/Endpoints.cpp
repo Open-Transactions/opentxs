@@ -4,6 +4,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::api::session::Endpoints
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 
 #include "api/session/Endpoints.hpp"  // IWYU pragma: associated
 

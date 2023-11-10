@@ -16,7 +16,6 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/Data.hpp"
 
 namespace opentxs::blockchain::block::implementation
 {

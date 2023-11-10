@@ -3,9 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "opentxs/core/display/Definition.hpp"  // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <array>  // IWYU pragma: keep
 #include <memory>
 #include <optional>
@@ -51,7 +54,7 @@ auto GetDefinition(UnitType in) noexcept -> const Definition&
     //
     // Revisit this after XCode 15 and NDK-26 are officially released.
     // const auto map = frozen::make_unordered_map<UnitType, Definition>({
-    static const auto map = ankerl::unordered_dense::map<UnitType, Definition>{
+    static const auto map = boost::unordered_flat_map<UnitType, Definition>{
 #include "core/display/data/defs"  // IWYU pragma: keep
     };
 

@@ -6,7 +6,6 @@
 #include "opentxs/interface/rpc/request/Base.hpp"  // IWYU pragma: associated
 
 #include <RPCCommand.pb.h>
-#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <stdexcept>

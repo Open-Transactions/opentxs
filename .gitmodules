@@ -26,10 +26,6 @@
 	path = deps/bech32
 	url = https://github.com/sipa/bech32
 	shallow = true
-[submodule "deps/robin-hood"]
-	path = deps/robin-hood
-	url = https://github.com/martinus/robin-hood-hashing
-	shallow = true
 [submodule "deps/packetcrypt/packetcrypt_rs"]
 	path = deps/packetcrypt/packetcrypt_rs
 	url = https://github.com/cjdelisle/packetcrypt_rs
@@ -53,10 +49,6 @@
 [submodule "deps/vcpkg-overlay"]
 	path = deps/vcpkg-overlay
 	url = https://github.com/Open-Transactions/vcpkg-overlay
-	shallow = true
-[submodule "deps/unordered_dense"]
-	path = deps/unordered_dense
-	url = https://github.com/martinus/unordered_dense
 	shallow = true
 [submodule "tests/ottest/data/blockchain/cashtoken"]
 	path = tests/ottest/data/blockchain/cashtoken

@@ -3,14 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/container_hash/hash.hpp>
+
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <frozen/unordered_map.h>
 #include <cstdint>
 #include <cstring>
-#include <string_view>
 #include <utility>
+#include <variant>
 
 #include "opentxs/util/Container.hpp"
 
@@ -28,8 +31,8 @@ enum ContactSectionName : int;
 
 namespace opentxs::proto
 {
-using ContactSectionVersion = std::pair<uint32_t, ContactSectionName>;
-using EnumLang = std::pair<uint32_t, UnallocatedCString>;
+using ContactSectionVersion = std::pair<std::uint32_t, ContactSectionName>;
+using EnumLang = std::pair<std::uint32_t, UnallocatedCString>;
 }  // namespace opentxs::proto
 
 namespace std
@@ -52,18 +55,20 @@ struct hash<opentxs::proto::EnumLang> {
 namespace opentxs::proto
 {
 // A map of allowed section names by ContactData version
-using ContactSectionMap = ankerl::unordered_dense::
-    map<uint32_t, ankerl::unordered_dense::set<ContactSectionName>>;
+using ContactSectionMap = boost::unordered_flat_map<
+    std::uint32_t,
+    boost::unordered_flat_set<ContactSectionName>>;
 
 // A map of allowed item types by ContactSection version
-using ContactItemMap = ankerl::unordered_dense::
-    map<ContactSectionVersion, ankerl::unordered_dense::set<ContactItemType>>;
+using ContactItemMap = boost::unordered_flat_map<
+    ContactSectionVersion,
+    boost::unordered_flat_set<ContactItemType>>;
 // A map of allowed item attributes by ContactItem version
-using ItemAttributeMap = ankerl::unordered_dense::
-    map<uint32_t, ankerl::unordered_dense::set<ContactItemAttribute>>;
+using ItemAttributeMap = boost::unordered_flat_map<
+    std::uint32_t,
+    boost::unordered_flat_set<ContactItemAttribute>>;
 // Maps for converting enum values to human-readable names
-using EnumTranslation =
-    ankerl::unordered_dense::map<EnumLang, UnallocatedCString>;
+using EnumTranslation = boost::unordered_flat_map<EnumLang, UnallocatedCString>;
 // A map for storing relationship reciprocities
 static constexpr auto RelationshipReciprocityMapSize = std::size_t{19};
 using RelationshipReciprocity = frozen::unordered_map<

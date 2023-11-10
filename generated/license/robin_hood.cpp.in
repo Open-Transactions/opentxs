@@ -3,17 +3,3 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "util/license/License.hpp"  // IWYU pragma: associated
-
-namespace opentxs
-{
-auto license_robin_hood(LicenseMap& out) noexcept -> void
-{
-    static constexpr unsigned char bytes[] = {
-@ROBIN_HOOD_HEX@
-    };
-    static const std::string_view view{
-        reinterpret_cast<const char*>(bytes), sizeof(bytes)};
-    out.emplace("robin_hood_hashing", view);
-}
-}  // namespace opentxs

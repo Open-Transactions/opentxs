@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_node_map.hpp>
+#include <boost/unordered/unordered_node_set.hpp>
 #include <cs_plain_guarded.h>
-#include <robin_hood.h>
 #include <functional>
 #include <optional>
 
@@ -20,6 +21,9 @@
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -67,7 +71,8 @@ constexpr auto subchain_config_{Table::Config};
 class SubchainCache
 {
 public:
-    using dbPatterns = robin_hood::unordered_node_set<db::Pattern>;
+    using dbPatterns =
+        boost::unordered_node_set<db::Pattern, std::hash<db::Pattern>>;
     using dbPatternIndex = Set<ElementID>;
 
     auto DecodeIndex(const SubchainID& key) const noexcept(false)
@@ -114,14 +119,16 @@ public:
 private:
     static constexpr auto reserve_ = 1000_uz;
 
-    using SubchainIDMap =
-        robin_hood::unordered_node_map<SubchainID, db::SubchainID>;
-    using LastIndexedMap = ankerl::unordered_dense::map<SubchainID, Bip32Index>;
-    using LastScannedMap =
-        robin_hood::unordered_node_map<SubchainID, db::Position>;
-    using PatternsMap = robin_hood::unordered_node_map<ElementID, dbPatterns>;
-    using PatternIndexMap =
-        robin_hood::unordered_node_map<SubchainID, dbPatternIndex>;
+    using SubchainIDMap = boost::
+        unordered_node_map<SubchainID, db::SubchainID, std::hash<SubchainID>>;
+    using LastIndexedMap = boost::
+        unordered_flat_map<SubchainID, Bip32Index, std::hash<SubchainID>>;
+    using LastScannedMap = boost::
+        unordered_node_map<SubchainID, db::Position, std::hash<SubchainID>>;
+    using PatternsMap =
+        boost::unordered_node_map<ElementID, dbPatterns, std::hash<ElementID>>;
+    using PatternIndexMap = boost::
+        unordered_node_map<SubchainID, dbPatternIndex, std::hash<SubchainID>>;
     using GuardedSubchainID = libguarded::plain_guarded<SubchainIDMap>;
     using GuardedLastIndexed = libguarded::plain_guarded<LastIndexedMap>;
     using GuardedLastScanned = libguarded::plain_guarded<LastScannedMap>;

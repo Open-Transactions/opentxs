@@ -3,14 +3,17 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 #include "opentxs/blockchain/Blockchain.hpp"   // IWYU pragma: associated
 #include "opentxs/blockchain/Types.hpp"        // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
 #include <boost/container/flat_map.hpp>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/vector.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -39,7 +42,7 @@ namespace opentxs
 auto unit_to_blockchain(const UnitType type) noexcept -> blockchain::Type
 {
     static const auto map = [] {
-        auto out = ankerl::unordered_dense::map<UnitType, blockchain::Type>{};
+        auto out = boost::unordered_flat_map<UnitType, blockchain::Type>{};
 
         for (const auto chain : blockchain::defined_chains()) {
             out.emplace(blockchain::params::get(chain).CurrencyType(), chain);

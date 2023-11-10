@@ -5,13 +5,15 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <cs_plain_guarded.h>
 #include <functional>
 #include <string_view>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -106,9 +108,11 @@ public:
 
 private:
     using BlockchainMap =
-        ankerl::unordered_dense::map<opentxs::blockchain::Type, CString>;
-    using BlockchainTransactionsMap =
-        ankerl::unordered_dense::map<identifier::Nym, CString>;
+        boost::unordered_flat_map<opentxs::blockchain::Type, CString>;
+    using BlockchainTransactionsMap = boost::unordered_flat_map<
+        identifier::Nym,
+        CString,
+        std::hash<identifier::Nym>>;
     using ThreadMap = Map<CString, CString>;
 
     static constexpr auto version_1_{1};

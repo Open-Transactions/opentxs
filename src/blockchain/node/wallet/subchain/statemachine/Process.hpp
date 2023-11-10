@@ -7,7 +7,7 @@
 
 #include "internal/blockchain/node/wallet/subchain/statemachine/Process.hpp"
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_set.hpp>
 #include <cstddef>
 #include <memory>
 #include <span>
@@ -19,7 +19,6 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/JobCounter.hpp"
@@ -98,7 +97,10 @@ private:
     DownloadIndex downloading_index_;
     Ready ready_;
     Ready processing_;
-    ankerl::unordered_dense::set<block::TransactionHash> txid_cache_;
+    boost::unordered_flat_set<
+        block::TransactionHash,
+        std::hash<block::TransactionHash>>
+        txid_cache_;
     JobCounter counter_;
     Outstanding running_;
 

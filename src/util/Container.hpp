@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
-#include <robin_hood.h>
+#include <algorithm>
 #include <ranges>
 #include <span>
 
@@ -115,17 +114,6 @@ auto reverse_map(const UnallocatedMap<Key, Value>& map) noexcept
     -> UnallocatedMap<Value, Key>
 {
     return reverse_arbitrary_map<Key, Value>(map);
-}
-
-template <typename Key, typename Value>
-auto reverse_map(const ankerl::unordered_dense::map<Key, Value>& map) noexcept
-    -> ankerl::unordered_dense::map<Value, Key>
-{
-    return reverse_arbitrary_map<
-        Key,
-        Value,
-        ankerl::unordered_dense::map<Value, Key>,
-        ankerl::unordered_dense::map<Key, Value>>(map);
 }
 
 template <typename T>

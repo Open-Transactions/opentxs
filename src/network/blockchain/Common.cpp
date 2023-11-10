@@ -3,11 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "internal/network/blockchain/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/network/blockchain/Types.hpp"   // IWYU pragma: associated
 
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
 #include <boost/endian/conversion.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <span>
@@ -135,7 +138,7 @@ auto decode(const zeromq::Message& in) noexcept -> opentxs::blockchain::Type
     static const auto map = [] {
         using Key = opentxs::blockchain::params::ChainData::ZMQParams;
         using Value = opentxs::blockchain::Type;
-        auto out = ankerl::unordered_dense::map<Key, Value>{};
+        auto out = boost::unordered_flat_map<Key, Value>{};
 
         for (const auto chain : chains()) {
             const auto& data = get(chain);

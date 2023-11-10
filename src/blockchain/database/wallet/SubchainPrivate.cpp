@@ -3,8 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "blockchain/database/wallet/SubchainPrivate.hpp"  // IWYU pragma: associated
 
+#include <boost/unordered/unordered_node_set.hpp>
 #include <algorithm>
 #include <cstring>
 #include <future>

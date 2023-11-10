@@ -3,12 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "internal/core/contract/Contract.hpp"  // IWYU pragma: associated
 
 #include <ContractEnums.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
@@ -112,7 +115,7 @@ auto translate(const proto::UnitType in) noexcept -> contract::UnitType
     static const auto map = [] {
         const auto& unittypes = contract::unit_type_map_;
         auto out =
-            ankerl::unordered_dense::map<proto::UnitType, contract::UnitType>{};
+            boost::unordered_flat_map<proto::UnitType, contract::UnitType>{};
         std::ranges::transform(
             unittypes, std::inserter(out, out.end()), [](const auto& data) {
                 const auto& [key, value] = data;

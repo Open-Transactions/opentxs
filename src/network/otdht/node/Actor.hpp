@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ankerl/unordered_dense.h>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/unordered_set.h>
 #include <array>
 #include <cstddef>
@@ -32,6 +32,7 @@
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 
@@ -110,18 +111,24 @@ private:
     using Connections = Set<RemoteID>;
     using ExternalSocketIndex = std::size_t;
     using BlockchainPeerData = std::tuple<Cookie, LocalID, Queue>;
-    using IncomingBlockchainIndex =
-        ankerl::unordered_dense::pmr::map<RemoteID, BlockchainPeerData>;
-    using PeerManagerIndex = ankerl::unordered_dense::pmr::
-        map<opentxs::blockchain::Type, std::pair<PeerManagerID, Connections>>;
-    using IncomingBlockchainReverseIndex = ankerl::unordered_dense::pmr::
-        map<Cookie, std::pair<RemoteID, ExternalSocketIndex>>;
-    using OutgoingIndex = ankerl::unordered_dense::pmr::
-        map<LocalID, std::tuple<RemoteID, Cookie, ExternalSocketIndex>>;
+    template <typename Key, typename Value>
+    using FlatMap = boost::unordered_flat_map<
+        Key,
+        Value,
+        std::hash<Key>,
+        std::equal_to<Key>,
+        alloc::PMR<std::pair<const Key, Value>>>;
+    using IncomingBlockchainIndex = FlatMap<RemoteID, BlockchainPeerData>;
+    using PeerManagerIndex = FlatMap<
+        opentxs::blockchain::Type,
+        std::pair<PeerManagerID, Connections>>;
+    using IncomingBlockchainReverseIndex =
+        FlatMap<Cookie, std::pair<RemoteID, ExternalSocketIndex>>;
+    using OutgoingIndex =
+        FlatMap<LocalID, std::tuple<RemoteID, Cookie, ExternalSocketIndex>>;
     using ExternalSockets =
         frozen::unordered_set<zeromq::SocketID, external_router_limit_>;
-    using ExternalIndex = ankerl::unordered_dense::pmr::
-        map<zeromq::SocketID, ExternalSocketIndex>;
+    using ExternalIndex = FlatMap<zeromq::SocketID, ExternalSocketIndex>;
 
     std::shared_ptr<const api::Session> api_p_;
     std::shared_ptr<Shared> shared_p_;

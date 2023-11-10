@@ -3,12 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
 #include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
-#include <ankerl/unordered_dense.h>
 #include <boost/container/vector.hpp>
 #include <boost/endian/conversion.hpp>
+#include <boost/unordered/unordered_node_map.hpp>
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>

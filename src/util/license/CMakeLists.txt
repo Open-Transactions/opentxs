@@ -6,7 +6,6 @@
 target_sources(
   opentxs-common
   PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}/ankerl.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/apache.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/argon.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/base58.cpp"
@@ -25,7 +24,6 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/opentxs.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/packetcrypt.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/protobuf.cpp"
-    "${CMAKE_CURRENT_BINARY_DIR}/robin_hood.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/secp256k1.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/simpleini.cpp"
     "${CMAKE_CURRENT_BINARY_DIR}/tbb.cpp"

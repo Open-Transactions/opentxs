@@ -5,10 +5,11 @@
 
 // IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
 
-#include <ankerl/unordered_dense.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_node_map.hpp>
 #include <cs_ordered_guarded.h>
 #include <cs_plain_guarded.h>
-#include <robin_hood.h>
 #include <atomic>
 #include <filesystem>
 #include <functional>
@@ -104,10 +105,10 @@ private:
     using StopMap = Map<BatchID, Set<void*>>;
     using ModifyMap = Map<SocketID, Vector<ModifyCallback>>;
     using Batches =
-        ankerl::unordered_dense::map<BatchID, std::shared_ptr<internal::Batch>>;
-    using BatchIndex = ankerl::unordered_dense::map<BatchID, Vector<SocketID>>;
-    using SocketIndex = ankerl::unordered_dense::
-        map<SocketID, std::pair<BatchID, socket::Raw*>>;
+        boost::unordered_flat_map<BatchID, std::shared_ptr<internal::Batch>>;
+    using BatchIndex = boost::unordered_flat_map<BatchID, Vector<SocketID>>;
+    using SocketIndex =
+        boost::unordered_flat_map<SocketID, std::pair<BatchID, socket::Raw*>>;
     using AllocatorMap = Map<BatchID, alloc::Logging>;
 
     struct Indices {
@@ -129,8 +130,8 @@ private:
     std::atomic<unsigned int> shutdown_counter_;
     std::atomic<bool> running_;
     Gatekeeper gate_;
-    robin_hood::unordered_node_map<unsigned int, ThreadNotifier> notify_;
-    robin_hood::unordered_node_map<unsigned int, context::Thread> threads_;
+    boost::unordered_node_map<unsigned int, ThreadNotifier> notify_;
+    boost::unordered_node_map<unsigned int, context::Thread> threads_;
     libguarded::ordered_guarded<Batches, std::shared_mutex> batches_;
     libguarded::ordered_guarded<Indices, std::shared_mutex> index_;
     libguarded::plain_guarded<StartMap> start_args_;

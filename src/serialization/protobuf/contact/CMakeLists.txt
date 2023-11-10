@@ -16,10 +16,6 @@ add_library(
 )
 target_include_directories(
   opentxs-serialization-protobuf-contact SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/unordered_dense/include"
-)
-target_include_directories(
-  opentxs-serialization-protobuf-contact SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
 )
 target_link_libraries(
