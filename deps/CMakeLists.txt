@@ -253,9 +253,6 @@ libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/")
 libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/cs_libguarded/src")
 libopentxs_include_directories("${opentxs_SOURCE_DIR}/deps/frozen/include")
 libopentxs_include_directories(
-  "${opentxs_SOURCE_DIR}/deps/robin-hood/src/include"
-)
-libopentxs_include_directories(
   "${opentxs_SOURCE_DIR}/deps/unordered_dense/include"
 )
 libopentxs_link_internal(Boost::headers)

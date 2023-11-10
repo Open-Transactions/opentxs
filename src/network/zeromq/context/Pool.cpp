@@ -3,6 +3,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/container_hash/hash.hpp>
+
 #include "network/zeromq/context/Pool.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>  // IWYU pragma: keep

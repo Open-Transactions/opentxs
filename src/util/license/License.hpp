@@ -27,7 +27,6 @@ auto license_matterfi(LicenseMap& out) noexcept -> void;
 auto license_opentxs(LicenseMap& out) noexcept -> void;
 auto license_packetcrypt(LicenseMap& out) noexcept -> void;
 auto license_protobuf(LicenseMap& out) noexcept -> void;
-auto license_robin_hood(LicenseMap& out) noexcept -> void;
 auto license_secp256k1(LicenseMap& out) noexcept -> void;
 auto license_simpleini(LicenseMap& out) noexcept -> void;
 auto license_tbb(LicenseMap& out) noexcept -> void;

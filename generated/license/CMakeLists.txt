@@ -84,9 +84,6 @@ otcommon_file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
 otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/frozen/LICENSE" "FROZEN_HEX")
 otcommon_file_to_hex(
-  "${opentxs_SOURCE_DIR}/deps/robin-hood/LICENSE" "ROBIN_HOOD_HEX"
-)
-otcommon_file_to_hex(
   "${opentxs_SOURCE_DIR}/deps/unordered_dense/LICENSE" "ANKERL_HEX"
 )
 
@@ -241,12 +238,6 @@ endif()
 configure_file(
   "protobuf.cpp.in"
   "${opentxs_BINARY_DIR}/src/util/license/protobuf.cpp"
-  @ONLY
-)
-
-configure_file(
-  "robin_hood.cpp.in"
-  "${opentxs_BINARY_DIR}/src/util/license/robin_hood.cpp"
   @ONLY
 )
 

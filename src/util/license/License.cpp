@@ -28,7 +28,6 @@ auto LicenseData() noexcept -> const LicenseMap&
         license_opentxs(out);
         license_packetcrypt(out);
         license_protobuf(out);
-        license_robin_hood(out);
         license_secp256k1(out);
         license_simpleini(out);
         license_tbb(out);

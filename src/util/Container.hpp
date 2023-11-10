@@ -9,7 +9,7 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/basic_types.h>
 #include <frozen/unordered_map.h>
-#include <robin_hood.h>
+#include <algorithm>
 #include <ranges>
 #include <span>
 
