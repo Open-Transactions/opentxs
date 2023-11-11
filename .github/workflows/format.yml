@@ -18,6 +18,10 @@ jobs:
       with:
         fetch-depth: '0'
         submodules: 'recursive'
+    - name: Cache Docker images
+      uses: ScribeMD/docker-cache@0.3.6
+      with:
+        key: docker-ci-${{ matrix.docker }}
     - name: Setup build environment
       run: |
         docker pull opentransactions/ci:${{ env.docker }}

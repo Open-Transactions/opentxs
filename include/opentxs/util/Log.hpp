@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <filesystem>
+#include <ostream>
 #include <source_location>
 #include <string_view>
 
@@ -59,6 +60,11 @@ namespace internal
 {
 class Log;
 }  // namespace internal
+
+namespace log
+{
+class Streambuf;
+}  // namespace log
 
 class Amount;
 class Armored;
@@ -156,7 +162,26 @@ public:
 private:
     Imp* imp_;
 };
+}  // namespace opentxs
 
+namespace opentxs::log
+{
+class OPENTXS_EXPORT Stream final : public std::ostream
+{
+public:
+    Stream(const std::source_location& loc, Streambuf& buf) noexcept;
+    Stream() = delete;
+    Stream(const Stream&) = delete;
+    Stream(Stream&&) = delete;
+    auto operator=(const Stream&) -> Stream& = delete;
+    auto operator=(Stream&&) -> Stream& = delete;
+
+    ~Stream() final;
+};
+}  // namespace opentxs::log
+
+namespace opentxs
+{
 OPENTXS_EXPORT auto LogAbort() noexcept -> Log&;
 OPENTXS_EXPORT auto LogConsole() noexcept -> Log&;
 OPENTXS_EXPORT auto LogDebug() noexcept -> Log&;
@@ -166,7 +191,38 @@ OPENTXS_EXPORT auto LogInsane() noexcept -> Log&;
 OPENTXS_EXPORT auto LogTrace() noexcept -> Log&;
 OPENTXS_EXPORT auto LogVerbose() noexcept -> Log&;
 OPENTXS_EXPORT auto PrintStackTrace() noexcept -> UnallocatedCString;
+}  // namespace opentxs
 
+namespace opentxs::log
+{
+OPENTXS_EXPORT auto Abort(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Console(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Debug(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Detail(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Error(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Insane(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Trace(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+OPENTXS_EXPORT auto Verbose(
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> Stream;
+}  // namespace opentxs::log
+
+namespace opentxs
+{
 OPENTXS_EXPORT inline auto assert_true(
     bool expression,
     std::string_view message,

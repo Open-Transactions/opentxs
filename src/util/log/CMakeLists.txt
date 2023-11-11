@@ -19,6 +19,9 @@ target_sources(
     "LogBuffer.hpp"
     "Logger.cpp"
     "Logger.hpp"
+    "Stream.cpp"
+    "Streambuf.cpp"
+    "Streambuf.hpp"
 )
 
 if(OT_BOOST_STACKTRACE_ADDR2LINE)

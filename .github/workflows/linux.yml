@@ -42,6 +42,10 @@ jobs:
         sudo rm -rf "${JAVA_HOME_11_X64}"
       shell: bash
       continue-on-error: true
+    - name: Cache Docker images
+      uses: ScribeMD/docker-cache@0.3.6
+      with:
+        key: docker-ci-${{ matrix.docker }}
     - name: Setup build environment
       run: |
         docker pull opentransactions/ci:${{ matrix.docker }}
