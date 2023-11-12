@@ -17,7 +17,7 @@ cmake_policy(
 list(
   APPEND
   CMAKE_MODULE_PATH
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake"
   "${CMAKE_CURRENT_SOURCE_DIR}/external/opentxs-cmake"
 )
 include(otcommon-set-osx-deployment-target)
