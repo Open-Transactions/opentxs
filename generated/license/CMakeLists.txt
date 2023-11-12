@@ -50,7 +50,7 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/CREDITS"
+  "${opentxs_SOURCE_DIR}/docs/CREDITS"
   OPENTXS_CREDITS_TEXT
 )
 file(
@@ -80,7 +80,7 @@ otcommon_file_to_hex(
 )
 otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/cc0.txt" "CC0_HEX")
 otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
-otcommon_file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
+otcommon_file_to_hex("${opentxs_SOURCE_DIR}/docs/MPL-2.0" "MPL_2_0_HEX")
 otcommon_file_to_hex(
   "${opentxs_SOURCE_DIR}/external/argon2/LICENSE" "ARGON_HEX"
 )
