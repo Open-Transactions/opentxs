@@ -5,7 +5,7 @@
 
 macro(libopentxs_generate_uninstall_target)
   configure_file(
-    "${${PROJECT_NAME}_SOURCE_DIR}/external/opentxs-cmake/uninstall.cmake.in"
+    "${OTCOMMON_TEMPLATE_DIR}/uninstall.cmake.in"
     "${${PROJECT_NAME}_BINARY_DIR}/uninstall.cmake"
     IMMEDIATE
     @ONLY
