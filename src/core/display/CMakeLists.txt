@@ -25,6 +25,6 @@ add_library(opentxs-core-display OBJECT "Common.cpp")
 target_link_libraries(opentxs-core-display PRIVATE Boost::headers)
 target_include_directories(
   opentxs-core-display SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+  PRIVATE "${opentxs_SOURCE_DIR}/external/frozen/include"
 )
 libopentxs_configure_constexpr_target(opentxs-core-display)

@@ -21,9 +21,9 @@ target_include_directories(
 target_include_directories(
   opentxs-testlib SYSTEM
   PUBLIC
-    "${opentxs_SOURCE_DIR}/deps/"
-    "${opentxs_SOURCE_DIR}/deps/cs_libguarded/src"
-    "${opentxs_SOURCE_DIR}/deps/frozen/include"
+    "${opentxs_SOURCE_DIR}/external/"
+    "${opentxs_SOURCE_DIR}/external/cs_libguarded/src"
+    "${opentxs_SOURCE_DIR}/external/frozen/include"
 )
 target_compile_definitions(
   opentxs-testlib

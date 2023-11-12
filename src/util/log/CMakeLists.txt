@@ -8,7 +8,7 @@ libopentxs_add_public_header("util" "Log.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
+    "${opentxs_BINARY_DIR}/external/BoostStacktrace.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Log.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/LogMacros.hpp"
     "Imp.cpp"

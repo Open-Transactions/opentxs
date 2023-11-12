@@ -1,41 +1,41 @@
 [submodule "cmake"]
-	path = deps/opentxs-cmake
+	path = external/opentxs-cmake
 	url = https://github.com/Open-Transactions/opentxs-cmake
 	shallow = true
 [submodule "deps/ChaiScript"]
-	path = deps/ChaiScript
+	path = external/ChaiScript
 	url = https://github.com/FellowTraveler/ChaiScript
 	shallow = true
 [submodule "deps/lucre"]
-	path = deps/lucre
+	path = external/lucre
 	url = https://github.com/Open-Transactions/lucre.git
 	shallow = true
 [submodule "deps/simpleini"]
-	path = deps/simpleini
+	path = external/simpleini
 	url = https://github.com/brofield/simpleini.git
 	shallow = true
 [submodule "deps/smhasher"]
-	path = deps/smhasher
+	path = external/smhasher
 	url = https://github.com/aappleby/smhasher
 	shallow = true
 [submodule "deps/SHA1"]
-	path = deps/SHA1
+	path = external/SHA1
 	url = https://github.com/983/SHA1
 	shallow = true
 [submodule "deps/bech32"]
-	path = deps/bech32
+	path = external/bech32
 	url = https://github.com/sipa/bech32
 	shallow = true
 [submodule "deps/packetcrypt/packetcrypt_rs"]
-	path = deps/packetcrypt/packetcrypt_rs
+	path = external/packetcrypt/packetcrypt_rs
 	url = https://github.com/cjdelisle/packetcrypt_rs
 	shallow = true
 [submodule "deps/secp256k1"]
-	path = deps/secp256k1
+	path = external/secp256k1
 	url = https://github.com/Open-Transactions/secp256k1-abc
 	shallow = true
 [submodule "deps/cs_libguarded"]
-	path = deps/cs_libguarded
+	path = external/cs_libguarded
 	url = https://github.com/copperspice/cs_libguarded
 	shallow = true
 [submodule "tests/ottest/data/blockchain/ethereum"]
@@ -43,11 +43,11 @@
 	url = https://github.com/ethereum/tests
 	shallow = true
 [submodule "deps/frozen"]
-	path = deps/frozen
+	path = external/frozen
 	url = https://github.com/Open-Transactions/frozen
 	shallow = true
 [submodule "deps/vcpkg-overlay"]
-	path = deps/vcpkg-overlay
+	path = external/vcpkg-overlay
 	url = https://github.com/Open-Transactions/vcpkg-overlay
 	shallow = true
 [submodule "tests/ottest/data/blockchain/cashtoken"]
@@ -55,6 +55,6 @@
 	url = https://github.com/bitjson/cashtokens
 	shallow = true
 [submodule "keccack-tiny"]
-	path = deps/keccack
+	path = external/keccack
 	url = https://github.com/Open-Transactions/keccak-tiny
 	shallow = true

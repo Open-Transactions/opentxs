@@ -19,7 +19,7 @@ configure_file(
 
 configure_file(
   "BoostIostreams.hpp.in"
-  "${opentxs_BINARY_DIR}/deps/BoostIostreams.hpp"
+  "${opentxs_BINARY_DIR}/external/BoostIostreams.hpp"
   @ONLY
 )
 

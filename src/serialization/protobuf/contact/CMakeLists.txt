@@ -16,7 +16,7 @@ add_library(
 )
 target_include_directories(
   opentxs-serialization-protobuf-contact SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+  PRIVATE "${opentxs_SOURCE_DIR}/external/frozen/include"
 )
 target_link_libraries(
   opentxs-serialization-protobuf-contact PRIVATE opentxs-common
