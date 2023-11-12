@@ -28,7 +28,7 @@ target_sources(
 add_library(opentxs-identity-wot-claim OBJECT "Internal.cpp")
 target_include_directories(
   opentxs-identity-wot-claim SYSTEM
-  PRIVATE "${opentxs_SOURCE_DIR}/deps/frozen/include"
+  PRIVATE "${opentxs_SOURCE_DIR}/external/frozen/include"
 )
 target_link_libraries(
   opentxs-identity-wot-claim PRIVATE opentxs-common opentxs-protobuf

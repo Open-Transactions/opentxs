@@ -1,1 +1,1 @@
-deps/opentxs-cmake/.cmake-format.py
+external/opentxs-cmake/.cmake-format.py

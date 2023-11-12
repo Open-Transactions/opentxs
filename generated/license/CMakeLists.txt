@@ -10,17 +10,17 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/base64/COPYING"
+  "${opentxs_SOURCE_DIR}/external/base64/COPYING"
   BASE64_LICENSE_TEXT
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/LICENSE.bech32"
+  "${opentxs_SOURCE_DIR}/external/LICENSE.bech32"
   BECH32_LICENSE_TEXT
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/ChaiScript/LICENSE"
+  "${opentxs_SOURCE_DIR}/external/ChaiScript/LICENSE"
   CHAISCRIPT_LICENSE_TEXT
 )
 file(
@@ -30,17 +30,17 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/irrxml/COPYING"
+  "${opentxs_SOURCE_DIR}/external/irrxml/COPYING"
   IRRXML_LICENSE_TEXT
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/cs_libguarded/LICENSE"
+  "${opentxs_SOURCE_DIR}/external/cs_libguarded/LICENSE"
   LIBGUARDED_LICENSE_TEXT
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/lucre/LICENCE"
+  "${opentxs_SOURCE_DIR}/external/lucre/LICENCE"
   LUCRE_LICENSE_TEXT
 )
 file(
@@ -50,7 +50,7 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/CREDITS"
+  "${opentxs_SOURCE_DIR}/docs/CREDITS"
   OPENTXS_CREDITS_TEXT
 )
 file(
@@ -60,12 +60,12 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/secp256k1/COPYING"
+  "${opentxs_SOURCE_DIR}/external/secp256k1/COPYING"
   LIBSECP256K1_LICENSE_TEXT
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/deps/simpleini/LICENCE.txt"
+  "${opentxs_SOURCE_DIR}/external/simpleini/LICENCE.txt"
   SIMPLEINI_LICENSE_TEXT
 )
 file(
@@ -80,9 +80,13 @@ otcommon_file_to_hex(
 )
 otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/cc0.txt" "CC0_HEX")
 otcommon_file_to_hex("${CMAKE_CURRENT_SOURCE_DIR}/lgpl-2.1.txt" "LGPL_2_1_HEX")
-otcommon_file_to_hex("${opentxs_SOURCE_DIR}/MPL-2.0" "MPL_2_0_HEX")
-otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/argon2/LICENSE" "ARGON_HEX")
-otcommon_file_to_hex("${opentxs_SOURCE_DIR}/deps/frozen/LICENSE" "FROZEN_HEX")
+otcommon_file_to_hex("${opentxs_SOURCE_DIR}/docs/MPL-2.0" "MPL_2_0_HEX")
+otcommon_file_to_hex(
+  "${opentxs_SOURCE_DIR}/external/argon2/LICENSE" "ARGON_HEX"
+)
+otcommon_file_to_hex(
+  "${opentxs_SOURCE_DIR}/external/frozen/LICENSE" "FROZEN_HEX"
+)
 
 configure_file(
   "argon.cpp.in"

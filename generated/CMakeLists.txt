@@ -91,18 +91,20 @@ configure_file(
 if(APPLE)
   configure_file(
     "BoostStacktrace.hpp.apple"
-    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
+    "${opentxs_BINARY_DIR}/external/BoostStacktrace.hpp"
     @ONLY
   )
 else()
   configure_file(
     "BoostStacktrace.hpp.other"
-    "${opentxs_BINARY_DIR}/deps/BoostStacktrace.hpp"
+    "${opentxs_BINARY_DIR}/external/BoostStacktrace.hpp"
     @ONLY
   )
 endif()
 
-target_include_directories(opentxs-common PRIVATE "${opentxs_BINARY_DIR}/deps")
+target_include_directories(
+  opentxs-common PRIVATE "${opentxs_BINARY_DIR}/external"
+)
 
 file(
   READ

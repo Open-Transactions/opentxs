@@ -17,8 +17,8 @@ cmake_policy(
 list(
   APPEND
   CMAKE_MODULE_PATH
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
-  "${CMAKE_CURRENT_SOURCE_DIR}/deps/opentxs-cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/external/opentxs-cmake"
 )
 include(otcommon-set-osx-deployment-target)
 otcommon_set_osx_deployment_target(13.4)
@@ -704,7 +704,7 @@ else()
   add_library(libopentxs STATIC "")
   target_include_directories(
     libopentxs INTERFACE $<BUILD_INTERFACE:${opentxs_BINARY_DIR}/src>
-                         $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/deps>
+                         $<BUILD_INTERFACE:${opentxs_SOURCE_DIR}/external>
   )
   target_compile_definitions(libopentxs INTERFACE "${OT_IMPORT_MACRO}")
 
@@ -760,7 +760,7 @@ if(OPENTXS_BUILD_TESTS)
 endif()
 
 add_subdirectory(generated)
-add_subdirectory(deps)
+add_subdirectory(external)
 add_subdirectory(src)
 
 if(OPENTXS_BUILD_TESTS AND OPENTXS_STANDALONE)
@@ -774,8 +774,10 @@ otcommon_print_target_compiler_flags(opentxs-common)
 # Package
 
 if(OPENTXS_STANDALONE)
+  include(libopentxs-generate-pkgconfig)
+  include(libopentxs-generate-uninstall-target)
   include(libopentxs-configure-cpack)
-  otcommon_generate_pkgconfig("-lopentxs")
-  otcommon_generate_uninstall_target()
+  libopentxs_generate_pkgconfig("-lopentxs")
+  libopentxs_generate_uninstall_target()
   libopentxs_configure_cpack()
 endif()
