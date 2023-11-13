@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::block
 {

@@ -9,6 +9,7 @@
 #include <Cashtoken.pb.h>
 #include <cstring>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <utility>
 

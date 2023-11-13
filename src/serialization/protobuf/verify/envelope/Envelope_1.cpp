@@ -10,6 +10,7 @@
 #include <Envelope.pb.h>
 #include <cstdint>
 #include <functional>
+#include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/AsymmetricKey.hpp"  // IWYU pragma: keep

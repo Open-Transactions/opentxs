@@ -15,6 +15,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
@@ -30,7 +31,6 @@ namespace network
 class Blockchain;
 }  // namespace network
 }  // namespace api
-class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

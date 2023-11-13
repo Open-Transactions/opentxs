@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <span>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "ottest/fixtures/contact/ContactItem.hpp"

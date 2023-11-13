@@ -9,6 +9,7 @@
 #include <future>
 #include <memory>
 #include <span>
+#include <utility>
 
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "opentxs/api/session/Client.hpp"

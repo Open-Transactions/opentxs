@@ -12,6 +12,7 @@
 #include <memory>
 #include <optional>
 #include <span>
+#include <tuple>
 
 #include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"

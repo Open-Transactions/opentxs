@@ -11,6 +11,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

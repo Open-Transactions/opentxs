@@ -9,6 +9,7 @@
 #include <exception>
 #include <memory>
 #include <utility>
+#include <variant>
 
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"

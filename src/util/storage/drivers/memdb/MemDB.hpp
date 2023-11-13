@@ -10,6 +10,7 @@
 #include <shared_mutex>
 #include <string_view>
 
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/storage/Types.hpp"
 #include "util/storage/drivers/Driver.hpp"

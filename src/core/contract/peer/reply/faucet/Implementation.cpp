@@ -8,6 +8,7 @@
 #include <FaucetReply.pb.h>
 #include <PeerReply.pb.h>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "internal/api/session/FactoryAPI.hpp"

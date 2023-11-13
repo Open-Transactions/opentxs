@@ -10,6 +10,7 @@
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
 #include <functional>
+#include <utility>
 
 #include "opentxs/otx/blind/CashType.hpp"    // IWYU pragma: keep
 #include "opentxs/otx/blind/PurseType.hpp"   // IWYU pragma: keep

@@ -8,6 +8,7 @@
 #include "blockchain/block/transaction/TransactionPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block::implementation
 {

@@ -9,6 +9,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Reject.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::reject

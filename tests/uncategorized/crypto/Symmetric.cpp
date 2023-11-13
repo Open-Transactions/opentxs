@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
+#include <functional>
 #include <span>
 
 #include "ottest/fixtures/crypto/Symmetric.hpp"

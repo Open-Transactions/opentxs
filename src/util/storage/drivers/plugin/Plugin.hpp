@@ -18,6 +18,7 @@
 
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

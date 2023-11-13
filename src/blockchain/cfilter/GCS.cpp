@@ -12,6 +12,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

@@ -11,6 +11,7 @@
 #include <zmq.h>
 #include <atomic>
 #include <cstddef>
+#include <functional>  // IWYU pragma: keep
 #include <string_view>
 
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep

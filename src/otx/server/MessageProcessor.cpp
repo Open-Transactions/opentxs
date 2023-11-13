@@ -14,6 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "internal/api/FactoryAPI.hpp"

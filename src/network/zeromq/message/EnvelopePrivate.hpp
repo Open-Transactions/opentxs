@@ -10,6 +10,7 @@
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

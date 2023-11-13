@@ -7,6 +7,7 @@
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <functional>  // IWYU pragma: keep
 #include <string_view>
 #include <utility>
 

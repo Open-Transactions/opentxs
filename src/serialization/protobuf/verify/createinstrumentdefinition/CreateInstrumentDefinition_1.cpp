@@ -8,6 +8,7 @@
 #include <ContactSectionName.pb.h>
 #include <CreateInstrumentDefinition.pb.h>
 #include <boost/unordered/unordered_flat_set.hpp>
+#include <utility>
 
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "serialization/protobuf/verify/Check.hpp"

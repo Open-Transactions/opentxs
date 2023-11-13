@@ -12,11 +12,13 @@
 #include "crypto/asymmetric/key/secp256k1/Secp256k1Private.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -55,7 +57,6 @@ class AsymmetricKey;
 class HDPath;
 }  // namespace proto
 
-class ByteArray;
 class Data;
 class PasswordPrompt;
 }  // namespace opentxs

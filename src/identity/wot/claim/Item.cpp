@@ -8,6 +8,7 @@
 #include <ContactItem.pb.h>
 #include <chrono>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"

@@ -9,6 +9,7 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/accountlist/AccountListItem.hpp"
 #include "internal/interface/ui/UI.hpp"

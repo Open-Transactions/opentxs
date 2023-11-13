@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"

@@ -10,6 +10,7 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/RSA.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::crypto::asymmetric::key
 {

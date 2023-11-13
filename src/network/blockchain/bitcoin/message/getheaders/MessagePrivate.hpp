@@ -11,6 +11,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Getheaders.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "crypto/Bip39.hpp"
 #include "ottest/fixtures/crypto/BIP39.hpp"

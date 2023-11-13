@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "opentxs/api/session/Notary.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/ConnectionMode.hpp"     // IWYU pragma: keep

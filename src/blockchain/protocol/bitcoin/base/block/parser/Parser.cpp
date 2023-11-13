@@ -5,13 +5,15 @@
 
 #include "blockchain/protocol/bitcoin/base/block/parser/Parser.hpp"  // IWYU pragma: associated
 
+#include <optional>
+#include <span>
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Container.hpp"

@@ -11,6 +11,7 @@
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/script/Imp.hpp"

@@ -11,7 +11,9 @@ extern "C" {
 
 #include <cstddef>
 #include <limits>
+#include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/util/Bytes.hpp"

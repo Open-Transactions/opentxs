@@ -8,6 +8,7 @@
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <functional>  // IWYU pragma: keep
 #include <utility>
 
 #include "core/identifier/IdentifierPrivate.hpp"

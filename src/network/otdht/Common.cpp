@@ -8,6 +8,7 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <string_view>
+#include <utility>
 
 #include "internal/network/otdht/Types.hpp"
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep

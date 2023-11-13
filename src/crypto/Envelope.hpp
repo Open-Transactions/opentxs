@@ -16,6 +16,7 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -28,14 +29,6 @@ namespace api
 {
 class Session;
 }  // namespace api
-
-namespace crypto
-{
-namespace symmetric
-{
-class Key;
-}  // namespace symmetric
-}  // namespace crypto
 
 namespace identity
 {

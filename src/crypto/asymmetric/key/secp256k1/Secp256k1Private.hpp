@@ -11,6 +11,7 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/crypto/asymmetric/key/Secp256k1.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 namespace opentxs::crypto::asymmetric::key

@@ -9,6 +9,7 @@
 #include <QVariant>
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/blockchainstatistics/BlockchainStatisticsItem.hpp"
 #include "internal/interface/ui/UI.hpp"

@@ -5,6 +5,7 @@
 
 #include "blockchain/node/wallet/proposals/BitcoinTransactionBuilderPrivate.hpp"  // IWYU pragma: associated
 
+#include <BlockchainTransaction.pb.h>
 #include <BlockchainTransactionProposal.pb.h>
 #include <algorithm>
 #include <cstddef>
@@ -18,6 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/transaction/TransactionPrivate.hpp"

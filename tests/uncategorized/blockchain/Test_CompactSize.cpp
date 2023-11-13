@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <span>
 #include <string_view>
+#include <utility>
 
 namespace ot = opentxs;
 

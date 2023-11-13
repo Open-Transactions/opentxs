@@ -14,6 +14,7 @@
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
 #include "network/blockchain/bitcoin/message/mempool/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

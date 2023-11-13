@@ -12,6 +12,7 @@
 #include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs

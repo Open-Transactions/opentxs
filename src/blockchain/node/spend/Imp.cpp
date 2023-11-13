@@ -20,6 +20,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <ratio>
 #include <stdexcept>
 #include <tuple>
 

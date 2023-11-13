@@ -8,6 +8,7 @@
 #include <P2PBlockchainSync.pb.h>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"

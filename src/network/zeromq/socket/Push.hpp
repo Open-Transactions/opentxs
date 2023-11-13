@@ -9,6 +9,7 @@
 
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Sender.hpp"
+#include "network/zeromq/socket/Socket.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -9,6 +9,7 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include "BoostAsio.hpp"
 #include "internal/util/Mutex.hpp"

@@ -17,6 +17,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 namespace opentxs::blockchain::block::implementation

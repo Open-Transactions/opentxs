@@ -23,6 +23,7 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <span>
+#include <string_view>
 
 #include "ottest/data/core/Data.hpp"
 #include "ottest/fixtures/core/Armored.hpp"

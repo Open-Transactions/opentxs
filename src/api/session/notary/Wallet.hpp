@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "api/session/Wallet.hpp"
 #include "internal/util/Editor.hpp"

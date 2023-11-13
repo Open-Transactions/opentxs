@@ -9,6 +9,7 @@
 
 #include <QAbstractItemModel>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "interface/qt/identitymanager/NymType.hpp"

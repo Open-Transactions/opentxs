@@ -19,6 +19,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

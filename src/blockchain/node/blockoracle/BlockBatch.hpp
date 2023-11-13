@@ -15,6 +15,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"

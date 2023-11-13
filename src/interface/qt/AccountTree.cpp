@@ -9,6 +9,7 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/accounttree/AccountCurrency.hpp"
 #include "interface/ui/accounttree/AccountTreeItem.hpp"

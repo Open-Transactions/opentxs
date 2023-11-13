@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <span>
 
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/storage/Types.hpp"
