@@ -6,6 +6,7 @@
 #pragma once
 
 #include <QAbstractItemModel>
+#include <QByteArray>
 #include <QHash>
 #include <QMetaObject>
 #include <QObject>
@@ -13,8 +14,6 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
-
-class QByteArray;
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

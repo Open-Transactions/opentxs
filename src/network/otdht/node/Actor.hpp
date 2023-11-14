@@ -20,6 +20,7 @@
 
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
+#include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
@@ -56,11 +57,6 @@ namespace network
 {
 namespace zeromq
 {
-namespace socket
-{
-class Raw;
-}  // namespace socket
-
 class Frame;
 }  // namespace zeromq
 }  // namespace network

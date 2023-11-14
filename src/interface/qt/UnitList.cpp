@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QVariant>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/unitlist/UnitListItem.hpp"
 #include "internal/interface/ui/UI.hpp"

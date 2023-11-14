@@ -12,6 +12,7 @@
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

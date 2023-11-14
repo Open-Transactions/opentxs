@@ -13,6 +13,7 @@
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 
 #include "internal/serialization/protobuf/Check.hpp"

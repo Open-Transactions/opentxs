@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/contract/peer/RequestType.hpp"
+
 #pragma once
 
 #include <span>
@@ -11,7 +13,7 @@
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "internal/core/contract/peer/request/StoreSecret.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::contract::peer::request

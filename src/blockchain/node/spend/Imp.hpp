@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/node/Funding.hpp"
+
 #pragma once
 
 #include <BlockchainTransaction.pb.h>  // IWYU pragma: keep
@@ -21,6 +23,7 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -66,7 +69,6 @@ class BlockchainTransactionProposedOutput;
 class BlockchainTransactionProposedSweep;
 }  // namespace proto
 
-class ByteArray;
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

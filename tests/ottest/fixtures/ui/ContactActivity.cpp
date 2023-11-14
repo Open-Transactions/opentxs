@@ -12,6 +12,7 @@
 #include <iterator>
 #include <sstream>
 #include <string_view>
+#include <utility>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/ContactActivity.hpp"

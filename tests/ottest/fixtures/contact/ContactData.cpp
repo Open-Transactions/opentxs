@@ -9,6 +9,7 @@
 #include <opentxs/opentxs.hpp>
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"

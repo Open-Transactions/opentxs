@@ -8,6 +8,7 @@
 #include <functional>
 #include <span>
 #include <string_view>
+#include <utility>
 
 #include "ottest/data/blockchain/Address.hpp"
 #include "ottest/data/crypto/Hashes.hpp"

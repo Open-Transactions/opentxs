@@ -11,6 +11,7 @@
 #include <QtGlobal>
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/blockchainselection/BlockchainSelectionItem.hpp"
 #include "internal/interface/ui/UI.hpp"

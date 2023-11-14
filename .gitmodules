@@ -1,7 +1,3 @@
-[submodule "cmake"]
-	path = external/opentxs-cmake
-	url = https://github.com/Open-Transactions/opentxs-cmake
-	shallow = true
 [submodule "deps/ChaiScript"]
 	path = external/ChaiScript
 	url = https://github.com/FellowTraveler/ChaiScript

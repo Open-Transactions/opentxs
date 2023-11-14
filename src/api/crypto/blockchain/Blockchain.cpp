@@ -8,6 +8,7 @@
 #include "api/crypto/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
 #include <HDPath.pb.h>
+#include <span>
 #include <utility>
 
 #include "api/crypto/blockchain/Imp.hpp"

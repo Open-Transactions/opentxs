@@ -14,6 +14,7 @@
 #include <future>
 #include <iostream>
 #include <string_view>
+#include <utility>
 
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"

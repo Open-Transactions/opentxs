@@ -11,6 +11,7 @@
 #include <Credential.pb.h>
 #include <Signature.pb.h>
 #include <memory>
+#include <span>
 #include <stdexcept>
 
 #include "2_Factory.hpp"

@@ -9,8 +9,11 @@
 
 #include <array>
 #include <memory>
+#include <optional>
 #include <span>
+#include <string>
 #include <utility>
+#include <variant>
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"

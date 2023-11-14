@@ -8,6 +8,7 @@
 #include "api/network/ZAP.hpp"  // IWYU pragma: associated
 
 #include <span>
+#include <tuple>
 #include <utility>
 
 #include "2_Factory.hpp"

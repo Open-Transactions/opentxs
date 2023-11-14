@@ -6,6 +6,7 @@
 #include "interface/rpc/response/Invalid.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <utility>
 
 #include "interface/rpc/response/Base.hpp"
 #include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep

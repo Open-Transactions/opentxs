@@ -3,12 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/contract/peer/RequestType.hpp"
+
 #pragma once
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
 #include "internal/core/contract/peer/reply/Faucet.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

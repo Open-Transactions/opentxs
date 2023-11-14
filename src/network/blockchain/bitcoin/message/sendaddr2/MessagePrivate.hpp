@@ -9,6 +9,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Sendaddr2.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::sendaddr2
 {

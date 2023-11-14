@@ -56,7 +56,11 @@ SubaccountPrivate::SubaccountPrivate(
         parent_.NymID(),
         parent_.AccountID(),
         id_);
-    assert_true(rc);
+
+    if (rc) {
+        LogTrace()()("registered ")(Describe())(" in internal database")
+            .Flush();
+    }
 }
 
 SubaccountPrivate::SubaccountPrivate(

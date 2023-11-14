@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iterator>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
@@ -18,6 +19,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
+#include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"

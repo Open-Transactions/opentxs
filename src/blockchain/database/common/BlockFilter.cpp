@@ -9,6 +9,7 @@
 #include <GCS.pb.h>
 #include <google/protobuf/arena.h>  // IWYU pragma: keep
 #include <cstring>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string_view>

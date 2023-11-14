@@ -5,6 +5,8 @@
 
 #include "interface/qt/DestinationValidator.hpp"  // IWYU pragma: associated
 
+#include <string>
+
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"

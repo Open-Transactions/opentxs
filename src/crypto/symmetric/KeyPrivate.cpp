@@ -14,6 +14,7 @@
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 #include "internal/api/session/Session.hpp"
@@ -32,6 +33,7 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"

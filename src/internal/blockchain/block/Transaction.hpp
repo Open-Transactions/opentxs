@@ -14,6 +14,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -62,7 +63,6 @@ class Transaction;
 
 namespace identifier
 {
-class Generic;
 class Nym;
 }  // namespace identifier
 

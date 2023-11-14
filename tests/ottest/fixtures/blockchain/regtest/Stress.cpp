@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <span>
 #include <string_view>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"

@@ -17,6 +17,7 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/Ed25519.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Types.hpp"
 

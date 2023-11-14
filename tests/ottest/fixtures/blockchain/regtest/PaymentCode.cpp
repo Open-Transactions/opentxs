@@ -10,6 +10,7 @@
 #include <functional>
 #include <future>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <tuple>
 #include <utility>

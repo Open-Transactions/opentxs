@@ -1,1 +1,0 @@
-external/opentxs-cmake/.cmake-format.py

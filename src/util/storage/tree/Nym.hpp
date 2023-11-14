@@ -18,6 +18,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

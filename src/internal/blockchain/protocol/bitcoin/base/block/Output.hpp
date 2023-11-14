@@ -11,7 +11,6 @@
 
 #include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
@@ -62,6 +61,7 @@ struct View;
 
 namespace block
 {
+class Position;
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain

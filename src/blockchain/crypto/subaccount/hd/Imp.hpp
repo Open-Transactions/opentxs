@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <BlockchainAddress.pb.h>
 #include <HDAccount.pb.h>
 #include <memory>
 #include <optional>

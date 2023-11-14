@@ -24,6 +24,7 @@
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

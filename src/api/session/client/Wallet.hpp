@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "api/session/Wallet.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"

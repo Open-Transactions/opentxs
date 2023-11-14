@@ -8,6 +8,7 @@
 #include <cstring>
 #include <optional>
 #include <span>
+#include <string_view>
 
 #include "ottest/data/blockchain/Bip143.hpp"
 #include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"

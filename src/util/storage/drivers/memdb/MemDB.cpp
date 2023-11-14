@@ -11,6 +11,7 @@
 #include <memory>
 #include <span>
 #include <utility>
+#include <variant>
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"

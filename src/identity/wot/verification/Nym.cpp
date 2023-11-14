@@ -10,6 +10,7 @@
 #include <chrono>
 #include <compare>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 

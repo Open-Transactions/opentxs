@@ -10,6 +10,7 @@
 #include <Credential.pb.h>
 #include <Enums.pb.h>
 #include <HDPath.pb.h>
+#include <Identifier.pb.h>
 #include <Signature.pb.h>
 #include <VerificationItem.pb.h>
 #include <algorithm>

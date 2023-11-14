@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cs_plain_guarded.h>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>

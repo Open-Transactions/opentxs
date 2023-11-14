@@ -7,6 +7,8 @@
 
 #include "blockchain/node/filteroracle/FilterOracle.hpp"  // IWYU pragma: associated
 
+#include <span>
+
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/blockchain/node/Factory.hpp"
 #include "opentxs/OT.hpp"

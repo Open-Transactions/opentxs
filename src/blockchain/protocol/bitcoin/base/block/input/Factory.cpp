@@ -27,6 +27,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"

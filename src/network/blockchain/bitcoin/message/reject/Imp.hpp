@@ -16,6 +16,7 @@
 #include "network/blockchain/bitcoin/message/reject/MessagePrivate.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
 

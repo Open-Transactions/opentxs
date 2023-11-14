@@ -14,7 +14,7 @@ function(libopentxs_generate_pkgconfig linkString)
   )
 
   configure_file(
-    "${${PROJECT_NAME}_SOURCE_DIR}/external/opentxs-cmake/project.pc.in"
+    "${OTCOMMON_TEMPLATE_DIR}/project.pc.in"
     "${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.pc.in"
     @ONLY
   )

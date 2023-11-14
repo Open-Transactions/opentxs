@@ -6,6 +6,7 @@
 #include "blockchain/database/Filters.hpp"  // IWYU pragma: associated
 
 #include <cstddef>
+#include <optional>
 #include <utility>
 
 #include "blockchain/database/common/Database.hpp"

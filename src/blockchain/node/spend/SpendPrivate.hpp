@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/blockchain/node/Funding.hpp"
+
 #pragma once
 
 #include <span>
@@ -10,7 +12,7 @@
 
 #include "internal/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Account.hpp"

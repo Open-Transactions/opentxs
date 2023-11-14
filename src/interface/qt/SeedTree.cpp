@@ -9,6 +9,7 @@
 #include <QVariant>
 #include <cstddef>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/seedtree/SeedTreeItem.hpp"
 #include "interface/ui/seedtree/SeedTreeNym.hpp"

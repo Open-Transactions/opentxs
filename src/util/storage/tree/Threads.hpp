@@ -11,6 +11,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
@@ -21,6 +22,7 @@
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
+#include "util/storage/tree/Thread.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -54,7 +56,6 @@ namespace tree
 {
 class Mailbox;
 class Nym;
-class Thread;
 }  // namespace tree
 }  // namespace storage
 }  // namespace opentxs

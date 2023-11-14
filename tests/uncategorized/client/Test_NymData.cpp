@@ -12,6 +12,7 @@
 #include <opentxs/opentxs.hpp>
 #include <algorithm>
 #include <iterator>
+#include <span>
 
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"

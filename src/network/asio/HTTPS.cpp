@@ -9,6 +9,7 @@
 #include <boost/system/error_code.hpp>
 #include <openssl/err.h>
 #include <openssl/ssl3.h>
+#include <openssl/types.h>
 #include <chrono>
 #include <compare>
 #include <exception>

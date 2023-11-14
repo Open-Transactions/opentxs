@@ -23,6 +23,7 @@
 #include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

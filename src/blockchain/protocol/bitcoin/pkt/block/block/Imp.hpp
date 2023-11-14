@@ -15,11 +15,28 @@
 #include "internal/blockchain/protocol/bitcoin/pkt/block/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace blockchain
+{
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+class Header;
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
+}  // namespace blockchain
+
 class WriteBuffer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

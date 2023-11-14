@@ -9,6 +9,7 @@
 #pragma once
 
 #include <Bip47Channel.pb.h>
+#include <BlockchainAddress.pb.h>
 #include <cstddef>
 #include <functional>
 #include <memory>

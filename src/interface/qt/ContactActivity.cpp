@@ -10,6 +10,8 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
+#include <string>
+#include <utility>
 
 #include "interface/qt/DraftValidator.hpp"
 #include "interface/ui/contactactivity/ContactActivityItem.hpp"

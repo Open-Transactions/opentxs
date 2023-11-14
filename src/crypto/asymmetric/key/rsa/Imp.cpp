@@ -8,6 +8,7 @@
 #include <AsymmetricKey.pb.h>
 #include <Ciphertext.pb.h>
 #include <stdexcept>
+#include <string>
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "opentxs/api/session/Factory.hpp"

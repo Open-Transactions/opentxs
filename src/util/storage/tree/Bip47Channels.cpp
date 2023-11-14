@@ -26,6 +26,7 @@
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Account.hpp"

@@ -5,6 +5,8 @@
 
 #include "util/log/Streambuf.hpp"  // IWYU pragma: associated
 
+#include <memory>
+
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::log

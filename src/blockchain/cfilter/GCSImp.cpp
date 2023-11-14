@@ -16,6 +16,7 @@
 #include <limits>
 #include <optional>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/Blockchain.hpp"

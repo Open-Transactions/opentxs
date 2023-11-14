@@ -11,6 +11,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Inv.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::inv
 {

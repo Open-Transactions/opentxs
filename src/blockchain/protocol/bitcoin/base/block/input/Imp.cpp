@@ -23,6 +23,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string_view>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"

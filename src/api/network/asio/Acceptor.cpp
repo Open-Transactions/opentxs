@@ -7,6 +7,7 @@
 
 #include <boost/system/error_code.hpp>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <mutex>

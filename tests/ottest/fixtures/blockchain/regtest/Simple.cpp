@@ -12,6 +12,8 @@
 #include <functional>
 #include <future>
 #include <optional>
+#include <ratio>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string_view>

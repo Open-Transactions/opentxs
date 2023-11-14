@@ -9,6 +9,7 @@
 #include <BlockchainBlockLocalData.pb.h>
 #include <cstring>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 

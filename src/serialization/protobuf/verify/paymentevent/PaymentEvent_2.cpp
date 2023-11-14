@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <functional>
 #include <stdexcept>
+#include <utility>
 
 #include "internal/serialization/protobuf/verify/VerifyWorkflows.hpp"
 #include "opentxs/util/Container.hpp"

@@ -6,6 +6,7 @@
 #include "ottest/fixtures/blockchain/regtest/MultiplePaymentCode.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
+#include <functional>
 #include <string_view>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"

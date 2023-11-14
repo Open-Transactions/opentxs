@@ -18,16 +18,20 @@ list(
   APPEND
   CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmake"
-  "${CMAKE_CURRENT_SOURCE_DIR}/external/opentxs-cmake"
 )
-include(otcommon-set-osx-deployment-target)
-otcommon_set_osx_deployment_target(13.4)
+include(libopentxs-set-osx-deployment-target)
+libopentxs_set_osx_deployment_target(13.4)
 project(opentxs)
 
 # -----------------------------------------------------------------------------
 # Setup
 
-include(otcommon-cmake)
+find_package(
+  otcommon
+  1
+  CONFIG
+  REQUIRED
+)
 otcommon_version_from_git()
 otcommon_set_build_type()
 otcommon_require_out_of_source_build()

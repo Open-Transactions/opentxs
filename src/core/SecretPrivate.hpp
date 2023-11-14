@@ -10,6 +10,7 @@
 #include "core/ByteArrayPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

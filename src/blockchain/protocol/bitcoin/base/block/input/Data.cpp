@@ -9,6 +9,7 @@
 #include <iterator>
 #include <optional>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Input.hpp"

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "api/crypto/blockchain/AccountCache.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
@@ -273,45 +275,48 @@ auto AccountCache::RegisterSubaccount(
 
     const auto& crypto = api_.Crypto();
 
-    if (subaccount_params_.try_emplace(subaccount, type, chain, owner, account)
-            .second) {
-        LogTrace()()("subaccount ")(subaccount, crypto)(" for ")(owner, crypto)(
-            " on ")(print(chain))(" registered")
-            .Flush();
-        account_params_.try_emplace(account, chain, owner);
-        auto& index = nym_index_[chain][owner];
-
-        if (index.first.empty()) {
-            index.first = account;
-        } else if (index.first != account) {
-            LogError()()(
-                "aubaccount parent does not match existing recorded value")
-                .Flush();
-
-            return false;
-        }
-
-        index.second.emplace(subaccount);
-        account_index_[account].emplace(subaccount);
-        socket_.SendDeferred([&] {
-            auto work = opentxs::network::zeromq::tagged_message(
-                WorkType::BlockchainAccountCreated, true);
-            work.AddFrame(chain);
-            work.AddFrame(owner);
-            work.AddFrame(type);
-            subaccount.Serialize(work);
-
-            return work;
-        }());
-
-        return true;
-    } else {
-        LogTrace()()("subaccount ")(subaccount, crypto)(" for ")(owner, crypto)(
-            " on ")(print(chain))(" already registered")
+    if (subaccount_params_.contains(subaccount)) {
+        LogTrace()()("subaccount ")
+            .asHex(subaccount)(" for ")(owner, crypto)(" on ")(print(chain))(
+                " already registered")
             .Flush();
 
         return false;
     }
+
+    auto [it, added] =
+        subaccount_params_.try_emplace(subaccount, type, chain, owner, account);
+    assert_true(added);
+    LogTrace()()("subaccount ")
+        .asHex(subaccount)(" for ")(owner, crypto)(" on ")(print(chain))(
+            " registered")
+        .Flush();
+    account_params_.try_emplace(account, chain, owner);
+    auto& index = nym_index_[chain][owner];
+
+    if (index.first.empty()) {
+        index.first = account;
+    } else if (index.first != account) {
+        LogError()()("aubaccount parent does not match existing recorded value")
+            .Flush();
+
+        return false;
+    }
+
+    index.second.emplace(subaccount);
+    account_index_[account].emplace(subaccount);
+    socket_.SendDeferred([&] {
+        auto work = opentxs::network::zeromq::tagged_message(
+            WorkType::BlockchainAccountCreated, true);
+        work.AddFrame(chain);
+        work.AddFrame(owner);
+        work.AddFrame(type);
+        subaccount.Serialize(work);
+
+        return work;
+    }());
+
+    return true;
 }
 
 auto AccountCache::SubaccountType(const identifier::Account& id) const noexcept

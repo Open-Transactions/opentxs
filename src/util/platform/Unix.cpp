@@ -18,6 +18,8 @@ extern "C" {
 #include <array>
 #include <cerrno>
 #include <cstring>
+#include <functional>  // IWYU pragma: keep
+#include <utility>
 
 #include "opentxs/util/Log.hpp"
 

@@ -6,6 +6,7 @@
 #include "opentxs/interface/qt/MessagableList.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <utility>
 
 #include "internal/interface/ui/UI.hpp"
 

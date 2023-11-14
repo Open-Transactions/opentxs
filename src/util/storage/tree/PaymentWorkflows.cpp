@@ -24,6 +24,7 @@
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"              // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"

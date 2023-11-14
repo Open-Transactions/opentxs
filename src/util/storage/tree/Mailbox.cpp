@@ -19,6 +19,7 @@
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

@@ -34,24 +34,16 @@ project.
 
 ### Contributing
 
-All development goes in develop branch - please don't submit pull requests to
-master.
-
-Use clang-format and cmake-format.
-
-#### clang-format Git hook
-
-For convenience please enable the git hook which will trigger clang-format each
-time you commit. To do so type in the repo directory:
-
-    cd .git/hooks
-    ln -s ../../cmake/scripts/git_hooks/pre-commit
+Configuration files for clang-format and cmake-format are available in
+[otcommon](https://github.com/Open-Transactions/otcommon).
 
 ### Build Instructions
 
 Ensure opentxs is fully checked out prior to running cmake:
 
     git submodule update --init --recursive
+
+Install dependencies, including [otcommon](https://github.com/Open-Transactions/otcommon) or use vcpkg.
 
 Basic build instructions:
 

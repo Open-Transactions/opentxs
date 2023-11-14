@@ -6,6 +6,7 @@
 #include "opentxs/interface/qt/Model.hpp"  // IWYU pragma: associated
 
 #include <QByteArray>
+#include <QList>
 #include <QString>
 #include <algorithm>
 #include <atomic>

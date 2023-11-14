@@ -10,6 +10,7 @@
 #include <QtGlobal>
 #include <exception>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/accountsummary/AccountSummaryItem.hpp"
 #include "interface/ui/accountsummary/IssuerItem.hpp"

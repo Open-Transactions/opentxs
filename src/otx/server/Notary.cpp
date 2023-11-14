@@ -32,6 +32,7 @@
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
+#include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"

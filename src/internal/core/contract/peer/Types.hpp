@@ -5,6 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::proto::ConnectionInfoType
 // IWYU pragma: no_forward_declare opentxs::proto::PairEventType
+// IWYU pragma: no_include "opentxs/core/contract/peer/ObjectType.hpp"
+// IWYU pragma: no_include "opentxs/core/contract/peer/RequestType.hpp"
 
 #pragma once
 

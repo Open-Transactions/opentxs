@@ -15,6 +15,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <span>
 #include <utility>
 
 #include "core/Worker.hpp"

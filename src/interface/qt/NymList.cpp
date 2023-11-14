@@ -7,6 +7,7 @@
 
 #include <QVariant>
 #include <memory>
+#include <utility>
 
 #include "interface/ui/nymlist/NymListItem.hpp"
 #include "internal/interface/ui/UI.hpp"

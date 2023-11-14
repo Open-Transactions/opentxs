@@ -18,6 +18,7 @@
 #include <iterator>
 #include <limits>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/transaction/Imp.hpp"

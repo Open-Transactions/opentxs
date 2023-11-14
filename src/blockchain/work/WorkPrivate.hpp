@@ -11,6 +11,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain

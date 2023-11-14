@@ -7,6 +7,7 @@
 
 #include <Envelope.pb.h>
 #include <Purse.pb.h>
+#include <Token.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>

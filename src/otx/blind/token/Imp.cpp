@@ -6,6 +6,7 @@
 #include "otx/blind/token/Imp.hpp"  // IWYU pragma: associated
 
 #include <Token.pb.h>
+#include <string>
 
 #include "internal/core/Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
