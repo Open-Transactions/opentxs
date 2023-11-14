@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <boost/unordered/unordered_node_map.hpp>
 #include <functional>
 #include <utility>
 
@@ -124,9 +125,17 @@ private:
     using NymIndex =
         Map<identifier::Nym, std::pair<identifier::Account, Subaccounts>>;
     using ChainIndex = Map<opentxs::blockchain::Type, NymIndex>;
-    using Sub = Map<identifier::Account, SubaccountParams>;
-    using Acct = Map<identifier::Account, AccountParams>;
-    using AccountIndex = Map<identifier::Account, Set<identifier::Account>>;
+    template <typename Key, typename Value>
+    using BoostMap = boost::unordered_node_map<
+        Key,
+        Value,
+        std::hash<Key>,
+        std::equal_to<Key>,
+        alloc::PMR<std::pair<const Key, Value>>>;
+    using Sub = BoostMap<identifier::Account, SubaccountParams>;
+    using Acct = BoostMap<identifier::Account, AccountParams>;
+    using AccountIndex =
+        BoostMap<identifier::Account, Set<identifier::Account>>;
 
     const api::Session& api_;
     bool populated_;
