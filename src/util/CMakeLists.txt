@@ -6,7 +6,6 @@
 add_subdirectory(alloc)
 add_subdirectory(license)
 add_subdirectory(log)
-add_subdirectory(platform)
 add_subdirectory(storage)
 
 libopentxs_add_public_header("util" "Allocated.hpp")
@@ -104,7 +103,21 @@ target_sources(
     "WriterPrivate.cpp"
     "WriterPrivate.hpp"
 )
+
+libopentxs_add_platform_specific("Signals")
+libopentxs_add_platform_specific("Thread")
+
+if(OPENTXS_DEBUG_BUILD)
+  libopentxs_add_platform_specific("Thread.debug")
+else()
+  target_sources(opentxs-common PRIVATE "Thread.release.cpp")
+endif()
+
 libopentxs_link_internal(unofficial-sodium::sodium)
 libopentxs_link_external(Boost::container)
 libopentxs_link_external(Boost::program_options)
 libopentxs_link_external(unofficial-sodium::sodium)
+
+if(WIN32)
+  libopentxs_link_external(PThreads4W::PThreads4W)
+endif()

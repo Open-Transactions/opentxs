@@ -14,6 +14,7 @@ if(FS_EXPORT)
       "GarbageCollected.cpp"
       "GarbageCollected.hpp"
   )
+  libopentxs_add_platform_specific("Common")
   libopentxs_link_external(Boost::iostreams)
 else()
   target_sources(opentxs-common PRIVATE "null.cpp")

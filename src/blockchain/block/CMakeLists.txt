@@ -26,6 +26,8 @@ target_sources(
     "TransactionHash.cpp"
 )
 
+libopentxs_add_platform_specific("Hash")
+
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common

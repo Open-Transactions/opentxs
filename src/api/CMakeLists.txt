@@ -32,3 +32,6 @@ target_sources(
     "Settings.cpp"
     "Settings.hpp"
 )
+
+libopentxs_add_platform_specific("Legacy")
+libopentxs_add_platform_specific("Log")

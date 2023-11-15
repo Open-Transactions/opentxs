@@ -56,8 +56,6 @@ auto Mapped::preload(std::span<ReadView> bytes) noexcept -> void
     preload_platform(bytes);
 }
 
-// NOTE: Mapped::preload_platform defined in src/util/platform
-
 auto Mapped::Read(const std::span<const Index> indices, allocator_type alloc)
     const noexcept -> Vector<ReadView>
 {

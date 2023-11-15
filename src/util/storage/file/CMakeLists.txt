@@ -20,5 +20,6 @@ if(LMDB_EXPORT)
       "ReaderPrivate.cpp"
       "ReaderPrivate.hpp"
   )
+  libopentxs_add_platform_specific("Mapped")
   libopentxs_link_external(Boost::iostreams)
 endif()

@@ -21,6 +21,9 @@ target_sources(
     "Header.cpp"
 )
 
+libopentxs_add_platform_specific("Hash")
+libopentxs_add_platform_specific("Header")
+
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common

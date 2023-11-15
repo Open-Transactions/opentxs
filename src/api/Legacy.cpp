@@ -332,9 +332,6 @@ auto Legacy::get_home_directory() noexcept -> fs::path
     LogAbort()().Abort();
 }
 
-// NOTE: Legacy::get_home_platform defined in src/util/platform
-// NOTE: Legacy::get_suffix() defined in src/util/platform
-
 auto Legacy::get_suffix(std::string_view application) noexcept -> fs::path
 {
     auto output = prepend();
@@ -424,8 +421,6 @@ auto Legacy::PIDFilePath() const noexcept -> fs::path
     return get_file(pid_file_);
 }
 
-// NOTE: Legacy::prepend defined in src/util/platform
-
 auto Legacy::remove_trailing_separator(const fs::path& in) noexcept -> fs::path
 {
     const auto path = fs::path{in}.make_preferred();
@@ -447,6 +442,4 @@ auto Legacy::ServerDataFolder(const int instance) const noexcept -> fs::path
 {
     return get_path(server_data_folder_, instance);
 }
-
-// NOTE: Legacy::use_dot defined in src/util/platform
 }  // namespace opentxs::api::imp
