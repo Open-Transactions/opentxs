@@ -753,6 +753,7 @@ target_compile_definitions(opentxs-common PRIVATE "${OT_EXPORT_MACRO}")
 add_dependencies(opentxs-common generated_code)
 
 include(libopentxs-add-public-header)
+include(libopentxs-add-platform-specific)
 
 if(OPENTXS_BUILD_TESTS)
   add_library(opentxs-testlib "")

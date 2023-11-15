@@ -36,6 +36,4 @@ auto Read(const Position& in, alloc::Default alloc) noexcept -> Reader
     return pmr::construct<ReaderPrivate>(
         alloc, *in.file_name_, in.offset_, in.length_);
 }
-
-// NOTE: Write defined in src/util/platform
 }  // namespace opentxs::storage::file

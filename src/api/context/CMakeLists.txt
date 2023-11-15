@@ -13,6 +13,14 @@ target_sources(
     "Context.hpp"
 )
 
+libopentxs_add_platform_specific("Context")
+
+if(OPENTXS_DEBUG_BUILD)
+  target_sources(opentxs-common PRIVATE "Context.debug.cpp")
+else()
+  libopentxs_add_platform_specific("Context.release")
+endif()
+
 if(OT_ENABLE_RPC)
   target_sources(opentxs-common PRIVATE "rpc.cpp")
 else()

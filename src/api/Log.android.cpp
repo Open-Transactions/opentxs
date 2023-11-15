@@ -3,8 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/Legacy.hpp"  // IWYU pragma: associated
-#include "api/Log.hpp"     // IWYU pragma: associated
+#include "api/Log.hpp"  // IWYU pragma: associated
 
 extern "C" {
 #include <android/log.h>
@@ -14,8 +13,6 @@ extern "C" {
 
 namespace opentxs::api::imp
 {
-auto Legacy::use_dot() noexcept -> bool { return false; }
-
 auto Log::print(
     const int level,
     const Console,

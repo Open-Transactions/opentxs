@@ -263,8 +263,6 @@ auto Context::GetPasswordCaller() const noexcept -> PasswordCaller&
     return *external_password_callback_;
 }
 
-// NOTE: Context::HandleSignals defined in src/util/platform
-
 auto Context::Init(std::shared_ptr<const api::Context> me) noexcept -> void
 {
     me_ = std::move(me);
@@ -278,8 +276,6 @@ auto Context::Init(std::shared_ptr<const api::Context> me) noexcept -> void
     Init_CoreDump();
     Init_Zap();
 }
-
-// NOTE: Context::Init_CoreDump defined in src/util/platform
 
 auto Context::Init_Crypto() -> void
 {
@@ -383,8 +379,6 @@ auto Context::Init_Profile() -> void
     }
 }
 
-// NOTE: Context::Init_Rlimit defined in src/util/platform
-
 auto Context::Init_Zap() -> void
 {
     zap_.reset(opentxs::Factory::ZAP(zmq_context_));
@@ -441,8 +435,6 @@ auto Context::server_instance(const int count) -> int
     // Clients use even numbers and servers use odd numbers.
     return (2 * count) + 1;
 }
-
-// NOTE: Context::set_desired_files defined in src/util/platform
 
 auto Context::Shutdown() noexcept -> void
 {

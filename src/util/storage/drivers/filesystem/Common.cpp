@@ -30,8 +30,6 @@ namespace opentxs::storage::driver::filesystem
 {
 using namespace std::literals;
 
-// NOTE Common::FileDescriptor defined in src/util/platform
-
 Common::Common(
     const api::Crypto& crypto,
     const storage::Config& config,
@@ -228,8 +226,6 @@ auto Common::sync(const fs::path& path) noexcept -> bool
 }
 
 auto Common::sync(File& file) noexcept -> bool { return sync(file->handle()); }
-
-// NOTE: Common::sync(DescriptorType::handle_type) defined in src/util/platform
 
 auto Common::write_file(
     const fs::path& directory,

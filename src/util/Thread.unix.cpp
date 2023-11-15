@@ -3,18 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/Legacy.hpp"            // IWYU pragma: associated
 #include "internal/util/Thread.hpp"  // IWYU pragma: associated
-#include "util/storage/drivers/filesystem/Common.hpp"  // IWYU pragma: associated
 
 extern "C" {
+#include <pthread.h>  // IWYU pragma: keep
 #include <sys/resource.h>
 #include <unistd.h>
 }
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
-#include <pthread.h>  // IWYU pragma: keep
 #include <array>
 #include <cerrno>
 #include <cstring>
@@ -52,18 +50,3 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
     }
 }
 }  // namespace opentxs
-
-namespace opentxs::api::imp
-{
-auto Legacy::get_suffix() noexcept -> fs::path { return get_suffix("ot"); }
-
-auto Legacy::prepend() noexcept -> UnallocatedCString { return {}; }
-}  // namespace opentxs::api::imp
-
-namespace opentxs::storage::driver::filesystem
-{
-auto Common::sync(DescriptorType::handle_type fd) noexcept -> bool
-{
-    return 0 == ::fsync(fd);
-}
-}  // namespace opentxs::storage::driver::filesystem

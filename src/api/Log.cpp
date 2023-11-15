@@ -85,8 +85,5 @@ auto Log::callback(zmq::Message&& in) noexcept -> void
     }
 }
 
-// NOTE: Log::get_suffix defined in src/util/platform
-// NOTE: Log::print defined in src/util/platform
-
 Log::~Log() { opentxs::internal::Log::Shutdown(); }
 }  // namespace opentxs::api::imp

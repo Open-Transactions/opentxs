@@ -22,6 +22,8 @@ target_sources(
     "Config.hpp"
 )
 
+libopentxs_add_platform_specific("Common")
+
 if(LMDB_EXPORT)
   target_sources(opentxs-common PRIVATE "config/DefaultLMDB.cpp")
 elseif(SQLITE_EXPORT)
