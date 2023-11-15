@@ -22,17 +22,6 @@ class Ethereum;
 class Ethereum;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,8 +34,6 @@ public:
 
     virtual auto asEthereum() const noexcept -> const internal::Ethereum&;
     virtual auto asEthereumPublic() const noexcept -> const crypto::Ethereum&;
-    virtual auto Key() const noexcept
-        -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
 
     virtual auto asEthereum() noexcept -> internal::Ethereum&;
     virtual auto asEthereumPublic() noexcept -> crypto::Ethereum&;

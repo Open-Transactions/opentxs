@@ -43,22 +43,12 @@ namespace block
 {
 class TransactionHash;
 }  // namespace block
-
-namespace crypto
-{
-namespace implementation
-{
-class Element;
-}  // namespace implementation
-}  // namespace crypto
 }  // namespace blockchain
 
 namespace proto
 {
 class BlockchainActivity;
 }  // namespace proto
-
-class PasswordPrompt;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -81,13 +71,6 @@ public:
     {
         return parent_;
     }
-    auto PrivateKey(
-        const implementation::Element& element,
-        const Subchain type,
-        const Bip32Index index,
-        const PasswordPrompt& reason) const noexcept
-        -> const opentxs::crypto::asymmetric::key::EllipticCurve& override;
-    auto ScanProgress(Subchain type) const noexcept -> block::Position override;
     auto Source() const noexcept -> const identifier::Generic& final
     {
         return source_;
@@ -109,11 +92,6 @@ public:
         const Subchain type,
         const Bip32Index index,
         const std::string_view label) noexcept(false) -> bool final;
-    auto SetScanProgress(
-        const block::Position& progress,
-        Subchain type) noexcept -> void override
-    {
-    }
     auto Type() const noexcept -> SubaccountType final { return type_; }
     auto Unconfirm(
         const Subchain type,

@@ -56,7 +56,8 @@ struct Element : virtual public crypto::Element {
         const identifier::Generic& contact,
         const std::string_view memo) const noexcept -> Availability = 0;
     virtual auto NymID() const noexcept -> const identifier::Nym& = 0;
-    virtual auto Serialize() const noexcept -> SerializedType = 0;
+    virtual auto Serialize(bool withPrivate = false) const noexcept
+        -> SerializedType = 0;
 
     virtual auto Confirm(const block::TransactionHash& tx) noexcept -> bool = 0;
     virtual auto Reserve(const Time time) noexcept -> bool = 0;

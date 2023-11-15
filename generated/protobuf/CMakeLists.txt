@@ -30,6 +30,7 @@ set(PROTO_SOURCES
     BlockchainExternalAddress.proto
     BlockchainFilterHeader.proto
     BlockchainHDAccountData.proto
+    BlockchainImportedAccountData.proto
     BlockchainInputWitness.proto
     BlockchainOutputMultisigDetails.proto
     BlockchainPeerAddress.proto
@@ -265,6 +266,7 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainExternalAddress.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainFilterHeader.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainHDAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainImportedAccountData.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainInputWitness.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainOutputMultisigDetails.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainPeerAddress.pb.h$<ANGLE-R>>"

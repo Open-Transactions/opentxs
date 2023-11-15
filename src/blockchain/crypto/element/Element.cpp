@@ -343,7 +343,8 @@ auto Element::Reserve(const Time time) noexcept -> bool
     return true;
 }
 
-auto Element::Serialize() const noexcept -> Element::SerializedType
+auto Element::Serialize(bool withPrivate) const noexcept
+    -> Element::SerializedType
 {
     auto handle = data_.lock();
     auto& data = *handle;
@@ -352,7 +353,7 @@ auto Element::Serialize() const noexcept -> Element::SerializedType
         const auto key = [&] {
             auto serialized = proto::AsymmetricKey{};
 
-            if (key_.HasPrivate()) {
+            if (key_.HasPrivate() && (false == withPrivate)) {
                 key_.asPublic().Internal().Serialize(serialized);
             } else {
                 key_.Internal().Serialize(serialized);

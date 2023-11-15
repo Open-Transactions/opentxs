@@ -9,6 +9,8 @@ target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Imported.hpp"
+    "Imp.cpp"
+    "Imp.hpp"
     "Imported.cpp"
     "Internal.cpp"
 )
