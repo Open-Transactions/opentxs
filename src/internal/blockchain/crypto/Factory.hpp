@@ -57,6 +57,7 @@ class Nym;
 namespace proto
 {
 class Bip47Channel;
+class BlockchainEthereumAccountData;
 class HDAccount;
 class HDPath;
 }  // namespace proto
@@ -77,6 +78,20 @@ auto BlockchainAccountKeys(
     const UnallocatedSet<identifier::Account>& importedAccounts,
     const UnallocatedSet<identifier::Account>& paymentCodeAccounts) noexcept
     -> std::unique_ptr<blockchain::crypto::Account>;
+auto BlockchainEthereumSubaccount(
+    const api::Session& api,
+    const blockchain::crypto::Account& parent,
+    const identifier::Account& id,
+    const proto::HDPath& path,
+    const blockchain::crypto::HDProtocol standard,
+    const PasswordPrompt& reason) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
+auto BlockchainEthereumSubaccount(
+    const api::Session& api,
+    const blockchain::crypto::Account& parent,
+    const identifier::Account& id,
+    const proto::BlockchainEthereumAccountData& proto) noexcept
+    -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,

@@ -63,6 +63,7 @@ class Nym;
 
 namespace proto
 {
+class BlockchainEthereumAccountData;
 class HDAccount;
 class Nym;
 class Purse;
@@ -100,6 +101,10 @@ public:
         -> UnallocatedSet<identifier::Account>;
     auto BlockchainAccountType(const identifier::Account& accountID) const
         -> UnitType;
+    auto BlockchainEthereumAccountList(const UnitType type) const
+        -> UnallocatedSet<identifier::Account>;
+    auto BlockchainEthereumAccountType(
+        const identifier::Account& accountID) const -> UnitType;
 
     auto Bip47Channels() const -> const tree::Bip47Channels&;
     auto Contexts() const -> const tree::Contexts&;
@@ -140,6 +145,10 @@ public:
     auto Alias() const -> UnallocatedCString;
     auto Load(
         const identifier::Account& id,
+        std::shared_ptr<proto::BlockchainEthereumAccountData>& output,
+        ErrorReporting checking) const -> bool;
+    auto Load(
+        const identifier::Account& id,
         std::shared_ptr<proto::HDAccount>& output,
         ErrorReporting checking) const -> bool;
     auto Load(
@@ -153,6 +162,9 @@ public:
         ErrorReporting checking) const -> bool;
 
     auto SetAlias(std::string_view alias) -> bool;
+    auto Store(
+        const UnitType type,
+        const proto::BlockchainEthereumAccountData& data) -> bool;
     auto Store(const UnitType type, const proto::HDAccount& data) -> bool;
     auto Store(
         const proto::Nym& data,
@@ -179,7 +191,7 @@ private:
 
     using PurseID = std::pair<identifier::Notary, identifier::UnitDefinition>;
 
-    static constexpr auto current_version_ = VersionNumber{9};
+    static constexpr auto current_version_ = VersionNumber{10};
     static constexpr auto blockchain_index_version_ = VersionNumber{1};
     static constexpr auto storage_purse_version_ = VersionNumber{1};
 
@@ -243,6 +255,14 @@ private:
     mutable std::mutex workflows_lock_;
     mutable std::unique_ptr<tree::PaymentWorkflows> workflows_;
     UnallocatedMap<PurseID, Hash> purse_id_;
+    mutable std::mutex ethereum_lock_;
+    UnallocatedMap<UnitType, UnallocatedSet<identifier::Account>>
+        ethereum_account_types_{};
+    UnallocatedMap<identifier::Account, UnitType> ethereum_account_index_;
+    UnallocatedMap<
+        identifier::Account,
+        std::shared_ptr<proto::BlockchainEthereumAccountData>>
+        ethereum_accounts_{};
 
     template <typename T, typename... Args>
     auto construct(

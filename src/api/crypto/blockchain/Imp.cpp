@@ -434,40 +434,6 @@ auto Blockchain::Imp::bip44_type(const UnitType in) const noexcept -> Bip44Type
     }
 }
 
-auto Blockchain::Imp::CalculateAddress(
-    const opentxs::blockchain::Type chain,
-    const Style format,
-    const Data& pubkey) const noexcept -> UnallocatedCString
-{
-    auto data = api_.Factory().Data();
-
-    switch (format) {
-        case Style::p2wpkh:
-        case Style::p2pkh: {
-            try {
-                data = PubkeyHash(chain, pubkey);
-            } catch (...) {
-                LogError()()("Invalid public key.").Flush();
-
-                return {};
-            }
-        } break;
-        case Style::unknown_address_style:
-        case Style::p2sh:
-        case Style::p2wsh:
-        case Style::p2tr:
-        default: {
-            LogError()()("Unsupported address style (")(
-                static_cast<std::uint16_t>(format))(")")
-                .Flush();
-
-            return {};
-        }
-    }
-
-    return EncodeAddress(format, chain, data);
-}
-
 auto Blockchain::Imp::Confirm(
     const Key key,
     const opentxs::blockchain::block::TransactionHash& tx) const noexcept
@@ -792,7 +758,9 @@ auto Blockchain::Imp::ethereum(
     const opentxs::blockchain::Type chain,
     const Data& pubkeyHash) const noexcept -> UnallocatedCString
 {
-    if (20_uz == pubkeyHash.size()) {
+    constexpr auto expected = 20_uz;
+
+    if (const auto size = pubkeyHash.size(); expected == size) {
 
         return "0x"s + make_checksum(pubkeyHash);
     } else {
@@ -1145,6 +1113,91 @@ auto Blockchain::Imp::make_checksum(const Data& hash) const noexcept
     return out;
 }
 
+auto Blockchain::Imp::NewEthereumSubaccount(
+    const identifier::Nym& nymID,
+    const opentxs::blockchain::crypto::HDProtocol standard,
+    const opentxs::blockchain::Type derivationChain,
+    const opentxs::blockchain::Type targetChain,
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
+{
+    static const auto blank = identifier::Account{};
+
+    if (false == validate_nym(nymID)) { return blank; }
+
+    if (opentxs::blockchain::Type::UnknownBlockchain == derivationChain) {
+        LogError()()("Invalid derivationChain").Flush();
+
+        return blank;
+    }
+
+    if (opentxs::blockchain::Type::UnknownBlockchain == targetChain) {
+        LogError()()("Invalid targetChain").Flush();
+
+        return blank;
+    }
+
+    auto nym = api_.Wallet().Nym(nymID);
+
+    if (false == bool(nym)) {
+        LogError()()("Nym does not exist.").Flush();
+
+        return blank;
+    }
+
+    auto nymPath = proto::HDPath{};
+
+    if (false == nym->Internal().Path(nymPath)) {
+        LogError()()("No nym path.").Flush();
+
+        return blank;
+    }
+
+    if (false == nymPath.has_seed()) {
+        LogError()()("Missing seed.").Flush();
+
+        return blank;
+    }
+
+    if (2 > nymPath.child().size()) {
+        LogError()()("Invalid path.").Flush();
+
+        return blank;
+    }
+
+    auto accountPath = proto::HDPath{};
+    init_path(
+        api_.Factory().Internal().SeedID(nymPath.seed()),
+        blockchain_to_unit(derivationChain),
+        HDIndex{nymPath.child(1), Bip32Child::HARDENED},
+        standard,
+        accountPath);
+
+    try {
+        const auto& subaccount =
+            wallet_mutable(targetChain)
+                .Internal()
+                .AddEthereum(nymID, accountPath, standard, reason);
+
+        if (subaccount.IsValid()) {
+            const auto& id = subaccount.ID();
+            LogVerbose()()("Created new ethereum subaccount ")(
+                id, api_.Crypto())(" for ")(print(targetChain))(
+                " account for ")(nymID.asBase58(api_.Crypto()))(" using path ")(
+                opentxs::crypto::Print(accountPath))
+                .Flush();
+
+            return id;
+        } else {
+
+            throw std::runtime_error{"failed to create account"};
+        }
+    } catch (const std::exception& e) {
+        LogConsole()()(e.what()).Flush();
+
+        return blank;
+    }
+}
+
 auto Blockchain::Imp::NewHDSubaccount(
     const identifier::Nym& nymID,
     const opentxs::blockchain::crypto::HDProtocol standard,
@@ -1382,8 +1435,8 @@ auto Blockchain::Imp::ProcessTransactions(
 }
 
 auto Blockchain::Imp::PubkeyHash(
-    [[maybe_unused]] const opentxs::blockchain::Type chain,
-    const Data& pubkey) const noexcept(false) -> ByteArray
+    const opentxs::blockchain::Type chain,
+    ReadView pubkey) const noexcept(false) -> ByteArray
 {
     if (pubkey.empty()) { throw std::runtime_error("Empty pubkey"); }
 
@@ -1393,10 +1446,8 @@ auto Blockchain::Imp::PubkeyHash(
 
     auto output = ByteArray{};
 
-    if (false == api_.Crypto().Hash().Digest(
-                     opentxs::crypto::HashType::Bitcoin,
-                     pubkey.Bytes(),
-                     output.WriteInto())) {
+    if (false == opentxs::blockchain::PubkeyHash(
+                     api_.Crypto(), chain, pubkey, output.WriteInto())) {
         throw std::runtime_error("Unable to calculate hash.");
     }
 

@@ -178,8 +178,7 @@ Element::Element(
 auto Element::Address(const blockchain::crypto::AddressStyle format)
     const noexcept -> UnallocatedCString
 {
-    return blockchain_.CalculateAddress(
-        chain_, format, api_.Factory().DataFromBytes(key_.PublicKey()));
+    return blockchain_.EncodeAddress(format, chain_, key_);
 }
 
 auto Element::Confirmed() const noexcept -> Txids

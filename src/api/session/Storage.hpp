@@ -29,7 +29,6 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -67,6 +66,7 @@ class Key;
 namespace proto
 {
 class Bip47Channel;
+class BlockchainEthereumAccountData;
 class Ciphertext;
 class Contact;
 class Context;
@@ -170,6 +170,10 @@ public:
         const identifier::Nym& nymID,
         const UnitType type) const noexcept
         -> UnallocatedSet<identifier::Account> final;
+    auto BlockchainEthereumAccountList(
+        const identifier::Nym& nymID,
+        const UnitType type) const noexcept
+        -> UnallocatedSet<identifier::Account> final;
     auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
         const identifier::Account& id) const noexcept -> UnitType final;
@@ -225,6 +229,12 @@ public:
         const identifier::Account& channelID,
         proto::Bip47Channel& output,
         ErrorReporting checking) const noexcept -> bool final;
+    auto Load(
+        const identifier::Nym& nymID,
+        const identifier::Account& accountID,
+        proto::BlockchainEthereumAccountData& output,
+        ErrorReporting checking = ErrorReporting::silent) const noexcept
+        -> bool final;
     auto Load(
         const identifier::Generic& id,
         proto::Contact& contact,
@@ -435,12 +445,17 @@ public:
         const UnitType unit) const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nymID,
-        const identity::wot::claim::ClaimType type,
+        const UnitType type,
         const proto::HDAccount& data) const noexcept -> bool final;
     auto Store(
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
         const proto::Bip47Channel& data) const noexcept -> bool final;
+    auto Store(
+        const identifier::Nym& nymID,
+        const UnitType type,
+        const proto::BlockchainEthereumAccountData& data) const noexcept
+        -> bool final;
     auto Store(const proto::Contact& data) const noexcept -> bool final;
     auto Store(const proto::Context& data) const noexcept -> bool final;
     auto Store(const proto::Credential& data) const noexcept -> bool final;

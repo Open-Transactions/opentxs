@@ -24,7 +24,6 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -130,9 +129,6 @@ private:
     mutable opentxs::crypto::asymmetric::key::HD cached_internal_;
     mutable opentxs::crypto::asymmetric::key::HD cached_external_;
     mutable Me self_;
-
-    static auto name(const proto::HDPath& path, HDProtocol type) noexcept
-        -> UnallocatedCString;
 
     auto account_already_exists(const rLock& lock) const noexcept -> bool final;
     auto save(const rLock& lock) const noexcept -> bool final;

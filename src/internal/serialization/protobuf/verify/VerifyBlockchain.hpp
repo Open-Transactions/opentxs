@@ -29,6 +29,9 @@ auto BlockchainDeterministicAccountDataAllowedBlockchainAccountData() noexcept
     -> const VersionMap&;
 auto BlockchainDeterministicAccountDataAllowedHDPath() noexcept
     -> const VersionMap&;
+auto BlockchainEthereumAccountDataAllowedHDPath() noexcept -> const VersionMap&;
+auto BlockchainEthereumAccountDataAllowedBlockchainImportedAccountData() noexcept
+    -> const VersionMap&;
 auto BlockchainImportedAccountDataAllowedBlockchainAccountData() noexcept
     -> const VersionMap&;
 auto BlockchainImportedAccountDataAllowedBlockchainAddress() noexcept

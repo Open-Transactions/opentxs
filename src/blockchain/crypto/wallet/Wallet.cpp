@@ -74,6 +74,17 @@ auto Wallet::add(
     return true;
 }
 
+auto Wallet::AddEthereum(
+    const identifier::Nym& nym,
+    const proto::HDPath& path,
+    const crypto::HDProtocol standard,
+    const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
+{
+    return get_or_create(*data_.lock(), nym)
+        .Internal()
+        .AddEthereum(path, standard, reason);
+}
+
 auto Wallet::AddHD(
     const identifier::Nym& nym,
     const proto::HDPath& path,
@@ -127,18 +138,19 @@ auto Wallet::end() const noexcept -> const_iterator
 auto Wallet::factory(
     const identifier::Nym& nym,
     const Accounts& hd,
+    const Accounts& ethereum,
     const Accounts& paymentCode) const noexcept
     -> std::unique_ptr<crypto::Account>
 {
     return factory::BlockchainAccountKeys(
-        api_, contacts_, *this, nym, hd, {}, paymentCode);
+        api_, contacts_, *this, nym, hd, ethereum, paymentCode);
 }
 
 auto Wallet::get_or_create(Data& data, const identifier::Nym& id) const noexcept
     -> crypto::Account&
 {
     if (false == data.index_.contains(id)) {
-        auto pTree = factory(id, {}, {});
+        auto pTree = factory(id, {}, {}, {});
 
         assert_false(nullptr == pTree);
 
@@ -160,13 +172,17 @@ auto Wallet::init() noexcept -> void
         const auto unit = blockchain_to_unit(chain_);
         const auto hd =
             api_.Storage().Internal().BlockchainAccountList(nymID, unit);
+        const auto ethereum =
+            api_.Storage().Internal().BlockchainEthereumAccountList(
+                nymID, unit);
         const auto pc =
             api_.Storage().Internal().Bip47ChannelsByChain(nymID, unit);
         LogConsole()("Loading ")(print(chain_))(" key manager for ")(
-            nymID, api_.Crypto())(" with ")(hd.size())(" HD subaccounts and ")(
-            pc.size())(" payment code subaccounts")
+            nymID, api_.Crypto())(" with ")(hd.size())(" HD subaccounts, ")(
+            ethereum.size())(" ethereum subaccounts, ")(" and ")(pc.size())(
+            " payment code subaccounts")
             .Flush();
-        add(data, nymID, factory(nymID, hd, pc));
+        add(data, nymID, factory(nymID, hd, ethereum, pc));
     }
 }
 

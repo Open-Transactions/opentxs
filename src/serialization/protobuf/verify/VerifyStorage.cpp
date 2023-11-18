@@ -146,6 +146,7 @@ auto StorageNymAllowedBlockchainAccountList() noexcept -> const VersionMap&
         {7, {1, 1}},
         {8, {1, 1}},
         {9, {1, 1}},
+        {10, {1, 1}},
     };
 
     return output;
@@ -159,6 +160,16 @@ auto StorageNymAllowedHDAccount() noexcept -> const VersionMap&
         {7, {1, 1}},
         {8, {1, 1}},
         {9, {1, 1}},
+        {10, {1, 1}},
+    };
+
+    return output;
+}
+auto StorageNymAllowedBlockchainEthereumAccountData() noexcept
+    -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {10, {1, 1}},
     };
 
     return output;
@@ -169,6 +180,7 @@ auto StorageNymAllowedStorageBip47AddressIndex() noexcept -> const VersionMap&
         {7, {1, 1}},
         {8, {1, 1}},
         {9, {1, 1}},
+        {10, {1, 1}},
     };
 
     return output;
@@ -185,6 +197,7 @@ auto StorageNymAllowedStorageItemHash() noexcept -> const VersionMap&
         {7, {2, 7}},
         {8, {2, 8}},
         {9, {2, 9}},
+        {10, {2, 9}},
     };
 
     return output;
@@ -194,6 +207,7 @@ auto StorageNymAllowedStoragePurse() noexcept -> const VersionMap&
     static const auto output = VersionMap{
         {8, {1, 1}},
         {9, {1, 1}},
+        {10, {1, 1}},
     };
 
     return output;

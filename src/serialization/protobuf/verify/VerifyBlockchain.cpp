@@ -118,6 +118,23 @@ auto BlockchainDeterministicAccountDataAllowedHDPath() noexcept
 
     return output;
 }
+auto BlockchainEthereumAccountDataAllowedHDPath() noexcept -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
+auto BlockchainEthereumAccountDataAllowedBlockchainImportedAccountData() noexcept
+    -> const VersionMap&
+{
+    static const auto output = VersionMap{
+        {1, {1, 1}},
+    };
+
+    return output;
+}
 auto BlockchainImportedAccountDataAllowedBlockchainAccountData() noexcept
     -> const VersionMap&
 {

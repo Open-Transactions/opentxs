@@ -159,10 +159,6 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
     {
         return balance_oracle_endpoint_;
     }
-    auto CalculateAddress(
-        const opentxs::blockchain::Type chain,
-        const Style format,
-        const Data& pubkey) const noexcept -> UnallocatedCString;
     auto Confirm(
         const Key key,
         const opentxs::blockchain::block::TransactionHash& tx) const noexcept
@@ -229,6 +225,12 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         -> AccountData;
     virtual auto LookupContacts(const Data& pubkeyHash) const noexcept
         -> ContactList;
+    auto NewEthereumSubaccount(
+        const identifier::Nym& nymID,
+        const opentxs::blockchain::crypto::HDProtocol standard,
+        const opentxs::blockchain::Type derivationChain,
+        const opentxs::blockchain::Type targetChain,
+        const PasswordPrompt& reason) const noexcept -> identifier::Account;
     auto NewHDSubaccount(
         const identifier::Nym& nymID,
         const opentxs::blockchain::crypto::HDProtocol standard,
@@ -262,7 +264,7 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         Set<opentxs::blockchain::block::Transaction>&& transactions,
         const PasswordPrompt& reason,
         alloc::Default monotonic) const noexcept -> bool;
-    auto PubkeyHash(const opentxs::blockchain::Type chain, const Data& pubkey)
+    auto PubkeyHash(const opentxs::blockchain::Type chain, ReadView pubkey)
         const noexcept(false) -> ByteArray;
     auto RecipientContact(const Key& key) const noexcept -> identifier::Generic;
     [[nodiscard]] auto RegisterAccount(

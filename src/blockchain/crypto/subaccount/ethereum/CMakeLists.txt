@@ -10,5 +10,8 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Ethereum.hpp"
     "Ethereum.cpp"
+    "Factory.cpp"
+    "Imp.cpp"
+    "Imp.hpp"
     "Internal.cpp"
 )

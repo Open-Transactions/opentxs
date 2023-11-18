@@ -57,6 +57,10 @@ struct Account : virtual public crypto::Account {
     virtual auto FindNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
 
+    virtual auto AddEthereum(
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddHD(
         const proto::HDPath& path,
         const crypto::HDProtocol standard,

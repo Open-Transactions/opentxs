@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Imported.hpp"
 #include "opentxs/blockchain/protocol/ethereum/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -39,14 +40,31 @@ public:
     OPENTXS_NO_EXPORT static auto Blank() noexcept -> Ethereum&;
 
     auto Balance() const noexcept -> Amount;
-    auto KnownTransactions(alloc::Strategy alloc) const noexcept
+    auto KnownIncoming(alloc::Strategy alloc) const noexcept
+        -> Set<block::TransactionHash>;
+    auto KnownOutgoing(alloc::Strategy alloc) const noexcept
+        -> Set<block::TransactionHash>;
+    auto MissingOutgoing(alloc::Strategy alloc) const noexcept
         -> Set<protocol::ethereum::AccountNonce>;
-    auto MissingTransactions(alloc::Strategy alloc) const noexcept
-        -> Set<protocol::ethereum::AccountNonce>;
-    auto NextNonce() const noexcept -> protocol::ethereum::AccountNonce;
-    auto UpdateBalance(
+    auto NextOutgoing() const noexcept -> protocol::ethereum::AccountNonce;
+
+    auto AddIncoming(
         const Amount& balance,
-        protocol::ethereum::AccountNonce nonce) const noexcept -> bool;
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    auto AddIncoming(
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    auto AddOutgoing(
+        const Amount& balance,
+        protocol::ethereum::AccountNonce nonce,
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    auto AddOutgoing(
+        protocol::ethereum::AccountNonce nonce,
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    auto UpdateBalance(const Amount& balance) noexcept -> bool;
 
     OPENTXS_NO_EXPORT Ethereum(
         std::shared_ptr<internal::Subaccount> imp) noexcept;

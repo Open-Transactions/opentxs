@@ -6,6 +6,7 @@
 #pragma once
 
 #include "internal/blockchain/crypto/Imported.hpp"
+#include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/protocol/ethereum/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -25,14 +26,32 @@ public:
     static auto Blank() noexcept -> Ethereum&;
 
     virtual auto Balance() const noexcept -> Amount;
-    virtual auto KnownTransactions(alloc::Strategy alloc) const noexcept
+    virtual auto KnownIncoming(alloc::Strategy alloc) const noexcept
+        -> Set<block::TransactionHash>;
+    virtual auto KnownOutgoing(alloc::Strategy alloc) const noexcept
+        -> Set<block::TransactionHash>;
+    virtual auto MissingOutgoing(alloc::Strategy alloc) const noexcept
         -> Set<protocol::ethereum::AccountNonce>;
-    virtual auto MissingTransactions(alloc::Strategy alloc) const noexcept
-        -> Set<protocol::ethereum::AccountNonce>;
-    virtual auto NextNonce() const noexcept -> protocol::ethereum::AccountNonce;
-    virtual auto UpdateBalance(
+    virtual auto NextOutgoing() const noexcept
+        -> protocol::ethereum::AccountNonce;
+
+    virtual auto AddIncoming(
         const Amount& balance,
-        protocol::ethereum::AccountNonce nonce) const noexcept -> bool;
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    virtual auto AddIncoming(
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    virtual auto AddOutgoing(
+        const Amount& balance,
+        protocol::ethereum::AccountNonce nonce,
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    virtual auto AddOutgoing(
+        protocol::ethereum::AccountNonce nonce,
+        const block::TransactionHash& txid,
+        bool confirmed) noexcept -> bool;
+    virtual auto UpdateBalance(const Amount& balance) noexcept -> bool;
 
     Ethereum() = default;
     Ethereum(const Ethereum&) = delete;

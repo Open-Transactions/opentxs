@@ -14,17 +14,13 @@ namespace ottest
 {
 namespace ot = opentxs;
 
-//    static constexpr auto version_ = std::uint8_t{1};
-//    static constexpr auto chain_ = ot::blockchain::Type::Bitcoin;
-
 auto PaymentCode_v1::KeyToAddress(
     const ot::crypto::asymmetric::key::EllipticCurve& key) const noexcept
     -> ot::UnallocatedCString
 {
     constexpr auto style = ot::blockchain::crypto::AddressStyle::p2pkh;
 
-    return api_.Crypto().Blockchain().CalculateAddress(
-        chain_, style, api_.Factory().DataFromBytes(key.PublicKey()));
+    return api_.Crypto().Blockchain().EncodeAddress(style, chain_, key);
 }
 
 PaymentCode_v1::PaymentCode_v1()

@@ -127,13 +127,6 @@ public:
     {
         return {};
     }
-    auto CalculateAddress(
-        const opentxs::blockchain::Type,
-        const opentxs::blockchain::crypto::AddressStyle,
-        const Data&) const noexcept -> UnallocatedCString final
-    {
-        return {};
-    }
     auto Confirm(const Key, const opentxs::blockchain::block::TransactionHash&)
         const noexcept -> bool final
     {
@@ -238,6 +231,23 @@ public:
     auto LookupContacts(const Data&) const noexcept -> ContactList final
     {
         return {};
+    }
+    auto NewEthereumSubaccount(
+        const identifier::Nym&,
+        const opentxs::blockchain::crypto::HDProtocol,
+        const Chain,
+        const PasswordPrompt&) const noexcept -> identifier::Account final
+    {
+        return {account_};
+    }
+    auto NewEthereumSubaccount(
+        const identifier::Nym&,
+        const opentxs::blockchain::crypto::HDProtocol,
+        const Chain,
+        const Chain,
+        const PasswordPrompt&) const noexcept -> identifier::Account final
+    {
+        return {account_};
     }
     auto NewHDSubaccount(
         const identifier::Nym&,

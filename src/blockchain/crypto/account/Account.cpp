@@ -8,6 +8,7 @@
 #include "blockchain/crypto/account/Account.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
+#include <BlockchainEthereumAccountData.pb.h>
 #include <HDAccount.pb.h>
 #include <boost/endian/conversion.hpp>
 #include <algorithm>
@@ -115,7 +116,7 @@ Account::Account(
     const crypto::Wallet& parent,
     const identifier::Nym& nym,
     const Accounts& hd,
-    const Accounts& imported,
+    const Accounts& ethereum,
     const Accounts& paymentCode) noexcept
     : api_(api)
     , contacts_(contacts)
@@ -144,7 +145,16 @@ Account::Account(
     auto& data = *handle;
     init_notification(data);
     init_hd(hd, data);
+    init_ethereum(ethereum, data);
     init_payment_code(paymentCode, data);
+}
+
+auto Account::AddEthereum(
+    const proto::HDPath& path,
+    const crypto::HDProtocol standard,
+    const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
+{
+    return init_ethereum(path, standard, reason);
 }
 
 auto Account::AddHD(
@@ -317,6 +327,102 @@ auto Account::get_subaccounts(SubaccountType type, Data& data) const noexcept
     for (const auto& p : subrange(begin, end)) { out.emplace_back(p.second); }
 
     return out;
+}
+
+auto Account::init_ethereum(const Accounts& accounts, Data& data) noexcept
+    -> void
+{
+    LogTrace()()("loading ")(accounts.size())(" ethereum subaccounts for ")(
+        nym_id_, api_.Crypto())(" on ")(print(chain_))
+        .Flush();
+    using namespace std::ranges;
+    for_each(accounts, [&, this](const auto& id) {
+        init_ethereum(id, data, false);
+    });
+}
+
+auto Account::init_ethereum(
+    const identifier::Account& id,
+    Data& data,
+    bool checking) noexcept -> crypto::Subaccount&
+{
+    try {
+        if (auto i = data.index_.find(id); data.index_.end() != i) {
+
+            return i->second->Self();
+        }
+
+        auto proto = proto::BlockchainEthereumAccountData{};
+        const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
+
+        if (false == loaded) {
+            if (checking) {
+
+                return Subaccount::Blank();
+            } else {
+                throw std::runtime_error{
+                    "failed to load serialized subaccount "s.append(
+                        id.asBase58(api_.Crypto()))};
+            }
+        }
+
+        auto subaccount =
+            factory::BlockchainEthereumSubaccount(api_, *this, id, proto);
+
+        if (nullptr == subaccount) {
+            throw std::runtime_error{
+                "failed to instantiate ethereum subaccount "s.append(
+                    id.asBase58(api_.Crypto()))};
+        }
+
+        data.map_.emplace(subaccount->Type(), subaccount);
+        data.index_.emplace(id, subaccount);
+
+        assert_true(data.map_.size() == data.index_.size());
+
+        return subaccount->Self();
+    } catch (const std::exception& e) {
+        LogError()()(e.what()).Flush();
+
+        return Subaccount::Blank();
+    }
+}
+
+auto Account::init_ethereum(
+    const proto::HDPath& path,
+    const crypto::HDProtocol standard,
+    const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
+{
+    const auto id = api_.Factory().Internal().AccountID(
+        UnitToClaim(target_to_unit(chain_)), path);
+    auto handle = subaccounts_.lock();
+    auto& data = *handle;
+
+    if (auto& existing = init_ethereum(id, data, true); existing.IsValid()) {
+
+        return existing;
+    }
+
+    try {
+        auto subaccount = factory::BlockchainEthereumSubaccount(
+            api_, *this, id, path, standard, reason);
+
+        if (nullptr == subaccount) {
+            throw std::runtime_error{"failed to create subaccount "s.append(
+                id.asBase58(api_.Crypto()))};
+        }
+
+        data.map_.emplace(subaccount->Type(), subaccount);
+        data.index_.emplace(id, subaccount);
+
+        assert_true(data.map_.size() == data.index_.size());
+
+        return subaccount->Self();
+    } catch (const std::exception& e) {
+        LogError()()(e.what()).Flush();
+
+        return Subaccount::Blank();
+    }
 }
 
 auto Account::init_hd(const Accounts& accounts, Data& data) noexcept -> void
