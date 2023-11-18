@@ -11,12 +11,12 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/util/Editor.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

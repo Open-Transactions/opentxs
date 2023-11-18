@@ -26,11 +26,8 @@
 #include <utility>
 
 #include "BoostAsio.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Peer.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -51,6 +48,9 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/blockchain/Seednodes.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -59,7 +59,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -228,14 +228,14 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     database::Peer& db,
     std::string_view peers,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : ActorType(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               using namespace std::literals;
@@ -285,7 +285,7 @@ Actor::Actor(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , me_()
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , db_(db)
     , to_blockchain_api_(pipeline_.Internal().ExtraSocket(0))
@@ -1223,7 +1223,7 @@ auto Actor::process_addlistener(
     const auto body = msg.Payload();
     assert_true(1 < body.size());
 
-    auto address = api_.Factory().InternalSession().BlockchainAddress(
+    auto address = api_.Factory().Internal().Session().BlockchainAddress(
         proto::Factory<proto::BlockchainPeerAddress>(body[1]));
 
     if (address.IsValid()) {
@@ -1238,7 +1238,7 @@ auto Actor::process_addpeer(Message&& msg) noexcept -> void
     const auto body = msg.Payload();
     assert_true(1 < body.size());
 
-    auto address = api_.Factory().InternalSession().BlockchainAddress(
+    auto address = api_.Factory().Internal().Session().BlockchainAddress(
         proto::Factory<proto::BlockchainPeerAddress>(body[1]));
 
     if (address.IsValid()) {
@@ -1300,7 +1300,7 @@ auto Actor::process_gossip_address(Message&& msg) noexcept -> void
     auto good = 0_uz;
 
     for (auto& frame : addresses) {
-        auto addr = api_.Factory().InternalSession().BlockchainAddress(
+        auto addr = api_.Factory().Internal().Session().BlockchainAddress(
             proto::Factory<proto::BlockchainPeerAddress>(frame));
 
         if (addr.IsValid()) {

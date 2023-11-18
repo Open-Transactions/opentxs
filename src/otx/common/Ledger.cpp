@@ -12,11 +12,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -32,10 +27,15 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -664,22 +664,22 @@ auto Ledger::make_filename(const ledgerType theType) -> std::
 
     switch (theType) {
         case ledgerType::nymbox: {
-            pszFolder = api_.Internal().Legacy().Nymbox();
+            pszFolder = api_.Internal().Paths().Nymbox();
         } break;
         case ledgerType::inbox: {
-            pszFolder = api_.Internal().Legacy().Inbox();
+            pszFolder = api_.Internal().Paths().Inbox();
         } break;
         case ledgerType::outbox: {
-            pszFolder = api_.Internal().Legacy().Outbox();
+            pszFolder = api_.Internal().Paths().Outbox();
         } break;
         case ledgerType::paymentInbox: {
-            pszFolder = api_.Internal().Legacy().PaymentInbox();
+            pszFolder = api_.Internal().Paths().PaymentInbox();
         } break;
         case ledgerType::recordBox: {
-            pszFolder = api_.Internal().Legacy().RecordBox();
+            pszFolder = api_.Internal().Paths().RecordBox();
         } break;
         case ledgerType::expiredBox: {
-            pszFolder = api_.Internal().Legacy().ExpiredBox();
+            pszFolder = api_.Internal().Paths().ExpiredBox();
         } break;
         case ledgerType::message:
         case ledgerType::error_state:
@@ -709,7 +709,10 @@ auto Ledger::make_filename(const ledgerType theType) -> std::
     three = ledgerID->Get();
 
     if (false == filename_->Exists()) {
-        filename_->Set((fs::path{two} / fs::path{three}).string().c_str());
+        filename_->Set(
+            (std::filesystem::path{two} / std::filesystem::path{three})
+                .string()
+                .c_str());
     }
 
     if (2 > one.size()) { return output; }
@@ -833,51 +836,50 @@ auto Ledger::generate_ledger(
 {
     switch (theType) {
         case ledgerType::nymbox: {
-            foldername_ = String::Factory(api_.Internal().Legacy().Nymbox());
+            foldername_ = String::Factory(api_.Internal().Paths().Nymbox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
         } break;
         case ledgerType::inbox: {
-            foldername_ = String::Factory(api_.Internal().Legacy().Inbox());
+            foldername_ = String::Factory(api_.Internal().Paths().Inbox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
         } break;
         case ledgerType::outbox: {
-            foldername_ = String::Factory(api_.Internal().Legacy().Outbox());
+            foldername_ = String::Factory(api_.Internal().Paths().Outbox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
         } break;
         case ledgerType::paymentInbox: {
             foldername_ =
-                String::Factory(api_.Internal().Legacy().PaymentInbox());
+                String::Factory(api_.Internal().Paths().PaymentInbox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
         } break;
         case ledgerType::recordBox: {
-            foldername_ = String::Factory(api_.Internal().Legacy().RecordBox());
+            foldername_ = String::Factory(api_.Internal().Paths().RecordBox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
         } break;
         case ledgerType::expiredBox: {
-            foldername_ =
-                String::Factory(api_.Internal().Legacy().ExpiredBox());
+            foldername_ = String::Factory(api_.Internal().Paths().ExpiredBox());
             filename_->Set(api_.Internal()
-                               .Legacy()
+                               .Paths()
                                .LedgerFileName(theNotaryID, theAcctID)
                                .string()
                                .c_str());
@@ -1211,7 +1213,7 @@ auto Ledger::GetTransferReceipt(std::int64_t lNumberOfOrigin)
             auto strReference = String::Factory();
             pTransaction->GetReferenceString(strReference);
 
-            auto pOriginalItem{api_.Factory().InternalSession().Item(
+            auto pOriginalItem{api_.Factory().Internal().Session().Item(
                 strReference,
                 pTransaction->GetPurportedNotaryID(),
                 pTransaction->GetReferenceToNum())};
@@ -1290,7 +1292,7 @@ auto Ledger::GetChequeReceipt(std::int64_t lChequeNum)
         auto strDepositChequeMsg = String::Factory();
         pCurrentReceipt->GetReferenceString(strDepositChequeMsg);
 
-        auto pOriginalItem{api_.Factory().InternalSession().Item(
+        auto pOriginalItem{api_.Factory().Internal().Session().Item(
             strDepositChequeMsg,
             GetPurportedNotaryID(),
             pCurrentReceipt->GetReferenceToNum())};
@@ -1314,7 +1316,7 @@ auto Ledger::GetChequeReceipt(std::int64_t lChequeNum)
             auto strCheque = String::Factory();
             pOriginalItem->GetAttachment(strCheque);
 
-            auto pCheque{api_.Factory().InternalSession().Cheque()};
+            auto pCheque{api_.Factory().Internal().Session().Cheque()};
             assert_false(nullptr == pCheque);
 
             if (!((strCheque->GetLength() > 2) &&
@@ -1455,7 +1457,7 @@ auto Ledger::GenerateBalanceStatement(
     // theOwner is the withdrawal, or deposit, or whatever, that wants to change
     // the account balance, and thus that needs a new balance agreement signed.
     //
-    auto pBalanceItem{api_.Factory().InternalSession().Item(
+    auto pBalanceItem{api_.Factory().Internal().Session().Item(
         theOwner, itemType::balanceStatement, {})};  // <=== balanceStatement
                                                      // type, with user ID,
                                                      // server ID, account ID,
@@ -2037,7 +2039,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                     // which is ONLY used here.
                     //
                     auto pTransaction{
-                        api_.Factory().InternalSession().Transaction(
+                        api_.Factory().Internal().Session().Transaction(
                             NYM_ID,
                             ACCOUNT_ID,
                             NOTARY_ID,
@@ -2229,7 +2231,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             //            OTTransaction * pTransaction = new
             // OTTransaction(GetNymID(), GetRealAccountID(),
             // GetRealNotaryID());
-            auto pTransaction{api_.Factory().InternalSession().Transaction(
+            auto pTransaction{api_.Factory().Internal().Session().Transaction(
                 GetNymID(), GetPurportedAccountID(), GetPurportedNotaryID())};
             assert_false(nullptr == pTransaction);
 

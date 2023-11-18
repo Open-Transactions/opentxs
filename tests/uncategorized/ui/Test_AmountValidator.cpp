@@ -8,13 +8,10 @@
 #include <opentxs/opentxs.hpp>
 #include <QString>
 #include <QValidator>
-#include <future>
 #include <string_view>
 #include <tuple>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/otx/client/Pair.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/Notary.hpp"
 #include "ottest/fixtures/common/User.hpp"
@@ -37,7 +34,7 @@ TEST_F(AmountValidator, preconditions)
     const auto& server = ot_.NotarySession(0);
     const auto& session = StartClient(0);
     session.OTX().DisableAutoaccept();
-    session.InternalClient().Pair().Stop().get();
+    StopPair(session);
     const auto seed =
         ImportBip39(session, GetPaymentCodeVector3().alice_.words_);
 

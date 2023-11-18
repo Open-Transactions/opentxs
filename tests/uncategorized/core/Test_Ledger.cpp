@@ -7,11 +7,10 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
+#include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/core/Ledger.hpp"
 
 namespace ot = opentxs;
@@ -28,10 +27,10 @@ TEST_F(Ledger, init)
     ASSERT_FALSE(nym_id_.empty());
 
     const auto serverContract =
-        server_.Wallet().Internal().Server(server_.ID());
+        Base::InternalWallet(server_).Server(server_.ID());
     auto bytes = ot::Space{};
     serverContract->Serialize(ot::writer(bytes), true);
-    client_.Wallet().Internal().Server(ot::reader(bytes));
+    Base::InternalWallet(client_).Server(ot::reader(bytes));
     server_id_ = serverContract->ID();
 
     ASSERT_FALSE(server_id_.empty());
@@ -43,8 +42,7 @@ TEST_F(Ledger, create_nymbox)
 
     ASSERT_TRUE(nym);
 
-    auto nymbox = client_.Factory().InternalSession().Ledger(
-        nym_id_, nym_id_, server_id_, ot::ledgerType::nymbox, true);
+    auto nymbox = get_nymbox(nym_id_, server_id_, true);
 
     ASSERT_TRUE(nymbox);
 
@@ -57,8 +55,7 @@ TEST_F(Ledger, create_nymbox)
 
 TEST_F(Ledger, load_nymbox)
 {
-    auto nymbox = client_.Factory().InternalSession().Ledger(
-        nym_id_, nym_id_, server_id_, ot::ledgerType::nymbox, false);
+    auto nymbox = get_nymbox(nym_id_, server_id_, false);
 
     ASSERT_TRUE(nymbox);
     EXPECT_TRUE(nymbox->LoadNymbox());

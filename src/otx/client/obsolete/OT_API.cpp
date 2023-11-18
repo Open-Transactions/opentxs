@@ -15,13 +15,7 @@
 #include <limits>
 #include <memory>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/Settings.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
@@ -55,13 +49,19 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -96,15 +96,15 @@ auto VerifyBalanceReceipt(
     const auto& SERVER_NYM = context.RemoteNym();
     // Load the last successful BALANCE STATEMENT...
 
-    auto tranOut{api.Factory().InternalSession().Transaction(
+    auto tranOut{api.Factory().Internal().Session().Transaction(
         SERVER_NYM.ID(), accountID, NOTARY_ID)};
 
     assert_true(false != bool(tranOut));
 
-    auto filename = api::Legacy::GetFilenameSuccess(
+    auto filename = api::internal::Paths::GetFilenameSuccess(
         accountID.asBase58(api.Crypto())
             .c_str());  // receipts/NOTARY_ID/accountID.success
-    const char* szFolder1name = api.Internal().Legacy().Receipt();  // receipts
+    const char* szFolder1name = api.Internal().Paths().Receipt();  // receipts
     const auto sNotaryID{NOTARY_ID.asBase58(api.Crypto())};
     const char* szFolder2name = sNotaryID.c_str();  // receipts/NOTARY_ID
 
@@ -302,7 +302,7 @@ auto OT_API::LoadConfigFile() -> bool
     // then we pass it to the OpenPid function.
     auto strDataPath = String::Factory(api_.DataFolder().string().c_str());
 
-    if (!api_.Internal().Legacy().ConfirmCreateFolder(strDataPath->Get())) {
+    if (!api_.Internal().Paths().ConfirmCreateFolder(strDataPath->Get())) {
         return false;
     }
 
@@ -446,7 +446,7 @@ auto OT_API::Create_SmartContract(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract = api_.Factory().InternalSession().SmartContract();
+    auto contract = api_.Factory().Internal().Session().SmartContract();
     assert_false(
         nullptr == contract,
         "ASSERT while trying to instantiate blank smart contract.");
@@ -486,7 +486,7 @@ auto OT_API::SmartContract_SetDates(
     // to
     // cleanup.)
 
-    auto contract{api_.Factory().InternalSession().CronItem(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().CronItem(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -529,7 +529,7 @@ auto OT_API::SmartContract_AddParty(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract(api_.Factory().InternalSession().Scriptable(THE_CONTRACT));
+    auto contract(api_.Factory().Internal().Session().Scriptable(THE_CONTRACT));
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -619,7 +619,7 @@ auto OT_API::SmartContract_RemoveParty(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -664,7 +664,7 @@ auto OT_API::SmartContract_AddAccount(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -772,7 +772,7 @@ auto OT_API::SmartContract_RemoveAccount(
     // By this point, nymfile is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -815,7 +815,7 @@ auto OT_API::SmartContract_CountNumsNeeded(
 
     std::int32_t nReturnValue = 0;
     const UnallocatedCString str_agent_name(AGENT_NAME.Get());
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
 
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract.").Flush();
@@ -858,7 +858,8 @@ auto OT_API::SmartContract_ConfirmAccount(
 
     // By this point, account is a good pointer, and is on the wallet. (No need
     // to cleanup.)
-    auto pScriptable{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto pScriptable{
+        api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(pScriptable)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -1013,7 +1014,7 @@ auto OT_API::SmartContract_ConfirmAccount(
 auto OT_API::Smart_ArePartiesSpecified(const String& THE_CONTRACT) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -1027,7 +1028,7 @@ auto OT_API::Smart_AreAssetTypesSpecified(const String& THE_CONTRACT) const
     -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -1061,7 +1062,7 @@ auto OT_API::SmartContract_ConfirmParty(
     // to
     // cleanup.)
 
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -1140,7 +1141,7 @@ auto OT_API::SmartContract_ConfirmParty(
     // have to track it until it's activated or until we cancel it.)
     //
     const auto strInstrument = String::Factory(*contract);
-    auto pMessage = api_.Factory().InternalSession().Message();
+    auto pMessage = api_.Factory().Internal().Session().Message();
     assert_true(false != bool(pMessage));
 
     const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
@@ -1180,7 +1181,7 @@ auto OT_API::SmartContract_AddBylaw(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart "
                      "contract: ")(THE_CONTRACT)(".")
@@ -1240,7 +1241,7 @@ auto OT_API::SmartContract_RemoveBylaw(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart "
                      "contract: ")(THE_CONTRACT)(".")
@@ -1288,7 +1289,7 @@ auto OT_API::SmartContract_AddHook(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart "
                      "contract: ")(THE_CONTRACT)(".")
@@ -1350,7 +1351,7 @@ auto OT_API::SmartContract_RemoveHook(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart "
                      "contract: ")(THE_CONTRACT)(".")
@@ -1408,7 +1409,7 @@ auto OT_API::SmartContract_AddCallback(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1472,7 +1473,7 @@ auto OT_API::SmartContract_RemoveCallback(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1526,7 +1527,7 @@ auto OT_API::SmartContract_AddClause(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1594,7 +1595,7 @@ auto OT_API::SmartContract_UpdateClause(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1649,7 +1650,7 @@ auto OT_API::SmartContract_RemoveClause(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1711,7 +1712,7 @@ auto OT_API::SmartContract_AddVariable(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading "
                      "smart contract: ")(THE_CONTRACT)(".")
@@ -1822,7 +1823,7 @@ auto OT_API::SmartContract_RemoveVariable(
     // By this point, nym is a good pointer, and is on the wallet. (No need
     // to
     // cleanup.)
-    auto contract{api_.Factory().InternalSession().Scriptable(THE_CONTRACT)};
+    auto contract{api_.Factory().Internal().Session().Scriptable(THE_CONTRACT)};
     if (false == bool(contract)) {
         LogError()()("Error loading smart contract: ")(THE_CONTRACT)(".")
             .Flush();
@@ -1904,7 +1905,7 @@ auto OT_API::WriteCheque(
         .Flush();
 
     // At this point, I know that number contains one I can use.
-    auto pCheque{api_.Factory().InternalSession().Cheque(
+    auto pCheque{api_.Factory().Internal().Session().Cheque(
         account.get().GetRealNotaryID(),
         account.get().GetInstrumentDefinitionID())};
     assert_false(nullptr == pCheque, "Error allocating memory in the OT API.");
@@ -2031,7 +2032,8 @@ auto OT_API::ProposePaymentPlan(
     if (pSENDER_accountID.empty()) {
         pPlan.reset(
             api_.Factory()
-                .InternalSession()
+                .Internal()
+                .Session()
                 .PaymentPlan(
                     NOTARY_ID, account.get().GetInstrumentDefinitionID())
                 .release());
@@ -2045,7 +2047,8 @@ auto OT_API::ProposePaymentPlan(
         pPlan->SetRecipientAcctID(RECIPIENT_accountID);
     } else {
         pPlan.reset(api_.Factory()
-                        .InternalSession()
+                        .Internal()
+                        .Session()
                         .PaymentPlan(
                             NOTARY_ID,
                             account.get().GetInstrumentDefinitionID(),
@@ -2145,7 +2148,7 @@ auto OT_API::ProposePaymentPlan(
     // have to track it until it's deposited or until we cancel it.)
     //
     const auto strInstrument = String::Factory(*pPlan);
-    auto pMessage = api_.Factory().InternalSession().Message();
+    auto pMessage = api_.Factory().Internal().Session().Message();
     assert_true(false != bool(pMessage));
 
     const auto strNymID = String::Factory(RECIPIENT_NYM_ID, api_.Crypto()),
@@ -2252,7 +2255,7 @@ auto OT_API::ConfirmPaymentPlan(
     // have to track it until it's deposited or until we cancel it.)
     //
     const auto strInstrument = String::Factory(thePlan);
-    auto pMessage = api_.Factory().InternalSession().Message();
+    auto pMessage = api_.Factory().Internal().Session().Message();
     assert_true(false != bool(pMessage));
 
     const auto strNymID = String::Factory(SENDER_NYM_ID, api_.Crypto()),
@@ -2293,7 +2296,7 @@ auto OT_API::LoadNymbox(
     }
 
     auto nym = context->Signer();
-    auto pLedger{api_.Factory().InternalSession().Ledger(
+    auto pLedger{api_.Factory().Internal().Session().Ledger(
         NYM_ID, NYM_ID, NOTARY_ID, ledgerType::nymbox)};
 
     OT_NEW_ASSERT_MSG(
@@ -2585,7 +2588,8 @@ auto OT_API::GenerateBasketExchange(
                 .Flush();
         } else {
             pRequestBasket.reset(api_.Factory()
-                                     .InternalSession()
+                                     .Internal()
+                                     .Session()
                                      .Basket(
                                          static_cast<std::int32_t>(currencies),
                                          contract->Weight())
@@ -2836,7 +2840,7 @@ auto OT_API::exchangeBasket(
         return output;
     }
 
-    auto basket{api_.Factory().InternalSession().Basket()};
+    auto basket{api_.Factory().Internal().Session().Basket()};
 
     assert_true(false != bool(basket));
 
@@ -2906,7 +2910,7 @@ auto OT_API::exchangeBasket(
     LogVerbose()()("Allocated transaction number ")(managedNumber.Value())(".")
         .Flush();
     transactionNum = managedNumber.Value();
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         accountID,
         serverID,
@@ -2916,7 +2920,7 @@ auto OT_API::exchangeBasket(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::exchangeBasket, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -2958,7 +2962,7 @@ auto OT_API::exchangeBasket(
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
     auto ledger{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
     std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
@@ -2994,7 +2998,7 @@ auto OT_API::getTransactionNumbers(otx::context::Server& context) const
     -> std::unique_ptr<Message>
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    auto output{api_.Factory().InternalSession().Message()};
+    auto output{api_.Factory().Internal().Session().Message()};
     auto requestNum = client_->ProcessUserCommand(
         MessageType::getTransactionNumbers,
         context,
@@ -3172,7 +3176,7 @@ auto OT_API::payDividend(
     // cheque when it constructs the actual voucher (to the dividend payee.)
     // And remember there might be a hundred shareholders, so the server
     // would create a hundred vouchers in that case.
-    auto theRequestVoucher{api_.Factory().InternalSession().Cheque(
+    auto theRequestVoucher{api_.Factory().Internal().Session().Cheque(
         serverID, SHARES_INSTRUMENT_DEFINITION_ID)};
     const bool bIssueCheque = theRequestVoucher->IssueCheque(
         AMOUNT_PER_SHARE,  // <====== Server needs this (AMOUNT_PER_SHARE.)
@@ -3222,7 +3226,7 @@ auto OT_API::payDividend(
         return output;
     }
 
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         DIVIDEND_FROM_accountID,
         serverID,
@@ -3232,7 +3236,7 @@ auto OT_API::payDividend(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::payDividend, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -3282,7 +3286,7 @@ auto OT_API::payDividend(
         *transaction, context, dividendAccount.get(), reason);
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
-    auto ledger{api_.Factory().InternalSession().Ledger(
+    auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, DIVIDEND_FROM_accountID, serverID)};
     ledger->GenerateLedger(
         DIVIDEND_FROM_accountID, serverID, ledgerType::message);
@@ -3385,7 +3389,7 @@ auto OT_API::withdrawVoucher(
     // when it
     // constructs the actual voucher.
     auto theRequestVoucher{
-        api_.Factory().InternalSession().Cheque(serverID, contractID)};
+        api_.Factory().Internal().Session().Cheque(serverID, contractID)};
 
     assert_true(false != bool(theRequestVoucher));
 
@@ -3420,7 +3424,7 @@ auto OT_API::withdrawVoucher(
 
     if (!bIssueCheque) { return output; }
 
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         accountID,
         serverID,
@@ -3429,7 +3433,7 @@ auto OT_API::withdrawVoucher(
         withdrawalNumber.Value())};
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::withdrawVoucher, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -3455,7 +3459,7 @@ auto OT_API::withdrawVoucher(
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
     auto ledger{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
     std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
@@ -3515,7 +3519,7 @@ auto OT_API::depositPaymentPlan(
     const auto& nymID = nym.ID();
     const auto& serverID = context.Notary();
 
-    auto plan{api_.Factory().InternalSession().PaymentPlan()};
+    auto plan{api_.Factory().Internal().Session().PaymentPlan()};
 
     assert_true(false != bool(plan));
 
@@ -3569,7 +3573,7 @@ auto OT_API::depositPaymentPlan(
     }
 
     const auto openingNumber = plan->GetOpeningNumber(nymID);
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         accountID,
         serverID,
@@ -3579,7 +3583,7 @@ auto OT_API::depositPaymentPlan(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::paymentPlan, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -3601,7 +3605,7 @@ auto OT_API::depositPaymentPlan(
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
     auto ledger{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
 
     assert_true(false != bool(ledger));
 
@@ -3708,7 +3712,7 @@ auto OT_API::activateSmartContract(
     const auto& nymID = nym.ID();
     const auto& serverID = context.Notary();
     std::unique_ptr<OTSmartContract> contract =
-        api_.Factory().InternalSession().SmartContract(serverID);
+        api_.Factory().Internal().Session().SmartContract(serverID);
 
     if (false == contract->LoadContractFromString(THE_SMART_CONTRACT)) {
         LogError()()("Unable to load smart contract from string: ")(
@@ -3945,7 +3949,7 @@ auto OT_API::activateSmartContract(
     }
 
     contract->SaveContract();
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         accountID,
         serverID,
@@ -3955,7 +3959,7 @@ auto OT_API::activateSmartContract(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::smartContract, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -3975,7 +3979,7 @@ auto OT_API::activateSmartContract(
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
     auto ledger{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
     std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
@@ -4095,7 +4099,7 @@ auto OT_API::cancelCronItem(
     LogVerbose()()("Allocated transaction number ")(managedNumber.Value())(".")
         .Flush();
     transactionNum = managedNumber.Value();
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         ASSET_ACCOUNT_ID,
         serverID,
@@ -4105,7 +4109,7 @@ auto OT_API::cancelCronItem(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::cancelCronItem, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
@@ -4127,7 +4131,7 @@ auto OT_API::cancelCronItem(
     transaction->SaveContract();
 
     // set up the ledger
-    auto ledger{api_.Factory().InternalSession().Ledger(
+    auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, ASSET_ACCOUNT_ID, serverID)};
     ledger->GenerateLedger(ASSET_ACCOUNT_ID, serverID, ledgerType::message);
     std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
@@ -4360,12 +4364,12 @@ auto OT_API::issueMarketOffer(
         price_limit.append(limit);
     }
 
-    auto offer{api_.Factory().InternalSession().Offer(
+    auto offer{api_.Factory().Internal().Session().Offer(
         serverID, assetContractID, currencyContractID, lMarketScale)};
 
     assert_true(false != bool(offer));
 
-    auto trade{api_.Factory().InternalSession().Trade(
+    auto trade{api_.Factory().Internal().Session().Trade(
         serverID,
         assetContractID,
         ASSET_ACCOUNT_ID,
@@ -4447,7 +4451,7 @@ auto OT_API::issueMarketOffer(
         lMinimumIncrement, unittype)(". At market of scale: ")(
         lMarketScale)(". Valid From: ")(VALID_FROM)(". To: ")(VALID_TO)
         .Flush();
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymID,
         ASSET_ACCOUNT_ID,
         serverID,
@@ -4457,7 +4461,7 @@ auto OT_API::issueMarketOffer(
 
     if (false == bool(transaction)) { return output; }
 
-    auto item{api_.Factory().InternalSession().Item(
+    auto item{api_.Factory().Internal().Session().Item(
         *transaction, itemType::marketOffer, CURRENCY_ACCOUNT_ID)};
 
     if (false == bool(item)) { return output; }
@@ -4478,7 +4482,7 @@ auto OT_API::issueMarketOffer(
     AddHashesToTransaction(*transaction, context, ASSET_ACCOUNT_ID, reason);
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
-    auto ledger{api_.Factory().InternalSession().Ledger(
+    auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, ASSET_ACCOUNT_ID, serverID)};
 
     assert_true(false != bool(ledger));
@@ -4843,7 +4847,7 @@ auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
     transactionNum = 0;
     status = otx::client::SendResult::Error;
     reply.reset();
-    auto message{api_.Factory().InternalSession().Message()};
+    auto message{api_.Factory().Internal().Session().Message()};
     requestNum = client_->ProcessUserCommand(
         MessageType::unregisterNym,
         context,
@@ -4881,7 +4885,8 @@ auto OT_API::CreateProcessInbox(
     auto& [processInbox, number] = output;
     processInbox.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Ledger(nymID, accountID, serverID, ledgerType::message)
             .release());
 
@@ -5250,7 +5255,7 @@ auto OT_API::find_standard(
         case itemType::acceptItemReceipt: {
             auto reference = String::Factory();
             serverTransaction.GetReferenceString(reference);
-            auto original{api_.Factory().InternalSession().Item(
+            auto original{api_.Factory().Internal().Session().Item(
                 reference, notaryID, number)};
 
             if (false == bool(original)) {
@@ -5269,7 +5274,7 @@ auto OT_API::find_standard(
                 case itemType::depositCheque: {
                     auto attachment = String::Factory();
                     original->GetAttachment(attachment);
-                    auto cheque{api_.Factory().InternalSession().Cheque()};
+                    auto cheque{api_.Factory().Internal().Session().Cheque()};
 
                     assert_true(false != bool(cheque));
 
@@ -5467,7 +5472,7 @@ auto OT_API::add_accept_item(
     OTTransaction& processInbox) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    std::shared_ptr<Item> acceptItem{api_.Factory().InternalSession().Item(
+    std::shared_ptr<Item> acceptItem{api_.Factory().Internal().Session().Item(
         processInbox, type, identifier::Account{})};
 
     if (false == bool(acceptItem)) { return false; }
@@ -5513,7 +5518,7 @@ auto OT_API::get_or_create_process_inbox(
         LogVerbose()()("Allocated transaction number ")(number.Value())(".")
             .Flush();
 
-        auto newProcessInbox{api_.Factory().InternalSession().Transaction(
+        auto newProcessInbox{api_.Factory().Internal().Session().Transaction(
             nymID,
             accountID,
             serverID,
@@ -5618,7 +5623,7 @@ auto OT_API::get_origin(
                 return {};
             }
 
-            auto original{api_.Factory().InternalSession().Item(
+            auto original{api_.Factory().Internal().Session().Item(
                 reference, notaryID, source.GetReferenceToNum())};
 
             if (false == bool(original)) {

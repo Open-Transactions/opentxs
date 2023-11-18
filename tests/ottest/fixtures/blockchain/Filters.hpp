@@ -38,5 +38,4 @@ public:
 
     Filters();
 };
-
 }  // namespace ottest

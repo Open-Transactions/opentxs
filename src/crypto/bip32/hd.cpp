@@ -13,6 +13,7 @@
 
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -41,7 +42,7 @@ auto Bip32::Imp::DeriveKey(
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         pathOut = path;
         auto node = [&] {
-            auto ret = HDNode{*factory, crypto_};
+            auto ret = HDNode{factory->Self(), crypto_};
             const auto init = root_node(
                 EcdsaCurve::secp256k1,
                 seed.Bytes(),
@@ -107,7 +108,7 @@ auto Bip32::Imp::derive_private_key(
     try {
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
-            auto ret = HDNode{*factory, crypto_};
+            auto ret = HDNode{factory->Self(), crypto_};
 
             if (false == copy(parentPrivate, ret.InitPrivate())) {
                 throw std::runtime_error("Failed to initialize public key");
@@ -174,7 +175,7 @@ auto Bip32::Imp::derive_public_key(
     try {
         auto& [privateKey, chainCode, publicKey, pathOut, parent] = output;
         auto node = [&] {
-            auto ret = HDNode{*factory, crypto_};
+            auto ret = HDNode{factory->Self(), crypto_};
 
             if (false == copy(parentChaincode, ret.InitCode())) {
                 throw std::runtime_error("Failed to initialize chain code");

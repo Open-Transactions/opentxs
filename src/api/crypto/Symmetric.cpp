@@ -12,13 +12,14 @@
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"  // IWYU pragma: keep
@@ -26,7 +27,7 @@
 
 namespace opentxs::factory
 {
-auto Symmetric(const api::Session& api) noexcept
+auto Symmetric(const api::internal::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Symmetric>
 {
     using ReturnType = api::crypto::imp::Symmetric;
@@ -37,7 +38,7 @@ auto Symmetric(const api::Session& api) noexcept
 
 namespace opentxs::api::crypto::imp
 {
-Symmetric::Symmetric(const api::Session& api) noexcept
+Symmetric::Symmetric(const api::internal::Session& api) noexcept
     : api_(api)
 {
 }
@@ -57,7 +58,7 @@ auto Symmetric::Key(
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 
-    return api_.Factory().InternalSession().SymmetricKey(
+    return api_.Factory().Internal().Session().SymmetricKey(
         provider, mode, password, alloc);
 }
 
@@ -78,7 +79,7 @@ auto Symmetric::Key(
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
     auto ciphertext = proto::Factory<proto::Ciphertext>(serializedCiphertext);
 
-    return api_.Factory().InternalSession().SymmetricKey(
+    return api_.Factory().Internal().Session().SymmetricKey(
         provider, ciphertext.key(), alloc);
 }
 
@@ -92,7 +93,7 @@ auto Symmetric::Key(
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 
-    return api_.Factory().InternalSession().SymmetricKey(
+    return api_.Factory().Internal().Session().SymmetricKey(
         provider,
         seed,
         operations,
@@ -161,7 +162,7 @@ auto Symmetric::Key(
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(type);
 
-    return api_.Factory().InternalSession().SymmetricKey(
+    return api_.Factory().Internal().Session().SymmetricKey(
         provider,
         seed,
         salt,
@@ -180,7 +181,7 @@ auto Symmetric::Key(
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
 
-    return api_.Factory().InternalSession().SymmetricKey(
+    return api_.Factory().Internal().Session().SymmetricKey(
         provider, serialized, alloc);
 }
 }  // namespace opentxs::api::crypto::imp

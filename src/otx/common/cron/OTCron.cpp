@@ -10,10 +10,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
@@ -24,9 +20,13 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -77,7 +77,7 @@ OTCron::OTCron(const api::Session& server)
 // used for signing and verifying..
 auto OTCron::LoadCron() -> bool
 {
-    const char* szFoldername = api_.Internal().Legacy().Cron();
+    const char* szFoldername = api_.Internal().Paths().Cron();
     const char* szFilename = "OT-CRON.crn";  // todo stop hardcoding filenames.
 
     assert_false(nullptr == GetServerNym());
@@ -91,7 +91,7 @@ auto OTCron::LoadCron() -> bool
 
 auto OTCron::SaveCron() -> bool
 {
-    const char* szFoldername = api_.Internal().Legacy().Cron();
+    const char* szFoldername = api_.Internal().Paths().Cron();
     const char* szFilename = "OT-CRON.crn";  // todo stop hardcoding filenames.
     auto reason = api_.Factory().PasswordPrompt(__func__);
 
@@ -432,7 +432,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 .Flush();
             return (-1);  // error condition
         } else {
-            auto pItem{api_.Factory().InternalSession().CronItem(strData)};
+            auto pItem{api_.Factory().Internal().Session().CronItem(strData)};
 
             if (false == bool(pItem)) {
                 LogError()()(
@@ -505,7 +505,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             .Flush();
 
         // LoadMarket() needs this info to do its thing.
-        auto pMarket{api_.Factory().InternalSession().Market(
+        auto pMarket{api_.Factory().Internal().Session().Market(
             notary_id_, INSTRUMENT_DEFINITION_ID, CURRENCY_ID, lScale)};
 
         assert_true(false != bool(pMarket));
@@ -1060,7 +1060,7 @@ auto OTCron::GetOrCreateMarket(
     const identifier::UnitDefinition& CURRENCY_ID,
     const Amount& lScale) -> std::shared_ptr<OTMarket>
 {
-    auto pMarket{api_.Factory().InternalSession().Market(
+    auto pMarket{api_.Factory().Internal().Session().Market(
         GetNotaryID(), INSTRUMENT_DEFINITION_ID, CURRENCY_ID, lScale)};
 
     assert_true(false != bool(pMarket));

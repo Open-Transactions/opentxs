@@ -16,7 +16,6 @@
 #include "blockchain/database/common/Database.hpp"
 #include "blockchain/node/UpdateTransaction.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -29,11 +28,13 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -510,7 +511,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
         const auto serialized = common_.LoadBlockHeader(hash);
 
         if (false == lmdb_.Exists(BlockHeaderMetadata, hash.Bytes())) {
-            auto header = api_.Factory().InternalSession().BlockHeader(
+            auto header = api_.Factory().Internal().Session().BlockHeader(
                 serialized, {});  // TODO allocator
 
             assert_true(header.IsValid());
@@ -593,7 +594,7 @@ auto Headers::load_header(const block::Hash& hash) const -> block::Header
         throw std::out_of_range("Block header metadata not found");
     }
 
-    auto output = api_.Factory().InternalSession().BlockHeader(
+    auto output = api_.Factory().Internal().Session().BlockHeader(
         proto, {});  // TODO allocator
 
     assert_true(output.IsValid());

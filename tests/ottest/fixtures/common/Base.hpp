@@ -8,12 +8,22 @@
 #include <gtest/gtest.h>
 #include <opentxs/Export.hpp>
 
+#include "internal/core/contract/ServerContract.hpp"
+#include "internal/core/contract/Unit.hpp"
+#include "opentxs/opentxs.hpp"
+
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
-class Context;
+namespace session
+{
+namespace internal
+{
+class Wallet;
+}  // namespace internal
+}  // namespace session
 }  // namespace api
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -24,6 +34,31 @@ namespace ottest
 {
 class OPENTXS_EXPORT Base : virtual public ::testing::Test
 {
+public:
+    static auto CurrencyContract(
+        const ot::api::Session& api,
+        const ot::UnallocatedCString& nymid,
+        const ot::UnallocatedCString& shortname,
+        const ot::UnallocatedCString& terms,
+        const ot::UnitType unitOfAccount,
+        const ot::Amount& redemptionIncrement,
+        const ot::PasswordPrompt& reason) noexcept(false)
+        -> ot::OTUnitDefinition;
+    static auto InternalWallet(const ot::api::Session& api) noexcept
+        -> const ot::api::session::internal::Wallet&;
+    static auto NotaryContract(
+        const ot::api::Session& api,
+        const ot::identifier::Notary& id) noexcept -> ot::OTServerContract;
+    static auto NotaryContract(
+        const ot::api::Session& api,
+        const ot::UnallocatedCString& nymid,
+        const ot::UnallocatedCString& name,
+        const ot::UnallocatedCString& terms,
+        const ot::UnallocatedList<ot::contract::Server::Endpoint>& endpoints,
+        const ot::PasswordPrompt& reason,
+        const ot::VersionNumber version) noexcept -> ot::OTServerContract;
+    static auto StopPair(const ot::api::session::Client& api) noexcept -> void;
+
 protected:
     const ot::api::Context& ot_;
 

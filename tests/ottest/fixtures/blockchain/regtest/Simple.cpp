@@ -19,13 +19,14 @@
 #include <string_view>
 #include <tuple>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/UI.hpp"
 #include "internal/interface/ui/AccountActivity.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -237,7 +238,7 @@ auto Regtest_fixture_simple::MineBlocks(
 
         auto tx = gen(previousHeader.Height() + 1);
 
-        auto block = miner_.Factory().InternalSession().BitcoinBlock(
+        auto block = miner_.Factory().Internal().Session().BitcoinBlock(
             previousHeader,
             std::move(tx),
             previousHeader.nBits(),

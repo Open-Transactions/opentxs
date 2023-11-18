@@ -25,6 +25,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -43,7 +48,6 @@ namespace zeromq
 class Message;
 }  // namespace zeromq
 }  // namespace network
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -62,7 +66,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::shared_ptr<Shared> shared,
         network::zeromq::BatchID batch,
@@ -75,7 +79,7 @@ private:
 
     using Data = Vector<std::pair<Time, Amount>>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;

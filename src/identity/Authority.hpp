@@ -40,7 +40,6 @@ class Session;
 
 namespace crypto
 {
-
 namespace symmetric
 {
 class Key;

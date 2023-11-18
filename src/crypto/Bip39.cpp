@@ -20,15 +20,14 @@
 #include <string_view>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"   // IWYU pragma: keep
@@ -37,6 +36,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

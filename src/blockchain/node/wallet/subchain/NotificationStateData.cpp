@@ -17,8 +17,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/Notification.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
@@ -26,11 +24,13 @@
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -58,7 +58,7 @@ NotificationStateData::NotificationStateData(
     Reorg& reorg,
     crypto::Notification& subaccount,
     const opentxs::PaymentCode& code,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,
     std::string_view fromParent,

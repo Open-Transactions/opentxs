@@ -15,7 +15,6 @@ namespace opentxs
 {
 namespace ui
 {
-
 namespace internal
 {
 struct ContactActivity;

@@ -19,7 +19,6 @@ namespace internal
 {
 struct ActivitySummary;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -21,9 +21,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Encode.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -32,13 +30,15 @@
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep

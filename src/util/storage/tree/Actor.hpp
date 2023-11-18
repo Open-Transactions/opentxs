@@ -22,6 +22,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 namespace imp
@@ -52,7 +57,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<api::session::imp::Storage> parent,
         opentxs::network::zeromq::BatchID batchID,
         std::chrono::seconds interval,
@@ -72,7 +77,7 @@ private:
     using GuardedSocket =
         libguarded::plain_guarded<network::zeromq::socket::Raw>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<api::session::imp::Storage> parent_p_;
     std::shared_ptr<Actor> self_;
     const api::Session& api_;
@@ -82,7 +87,7 @@ private:
     Timer timer_;
 
     static auto run_gc(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<api::session::imp::Storage> parent,
         std::shared_ptr<Actor> self,
         const GCParams& params) noexcept -> void;

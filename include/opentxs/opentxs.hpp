@@ -5,11 +5,12 @@
 
 #pragma once
 
+#include "opentxs/Context.hpp"                            // IWYU pragma: export
 #include "opentxs/Export.hpp"                             // IWYU pragma: export
-#include "opentxs/OT.hpp"                                 // IWYU pragma: export
 #include "opentxs/api/Context.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Factory.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Periodic.hpp"                       // IWYU pragma: export
+#include "opentxs/api/Session.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Settings.hpp"                       // IWYU pragma: export
 #include "opentxs/api/crypto/Asymmetric.hpp"              // IWYU pragma: export
 #include "opentxs/api/crypto/Blockchain.hpp"              // IWYU pragma: export
@@ -35,7 +36,6 @@
 #include "opentxs/api/session/Factory.hpp"                // IWYU pragma: export
 #include "opentxs/api/session/Notary.hpp"                 // IWYU pragma: export
 #include "opentxs/api/session/OTX.hpp"                    // IWYU pragma: export
-#include "opentxs/api/session/Session.hpp"                // IWYU pragma: export
 #include "opentxs/api/session/Storage.hpp"                // IWYU pragma: export
 #include "opentxs/api/session/UI.hpp"                     // IWYU pragma: export
 #include "opentxs/api/session/Wallet.hpp"                 // IWYU pragma: export

@@ -29,7 +29,6 @@ namespace display
 {
 class Definition;
 }  // namespace display
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

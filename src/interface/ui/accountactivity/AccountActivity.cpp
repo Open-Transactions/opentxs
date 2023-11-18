@@ -9,14 +9,15 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "util/Work.hpp"
@@ -42,7 +43,7 @@ AccountActivity::AccountActivity(
                 api.Storage().Internal().AccountContract(account_id_));
         } catch (...) {
 
-            return api.Factory().InternalSession().UnitDefinition();
+            return api.Factory().Internal().Session().UnitDefinition();
         }
     }())
     , notary_([&] {
@@ -52,7 +53,7 @@ AccountActivity::AccountActivity(
                 api.Storage().Internal().AccountServer(account_id_));
         } catch (...) {
 
-            return api.Factory().InternalSession().ServerContract();
+            return api.Factory().Internal().Session().ServerContract();
         }
     }())
     , qt_(nullptr)

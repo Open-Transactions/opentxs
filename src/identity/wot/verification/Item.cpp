@@ -12,19 +12,19 @@
 #include <iterator>
 #include <stdexcept>
 
-#include "2_Factory.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/Verification.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
 #include "internal/identity/wot/verification/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

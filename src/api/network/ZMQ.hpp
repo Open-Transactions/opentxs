@@ -26,6 +26,7 @@ namespace api
 {
 class Session;
 }  // namespace api
+
 class Factory;
 class Flag;
 }  // namespace opentxs

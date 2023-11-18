@@ -29,7 +29,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
@@ -54,6 +57,7 @@ class Reorg;
 class Manager;
 }  // namespace node
 }  // namespace blockchain
+
 class Log;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -73,7 +77,7 @@ public:
     DeterministicStateData(
         Reorg& reorg,
         crypto::Deterministic& subaccount,
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,
         std::string_view fromParent,

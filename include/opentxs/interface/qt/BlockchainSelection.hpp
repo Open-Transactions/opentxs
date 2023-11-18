@@ -23,7 +23,6 @@ namespace internal
 {
 struct BlockchainSelection;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

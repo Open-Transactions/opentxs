@@ -18,12 +18,12 @@
 
 #include "identity/wot/claim/claim/ClaimPrivate.hpp"
 #include "identity/wot/claim/claim/Implementation.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

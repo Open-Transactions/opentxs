@@ -26,10 +26,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -740,7 +737,7 @@ protected:
                    // transaction saves its contents
 
 private:
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     OTTransaction(const api::Session& api);
     OTTransaction(const api::Session& api, const Ledger& theOwner);

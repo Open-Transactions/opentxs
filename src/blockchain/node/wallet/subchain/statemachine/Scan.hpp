@@ -23,7 +23,6 @@ namespace opentxs
 {
 namespace blockchain
 {
-
 namespace node
 {
 namespace internal

@@ -14,8 +14,6 @@
 
 #include "core/contract/Signable.hpp"
 #include "identity/credential/Base.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -24,10 +22,12 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -146,7 +146,8 @@ auto Base::calculate_id() const -> identifier_type
 
     assert_false(nullptr == idVersion);
 
-    return api_.Factory().InternalSession().IdentifierFromPreimage(*idVersion);
+    return api_.Factory().Internal().Session().IdentifierFromPreimage(
+        *idVersion);
 }
 
 auto Base::extract_signatures(const SerializedType& serialized) -> Signatures

@@ -9,8 +9,8 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 
 namespace ottest
 {

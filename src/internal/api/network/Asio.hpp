@@ -36,7 +36,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Context;
+}  // namespace internal
 }  // namespace api
 
 namespace network
@@ -137,7 +140,8 @@ public:
         const ReadView bytes,
         SocketImp socket) const noexcept -> bool = 0;
 
-    virtual auto Init(std::shared_ptr<const api::Context> context) noexcept
+    virtual auto Init(
+        std::shared_ptr<const api::internal::Context> context) noexcept
         -> void = 0;
     auto Internal() noexcept -> internal::Asio& final { return *this; }
     virtual auto Shutdown() noexcept -> void = 0;

@@ -15,7 +15,6 @@
 #include <sstream>  // IWYU pragma: keep
 #include <string_view>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Types.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
@@ -28,6 +27,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"

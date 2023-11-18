@@ -28,12 +28,16 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
 namespace blockchain
 {
-
 namespace cfilter
 {
 class Header;
@@ -163,7 +167,7 @@ public:
         Vector<block::Hash>& hashes,
         const network::otdht::Data& data) noexcept -> std::size_t;
     auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node) noexcept -> void;
     auto SubmitBlock(const ReadView in) noexcept -> void;
 

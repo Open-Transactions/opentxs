@@ -21,8 +21,12 @@ namespace opentxs
 {
 namespace api
 {
-class Crypto;
+namespace internal
+{
 class Factory;
+}  // namespace internal
+
+class Crypto;
 }  // namespace api
 
 class Data;
@@ -64,7 +68,8 @@ public:
     [[nodiscard]] auto Z85Decode(std::string_view input, Writer&& output)
         const noexcept -> bool final;
 
-    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    auto Init(
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void final;
 
     Encode(const api::Crypto& crypto) noexcept;
@@ -80,7 +85,7 @@ private:
     static const std::uint8_t LineWidth{72};
 
     const api::Crypto& crypto_;
-    std::weak_ptr<const api::Factory> factory_;
+    std::weak_ptr<const api::internal::Factory> factory_;
 
     auto base64_encode(const std::uint8_t* inputStart, std::size_t inputSize)
         const -> UnallocatedCString;

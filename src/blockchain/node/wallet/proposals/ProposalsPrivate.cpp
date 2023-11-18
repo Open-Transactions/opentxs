@@ -16,13 +16,14 @@
 
 #include "blockchain/node/spend/Imp.hpp"
 #include "blockchain/node/wallet/proposals/BitcoinTransactionBuilder.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/Category.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -162,7 +163,7 @@ auto ProposalsPrivate::rebroadcast(Data& data) noexcept -> void
 
         if (false == proposal.has_value()) { continue; }
 
-        auto tx = api_.Factory().InternalSession().BlockchainTransaction(
+        auto tx = api_.Factory().Internal().Session().BlockchainTransaction(
             proposal.value().finished(), {});
 
         if (false == tx.IsValid()) { continue; }

@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -42,11 +41,13 @@
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -495,7 +496,7 @@ auto ServerConnection::Imp::Send(
         otx::client::SendResult::Error, nullptr};
     auto& status = output.first;
     auto& reply = output.second;
-    reply.reset(api_.Factory().InternalSession().Message().release());
+    reply.reset(api_.Factory().Internal().Session().Message().release());
 
     assert_true(false != bool(reply));
 
@@ -522,7 +523,7 @@ auto ServerConnection::Imp::Send(
 
     status = sendresult.first;
     auto in = sendresult.second;
-    auto replymessage{api_.Factory().InternalSession().Message()};
+    auto replymessage{api_.Factory().Internal().Session().Message()};
 
     assert_true(false != bool(replymessage));
 

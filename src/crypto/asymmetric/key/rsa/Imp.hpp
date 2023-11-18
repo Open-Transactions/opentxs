@@ -38,6 +38,7 @@ namespace symmetric
 {
 class Key;
 }  // namespace symmetric
+
 class AsymmetricProvider;
 class Parameters;
 }  // namespace crypto

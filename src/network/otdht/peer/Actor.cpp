@@ -18,7 +18,6 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/otdht/Types.hpp"
@@ -26,11 +25,12 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"
 #include "opentxs/network/otdht/Base.hpp"
@@ -59,7 +59,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using opentxs::network::zeromq::socket::Type;
 
 Peer::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Node::Shared> shared,
     std::string_view routingID,
     std::string_view toRemote,
@@ -68,7 +68,7 @@ Peer::Actor::Actor(
     Vector<zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
     : opentxs::Actor<Peer::Actor, PeerJob>(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               return CString{"OTDHT peer ", alloc}.append(toRemote);
@@ -88,7 +88,7 @@ Peer::Actor::Actor(
           {extra})
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , data_(shared_p_->data_)
     , external_dealer_(pipeline_.Internal().ExtraSocket(0_uz))
     , external_sub_([&]() -> auto& {
@@ -132,7 +132,7 @@ Peer::Actor::Actor(
 }
 
 Peer::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Node::Shared> shared,
     std::string_view routingID,
     std::string_view toRemote,

@@ -9,10 +9,10 @@
 #include <PeerRequest.pb.h>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 

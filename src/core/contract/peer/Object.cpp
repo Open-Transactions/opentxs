@@ -14,9 +14,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Reply.hpp"
 #include "internal/core/contract/peer/Request.hpp"
@@ -28,10 +25,13 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
@@ -104,7 +104,7 @@ Object::Object(
                 std::make_unique<UnallocatedCString>(serialized.otmessage());
         } break;
         case (contract::peer::ObjectType::Request): {
-            request_ = api_.Factory().InternalSession().PeerRequest(
+            request_ = api_.Factory().Internal().Session().PeerRequest(
                 serialized.otrequest());
         } break;
         case (contract::peer::ObjectType::Response): {
@@ -113,9 +113,9 @@ Object::Object(
                     serialized.otrequest().recipient()));
             }
 
-            request_ = api_.Factory().InternalSession().PeerRequest(
+            request_ = api_.Factory().Internal().Session().PeerRequest(
                 serialized.otrequest());
-            reply_ = api_.Factory().InternalSession().PeerReply(
+            reply_ = api_.Factory().Internal().Session().PeerReply(
                 serialized.otreply());
         } break;
         case (contract::peer::ObjectType::Payment): {

@@ -19,7 +19,7 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -353,7 +353,8 @@ auto Bip32::Imp::extract(
 }
 
 auto Bip32::Imp::Init(
-    const std::shared_ptr<const api::Factory>& factory) noexcept -> void
+    const std::shared_ptr<const api::internal::Factory>& factory) noexcept
+    -> void
 {
     assert_false(nullptr == factory);
 

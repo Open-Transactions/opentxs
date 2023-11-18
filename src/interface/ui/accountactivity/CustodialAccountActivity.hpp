@@ -12,8 +12,8 @@
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -25,7 +25,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace identifier
 {
 class Generic;

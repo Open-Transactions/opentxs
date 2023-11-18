@@ -22,12 +22,8 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Wallet;
-}  // namespace imp
-
 class Factory;
+class WalletPrivate;
 }  // namespace session
 
 class Crypto;
@@ -171,7 +167,7 @@ public:
     ~NymData();
 
 private:
-    friend api::session::imp::Wallet;
+    friend api::session::WalletPrivate;
 
     using Lock = std::unique_lock<std::mutex>;
     using LockedSave = std::function<void(NymData*, Lock&)>;

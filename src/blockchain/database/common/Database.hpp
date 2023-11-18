@@ -37,7 +37,11 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
-class Legacy;
+namespace internal
+{
+class Paths;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -224,7 +228,7 @@ public:
     Database(
         const api::Session& api,
         const api::crypto::Blockchain& blockchain,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept(false);
     Database() = delete;

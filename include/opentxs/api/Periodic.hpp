@@ -10,39 +10,45 @@
 #include <functional>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {
+namespace api
+{
+class Periodic;  // IWYU pragma: keep
+}  // namespace api
+
 using namespace std::literals::chrono_literals;
 
 using PeriodicTask = std::function<void()>;
 }  // namespace opentxs
 
-namespace opentxs::api
-{
 /**
  The Periodic API is used for scheduling and canceling recurring tasks.
  */
-class OPENTXS_EXPORT Periodic
+class OPENTXS_EXPORT opentxs::api::Periodic
 {
 public:
     using TaskID = std::ptrdiff_t;
 
     /// Cancels a periodic task.
-    virtual auto Cancel(const TaskID task) const -> bool = 0;
+    virtual auto Cancel(TaskID task) const noexcept -> bool = 0;
     /// Reschedules a periodic task.
-    virtual auto Reschedule(
-        const TaskID task,
-        const std::chrono::seconds& interval) const -> bool = 0;
+    virtual auto Reschedule(TaskID task, std::chrono::seconds interval)
+        const noexcept -> bool = 0;
     /** Adds a task to the periodic task list with the specified interval. By
      * default, schedules for immediate execution.
      *
      * \returns: task identifier which may be used to manage the task
      */
     virtual auto Schedule(
-        const std::chrono::seconds& interval,
-        const opentxs::PeriodicTask& task,
-        const std::chrono::seconds& last = 0s) const -> TaskID = 0;
+        std::chrono::seconds interval,
+        opentxs::SimpleCallback task) const noexcept -> TaskID = 0;
+    virtual auto Schedule(
+        std::chrono::seconds interval,
+        opentxs::SimpleCallback task,
+        std::chrono::seconds last) const noexcept -> TaskID = 0;
 
     Periodic(const Periodic&) = delete;
     Periodic(Periodic&&) = delete;
@@ -54,4 +60,3 @@ public:
 protected:
     Periodic() = default;
 };
-}  // namespace opentxs::api

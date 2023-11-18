@@ -8,8 +8,8 @@
 #include <HDPath.pb.h>
 
 #include "internal/blockchain/crypto/Types.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"

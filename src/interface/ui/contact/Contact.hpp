@@ -9,8 +9,8 @@
 
 #include "interface/ui/base/List.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -18,11 +18,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace identifier
 {
 class Generic;
 }  // namespace identifier
+
 class Contact;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

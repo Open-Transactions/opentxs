@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -18,19 +18,21 @@ namespace opentxs
 {
 namespace api
 {
-namespace session
-{
 namespace internal
 {
-class Notary;
+class Session;
 }  // namespace internal
+
+namespace session
+{
+class Notary;  // IWYU pragma: keep
 }  // namespace session
 }  // namespace api
 
 namespace identifier
 {
-class Nym;
 class Notary;
+class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
@@ -46,51 +48,39 @@ namespace server
 {
 class Server;
 }  // namespace server
-
-class Options;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::api::session
-{
-class OPENTXS_EXPORT Notary : virtual public api::Session
+class OPENTXS_EXPORT opentxs::api::session::Notary final : public api::Session
 {
 public:
     static auto DefaultMintKeyBytes() noexcept -> std::size_t;
 
     /** Drop a specified number of incoming requests for testing purposes */
-    virtual auto DropIncoming(const int count) const -> void = 0;
+    auto DropIncoming(const int count) const -> void;
     /** Drop a specified number of outgoing replies for testing purposes */
-    virtual auto DropOutgoing(const int count) const -> void = 0;
-    virtual auto GetAdminNym() const -> UnallocatedCString = 0;
-    virtual auto GetAdminPassword() const -> UnallocatedCString = 0;
-    virtual auto GetOwnerName() const -> std::string_view = 0;
-    virtual auto GetPrivateMint(
+    auto DropOutgoing(const int count) const -> void;
+    auto GetAdminNym() const -> UnallocatedCString;
+    auto GetAdminPassword() const -> UnallocatedCString;
+    auto GetOwnerName() const -> std::string_view;
+    auto GetPrivateMint(
         const identifier::UnitDefinition& unitid,
-        std::uint32_t series) const noexcept -> otx::blind::Mint& = 0;
-    virtual auto GetPublicMint(const identifier::UnitDefinition& unitID)
-        const noexcept -> otx::blind::Mint& = 0;
-    virtual auto GetUserTerms() const -> std::string_view = 0;
-    virtual auto ID() const -> const identifier::Notary& = 0;
-    OPENTXS_NO_EXPORT virtual auto InternalNotary() const noexcept
-        -> const session::internal::Notary& = 0;
-    virtual auto NymID() const -> const identifier::Nym& = 0;
-    virtual auto Server() const -> opentxs::server::Server& = 0;
-    virtual auto SetMintKeySize(const std::size_t size) const -> void = 0;
-    virtual auto UpdateMint(const identifier::UnitDefinition& unitID) const
-        -> void = 0;
+        std::uint32_t series) const noexcept -> otx::blind::Mint&;
+    auto GetPublicMint(const identifier::UnitDefinition& unitID) const noexcept
+        -> otx::blind::Mint&;
+    auto GetUserTerms() const -> std::string_view;
+    auto ID() const -> const identifier::Notary&;
+    auto NymID() const -> const identifier::Nym&;
+    auto Server() const -> opentxs::server::Server&;
+    auto SetMintKeySize(const std::size_t size) const -> void;
+    auto UpdateMint(const identifier::UnitDefinition& unitID) const -> void;
 
-    OPENTXS_NO_EXPORT virtual auto InternalNotary() noexcept
-        -> session::internal::Notary& = 0;
-
+    OPENTXS_NO_EXPORT Notary(api::internal::Session* imp) noexcept;
+    Notary() = delete;
     Notary(const Notary&) = delete;
     Notary(Notary&&) = delete;
     auto operator=(const Notary&) -> Notary& = delete;
     auto operator=(Notary&&) -> Notary& = delete;
 
-    OPENTXS_NO_EXPORT ~Notary() override = default;
-
-protected:
-    Notary() = default;
+    OPENTXS_NO_EXPORT ~Notary() final;
 };
-}  // namespace opentxs::api::session

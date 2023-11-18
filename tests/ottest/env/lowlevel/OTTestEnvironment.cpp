@@ -9,7 +9,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include "internal/api/Context.hpp"
+#include "opentxs/api/Context.internal.hpp"
 #include "ottest/Basic.hpp"
 
 namespace ottest
@@ -20,7 +20,7 @@ auto OTTestEnvironment::GetOT() -> const opentxs::api::Context&
 {
     if (const auto& ot = opentxs::get_context_for_unit_tests(); ot) {
 
-        return *ot;
+        return ot->Self();
     } else {
 
         throw std::runtime_error{"Environment not initialized"};

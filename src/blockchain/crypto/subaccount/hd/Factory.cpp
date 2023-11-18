@@ -12,10 +12,10 @@
 #include <stdexcept>
 
 #include "blockchain/crypto/subaccount/hd/Imp.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/util/Log.hpp"

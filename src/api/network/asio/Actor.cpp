@@ -12,13 +12,13 @@
 #include <utility>
 
 #include "api/network/asio/Shared.hpp"
-#include "internal/api/Context.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Context.hpp"
+#include "opentxs/api/Context.internal.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -40,11 +40,11 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
-    std::shared_ptr<const api::Context> context,
+    std::shared_ptr<const api::internal::Context> context,
     std::shared_ptr<Shared> shared,
     allocator_type alloc) noexcept
     : opentxs::Actor<asio::Actor, OTZMQWorkType>(
-          *context,
+          context->Self(),
           LogTrace(),
           {"asio", alloc},
           1s,
@@ -66,7 +66,7 @@ Actor::Actor(
           })
     , context_p_(std::move(context))
     , shared_p_(std::move(shared))
-    , context_(*context_p_)
+    , context_(context_p_->Self())
     , shared_(*shared_p_)
     , router_(pipeline_.Internal().ExtraSocket(0_uz))
     , test_(context_.Options().TestMode())

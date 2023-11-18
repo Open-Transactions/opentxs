@@ -37,7 +37,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace network
 {
 namespace zeromq

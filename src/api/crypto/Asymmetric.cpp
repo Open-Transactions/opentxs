@@ -18,6 +18,7 @@
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -42,7 +43,7 @@
 
 namespace opentxs::factory
 {
-auto AsymmetricAPI(const api::Session& api) noexcept
+auto AsymmetricAPI(const api::internal::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Asymmetric>
 {
     using ReturnType = api::crypto::imp::Asymmetric;
@@ -64,9 +65,14 @@ const Asymmetric::TypeMap Asymmetric::curve_to_key_type_{
      opentxs::crypto::asymmetric::Algorithm::ED25519},
 };
 
-Asymmetric::Asymmetric(const api::Session& api) noexcept
+Asymmetric::Asymmetric(const api::internal::Session& api) noexcept
     : api_(api)
 {
+}
+
+auto Asymmetric::API() const noexcept -> const api::Session&
+{
+    return api_.Self();
 }
 
 template <typename ReturnType>
@@ -84,7 +90,7 @@ auto Asymmetric::instantiate_hd_key(
     switch (type) {
         case opentxs::crypto::asymmetric::Algorithm::ED25519: {
             return factory::Ed25519Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 privkey,
                 ccode,
@@ -98,7 +104,7 @@ auto Asymmetric::instantiate_hd_key(
         }
         case opentxs::crypto::asymmetric::Algorithm::Secp256k1: {
             return factory::Secp256k1Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 privkey,
                 ccode,
@@ -133,14 +139,14 @@ auto Asymmetric::instantiate_serialized_key(
     switch (type) {
         case Type::ED25519: {
             return factory::Ed25519Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 serialized,
                 alloc);
         }
         case Type::Secp256k1: {
             return factory::Secp256k1Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 serialized,
                 alloc);
@@ -288,7 +294,7 @@ auto Asymmetric::InstantiateKey(
         }
         case Type::Legacy: {
             return factory::RSAKey(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().AsymmetricProvider(type),
                 serialized,
                 alloc);
@@ -359,7 +365,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     using Type = opentxs::crypto::asymmetric::Algorithm;
 
     return factory::Secp256k1Key(
-        api_,
+        api_.Self(),
         api_.Crypto().Internal().EllipticProvider(Type::Secp256k1),
         blank,
         api_.Factory().DataFromBytes(publicKey),
@@ -429,7 +435,7 @@ auto Asymmetric::InstantiateSecp256k1Key(
     }
 
     return factory::Secp256k1Key(
-        api_, ecdsa, priv, pub, role, version, reason, alloc);
+        api_.Self(), ecdsa, priv, pub, role, version, reason, alloc);
 }
 
 auto Asymmetric::NewHDKey(
@@ -565,7 +571,7 @@ auto Asymmetric::NewKey(
     switch (type) {
         case (Type::ED25519): {
             return factory::Ed25519Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 role,
                 version,
@@ -574,7 +580,7 @@ auto Asymmetric::NewKey(
         }
         case (Type::Secp256k1): {
             return factory::Secp256k1Key(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().EllipticProvider(type),
                 role,
                 version,
@@ -583,7 +589,7 @@ auto Asymmetric::NewKey(
         }
         case (Type::Legacy): {
             return factory::RSAKey(
-                api_,
+                api_.Self(),
                 api_.Crypto().Internal().AsymmetricProvider(type),
                 role,
                 version,
@@ -669,7 +675,7 @@ auto Asymmetric::NewSecp256k1Key(
     using Type = opentxs::crypto::asymmetric::Algorithm;
 
     return factory::Secp256k1Key(
-        api_,
+        api_.Self(),
         api_.Crypto().Internal().EllipticProvider(Type::Secp256k1),
         privkey,
         ccode,

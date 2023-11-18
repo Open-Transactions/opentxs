@@ -20,7 +20,6 @@
 
 #include "BoostAsio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
@@ -34,6 +33,8 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
@@ -42,7 +43,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -80,13 +80,13 @@ using enum zeromq::socket::Policy;
 using zeromq::socket::Type;
 
 Node::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Shared> shared,
     zeromq::BatchID batchID,
     Vector<network::zeromq::socket::SocketRequest> extra,
     allocator_type alloc) noexcept
     : opentxs::Actor<Node::Actor, NodeJob>(
-          *api,
+          api->Self(),
           LogTrace(),
           {"OTDHT node", alloc},
           0ms,
@@ -106,7 +106,7 @@ Node::Actor::Actor(
     , api_p_(std::move(api))
     , shared_p_(std::move(shared))
     , shared_(*shared_p_)
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , data_(shared_.data_)
     , publish_(pipeline_.Internal().ExtraSocket(0))
     , router_(pipeline_.Internal().ExtraSocket(1))
@@ -162,7 +162,7 @@ Node::Actor::Actor(
 }
 
 Node::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Shared> shared,
     zeromq::BatchID batchID,
     allocator_type alloc) noexcept

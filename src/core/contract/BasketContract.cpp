@@ -17,7 +17,6 @@
 #include <string_view>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "core/contract/Signable.hpp"
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/BasketContract.hpp"
@@ -25,6 +24,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

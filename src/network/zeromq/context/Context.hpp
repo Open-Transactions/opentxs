@@ -32,6 +32,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Pool.hpp"
+#include "opentxs/api/Log.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -211,7 +212,7 @@ private:
 
     ScopeGuard post_;
     void* context_;
-    std::unique_ptr<api::internal::Log> log_;
+    api::internal::Log log_;
     mutable Pool pool_;
     mutable GuardedSocketMap push_sockets_;
 

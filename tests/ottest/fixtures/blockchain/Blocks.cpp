@@ -12,7 +12,6 @@
 #include <span>
 #include <string_view>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
@@ -20,6 +19,8 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 
 namespace ottest
 {
@@ -129,7 +130,7 @@ auto BlockchainBlocks::check_protobuf(
     if (false == proto.has_value()) { return false; }
 
     const auto restored =
-        api.Factory().InternalSession().BlockchainTransaction(*proto, {});
+        api.Factory().Internal().Session().BlockchainTransaction(*proto, {});
 
     EXPECT_TRUE(restored.IsValid());
 

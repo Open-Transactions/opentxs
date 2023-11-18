@@ -13,12 +13,12 @@
 #include <stdexcept>
 
 #include "BoostAsio.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/P0330.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/ByteArray.hpp"

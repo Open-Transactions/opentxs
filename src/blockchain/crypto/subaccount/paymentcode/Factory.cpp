@@ -11,11 +11,12 @@
 #include <utility>
 
 #include "blockchain/crypto/subaccount/paymentcode/Imp.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -59,7 +60,7 @@ auto BlockchainPCSubaccount(
 {
     using ReturnType = blockchain::crypto::PaymentCodePrivate;
     auto contact = contacts.PaymentCodeToContact(
-        api.Factory().InternalSession().PaymentCode(serialized.remote()),
+        api.Factory().Internal().Session().PaymentCode(serialized.remote()),
         blockchain::crypto::target_to_unit(parent.Target()));
 
     assert_false(contact.empty());

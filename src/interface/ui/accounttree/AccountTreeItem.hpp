@@ -22,7 +22,6 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace display
 {
 class Definition;

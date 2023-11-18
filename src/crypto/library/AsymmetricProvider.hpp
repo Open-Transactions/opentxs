@@ -18,7 +18,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Factory;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -68,7 +72,8 @@ public:
         const Signature& theSignature,
         const crypto::HashType hashType) const -> bool override;
 
-    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    auto Init(
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void final;
 
     AsymmetricProvider(const AsymmetricProvider&) = delete;
@@ -79,7 +84,7 @@ public:
     ~AsymmetricProvider() override = default;
 
 protected:
-    std::weak_ptr<const api::Factory> factory_;
+    std::weak_ptr<const api::internal::Factory> factory_;
 
     AsymmetricProvider() noexcept;
 };

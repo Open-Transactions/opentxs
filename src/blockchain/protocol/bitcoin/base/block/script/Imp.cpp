@@ -25,9 +25,9 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"          // IWYU pragma: keep

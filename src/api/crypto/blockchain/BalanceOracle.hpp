@@ -26,7 +26,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace network
@@ -54,7 +57,7 @@ public:
         return pmr::make_deleter(this);
     }
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::internal::Session> api,
         std::string_view endpoint,
         const opentxs::network::zeromq::BatchID batch,
         allocator_type alloc) noexcept;
@@ -71,7 +74,7 @@ private:
     using NymData = Map<identifier::Nym, Data>;
     using ChainData = std::pair<Data, NymData>;
 
-    std::shared_ptr<const api::Session> api_;
+    std::shared_ptr<const api::internal::Session> api_;
     opentxs::network::zeromq::socket::Raw& router_;
     opentxs::network::zeromq::socket::Raw& publish_;
     Map<Chain, ChainData> data_;

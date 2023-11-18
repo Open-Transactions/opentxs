@@ -19,11 +19,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Settings.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
@@ -54,13 +50,17 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -133,7 +133,7 @@ UserCommandProcessor::FinalizeResponse::~FinalizeResponse()
     auto reason = api_.Factory().PasswordPrompt(__func__);
 
     if (response_.empty()) {
-        auto transaction = api_.Factory().InternalSession().Transaction(
+        auto transaction = api_.Factory().Internal().Session().Transaction(
             ledger_,
             transactionType::error_state,
             originType::not_applicable,
@@ -220,7 +220,7 @@ auto UserCommandProcessor::add_numbers_to_nymbox(
     // numbers now, we don't NEED to be able to combine them
     // anyway, since the problem is still effectively solved.
 
-    auto transaction{api_.Factory().InternalSession().Transaction(
+    auto transaction{api_.Factory().Internal().Session().Transaction(
         nymbox,
         transactionType::blank,
         originType::not_applicable,
@@ -281,7 +281,7 @@ void UserCommandProcessor::check_acknowledgements(ReplyMessage& reply) const
     // list, we will want to save (at the end.)
     auto numlist_ack_reply = reply.Acknowledged();
     const auto& nymID = context.RemoteNym().ID();
-    auto nymbox{api_.Factory().InternalSession().Ledger(
+    auto nymbox{api_.Factory().Internal().Session().Ledger(
         nymID, nymID, context.Notary())};
 
     assert_false(nullptr == nymbox);
@@ -402,7 +402,7 @@ auto UserCommandProcessor::check_ping_notary(const Message& msgIn) const -> bool
     const auto serialized = proto::StringToProto<proto::AsymmetricKey>(
         api_.Crypto(), msgIn.nym_public_key_);
     auto nymAuthentKey =
-        api_.Factory().InternalSession().AsymmetricKey(serialized);
+        api_.Factory().Internal().Session().AsymmetricKey(serialized);
 
     if (false == bool(nymAuthentKey.IsValid())) { return false; }
 
@@ -1241,7 +1241,7 @@ auto UserCommandProcessor::cmd_get_transaction_numbers(
     bool bSavedNymbox = false;
     const auto& serverID = context.Notary();
     auto theLedger{
-        api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, serverID)};
 
     assert_false(nullptr == theLedger);
 
@@ -1479,8 +1479,8 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
-    auto responseLedger{api_.Factory().InternalSession().Ledger(
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
+    auto responseLedger{api_.Factory().Internal().Session().Ledger(
         serverNymID, accountID, serverID, ledgerType::message, false)};
 
     assert_false(nullptr == input);
@@ -1518,7 +1518,8 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
         const auto inputNumber = transaction->GetTransactionNum();
         auto outTrans = response.AddResponse(
             std::shared_ptr<OTTransaction>(api_.Factory()
-                                               .InternalSession()
+                                               .Internal()
+                                               .Session()
                                                .Transaction(
                                                    *responseLedger,
                                                    transactionType::error_state,
@@ -1580,8 +1581,8 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
         server_.API().Factory().AccountIDFromBase58(msgIn.acct_id_->Bytes());
     auto nymboxHash = identifier::Generic{};
     auto input{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
-    auto responseLedger{api_.Factory().InternalSession().Ledger(
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
+    auto responseLedger{api_.Factory().Internal().Session().Ledger(
         serverNymID, accountID, serverID, ledgerType::message, false)};
 
     assert_false(nullptr == input);
@@ -1656,7 +1657,8 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     reply.DropToNymbox(true);
     auto pResponseTrans = response.AddResponse(
         std::shared_ptr<OTTransaction>(api_.Factory()
-                                           .InternalSession()
+                                           .Internal()
+                                           .Session()
                                            .Transaction(
                                                *responseLedger,
                                                transactionType::error_state,
@@ -1734,8 +1736,9 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
     const auto& serverNym = *context.Signer();
     const auto& serverNymID = serverNym.ID();
     auto nymboxHash = identifier::Generic{};
-    auto input{api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
-    auto responseLedger{api_.Factory().InternalSession().Ledger(
+    auto input{
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, serverID)};
+    auto responseLedger{api_.Factory().Internal().Session().Ledger(
         serverNymID, nymID, serverID, ledgerType::message, false)};
 
     assert_false(nullptr == input);
@@ -1775,7 +1778,8 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
         auto responseTrans =
             response.AddResponse(std::shared_ptr<OTTransaction>(
                 api_.Factory()
-                    .InternalSession()
+                    .Internal()
+                    .Session()
                     .Transaction(
                         *responseLedger,
                         transactionType::error_state,
@@ -1912,9 +1916,9 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
     auto accountID = identifier::Account{};
     account.get().GetIdentifier(accountID);
     auto outbox{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     auto inbox{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
 
     assert_false(nullptr == outbox);
     assert_false(nullptr == inbox);
@@ -2450,7 +2454,8 @@ auto UserCommandProcessor::create_nymbox(
     const identifier::Notary& server,
     const identity::Nym& serverNym) const -> std::unique_ptr<Ledger>
 {
-    auto nymbox{api_.Factory().InternalSession().Ledger(nymID, nymID, server)};
+    auto nymbox{
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, server)};
 
     if (false == bool(nymbox)) {
         LogError()()("Unable to instantiate nymbox for ")(nymID, api_.Crypto())(
@@ -2496,7 +2501,7 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
     const auto& nymID = context.RemoteNym().ID();
     const auto& serverID = context.Notary();
     const auto& serverNym = *context.Signer();
-    auto theNymbox{server.API().Factory().InternalSession().Ledger(
+    auto theNymbox{server.API().Factory().Internal().Session().Ledger(
         nymID, nymID, serverID)};
 
     assert_false(nullptr == theNymbox);
@@ -2529,7 +2534,7 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
         return;
     }
 
-    auto pReplyNotice{server.API().Factory().InternalSession().Transaction(
+    auto pReplyNotice{server.API().Factory().Internal().Session().Transaction(
         *theNymbox,
         transactionType::replyNotice,
         originType::not_applicable,
@@ -2537,7 +2542,7 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 
     assert_false(nullptr == pReplyNotice);
 
-    auto pReplyNoticeItem{server.API().Factory().InternalSession().Item(
+    auto pReplyNoticeItem{server.API().Factory().Internal().Session().Item(
         *pReplyNotice, itemType::replyNotice, {})};
 
     assert_false(nullptr == pReplyNoticeItem);
@@ -2640,7 +2645,7 @@ auto UserCommandProcessor::load_inbox(
     }
 
     auto inbox{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(inbox)) {
         LogError()()("Unable to instantiate inbox for ")(nymID, api_.Crypto())(
@@ -2678,7 +2683,7 @@ auto UserCommandProcessor::load_nymbox(
     const bool verifyAccount) const -> std::unique_ptr<Ledger>
 {
     auto nymbox{
-        api_.Factory().InternalSession().Ledger(nymID, nymID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, serverID)};
 
     if (false == bool(nymbox)) {
         LogError()()("Unable to instantiate nymbox for ")(nymID, api_.Crypto())(
@@ -2726,7 +2731,7 @@ auto UserCommandProcessor::load_outbox(
     }
 
     auto outbox{
-        api_.Factory().InternalSession().Ledger(nymID, accountID, serverID)};
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
 
     if (false == bool(outbox)) {
         LogError()()("Unable to instantiate outbox for ")(nymID, api_.Crypto())(

@@ -13,9 +13,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -26,10 +23,13 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -62,9 +62,9 @@ Mint::Mint(
     , expiration_(Time::min())
     , cash_account_id_()
 {
-    foldername_->Set(api.Internal().Legacy().Mint());
+    foldername_->Set(api.Internal().Paths().Mint());
     filename_->Set(api_.Internal()
-                       .Legacy()
+                       .Paths()
                        .MintFileName(notary_id_, instrument_definition_id_)
                        .string()
                        .c_str());
@@ -89,9 +89,9 @@ Mint::Mint(
     , expiration_(Time::min())
     , cash_account_id_()
 {
-    foldername_->Set(api.Internal().Legacy().Mint());
+    foldername_->Set(api.Internal().Paths().Mint());
     filename_->Set(api_.Internal()
-                       .Legacy()
+                       .Paths()
                        .MintFileName(notary_id_, instrument_definition_id_)
                        .string()
                        .c_str());
@@ -180,7 +180,7 @@ auto Mint::LoadContract() -> bool { return LoadMint({}); }
 auto Mint::LoadMint(std::string_view extension) -> bool
 {
     if (!foldername_->Exists()) {
-        foldername_->Set(api_.Internal().Legacy().Mint());
+        foldername_->Set(api_.Internal().Paths().Mint());
     }
 
     const auto strNotaryID = String::Factory(notary_id_, api_.Crypto());
@@ -188,7 +188,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
     if (!filename_->Exists()) {
         filename_->Set(
             api_.Internal()
-                .Legacy()
+                .Paths()
                 .MintFileName(notary_id_, instrument_definition_id_, extension)
                 .string()
                 .c_str());
@@ -197,7 +197,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
     const auto strFilename =
         fs::path{instrument_definition_id_.asBase58(api_.Crypto())} +=
         extension;
-    const char* szFolder1name = api_.Internal().Legacy().Mint();
+    const char* szFolder1name = api_.Internal().Paths().Mint();
     const char* szFolder2name = strNotaryID->Get();
     const auto pathString = strFilename.string();
     const char* szFilename = pathString.c_str();
@@ -245,7 +245,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
 auto Mint::SaveMint(std::string_view extension) -> bool
 {
     if (!foldername_->Exists()) {
-        foldername_->Set(api_.Internal().Legacy().Mint());
+        foldername_->Set(api_.Internal().Paths().Mint());
     }
 
     const auto strNotaryID = String::Factory(notary_id_, api_.Crypto());
@@ -253,7 +253,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     if (!filename_->Exists()) {
         filename_->Set(
             api_.Internal()
-                .Legacy()
+                .Paths()
                 .MintFileName(notary_id_, instrument_definition_id_, extension)
                 .string()
                 .c_str());
@@ -262,7 +262,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
     const auto strFilename =
         fs::path{instrument_definition_id_.asBase58(api_.Crypto())} +=
         extension;
-    const char* szFolder1name = api_.Internal().Legacy().Mint();
+    const char* szFolder1name = api_.Internal().Paths().Mint();
     const char* szFolder2name = strNotaryID->Get();
     const auto pathString = strFilename.string();
     const char* szFilename = pathString.c_str();

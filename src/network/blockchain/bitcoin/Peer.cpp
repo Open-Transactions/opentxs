@@ -67,10 +67,11 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/Peer.tpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
@@ -113,7 +114,7 @@
 namespace opentxs::factory
 {
 auto BlockchainPeerBitcoin(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,
@@ -167,7 +168,7 @@ namespace opentxs::network::blockchain::bitcoin
 using namespace std::literals;
 
 Peer::Peer(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     message::Nonce nonce,
     int peerID,

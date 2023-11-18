@@ -29,7 +29,6 @@ class SubchainStateData;
 }  // namespace wallet
 }  // namespace node
 }  // namespace blockchain
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

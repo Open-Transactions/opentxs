@@ -31,11 +31,11 @@ extern "C" {
 #include "blockchain/database/common/Peers.hpp"
 #include "blockchain/database/common/Sync.hpp"
 #include "blockchain/database/common/Wallet.hpp"
-#include "internal/api/Legacy.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
@@ -59,7 +59,7 @@ struct Database::Imp {
     static const storage::lmdb::TableNames table_names_;
 
     const api::Session& api_;
-    const api::Legacy& legacy_;
+    const api::internal::Paths& legacy_;
     const fs::path blockchain_path_;
     const fs::path common_path_;
     const fs::path blocks_path_;
@@ -79,7 +79,7 @@ struct Database::Imp {
         return 1 == storage_enabled_;
     }
     static auto init_folder(
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const fs::path& parent,
         const fs::path& child) noexcept(false) -> fs::path
     {
@@ -96,7 +96,7 @@ struct Database::Imp {
         return output;
     }
     static auto init_storage_path(
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const fs::path& dataFolder) noexcept(false) -> fs::path
     {
         auto output = fs::path{};
@@ -195,7 +195,7 @@ struct Database::Imp {
 
     Imp(const api::Session& api,
         const api::crypto::Blockchain& blockchain,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const fs::path& dataFolder,
         const Options& args) noexcept(false)
         : api_(api)
@@ -298,7 +298,7 @@ const storage::lmdb::TableNames Database::Imp::table_names_ = [] {
 Database::Database(
     const api::Session& api,
     const api::crypto::Blockchain& blockchain,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const fs::path& dataFolder,
     const Options& args) noexcept(false)
     : imp_(std::make_unique<Imp>(api, blockchain, legacy, dataFolder, args))

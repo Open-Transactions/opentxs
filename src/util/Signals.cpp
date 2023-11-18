@@ -9,7 +9,7 @@
 #include <memory>
 #include <utility>
 
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

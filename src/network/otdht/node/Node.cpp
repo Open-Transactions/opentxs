@@ -16,8 +16,8 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
 #include "network/otdht/node/Shared.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -83,7 +83,8 @@ auto Node::get_allocator() const noexcept -> allocator_type
     return shared_->get_allocator();
 }
 
-auto Node::Init(std::shared_ptr<const api::Session> api) noexcept -> void
+auto Node::Init(std::shared_ptr<const api::internal::Session> api) noexcept
+    -> void
 {
     auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{get_allocator()},

@@ -33,7 +33,18 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
-class Legacy;
+namespace internal
+{
+class Paths;
+}  // namespace internal
+
+namespace session
+{
+namespace internal
+{
+class Client;
+}  // namespace internal
+}  // namespace session
 }  // namespace api
 
 namespace blockchain
@@ -130,9 +141,10 @@ struct Blockchain::Imp : virtual public internal::Blockchain {
     }
 
     auto Init(
-        [[maybe_unused]] std::shared_ptr<const api::session::Client> api,
+        [[maybe_unused]] std::shared_ptr<const api::session::internal::Client>
+            api,
         [[maybe_unused]] const api::crypto::Blockchain& crypto,
-        [[maybe_unused]] const api::Legacy& legacy,
+        [[maybe_unused]] const api::internal::Paths& legacy,
         [[maybe_unused]] const std::filesystem::path& dataFolder,
         [[maybe_unused]] const Options& args) noexcept -> void override
     {

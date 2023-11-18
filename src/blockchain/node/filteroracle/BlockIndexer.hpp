@@ -37,6 +37,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -71,7 +76,7 @@ public:
     }
     auto Init(std::shared_ptr<Imp> me) noexcept -> void;
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::shared_ptr<Shared> shared,
         const network::zeromq::BatchID batch,
@@ -138,7 +143,7 @@ private:
     static constexpr auto max_blocks_ = 1000_uz;
     static constexpr auto max_cached_cfilters_ = 256_mib;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;

@@ -11,9 +11,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/AccountList.hpp"
@@ -21,10 +18,13 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -163,7 +163,7 @@ auto MainFile::CreateMainFile(
             server_.API(),
             strContract,
             server_.API().DataFolder().string(),
-            server_.API().Internal().Legacy().Contract(),
+            server_.API().Internal().Paths().Contract(),
             strNotaryID,
             "",
             "")) {

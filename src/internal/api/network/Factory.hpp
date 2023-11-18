@@ -12,6 +12,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace network
 {
 class Asio;
@@ -25,8 +30,6 @@ namespace session
 class Client;
 class Endpoints;
 }  // namespace session
-
-class Session;
 }  // namespace api
 
 namespace network
@@ -51,14 +54,14 @@ auto BlockchainNetworkAPI(
 auto BlockchainNetworkAPINull() noexcept
     -> std::unique_ptr<api::network::Blockchain>;
 auto NetworkAPI(
-    const api::Session& api,
+    const api::internal::Session& api,
     const api::network::Asio& asio,
     const network::zeromq::Context& zmq,
     const api::session::Endpoints& endpoints,
     std::unique_ptr<api::network::Blockchain> blockchain) noexcept
     -> std::unique_ptr<api::network::Network>;
 auto OTDHT(
-    const api::Session& api,
+    const api::internal::Session& api,
     const network::zeromq::Context& zmq,
     const api::session::Endpoints& endpoints,
     const api::network::Blockchain& blockchain) noexcept

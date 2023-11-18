@@ -13,13 +13,8 @@
 #include <filesystem>
 #include <regex>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
-#include "internal/api/session/notary/Notary.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -35,7 +30,10 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -43,9 +41,12 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
+#include "opentxs/api/session/Notary.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -102,7 +103,7 @@ Server::Server(
     , notary_id_()
     , server_nym_id_()
     , nym_server_(nullptr)
-    , cron_(manager.Factory().InternalSession().Cron())
+    , cron_(manager.Factory().Internal().Session().Cron())
     , notification_socket_(api_.Network().ZeroMQ().Internal().PushSocket(
           zmq::socket::Direction::Connect))
 {
@@ -284,7 +285,7 @@ void Server::CreateMainFile(bool& mainFileExists)
         endpoints.emplace_back(
             AddressType::Inproc,
             contract::ProtocolVersion::Legacy,
-            api_.InternalNotary().InprocEndpoint(),
+            api_.Internal().asNotary().InprocEndpoint(),
             publicPort,
             2);
     } else {
@@ -455,9 +456,10 @@ void Server::CreateMainFile(bool& mainFileExists)
 void Server::Init(bool readOnly)
 {
     read_only_ = readOnly;
-    const auto& config = api_.Config().Internal();
+    const auto& settings = api_.Config();
+    const auto& config = settings.Internal();
 
-    if (!ConfigLoader::load(api_, config, WalletFilename())) {
+    if (!ConfigLoader::load(api_, settings, WalletFilename())) {
         LogError()()("Unable to Load Config File!").Flush();
         LogAbort()().Abort();
     }
@@ -709,7 +711,8 @@ auto Server::DropMessageToNymbox(
     const Message* message{nullptr};
 
     if (nullptr == pMsg) {
-        theMsgAngel.reset(api_.Factory().InternalSession().Message().release());
+        theMsgAngel.reset(
+            api_.Factory().Internal().Session().Message().release());
 
         if (nullptr != szCommand) {
             theMsgAngel->command_ = String::Factory(szCommand);
@@ -740,7 +743,7 @@ auto Server::DropMessageToNymbox(
         auto nymRecipient = api_.Wallet().Nym(RECIPIENT_NYM_ID);
 
         // Wrap the message up into an envelope and attach it to theMsgAngel.
-        auto theEnvelope = api_.Factory().InternalSession().Envelope();
+        auto theEnvelope = api_.Factory().Internal().Session().Envelope();
         theMsgAngel->payload_->Release();
 
         if ((!pstrMessage.empty()) &&
@@ -784,7 +787,7 @@ auto Server::DropMessageToNymbox(
     // Grab a string copy of message.
     //
     const auto strInMessage = String::Factory(*message);
-    auto theLedger{api_.Factory().InternalSession().Ledger(
+    auto theLedger{api_.Factory().Internal().Session().Ledger(
         RECIPIENT_NYM_ID, RECIPIENT_NYM_ID, NOTARY_ID)};  // The
                                                           // recipient's
                                                           // Nymbox.
@@ -798,7 +801,7 @@ auto Server::DropMessageToNymbox(
                                            // Signature only.
          theLedger->VerifySignature(*nym_server_))) {
         // Create the instrumentNotice to put in the Nymbox.
-        auto pTransaction{api_.Factory().InternalSession().Transaction(
+        auto pTransaction{api_.Factory().Internal().Session().Transaction(
             *theLedger, theType, originType::not_applicable, lTransNum)};
 
         if (false != bool(pTransaction)) {

@@ -10,12 +10,12 @@
 #include <span>
 #include <utility>
 
-#include "internal/api/Settings.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Settings.internal.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

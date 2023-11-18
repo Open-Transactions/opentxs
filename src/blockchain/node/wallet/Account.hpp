@@ -35,6 +35,11 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 }  // namespace session
 }  // namespace api
@@ -90,7 +95,7 @@ public:
 
     Imp(Reorg& reorg,
         const crypto::Account& account,
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node,
         std::string_view fromParent,
         network::zeromq::BatchID batch,
@@ -105,7 +110,7 @@ private:
     using HandledReorgs = Set<StateSequence>;
     using State = JobState;
 
-    std::shared_ptr<const api::session::Client> api_p_;
+    std::shared_ptr<const api::session::internal::Client> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     const api::session::Client& api_;
     const crypto::Account& account_;
@@ -178,7 +183,7 @@ private:
 
     Imp(Reorg& reorg,
         const crypto::Account& account,
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node,
         CString&& fromParent,
         network::zeromq::BatchID batch,

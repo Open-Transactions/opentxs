@@ -23,8 +23,8 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -488,7 +488,7 @@ auto Shared::Init() noexcept -> void
 }
 
 auto Shared::Init(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared) noexcept -> void
 {

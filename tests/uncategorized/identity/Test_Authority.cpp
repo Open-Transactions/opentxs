@@ -17,7 +17,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
@@ -25,6 +24,7 @@
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "ottest/fixtures/core/Identifier.hpp"
 #include "ottest/fixtures/identity/Authority.hpp"
 

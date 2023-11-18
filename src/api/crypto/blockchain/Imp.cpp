@@ -19,7 +19,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
@@ -29,13 +28,14 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
@@ -1526,8 +1526,8 @@ auto Blockchain::Imp::SenderContact(const Key& key) const noexcept
     }
 }
 
-auto Blockchain::Imp::Start(std::shared_ptr<const api::Session> api) noexcept
-    -> void
+auto Blockchain::Imp::Start(
+    std::shared_ptr<const api::internal::Session> api) noexcept -> void
 {
     for (const auto& chain : opentxs::blockchain::supported_chains()) {
         Wallet(chain);

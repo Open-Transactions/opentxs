@@ -17,6 +17,7 @@ namespace proto
 {
 class RPCCommand;
 }  // namespace proto
+
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

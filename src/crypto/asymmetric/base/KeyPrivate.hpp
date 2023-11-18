@@ -38,8 +38,8 @@ class Secp256k1Private;
 
 class Key;
 }  // namespace asymmetric
-
 }  // namespace crypto
+
 class PasswordPrompt;
 class Writer;
 }  // namespace opentxs

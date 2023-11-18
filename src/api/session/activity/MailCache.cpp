@@ -13,7 +13,6 @@
 #include <queue>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Object.hpp"
@@ -23,10 +22,12 @@
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/storage/Types.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
@@ -118,7 +119,7 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             return output;
         }
 
-        output = api_.Factory().InternalSession().Message();
+        output = api_.Factory().Internal().Session().Message();
 
         assert_false(nullptr == output);
 
@@ -175,7 +176,7 @@ struct MailCache::Imp : public std::enable_shared_from_this<Imp> {
             return;
         }
 
-        const auto object = api_.Factory().InternalSession().PeerObject(
+        const auto object = api_.Factory().Internal().Session().PeerObject(
             nym, mail->payload_, task.reason_);
 
         if (!object) {

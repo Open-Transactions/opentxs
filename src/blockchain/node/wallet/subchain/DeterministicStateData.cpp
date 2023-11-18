@@ -24,8 +24,8 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -45,7 +45,7 @@ namespace opentxs::blockchain::node::wallet
 DeterministicStateData::DeterministicStateData(
     Reorg& reorg,
     crypto::Deterministic& subaccount,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,
     std::string_view fromParent,

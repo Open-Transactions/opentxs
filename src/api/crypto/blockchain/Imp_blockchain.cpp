@@ -28,6 +28,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -65,7 +65,7 @@ BlockchainImp::BlockchainImp(
     const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const std::string_view dataFolder,
     const Options& args,
     api::crypto::Blockchain& parent) noexcept
@@ -518,8 +518,8 @@ auto BlockchainImp::ReportScan(
     }());
 }
 
-auto BlockchainImp::Start(std::shared_ptr<const api::Session> api) noexcept
-    -> void
+auto BlockchainImp::Start(
+    std::shared_ptr<const api::internal::Session> api) noexcept -> void
 {
     Imp::Start(api);
     blockchain::BalanceOracle{std::move(api), balance_oracle_endpoint_}.Start();

@@ -6,9 +6,9 @@
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"  // IWYU pragma: associated
 
 #include "internal/api/crypto/Encode.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

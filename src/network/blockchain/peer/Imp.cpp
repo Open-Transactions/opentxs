@@ -20,8 +20,6 @@
 #include <tuple>
 
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/session/FactoryAPI.hpp"  // IWYU pragma: keep
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Peer.hpp"
 #include "internal/blockchain/node/Config.hpp"
@@ -45,13 +43,16 @@
 #include "network/blockchain/peer/RunJob.hpp"
 #include "network/blockchain/peer/UpdateBlockJob.hpp"
 #include "network/blockchain/peer/UpdateGetHeadersJob.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
@@ -59,6 +60,7 @@
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Socket.hpp"
@@ -157,7 +159,7 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Peer::Imp::Imp(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     int peerID,
     blockchain::Address address,
@@ -171,7 +173,7 @@ Peer::Imp::Imp(
     zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Actor(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               using opentxs::blockchain::print;
@@ -229,7 +231,7 @@ Peer::Imp::Imp(
           })
     , api_p_(api)
     , network_p_(network)
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , network_(*network_p_)
     , config_(network_.Internal().GetConfig())
     , header_oracle_(network_.HeaderOracle())
@@ -1100,7 +1102,7 @@ auto Peer::Imp::process_gossip_address(
     out.reserve(out.size() + payload.size());
     std::ranges::transform(
         frames, std::back_inserter(out), [this](const auto& frame) {
-            return api_.Factory().InternalSession().BlockchainAddress(
+            return api_.Factory().Internal().Session().BlockchainAddress(
                 proto::Factory<proto::BlockchainPeerAddress>(frame));
         });
     log()(name_)(": address queue contains ")(out.size())(" items").Flush();

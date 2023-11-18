@@ -8,15 +8,13 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <functional>
-#include <future>
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/Wallet.hpp"
-#include "internal/otx/client/Pair.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
+#include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ot = opentxs;
@@ -49,7 +47,7 @@ TEST_F(RPC_fixture, preconditions)
         const auto& server = ot_.NotarySession(0);
         const auto& session = StartClient(0);
         session.OTX().DisableAutoaccept();
-        session.InternalClient().Pair().Stop().get();
+        StopPair(session);
         const auto instance = session.Instance();
         const auto& nyms = local_nym_map_.at(instance);
         const auto& seeds = seed_map_.at(instance);
@@ -299,13 +297,13 @@ TEST_F(RPC_fixture, postconditions)
 {
     const auto& api = ot_.ClientSession(0);
     auto account1 =
-        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
+        Base::InternalWallet(api).Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(issuer_).front()));
     auto account2 =
-        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
+        Base::InternalWallet(api).Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(brian_).front()));
     auto account3 =
-        api.Wallet().Internal().Account(api.Factory().AccountIDFromBase58(
+        Base::InternalWallet(api).Account(api.Factory().AccountIDFromBase58(
             registered_accounts_.at(chris_).front()));
 
     EXPECT_EQ(account1.get().GetBalance(), -100);

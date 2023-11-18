@@ -14,7 +14,7 @@
 #include "internal/crypto/library/HashingProvider.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

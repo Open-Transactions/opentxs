@@ -11,11 +11,11 @@
 #include <memory>
 #include <stdexcept>
 
-#include "2_Factory.hpp"
 #include "identity/credential/Key.hpp"
 #include "opentxs/api/session/Crypto.hpp"       // IWYU pragma: keep
 #include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

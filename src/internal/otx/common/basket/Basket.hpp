@@ -22,10 +22,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -209,7 +206,7 @@ protected:
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t final;
 
 private:
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     Basket(const api::Session& api);
     Basket(

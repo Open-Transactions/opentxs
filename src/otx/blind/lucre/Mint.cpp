@@ -22,16 +22,17 @@ extern "C" {
 #include <utility>
 
 #include "crypto/library/openssl/BIO.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/CashType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Mint.hpp"
@@ -175,7 +176,7 @@ auto Lucre::AddDenomination(
 
     // Seal the private bank info up into an encrypted Envelope
     // and set it onto pPrivate
-    auto envelope = api_.Factory().InternalSession().Envelope();
+    auto envelope = api_.Factory().Internal().Session().Envelope();
     envelope->Seal(theNotary, strPrivateBank->Bytes(), reason);
     // TODO check the return values on these twofunctions
     envelope->Armored(pPrivate);
@@ -237,7 +238,7 @@ auto Lucre::SignToken(
 
     try {
         auto envelope =
-            api_.Factory().InternalSession().Envelope(armoredPrivate);
+            api_.Factory().Internal().Session().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
             LogError()()("Failed to decrypt private key").Flush();
@@ -344,7 +345,7 @@ auto Lucre::VerifyToken(
 
     try {
         auto envelope =
-            api_.Factory().InternalSession().Envelope(armoredPrivate);
+            api_.Factory().Internal().Session().Envelope(armoredPrivate);
 
         if (false == envelope->Open(notary, privateKey->WriteInto(), reason)) {
             LogError()()(": Failed to decrypt private mint key").Flush();

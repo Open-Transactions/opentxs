@@ -12,8 +12,8 @@
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -25,7 +25,6 @@ class QVariant;
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace ui
 {
 class BlockchainSubaccountSource;

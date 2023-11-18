@@ -11,10 +11,10 @@
 
 #include "identity/wot/verification/verification/Implementation.hpp"
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"

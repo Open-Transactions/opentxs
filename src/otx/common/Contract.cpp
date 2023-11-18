@@ -14,9 +14,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
@@ -30,9 +27,13 @@
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -127,8 +128,7 @@ Contract::~Contract() { Release_Contract(); }
 
 auto Contract::SaveToContractFolder() -> bool
 {
-    OTString strFoldername(
-        String::Factory(api_.Internal().Legacy().Contract())),
+    OTString strFoldername(String::Factory(api_.Internal().Paths().Contract())),
         strFilename = String::Factory();
 
     GetIdentifier(strFilename);
@@ -1451,7 +1451,8 @@ void Contract::CreateInnerContents(Tag& parent)
                 pTag->add_attribute(
                     "publicNym",
                     api_.Factory()
-                        .InternalSession()
+                        .Internal()
+                        .Session()
                         .Armored(publicNym, "PUBLIC NYM")
                         ->Get());
 

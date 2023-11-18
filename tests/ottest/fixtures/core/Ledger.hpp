@@ -7,8 +7,16 @@
 
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <memory>
 
 namespace ot = opentxs;
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+class Ledger;
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace ottest
 {
@@ -17,6 +25,11 @@ struct OPENTXS_EXPORT Ledger : public ::testing::Test {
     const ot::api::session::Notary& server_;
     ot::PasswordPrompt reason_c_;
     ot::PasswordPrompt reason_s_;
+
+    auto get_nymbox(
+        const ot::identifier::Nym& nym,
+        const ot::identifier::Notary& server,
+        bool create) const noexcept -> std::unique_ptr<opentxs::Ledger>;
 
     Ledger();
 };

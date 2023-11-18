@@ -8,8 +8,8 @@
 #include <cstdint>
 
 #include "internal/core/String.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

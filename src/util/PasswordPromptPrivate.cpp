@@ -6,8 +6,8 @@
 #include "util/PasswordPromptPrivate.hpp"  // IWYU pragma: associated
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 
 namespace opentxs

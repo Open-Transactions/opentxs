@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "internal/api/session/UI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -26,6 +25,7 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 

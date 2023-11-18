@@ -12,7 +12,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/identifier/Identifier.hpp"
@@ -20,8 +19,10 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -221,7 +222,7 @@ public:
         const ReadView id,
         const ReadView payload) noexcept
         : Imp(type,
-              api.Factory().InternalSession().Identifier(
+              api.Factory().Internal().Session().Identifier(
                   proto::Factory<proto::Identifier>(id.data(), id.size())),
               space(payload))
     {

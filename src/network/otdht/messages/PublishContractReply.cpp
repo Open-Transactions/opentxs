@@ -12,14 +12,15 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
@@ -142,7 +143,7 @@ public:
     Imp(const api::Session& api,
         const ReadView id,
         const ReadView success) noexcept
-        : Imp(api.Factory().InternalSession().Identifier(
+        : Imp(api.Factory().Internal().Session().Identifier(
                   proto::Factory<proto::Identifier>(id.data(), id.size())),
               [&]() -> bool {
                   if (0u == success.size()) { return false; }

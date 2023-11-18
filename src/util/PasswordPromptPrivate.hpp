@@ -9,7 +9,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "internal/util/PasswordPrompt.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"

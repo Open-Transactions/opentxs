@@ -11,8 +11,6 @@
 #include <cstring>
 #include <memory>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -31,10 +29,13 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -178,7 +179,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
     const PasswordPrompt& reason) -> bool
 {
     auto theLedger{
-        api.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
+        api.Factory().Internal().Session().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
 
     assert_true(false != bool(theLedger));
 
@@ -203,7 +204,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
         return false;
     }
 
-    auto pTransaction{api.Factory().InternalSession().Transaction(
+    auto pTransaction{api.Factory().Internal().Session().Transaction(
         *theLedger,
         transactionType::notice,
         theOriginType,
@@ -216,7 +217,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
 
         // Set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
-        auto pItem1{api.Factory().InternalSession().Item(
+        auto pItem1{api.Factory().Internal().Session().Item(
             *pTransaction, itemType::notice, identifier::Account{})};
         assert_true(false != bool(pItem1));  // This may be unnecessary, I'll
                                              // have to check

@@ -26,6 +26,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -62,7 +67,6 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
-
 }  // namespace zeromq
 }  // namespace network
 
@@ -75,7 +79,7 @@ namespace opentxs::blockchain::node::wallet::statemachine
 class Job : virtual public wallet::Job, public opentxs::Actor<Job, SubchainJobs>
 {
     std::shared_ptr<const SubchainStateData> parent_p_;
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
 
 public:

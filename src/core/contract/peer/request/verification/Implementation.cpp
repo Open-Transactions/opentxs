@@ -9,10 +9,11 @@
 #include <VerificationRequest.pb.h>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/identity/wot/Claim.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 
 namespace opentxs::contract::peer::request::verification
@@ -46,7 +47,7 @@ Implementation::Implementation(
     : RequestPrivate(alloc)
     , VerificationPrivate(alloc)
     , base::Implementation(api, std::move(signer), proto, alloc)
-    , claim_(api.Factory().InternalSession().Claim(
+    , claim_(api.Factory().Internal().Session().Claim(
           proto.verification().claim(),
           alloc))
     , self_(this)

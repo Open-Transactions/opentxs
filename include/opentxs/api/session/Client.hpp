@@ -6,14 +6,18 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
-#include "opentxs/api/session/Session.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/api/Session.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace network
 {
 class ZMQ;
@@ -21,12 +25,8 @@ class ZMQ;
 
 namespace session
 {
-namespace internal
-{
-class Client;
-}  // namespace internal
-
 class Activity;
+class Client;  // IWYU pragma: keep
 class Contacts;
 class OTX;
 class UI;
@@ -36,40 +36,31 @@ class Workflow;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::api::session
-{
 /**
  Returns various API handles related to a client session.
  */
-class OPENTXS_EXPORT Client : virtual public api::Session
+class OPENTXS_EXPORT opentxs::api::session::Client final : public api::Session
 {
 public:
     /// Returns the session's Activities.
-    virtual auto Activity() const -> const session::Activity& = 0;
+    auto Activity() const -> const session::Activity&;
     /// Returns the session's Contacts.
-    virtual auto Contacts() const -> const api::session::Contacts& = 0;
-    OPENTXS_NO_EXPORT virtual auto InternalClient() const noexcept
-        -> const internal::Client& = 0;
+    auto Contacts() const -> const api::session::Contacts&;
     /// Returns the OTX API for this session.
-    virtual auto OTX() const -> const session::OTX& = 0;
+    auto OTX() const -> const session::OTX&;
     /// Returns the UI API for this session.
-    virtual auto UI() const -> const session::UI& = 0;
+    auto UI() const -> const session::UI&;
     /// Returns the Workflow API for this session.
-    virtual auto Workflow() const -> const session::Workflow& = 0;
+    auto Workflow() const -> const session::Workflow&;
     /// Returns the ZMQ API for this session. For message passing.
-    virtual auto ZMQ() const -> const network::ZMQ& = 0;
+    auto ZMQ() const -> const network::ZMQ&;
 
-    OPENTXS_NO_EXPORT virtual auto InternalClient() noexcept
-        -> internal::Client& = 0;
-
+    OPENTXS_NO_EXPORT Client(api::internal::Session* imp) noexcept;
+    Client() = delete;
     Client(const Client&) = delete;
     Client(Client&&) = delete;
     auto operator=(const Client&) -> Client& = delete;
     auto operator=(Client&&) -> Client& = delete;
 
-    OPENTXS_NO_EXPORT ~Client() override = default;
-
-protected:
-    Client() = default;
+    OPENTXS_NO_EXPORT ~Client() final;
 };
-}  // namespace opentxs::api::session

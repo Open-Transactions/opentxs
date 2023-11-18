@@ -28,7 +28,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
@@ -73,7 +76,7 @@ public:
         Reorg& reorg,
         crypto::Notification& subaccount,
         const opentxs::PaymentCode& code,
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,
         std::string_view fromParent,

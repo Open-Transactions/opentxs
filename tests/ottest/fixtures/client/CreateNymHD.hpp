@@ -32,5 +32,4 @@ public:
 
     CreateNymHD();
 };
-
 }  // namespace ottest

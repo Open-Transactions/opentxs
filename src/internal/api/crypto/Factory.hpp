@@ -25,6 +25,12 @@ class Seed;
 class Symmetric;
 }  // namespace crypto
 
+namespace internal
+{
+class Paths;
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Activity;
@@ -36,7 +42,6 @@ class Storage;
 }  // namespace session
 
 class Crypto;
-class Legacy;
 class Session;
 class Settings;
 }  // namespace api
@@ -65,13 +70,13 @@ class Options;
 
 namespace opentxs::factory
 {
-auto AsymmetricAPI(const api::Session& api) noexcept
+auto AsymmetricAPI(const api::internal::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Asymmetric>;
 auto BlockchainAPI(
     const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const UnallocatedCString& dataFolder,
     const Options& args) noexcept -> std::shared_ptr<api::crypto::Blockchain>;
 auto CryptoAPI(const api::Settings& settings) noexcept
@@ -88,7 +93,7 @@ auto Hash(
     const crypto::Scrypt& scrypt) noexcept
     -> std::unique_ptr<api::crypto::Hash>;
 auto SeedAPI(
-    const api::Session& api,
+    const api::internal::Session& api,
     const api::session::Endpoints& endpoints,
     const api::session::Factory& factory,
     const api::crypto::Asymmetric& asymmetric,
@@ -98,6 +103,6 @@ auto SeedAPI(
     const crypto::Bip39& bip39,
     const network::zeromq::Context& zmq) noexcept
     -> std::unique_ptr<api::crypto::Seed>;
-auto Symmetric(const api::Session& api) noexcept
+auto Symmetric(const api::internal::Session& api) noexcept
     -> std::unique_ptr<api::crypto::Symmetric>;
 }  // namespace opentxs::factory

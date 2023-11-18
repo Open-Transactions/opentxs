@@ -7,8 +7,8 @@
 
 #include "StateMachine.hpp"  // IWYU pragma: associated
 
-#include "internal/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 

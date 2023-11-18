@@ -21,6 +21,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Contacts;
@@ -107,8 +112,8 @@ public:
 
     virtual auto Init() noexcept -> void = 0;
     auto Internal() noexcept -> Blockchain& final { return *this; }
-    virtual auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void = 0;
+    virtual auto Start(
+        std::shared_ptr<const api::internal::Session> api) noexcept -> void = 0;
 
     ~Blockchain() override = default;
 };

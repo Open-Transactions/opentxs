@@ -16,6 +16,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -65,7 +70,7 @@ public:
 
     virtual auto Heartbeat() noexcept -> void = 0;
     virtual auto Init(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node) noexcept -> void = 0;
     auto Internal() noexcept -> internal::FilterOracle& final { return *this; }
 

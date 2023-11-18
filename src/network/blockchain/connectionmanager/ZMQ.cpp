@@ -17,8 +17,8 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"

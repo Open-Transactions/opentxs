@@ -12,11 +12,11 @@
 #include <stdexcept>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/verification/Set.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

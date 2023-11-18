@@ -9,10 +9,10 @@
 #include <Enums.pb.h>
 #include <cstdint>
 
-#include "2_Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

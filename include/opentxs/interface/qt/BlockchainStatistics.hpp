@@ -21,7 +21,6 @@ namespace internal
 {
 struct BlockchainStatistics;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

@@ -18,7 +18,6 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -32,11 +31,12 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
 #include "network/blockchain/otdht/Server.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
@@ -91,12 +91,12 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 OTDHT::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
     network::zeromq::BatchID batchID,
     allocator_type alloc) noexcept
     : opentxs::Actor<OTDHT::Actor, DHTJob>(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               return CString{print(node->Internal().Chain()), alloc}.append(
@@ -142,7 +142,7 @@ OTDHT::Actor::Actor(
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , chain_(node_.Internal().Chain())
     , filter_type_(node_.FilterOracle().DefaultType())
@@ -281,7 +281,7 @@ auto OTDHT::Actor::do_startup(allocator_type) noexcept -> bool
 }
 
 auto OTDHT::Actor::Factory(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
     network::zeromq::BatchID batchID) noexcept -> void
 {

@@ -9,10 +9,10 @@
 #include <future>
 #include <memory>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest

@@ -28,6 +28,7 @@ namespace identifier
 {
 class Nym;
 }  // namespace identifier
+
 class OTPayment;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

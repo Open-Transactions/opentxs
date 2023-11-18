@@ -20,7 +20,6 @@
 #include <type_traits>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Factory.hpp"
@@ -30,12 +29,13 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"

@@ -40,14 +40,17 @@ class Asymmetric;
 class Symmetric;
 }  // namespace crypto
 
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Endpoints;
 class Factory;
 class Storage;
 }  // namespace session
-
-class Session;
 }  // namespace api
 
 namespace crypto
@@ -213,7 +216,7 @@ public:
         const PasswordPrompt& reason) const -> UnallocatedCString final;
 
     Seed(
-        const api::Session& api,
+        const api::internal::Session& api,
         const api::session::Endpoints& endpoints,
         const api::session::Factory& factory,
         const api::crypto::Asymmetric& asymmetric,
@@ -234,7 +237,8 @@ private:
     using SeedMap =
         UnallocatedMap<opentxs::crypto::SeedID, opentxs::crypto::Seed>;
 
-    const api::Session& api_;  // WARNING do not access during construction
+    const api::internal::Session& api_;  // WARNING do not access during
+                                         // construction
     const api::session::Factory& factory_;
     const api::crypto::Symmetric& symmetric_;
     const api::crypto::Asymmetric& asymmetric_;

@@ -26,15 +26,12 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Wallet;
-}  // namespace imp
-
 namespace notary
 {
-class Wallet;
+class WalletPrivate;
 }  // namespace notary
+
+class WalletPrivate;
 }  // namespace session
 
 class Session;
@@ -151,8 +148,8 @@ public:
 
 private:
     friend OTWallet;
-    friend opentxs::api::session::imp::Wallet;
-    friend opentxs::api::session::notary::Wallet;
+    friend opentxs::api::session::WalletPrivate;
+    friend opentxs::api::session::notary::WalletPrivate;
 
     AccountType acct_type_{err_acct};
     // These are all the variables from the account file itself.

@@ -36,7 +36,7 @@ auto BlockchainAPI(
     const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const UnallocatedCString& dataFolder,
     const Options& args) noexcept -> std::shared_ptr<api::crypto::Blockchain>
 {
@@ -440,7 +440,8 @@ auto Blockchain::SenderContact(const Key& key) const noexcept
     return imp_->SenderContact(key);
 }
 
-auto Blockchain::Start(std::shared_ptr<const api::Session> api) noexcept -> void
+auto Blockchain::Start(
+    std::shared_ptr<const api::internal::Session> api) noexcept -> void
 {
     imp_->Start(std::move(api));
 }

@@ -19,12 +19,6 @@
 #include <string_view>
 #include <utility>
 
-#include "2_Factory.hpp"
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
@@ -44,10 +38,15 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
@@ -63,6 +62,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -188,7 +188,7 @@ auto Unit::AddAccountRecord(
 
     const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto record_file =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
+        api::internal::Paths::GetFilenameA(strInstrumentDefinitionID.c_str());
 
     OTDB::Storable* pStorable = nullptr;
     std::unique_ptr<OTDB::Storable> theAngel;
@@ -197,7 +197,7 @@ auto Unit::AddAccountRecord(
     if (OTDB::Exists(
             api_,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             record_file,
             "",
             "")) {  // the file already exists; let's
@@ -206,7 +206,7 @@ auto Unit::AddAccountRecord(
             api_,
             OTDB::STORED_OBJ_STRING_MAP,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             record_file,
             "",
             "");
@@ -277,7 +277,7 @@ auto Unit::AddAccountRecord(
             api_,
             *pMap,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             record_file,
             "",
             "")) {
@@ -350,7 +350,7 @@ auto Unit::EraseAccountRecord(
     const auto strAcctID = String::Factory(theAcctID, api_.Crypto());
     const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto strAcctRecordFile =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
+        api::internal::Paths::GetFilenameA(strInstrumentDefinitionID.c_str());
 
     OTDB::Storable* pStorable = nullptr;
     std::unique_ptr<OTDB::Storable> theAngel;
@@ -359,7 +359,7 @@ auto Unit::EraseAccountRecord(
     if (OTDB::Exists(
             api_,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             strAcctRecordFile,
             "",
             "")) {  // the file already exists; let's
@@ -368,7 +368,7 @@ auto Unit::EraseAccountRecord(
             api_,
             OTDB::STORED_OBJ_STRING_MAP,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             strAcctRecordFile,
             "",
             "");
@@ -415,7 +415,7 @@ auto Unit::EraseAccountRecord(
             api_,
             *pMap,
             dataFolder,
-            api_.Internal().Legacy().Contract(),
+            api_.Internal().Paths().Contract(),
             strAcctRecordFile,
             "",
             "")) {
@@ -476,7 +476,7 @@ auto Unit::get_displayscales(const SerializedType& serialized) const
 auto Unit::GetID(const api::Session& api, const SerializedType& contract)
     -> identifier_type
 {
-    return api.Factory().InternalSession().UnitIDFromPreimage(contract);
+    return api.Factory().Internal().Session().UnitIDFromPreimage(contract);
 }
 
 auto Unit::get_unitofaccount(const SerializedType& serialized) const
@@ -655,12 +655,12 @@ auto Unit::VisitAccountRecords(
 {
     const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto record_file =
-        api::Legacy::GetFilenameA(strInstrumentDefinitionID.c_str());
+        api::internal::Paths::GetFilenameA(strInstrumentDefinitionID.c_str());
     std::unique_ptr<OTDB::Storable> pStorable(OTDB::QueryObject(
         api_,
         OTDB::STORED_OBJ_STRING_MAP,
         dataFolder,
-        api_.Internal().Legacy().Contract(),
+        api_.Internal().Paths().Contract(),
         record_file,
         "",
         ""));

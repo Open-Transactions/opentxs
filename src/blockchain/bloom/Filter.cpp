@@ -16,9 +16,9 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/bloom/Filter.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"

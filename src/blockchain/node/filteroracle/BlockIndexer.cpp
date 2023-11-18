@@ -18,9 +18,7 @@
 #include <utility>
 
 #include "blockchain/node/filteroracle/Shared.hpp"
-#include "internal/api/Legacy.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/database/Cfilter.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
@@ -37,11 +35,13 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -101,7 +101,7 @@ namespace opentxs::blockchain::node::filteroracle
 using enum opentxs::network::zeromq::socket::Direction;
 
 BlockIndexer::Imp::Imp(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared,
     const network::zeromq::BatchID batch,
@@ -134,12 +134,12 @@ BlockIndexer::Imp::Imp(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , chain_(node_.Internal().Chain())
     , checkpoints_([&] {
         auto out = std::filesystem::path{};
-        const auto& legacy = api_.Internal().Legacy();
+        const auto& legacy = api_.Internal().Paths();
         auto rc = legacy.AppendFolder(
             out, api_.DataFolder(), legacy.BlockchainCheckpoints());
 
@@ -941,7 +941,7 @@ BlockIndexer::Imp::~Imp() = default;
 namespace opentxs::blockchain::node::filteroracle
 {
 BlockIndexer::BlockIndexer(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared) noexcept
     : imp_([&] {

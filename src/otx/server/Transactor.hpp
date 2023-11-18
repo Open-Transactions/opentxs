@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/otx/AccountList.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 

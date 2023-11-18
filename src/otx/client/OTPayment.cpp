@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -27,9 +26,11 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -1588,7 +1589,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
         case CHEQUE:
         case VOUCHER:
         case INVOICE: {
-            pContract = api_.Factory().InternalSession().Contract(payment_);
+            pContract = api_.Factory().Internal().Session().Contract(payment_);
 
             if (false != bool(pContract)) {
                 pCheque = dynamic_cast<Cheque*>(pContract.release());
@@ -1608,7 +1609,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
             }
         } break;
         case PAYMENT_PLAN: {
-            pContract = api_.Factory().InternalSession().Contract(payment_);
+            pContract = api_.Factory().Internal().Session().Contract(payment_);
 
             if (false != bool(pContract)) {
                 pPaymentPlan =
@@ -1631,7 +1632,7 @@ auto OTPayment::Instantiate() const -> OTTrackable*
             }
         } break;
         case SMART_CONTRACT: {
-            pContract = api_.Factory().InternalSession().Contract(payment_);
+            pContract = api_.Factory().Internal().Session().Contract(payment_);
 
             if (false != bool(pContract)) {
                 pSmartContract =
@@ -1699,7 +1700,7 @@ auto OTPayment::InstantiateNotice(const String& strNotice) -> OTTransaction*
 auto OTPayment::InstantiateNotice() const -> OTTransaction*
 {
     if (payment_->Exists() && (OTPayment::NOTICE == GetType())) {
-        auto pType = api_.Factory().InternalSession().Transaction(payment_);
+        auto pType = api_.Factory().Internal().Session().Transaction(payment_);
 
         if (false == bool(pType)) {
             LogError()()("Failure 1: This payment object does "

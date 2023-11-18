@@ -14,14 +14,14 @@
 #include "blockchain/node/stats/Shared.hpp"
 #include "internal/api/network/Types.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -72,12 +72,12 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batchID,
     allocator_type alloc) noexcept
     : opentxs::Actor<stats::Actor, Work>(
-          *api,
+          api->Self(),
           LogTrace(),
           {"blockchain stats", alloc},
           0ms,
@@ -106,7 +106,7 @@ Actor::Actor(
           })
     , api_p_(std::move(api))
     , shared_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , data_(*shared_)
     , to_blockchain_api_(pipeline_.Internal().ExtraSocket(0_uz))
 {

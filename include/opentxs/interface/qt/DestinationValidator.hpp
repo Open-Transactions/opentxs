@@ -35,7 +35,6 @@ namespace implementation
 {
 class AccountActivity;
 }  // namespace implementation
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

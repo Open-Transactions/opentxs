@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "internal/otx/common/Account.hpp"
+
 #pragma once
 
 #include <atomic>
@@ -10,7 +12,6 @@
 #include <memory>
 #include <shared_mutex>
 
-#include "internal/otx/common/Account.hpp"
 #include "internal/util/Mutex.hpp"
 
 namespace opentxs

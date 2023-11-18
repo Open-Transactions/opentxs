@@ -19,6 +19,7 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
@@ -38,9 +39,9 @@ namespace opentxs::blockchain::node::wallet
 using namespace std::literals;
 
 Shared::Shared(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept
-    : api_(*api)
+    : api_(api->asClientPublic())
     , chain_(node->Internal().Chain())
     , db_(node->Internal().DB())
     , fee_oracle_(api, node)

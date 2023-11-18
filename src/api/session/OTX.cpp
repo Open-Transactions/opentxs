@@ -21,13 +21,8 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "internal/api/Settings.hpp"
-#include "internal/api/session/Client.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
@@ -48,17 +43,24 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
@@ -763,7 +765,7 @@ auto OTX::can_deposit(
     }
 
     const bool registered =
-        api_.InternalClient().OTAPI().IsNym_RegisteredAtServer(
+        api_.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
             recipient, depositServer);
 
     if (false == registered) {
@@ -906,7 +908,7 @@ auto OTX::can_message(
     }
 
     const bool registered =
-        api_.InternalClient().OTAPI().IsNym_RegisteredAtServer(
+        api_.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
             senderNymID, serverID);
 
     if (false == registered) {
@@ -1488,7 +1490,7 @@ auto OTX::InitiateBailment(
         }
 
         const auto nym = api_.Wallet().Nym(localNymID);
-        auto peerrequest = api_.Factory().InternalSession().BailmentRequest(
+        auto peerrequest = api_.Factory().Internal().Session().BailmentRequest(
             nym, targetNymID, instrumentDefinitionID, notary, reason_);
 
         if (setID) { setID(peerrequest.ID()); }
@@ -1529,7 +1531,7 @@ auto OTX::InitiateFaucet(
         }
 
         const auto nym = api_.Wallet().Nym(localNymID);
-        auto peerrequest = api_.Factory().InternalSession().FaucetRequest(
+        auto peerrequest = api_.Factory().Internal().Session().FaucetRequest(
             nym, targetNymID, unit, address, reason_);
 
         if (setID) { setID(peerrequest.ID()); }
@@ -1572,14 +1574,15 @@ auto OTX::InitiateOutbailment(
         }
 
         const auto nym = api_.Wallet().Nym(localNymID);
-        auto peerrequest = api_.Factory().InternalSession().OutbailmentRequest(
-            nym,
-            targetNymID,
-            instrumentDefinitionID,
-            notary,
-            amount,
-            message,
-            reason_);
+        auto peerrequest =
+            api_.Factory().Internal().Session().OutbailmentRequest(
+                nym,
+                targetNymID,
+                instrumentDefinitionID,
+                notary,
+                amount,
+                message,
+                reason_);
 
         if (setID) { setID(peerrequest.ID()); }
 
@@ -1618,8 +1621,9 @@ auto OTX::InitiateRequestConnection(
         }
 
         const auto nym = api_.Wallet().Nym(localNymID);
-        auto peerrequest = api_.Factory().InternalSession().ConnectionRequest(
-            nym, targetNymID, type, reason_);
+        auto peerrequest =
+            api_.Factory().Internal().Session().ConnectionRequest(
+                nym, targetNymID, type, reason_);
 
         if (setID) { setID(peerrequest.ID()); }
 
@@ -2047,7 +2051,7 @@ auto OTX::queue_cheque_deposit(
     const Cheque& cheque) const -> bool
 {
     auto payment{
-        api_.Factory().InternalSession().Payment(String::Factory(cheque))};
+        api_.Factory().Internal().Session().Payment(String::Factory(cheque))};
 
     assert_true(false != bool(payment));
 
@@ -2094,7 +2098,7 @@ auto OTX::refresh_accounts() const -> bool
             auto logStr = String::Factory(": Nym ");
             logStr->Concatenate(String::Factory(nymID.asBase58(api_.Crypto())));
             const bool registered =
-                api_.InternalClient().OTAPI().IsNym_RegisteredAtServer(
+                api_.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
                     nymID, serverID);
 
             if (registered) {

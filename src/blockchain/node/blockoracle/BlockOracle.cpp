@@ -18,8 +18,8 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -97,7 +97,7 @@ auto BlockOracle::Load(std::span<const block::Hash> hashes) const noexcept
 }
 
 auto BlockOracle::Start(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
     assert_false(nullptr == api);
@@ -107,7 +107,7 @@ auto BlockOracle::Start(
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
     shared_ = std::allocate_shared<BlockOracle::Shared>(
-        alloc::PMR<BlockOracle::Shared>{alloc}, *api, *node);
+        alloc::PMR<BlockOracle::Shared>{alloc}, api->Self(), *node);
 
     assert_false(nullptr == shared_);
 

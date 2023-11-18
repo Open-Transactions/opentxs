@@ -9,8 +9,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"

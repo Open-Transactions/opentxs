@@ -13,14 +13,14 @@
 #include "internal/api/network/Factory.hpp"
 #include "internal/api/network/OTDHT.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Notary.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
+#include "opentxs/api/session/Notary.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
 auto NetworkAPI(
-    const api::Session& api,
+    const api::internal::Session& api,
     const api::network::Asio& asio,
     const network::zeromq::Context& zmq,
     const api::session::Endpoints& endpoints,
@@ -37,7 +37,7 @@ auto NetworkAPI(
 namespace opentxs::api::network::implementation
 {
 Network::Network(
-    const api::Session& api,
+    const api::internal::Session& api,
     const network::Asio& asio,
     const opentxs::network::zeromq::Context& zmq,
     const api::session::Endpoints& endpoints,
@@ -52,9 +52,9 @@ Network::Network(
 }
 
 auto Network::Start(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     const api::crypto::Blockchain& crypto,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const std::filesystem::path& dataFolder,
     const Options& args) noexcept -> void
 {
@@ -63,9 +63,9 @@ auto Network::Start(
 }
 
 auto Network::Start(
-    std::shared_ptr<const api::session::Notary> api,
+    std::shared_ptr<const api::session::internal::Notary> api,
     const api::crypto::Blockchain& crypto,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const std::filesystem::path& dataFolder,
     const Options& args) noexcept -> void
 {

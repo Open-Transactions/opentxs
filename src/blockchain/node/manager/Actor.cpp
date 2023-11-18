@@ -18,7 +18,6 @@
 #include "blockchain/node/manager/Shared.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -33,11 +32,12 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -101,13 +101,13 @@ using opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<node::Manager> self,
     std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : ManagerActor(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               auto out = CString{alloc};
@@ -154,7 +154,7 @@ Actor::Actor(
     , api_p_(std::move(api))
     , self_p_(std::move(self))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , self_(*self_p_)
     , shared_(*shared_p_)
     , to_peer_manager_(pipeline_.Internal().ExtraSocket(0))

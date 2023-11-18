@@ -20,12 +20,14 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
 {
-
 namespace block
 {
 class Block;
@@ -68,7 +70,7 @@ public:
 
     auto Internal() noexcept -> BlockOracle& final { return *this; }
     auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node) noexcept -> void;
 
     BlockOracle() noexcept;

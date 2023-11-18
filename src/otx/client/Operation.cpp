@@ -26,15 +26,8 @@
 #include <stdexcept>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "core/StateMachine.hpp"
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
 #include "internal/api/session/Activity.hpp"
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -65,12 +58,18 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -90,6 +89,7 @@
 #include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/OperationType.hpp"    // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
@@ -183,7 +183,7 @@
     LogVerbose()()("Allocated transaction number ")(managedNumber.Value())     \
         .Flush();                                                              \
     const auto transactionNum = managedNumber.Value();                         \
-    auto pLedger{api_.Factory().InternalSession().Ledger(                      \
+    auto pLedger{api_.Factory().Internal().Session().Ledger(                   \
         nymID, account_id_, serverID)};                                        \
                                                                                \
     if (false == bool(pLedger)) {                                              \
@@ -203,7 +203,8 @@
     }                                                                          \
                                                                                \
     std::shared_ptr<OTTransaction> pTransaction{api_.Factory()                 \
-                                                    .InternalSession()         \
+                                                    .Internal()                \
+                                                    .Session()                 \
                                                     .Transaction(              \
                                                         nymID,                 \
                                                         account_id_,           \
@@ -221,7 +222,7 @@
                                                                                \
     ledger.AddTransaction(pTransaction);                                       \
     auto& transaction = *pTransaction;                                         \
-    std::shared_ptr<Item> pItem{api_.Factory().InternalSession().Item(         \
+    std::shared_ptr<Item> pItem{api_.Factory().Internal().Session().Item(      \
         transaction, ITEM_TYPE, DESTINATION_ACCOUNT)};                         \
                                                                                \
     if (false == bool(pItem)) {                                                \
@@ -614,7 +615,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
         return {};
     }
 
-    auto envelope = api_.Factory().InternalSession().Envelope();
+    auto envelope = api_.Factory().Internal().Session().Envelope();
     auto sealed = envelope->Seal(
         {recipientNym, context.Signer()}, serialized->Bytes(), reason_);
 
@@ -634,7 +635,7 @@ auto Operation::construct_convey_payment() -> std::shared_ptr<Message>
         return {};
     }
 
-    const auto pObject = api_.Factory().InternalSession().PeerObject(
+    const auto pObject = api_.Factory().Internal().Session().PeerObject(
         context.Signer(), String::Factory(message)->Get(), true);
 
     if (false == bool(pObject)) {
@@ -718,7 +719,7 @@ auto Operation::construct_deposit_cheque() -> std::shared_ptr<Message>
     // If cancellingCheque==true, we're actually cancelling the cheque by
     // "depositing" it back into the same account it's drawn on.
     bool cancellingCheque{false};
-    auto copy{api_.Factory().InternalSession().Cheque(
+    auto copy{api_.Factory().Internal().Session().Cheque(
         serverID, account.get().GetInstrumentDefinitionID())};
 
     if (cheque.HasRemitter()) {
@@ -858,7 +859,8 @@ auto Operation::construct_get_account_data(const identifier::Account& accountID)
 
 auto Operation::construct_get_transaction_numbers() -> std::shared_ptr<Message>
 {
-    return api_.InternalClient().OTAPI().getTransactionNumbers(context().get());
+    return api_.Internal().asClient().OTAPI().getTransactionNumbers(
+        context().get());
 }
 
 auto Operation::construct_issue_unit_definition() -> std::shared_ptr<Message>
@@ -1056,7 +1058,7 @@ auto Operation::construct_send_nym_object(
 {
     CREATE_MESSAGE(sendNymMessage, recipient->ID(), number, true, true);
 
-    auto envelope = api_.Factory().InternalSession().Envelope();
+    auto envelope = api_.Factory().Internal().Session().Envelope();
     auto output = proto::PeerObject{};
     if (false == object.Serialize(output)) {
         LogError()()("Failed to serialize object.").Flush();
@@ -1078,7 +1080,7 @@ auto Operation::construct_send_nym_object(
     senderCopy.Set(message.payload_);
 
     {
-        auto copy = api_.Factory().InternalSession().Envelope(senderCopy);
+        auto copy = api_.Factory().Internal().Session().Envelope(senderCopy);
         auto text = UnallocatedCString{};
 
         // FIXME removing this line causes the sender to be unable to decrypt
@@ -1107,7 +1109,7 @@ auto Operation::construct_send_cash() -> std::shared_ptr<Message>
 
     PREPARE_CONTEXT();
 
-    const auto pObject = api_.Factory().InternalSession().PeerObject(
+    const auto pObject = api_.Factory().Internal().Session().PeerObject(
         context.Signer(), std::move(purse_.value()));
 
     if (false == bool(pObject)) {
@@ -1142,7 +1144,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
     auto envelope = api_.Factory().Internal().Armored();
-    const auto pObject = api_.Factory().InternalSession().PeerObject(
+    const auto pObject = api_.Factory().Internal().Session().PeerObject(
         context.Signer(), memo_->Get(), false);
 
     if (false == bool(pObject)) {
@@ -1227,7 +1229,7 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
         return {};
     }
 
-    const auto pObject = api_.Factory().InternalSession().PeerObject(
+    const auto pObject = api_.Factory().Internal().Session().PeerObject(
         peer_request_, peer_reply_, PEER_OBJECT_PEER_REPLY);
 
     if (false == bool(pObject)) {
@@ -1283,7 +1285,7 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
     }
 
     const auto itemID = peer_request_.ID();
-    const auto pObject = api_.Factory().InternalSession().PeerObject(
+    const auto pObject = api_.Factory().Internal().Session().PeerObject(
         peer_request_, PEER_OBJECT_PEER_REQUEST);
 
     if (false == bool(pObject)) {
@@ -1327,7 +1329,8 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
     // throw a dummy on there before generating balance statement.
     std::shared_ptr<OTTransaction> outboxTransaction{
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Transaction(
                 *outbox_,
                 transactionType::pending,
@@ -1381,13 +1384,13 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
     const bool exists = OTDB::Exists(
         api_,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Mint(),
+        api_.Internal().Paths().Mint(),
         serverID.asBase58(api_.Crypto()),
         unitID.asBase58(api_.Crypto()),
         "");
 
     if (false == exists) {
-        LogError()()("File does not exist: ")(api_.Internal().Legacy().Mint())(
+        LogError()()("File does not exist: ")(api_.Internal().Paths().Mint())(
             '/')(serverID, api_.Crypto())('/')(unitID, api_.Crypto())
             .Flush();
 
@@ -1542,9 +1545,9 @@ auto Operation::download_account(
     const identifier::Account& accountID,
     otx::context::Server::DeliveryResult& lastResult) -> std::size_t
 {
-    std::shared_ptr<Ledger> inbox{api_.Factory().InternalSession().Ledger(
+    std::shared_ptr<Ledger> inbox{api_.Factory().Internal().Session().Ledger(
         nym_id_, accountID, server_id_, ledgerType::inbox)};
-    std::shared_ptr<Ledger> outbox{api_.Factory().InternalSession().Ledger(
+    std::shared_ptr<Ledger> outbox{api_.Factory().Internal().Session().Ledger(
         nym_id_, accountID, server_id_, ledgerType::outbox)};
 
     assert_false(nullptr == inbox);
@@ -1703,7 +1706,7 @@ auto Operation::evaluate_transaction_reply(
         return false;
     }
 
-    auto response{api_.Factory().InternalSession().Ledger(
+    auto response{api_.Factory().Internal().Session().Ledger(
         nym_id_, accountID, server_id_)};
 
     assert_false(nullptr == response);
@@ -2163,7 +2166,7 @@ auto Operation::process_inbox(
     PREPARE_CONTEXT();
 
     auto [response, recoverNumber] =
-        api_.InternalClient().OTAPI().CreateProcessInbox(
+        api_.Internal().asClient().OTAPI().CreateProcessInbox(
             accountID, context, *inbox);
 
     if (false == bool(response)) {
@@ -2210,8 +2213,9 @@ auto Operation::process_inbox(
             }
         }
 
-        const bool accepted = api_.InternalClient().OTAPI().IncludeResponse(
-            accountID, true, context, *transaction, *response);
+        const bool accepted =
+            api_.Internal().asClient().OTAPI().IncludeResponse(
+                accountID, true, context, *transaction, *response);
 
         if (false == accepted) {
             LogError()()("Failed to accept item: ")(number).Flush();
@@ -2220,8 +2224,9 @@ auto Operation::process_inbox(
         }
     }
 
-    const bool finalized = api_.InternalClient().OTAPI().FinalizeProcessInbox(
-        accountID, context, *response, *inbox, *outbox, reason_);
+    const bool finalized =
+        api_.Internal().asClient().OTAPI().FinalizeProcessInbox(
+            accountID, context, *response, *inbox, *outbox, reason_);
 
     if (false == finalized) {
         LogError()()("Unable to finalize response.").Flush();
@@ -2671,7 +2676,7 @@ void Operation::transaction_numbers()
     }
 
     std::shared_ptr<Message> message{
-        api_.InternalClient().OTAPI().getTransactionNumbers(context)};
+        api_.Internal().asClient().OTAPI().getTransactionNumbers(context)};
 
     if (false == bool(message)) { return; }
 
@@ -2738,7 +2743,7 @@ void Operation::update_workflow_convey_payment(
     }
 
     bool workflowUpdated{false};
-    auto pCheque{api_.Factory().InternalSession().Cheque()};
+    auto pCheque{api_.Factory().Internal().Session().Cheque()};
 
     assert_false(nullptr == pCheque);
 

@@ -10,8 +10,8 @@
 #include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -55,7 +55,7 @@ auto print(DHTJob job) noexcept -> std::string_view
 namespace opentxs::network::blockchain
 {
 OTDHT::OTDHT(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node) noexcept
 {
     assert_false(nullptr == api);

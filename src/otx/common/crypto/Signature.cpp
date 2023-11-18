@@ -7,8 +7,8 @@
 
 #include "core/Armored.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 
 namespace opentxs
 {

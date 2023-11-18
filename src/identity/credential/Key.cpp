@@ -15,8 +15,6 @@
 #include <stdexcept>
 
 #include "identity/credential/Base.hpp"
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
@@ -26,9 +24,11 @@
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
@@ -215,10 +215,11 @@ auto Key::deserialize_key(
     if (hasPrivate) {
         const auto privateKey = credential.privatecredential().key(index - 1);
 
-        return api.Factory().InternalSession().Keypair(publicKey, privateKey);
+        return api.Factory().Internal().Session().Keypair(
+            publicKey, privateKey);
     }
 
-    return api.Factory().InternalSession().Keypair(publicKey);
+    return api.Factory().Internal().Session().Keypair(publicKey);
 }
 
 auto Key::GetKeypair(const opentxs::crypto::asymmetric::Role role) const
@@ -392,7 +393,7 @@ auto Key::new_key(
             auto revised{params};
             revised.SetDHParams(dh);
 
-            return api.Factory().InternalSession().Keypair(
+            return api.Factory().Internal().Session().Keypair(
                 revised, version, translate(role), reason);
         }
         case identity::CredentialType::HD: {
@@ -407,7 +408,7 @@ auto Key::new_key(
                 throw std::runtime_error("Invalid curve type");
             }
 
-            return api.Factory().InternalSession().Keypair(
+            return api.Factory().Internal().Session().Keypair(
                 params.Seed(),
                 params.Nym(),
                 params.Credset(),

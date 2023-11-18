@@ -13,15 +13,15 @@
 
 #include "blockchain/node/blockoracle/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -45,13 +45,13 @@ using opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 BlockOracle::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : BlockOracleActor(
-          *api,
+          api->Self(),
           shared->log_,
           CString{shared->name_, alloc},
           0ms,
@@ -88,7 +88,7 @@ BlockOracle::Actor::Actor(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , shared_(*shared_p_)
     , router_(pipeline_.Internal().ExtraSocket(0))

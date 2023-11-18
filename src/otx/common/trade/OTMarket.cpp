@@ -13,11 +13,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -35,10 +30,15 @@
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/display/Definition.hpp"
@@ -77,7 +77,7 @@ OTMarket::OTMarket(const api::Session& api, const char* szFilename)
 
     InitMarket();
     filename_->Set(szFilename);
-    foldername_->Set(api_.Internal().Legacy().Market());
+    foldername_->Set(api_.Internal().Paths().Market());
 }
 
 OTMarket::OTMarket(const api::Session& api)
@@ -176,7 +176,7 @@ auto OTMarket::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             LogError()()("Error: Offer field without value.").Flush();
             return (-1);  // error condition
         } else {
-            auto pOffer{api_.Factory().InternalSession().Offer(
+            auto pOffer{api_.Factory().Internal().Session().Offer(
                 notary_id_,
                 instrument_definition_id_,
                 currency_type_id_,
@@ -885,7 +885,7 @@ auto OTMarket::LoadMarket() -> bool
     auto MARKET_ID = api_.Factory().Internal().Identifier(*this);
     auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
 
-    const char* szFoldername = api_.Internal().Legacy().Market();
+    const char* szFoldername = api_.Internal().Paths().Market();
     const char* szFilename = str_MARKET_ID->Get();
 
     bool bSuccess = OTDB::Exists(
@@ -902,7 +902,8 @@ auto OTMarket::LoadMarket() -> bool
     if (bSuccess) {
         if (nullptr != trade_list_) { delete trade_list_; }
 
-        auto trade_files = api::Legacy::GetFilenameBin(str_MARKET_ID->Get());
+        auto trade_files =
+            api::internal::Paths::GetFilenameBin(str_MARKET_ID->Get());
 
         const char* szSubFolder = "recent";  // todo stop hardcoding.
 
@@ -927,7 +928,7 @@ auto OTMarket::SaveMarket(const PasswordPrompt& reason) -> bool
     auto MARKET_ID = api_.Factory().Internal().Identifier(*this);
     auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
 
-    const char* szFoldername = api_.Internal().Legacy().Market();
+    const char* szFoldername = api_.Internal().Paths().Market();
     const char* szFilename = str_MARKET_ID->Get();
 
     // Remember, if the market has changed, the new contents will not be written
@@ -950,7 +951,8 @@ auto OTMarket::SaveMarket(const PasswordPrompt& reason) -> bool
 
     if (nullptr != trade_list_) {
 
-        auto filename = api::Legacy::GetFilenameBin(str_MARKET_ID->Get());
+        auto filename =
+            api::internal::Paths::GetFilenameBin(str_MARKET_ID->Get());
 
         const char* szSubFolder = "recent";  // todo stop hardcoding.
 
@@ -1381,13 +1383,13 @@ void OTMarket::ProcessTrade(
         // IF they can be loaded up from file, or generated, that is.
 
         // Load the inbox/outbox in case they already exist
-        auto theFirstAssetInbox{api_.Factory().InternalSession().Ledger(
+        auto theFirstAssetInbox{api_.Factory().Internal().Session().Ledger(
             FIRST_NYM_ID, theTrade.GetSenderAcctID(), NOTARY_ID)};
-        auto theFirstCurrencyInbox{api_.Factory().InternalSession().Ledger(
+        auto theFirstCurrencyInbox{api_.Factory().Internal().Session().Ledger(
             FIRST_NYM_ID, theTrade.GetCurrencyAcctID(), NOTARY_ID)};
-        auto theOtherAssetInbox{api_.Factory().InternalSession().Ledger(
+        auto theOtherAssetInbox{api_.Factory().Internal().Session().Ledger(
             OTHER_NYM_ID, pOtherTrade->GetSenderAcctID(), NOTARY_ID)};
-        auto theOtherCurrencyInbox{api_.Factory().InternalSession().Ledger(
+        auto theOtherCurrencyInbox{api_.Factory().Internal().Session().Ledger(
             OTHER_NYM_ID, pOtherTrade->GetCurrencyAcctID(), NOTARY_ID)};
 
         assert_true(false != bool(theFirstAssetInbox));
@@ -1527,7 +1529,7 @@ void OTMarket::ProcessTrade(
 
             // Start generating the receipts (for all four inboxes.)
 
-            auto pTrans1{api_.Factory().InternalSession().Transaction(
+            auto pTrans1{api_.Factory().Internal().Session().Transaction(
                 *theFirstAssetInbox,
                 transactionType::marketReceipt,
                 originType::origin_market_offer,
@@ -1535,7 +1537,7 @@ void OTMarket::ProcessTrade(
 
             assert_true(false != bool(pTrans1));
 
-            auto pTrans2{api_.Factory().InternalSession().Transaction(
+            auto pTrans2{api_.Factory().Internal().Session().Transaction(
                 *theFirstCurrencyInbox,
                 transactionType::marketReceipt,
                 originType::origin_market_offer,
@@ -1543,7 +1545,7 @@ void OTMarket::ProcessTrade(
 
             assert_true(false != bool(pTrans2));
 
-            auto pTrans3{api_.Factory().InternalSession().Transaction(
+            auto pTrans3{api_.Factory().Internal().Session().Transaction(
                 *theOtherAssetInbox,
                 transactionType::marketReceipt,
                 originType::origin_market_offer,
@@ -1551,7 +1553,7 @@ void OTMarket::ProcessTrade(
 
             assert_true(false != bool(pTrans3));
 
-            auto pTrans4{api_.Factory().InternalSession().Transaction(
+            auto pTrans4{api_.Factory().Internal().Session().Transaction(
                 *theOtherCurrencyInbox,
                 transactionType::marketReceipt,
                 originType::origin_market_offer,
@@ -1577,13 +1579,13 @@ void OTMarket::ProcessTrade(
 
             // set up the transaction items (each transaction may have
             // multiple items... but not in this case.)
-            auto pItem1{api_.Factory().InternalSession().Item(
+            auto pItem1{api_.Factory().Internal().Session().Item(
                 *trans1, itemType::marketReceipt, {})};
-            auto pItem2{api_.Factory().InternalSession().Item(
+            auto pItem2{api_.Factory().Internal().Session().Item(
                 *trans2, itemType::marketReceipt, {})};
-            auto pItem3{api_.Factory().InternalSession().Item(
+            auto pItem3{api_.Factory().Internal().Session().Item(
                 *trans3, itemType::marketReceipt, {})};
-            auto pItem4{api_.Factory().InternalSession().Item(
+            auto pItem4{api_.Factory().Internal().Session().Item(
                 *trans4, itemType::marketReceipt, {})};
 
             assert_true(false != bool(pItem1));

@@ -16,7 +16,6 @@
 #include "blockchain/node/wallet/subchain/NotificationStateData.hpp"
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -29,12 +28,14 @@
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
@@ -102,13 +103,13 @@ using enum opentxs::network::zeromq::socket::Direction;
 Account::Imp::Imp(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     CString&& fromParent,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Actor(
-          *api,
+          api->asClientPublic(),
           LogTrace(),
           [&] {
               using namespace std::literals;
@@ -128,7 +129,7 @@ Account::Imp::Imp(
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
-    , api_(*api_p_)
+    , api_(api_p_->asClientPublic())
     , account_(account)
     , node_(*node_p_)
     , db_(node_.Internal().DB())
@@ -168,7 +169,7 @@ Account::Imp::Imp(
 Account::Imp::Imp(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view fromParent,
     network::zeromq::BatchID batch,
@@ -643,7 +644,7 @@ namespace opentxs::blockchain::node::wallet
 Account::Account(
     Reorg& reorg,
     const crypto::Account& account,
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view fromParent) noexcept
     : imp_([&] {

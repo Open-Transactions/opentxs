@@ -20,9 +20,9 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "2_Factory.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Source.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "ottest/fixtures/core/Identifier.hpp"
 #include "ottest/fixtures/identity/Source.hpp"
 #include "ottest/mocks/identity/credential/Primary.hpp"

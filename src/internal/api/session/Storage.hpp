@@ -28,6 +28,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -486,8 +491,8 @@ public:
         const identifier::Generic& threadId) const noexcept -> std::size_t = 0;
 
     auto Internal() noexcept -> internal::Storage& final { return *this; }
-    virtual auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void = 0;
+    virtual auto Start(
+        std::shared_ptr<const api::internal::Session> api) noexcept -> void = 0;
     virtual auto Upgrade() noexcept -> void = 0;
 
     Storage(const Storage&) = delete;

@@ -18,11 +18,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "core/StateMachine.hpp"
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -39,9 +35,12 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/UnitType.hpp"
@@ -53,6 +52,7 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"
 #include "opentxs/otx/OperationType.hpp"
 #include "opentxs/util/Container.hpp"
@@ -408,7 +408,8 @@ auto StateMachine::deposit_cheque(
         return finish_task(taskID, false, error_result());
     }
 
-    std::shared_ptr<Cheque> cheque{api_.Factory().InternalSession().Cheque()};
+    std::shared_ptr<Cheque> cheque{
+        api_.Factory().Internal().Session().Cheque()};
 
     assert_false(nullptr == cheque);
 
@@ -1158,15 +1159,16 @@ auto StateMachine::write_and_send_cheque(
         return TaskDone::retry;
     }
 
-    std::unique_ptr<Cheque> cheque(api_.InternalClient().OTAPI().WriteCheque(
-        op_.ServerID(),
-        value,
-        validFrom,
-        validTo,
-        accountID,
-        op_.NymID(),
-        String::Factory(memo.c_str()),
-        recipient));
+    std::unique_ptr<Cheque> cheque(
+        api_.Internal().asClient().OTAPI().WriteCheque(
+            op_.ServerID(),
+            value,
+            validFrom,
+            validTo,
+            accountID,
+            op_.NymID(),
+            String::Factory(memo.c_str()),
+            recipient));
 
     if (false == bool(cheque)) {
         LogError()()("Failed to write cheque.").Flush();
@@ -1175,7 +1177,7 @@ auto StateMachine::write_and_send_cheque(
     }
 
     std::shared_ptr<OTPayment> payment{
-        api_.Factory().InternalSession().Payment(String::Factory(*cheque))};
+        api_.Factory().Internal().Session().Payment(String::Factory(*cheque))};
 
     if (false == bool(payment)) {
         LogError()()("Failed to instantiate payment.").Flush();

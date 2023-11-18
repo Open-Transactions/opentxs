@@ -18,7 +18,6 @@ class io_context;
 
 namespace opentxs
 {
-
 namespace network
 {
 namespace asio

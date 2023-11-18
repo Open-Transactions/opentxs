@@ -16,6 +16,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Client;
@@ -68,7 +73,7 @@ auto BlockchainNetworkBitcoin(
     std::string_view seednode) noexcept
     -> std::shared_ptr<blockchain::node::Manager>;
 auto BlockchainPeerManager(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node,
     blockchain::database::Peer& db,
     std::string_view peers) noexcept -> void;

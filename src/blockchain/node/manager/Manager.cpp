@@ -15,7 +15,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -162,7 +162,7 @@ auto Base::ShuttingDown() const noexcept -> bool
 }
 
 auto Base::Start(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<node::Manager> me) noexcept -> void
 {
     assert_false(nullptr == api);

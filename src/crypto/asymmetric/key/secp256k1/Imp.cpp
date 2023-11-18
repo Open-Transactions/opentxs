@@ -12,8 +12,8 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep

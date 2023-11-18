@@ -7,11 +7,11 @@
 
 #include <memory>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 
 namespace opentxs::factory
 {

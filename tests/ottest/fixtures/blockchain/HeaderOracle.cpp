@@ -11,11 +11,12 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "ottest/data/blockchain/Headers.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
@@ -174,7 +175,7 @@ auto HeaderOracle_base::MakeTestBlock(
     const bb::Hash& parent) -> bool
 {
     const auto child = ot::blockchain::block::Hash{tag.value_};
-    auto header = api_.Factory().InternalSession().BlockHeaderForUnitTests(
+    auto header = api_.Factory().Internal().Session().BlockHeaderForUnitTests(
         child, parent, -1, {});
 
     if (header.IsValid()) {

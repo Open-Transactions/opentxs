@@ -31,6 +31,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -155,7 +160,7 @@ private:
         const network::blockchain::AddressID& id) noexcept -> void;
     auto get() noexcept -> GuardedData& { return future_.get(); }
     auto init(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void;
     auto init_chains(
         const api::Session& api,

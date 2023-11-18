@@ -21,7 +21,6 @@
 
 #include "base58/base58.h"
 #include "base64/base64.h"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Core.hpp"
@@ -29,7 +28,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -71,7 +70,7 @@ auto Encode::Armor(ReadView input, Writer&& output, std::string_view bookend)
 
     if (false == factory.operator bool()) { return false; }
 
-    auto buf = factory->Internal().Armored(ByteArray{input});
+    auto buf = factory->Armored(ByteArray{input});
     auto out = String::Factory();
 
     if (false == buf->WriteArmoredString(out, UnallocatedCString{bookend})) {
@@ -273,7 +272,7 @@ auto Encode::Dearmor(ReadView input, Writer&& output) const noexcept -> bool
 
     if (false == factory.operator bool()) { return false; }
 
-    auto armored = factory->Internal().Armored();
+    auto armored = factory->Armored();
     auto buf = String::Factory(input.data(), input.size());
 
     if (false == armored->LoadFromString(buf)) { return false; }
@@ -285,7 +284,8 @@ auto Encode::Dearmor(ReadView input, Writer&& output) const noexcept -> bool
     return copy(out.Bytes(), std::move(output));
 }
 
-auto Encode::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+auto Encode::Init(
+    const std::shared_ptr<const api::internal::Factory>& factory) noexcept
     -> void
 {
     factory_ = factory;

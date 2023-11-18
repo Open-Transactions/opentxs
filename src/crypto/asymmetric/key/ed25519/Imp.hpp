@@ -40,7 +40,6 @@ namespace implementation
 class EllipticCurve;
 }  // namespace implementation
 }  // namespace key
-
 }  // namespace asymmetric
 
 namespace symmetric

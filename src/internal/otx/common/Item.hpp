@@ -24,10 +24,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -246,7 +243,7 @@ protected:
     void UpdateContents(const PasswordPrompt& reason) override;
 
 private:  // Private prevents erroneous use by other classes.
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     using ot_super = OTTransactionType;
 

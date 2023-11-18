@@ -21,15 +21,16 @@
 
 #include "blockchain/crypto/element/Element.hpp"
 #include "blockchain/crypto/subaccount/deterministic/Imp.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -202,8 +203,8 @@ PaymentCodePrivate::PaymentCodePrivate(
           parent,
           id,
           serialized,
-          api.Factory().InternalSession().PaymentCode(serialized.local()),
-          api.Factory().InternalSession().PaymentCode(serialized.remote()),
+          api.Factory().Internal().Session().PaymentCode(serialized.local()),
+          api.Factory().Internal().Session().PaymentCode(serialized.remote()),
           std::move(contact))
 {
 }

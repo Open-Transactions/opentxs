@@ -14,13 +14,12 @@
 #include <span>
 #include <stdexcept>
 
-#include "2_Factory.hpp"
 #include "identity/credential/Base.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"

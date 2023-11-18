@@ -14,7 +14,7 @@ extern "C" {
 #include <string_view>
 #include <utility>
 
-#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"  // IWYU pragma: keep

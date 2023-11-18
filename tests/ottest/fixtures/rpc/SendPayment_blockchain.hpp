@@ -41,5 +41,4 @@ protected:
 
     RPC_BC();
 };
-
 }  // namespace ottest

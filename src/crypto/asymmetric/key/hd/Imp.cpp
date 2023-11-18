@@ -14,15 +14,15 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32.hpp"

@@ -7,8 +7,8 @@
 
 #include <RPCResponse.pb.h>
 
-#include "2_Factory.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
+#include "opentxs/internal.factory.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

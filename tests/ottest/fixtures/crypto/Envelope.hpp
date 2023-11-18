@@ -11,7 +11,9 @@
 #include <string_view>
 #include <utility>
 
+#include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
+#include "internal/crypto/Envelope.hpp"
 
 namespace ottest
 {
@@ -43,6 +45,18 @@ public:
     static auto can_seal(const std::size_t row) -> bool;
     static auto can_open(const std::size_t row, const std::size_t column)
         -> bool;
+    static auto get_armored(const ot::api::Session& api) noexcept
+        -> opentxs::OTArmored;
+    static auto get_envelope(const ot::api::Session& api) noexcept
+        -> opentxs::OTEnvelope;
+    static auto get_envelope(
+        const ot::api::Session& api,
+        const opentxs::Armored& ciphertext) noexcept(false)
+        -> opentxs::OTEnvelope;
+    static auto get_envelope(
+        const ot::api::Session& api,
+        const opentxs::ReadView& ciphertext) noexcept(false)
+        -> opentxs::OTEnvelope;
     static auto is_active(const std::size_t row, const std::size_t column)
         -> bool;
     static auto should_seal(const std::size_t row, const std::size_t column)

@@ -22,7 +22,6 @@ namespace crypto
 {
 namespace asymmetric
 {
-
 namespace key
 {
 class Ed25519;
@@ -30,7 +29,6 @@ class HD;
 class Secp256k1;
 }  // namespace key
 }  // namespace asymmetric
-
 }  // namespace crypto
 
 class PasswordPrompt;

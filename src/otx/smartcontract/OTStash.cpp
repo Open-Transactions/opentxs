@@ -17,8 +17,8 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/smartcontract/OTStashItem.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

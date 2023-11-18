@@ -12,10 +12,6 @@
 #include <string_view>
 #include <utility>
 
-#include "2_Factory.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/identity/Source.hpp"
@@ -24,13 +20,18 @@
 #include "internal/otx/common/StringXML.hpp"
 #include "internal/otx/common/crypto/OTSignedFile.hpp"
 #include "internal/otx/common/util/Tag.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -272,7 +273,8 @@ auto NymFile::deserialize_nymfile(
 
                                 if (strMessage->GetLength() > 2) {
                                     auto pMessage = api_.Factory()
-                                                        .InternalSession()
+                                                        .Internal()
+                                                        .Session()
                                                         .Message();
 
                                     assert_true(false != bool(pMessage));
@@ -428,8 +430,11 @@ auto NymFile::GetOutpaymentsByTransNum(
         //
         if (pMsg->payload_->Exists() && pMsg->payload_->GetString(strPayment) &&
             strPayment->Exists()) {
-            pPayment.reset(
-                api_.Factory().InternalSession().Payment(strPayment).release());
+            pPayment.reset(api_.Factory()
+                               .Internal()
+                               .Session()
+                               .Payment(strPayment)
+                               .release());
 
             // Let's see if it's the cheque we're looking for...
             //
@@ -475,8 +480,8 @@ auto NymFile::load_signed_nymfile(
 
     // Create an OTSignedFile object, giving it the filename (the ID) and the
     // local directory ("nyms")
-    auto theNymFile = api_.Factory().InternalSession().SignedFile(
-        String::Factory(api_.Internal().Legacy().Nym()), nymID);
+    auto theNymFile = api_.Factory().Internal().Session().SignedFile(
+        String::Factory(api_.Internal().Paths().Nym()), nymID);
 
     if (!theNymFile->LoadFile()) {
         LogDetail()()("Failed loading a signed nymfile: ")(nymID.get()).Flush();
@@ -754,8 +759,8 @@ auto NymFile::save_signed_nymfile(
 
     // Create an OTSignedFile object, giving it the filename (the ID) and the
     // local directory ("nyms")
-    auto theNymFile = api_.Factory().InternalSession().SignedFile(
-        api_.Internal().Legacy().Nym(), strNymID);
+    auto theNymFile = api_.Factory().Internal().Session().SignedFile(
+        api_.Internal().Paths().Nym(), strNymID);
     theNymFile->GetFilename(nym_file_);
 
     LogVerbose()()("Saving nym to: ")(nym_file_.get()).Flush();

@@ -4,20 +4,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(activity)
-add_subdirectory(client)
-add_subdirectory(notary)
 add_subdirectory(ui)
 
 libopentxs_add_public_header("api/session" "Contacts.hpp")
 libopentxs_add_public_header("api/session" "Crypto.hpp")
 libopentxs_add_public_header("api/session" "Endpoints.hpp")
-libopentxs_add_public_header("api/session" "Factory.hpp")
-libopentxs_add_public_header("api/session" "Notary.hpp")
 libopentxs_add_public_header("api/session" "OTX.hpp")
-libopentxs_add_public_header("api/session" "Session.hpp")
 libopentxs_add_public_header("api/session" "Storage.hpp")
 libopentxs_add_public_header("api/session" "UI.hpp")
-libopentxs_add_public_header("api/session" "Wallet.hpp")
 libopentxs_add_public_header("api/session" "Workflow.hpp")
 
 target_sources(
@@ -25,20 +19,10 @@ target_sources(
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/api/session/Crypto.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/session/Endpoints.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/api/session/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/api/session/FactoryAPI.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/session/OTX.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/api/session/Session.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/session/Storage.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/session/Types.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/api/session/Wallet.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/api/session/Workflow.hpp"
-    "base/Scheduler.cpp"
-    "base/Scheduler.hpp"
-    "base/Storage.cpp"
-    "base/Storage.hpp"
-    "base/ZMQ.cpp"
-    "base/ZMQ.hpp"
     "Common.cpp"
     "Contacts.cpp"
     "Contacts.hpp"
@@ -46,16 +30,10 @@ target_sources(
     "Crypto.hpp"
     "Endpoints.cpp"
     "Endpoints.hpp"
-    "Factory.cpp"
-    "Factory.hpp"
     "OTX.cpp"
     "OTX.hpp"
-    "Session.cpp"
-    "Session.hpp"
     "Storage.cpp"
     "Storage.hpp"
-    "Wallet.cpp"
-    "Wallet.hpp"
     "Workflow.cpp"
     "Workflow.hpp"
 )

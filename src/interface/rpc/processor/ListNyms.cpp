@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "opentxs/api/Context.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep

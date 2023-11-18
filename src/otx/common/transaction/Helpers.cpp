@@ -8,9 +8,6 @@
 #include <cstdint>
 #include <filesystem>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -20,9 +17,13 @@
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -108,7 +109,6 @@ char const* const OriginTypeStrings[] = {
     "origin_smart_contract",  // finalReceipt, paymentReceipt
     "origin_pay_dividend",    // SOME voucher receipts are from a payDividend.
     "origin_error_state"};
-
 }  // namespace
 
 namespace opentxs
@@ -443,7 +443,8 @@ auto LoadBoxReceipt(
     // Finally, try to load the transaction from that string and see if
     // successful.
     //
-    auto pTransType = api.Factory().InternalSession().Transaction(strRawFile);
+    auto pTransType =
+        api.Factory().Internal().Session().Transaction(strRawFile);
 
     if (false == bool(pTransType)) {
         LogError()()(
@@ -523,23 +524,23 @@ auto SetupBoxReceiptFilename(
     const char* pszFolder = nullptr;  // "nymbox" (or "inbox" or "outbox")
     switch (lLedgerType) {
         case 0:
-            pszFolder = api.Internal().Legacy().Nymbox();
+            pszFolder = api.Internal().Paths().Nymbox();
             break;
         case 1:
-            pszFolder = api.Internal().Legacy().Inbox();
+            pszFolder = api.Internal().Paths().Inbox();
             break;
         case 2:
-            pszFolder = api.Internal().Legacy().Outbox();
+            pszFolder = api.Internal().Paths().Outbox();
             break;
         //      case 3: (message ledger.)
         case 4:
-            pszFolder = api.Internal().Legacy().PaymentInbox();
+            pszFolder = api.Internal().Paths().PaymentInbox();
             break;
         case 5:
-            pszFolder = api.Internal().Legacy().RecordBox();
+            pszFolder = api.Internal().Paths().RecordBox();
             break;
         case 6:
-            pszFolder = api.Internal().Legacy().ExpiredBox();
+            pszFolder = api.Internal().Paths().ExpiredBox();
             break;
         default:
             LogError()()("Error: Unknown box type: ")(
@@ -550,11 +551,12 @@ auto SetupBoxReceiptFilename(
 
     strFolder1name.Set(pszFolder);    // "nymbox" (or "inbox" or "outbox")
     strFolder2name.Set(strNotaryID);  // "NOTARY_ID"
-    auto folder_3_name = api::Legacy::GetFilenameR(strUserOrAcctID.Get());
+    auto folder_3_name =
+        api::internal::Paths::GetFilenameR(strUserOrAcctID.Get());
     strFolder3name.Set(folder_3_name.c_str());
 
     // "TRANSACTION_ID.rct"
-    auto filename = api::Legacy::GetFilenameRct(lTransactionNum);
+    auto filename = api::internal::Paths::GetFilenameRct(lTransactionNum);
     strFilename.Set(filename.c_str());
 
     // Finished product: "nymbox/NOTARY_ID/NYM_ID.r/TRANSACTION_ID.rct"

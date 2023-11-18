@@ -11,7 +11,7 @@
 
 #include "blockchain/node/filteroracle/Shared.hpp"
 #include "internal/blockchain/node/Factory.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/blockchain/cfilter/Hash.hpp"  // IWYU pragma: keep
@@ -79,7 +79,7 @@ auto FilterOracle::DefaultType() const noexcept -> cfilter::Type
 auto FilterOracle::Heartbeat() noexcept -> void { shared_.Heartbeat(); }
 
 auto FilterOracle::Init(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
     shared_.Init(api, node, shared_p_);

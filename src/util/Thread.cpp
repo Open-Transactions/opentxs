@@ -11,8 +11,8 @@
 #include <thread>
 #include <utility>
 
-#include "internal/api/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Context.internal.hpp"
 
 namespace opentxs
 {

@@ -65,12 +65,6 @@ else()
 endif()
 
 configure_file(
-  "Version.cpp.in"
-  "${opentxs_BINARY_DIR}/src/Version.cpp"
-  @ONLY
-)
-
-configure_file(
   "StorageLevel.cpp.in"
   "${opentxs_BINARY_DIR}/src/blockchain/database/common/StorageLevel.cpp"
   @ONLY
@@ -104,23 +98,4 @@ endif()
 
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_BINARY_DIR}/external"
-)
-
-file(
-  READ
-  "export.in"
-  OPENTXS_CUSTOM_CONTENT_FROM_VARIABLE
-)
-
-include(GenerateExportHeader)
-generate_export_header(
-  libopentxs
-  BASE_NAME
-  opentxs
-  EXPORT_FILE_NAME
-  "${opentxs_BINARY_DIR}/include/opentxs/Export.hpp"
-  EXPORT_MACRO_NAME
-  OPENTXS_EXPORT
-  CUSTOM_CONTENT_FROM_VARIABLE
-  OPENTXS_CUSTOM_CONTENT_FROM_VARIABLE
 )

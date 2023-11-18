@@ -46,6 +46,11 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Contacts;
@@ -280,8 +285,8 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         const opentxs::blockchain::block::Position& progress) const noexcept
         -> void;
     auto SenderContact(const Key& key) const noexcept -> identifier::Generic;
-    virtual auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void;
+    virtual auto Start(
+        std::shared_ptr<const api::internal::Session> api) noexcept -> void;
     auto SubaccountList(
         const identifier::Nym& nymID,
         const opentxs::blockchain::Type chain) const noexcept

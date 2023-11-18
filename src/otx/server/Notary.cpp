@@ -15,12 +15,7 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -57,12 +52,17 @@
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -230,7 +230,8 @@ void Notary::cancel_cheque(
     server_.GetTransactor().issueNextTransactionNumber(receiptNumber);
     std::shared_ptr<OTTransaction> inboxTransaction{
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Transaction(
                 inbox,
                 transactionType::chequeReceipt,
@@ -335,7 +336,8 @@ void Notary::deposit_cheque(
         {
             senderInbox.reset(
                 api_.Factory()
-                    .InternalSession()
+                    .Internal()
+                    .Session()
                     .Ledger(
                         (isVoucher ? remitterNymID : senderNymID),
                         (isVoucher ? remitterAccountID : sourceAccountID),
@@ -362,7 +364,8 @@ void Notary::deposit_cheque(
         {
             senderOutbox.reset(
                 api_.Factory()
-                    .InternalSession()
+                    .Internal()
+                    .Session()
                     .Ledger(
                         (isVoucher ? remitterNymID : senderNymID),
                         (isVoucher ? remitterAccountID : sourceAccountID),
@@ -590,7 +593,8 @@ void Notary::deposit_cheque(
     }
 
     inboxItem.reset(api_.Factory()
-                        .InternalSession()
+                        .Internal()
+                        .Session()
                         .Transaction(
                             senderInbox,
                             isVoucher ? transactionType::voucherReceipt
@@ -627,7 +631,7 @@ auto Notary::extract_cheque(
 {
     auto serialized = String::Factory();
     item.GetAttachment(serialized);
-    auto cheque = api_.Factory().InternalSession().Cheque(serverID, unitID);
+    auto cheque = api_.Factory().Internal().Session().Cheque(serverID, unitID);
 
     assert_false(nullptr == cheque);
 
@@ -683,7 +687,8 @@ void Notary::NotarizeTransfer(
          strAccountID = String::Factory(ACCOUNT_ID, api_.Crypto());
     pResponseBalanceItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
 
@@ -695,7 +700,8 @@ void Notary::NotarizeTransfer(
                                             // it now.
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atTransfer, identifier::Account{})
             .release());
 
@@ -861,11 +867,12 @@ void Notary::NotarizeTransfer(
             // IF they can be loaded up from file, or generated, that is.
 
             // Load the inbox/outbox in case they already exist
-            auto theFromOutbox{api_.Factory().InternalSession().Ledger(
+            auto theFromOutbox{api_.Factory().Internal().Session().Ledger(
                 NYM_ID, IDFromAccount, NOTARY_ID)};
             recipientInbox.reset(
                 api_.Factory()
-                    .InternalSession()
+                    .Internal()
+                    .Session()
                     .Ledger(pItem->GetDestinationAcctID(), NOTARY_ID)
                     .release());
 
@@ -873,7 +880,8 @@ void Notary::NotarizeTransfer(
             {
                 recipientOutbox.reset(
                     api_.Factory()
-                        .InternalSession()
+                        .Internal()
+                        .Session()
                         .Ledger(pItem->GetDestinationAcctID(), NOTARY_ID)
                         .release());
 
@@ -954,7 +962,7 @@ void Notary::NotarizeTransfer(
                 // pOutbox.
                 //
                 auto pTEMPOutboxTransaction{
-                    api_.Factory().InternalSession().Transaction(
+                    api_.Factory().Internal().Session().Transaction(
                         outbox,
                         transactionType::pending,
                         originType::not_applicable,
@@ -963,7 +971,7 @@ void Notary::NotarizeTransfer(
                 assert_true(false != bool(pTEMPOutboxTransaction));
 
                 auto pOutboxTransaction{
-                    api_.Factory().InternalSession().Transaction(
+                    api_.Factory().Internal().Session().Transaction(
                         *theFromOutbox,
                         transactionType::pending,
                         originType::not_applicable,
@@ -972,7 +980,8 @@ void Notary::NotarizeTransfer(
                 assert_true(false != bool(pOutboxTransaction));
 
                 inboxTransaction.reset(api_.Factory()
-                                           .InternalSession()
+                                           .Internal()
+                                           .Session()
                                            .Transaction(
                                                *recipientInbox,
                                                transactionType::pending,
@@ -1269,7 +1278,8 @@ void Notary::NotarizeWithdrawal(
     }
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
@@ -1278,7 +1288,8 @@ void Notary::NotarizeWithdrawal(
 
     pResponseBalanceItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -1410,9 +1421,9 @@ void Notary::NotarizeWithdrawal(
                 server_.API().Factory().Internal().AccountID(
                     voucherReserveAccount.get());
 
-            auto theVoucher{api_.Factory().InternalSession().Cheque(
+            auto theVoucher{api_.Factory().Internal().Session().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
-            auto theVoucherRequest{api_.Factory().InternalSession().Cheque(
+            auto theVoucherRequest{api_.Factory().Internal().Session().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
 
             bool bLoadContractFromString =
@@ -1766,7 +1777,8 @@ void Notary::NotarizePayDividend(
     // (They're getting SOME sort of response item.)
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, theReplyItemType, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);
@@ -1774,7 +1786,8 @@ void Notary::NotarizePayDividend(
     tranOut.AddItem(pResponseItem);
     pResponseBalanceItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);
@@ -1848,7 +1861,7 @@ void Notary::NotarizePayDividend(
         // This response item is IN RESPONSE to pItem and its Owner Transaction.
         pResponseBalanceItem->SetReferenceToNum(pItem->GetTransactionNum());
         const Amount& lTotalCostOfDividend = pItem->GetAmount();
-        auto theVoucherRequest{api_.Factory().InternalSession().Cheque()};
+        auto theVoucherRequest{api_.Factory().Internal().Session().Cheque()};
 
         assert_true(false != bool(theVoucherRequest));
 
@@ -2290,7 +2303,7 @@ void Notary::NotarizePayDividend(
                                             "to sender...)")
                                             .Flush();
                                         auto theVoucher{
-                                            api_.Factory().InternalSession().Cheque(
+                                            api_.Factory().Internal().Session().Cheque(
                                                 NOTARY_ID,
                                                 PAYOUT_INSTRUMENT_DEFINITION_ID)};
                                         const auto VALID_FROM = Clock::now();
@@ -2412,7 +2425,8 @@ void Notary::NotarizePayDividend(
                                                         *theVoucher);
                                                 auto thePayment{
                                                     api_.Factory()
-                                                        .InternalSession()
+                                                        .Internal()
+                                                        .Session()
                                                         .Payment(strVoucher)};
 
                                                 // calls DropMessageToNymbox
@@ -2570,14 +2584,16 @@ void Notary::NotarizeDeposit(
     }
 
     responseItem.reset(api_.Factory()
-                           .InternalSession()
+                           .Internal()
+                           .Session()
                            .Item(output, type, identifier::Account{})
                            .release());
     responseItem->SetStatus(Item::rejection);
     output.AddItem(responseItem);
     responseBalanceItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(output, itemType::atBalanceStatement, identifier::Account{})
             .release());
     responseBalanceItem->SetStatus(Item::rejection);
@@ -2775,14 +2791,16 @@ void Notary::NotarizePaymentPlan(
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atPaymentPlan, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
@@ -2845,7 +2863,7 @@ void Notary::NotarizePaymentPlan(
             // Also load up the Payment Plan from inside the transaction item.
             auto strPaymentPlan = String::Factory();
             pItem->GetAttachment(strPaymentPlan);
-            auto pPlan = api_.Factory().InternalSession().PaymentPlan();
+            auto pPlan = api_.Factory().Internal().Session().PaymentPlan();
 
             assert_false(nullptr == pPlan);
 
@@ -3484,14 +3502,16 @@ void Notary::NotarizeSmartContract(
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atSmartContract, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
@@ -3564,7 +3584,7 @@ void Notary::NotarizeSmartContract(
             auto strContract = String::Factory();
             pItem->GetAttachment(strContract);
             auto pContract{
-                api_.Factory().InternalSession().SmartContract(NOTARY_ID)};
+                api_.Factory().Internal().Session().SmartContract(NOTARY_ID)};
             assert_true(false != bool(pContract));
 
             // If we failed to load the smart contract...
@@ -4262,7 +4282,8 @@ void Notary::NotarizeCancelCronItem(
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atCancelCronItem, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
@@ -4270,7 +4291,8 @@ void Notary::NotarizeCancelCronItem(
                                      // cleanup the item. It "owns" it now.
 
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
@@ -4469,7 +4491,8 @@ void Notary::NotarizeExchangeBasket(
 
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atExchangeBasket, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
@@ -4478,7 +4501,8 @@ void Notary::NotarizeExchangeBasket(
 
     pResponseBalanceItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
             .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -4549,7 +4573,7 @@ void Notary::NotarizeExchangeBasket(
 
             // Here's the request from the user.
             auto strBasket = String::Factory();
-            auto theRequestBasket{api_.Factory().InternalSession().Basket()};
+            auto theRequestBasket{api_.Factory().Internal().Session().Basket()};
 
             assert_true(false != bool(theRequestBasket));
 
@@ -4932,7 +4956,8 @@ void Notary::NotarizeExchangeBasket(
 
                                                 auto pInboxTransaction{
                                                     api_.Factory()
-                                                        .InternalSession()
+                                                        .Internal()
+                                                        .Session()
                                                         .Transaction(
                                                             *pSubInbox,
                                                             transactionType::
@@ -4947,7 +4972,8 @@ void Notary::NotarizeExchangeBasket(
 
                                                 auto pItemInbox =
                                                     api_.Factory()
-                                                        .InternalSession()
+                                                        .Internal()
+                                                        .Session()
                                                         .Item(
                                                             *pInboxTransaction,
                                                             itemType::
@@ -5151,7 +5177,8 @@ void Notary::NotarizeExchangeBasket(
 
                                         auto pInboxTransaction{
                                             api_.Factory()
-                                                .InternalSession()
+                                                .Internal()
+                                                .Session()
                                                 .Transaction(
                                                     inbox,
                                                     transactionType::
@@ -5164,7 +5191,8 @@ void Notary::NotarizeExchangeBasket(
 
                                         auto pItemInbox =
                                             api_.Factory()
-                                                .InternalSession()
+                                                .Internal()
+                                                .Session()
                                                 .Item(
                                                     *pInboxTransaction,
                                                     itemType::basketReceipt,
@@ -5407,7 +5435,8 @@ void Notary::NotarizeMarketOffer(
     pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
-            .InternalSession()
+            .Internal()
+            .Session()
             .Item(tranOut, itemType::atMarketOffer, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
@@ -5415,7 +5444,8 @@ void Notary::NotarizeMarketOffer(
                                      // cleanup the item. It "owns" it now.
 
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
@@ -5502,13 +5532,13 @@ void Notary::NotarizeMarketOffer(
                     CURRENCY_ACCT_ID, reason_);
             // Also load up the Trade from inside the transaction item.
             auto strOffer = String::Factory();
-            auto theOffer{api_.Factory().InternalSession().Offer()};
+            auto theOffer{api_.Factory().Internal().Session().Offer()};
 
             assert_true(false != bool(theOffer));
 
             auto strTrade = String::Factory();
             pItem->GetAttachment(strTrade);
-            auto pTrade = api_.Factory().InternalSession().Trade();
+            auto pTrade = api_.Factory().Internal().Session().Trade();
 
             assert_true(false != bool(pTrade));
 
@@ -6289,7 +6319,7 @@ auto Notary::NotarizeProcessNymbox(
     const auto& NOTARY_ID = context.Notary();
     UnallocatedSet<TransactionNumber> newNumbers;
     auto theNymbox{
-        api_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
+        api_.Factory().Internal().Session().Ledger(NYM_ID, NYM_ID, NOTARY_ID)};
 
     assert_true(false != bool(theNymbox));
 
@@ -6302,7 +6332,8 @@ auto Notary::NotarizeProcessNymbox(
     }
 
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        tranOut,
                                        itemType::atTransactionStatement,
@@ -6518,7 +6549,8 @@ auto Notary::NotarizeProcessNymbox(
                     // transaction (tranOut) They're getting SOME sort of
                     // response item.
                     pResponseItem.reset(api_.Factory()
-                                            .InternalSession()
+                                            .Internal()
+                                            .Session()
                                             .Item(
                                                 tranOut,
                                                 theReplyItemType,
@@ -6705,7 +6737,8 @@ auto Notary::NotarizeProcessNymbox(
                                 //
                                 auto pSuccessNotice{
                                     api_.Factory()
-                                        .InternalSession()
+                                        .Internal()
+                                        .Session()
                                         .Transaction(
                                             *theNymbox,
                                             transactionType::successNotice,
@@ -6894,12 +6927,14 @@ auto Notary::NotarizeProcessNymbox(
                                                       // return
             bOutSuccess = true;  // the processNymbox was successful.
             strPath->Set(
-                api::Legacy::GetFilenameSuccess(strNymID->Get()).c_str());
+                api::internal::Paths::GetFilenameSuccess(strNymID->Get())
+                    .c_str());
         } else {
-            strPath->Set(api::Legacy::GetFilenameFail(strNymID->Get()).c_str());
+            strPath->Set(
+                api::internal::Paths::GetFilenameFail(strNymID->Get()).c_str());
         }
 
-        const char* szFoldername = server_.API().Internal().Legacy().Receipt();
+        const char* szFoldername = server_.API().Internal().Paths().Receipt();
         tranOut.SaveContract(szFoldername, strPath->Get());
     }
 
@@ -6946,7 +6981,8 @@ void Notary::NotarizeProcessInbox(
         String::Factory(NYM_ID, api_.Crypto())->Get());
     UnallocatedSet<TransactionNumber> closedNumbers, closedCron;
     pResponseBalanceItem.reset(api_.Factory()
-                                   .InternalSession()
+                                   .Internal()
+                                   .Session()
                                    .Item(
                                        processInboxResponse,
                                        itemType::atBalanceStatement,
@@ -7272,7 +7308,7 @@ void Notary::NotarizeProcessInbox(
                 auto strOriginalItem = String::Factory();
                 serverTransaction.GetReferenceString(strOriginalItem);
 
-                auto pOriginalItem{api_.Factory().InternalSession().Item(
+                auto pOriginalItem{api_.Factory().Internal().Session().Item(
                     strOriginalItem,
                     NOTARY_ID,
                     serverTransaction.GetReferenceToNum())};
@@ -7312,7 +7348,7 @@ void Notary::NotarizeProcessInbox(
                         auto strCheque = String::Factory();
                         pOriginalItem->GetAttachment(strCheque);
                         auto theCheque{
-                            api_.Factory().InternalSession().Cheque()};
+                            api_.Factory().Internal().Session().Cheque()};
 
                         assert_true(false != bool(theCheque));
 
@@ -7586,7 +7622,8 @@ void Notary::NotarizeProcessInbox(
         // They're getting SOME sort of response item.
 
         pResponseItem.reset(api_.Factory()
-                                .InternalSession()
+                                .Internal()
+                                .Session()
                                 .Item(
                                     processInboxResponse,
                                     theReplyItemType,
@@ -7615,7 +7652,7 @@ void Notary::NotarizeProcessInbox(
         // process it.
         // theAcctID is the ID on the client Account that was
         // passed in.
-        auto theInbox{api_.Factory().InternalSession().Ledger(
+        auto theInbox{api_.Factory().Internal().Session().Ledger(
             NYM_ID, ACCOUNT_ID, NOTARY_ID)};
 
         assert_true(false != bool(theInbox));
@@ -7799,7 +7836,7 @@ void Notary::NotarizeProcessInbox(
             auto strOriginalItem = String::Factory();
             pServerTransaction->GetReferenceString(strOriginalItem);
 
-            auto pOriginalItem{api_.Factory().InternalSession().Item(
+            auto pOriginalItem{api_.Factory().Internal().Session().Item(
                 strOriginalItem,
                 NOTARY_ID,
                 pServerTransaction->GetReferenceToNum())};
@@ -7946,12 +7983,14 @@ void Notary::NotarizeProcessInbox(
                     // The 'from' inbox is loaded in order to
                     // put a notice of this acceptance for the
                     // sender's records.
-                    auto theFromOutbox{api_.Factory().InternalSession().Ledger(
-                        IDFromAccount, NOTARY_ID)};  // Sender's
-                                                     // *OUTBOX*
-                    auto theFromInbox{api_.Factory().InternalSession().Ledger(
-                        IDFromAccount, NOTARY_ID)};  // Sender's
-                                                     // *INBOX*
+                    auto theFromOutbox{
+                        api_.Factory().Internal().Session().Ledger(
+                            IDFromAccount, NOTARY_ID)};  // Sender's
+                                                         // *OUTBOX*
+                    auto theFromInbox{
+                        api_.Factory().Internal().Session().Ledger(
+                            IDFromAccount, NOTARY_ID)};  // Sender's
+                                                         // *INBOX*
 
                     assert_true(false != bool(theFromOutbox));
                     assert_true(false != bool(theFromInbox));
@@ -8008,7 +8047,7 @@ void Notary::NotarizeProcessInbox(
                         // Generate a new transaction... (to
                         // notice the sender of acceptance.)
                         auto pInboxTransaction{
-                            api_.Factory().InternalSession().Transaction(
+                            api_.Factory().Internal().Session().Transaction(
                                 *theFromInbox,
                                 transactionType::transferReceipt,
                                 originType::not_applicable,
@@ -8277,12 +8316,14 @@ send_message:
         for (const auto& number : closedCron) { context.CloseCronItem(number); }
 
         bOutSuccess = true;  // the processInbox was successful.
-        strPath->Set(api::Legacy::GetFilenameSuccess(strAcctID->Get()).c_str());
+        strPath->Set(
+            api::internal::Paths::GetFilenameSuccess(strAcctID->Get()).c_str());
     } else {
-        strPath->Set(api::Legacy::GetFilenameFail(strAcctID->Get()).c_str());
+        strPath->Set(
+            api::internal::Paths::GetFilenameFail(strAcctID->Get()).c_str());
     }
 
-    const char* szFoldername = server_.API().Internal().Legacy().Receipt();
+    const char* szFoldername = server_.API().Internal().Paths().Receipt();
 
     // Save the receipt. (My outgoing transaction including the client's
     // signed request that triggered it.)
@@ -8371,7 +8412,7 @@ void Notary::process_cash_deposit(
             LogError()()("Invalid purse").Flush();
         } else {
             auto purse =
-                api_.Factory().InternalSession().Purse(serializedPurse);
+                api_.Factory().Internal().Session().Purse(serializedPurse);
 
             if (false == bool(purse)) {
                 LogError()()("Failed to instantiate request purse").Flush();

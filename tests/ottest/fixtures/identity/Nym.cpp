@@ -9,9 +9,9 @@
 #include <memory>
 #include <utility>
 
-#include "2_Factory.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/identity/Nym.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest

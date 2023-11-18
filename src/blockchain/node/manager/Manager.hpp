@@ -31,6 +31,11 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 }  // namespace session
 }  // namespace api
@@ -112,7 +117,7 @@ public:
     auto Internal() noexcept -> Manager& final { return *this; }
     auto Shutdown() noexcept -> void final;
     auto Start(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<node::Manager>) noexcept -> void final;
     auto StartWallet() noexcept -> void final;
     auto Wallet() const noexcept -> const node::Wallet& final;

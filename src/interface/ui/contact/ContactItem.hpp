@@ -20,7 +20,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace ui
 {
 class ContactItem;

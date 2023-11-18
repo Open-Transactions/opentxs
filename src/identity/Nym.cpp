@@ -20,10 +20,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "2_Factory.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Seed.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
@@ -38,11 +35,13 @@
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -70,6 +69,7 @@
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -1240,7 +1240,7 @@ auto Nym::PaymentCodePublic() const -> opentxs::PaymentCode
 
     if (false == source_.Internal().Serialize(serialized)) { return {}; }
 
-    return api_.Factory().InternalSession().PaymentCode(
+    return api_.Factory().Internal().Session().PaymentCode(
         serialized.paymentcode());
 }
 

@@ -16,6 +16,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Context;
+}  // namespace internal
+
 namespace network
 {
 namespace asio
@@ -56,7 +61,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Context> context,
+        std::shared_ptr<const api::internal::Context> context,
         std::shared_ptr<Shared> shared,
         allocator_type alloc) noexcept;
     Actor() = delete;
@@ -70,7 +75,7 @@ public:
 private:
     friend opentxs::Actor<Actor, OTZMQWorkType>;
 
-    std::shared_ptr<const api::Context> context_p_;
+    std::shared_ptr<const api::internal::Context> context_p_;
     std::shared_ptr<Shared> shared_p_;
     const api::Context& context_;
     Shared& shared_;

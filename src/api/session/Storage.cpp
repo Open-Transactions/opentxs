@@ -30,8 +30,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/Factory.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -41,10 +39,12 @@
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"  // IWYU pragma: keep
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Types.hpp"
@@ -1768,7 +1768,8 @@ auto Storage::ServerList() const noexcept -> ObjectList
     return Root().Trunk().Servers().List();
 }
 
-auto Storage::Start(std::shared_ptr<const api::Session> api) noexcept -> void
+auto Storage::Start(std::shared_ptr<const api::internal::Session> api) noexcept
+    -> void
 {
     const auto me = shared_from_this();
 

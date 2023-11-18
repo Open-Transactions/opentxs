@@ -11,12 +11,12 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 
 namespace opentxs::identity::wot::claim::implementation
@@ -66,9 +66,7 @@ Claim::Claim(
             return out;
         }
     }())
-    , id_(api_.Factory().InternalSession().IdentifierFromPreimage(
-          preimage_,
-          alloc))
+    , id_(api_.Factory().Internal().IdentifierFromPreimage(preimage_, alloc))
     , attributes_(std::move(attributes), alloc)
 {
 }

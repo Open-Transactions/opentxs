@@ -112,7 +112,6 @@ class BlockchainTransaction;
 class BlockchainTransactionInput;
 class BlockchainTransactionOutput;
 }  // namespace proto
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

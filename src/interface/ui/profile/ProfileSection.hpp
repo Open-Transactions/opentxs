@@ -9,8 +9,8 @@
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -18,7 +18,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace identity
 {
 namespace wot

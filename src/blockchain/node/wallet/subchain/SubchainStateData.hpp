@@ -55,6 +55,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -124,7 +129,7 @@ class SubchainStateData
       public std::enable_shared_from_this<SubchainStateData>
 {
 private:
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
 
 public:
@@ -229,7 +234,7 @@ protected:
     SubchainStateData(
         Reorg& reorg,
         crypto::Subaccount& subaccount,
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,
         std::string_view fromParent,
@@ -382,7 +387,7 @@ private:
     SubchainStateData(
         Reorg& reorg,
         crypto::Subaccount& subaccount,
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         crypto::Subchain subchain,
         network::zeromq::BatchID batch,

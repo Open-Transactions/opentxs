@@ -44,6 +44,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -124,7 +129,7 @@ public:
     ~Imp() override;
 
 private:
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const opentxs::blockchain::node::Manager> network_p_;
 
 protected:
@@ -204,7 +209,7 @@ protected:
     auto update_remote_position(
         opentxs::blockchain::block::Position pos) noexcept -> void;
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         int peerID,
         blockchain::Address address,

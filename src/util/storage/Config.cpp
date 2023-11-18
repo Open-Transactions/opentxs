@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <chrono>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 
@@ -23,7 +23,7 @@ namespace C = std::chrono;
 namespace opentxs::storage
 {
 Config::Config(
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const api::Settings& config,
     const Options& args,
     const std::filesystem::path& dataFolder) noexcept

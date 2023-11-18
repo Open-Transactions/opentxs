@@ -21,7 +21,6 @@ namespace opentxs
 {
 namespace api
 {
-
 namespace session
 {
 class Client;

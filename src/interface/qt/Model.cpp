@@ -22,7 +22,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

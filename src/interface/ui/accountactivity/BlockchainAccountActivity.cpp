@@ -18,7 +18,6 @@
 #include <stdexcept>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/crypto/Types.hpp"
@@ -29,6 +28,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
@@ -36,6 +36,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
@@ -494,7 +495,8 @@ auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
 
     const auto proto = proto::Factory<proto::BlockchainTransaction>(body[3]);
     process_txid(
-        txid, api.Factory().InternalSession().BlockchainTransaction(proto, {}));
+        txid,
+        api.Factory().Internal().Session().BlockchainTransaction(proto, {}));
 }
 
 auto BlockchainAccountActivity::process_txid(

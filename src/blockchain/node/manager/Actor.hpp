@@ -19,6 +19,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -64,7 +69,7 @@ public:
     auto Init(std::shared_ptr<Actor> me) noexcept -> void;
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<node::Manager> self,
         std::shared_ptr<Shared> shared,
         network::zeromq::BatchID batch,
@@ -82,7 +87,7 @@ private:
 
     static constexpr auto heartbeat_interval_ = 5s;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<node::Manager> self_p_;
     std::shared_ptr<Shared> shared_p_;
     const api::Session& api_;

@@ -9,8 +9,8 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Types.hpp"
@@ -18,7 +18,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace identifier
 {
 class Nym;
