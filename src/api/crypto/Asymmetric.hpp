@@ -13,7 +13,7 @@
 #include <HDPath.pb.h>
 
 #include "internal/api/crypto/Asymmetric.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -27,6 +27,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Crypto;
 }  // namespace api
 
@@ -50,7 +55,7 @@ namespace opentxs::api::crypto::imp
 class Asymmetric final : virtual public api::crypto::internal::Asymmetric
 {
 public:
-    auto API() const noexcept -> const api::Session& final { return api_; }
+    auto API() const noexcept -> const api::Session& final;
     auto InstantiateECKey(
         const proto::AsymmetricKey& serialized,
         alloc::Default alloc) const noexcept
@@ -232,7 +237,7 @@ public:
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
 
-    Asymmetric(const api::Session& api) noexcept;
+    Asymmetric(const api::internal::Session& api) noexcept;
     Asymmetric() = delete;
     Asymmetric(const Asymmetric&) = delete;
     Asymmetric(Asymmetric&&) = delete;
@@ -249,7 +254,7 @@ private:
     static const VersionNumber serialized_path_version_;
     static const TypeMap curve_to_key_type_;
 
-    const api::Session& api_;
+    const api::internal::Session& api_;
 
     static auto serialize_path(
         const api::Crypto& api,

@@ -17,7 +17,6 @@
 #include <string>
 #include <utility>
 
-#include "internal/api/session/Session.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
@@ -26,8 +25,9 @@
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep

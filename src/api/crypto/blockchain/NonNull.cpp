@@ -13,7 +13,7 @@ Blockchain::Blockchain(
     const api::session::Client& api,
     const api::session::Activity& activity,
     const api::session::Contacts& contacts,
-    const api::Legacy& legacy,
+    const api::internal::Paths& legacy,
     const UnallocatedCString& dataFolder,
     const Options& args) noexcept
     : imp_(std::make_unique<BlockchainImp>(

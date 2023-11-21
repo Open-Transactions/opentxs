@@ -54,5 +54,4 @@ public:
 
     virtual ~OTStashItem();
 };
-
 }  // namespace opentxs

@@ -12,11 +12,11 @@
 #include <utility>
 
 #include "TBB.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"  // IWYU pragma: keep
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
 

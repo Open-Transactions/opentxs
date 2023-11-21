@@ -20,11 +20,11 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/interface/ui/SeedTreeItem.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"

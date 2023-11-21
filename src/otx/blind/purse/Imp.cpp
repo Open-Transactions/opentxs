@@ -17,7 +17,6 @@
 #include <utility>
 
 #include "internal/api/crypto/Symmetric.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Factory.hpp"
@@ -30,11 +29,13 @@
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -92,7 +93,7 @@ auto Purse(
     using ReturnType = otx::blind::Purse;
     using Imp = otx::blind::purse::Purse;
     auto pEnvelope = std::make_unique<OTEnvelope>(
-        api.Factory().InternalSession().Envelope());
+        api.Factory().Internal().Session().Envelope());
 
     assert_false(nullptr == pEnvelope);
 
@@ -412,7 +413,7 @@ auto Purse::AddNym(const identity::Nym& nym, const PasswordPrompt& reason)
         return false;
     }
 
-    auto envelope = api_.Factory().InternalSession().Envelope();
+    auto envelope = api_.Factory().Internal().Session().Envelope();
 
     if (envelope->Seal(nym, primary_key_password_.Bytes(), reason)) {
         if (false == envelope->Serialize(sessionKey)) { return false; }
@@ -502,7 +503,7 @@ auto Purse::deserialize_secondary_password(
         case blind::PurseType::Request:
         case blind::PurseType::Issue: {
             auto output = std::make_unique<OTEnvelope>(
-                api.Factory().InternalSession().Envelope(
+                api.Factory().Internal().Session().Envelope(
                     in.secondarypassword()));
 
             if (false == bool(output)) {
@@ -845,7 +846,7 @@ auto Purse::Unlock(
     for (const auto& sessionKey : primary_passwords_) {
         try {
             const auto envelope =
-                api_.Factory().InternalSession().Envelope(sessionKey);
+                api_.Factory().Internal().Session().Envelope(sessionKey);
             const auto opened = envelope->Open(
                 nym, password.WriteInto(Secret::Mode::Mem), reason);
 

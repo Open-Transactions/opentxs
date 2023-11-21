@@ -12,9 +12,7 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/api/session/UI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/PairEventType.hpp"  // IWYU pragma: keep
@@ -25,6 +23,8 @@
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -139,11 +139,11 @@ TEST_F(Pair, pair_untrusted)
 {
     account_summary_.expected_ += 5;
 
-    ASSERT_TRUE(api_chris_.InternalClient().Pair().AddIssuer(
+    ASSERT_TRUE(api_chris_.Internal().asClient().Pair().AddIssuer(
         chris_.nym_id_, issuer_.nym_id_, ""));
     EXPECT_TRUE(issuer_data_.bailment_.get());
 
-    api_chris_.InternalClient().Pair().Wait().get();
+    api_chris_.Internal().asClient().Pair().Wait().get();
 
     {
         const auto pIssuer = api_chris_.Wallet().Internal().Issuer(
@@ -251,10 +251,10 @@ TEST_F(Pair, pair_trusted)
 {
     account_summary_.expected_ += 2;
 
-    ASSERT_TRUE(api_chris_.InternalClient().Pair().AddIssuer(
+    ASSERT_TRUE(api_chris_.Internal().asClient().Pair().AddIssuer(
         chris_.nym_id_, issuer_.nym_id_, server_1_.password_));
 
-    api_chris_.InternalClient().Pair().Wait().get();
+    api_chris_.Internal().asClient().Pair().Wait().get();
 
     {
         const auto pIssuer = api_chris_.Wallet().Internal().Issuer(

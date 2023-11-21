@@ -52,13 +52,14 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -166,7 +167,7 @@ using enum opentxs::network::zeromq::socket::Type;
 SubchainStateData::SubchainStateData(
     Reorg& reorg,
     crypto::Subaccount& subaccount,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,
     network::zeromq::BatchID batch,
@@ -177,7 +178,7 @@ SubchainStateData::SubchainStateData(
     CString&& toProgress,
     allocator_type alloc) noexcept
     : Actor(
-          *api,
+          api->Self(),
           LogTrace(),
           describe(subaccount, subchain, alloc),
           0ms,
@@ -210,7 +211,7 @@ SubchainStateData::SubchainStateData(
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , db_(node_.Internal().DB())
     , mempool_oracle_(node_.Internal().Mempool())
@@ -270,7 +271,7 @@ SubchainStateData::SubchainStateData(
 SubchainStateData::SubchainStateData(
     Reorg& reorg,
     crypto::Subaccount& subaccount,
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     crypto::Subchain subchain,
     std::string_view fromParent,

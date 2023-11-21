@@ -17,7 +17,6 @@
 
 #include "crypto/Seed.hpp"
 #include "internal/api/Crypto.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/session/Storage.hpp"
@@ -29,6 +28,9 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -36,7 +38,6 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
@@ -72,7 +73,7 @@
 namespace opentxs::factory
 {
 auto SeedAPI(
-    const api::Session& api,
+    const api::internal::Session& api,
     const api::session::Endpoints& endpoints,
     const api::session::Factory& factory,
     const api::crypto::Asymmetric& asymmetric,
@@ -103,7 +104,7 @@ namespace opentxs::api::crypto::imp
 using namespace std::literals;
 
 Seed::Seed(
-    const api::Session& api,
+    const api::internal::Session& api,
     const api::session::Endpoints& endpoints,
     const api::session::Factory& factory,
     const api::crypto::Asymmetric& asymmetric,
@@ -489,7 +490,8 @@ auto Seed::GetSeed(
     } catch (const std::exception& e) {
         LogError()()(e.what())(" for ")(id, api_.Crypto()).Flush();
 
-        return std::make_unique<opentxs::crypto::Seed::Imp>(api_).release();
+        return std::make_unique<opentxs::crypto::Seed::Imp>(api_.Self())
+            .release();
     }
 }
 
@@ -510,7 +512,7 @@ auto Seed::get_seed(
     }
 
     auto seed = factory::Seed(
-        api_, bip39_, symmetric_, factory_, storage_, proto, reason);
+        api_.Self(), bip39_, symmetric_, factory_, storage_, proto, reason);
     const auto& id = seed.ID();
 
     assert_true(id == seedID);
@@ -537,7 +539,7 @@ auto Seed::ImportRaw(
             lock,
             comment,
             factory::Seed(
-                api_,
+                api_.Self(),
                 bip32_,
                 bip39_,
                 symmetric_,
@@ -582,7 +584,7 @@ auto Seed::ImportSeed(
             lock,
             comment,
             factory::Seed(
-                api_,
+                api_.Self(),
                 bip32_,
                 bip39_,
                 symmetric_,
@@ -664,7 +666,7 @@ auto Seed::new_seed(
             lock,
             comment,
             factory::Seed(
-                api_,
+                api_.Self(),
                 bip32_,
                 bip39_,
                 symmetric_,

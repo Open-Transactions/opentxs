@@ -12,11 +12,7 @@
 #include <filesystem>
 #include <memory>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -39,11 +35,16 @@
 #include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -947,7 +948,8 @@ auto OTTransaction::HarvestOpeningNumber(
                                 //
                                 auto strPaymentPlan = String::Factory();
                                 auto thePlan{api_.Factory()
-                                                 .InternalSession()
+                                                 .Internal()
+                                                 .Session()
                                                  .PaymentPlan()};
                                 pItem->GetAttachment(strPaymentPlan);
 
@@ -1086,7 +1088,7 @@ auto OTTransaction::HarvestOpeningNumber(
                 {
                     auto strSmartContract = String::Factory();
                     auto theSmartContract{
-                        api_.Factory().InternalSession().SmartContract(
+                        api_.Factory().Internal().Session().SmartContract(
                             GetPurportedNotaryID())};
                     pItem->GetAttachment(strSmartContract);
 
@@ -1201,7 +1203,7 @@ auto OTTransaction::HarvestClosingNumbers(
                 } else  // pItem is good. Let's load up the OTCronIteam
                         // object...
                 {
-                    auto theTrade{api_.Factory().InternalSession().Trade()};
+                    auto theTrade{api_.Factory().Internal().Session().Trade()};
 
                     assert_true(false != bool(theTrade));
 
@@ -1316,7 +1318,7 @@ auto OTTransaction::HarvestClosingNumbers(
                 {
                     auto strPaymentPlan = String::Factory();
                     auto thePlan{
-                        api_.Factory().InternalSession().PaymentPlan()};
+                        api_.Factory().Internal().Session().PaymentPlan()};
 
                     assert_true(false != bool(thePlan));
 
@@ -1428,7 +1430,7 @@ auto OTTransaction::HarvestClosingNumbers(
                 {
                     auto strSmartContract = String::Factory();
                     auto theSmartContract{
-                        api_.Factory().InternalSession().SmartContract(
+                        api_.Factory().Internal().Session().SmartContract(
                             GetPurportedNotaryID())};
 
                     assert_true(false != bool(theSmartContract));
@@ -1712,9 +1714,10 @@ auto OTTransaction::VerifyBalanceReceipt(
                strReceiptID = String::Factory(NYM_ID, api_.Crypto());
 
     // Load the last TRANSACTION STATEMENT as well...
-    const char* szFolder1name = api_.Internal().Legacy().Receipt();
+    const char* szFolder1name = api_.Internal().Paths().Receipt();
     const char* szFolder2name = strNotaryID->Get();
-    auto filename = api::Legacy::GetFilenameSuccess(strReceiptID->Get());
+    auto filename =
+        api::internal::Paths::GetFilenameSuccess(strReceiptID->Get());
 
     if (!OTDB::Exists(
             api_,
@@ -1747,7 +1750,7 @@ auto OTTransaction::VerifyBalanceReceipt(
 
     auto strTransaction = String::Factory(strFileContents.c_str());
     const auto pContents{
-        api_.Factory().InternalSession().Transaction(strTransaction)};
+        api_.Factory().Internal().Session().Transaction(strTransaction)};
 
     if (false == bool(pContents)) {
         LogError()()("Unable to load "
@@ -1838,7 +1841,8 @@ auto OTTransaction::VerifyBalanceReceipt(
 
         pTransactionItem.reset(
             api_.Factory()
-                .InternalSession()
+                .Internal()
+                .Session()
                 .Item(
                     strBalanceItem,
                     GetRealNotaryID(),
@@ -1922,7 +1926,8 @@ auto OTTransaction::VerifyBalanceReceipt(
     }
 
     pBalanceItem.reset(api_.Factory()
-                           .InternalSession()
+                           .Internal()
+                           .Session()
                            .Item(
                                strBalanceItem,
                                GetRealNotaryID(),
@@ -4178,7 +4183,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             return (-1);  // error condition
         } else {
             auto pItem{
-                api_.Factory().InternalSession().Item(GetNymID(), *this)};
+                api_.Factory().Internal().Session().Item(GetNymID(), *this)};
             assert_true(false != bool(pItem));
 
             if (!load_securely_) { pItem->SetLoadInsecure(); }
@@ -5354,7 +5359,7 @@ void OTTransaction::ProduceInboxReportItem(
     // theBalanceItem.
 
     auto pReportItem{
-        api_.Factory().InternalSession().Item(*this, theItemType, {})};
+        api_.Factory().Internal().Session().Item(*this, theItemType, {})};
 
     if (false != bool(pReportItem))  // above line will assert if mem allocation
                                      // fails.
@@ -5426,7 +5431,7 @@ void OTTransaction::ProduceOutboxReportItem(
     // theBalanceItem.
 
     auto pReportItem{
-        api_.Factory().InternalSession().Item(*this, theItemType, {})};
+        api_.Factory().Internal().Session().Item(*this, theItemType, {})};
 
     if (false != bool(pReportItem))  // above line will assert if mem allocation
                                      // fails.
@@ -5516,7 +5521,8 @@ auto OTTransaction::GetReceiptAmount(const PasswordPrompt& reason) -> Amount
             GetReferenceString(strReference);
 
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -5555,7 +5561,7 @@ auto OTTransaction::GetReceiptAmount(const PasswordPrompt& reason) -> Amount
             }
 
             auto strAttachment = String::Factory();
-            auto theCheque{api_.Factory().InternalSession().Cheque()};
+            auto theCheque{api_.Factory().Internal().Session().Cheque()};
 
             // Get the cheque from the Item and load it up into a Cheque
             // object.
@@ -5817,7 +5823,7 @@ void OTTransaction::CalculateNumberOfOrigin()
             // number of origin
             // as its transaction number.
             //
-            auto pOriginalItem{api_.Factory().InternalSession().Item(
+            auto pOriginalItem{api_.Factory().Internal().Session().Item(
                 strReference, GetPurportedNotaryID(), GetReferenceToNum())};
 
             assert_false(nullptr == pOriginalItem);
@@ -5969,7 +5975,7 @@ auto OTTransaction::GetReferenceNumForDisplay() -> std::int64_t
             GetReferenceString(strRef);
             if (strRef->Exists()) {
                 const auto pCronItem{
-                    api_.Factory().InternalSession().CronItem(strRef)};
+                    api_.Factory().Internal().Session().CronItem(strRef)};
 
                 if (false != bool(pCronItem)) {
                     lReferenceNum = pCronItem->GetTransactionNum();
@@ -6091,8 +6097,8 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
 
@@ -6145,8 +6151,8 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
 
@@ -6203,7 +6209,7 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
             //          above.) GetReferenceString(strReference);   // (Already
             //          done above.)
 
-            auto theSentMsg{api_.Factory().InternalSession().Message()};
+            auto theSentMsg{api_.Factory().Internal().Session().Message()};
 
             if (strReference->Exists() &&
                 theSentMsg->LoadContractFromString(strReference)) {
@@ -6230,7 +6236,8 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -6269,7 +6276,7 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            auto theCheque{api_.Factory().InternalSession().Cheque()};
+            auto theCheque{api_.Factory().Internal().Session().Cheque()};
             auto strAttachment = String::Factory();
 
             // Get the cheque from the Item and load it up into a Cheque
@@ -6348,8 +6355,8 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
             auto* pPlan = dynamic_cast<OTPaymentPlan*>(pCronItem.get());
@@ -6402,8 +6409,8 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
             auto* pPlan = dynamic_cast<OTPaymentPlan*>(pCronItem.get());
@@ -6455,7 +6462,7 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
              -------------------------------------------------------------------
              */
 
-            auto theSentMsg{api_.Factory().InternalSession().Message()};
+            auto theSentMsg{api_.Factory().Internal().Session().Message()};
 
             assert_true(false != bool(theSentMsg));
 
@@ -6484,7 +6491,8 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -6532,7 +6540,7 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
                 return false;
             }
 
-            auto theCheque{api_.Factory().InternalSession().Cheque()};
+            auto theCheque{api_.Factory().Internal().Session().Cheque()};
             auto strAttachment = String::Factory();
 
             // Get the cheque from the Item and load it up into a Cheque
@@ -6592,8 +6600,8 @@ auto OTTransaction::GetSenderAcctIDForDisplay(identifier::Generic& theReturnID)
                     .Flush();
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
 
@@ -6629,7 +6637,8 @@ auto OTTransaction::GetSenderAcctIDForDisplay(identifier::Generic& theReturnID)
                                                // item, attached.)
         {
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -6666,7 +6675,7 @@ auto OTTransaction::GetSenderAcctIDForDisplay(identifier::Generic& theReturnID)
                 return false;
             }
 
-            auto theCheque{api_.Factory().InternalSession().Cheque()};
+            auto theCheque{api_.Factory().Internal().Session().Cheque()};
             auto strAttachment = String::Factory();
 
             // Get the cheque from the Item and load it up into a Cheque
@@ -6736,8 +6745,8 @@ auto OTTransaction::GetRecipientAcctIDForDisplay(
                     .Flush();
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
             auto* pPlan = dynamic_cast<OTPaymentPlan*>(pCronItem.get());
@@ -6771,7 +6780,8 @@ auto OTTransaction::GetRecipientAcctIDForDisplay(
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -6867,8 +6877,8 @@ auto OTTransaction::GetMemo(String& strMemo) -> bool
                     .Flush();
             }
 
-            const auto pCronItem{
-                api_.Factory().InternalSession().CronItem(strUpdatedCronItem)};
+            const auto pCronItem{api_.Factory().Internal().Session().CronItem(
+                strUpdatedCronItem)};
 
             auto* pSmart = dynamic_cast<OTSmartContract*>(pCronItem.get());
             auto* pPlan = dynamic_cast<OTPaymentPlan*>(pCronItem.get());
@@ -6899,7 +6909,8 @@ auto OTTransaction::GetMemo(String& strMemo) -> bool
         case transactionType::chequeReceipt:
         case transactionType::voucherReceipt: {
             pOriginalItem.reset(api_.Factory()
-                                    .InternalSession()
+                                    .Internal()
+                                    .Session()
                                     .Item(
                                         strReference,
                                         GetPurportedNotaryID(),
@@ -6939,7 +6950,7 @@ auto OTTransaction::GetMemo(String& strMemo) -> bool
                     .Flush();
                 return false;
             } else {
-                auto theCheque{api_.Factory().InternalSession().Cheque()};
+                auto theCheque{api_.Factory().Internal().Session().Cheque()};
 
                 assert_true(false != bool(theCheque));
 

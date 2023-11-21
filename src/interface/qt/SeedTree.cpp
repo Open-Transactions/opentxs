@@ -14,9 +14,9 @@
 #include "interface/ui/seedtree/SeedTreeItem.hpp"
 #include "interface/ui/seedtree/SeedTreeNym.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 

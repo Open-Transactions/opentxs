@@ -142,7 +142,8 @@ auto Asio::GetTimer() const noexcept -> Timer
     }
 }
 
-auto Asio::Init(std::shared_ptr<const api::Context> context) noexcept -> void
+auto Asio::Init(std::shared_ptr<const api::internal::Context> context) noexcept
+    -> void
 {
     auto shared = weak_.lock();
 

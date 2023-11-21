@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "2_Factory.hpp"        // IWYU pragma: associated
-#include "identity/Source.hpp"  // IWYU pragma: associated
+#include "identity/Source.hpp"           // IWYU pragma: associated
+#include "opentxs/internal.factory.hpp"  // IWYU pragma: associated
 
 #include <AsymmetricKey.pb.h>
 #include <Credential.pb.h>
@@ -19,8 +19,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/String.hpp"
@@ -30,10 +28,12 @@
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -80,7 +80,7 @@ auto Factory::NymIDSource(
             switch (params.credentialType()) {
                 case identity::CredentialType::Legacy: {
                     params.Internal().Keypair() =
-                        api.Factory().InternalSession().Keypair(
+                        api.Factory().Internal().Session().Keypair(
                             params,
                             crypto::asymmetric::Key::DefaultVersion(),
                             opentxs::crypto::asymmetric::Role::Sign,
@@ -100,7 +100,7 @@ auto Factory::NymIDSource(
                     }
 
                     params.Internal().Keypair() =
-                        api.Factory().InternalSession().Keypair(
+                        api.Factory().Internal().Session().Keypair(
                             params.Seed(),
                             params.Nym(),
                             params.Credset(),
@@ -219,7 +219,8 @@ auto Source::deserialize_paymentcode(
 {
     if (identity::SourceType::Bip47 == type) {
 
-        return factory.InternalSession().PaymentCode(serialized.paymentcode());
+        return factory.Internal().Session().PaymentCode(
+            serialized.paymentcode());
     } else {
 
         return {};
@@ -233,7 +234,7 @@ auto Source::deserialize_pubkey(
 {
     if (identity::SourceType::PubKey == type) {
 
-        return factory.InternalSession().AsymmetricKey(serialized.key());
+        return factory.Internal().Session().AsymmetricKey(serialized.key());
     } else {
 
         return {};

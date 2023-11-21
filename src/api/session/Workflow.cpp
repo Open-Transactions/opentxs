@@ -20,9 +20,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/core/String.hpp"
@@ -42,15 +39,18 @@
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -236,7 +236,7 @@ auto Workflow::InstantiateCheque(
         case PaymentWorkflowType::IncomingCheque:
         case PaymentWorkflowType::OutgoingInvoice:
         case PaymentWorkflowType::IncomingInvoice: {
-            cheque.reset(api.Factory().InternalSession().Cheque().release());
+            cheque.reset(api.Factory().Internal().Session().Cheque().release());
 
             assert_false(nullptr == cheque);
 
@@ -292,7 +292,7 @@ auto Workflow::InstantiatePurse(
                     return out;
                 }();
 
-                purse = api.Factory().InternalSession().Purse(serialized);
+                purse = api.Factory().Internal().Session().Purse(serialized);
 
                 if (false == bool(purse)) {
                     throw std::runtime_error{"Failed to instantiate purse"};
@@ -337,7 +337,7 @@ auto Workflow::InstantiateTransfer(
             if (serialized.empty()) { return output; }
 
             transfer.reset(
-                api.Factory().InternalSession().Item(serialized).release());
+                api.Factory().Internal().Session().Item(serialized).release());
 
             if (false == bool(transfer)) {
                 LogError()()("Failed to instantiate transfer").Flush();
@@ -1180,7 +1180,7 @@ auto Workflow::ClearCheque(
         return false;
     }
 
-    auto cheque{api_.Factory().InternalSession().Cheque(receipt)};
+    auto cheque{api_.Factory().Internal().Session().Cheque(receipt)};
 
     if (false == bool(cheque)) {
         LogError()()("Failed to load cheque from receipt.").Flush();
@@ -1940,7 +1940,8 @@ auto Workflow::extract_transfer_from_pending(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    auto transfer = api_.Factory().InternalSession().Item(serializedTransfer);
+    auto transfer =
+        api_.Factory().Internal().Session().Item(serializedTransfer);
 
     if (false == bool(transfer)) {
         LogError()()("Unable to instantiate transfer item").Flush();
@@ -1982,7 +1983,7 @@ auto Workflow::extract_transfer_from_receipt(
     }
 
     const auto acceptPending =
-        api_.Factory().InternalSession().Item(serializedAcceptPending);
+        api_.Factory().Internal().Session().Item(serializedAcceptPending);
 
     if (false == bool(acceptPending)) {
         LogError()()("Unable to instantiate accept pending item").Flush();
@@ -2006,7 +2007,7 @@ auto Workflow::extract_transfer_from_receipt(
         return nullptr;
     }
 
-    auto pending = api_.Factory().InternalSession().Transaction(
+    auto pending = api_.Factory().Internal().Session().Transaction(
         receipt.GetNymID(),
         receipt.GetRealAccountID(),
         receipt.GetRealNotaryID());
@@ -2040,7 +2041,8 @@ auto Workflow::extract_transfer_from_receipt(
         return nullptr;
     }
 
-    auto transfer = api_.Factory().InternalSession().Item(serializedTransfer);
+    auto transfer =
+        api_.Factory().Internal().Session().Item(serializedTransfer);
 
     if (false == bool(transfer)) {
         LogError()()("Unable to instantiate transfer item").Flush();

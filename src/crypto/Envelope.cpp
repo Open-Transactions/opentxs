@@ -17,10 +17,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "2_Factory.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/crypto/Symmetric.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
@@ -29,11 +26,13 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
@@ -49,6 +48,7 @@
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -358,7 +358,7 @@ auto Envelope::read_dh(
 
     for (const auto& key : rhs.dhkey()) {
         auto& set = output[translate(key.type())];
-        set.emplace_back(api.Factory().InternalSession().AsymmetricKey(key));
+        set.emplace_back(api.Factory().Internal().Session().AsymmetricKey(key));
     }
 
     return output;

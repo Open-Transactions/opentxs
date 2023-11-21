@@ -11,11 +11,12 @@
 #include <string>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 
 namespace opentxs::contract::peer::reply::faucet
@@ -55,7 +56,7 @@ Implementation::Implementation(
     , FaucetPrivate(alloc)
     , base::Implementation(api, std::move(signer), proto, alloc)
     , txid_(proto.faucet().txid())
-    , transaction_(api_.Factory().InternalSession().BlockchainTransaction(
+    , transaction_(api_.Factory().Internal().Session().BlockchainTransaction(
           proto.faucet().transaction(),
           alloc))
     , tx_serialized_(proto.faucet().transaction())

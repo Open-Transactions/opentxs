@@ -16,8 +16,8 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -252,9 +252,9 @@ void OTSignedFile::SetFilename(
     filename_.Format("%s%s" // data_folder/
                          "%s%s" // nyms/
                          "%s",  // 5bf9a88c.nym
-                         OTLog::Path(), OTapi::Legacy::PathSeparator(),
-                         local_dir_.Get(), OTapi::Legacy::PathSeparator(),
-                         signed_filename_.Get());
+                         OTLog::Path(), OTapi::internal::Paths::PathSeparator(),
+                         local_dir_.Get(),
+    OTapi::internal::Paths::PathSeparator(), signed_filename_.Get());
     */
     // Software Path + Local Sub-directory + Filename
     //

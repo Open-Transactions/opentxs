@@ -36,6 +36,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -124,7 +129,7 @@ public:
     }
 
     Peer(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> network,
         message::Nonce nonce,
         int peerID,

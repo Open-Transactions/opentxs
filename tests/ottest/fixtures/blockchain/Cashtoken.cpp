@@ -10,9 +10,10 @@
 #include <opentxs/opentxs.hpp>
 #include <optional>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -50,7 +51,7 @@ auto Cashtoken::check_parsing_and_serialization(ot::ReadView raw) const noexcept
     if (false == proto.has_value()) { return false; }
 
     const auto tx2 =
-        api_.Factory().InternalSession().BlockchainTransaction(*proto, {});
+        api_.Factory().Internal().Session().BlockchainTransaction(*proto, {});
 
     EXPECT_TRUE(tx2);
 

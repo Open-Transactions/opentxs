@@ -25,7 +25,7 @@ namespace session
 {
 namespace notary
 {
-class Factory;
+class FactoryPrivate;
 }  // namespace notary
 }  // namespace session
 
@@ -190,7 +190,7 @@ public:
 private:
     using ot_super = Contract;
 
-    friend api::session::notary::Factory;
+    friend api::session::notary::FactoryPrivate;
 
     // Number of transaction numbers Cron  will grab for itself, when it gets
     // low, before each round.

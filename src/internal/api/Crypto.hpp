@@ -16,7 +16,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Factory;
+}  // namespace internal
 }  // namespace api
 
 namespace crypto
@@ -56,7 +59,7 @@ public:
     virtual auto hasSodium() const noexcept -> bool = 0;
 
     virtual auto Init(
-        const std::shared_ptr<const api::Factory>& factory) noexcept
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void = 0;
     auto Internal() noexcept -> Crypto& final { return *this; }
 

@@ -9,7 +9,6 @@
 #include <cstring>
 #include <memory>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
@@ -27,9 +26,11 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -960,7 +961,7 @@ void Item::CalculateNumberOfOrigin()
         case itemType::depositCheque:  // this item is a request to deposit a
                                        // cheque.
         {
-            const auto theCheque{api_.Factory().InternalSession().Cheque()};
+            const auto theCheque{api_.Factory().Internal().Session().Cheque()};
             auto strAttachment = String::Factory();
             GetAttachment(strAttachment);
 
@@ -1000,7 +1001,7 @@ void Item::CalculateNumberOfOrigin()
             // contains the number
             // of origin as its transaction number.
             //
-            const auto pOriginalItem{api_.Factory().InternalSession().Item(
+            const auto pOriginalItem{api_.Factory().Internal().Session().Item(
                 strReference, GetPurportedNotaryID(), GetReferenceToNum())};
 
             assert_true(false != bool(pOriginalItem));

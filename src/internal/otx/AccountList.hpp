@@ -9,9 +9,9 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

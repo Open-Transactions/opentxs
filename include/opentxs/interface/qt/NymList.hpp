@@ -20,7 +20,6 @@ namespace internal
 {
 struct NymList;
 }  // namespace internal
-
 }  // namespace ui
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

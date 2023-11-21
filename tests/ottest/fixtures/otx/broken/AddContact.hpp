@@ -23,5 +23,4 @@ struct OPENTXS_EXPORT AddContact : public IntegrationFixture {
 
     AddContact();
 };
-
 }  // namespace ottest

@@ -28,6 +28,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -64,7 +69,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,
@@ -87,7 +92,7 @@ private:
     using Chains = Set<opentxs::blockchain::Type>;
     using Queue = Map<opentxs::blockchain::Type, Vector<Message>>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<Node::Shared> shared_p_;
     const api::Session& api_;
     Node::Shared::Guarded& data_;
@@ -137,7 +142,7 @@ private:
     auto work(allocator_type monotonic) noexcept -> bool;
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,

@@ -14,6 +14,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 }  // namespace opentxs
@@ -27,7 +32,7 @@ public:
     auto Start() noexcept -> void;
 
     BalanceOracle(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::string_view endpoint) noexcept;
     BalanceOracle() = delete;
     BalanceOracle(const BalanceOracle&) = delete;

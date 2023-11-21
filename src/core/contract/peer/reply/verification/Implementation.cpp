@@ -9,10 +9,11 @@
 #include <VerificationReply.pb.h>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/identity/wot/Verification.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Verification.hpp"
 
@@ -52,7 +53,7 @@ Implementation::Implementation(
     , verification_([&]() -> decltype(verification_) {
         if (proto.verification().has_response()) {
 
-            return api.Factory().InternalSession().Verification(
+            return api.Factory().Internal().Session().Verification(
                 proto.verification().response(), alloc);
         } else {
 

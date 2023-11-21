@@ -11,8 +11,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/AccountList.hpp"
 #include "internal/otx/Types.hpp"
@@ -40,10 +38,13 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -2356,7 +2357,7 @@ auto OTSmartContract::StashFunds(
         // (No need for the stash's inbox -- the server owns it.)
 
         // Load the inbox in case it already exists
-        auto thePartyInbox{api_.Factory().InternalSession().Ledger(
+        auto thePartyInbox{api_.Factory().Internal().Session().Ledger(
             PARTY_NYM_ID, PARTY_ACCT_ID, NOTARY_ID)};
 
         assert_true(false != bool(thePartyInbox));
@@ -2392,7 +2393,7 @@ auto OTSmartContract::StashFunds(
                 return false;
             }
 
-            auto pTransParty{api_.Factory().InternalSession().Transaction(
+            auto pTransParty{api_.Factory().Internal().Session().Transaction(
                 *thePartyInbox,
                 transactionType::paymentReceipt,
                 originType::origin_smart_contract,
@@ -2409,7 +2410,7 @@ auto OTSmartContract::StashFunds(
             // set up the transaction item (each transaction may have multiple
             // items... but not in this case.)
             //
-            auto pItemParty{api_.Factory().InternalSession().Item(
+            auto pItemParty{api_.Factory().Internal().Session().Item(
                 *pTransParty, itemType::paymentReceipt, identifier::Account{})};
             assert_true(
                 false != bool(pItemParty));  //  may be unnecessary, I'll
@@ -5666,9 +5667,9 @@ auto OTSmartContract::MoveFunds(
         // IF they can be loaded up from file, or generated, that is.
 
         // Load the inboxes in case they already exist
-        auto theSenderInbox{api_.Factory().InternalSession().Ledger(
+        auto theSenderInbox{api_.Factory().Internal().Session().Ledger(
             SENDER_NYM_ID, SOURCE_ACCT_ID, NOTARY_ID)};
-        auto theRecipientInbox{api_.Factory().InternalSession().Ledger(
+        auto theRecipientInbox{api_.Factory().Internal().Session().Ledger(
             RECIPIENT_NYM_ID, RECIPIENT_ACCT_ID, NOTARY_ID)};
 
         // ALL inboxes -- no outboxes. All will receive notification of
@@ -5713,7 +5714,7 @@ auto OTSmartContract::MoveFunds(
                 return false;
             }
 
-            auto pTransSend{api_.Factory().InternalSession().Transaction(
+            auto pTransSend{api_.Factory().Internal().Session().Transaction(
                 *theSenderInbox,
                 transactionType::paymentReceipt,
                 originType::origin_smart_contract,
@@ -5721,7 +5722,7 @@ auto OTSmartContract::MoveFunds(
 
             assert_true(false != bool(pTransSend));
 
-            auto pTransRecip{api_.Factory().InternalSession().Transaction(
+            auto pTransRecip{api_.Factory().Internal().Session().Transaction(
                 *theRecipientInbox,
                 transactionType::paymentReceipt,
                 originType::origin_smart_contract,
@@ -5737,9 +5738,9 @@ auto OTSmartContract::MoveFunds(
 
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
-            auto pItemSend{api_.Factory().InternalSession().Item(
+            auto pItemSend{api_.Factory().Internal().Session().Item(
                 *pTransSend, itemType::paymentReceipt, identifier::Account{})};
-            auto pItemRecip{api_.Factory().InternalSession().Item(
+            auto pItemRecip{api_.Factory().Internal().Session().Item(
                 *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
 
             // these may be unnecessary, I'll have to check

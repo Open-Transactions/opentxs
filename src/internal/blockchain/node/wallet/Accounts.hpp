@@ -16,6 +16,11 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 }  // namespace session
 }  // namespace api
@@ -50,7 +55,7 @@ public:
     auto Init() noexcept -> void;
 
     Accounts(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node) noexcept;
     Accounts(const Accounts&) = delete;
     Accounts(Accounts&&) = delete;

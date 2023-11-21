@@ -11,9 +11,6 @@
 #include <cstring>
 #include <memory>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -28,10 +25,13 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -448,7 +448,7 @@ auto OTTrade::GetOffer(
         return nullptr;
     }
 
-    auto offer{api_.Factory().InternalSession().Offer()};
+    auto offer{api_.Factory().Internal().Session().Offer()};
     assert_true(false != bool(offer));
 
     // Trying to load the offer from the trader's original signed request
@@ -703,7 +703,7 @@ void OTTrade::onRemovalFromCron(const PasswordPrompt& reason)
             return;
         }
 
-        auto offer{api_.Factory().InternalSession().Offer()};
+        auto offer{api_.Factory().Internal().Session().Offer()};
 
         assert_true(false != bool(offer));
 

@@ -12,7 +12,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
@@ -35,7 +38,7 @@ public:
     auto Init() noexcept -> void;
 
     OTDHT(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager>
             node) noexcept;
     OTDHT() = delete;

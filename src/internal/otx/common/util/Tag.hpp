@@ -56,7 +56,6 @@ public:
     void output(UnallocatedCString& str_output) const;
     void outputXML(UnallocatedCString& str_output) const;
 };
-
 }  // namespace opentxs
 
 /*

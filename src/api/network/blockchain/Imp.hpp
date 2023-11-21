@@ -38,13 +38,21 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
+namespace internal
+{
+class Paths;
+}  // namespace internal
+
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 class Endpoints;
 }  // namespace session
-
-class Legacy;
 }  // namespace api
 
 namespace blockchain
@@ -104,9 +112,9 @@ struct BlockchainImp final : public Blockchain::Imp {
     auto Stop(const Imp::Chain type) const noexcept -> bool final;
 
     auto Init(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         const api::crypto::Blockchain& crypto,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept -> void final;
     auto Shutdown() noexcept -> void final;

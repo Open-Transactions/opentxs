@@ -26,6 +26,7 @@ namespace api
 {
 class Session;
 }  // namespace api
+
 class PasswordPrompt;
 class Writer;
 }  // namespace opentxs

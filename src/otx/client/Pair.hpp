@@ -60,7 +60,6 @@ namespace request
 {
 class BailmentNotice;
 }  // namespace request
-
 }  // namespace peer
 }  // namespace contract
 

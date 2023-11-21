@@ -25,10 +25,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -103,7 +100,7 @@ protected:
     bool is_signed_{false};
 
 private:
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     using TypeMap = UnallocatedMap<MessageType, UnallocatedCString>;
     using ReverseTypeMap = UnallocatedMap<UnallocatedCString, MessageType>;
@@ -235,5 +232,4 @@ public:
         Message::registerStrategy(name, strategy);
     }
 };
-
 }  // namespace opentxs

@@ -17,10 +17,7 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/notary/Notary.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/Batch.hpp"
@@ -38,11 +35,15 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
+#include "opentxs/api/session/Notary.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
@@ -240,7 +241,7 @@ auto MessageProcessor::Imp::init(
             auto endpoint = std::stringstream{};
 
             if (inproc) {
-                endpoint << api_.InternalNotary().InprocEndpoint();
+                endpoint << api_.Internal().asNotary().InprocEndpoint();
                 endpoint << ':';
             } else {
                 endpoint << UnallocatedCString("tcp://*:");
@@ -446,7 +447,7 @@ auto MessageProcessor::Imp::process_message(
         armored->MemSet(messageString.data(), shorten(messageString.size()));
         auto serialized = String::Factory();
         armored->GetString(serialized);
-        auto request{api_.Factory().InternalSession().Message()};
+        auto request{api_.Factory().Internal().Session().Message()};
 
         if (false == serialized->Exists()) {
             LogError()()("Empty serialized request.").Flush();
@@ -460,7 +461,7 @@ auto MessageProcessor::Imp::process_message(
             return true;
         }
 
-        auto replymsg{api_.Factory().InternalSession().Message()};
+        auto replymsg{api_.Factory().Internal().Session().Message()};
 
         assert_true(false != bool(replymsg));
 

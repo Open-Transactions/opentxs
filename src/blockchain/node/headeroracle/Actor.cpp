@@ -16,7 +16,6 @@
 #include "blockchain/node/headeroracle/Shared.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/database/Header.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
@@ -26,11 +25,12 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"  // IWYU pragma: keep
@@ -53,13 +53,13 @@ using enum opentxs::network::zeromq::socket::Direction;
 using enum opentxs::network::zeromq::socket::Type;
 
 HeaderOracle::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : HeaderOracleActor(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               using namespace std::literals;
@@ -92,7 +92,7 @@ HeaderOracle::Actor::Actor(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , shared_(*shared_p_)
     , job_ready_(pipeline_.Internal().ExtraSocket(0))

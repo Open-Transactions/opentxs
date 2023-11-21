@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "internal/api/crypto/blockchain/Types.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -20,13 +19,13 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -81,12 +80,12 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 BalanceOracle::Imp::Imp(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::string_view endpoint,
     const opentxs::network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : Actor(
-          *api,
+          api->Self(),
           LogTrace(),
           CString{"Balance oracle", alloc},
           0ms,
@@ -123,7 +122,7 @@ auto BalanceOracle::Imp::do_shutdown() noexcept -> void { api_.reset(); }
 
 auto BalanceOracle::Imp::do_startup(allocator_type) noexcept -> bool
 {
-    return api_->Internal().ShuttingDown();
+    return api_->ShuttingDown();
 }
 
 auto BalanceOracle::Imp::make_message(
@@ -382,7 +381,7 @@ BalanceOracle::Imp::~Imp() = default;
 namespace opentxs::api::crypto::blockchain
 {
 BalanceOracle::BalanceOracle(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::string_view endpoint) noexcept
     : imp_([&] {
         const auto& asio = api->Network().ZeroMQ().Internal();

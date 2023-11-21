@@ -11,14 +11,14 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -91,7 +91,8 @@ auto PaymentTasks::get_payment_id(const OTPayment& payment) const
 
     switch (payment.GetType()) {
         case OTPayment::CHEQUE: {
-            auto pCheque = parent_.api().Factory().InternalSession().Cheque();
+            auto pCheque =
+                parent_.api().Factory().Internal().Session().Cheque();
 
             assert_false(nullptr == pCheque);
 

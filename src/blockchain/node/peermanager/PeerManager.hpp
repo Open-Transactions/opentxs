@@ -38,6 +38,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -79,7 +84,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         database::Peer& db,
         std::string_view peers,
@@ -165,7 +170,7 @@ private:
     static constexpr auto zmq_peer_target_ = 2_uz;
     static constexpr auto dns_timeout_ = 30s;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     std::shared_ptr<Actor> me_;
     const api::Session& api_;

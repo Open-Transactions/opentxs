@@ -23,6 +23,12 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
+namespace internal
+{
+class Paths;
+class Session;
+}  // namespace internal
+
 namespace network
 {
 class Asio;
@@ -30,13 +36,14 @@ class Asio;
 
 namespace session
 {
+namespace internal
+{
 class Client;
-class Endpoints;
 class Notary;
-}  // namespace session
+}  // namespace internal
 
-class Legacy;
-class Session;
+class Endpoints;
+}  // namespace session
 }  // namespace api
 
 namespace network
@@ -73,20 +80,20 @@ public:
 
     auto Shutdown() noexcept -> void final;
     auto Start(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         const api::crypto::Blockchain& crypto,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept -> void final;
     auto Start(
-        std::shared_ptr<const api::session::Notary> api,
+        std::shared_ptr<const api::session::internal::Notary> api,
         const api::crypto::Blockchain& crypto,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept -> void final;
 
     Network(
-        const api::Session& api,
+        const api::internal::Session& api,
         const network::Asio& asio,
         const opentxs::network::zeromq::Context& zmq,
         const api::session::Endpoints& endpoints,

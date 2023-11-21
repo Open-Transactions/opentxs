@@ -19,8 +19,8 @@
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"  // IWYU pragma: keep
@@ -290,7 +290,7 @@ auto HeaderOracle::Siblings() const noexcept -> UnallocatedSet<block::Hash>
 }
 
 auto HeaderOracle::Start(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
     assert_false(nullptr == api);

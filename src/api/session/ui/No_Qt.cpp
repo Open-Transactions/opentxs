@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/api/session/Factory.hpp"  // IWYU pragma: associated
+#include "opentxs/api/session/internal.factory.hpp"  // IWYU pragma: associated
 
 #include "api/session/ui/Imp-base.hpp"
 #include "api/session/ui/UI.hpp"

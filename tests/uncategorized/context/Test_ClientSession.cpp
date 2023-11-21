@@ -9,8 +9,8 @@
 #include <future>
 #include <memory>
 
-#include "internal/api/session/Wallet.hpp"
 #include "ottest/Basic.hpp"
+#include "ottest/fixtures/common/Base.hpp"
 
 namespace ottest
 {
@@ -61,7 +61,7 @@ TEST(ClientSession, introduction_server)
     EXPECT_FALSE(server_id_.empty());
 
     {
-        const auto contract = server.Wallet().Internal().Server(serverID);
+        const auto contract = Base::NotaryContract(server, serverID);
         const auto id = client.OTX().SetIntroductionServer(contract);
 
         EXPECT_EQ(serverID, id);

@@ -7,12 +7,12 @@
 
 #include <utility>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/otx/client/Factory.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "otx/client/obsolete/OTAPI_Func.hpp"
@@ -240,7 +240,7 @@ auto ServerAction::ExchangeBasketCurrency(
         basketID,
         accountID,
         direction,
-        api_.InternalClient().OTAPI().GetBasketMemberCount(basketID)*/);
+        api_.Internal().asClient().OTAPI().GetBasketMemberCount(basketID)*/);
 }
 
 auto ServerAction::IssueBasketCurrency(

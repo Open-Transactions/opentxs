@@ -17,6 +17,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -49,7 +54,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         opentxs::network::zeromq::BatchID batchID,
         allocator_type alloc) noexcept;
     Actor() = delete;
@@ -63,7 +68,7 @@ public:
 private:
     friend opentxs::Actor<blockchain::Actor, Work>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     const api::Session& api_;
     opentxs::network::zeromq::socket::Raw& active_peers_;
     opentxs::network::zeromq::socket::Raw& block_available_;

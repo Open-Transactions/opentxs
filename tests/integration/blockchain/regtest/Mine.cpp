@@ -14,7 +14,6 @@
 #include <memory>
 #include <span>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -89,7 +88,8 @@ TEST_F(Regtest_fixture_single, generate_block)
         EXPECT_EQ(serialized, serialized2);
     }
 
-    auto block = miner_.Factory().InternalSession().BitcoinBlock(
+    auto block = Mine(
+        miner_,
         previousHeader,
         tx,
         previousHeader.nBits(),

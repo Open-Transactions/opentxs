@@ -15,10 +15,10 @@
 #include "internal/api/Crypto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep

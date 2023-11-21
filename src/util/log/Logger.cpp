@@ -8,10 +8,10 @@
 #include <cassert>
 #include <memory>
 
-#include "internal/api/Context.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Log.hpp"
+#include "opentxs/api/Context.internal.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "util/log/LogBuffer.hpp"

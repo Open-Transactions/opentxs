@@ -11,8 +11,8 @@
 #include "core/Worker.hpp"
 #include "interface/ui/base/List.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
@@ -27,7 +27,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-
 namespace blockchain
 {
 namespace crypto

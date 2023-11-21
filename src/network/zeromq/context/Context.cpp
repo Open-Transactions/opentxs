@@ -14,9 +14,6 @@
 #include <thread>
 #include <utility>
 
-#include "internal/api/Context.hpp"
-#include "internal/api/Factory.hpp"
-#include "internal/api/Log.hpp"
 #include "internal/network/zeromq/Factory.hpp"
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -33,6 +30,8 @@
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "network/zeromq/Actor.hpp"
 #include "network/zeromq/PairEventListener.hpp"
+#include "opentxs/api/Context.internal.hpp"
+#include "opentxs/api/internal.factory.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
@@ -88,7 +87,6 @@ Context::Context(const opentxs::Options& args) noexcept
     , push_sockets_()
 {
     if (nullptr == context_) { std::terminate(); }
-    if (false == log_.operator bool()) { std::terminate(); }
 }
 
 Context::operator void*() const noexcept
@@ -492,7 +490,7 @@ auto Context::ThreadID(BatchID id) const noexcept -> std::thread::id
 
 Context::~Context()
 {
-    log_.reset();
+    log_.Reset();
 
     if (nullptr != context_) {
         std::thread{[context = context_] {

@@ -10,7 +10,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -25,9 +24,11 @@
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -325,7 +326,7 @@ auto Message::HarvestTransactionNumbers(
     // in case.
 
     const auto strLedger = String::Factory(payload_);
-    auto theLedger = api_.Factory().InternalSession().Ledger(
+    auto theLedger = api_.Factory().Internal().Session().Ledger(
         MSG_NYM_ID,
         ACCOUNT_ID,
         NOTARY_ID);  // We're going to

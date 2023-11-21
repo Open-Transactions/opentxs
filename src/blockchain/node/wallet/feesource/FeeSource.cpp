@@ -12,7 +12,6 @@
 
 #include "BoostAsio.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
@@ -20,10 +19,11 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -44,7 +44,7 @@
 namespace opentxs::factory
 {
 auto FeeSources(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void
 {
     assert_false(nullptr == api);
@@ -98,7 +98,7 @@ auto FeeSource::Imp::display_scale() -> const display::Scale&
 }
 
 FeeSource::Imp::Imp(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view hostname,
     std::string_view path,
@@ -107,7 +107,7 @@ FeeSource::Imp::Imp(
     network::zeromq::BatchID batch,
     allocator_type&& alloc) noexcept
     : Actor(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               auto out = CString{print(node->Internal().Chain()), alloc};
@@ -136,7 +136,7 @@ FeeSource::Imp::Imp(
     , asio_(std::move(asio), alloc)
     , api_p_(std::move(api))
     , node_p_(std::move(node))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , hostname_(hostname, alloc)
     , path_(path, alloc)
@@ -151,7 +151,7 @@ FeeSource::Imp::Imp(
 }
 
 FeeSource::Imp::Imp(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::string_view hostname,
     std::string_view path,

@@ -37,7 +37,6 @@ namespace context
 class TransactionStatement;
 }  // namespace context
 }  // namespace otx
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

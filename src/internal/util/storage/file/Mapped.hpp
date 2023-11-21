@@ -32,7 +32,6 @@ class Database;
 class Transaction;
 }  // namespace lmdb
 }  // namespace storage
-
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

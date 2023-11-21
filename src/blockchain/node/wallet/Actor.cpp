@@ -10,14 +10,15 @@
 #include <utility>
 
 #include "blockchain/node/wallet/Shared.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Accounts.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -37,13 +38,13 @@ using opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Wallet::Actor::Actor(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<internal::Wallet::Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : opentxs::Actor<Wallet::Actor, wallet::WalletJobs>(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               auto out = CString{print(node->Internal().Chain()), alloc};
@@ -73,7 +74,7 @@ Wallet::Actor::Actor(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->asClientPublic())
     , node_(*node_p_)
     , shared_(*shared_p_)
     , to_accounts_(pipeline_.Internal().ExtraSocket(0))

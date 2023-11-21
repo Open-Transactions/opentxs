@@ -17,8 +17,8 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -51,7 +51,7 @@ auto print(FeeOracleJobs job) noexcept -> std::string_view
 namespace opentxs::blockchain::node::wallet
 {
 FeeOracle::FeeOracle(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node) noexcept
     : shared_(std::make_shared<Shared>())
 {

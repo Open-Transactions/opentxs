@@ -13,8 +13,8 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/listener/Actor.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -57,7 +57,7 @@ auto print(ListenerJob job) noexcept -> std::string_view
 namespace opentxs::network::otdht
 {
 Listener::Listener(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<Node::Shared> shared,
     std::string_view routerBind,
     std::string_view routerAdvertise,

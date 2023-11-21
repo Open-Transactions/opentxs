@@ -8,8 +8,6 @@
 #include <chrono>
 #include <memory>
 
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Account.hpp"
@@ -17,10 +15,13 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
@@ -101,7 +102,7 @@ auto PayDividendVisitor::Trigger(
     // just having it get lost in the ether.)
     bool bReturnValue = false;
 
-    auto theVoucher{server_.API().Factory().InternalSession().Cheque(
+    auto theVoucher{server_.API().Factory().Internal().Session().Cheque(
         theNotaryID, identifier::UnitDefinition{})};
 
     assert_true(false != bool(theVoucher));
@@ -169,7 +170,8 @@ auto PayDividendVisitor::Trigger(
             //
             const auto strVoucher = String::Factory(*theVoucher);
             auto thePayment{
-                server_.API().Factory().InternalSession().Payment(strVoucher)};
+                server_.API().Factory().Internal().Session().Payment(
+                    strVoucher)};
 
             assert_true(false != bool(thePayment));
 
@@ -208,7 +210,7 @@ auto PayDividendVisitor::Trigger(
         //
         if (!bSent) {
             auto theReturnVoucher{
-                server_.API().Factory().InternalSession().Cheque(
+                server_.API().Factory().Internal().Session().Cheque(
                     theNotaryID, identifier::UnitDefinition{})};
 
             assert_true(false != bool(theReturnVoucher));
@@ -245,7 +247,7 @@ auto PayDividendVisitor::Trigger(
                 const auto strReturnVoucher =
                     String::Factory(*theReturnVoucher);
                 auto theReturnPayment{
-                    server_.API().Factory().InternalSession().Payment(
+                    server_.API().Factory().Internal().Session().Payment(
                         strReturnVoucher)};
 
                 assert_true(false != bool(theReturnPayment));

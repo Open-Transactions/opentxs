@@ -26,6 +26,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -50,7 +55,6 @@ namespace socket
 {
 class Raw;
 }  // namespace socket
-
 }  // namespace zeromq
 }  // namespace network
 
@@ -75,7 +79,7 @@ protected:
         -> std::optional<Amount>;
     auto shutdown_timers() noexcept -> void;
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::string_view hostname,
         std::string_view path,
@@ -86,7 +90,7 @@ protected:
 private:
     friend Actor<Imp, FeeSourceJobs>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     const api::Session& api_;
     const node::Manager& node_;
@@ -114,7 +118,7 @@ private:
     auto reset_timer() noexcept -> void;
     auto work(allocator_type monotonic) noexcept -> bool;
 
-    Imp(std::shared_ptr<const api::Session> api,
+    Imp(std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::string_view hostname,
         std::string_view path,

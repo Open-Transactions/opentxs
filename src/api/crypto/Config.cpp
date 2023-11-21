@@ -7,11 +7,11 @@
 
 #include <memory>
 
-#include "internal/api/Settings.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"

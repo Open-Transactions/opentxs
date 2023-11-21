@@ -11,9 +11,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
@@ -21,11 +19,14 @@
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NymFile.hpp"  // IWYU pragma: keep
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
@@ -275,7 +276,7 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
     auto handle = get_data();
     auto& data = *handle;
     const auto& ownerNymID = client_nym_id();
-    auto nymbox{api_.Factory().InternalSession().Ledger(
+    auto nymbox{api_.Factory().Internal().Session().Ledger(
         ownerNymID, server_nym_id(), server_id_)};
 
     if (false == bool(nymbox)) {

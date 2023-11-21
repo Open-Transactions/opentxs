@@ -15,8 +15,6 @@
 #include <utility>
 #include <variant>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -25,7 +23,9 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -115,7 +115,7 @@ auto Nyms::init(const Hash& hash) noexcept(false) -> void
                 }
 
                 if (proto.has_defaultlocalnym()) {
-                    auto nym = factory_.InternalSession().NymID(
+                    auto nym = factory_.Internal().Session().NymID(
                         proto.defaultlocalnym());
                     default_local_nym_ = std::move(nym);
                 }

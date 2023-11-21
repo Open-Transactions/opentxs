@@ -17,7 +17,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Manager.hpp"
@@ -224,7 +224,7 @@ auto Wallet::StartRescan() const noexcept -> bool
 }
 
 auto Wallet::Init(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept -> void
 {
     assert_false(nullptr == api);

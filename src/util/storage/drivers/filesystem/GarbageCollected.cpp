@@ -13,7 +13,7 @@
 
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/util/Log.hpp"

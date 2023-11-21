@@ -9,8 +9,8 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "ottest/fixtures/common/User.hpp"
 
 namespace ottest

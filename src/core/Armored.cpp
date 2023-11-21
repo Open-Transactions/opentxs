@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "2_Factory.hpp"
 #include "BoostIostreams.hpp"
 #include "core/String.hpp"
 #include "internal/core/String.hpp"
@@ -22,10 +21,11 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

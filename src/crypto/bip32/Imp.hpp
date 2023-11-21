@@ -25,8 +25,12 @@ namespace opentxs
 {
 namespace api
 {
-class Crypto;
+namespace internal
+{
 class Factory;
+}  // namespace internal
+
+class Crypto;
 }  // namespace api
 
 namespace crypto
@@ -97,7 +101,8 @@ public:
         Bip32Index& index,
         Data& chainCode,
         Data& key) const -> bool;
-    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    auto Init(
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void final;
     auto SeedID(const ReadView entropy) const noexcept -> crypto::SeedID;
     auto SerializePrivate(
@@ -130,7 +135,7 @@ private:
     using HDNode = implementation::HDNode;
 
     const api::Crypto& crypto_;
-    std::weak_ptr<const api::Factory> factory_;
+    std::weak_ptr<const api::internal::Factory> factory_;
     DeferredConstruction<Key> blank_;
 
     static auto IsHard(const Bip32Index) noexcept -> bool;

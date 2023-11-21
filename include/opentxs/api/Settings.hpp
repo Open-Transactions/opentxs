@@ -19,56 +19,58 @@ namespace internal
 {
 class Settings;
 }  // namespace internal
+
+class Settings;  // IWYU pragma: keep
 }  // namespace api
 
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::api
-{
-class OPENTXS_EXPORT Settings
+class OPENTXS_EXPORT opentxs::api::Settings
 {
 public:
-    OPENTXS_NO_EXPORT virtual auto Internal() const noexcept
-        -> const internal::Settings& = 0;
-    [[nodiscard]] virtual auto ReadBool(
-        const std::string_view section,
-        const std::string_view key,
-        bool& out) const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto ReadNumber(
-        const std::string_view section,
-        const std::string_view key,
-        std::int64_t& out) const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto ReadString(
-        const std::string_view section,
-        const std::string_view key,
-        Writer&& out) const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto Save() const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto WriteBool(
-        const std::string_view section,
-        const std::string_view key,
-        const bool value) const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto WriteNumber(
-        const std::string_view section,
-        const std::string_view key,
-        const std::int64_t value) const noexcept -> bool = 0;
-    [[nodiscard]] virtual auto WriteString(
-        const std::string_view section,
-        const std::string_view key,
-        const std::string_view value) const noexcept -> bool = 0;
+    OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::Settings&;
+    [[nodiscard]] auto ReadBool(
+        std::string_view section,
+        std::string_view key,
+        bool& out) const noexcept -> bool;
+    [[nodiscard]] auto ReadNumber(
+        std::string_view section,
+        std::string_view key,
+        std::int64_t& out) const noexcept -> bool;
+    [[nodiscard]] auto ReadString(
+        std::string_view section,
+        std::string_view key,
+        Writer&& out) const noexcept -> bool;
+    [[nodiscard]] auto Save() const noexcept -> bool;
+    [[nodiscard]] auto WriteBool(
+        std::string_view section,
+        std::string_view key,
+        bool value) const noexcept -> bool;
+    [[nodiscard]] auto WriteNumber(
+        std::string_view section,
+        std::string_view key,
+        std::int64_t value) const noexcept -> bool;
+    [[nodiscard]] auto WriteString(
+        std::string_view section,
+        std::string_view key,
+        std::string_view value) const noexcept -> bool;
 
-    OPENTXS_NO_EXPORT virtual auto Internal() noexcept
-        -> internal::Settings& = 0;
+    OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Settings&;
 
+    OPENTXS_NO_EXPORT Settings(internal::Settings* imp) noexcept;
+    Settings() = delete;
     Settings(const Settings&) = delete;
     Settings(Settings&&) = delete;
     auto operator=(const Settings&) -> Settings& = delete;
     auto operator=(Settings&&) -> Settings& = delete;
 
-    OPENTXS_NO_EXPORT virtual ~Settings() = default;
+    OPENTXS_NO_EXPORT ~Settings();
 
-protected:
-    Settings() = default;
+private:
+    friend internal::Settings;
+
+    internal::Settings* imp_;
 };
-}  // namespace opentxs::api

@@ -33,5 +33,4 @@ public:
 
     Integration();
 };
-
 }  // namespace ottest

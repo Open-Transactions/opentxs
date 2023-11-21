@@ -15,9 +15,9 @@ extern "C" {
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Parameters.hpp"
@@ -89,7 +89,8 @@ AsymmetricProvider::AsymmetricProvider() noexcept
 }
 
 auto AsymmetricProvider::Init(
-    const std::shared_ptr<const api::Factory>& factory) noexcept -> void
+    const std::shared_ptr<const api::internal::Factory>& factory) noexcept
+    -> void
 {
     factory_ = factory;
 }
@@ -107,7 +108,7 @@ auto AsymmetricProvider::RandomKeypair(
             std::move(privateKey),
             std::move(publicKey),
             opentxs::crypto::asymmetric::Role::Sign,
-            Parameters{*factory},
+            Parameters{factory->Self()},
             std::move(params));
     } else {
 
@@ -129,7 +130,7 @@ auto AsymmetricProvider::RandomKeypair(
             std::move(privateKey),
             std::move(publicKey),
             role,
-            Parameters{*factory},
+            Parameters{factory->Self()},
             std::move(params));
     } else {
 

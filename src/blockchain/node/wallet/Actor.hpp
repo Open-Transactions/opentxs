@@ -20,6 +20,11 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 }  // namespace session
 }  // namespace api
@@ -61,7 +66,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node,
         std::shared_ptr<internal::Wallet::Shared> shared,
         network::zeromq::BatchID batch,
@@ -77,7 +82,7 @@ public:
 private:
     friend opentxs::Actor<Wallet::Actor, wallet::WalletJobs>;
 
-    std::shared_ptr<const api::session::Client> api_p_;
+    std::shared_ptr<const api::session::internal::Client> api_p_;
     std::shared_ptr<const node::Manager> node_p_;
     std::shared_ptr<internal::Wallet::Shared> shared_p_;
     const api::session::Client& api_;

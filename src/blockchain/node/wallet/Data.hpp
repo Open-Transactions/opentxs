@@ -17,7 +17,10 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
 class Client;
+}  // namespace internal
 }  // namespace session
 }  // namespace api
 
@@ -45,7 +48,7 @@ public:
     Proposals proposals_;
 
     Data(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node,
         database::Wallet& db) noexcept;
 

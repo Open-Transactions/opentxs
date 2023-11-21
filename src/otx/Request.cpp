@@ -13,9 +13,6 @@
 #include <utility>
 
 #include "core/contract/Signable.hpp"
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/OTX.hpp"
@@ -25,9 +22,12 @@
 #include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
@@ -238,7 +238,7 @@ Request::Imp::Imp(const Imp& rhs) noexcept
 
 auto Request::Imp::calculate_id() const -> identifier_type
 {
-    return api_.Factory().InternalSession().IdentifierFromPreimage(
+    return api_.Factory().Internal().Session().IdentifierFromPreimage(
         id_version());
 }
 

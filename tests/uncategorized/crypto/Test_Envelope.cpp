@@ -10,8 +10,6 @@
 #include <memory>
 #include <string_view>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/util/P0330.hpp"
@@ -32,8 +30,8 @@ TEST_F(Envelope, one_recipient)
     for (const auto& pNym : nyms_) {
         const auto& nym = *pNym;
         auto plaintext = ot::String::Factory();
-        auto armored = sender_.Factory().Internal().Armored();
-        auto sender = sender_.Factory().InternalSession().Envelope();
+        auto armored = get_armored(sender_);
+        auto sender = get_envelope(sender_);
         const auto sealed = sender->Seal(nym, plaintext_->Bytes(), reason_s_);
 
         EXPECT_TRUE(sealed);
@@ -43,8 +41,7 @@ TEST_F(Envelope, one_recipient)
         EXPECT_TRUE(sender->Armored(armored));
 
         try {
-            auto recipient =
-                recipient_.Factory().InternalSession().Envelope(armored);
+            auto recipient = get_envelope(recipient_, armored);
             auto opened =
                 recipient->Open(nym, plaintext->WriteInto(), reason_r_);
 
@@ -71,7 +68,7 @@ TEST_F(Envelope, multiple_recipients)
 
     for (auto row = 0_uz; row < (one << nyms_.size()); ++row) {
         auto recipients = ot::crypto::Envelope::Recipients{};
-        auto sender = sender_.Factory().InternalSession().Envelope();
+        auto sender = get_envelope(sender_);
 
         for (auto nym = nyms_.cbegin(); nym != nyms_.cend(); ++nym) {
             const auto column =
@@ -96,8 +93,7 @@ TEST_F(Envelope, multiple_recipients)
             auto plaintext = ot::String::Factory();
 
             try {
-                auto recipient = sender_.Factory().InternalSession().Envelope(
-                    ot::reader(bytes));
+                auto recipient = get_envelope(sender_, ot::reader(bytes));
                 auto rNym = recipient_.Wallet().Nym((*nym)->ID());
 
                 opentxs::assert_false(nullptr == rNym);

@@ -10,7 +10,7 @@
 #include "internal/identity/wot/verification/Group.hpp"
 #include "internal/identity/wot/verification/Item.hpp"
 #include "internal/identity/wot/verification/Set.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Group.hpp"

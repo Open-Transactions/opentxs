@@ -18,10 +18,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -91,7 +88,7 @@ protected:
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
 
 private:  // Private prevents erroneous use by other classes.
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     using ot_super = Contract;
 

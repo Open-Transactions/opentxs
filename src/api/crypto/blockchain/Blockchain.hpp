@@ -43,15 +43,18 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Paths;
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Activity;
 class Client;
 class Contacts;
 }  // namespace session
-
-class Legacy;
-class Session;
 }  // namespace api
 
 namespace blockchain
@@ -244,7 +247,8 @@ public:
         -> void final;
     auto SenderContact(const Key& key) const noexcept
         -> identifier::Generic final;
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto Start(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void final;
     auto SubaccountList(const identifier::Nym& nymID, const Chain chain)
         const noexcept -> UnallocatedSet<identifier::Account> final;
     auto UpdateElement(UnallocatedVector<ReadView>& pubkeyHashes) const noexcept
@@ -262,7 +266,7 @@ public:
         const api::session::Client& api,
         const api::session::Activity& activity,
         const api::session::Contacts& contacts,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const UnallocatedCString& dataFolder,
         const Options& args) noexcept;
     Blockchain() = delete;

@@ -19,10 +19,7 @@
 #include <thread>
 #include <utility>
 
-#include "internal/api/session/Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/core/String.hpp"
@@ -38,6 +35,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -45,9 +43,12 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
@@ -253,8 +254,8 @@ auto Activity::Cheque(
     const identifier::Generic& workflowID) const noexcept
     -> Activity::ChequeData
 {
-    auto output =
-        ChequeData{nullptr, api_.Factory().InternalSession().UnitDefinition()};
+    auto output = ChequeData{
+        nullptr, api_.Factory().Internal().Session().UnitDefinition()};
     auto& [cheque, contract] = output;
     auto [type, state] =
         api_.Storage().Internal().PaymentWorkflowState(nym, workflowID);
@@ -312,7 +313,7 @@ auto Activity::Transfer(
     -> Activity::TransferData
 {
     auto output = TransferData{
-        nullptr, api_.Factory().InternalSession().UnitDefinition()};
+        nullptr, api_.Factory().Internal().Session().UnitDefinition()};
     auto& [transfer, contract] = output;
     auto [type, state] =
         api_.Storage().Internal().PaymentWorkflowState(nym, workflowID);

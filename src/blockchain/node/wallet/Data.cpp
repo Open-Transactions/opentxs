@@ -10,7 +10,7 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -19,7 +19,7 @@
 namespace opentxs::blockchain::node::wallet
 {
 Data::Data(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     database::Wallet& db) noexcept
     : to_actor_([&] {
@@ -32,7 +32,7 @@ Data::Data(
 
         return out;
     }())
-    , proposals_(*api, *node, db, node->Internal().Chain())
+    , proposals_(api->asClientPublic(), *node, db, node->Internal().Chain())
 {
 }
 

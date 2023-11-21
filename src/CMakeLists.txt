@@ -130,6 +130,8 @@ endif()
 set(OPENTXS_QT_PUBLIC_HEADERS "")
 set(OPENTXS_QT_PRIVATE_HEADERS "")
 
+add_subdirectory(opentxs)
+
 add_subdirectory(api)
 add_subdirectory(blockchain)
 add_subdirectory(core)
@@ -143,13 +145,7 @@ add_subdirectory(serialization)
 add_subdirectory(std)
 add_subdirectory(util)
 
-libopentxs_add_public_header("" "Export.hpp")
-libopentxs_add_public_header("" "OT.hpp")
-libopentxs_add_public_header("" "opentxs.hpp")
-
 if(OT_QT_EXPORT)
-  libopentxs_add_public_header("" "Qt.hpp")
-
   qt_wrap_cpp(
     OPENTXS_MOC_SOURCES
     ${OPENTXS_QT_PUBLIC_HEADERS}
@@ -187,22 +183,6 @@ if(OT_QT_EXPORT)
   )
   target_compile_definitions(opentxs-common PRIVATE "QT_NO_KEYWORDS")
   libopentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
-endif()
-
-target_sources(
-  opentxs-common
-  PRIVATE
-    "${opentxs_BINARY_DIR}/src/Version.cpp"
-    "2_Factory.hpp"
-    "OT.cpp"
-)
-
-if(OT_WITH_TBB OR OT_PSTL_NEEDS_TBB)
-  target_sources(opentxs-common PRIVATE "tbb.cpp")
-  libopentxs_link_internal(TBB::tbb)
-  libopentxs_link_external(TBB::tbb)
-else()
-  target_sources(opentxs-common PRIVATE "no-tbb.cpp")
 endif()
 
 libopentxs_add_sources($<TARGET_OBJECTS:opentxs-common>)

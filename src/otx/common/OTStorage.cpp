@@ -13,16 +13,16 @@
 #include <sstream>  // IWYU pragma: keep
 #include <typeinfo>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStoragePB.hpp"
@@ -2371,7 +2371,7 @@ ot_exit_block:
     const auto strPath = std::filesystem::path{strBufPath};
     strOutput = strPath.string();
 
-    if (bMakePath) { api.Internal().Legacy().BuildFolderPath(strFolder); }
+    if (bMakePath) { api.Internal().Paths().BuildFolderPath(strFolder); }
 
     {
         const bool bFolderExists = std::filesystem::exists(strFolder);
@@ -2390,7 +2390,7 @@ ot_exit_block:
     {
         auto lFileLength = 0_uz;
         const bool bFileExists =
-            api.Internal().Legacy().FileExists(strPath, lFileLength);
+            api.Internal().Paths().FileExists(strPath, lFileLength);
 
         if (bFileExists) {
             return lFileLength;

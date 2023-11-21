@@ -14,7 +14,6 @@
 #include <utility>
 
 #include "internal/api/session/UI.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -40,6 +39,8 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
+#include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/common/Counter.hpp"
 #include "ottest/fixtures/common/User.hpp"
 #include "ottest/fixtures/integration/Helpers.hpp"
@@ -1080,13 +1081,14 @@ TEST_F(Integration, payable_list_bch_bob_2)
 
 TEST_F(Integration, issue_dollars)
 {
-    const auto contract = api_issuer_.Wallet().Internal().CurrencyContract(
-        issuer_.nym_id_.asBase58(api_alex_.Crypto()),
-        UNIT_DEFINITION_CONTRACT_NAME,
-        UNIT_DEFINITION_TERMS,
-        UNIT_DEFINITION_UNIT_OF_ACCOUNT,
-        1,
-        issuer_.Reason());
+    const auto contract = Base::InternalWallet(api_issuer_)
+                              .CurrencyContract(
+                                  issuer_.nym_id_.asBase58(api_alex_.Crypto()),
+                                  UNIT_DEFINITION_CONTRACT_NAME,
+                                  UNIT_DEFINITION_TERMS,
+                                  UNIT_DEFINITION_UNIT_OF_ACCOUNT,
+                                  1,
+                                  issuer_.Reason());
 
     EXPECT_EQ(UNIT_DEFINITION_CONTRACT_VERSION, contract->Version());
     EXPECT_EQ(ot::contract::UnitType::Currency, contract->Type());
@@ -1497,8 +1499,8 @@ TEST_F(Integration, process_inbox_issuer)
     EXPECT_EQ(ot::otx::LastReplyStatus::MessageSuccess, status);
     ASSERT_TRUE(message);
 
-    const auto account = api_issuer_.Wallet().Internal().Account(
-        issuer_.Account(UNIT_DEFINITION_TLA));
+    const auto account = Base::InternalWallet(api_issuer_)
+                             .Account(issuer_.Account(UNIT_DEFINITION_TLA));
 
     EXPECT_EQ(-1 * CHEQUE_AMOUNT_1, account.get().GetBalance());
 }

@@ -35,5 +35,4 @@ public:
         const ot::api::session::Client& client);
     void init();
 };
-
 }  // namespace ottest

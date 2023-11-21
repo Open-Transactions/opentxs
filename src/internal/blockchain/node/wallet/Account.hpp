@@ -16,6 +16,11 @@ namespace api
 {
 namespace session
 {
+namespace internal
+{
+class Client;
+}  // namespace internal
+
 class Client;
 }  // namespace session
 }  // namespace api
@@ -60,7 +65,7 @@ public:
     Account(
         Reorg& reorg,
         const crypto::Account& account,
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         std::shared_ptr<const node::Manager> node,
         std::string_view fromParent) noexcept;
     Account(const Account&) = delete;

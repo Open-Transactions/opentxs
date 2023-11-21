@@ -17,6 +17,7 @@ namespace proto
 {
 class AccountEvent;
 }  // namespace proto
+
 class Amount;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)

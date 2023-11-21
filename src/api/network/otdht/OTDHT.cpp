@@ -15,20 +15,19 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/Legacy.hpp"
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/network/otdht/Node.hpp"
 #include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -43,7 +42,7 @@
 namespace opentxs::factory
 {
 auto OTDHT(
-    const api::Session& api,
+    const api::internal::Session& api,
     const network::zeromq::Context& zmq,
     const api::session::Endpoints& endpoints,
     const api::network::Blockchain& blockchain) noexcept
@@ -57,16 +56,10 @@ auto OTDHT(
 
 namespace opentxs::api::network::implementation
 {
-OTDHT::OTDHT(
-    const api::Session& api,
+OTDHT::Data::Data(
     const opentxs::network::zeromq::Context& zmq,
-    const api::session::Endpoints& endpoints,
-    const api::network::Blockchain& blockchain) noexcept
-    : api_(api)
-    , blockchain_(blockchain)
-    , private_key_()
-    , public_key_()
-    , to_node_([&] {
+    const api::session::Endpoints& endpoints) noexcept
+    : to_node_([&] {
         auto out = zmq.Internal().RawSocket(
             opentxs::network::zeromq::socket::Type::Push);
         const auto rc =
@@ -76,8 +69,24 @@ OTDHT::OTDHT(
 
         return out;
     }())
+    , private_key_()
+    , public_key_()
+    , init_(false)
 {
-    load_config(api);
+}
+}  // namespace opentxs::api::network::implementation
+
+namespace opentxs::api::network::implementation
+{
+OTDHT::OTDHT(
+    const api::internal::Session& api,
+    const opentxs::network::zeromq::Context& zmq,
+    const api::session::Endpoints& endpoints,
+    const api::network::Blockchain& blockchain) noexcept
+    : api_(api)
+    , blockchain_(blockchain)
+    , data_(zmq, endpoints)
+{
 }
 
 auto OTDHT::AddPeer(std::string_view endpoint) const noexcept -> bool
@@ -91,9 +100,8 @@ auto OTDHT::AddPeer(std::string_view endpoint) const noexcept -> bool
     }
 }
 
-auto OTDHT::create_config(
-    const api::Session& api,
-    const std::filesystem::path& path) noexcept -> void
+auto OTDHT::create_config(const std::filesystem::path& path, Data& data)
+    const noexcept -> void
 {
     static_assert(41_uz == encoded_buffer_size_);
     auto bufPublic = std::array<char, encoded_buffer_size_>{};
@@ -112,19 +120,19 @@ auto OTDHT::create_config(
         boost::json::string_view{bufPublic.data(), encoded_key_size_};
     const auto seckeyJson =
         boost::json::string_view{bufSecret.data(), encoded_key_size_};
-    public_key_.set_value([&] {
-        auto out = decltype(public_key_)::value_type{};
+    data.public_key_.emplace([&] {
+        auto out = decltype(data.public_key_)::value_type{};
         const auto rc =
-            api.Crypto().Encode().Z85Decode(pubkey, out.WriteInto());
+            api_.Crypto().Encode().Z85Decode(pubkey, out.WriteInto());
 
         assert_true(rc);
 
         return out;
     }());
-    private_key_.set_value([&] {
-        auto out = api.Factory().Secret(key_size_);
+    data.private_key_.emplace([&] {
+        auto out = api_.Factory().Secret(key_size_);
         const auto rc =
-            api.Crypto().Encode().Z85Decode(seckey, out.WriteInto());
+            api_.Crypto().Encode().Z85Decode(seckey, out.WriteInto());
 
         assert_true(rc);
 
@@ -140,6 +148,11 @@ auto OTDHT::create_config(
     write_config(json, path);
 }
 
+auto OTDHT::CurvePublicKey() const noexcept -> ReadView
+{
+    return get_data()->public_key_->Bytes();
+}
+
 auto OTDHT::DeletePeer(std::string_view endpoint) const noexcept -> bool
 {
     if (api_.GetOptions().LoopbackDHT()) {
@@ -149,6 +162,18 @@ auto OTDHT::DeletePeer(std::string_view endpoint) const noexcept -> bool
 
         return blockchain_.Internal().DeleteSyncServer(endpoint);
     }
+}
+
+auto OTDHT::get_data() const noexcept -> Guarded::handle
+{
+    auto handle = data_.lock();
+    auto& data = *handle;
+
+    if (false == data.init_) { load_config(data); }
+
+    assert_true(data.init_);
+
+    return handle;
 }
 
 auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
@@ -166,14 +191,14 @@ auto OTDHT::KnownPeers(alloc::Default alloc) const noexcept -> Endpoints
     }
 }
 
-auto OTDHT::load_config(const api::Session& api) noexcept -> void
+auto OTDHT::load_config(Data& data) const noexcept -> void
 {
     const auto path = [&] {
         auto out = std::filesystem::path{};
-        const auto& legacy = api.Internal().Legacy();
-        const auto base = legacy.ClientDataFolder(api.Instance());
-        legacy.AppendFile(out, base, "otdht.json");
-        const auto rc = legacy.BuildFilePath(out);
+        const auto& paths = api_.Paths();
+        const auto base = paths.ClientDataFolder(api_.Instance());
+        paths.AppendFile(out, base, "otdht.json");
+        const auto rc = paths.BuildFilePath(out);
 
         assert_true(rc);
 
@@ -182,16 +207,17 @@ auto OTDHT::load_config(const api::Session& api) noexcept -> void
 
     if (std::filesystem::exists(path)) {
         LogConsole()("loading otdht config from ")(path).Flush();
-        read_config(api, path);
+        read_config(path, data);
     } else {
         LogConsole()("creating new otdht config at ")(path).Flush();
-        create_config(api, path);
+        create_config(path, data);
     }
+
+    data.init_ = true;
 }
 
-auto OTDHT::read_config(
-    const api::Session& api,
-    const std::filesystem::path& path) noexcept -> void
+auto OTDHT::read_config(const std::filesystem::path& path, Data& data)
+    const noexcept -> void
 {
     try {
         const auto json = [&] {
@@ -242,18 +268,18 @@ auto OTDHT::read_config(
             assert_true(rc);
         }
 
-        public_key_.set_value([&] {
-            auto out = decltype(public_key_)::value_type{};
-            const auto rc = api.Crypto().Encode().Z85Decode(
+        data.public_key_.emplace([&] {
+            auto out = decltype(data.public_key_)::value_type{};
+            const auto rc = api_.Crypto().Encode().Z85Decode(
                 {bufPublic.data(), encoded_key_size_}, out.WriteInto());
 
             assert_true(rc);
 
             return out;
         }());
-        private_key_.set_value([&] {
-            auto out = api.Factory().Secret(key_size_);
-            const auto rc = api.Crypto().Encode().Z85Decode(
+        data.private_key_.emplace([&] {
+            auto out = api_.Factory().Secret(key_size_);
+            const auto rc = api_.Crypto().Encode().Z85Decode(
                 {bufSecret.data(), encoded_key_size_}, out.WriteInto());
 
             assert_true(rc);
@@ -265,8 +291,11 @@ auto OTDHT::read_config(
     }
 }
 
-auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
+auto OTDHT::Start(std::shared_ptr<const api::internal::Session> api) noexcept
+    -> void
 {
+    auto handle = get_data();
+    const auto& data = *handle;
     const auto& options = api_.GetOptions();
 
     if (false == options.LoopbackDHT()) {
@@ -304,7 +333,7 @@ auto OTDHT::Start(std::shared_ptr<const api::Session> api) noexcept -> void
     }
 
     opentxs::network::otdht::Node{
-        api_, public_key_.get().Bytes(), private_key_.get()}
+        api_.Self(), data.public_key_->Bytes(), *data.private_key_}
         .Init(api);
 }
 
@@ -314,7 +343,7 @@ auto OTDHT::StartListener(
     std::string_view updateEndpoint,
     std::string_view publicUpdateEndpoint) const noexcept -> bool
 {
-    return to_node_.lock()->SendDeferred([&] {
+    return get_data()->to_node_.SendDeferred([&] {
         using Job = opentxs::network::otdht::NodeJob;
         auto out = MakeWork(Job::add_listener);
         out.AddFrame(syncEndpoint.data(), syncEndpoint.size());

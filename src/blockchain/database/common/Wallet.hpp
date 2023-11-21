@@ -33,7 +33,6 @@ class Session;
 
 namespace blockchain
 {
-
 namespace database
 {
 namespace common

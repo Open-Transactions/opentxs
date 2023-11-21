@@ -6,18 +6,19 @@
 #include "api/session/Crypto.hpp"  // IWYU pragma: associated
 
 #include "internal/api/crypto/Factory.hpp"
-#include "internal/api/session/Factory.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
 auto SessionCryptoAPI(
     api::Crypto& parent,
-    const api::Session& session,
+    const api::internal::Session& session,
     const api::session::Endpoints& endpoints,
     const api::session::Factory& factory,
     const api::session::Storage& storage,
@@ -35,7 +36,7 @@ namespace opentxs::api::session::imp
 {
 Crypto::Crypto(
     api::Crypto& parent,
-    const api::Session& session,
+    const api::internal::Session& session,
     const api::session::Endpoints& endpoints,
     const api::session::Factory& factory,
     const api::session::Storage& storage,
@@ -44,8 +45,8 @@ Crypto::Crypto(
     , blank_blockchain_(factory)
     , blockchain_()
     , parent_(parent.Internal())
-    , asymmetric_(factory.InternalSession().Asymmetric())
-    , symmetric_(factory.InternalSession().Symmetric())
+    , asymmetric_(factory.Internal().Session().Asymmetric())
+    , symmetric_(factory.Internal().Session().Symmetric())
     , seed_p_(factory::SeedAPI(
           session,
           endpoints,

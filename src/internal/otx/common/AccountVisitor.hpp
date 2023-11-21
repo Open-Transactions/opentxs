@@ -18,6 +18,7 @@ namespace session
 class Wallet;
 }  // namespace session
 }  // namespace api
+
 class Account;
 class PasswordPrompt;
 }  // namespace opentxs

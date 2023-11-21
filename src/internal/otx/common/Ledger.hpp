@@ -27,10 +27,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -273,7 +270,7 @@ protected:
                    // ledger saves its contents
 
 private:  // Private prevents erroneous use by other classes.
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     using ot_super = OTTransactionType;
 

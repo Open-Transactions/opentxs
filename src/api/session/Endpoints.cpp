@@ -13,8 +13,8 @@
 #include <span>
 #include <utility>
 
-#include "internal/api/session/Factory.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
+#include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"

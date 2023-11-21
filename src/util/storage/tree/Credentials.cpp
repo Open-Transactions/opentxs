@@ -14,7 +14,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -22,6 +21,7 @@
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"

@@ -17,7 +17,6 @@
 
 #include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"

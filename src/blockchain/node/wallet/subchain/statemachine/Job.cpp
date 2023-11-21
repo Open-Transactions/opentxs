@@ -23,10 +23,11 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -130,7 +131,7 @@ Job::Job(
     , parent_p_(parent)
     , api_p_(parent_p_->api_p_)
     , node_p_(parent_p_->node_p_)
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , parent_(*parent_p_)
     , reorg_(parent_.GetReorg().GetSlave(pipeline_, name_, alloc))

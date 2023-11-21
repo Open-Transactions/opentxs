@@ -5,8 +5,8 @@
 
 #include "util/NullCallback.hpp"  // IWYU pragma: associated
 
-#include "2_Factory.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/internal.factory.hpp"
 
 namespace opentxs
 {

@@ -10,7 +10,6 @@
 #include <thread>
 #include <utility>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/util/Mutex.hpp"
@@ -19,6 +18,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"

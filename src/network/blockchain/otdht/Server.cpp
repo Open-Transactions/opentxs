@@ -22,9 +22,9 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -81,7 +81,7 @@ auto Server::Shared::Best() const noexcept
 namespace opentxs::network::blockchain::otdht
 {
 Server::Server(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
     network::zeromq::BatchID batchID,
     allocator_type alloc) noexcept

@@ -16,7 +16,6 @@
 #include <sstream>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/StringXML.hpp"
@@ -33,9 +32,11 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -1075,7 +1076,7 @@ auto OTScriptable::VerifyPartyAuthorization(
     // the original signature, no matter WHO is authorized now. Otherwise your
     // entire contract falls apart.
 
-    auto pPartySignedCopy{api_.Factory().InternalSession().Scriptable(
+    auto pPartySignedCopy{api_.Factory().Internal().Session().Scriptable(
         theParty.GetMySignedCopy())};
 
     if (false == bool(pPartySignedCopy)) {
@@ -1261,8 +1262,8 @@ auto OTScriptable::VerifyNymAsAgent(
     // the original signature, no matter WHO is authorized now. Otherwise your
     // entire contract falls apart.
 
-    auto pPartySignedCopy{
-        api_.Factory().InternalSession().Scriptable(pParty->GetMySignedCopy())};
+    auto pPartySignedCopy{api_.Factory().Internal().Session().Scriptable(
+        pParty->GetMySignedCopy())};
 
     if (false == bool(pPartySignedCopy)) {
         LogError()()("Error loading party's (")(pParty->GetPartyName())(
@@ -1831,8 +1832,9 @@ auto OTScriptable::VerifyThisAgainstAllPartiesSignedCopies() -> bool
         assert_false(nullptr == pParty);
 
         if (pParty->GetMySignedCopy().Exists()) {
-            auto pPartySignedCopy{api_.Factory().InternalSession().Scriptable(
-                pParty->GetMySignedCopy())};
+            auto pPartySignedCopy{
+                api_.Factory().Internal().Session().Scriptable(
+                    pParty->GetMySignedCopy())};
 
             if (false == bool(pPartySignedCopy)) {
                 LogError()()("Error loading party's (")(

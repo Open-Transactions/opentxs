@@ -24,9 +24,9 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"

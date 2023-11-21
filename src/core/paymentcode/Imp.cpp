@@ -22,7 +22,6 @@
 #include <utility>
 
 #include "core/paymentcode/Preimage.hpp"
-#include "internal/api/FactoryAPI.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
@@ -37,6 +36,8 @@
 #include "internal/serialization/protobuf/verify/PaymentCode.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -44,7 +45,6 @@
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"

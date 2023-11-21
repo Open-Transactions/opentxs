@@ -39,14 +39,10 @@
 #include <tuple>
 #include <type_traits>
 
-#include "2_Factory.hpp"
 #include "interface/rpc/RPC.hpp"
 #include "interface/rpc/response/Invalid.hpp"
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Core.hpp"
 #include "internal/core/Factory.hpp"
@@ -80,19 +76,22 @@
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Contact.hpp"
@@ -114,6 +113,7 @@
 #include "opentxs/interface/rpc/ResponseCode.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/interface/rpc/response/Base.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -304,7 +304,8 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                     }
 
                     payment.reset(client.Factory()
-                                      .InternalSession()
+                                      .Internal()
+                                      .Session()
                                       .Payment(*cheque, reason)
                                       .release());
                 } break;
@@ -365,7 +366,7 @@ auto RPC::add_claim(const proto::RPCCommand& command) const
 
     for (const auto& addclaim : command.claim()) {
         const auto& contactitem = addclaim.item();
-        auto claim = session.Factory().InternalSession().Claim(
+        auto claim = session.Factory().Internal().Session().Claim(
             nymdata.Nym().ID(), translate(addclaim.sectiontype()), contactitem);
 
         for (const auto& attr : contactitem.attribute()) {
@@ -671,7 +672,7 @@ auto RPC::create_nym(const proto::RPCCommand& command) const
 
         for (const auto& addclaim : createnym.claims()) {
             const auto& contactitem = addclaim.item();
-            auto claim = client.Factory().InternalSession().Claim(
+            auto claim = client.Factory().Internal().Session().Claim(
                 nymdata.Nym().ID(),
                 translate(addclaim.sectiontype()),
                 contactitem);
@@ -849,7 +850,7 @@ auto RPC::evaluate_transaction_reply(
     if (transaction) {
         if (const auto sLedger = String::Factory(reply.payload_);
             sLedger->Exists()) {
-            if (auto ledger{api.Factory().InternalSession().Ledger(
+            if (auto ledger{api.Factory().Internal().Session().Ledger(
                     nymID, accountID, notaryID)};
                 ledger->LoadContractFromString(sLedger)) {
                 if (ledger->GetTransactionCount() > 0) {
@@ -1302,7 +1303,8 @@ auto RPC::immediate_create_account(
     const identifier::UnitDefinition& unit) const -> bool
 {
     const auto registered =
-        client.InternalClient().OTAPI().IsNym_RegisteredAtServer(owner, notary);
+        client.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
+            owner, notary);
 
     try {
         client.Wallet().Internal().UnitDefinition(unit);
@@ -1319,7 +1321,7 @@ auto RPC::immediate_register_issuer_account(
     const identifier::Nym& owner,
     const identifier::Notary& notary) const -> bool
 {
-    return client.InternalClient().OTAPI().IsNym_RegisteredAtServer(
+    return client.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
         owner, notary);
 }
 
@@ -1880,8 +1882,9 @@ auto RPC::register_nym(const proto::RPCCommand& command) const
     CHECK_OWNER();
 
     const auto notaryID = ot_.Factory().NotaryIDFromBase58(command.notary());
-    auto registered = client.InternalClient().OTAPI().IsNym_RegisteredAtServer(
-        ownerID, notaryID);
+    auto registered =
+        client.Internal().asClient().OTAPI().IsNym_RegisteredAtServer(
+            ownerID, notaryID);
 
     if (registered) {
         add_output_status(output, proto::RPCRESPONSE_UNNECESSARY);

@@ -16,6 +16,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -37,7 +42,8 @@ public:
     {
         return pmr::make_deleter(this);
     }
-    auto Init(std::shared_ptr<const api::Session> api) noexcept -> void;
+    auto Init(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void;
 
     Node(
         const api::Session& api,

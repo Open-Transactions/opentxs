@@ -13,17 +13,17 @@
 #include <string>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/contract/peer/Types.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/PeerRequest.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
@@ -130,7 +130,7 @@ auto Implementation::calculate_id(
     const api::Session& api,
     const serialized_type& contract) noexcept -> identifier_type
 {
-    return api.Factory().InternalSession().IdentifierFromPreimage(contract);
+    return api.Factory().Internal().Session().IdentifierFromPreimage(contract);
 }
 
 auto Implementation::calculate_id() const noexcept -> identifier_type

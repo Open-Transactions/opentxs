@@ -15,11 +15,7 @@
 #include <string_view>
 #include <utility>
 
-#include "2_Factory.hpp"
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
@@ -32,6 +28,10 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
@@ -116,7 +116,7 @@ auto Basic::load_unit(
         return api.Wallet().Internal().UnitDefinition(
             api.Factory().UnitIDFromBase58(id));
     } catch (...) {
-        return api.Factory().InternalSession().UnitDefinition();
+        return api.Factory().Internal().Session().UnitDefinition();
     }
 }
 
@@ -170,9 +170,9 @@ void Basic::import_server_contract(
 void Basic::init()
 {
     client_1_.OTX().DisableAutoaccept();
-    client_1_.InternalClient().Pair().Stop().get();
+    client_1_.Internal().asClient().Pair().Stop().get();
     client_2_.OTX().DisableAutoaccept();
-    client_2_.InternalClient().Pair().Stop().get();
+    client_2_.Internal().asClient().Pair().Stop().get();
     const_cast<ot::crypto::SeedID&>(SeedA_) = client_1_.Crypto().Seed().ImportSeed(
         client_1_.Factory().SecretFromText(
             "spike nominee miss inquiry fee nothing belt list other daughter leave valley twelve gossip paper"sv),
@@ -293,6 +293,13 @@ auto Basic::find_user_account() -> ot::identifier::Account
 auto Basic::find_second_user_account() -> ot::identifier::Account
 {
     return client_2_.Factory().AccountIDFromBase58(bob_account_2_id_);
+}
+
+auto Basic::payment_from_cheque(
+    const ot::api::Session& api,
+    const ot::String& cheque) noexcept -> std::shared_ptr<ot::OTPayment>
+{
+    return api.Factory().Internal().Session().Payment(cheque);
 }
 
 void Basic::receive_reply(
@@ -945,7 +952,7 @@ void Basic::verify_state_post(
     EXPECT_EQ(messageSuccess, message->success_);
 
     std::unique_ptr<ot::Ledger> nymbox{
-        client.InternalClient().OTAPI().LoadNymbox(
+        client.Internal().asClient().OTAPI().LoadNymbox(
             server_1_id_, serverContext.Signer()->ID())};
 
     ASSERT_TRUE(nymbox);
@@ -960,4 +967,26 @@ void Basic::verify_state_post(
     EXPECT_FALSE(serverContext.StaleNym());
 }
 
+auto Basic::write_cheque(
+    const ot::api::session::Client& api,
+    const ot::identifier::Notary& NOTARY_ID,
+    const ot::Amount& chequeAmount,
+    const ot::Time& VALID_FROM,
+    const ot::Time& VALID_TO,
+    const ot::identifier::Account& SENDER_accountID,
+    const ot::identifier::Nym& SENDER_NYM_ID,
+    const ot::String& chequeMemo,
+    const ot::identifier::Nym& pRECIPIENT_NYM_ID) -> std::unique_ptr<ot::Cheque>
+{
+    return std::unique_ptr<ot::Cheque>{
+        api.Internal().asClient().OTAPI().WriteCheque(
+            NOTARY_ID,
+            chequeAmount,
+            VALID_FROM,
+            VALID_TO,
+            SENDER_accountID,
+            SENDER_NYM_ID,
+            chequeMemo,
+            pRECIPIENT_NYM_ID)};
+}
 }  // namespace ottest

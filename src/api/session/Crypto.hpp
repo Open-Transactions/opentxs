@@ -36,15 +36,18 @@ class Symmetric;
 class Util;
 }  // namespace crypto
 
+namespace internal
+{
+class Factory;
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Endpoints;
 class Factory;
 class Storage;
 }  // namespace session
-
-class Factory;
-class Session;
 }  // namespace api
 
 namespace crypto
@@ -154,7 +157,8 @@ public:
 
     auto Cleanup() noexcept -> void final;
     using internal::Crypto::Init;
-    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    auto Init(
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void final
     {
         parent_.Init(factory);
@@ -166,7 +170,7 @@ public:
 
     Crypto(
         api::Crypto& parent,
-        const api::Session& session,
+        const api::internal::Session& session,
         const api::session::Endpoints& endpoints,
         const api::session::Factory& factory,
         const api::session::Storage& storage,

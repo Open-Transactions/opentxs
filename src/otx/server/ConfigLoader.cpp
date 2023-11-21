@@ -9,11 +9,11 @@
 #include <cstdint>
 #include <exception>
 
-#include "internal/api/Settings.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Settings.hpp"
+#include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/server/ServerSettings.hpp"

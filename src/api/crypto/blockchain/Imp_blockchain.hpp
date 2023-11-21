@@ -39,15 +39,18 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
+namespace internal
+{
+class Paths;
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Activity;
 class Client;
 class Contacts;
 }  // namespace session
-
-class Legacy;
-class Session;
 }  // namespace api
 
 namespace identifier
@@ -133,7 +136,8 @@ struct BlockchainImp final : public Blockchain::Imp {
         const Blockchain::Subchain subchain,
         const opentxs::blockchain::block::Position& progress) const noexcept
         -> void final;
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto Start(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void final;
     auto Unconfirm(
         const Blockchain::Key key,
         const Txid& tx,
@@ -147,7 +151,7 @@ struct BlockchainImp final : public Blockchain::Imp {
         const api::session::Client& api,
         const api::session::Activity& activity,
         const api::session::Contacts& contacts,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::string_view dataFolder,
         const Options& args,
         api::crypto::Blockchain& parent) noexcept;

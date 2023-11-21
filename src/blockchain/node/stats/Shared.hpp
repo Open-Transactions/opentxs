@@ -19,7 +19,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
@@ -51,7 +54,7 @@ public:
     auto SetPeerCount(Type chain, std::size_t count) noexcept -> void;
     auto SetSyncTip(Type chain, block::Position tip) noexcept -> void;
     auto Start(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Shared> me) noexcept -> void;
 
     Shared() noexcept;

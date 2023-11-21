@@ -14,7 +14,6 @@
 
 #include "blockchain/node/Mempool.hpp"
 #include "internal/api/network/Blockchain.hpp"
-#include "internal/api/session/Client.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/database/Database.hpp"
@@ -31,9 +30,11 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -311,7 +312,7 @@ auto Shared::Init(std::shared_ptr<node::Manager> self) noexcept -> void
     assert_false(nullptr == self);
 
     header_.Internal().Init();
-    auto api = api_.InternalClient().SharedClient();
+    auto api = api_.Internal().asClient().SharedClient();
     opentxs::network::blockchain::OTDHT{api, self}.Init();
     block_.Start(api, self);
     filter_->Internal().Init(api, self);

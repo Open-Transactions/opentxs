@@ -25,7 +25,11 @@ constexpr auto STORAGE_CONFIG_FS_ENCRYPTED_BACKUP_DIRECTORY_KEY =
 
 namespace api
 {
-class Legacy;
+namespace internal
+{
+class Paths;
+}  // namespace internal
+
 class Settings;
 }  // namespace api
 
@@ -68,7 +72,7 @@ public:
     UnallocatedCString lmdb_root_key_;
 
     Config(
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const api::Settings& options,
         const Options& cli,
         const std::filesystem::path& dataFolder) noexcept;

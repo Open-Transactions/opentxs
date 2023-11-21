@@ -15,9 +15,10 @@
 #include <span>
 #include <utility>
 
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "ottest/fixtures/blockchain/BlockHeaderListener.hpp"
 #include "ottest/fixtures/blockchain/BlockListener.hpp"
 #include "ottest/fixtures/blockchain/BlockchainStartup.hpp"
@@ -553,6 +554,26 @@ auto Regtest_fixture_base::MaturationInterval() noexcept
 }
 
 auto Regtest_fixture_base::Mine(
+    const ot::api::Session& api,
+    const ot::blockchain::block::Header& previous,
+    ot::blockchain::block::Transaction generationTransaction,
+    std::uint32_t nBits,
+    std::span<ot::blockchain::block::Transaction> extraTransactions,
+    std::int32_t version,
+    std::function<bool()> abort,
+    ot::alloc::Default alloc) noexcept -> ot::blockchain::block::Block
+{
+    return api.Factory().Internal().Session().BitcoinBlock(
+        previous,
+        generationTransaction,
+        nBits,
+        extraTransactions,
+        version,
+        abort,
+        alloc);
+}
+
+auto Regtest_fixture_base::Mine(
     const Height ancestor,
     const std::size_t count) noexcept -> bool
 {
@@ -616,7 +637,7 @@ auto Regtest_fixture_base::Mine(
         opentxs::assert_true(mineHeight > 0);
 
         auto tx = gen(mineHeight);
-        const auto block = miner_.Factory().InternalSession().BitcoinBlock(
+        const auto block = miner_.Factory().Internal().Session().BitcoinBlock(
             previousHeader,
             tx,
             previousHeader.nBits(),

@@ -29,7 +29,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Factory;
+}  // namespace internal
+
 class Settings;
 }  // namespace api
 
@@ -39,7 +43,6 @@ namespace blank
 {
 class EcdsaProvider;
 }  // namespace blank
-
 }  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -71,7 +74,8 @@ public:
     auto hasOpenSSL() const noexcept -> bool final;
     auto hasSodium() const noexcept -> bool final;
 
-    auto Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+    auto Init(
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void final;
 
     Crypto(const api::Settings& settings) noexcept;

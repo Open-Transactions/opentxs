@@ -26,14 +26,9 @@
 #include <stdexcept>
 
 #include "core/StateMachine.hpp"
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/Legacy.hpp"
 #include "internal/api/session/Activity.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/api/session/Types.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -78,16 +73,21 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -261,13 +261,13 @@ auto Server::accept_entire_nymbox(
 
     TransactionNumber lStoredTransactionNumber{0};
     auto processLedger =
-        api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, server_id_);
 
     assert_false(nullptr == processLedger);
 
     processLedger->GenerateLedger(nymID, server_id_, ledgerType::message);
     std::shared_ptr<OTTransaction> acceptTransaction{
-        api_.Factory().InternalSession().Transaction(
+        api_.Factory().Internal().Session().Transaction(
             nymID,
             nym_to_account(nymID),
             server_id_,
@@ -590,7 +590,7 @@ auto Server::add_item_to_payment_inbox(
     // After all, if the notary had created it (as normally happens) then
     // that's the Txn# that would have been on it anyway.
     std::shared_ptr<OTTransaction> transaction{
-        api_.Factory().InternalSession().Transaction(
+        api_.Factory().Internal().Session().Transaction(
             *paymentInbox,
             transactionType::instrumentNotice,
             originType::not_applicable,
@@ -617,7 +617,7 @@ auto Server::add_item_to_workflow(
     assert_false(nullptr == Signer());
 
     const auto& nym = *Signer();
-    auto message = api_.Factory().InternalSession().Message();
+    auto message = api_.Factory().Internal().Session().Message();
 
     assert_false(nullptr == message);
 
@@ -634,7 +634,7 @@ auto Server::add_item_to_workflow(
 
     try {
         auto envelope =
-            api_.Factory().InternalSession().Envelope(message->payload_);
+            api_.Factory().Internal().Session().Envelope(message->payload_);
         const auto decrypted =
             envelope->Open(nym, plaintext->WriteInto(), reason);
 
@@ -649,7 +649,7 @@ auto Server::add_item_to_workflow(
         return false;
     }
 
-    auto payment = api_.Factory().InternalSession().Payment(plaintext);
+    auto payment = api_.Factory().Internal().Session().Payment(plaintext);
 
     if (false == bool(payment)) {
         LogError()()("Invalid payment").Flush();
@@ -661,7 +661,7 @@ auto Server::add_item_to_workflow(
 
     if (payment->IsCancelledCheque(reason)) { return false; }
 
-    auto pCheque = api_.Factory().InternalSession().Cheque();
+    auto pCheque = api_.Factory().Internal().Session().Cheque();
 
     assert_false(nullptr == pCheque);
 
@@ -987,7 +987,7 @@ auto Server::extract_box_receipt(
     }
 
     std::shared_ptr<OTTransactionType> transaction{
-        api_.Factory().InternalSession().Transaction(serialized)};
+        api_.Factory().Internal().Session().Transaction(serialized)};
 
     if (false == bool(transaction)) {
         LogError()()("Failed to instantiate transaction").Flush();
@@ -1039,8 +1039,8 @@ auto Server::extract_ledger(
 
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
-    auto output =
-        api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
+    auto output = api_.Factory().Internal().Session().Ledger(
+        nymID, accountID, server_id_);
 
     assert_false(nullptr == output);
 
@@ -1066,7 +1066,7 @@ auto Server::extract_message(
     const Armored& armored,
     const identity::Nym& signer) const -> std::unique_ptr<Message>
 {
-    auto output = api_.Factory().InternalSession().Message();
+    auto output = api_.Factory().Internal().Session().Message();
 
     assert_false(nullptr == output);
 
@@ -1116,7 +1116,8 @@ auto Server::extract_original_item(const Item& response) const
         return {};
     }
 
-    auto transaction = api_.Factory().InternalSession().Transaction(serialized);
+    auto transaction =
+        api_.Factory().Internal().Session().Transaction(serialized);
 
     if (false == bool(transaction)) {
         LogError()()("Unable to instantiate serialized item").Flush();
@@ -1163,7 +1164,7 @@ auto Server::extract_payment_instrument_from_notice(
             return nullptr;
         }
         // --------------------
-        auto pMsg{api.Factory().InternalSession().Message()};
+        auto pMsg{api.Factory().Internal().Session().Message()};
         if (false == bool(pMsg)) {
             LogError()()(
                 "Null: Assert while allocating memory for an OTMessage!")
@@ -1189,7 +1190,7 @@ auto Server::extract_payment_instrument_from_notice(
         //
         try {
             auto theEnvelope =
-                api_.Factory().InternalSession().Envelope(pMsg->payload_);
+                api_.Factory().Internal().Session().Envelope(pMsg->payload_);
             auto strEnvelopeContents = String::Factory();
 
             // Decrypt the Envelope.
@@ -1208,7 +1209,7 @@ auto Server::extract_payment_instrument_from_notice(
                 // strEnvelopeContents contains a PURSE or CHEQUE
                 // (etc) and not specifically a generic "PAYMENT".
                 //
-                auto pPayment{api.Factory().InternalSession().Payment(
+                auto pPayment{api.Factory().Internal().Session().Payment(
                     strEnvelopeContents)};
                 if (false == bool(pPayment) || !pPayment->IsValid()) {
                     LogConsole()()(
@@ -1228,7 +1229,7 @@ auto Server::extract_payment_instrument_from_notice(
         }
     } else if (transactionType::notice == pTransaction->GetType()) {
         auto strNotice = String::Factory(*pTransaction);
-        auto pPayment{api.Factory().InternalSession().Payment(strNotice)};
+        auto pPayment{api.Factory().Internal().Session().Payment(strNotice)};
 
         if (false == bool(pPayment) || !pPayment->IsValid()) {
             LogConsole()()("Failed: the notice is invalid. Contents: ")(
@@ -1278,7 +1279,8 @@ auto Server::extract_transfer_pending(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    auto transfer = api_.Factory().InternalSession().Item(serializedTransfer);
+    auto transfer =
+        api_.Factory().Internal().Session().Item(serializedTransfer);
 
     if (false == bool(transfer)) {
         LogError()()("Unable to instantiate transfer item").Flush();
@@ -1308,7 +1310,7 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
     }
 
     const auto acceptPending =
-        api_.Factory().InternalSession().Item(serializedAcceptPending);
+        api_.Factory().Internal().Session().Item(serializedAcceptPending);
 
     if (false == bool(acceptPending)) {
         LogError()()("Unable to instantiate accept pending item").Flush();
@@ -1331,7 +1333,7 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    auto pending = api_.Factory().InternalSession().Transaction(
+    auto pending = api_.Factory().Internal().Session().Transaction(
         receipt.GetNymID(),
         receipt.GetRealAccountID(),
         receipt.GetRealNotaryID());
@@ -1365,7 +1367,8 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    auto transfer = api_.Factory().InternalSession().Item(serializedTransfer);
+    auto transfer =
+        api_.Factory().Internal().Session().Item(serializedTransfer);
 
     if (false == bool(transfer)) {
         LogError()()("Unable to instantiate transfer item").Flush();
@@ -1834,7 +1837,7 @@ void Server::init_sockets(Data& data)
 auto Server::initialize_server_command(const MessageType type) const
     -> std::unique_ptr<Message>
 {
-    auto output = api_.Factory().InternalSession().Message();
+    auto output = api_.Factory().Internal().Session().Message();
 
     assert_false(nullptr == output);
 
@@ -1893,7 +1896,7 @@ auto Server::initialize_server_command(
     -> std::pair<RequestNumber, std::unique_ptr<Message>>
 {
     std::pair<RequestNumber, std::unique_ptr<Message>> output{
-        0, api_.Factory().InternalSession().Message()};
+        0, api_.Factory().Internal().Session().Message()};
     auto& [requestNumber, message] = output;
 
     assert_false(nullptr == message);
@@ -1957,7 +1960,7 @@ auto Server::instantiate_message(
 {
     if (serialized.empty()) { return {}; }
 
-    auto output = api.Factory().InternalSession().Message();
+    auto output = api.Factory().Internal().Session().Message();
 
     assert_false(nullptr == output);
 
@@ -2006,7 +2009,7 @@ auto Server::make_accept_item(
     OTTransaction& acceptTransaction,
     const TransactionNumbers& accept) const -> const Item&
 {
-    std::shared_ptr<Item> acceptItem{api_.Factory().InternalSession().Item(
+    std::shared_ptr<Item> acceptItem{api_.Factory().Internal().Session().Item(
         acceptTransaction, type, identifier::Account{})};
 
     assert_false(nullptr == acceptItem);
@@ -2031,15 +2034,15 @@ auto Server::load_account_inbox(const identifier::Account& accountID) const
 
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
-    auto inbox =
-        api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
+    auto inbox = api_.Factory().Internal().Session().Ledger(
+        nymID, accountID, server_id_);
 
     assert_false(nullptr == inbox);
 
     bool output = OTDB::Exists(
         api_,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Inbox(),
+        api_.Internal().Paths().Inbox(),
         server_id_.asBase58(api_.Crypto()).c_str(),
         accountID.asBase58(api_.Crypto()).c_str(),
         "");
@@ -2065,15 +2068,15 @@ auto Server::load_or_create_account_recordbox(
 
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
-    auto recordBox =
-        api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
+    auto recordBox = api_.Factory().Internal().Session().Ledger(
+        nymID, accountID, server_id_);
 
     assert_false(nullptr == recordBox);
 
     bool output = OTDB::Exists(
         api_,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().RecordBox(),
+        api_.Internal().Paths().RecordBox(),
         server_id_.asBase58(api_.Crypto()).c_str(),
         accountID.asBase58(api_.Crypto()).c_str(),
         "");
@@ -2115,14 +2118,14 @@ auto Server::load_or_create_payment_inbox(const PasswordPrompt& reason) const
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     auto paymentInbox =
-        api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, server_id_);
 
     assert_false(nullptr == paymentInbox);
 
     bool output = OTDB::Exists(
         api_,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().PaymentInbox(),
+        api_.Internal().Paths().PaymentInbox(),
         server_id_.asBase58(api_.Crypto()).c_str(),
         nymID.asBase58(api_.Crypto()).c_str(),
         "");
@@ -2171,7 +2174,7 @@ void Server::need_box_items(
     const PasswordPrompt& reason)
 {
     Lock messageLock(data.message_lock_);
-    auto nymbox{api_.Factory().InternalSession().Ledger(
+    auto nymbox{api_.Factory().Internal().Session().Ledger(
         Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
     assert_false(nullptr == nymbox);
@@ -2333,7 +2336,7 @@ auto Server::need_process_nymbox(
     const PasswordPrompt& reason) -> void
 {
     Lock messageLock(data.message_lock_);
-    auto nymbox{api_.Factory().InternalSession().Ledger(
+    auto nymbox{api_.Factory().Internal().Session().Ledger(
         Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
     assert_false(nullptr == nymbox);
@@ -2372,7 +2375,7 @@ auto Server::need_process_nymbox(
         return;
     }
 
-    auto message{api_.Factory().InternalSession().Message()};
+    auto message{api_.Factory().Internal().Session().Message()};
 
     assert_false(nullptr == message);
 
@@ -2714,15 +2717,15 @@ auto Server::process_accept_cron_receipt_reply(
     pServerItem->GetAttachment(strOffer);
     // contains updated trade.
     pServerItem->GetNote(strTrade);
-    auto theOffer = api_.Factory().InternalSession().Offer();
+    auto theOffer = api_.Factory().Internal().Session().Offer();
 
     assert_false(nullptr == theOffer);
 
-    auto theTrade = api_.Factory().InternalSession().Trade();
+    auto theTrade = api_.Factory().Internal().Session().Trade();
 
     assert_false(nullptr == theTrade);
 
-    api_.Factory().InternalSession().Trade();
+    api_.Factory().Internal().Session().Trade();
     bool bLoadOfferFromString = theOffer->LoadContractFromString(strOffer);
     bool bLoadTradeFromString = theTrade->LoadContractFromString(strTrade);
 
@@ -2808,7 +2811,7 @@ auto Server::process_accept_cron_receipt_reply(
         if (OTDB::Exists(
                 api_,
                 api_.DataFolder().string(),
-                api_.Internal().Legacy().Nym(),
+                api_.Internal().Paths().Nym(),
                 "trades",  // todo stop
                            // hardcoding.
                 server_id_.asBase58(api_.Crypto()).c_str(),
@@ -2817,7 +2820,7 @@ auto Server::process_accept_cron_receipt_reply(
                 api_,
                 OTDB::STORED_OBJ_TRADE_LIST_NYM,
                 api_.DataFolder().string(),
-                api_.Internal().Legacy().Nym(),
+                api_.Internal().Paths().Nym(),
                 "trades",  // todo stop
                 // hardcoding.
                 server_id_.asBase58(api_.Crypto()).c_str(),
@@ -2905,7 +2908,7 @@ auto Server::process_accept_cron_receipt_reply(
                          api_,
                          *pList,
                          api_.DataFolder().string(),
-                         api_.Internal().Legacy().Nym(),
+                         api_.Internal().Paths().Nym(),
                          "trades",  // todo stop hardcoding.
                          server_id_.asBase58(api_.Crypto()).c_str(),
                          strNymID->Get())) {
@@ -2960,7 +2963,7 @@ void Server::process_accept_item_receipt_reply(
     const auto& nymID = Signer()->ID();
     auto serializedOriginal = String::Factory();
     inboxTransaction.GetReferenceString(serializedOriginal);
-    auto pOriginalItem = api_.Factory().InternalSession().Item(
+    auto pOriginalItem = api_.Factory().Internal().Session().Item(
         serializedOriginal, server_id_, inboxTransaction.GetReferenceToNum());
 
     if (false == bool(pOriginalItem)) {
@@ -2980,7 +2983,7 @@ void Server::process_accept_item_receipt_reply(
         case itemType::depositCheque: {
             auto serialized = String::Factory();
             originalItem.GetAttachment(serialized);
-            auto cheque = api_.Factory().InternalSession().Cheque();
+            auto cheque = api_.Factory().Internal().Session().Cheque();
 
             assert_false(nullptr == cheque);
 
@@ -3006,7 +3009,7 @@ void Server::process_accept_item_receipt_reply(
             }
 
             const auto transferReceipt =
-                api_.Factory().InternalSession().Transaction(
+                api_.Factory().Internal().Session().Transaction(
                     remote_nym_->ID(), accountID, server_id_);
 
             assert_false(nullptr == transferReceipt);
@@ -3137,7 +3140,7 @@ auto Server::process_accept_pending_reply(
 
     assert_false(attachment->empty());
 
-    const auto pending = api_.Factory().InternalSession().Transaction(
+    const auto pending = api_.Factory().Internal().Session().Transaction(
         remote_nym_->ID(), accountID, server_id_);
 
     assert_false(nullptr == pending);
@@ -3199,7 +3202,8 @@ auto Server::process_account_data(
     if (false == bool(data.inbox_)) {
         data.inbox_.reset(
             api_.Factory()
-                .InternalSession()
+                .Internal()
+                .Session()
                 .Ledger(nymID, accountID, server_id_, ledgerType::inbox)
                 .release());
     }
@@ -3281,7 +3285,8 @@ auto Server::process_account_data(
     if (false == bool(data.outbox_)) {
         data.outbox_.reset(
             api_.Factory()
-                .InternalSession()
+                .Internal()
+                .Session()
                 .Ledger(nymID, accountID, server_id_, ledgerType::outbox)
                 .release());
     }
@@ -3392,7 +3397,8 @@ auto Server::process_box_item(
     }
 
     std::shared_ptr<OTTransactionType> base{
-        api_.Factory().InternalSession().Transaction(String::Factory(payload))};
+        api_.Factory().Internal().Session().Transaction(
+            String::Factory(payload))};
 
     if (false == bool(base)) {
         LogError()()("Invalid payload").Flush();
@@ -3446,7 +3452,7 @@ auto Server::process_get_nymbox_response(
     const auto& nymID = Signer()->ID();
     auto serialized = String::Factory(reply.payload_);
     auto nymbox =
-        api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, server_id_);
 
     assert_false(nullptr == nymbox);
 
@@ -3678,7 +3684,7 @@ auto Server::process_get_box_receipt_response(
 auto Server::process_get_market_list_response(const Message& reply) const
     -> bool
 {
-    auto data_file = api::Legacy::GetFilenameBin("market_data");
+    auto data_file = api::internal::Paths::GetFilenameBin("market_data");
 
     auto* pStorage = OTDB::GetDefaultStorage();
     assert_false(nullptr == pStorage);
@@ -3694,8 +3700,8 @@ auto Server::process_get_market_list_response(const Message& reply) const
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Market(),  // "markets"
-            reply.notary_id_->Get(),            // "markets/<notaryID>"
+            api_.Internal().Paths().Market(),  // "markets"
+            reply.notary_id_->Get(),           // "markets/<notaryID>"
             data_file,
             "");  // "markets/<notaryID>/market_data.bin"
         if (!success) {
@@ -3747,8 +3753,8 @@ auto Server::process_get_market_list_response(const Message& reply) const
         api_,
         *pMarketList,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Market(),  // "markets"
-        reply.notary_id_->Get(),            // "markets/<notaryID>"
+        api_.Internal().Paths().Market(),  // "markets"
+        reply.notary_id_->Get(),           // "markets/<notaryID>"
         data_file,
         "");  // "markets/<notaryID>/market_data.bin"
     if (!success) {
@@ -3765,7 +3771,7 @@ auto Server::process_get_market_offers_response(const Message& reply) const
 {
     const String& marketID = reply.nym_id2_;  // market ID stored here.
 
-    auto data_file = api::Legacy::GetFilenameBin(marketID.Get());
+    auto data_file = api::internal::Paths::GetFilenameBin(marketID.Get());
 
     auto* pStorage = OTDB::GetDefaultStorage();
     assert_false(nullptr == pStorage);
@@ -3781,10 +3787,10 @@ auto Server::process_get_market_offers_response(const Message& reply) const
         auto success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Market(),  // "markets"
-            reply.notary_id_->Get(),            // "markets/<notaryID>",
-            "offers",                           // "markets/<notaryID>/offers"
-                                                // todo stop hardcoding.
+            api_.Internal().Paths().Market(),  // "markets"
+            reply.notary_id_->Get(),           // "markets/<notaryID>",
+            "offers",                          // "markets/<notaryID>/offers"
+                                               // todo stop hardcoding.
             data_file);  // "markets/<notaryID>/offers/<marketID>.bin"
         if (!success) {
             LogError()()("Error erasing offers list from market folder: ")(
@@ -3832,10 +3838,10 @@ auto Server::process_get_market_offers_response(const Message& reply) const
         api_,
         *pOfferList,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Market(),  // "markets"
-        reply.notary_id_->Get(),            // "markets/<notaryID>",
-        "offers",                           // "markets/<notaryID>/offers"
-                                            // todo stop hardcoding.
+        api_.Internal().Paths().Market(),  // "markets"
+        reply.notary_id_->Get(),           // "markets/<notaryID>",
+        "offers",                          // "markets/<notaryID>/offers"
+                                           // todo stop hardcoding.
         data_file);  // "markets/<notaryID>/offers/<marketID>.bin"
     if (!success) {
         LogError()()("Error storing ")(data_file)(" to market folder.").Flush();
@@ -3848,7 +3854,7 @@ auto Server::process_get_market_recent_trades_response(
     const Message& reply) const -> bool
 {
     const String& marketID = reply.nym_id2_;  // market ID stored here.
-    auto data_file = api::Legacy::GetFilenameBin(marketID.Get());
+    auto data_file = api::internal::Paths::GetFilenameBin(marketID.Get());
 
     auto* pStorage = OTDB::GetDefaultStorage();
     assert_false(nullptr == pStorage);
@@ -3866,12 +3872,12 @@ auto Server::process_get_market_recent_trades_response(
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Market(),  // "markets"
-            reply.notary_id_->Get(),            // "markets/<notaryID>recent",
-                                                // //
-                                                // "markets/<notaryID>/recent"
-                                                // // todo stop
-                                                // hardcoding.
+            api_.Internal().Paths().Market(),  // "markets"
+            reply.notary_id_->Get(),           // "markets/<notaryID>recent",
+                                               // //
+                                               // "markets/<notaryID>/recent"
+                                               // // todo stop
+                                               // hardcoding.
             data_file,
             "");  // "markets/<notaryID>/recent/<marketID>.bin"
         if (!success) {
@@ -3923,10 +3929,10 @@ auto Server::process_get_market_recent_trades_response(
         api_,
         *pTradeList,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Market(),  // "markets"
-        reply.notary_id_->Get(),            // "markets/<notaryID>"
-        "recent",                           // "markets/<notaryID>/recent"
-                                            // todo stop hardcoding.
+        api_.Internal().Paths().Market(),  // "markets"
+        reply.notary_id_->Get(),           // "markets/<notaryID>"
+        "recent",                          // "markets/<notaryID>/recent"
+                                           // todo stop hardcoding.
         data_file);  // "markets/<notaryID>/recent/<marketID>.bin"
     if (!success) {
         LogError()()("Error storing ")(data_file)(" to market folder.").Flush();
@@ -3962,7 +3968,7 @@ auto Server::process_get_mint_response(const Message& reply) const -> bool
 auto Server::process_get_nym_market_offers_response(const Message& reply) const
     -> bool
 {
-    auto data_file = api::Legacy::GetFilenameBin(reply.nym_id_->Get());
+    auto data_file = api::internal::Paths::GetFilenameBin(reply.nym_id_->Get());
 
     auto* pStorage = OTDB::GetDefaultStorage();
     assert_false(nullptr == pStorage);
@@ -3979,10 +3985,10 @@ auto Server::process_get_nym_market_offers_response(const Message& reply) const
         bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Nym(),  // "nyms"
-            reply.notary_id_->Get(),         // "nyms/<notaryID>",
-            "offers",                        // "nyms/<notaryID>/offers"
-                                             // todo stop hardcoding.
+            api_.Internal().Paths().Nym(),  // "nyms"
+            reply.notary_id_->Get(),        // "nyms/<notaryID>",
+            "offers",                       // "nyms/<notaryID>/offers"
+                                            // todo stop hardcoding.
             data_file);  // "nyms/<notaryID>/offers/<NymID>.bin"
         if (!success) {
             LogError()()("Error erasing offers list from nyms "
@@ -4032,10 +4038,10 @@ auto Server::process_get_nym_market_offers_response(const Message& reply) const
         api_,
         *pOfferList,
         api_.DataFolder().string(),
-        api_.Internal().Legacy().Nym(),  // "nyms"
-        reply.notary_id_->Get(),         // "nyms/<notaryID>",
-        "offers",                        // "nyms/<notaryID>/offers",
-        data_file);                      // "nyms/<notaryID>/offers/<NymID>.bin"
+        api_.Internal().Paths().Nym(),  // "nyms"
+        reply.notary_id_->Get(),        // "nyms/<notaryID>",
+        "offers",                       // "nyms/<notaryID>/offers",
+        data_file);                     // "nyms/<notaryID>/offers/<NymID>.bin"
     if (!success) {
         LogError()()("Error storing ")(data_file)(" to nyms folder.").Flush();
     }
@@ -4069,7 +4075,7 @@ auto Server::process_incoming_message(
         const auto& nymID = Signer()->ID();
         auto serialized = String::Factory();
         receipt.GetReferenceString(serialized);
-        auto message = api_.Factory().InternalSession().Message();
+        auto message = api_.Factory().Internal().Session().Message();
 
         assert_false(nullptr == message);
 
@@ -4093,7 +4099,7 @@ auto Server::process_incoming_message(
             throw std::runtime_error{"recipient nym ID missing or invalid"};
         }
 
-        const auto pPeerObject = api_.Factory().InternalSession().PeerObject(
+        const auto pPeerObject = api_.Factory().Internal().Session().PeerObject(
             Signer(), message->payload_, reason);
 
         if (false == bool(pPeerObject)) {
@@ -4254,8 +4260,8 @@ auto Server::process_notarize_transaction_response(
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
     const auto& serverNym = *remote_nym_;
-    auto responseLedger =
-        api_.Factory().InternalSession().Ledger(nymID, accountID, server_id_);
+    auto responseLedger = api_.Factory().Internal().Session().Ledger(
+        nymID, accountID, server_id_);
 
     assert_false(nullptr == responseLedger);
 
@@ -4381,9 +4387,10 @@ auto Server::process_process_box_response(
 
     auto serialized = String::Factory();
     replyTransaction->SaveContractRaw(serialized);
-    auto filename = replyTransaction->GetSuccess()
-                        ? api::Legacy::GetFilenameSuccess(receiptID->Get())
-                        : api::Legacy::GetFilenameFail(receiptID->Get());
+    auto filename =
+        replyTransaction->GetSuccess()
+            ? api::internal::Paths::GetFilenameSuccess(receiptID->Get())
+            : api::internal::Paths::GetFilenameFail(receiptID->Get());
 
     auto encoded = String::Factory();
     auto armored = Armored::Factory(api_.Crypto(), serialized);
@@ -4399,13 +4406,13 @@ auto Server::process_process_box_response(
             api_,
             encoded->Get(),
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Receipt(),
+            api_.Internal().Paths().Receipt(),
             notaryID->Get(),
             filename,
             "");
     } else {
         // This should never happen...
-        filename = api::Legacy::GetFilenameError(receiptID->Get());
+        filename = api::internal::Paths::GetFilenameError(receiptID->Get());
         LogError()()("Error saving transaction receipt: ")(notaryID.get())('/')(
             filename)(".")
             .Flush();
@@ -4413,7 +4420,7 @@ auto Server::process_process_box_response(
             api_,
             encoded->Get(),
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Receipt(),
+            api_.Internal().Paths().Receipt(),
             notaryID->Get(),
             filename,
             "");
@@ -4521,7 +4528,7 @@ auto Server::process_process_inbox_response(
 
         auto serializedOriginalItem = String::Factory();
         replyItem.GetReferenceString(serializedOriginalItem);
-        auto pReferenceItem = api_.Factory().InternalSession().Item(
+        auto pReferenceItem = api_.Factory().Internal().Session().Item(
             serializedOriginalItem, server_id_, replyItem.GetReferenceToNum());
         auto pItem = (pReferenceItem) ? transaction->GetItemInRefTo(
                                             pReferenceItem->GetReferenceToNum())
@@ -4643,7 +4650,7 @@ auto Server::process_process_nymbox_response(
 
     accept_numbers(data, *transaction, *replyTransaction);
     auto nymbox =
-        api_.Factory().InternalSession().Ledger(nymID, nymID, server_id_);
+        api_.Factory().Internal().Session().Ledger(nymID, nymID, server_id_);
 
     assert_false(nullptr == nymbox);
 
@@ -4948,7 +4955,7 @@ auto Server::process_response_transaction(
     if (false == armored->WriteArmoredString(encoded, "TRANSACTION")) {
         LogError()()("Error saving transaction receipt "
                      "(failed writing armored string): ")(
-            api_.Internal().Legacy().Receipt())('/')(server_id_, api_.Crypto())(
+            api_.Internal().Paths().Receipt())('/')(server_id_, api_.Crypto())(
             '/')(receiptID.get())
             .Flush();
 
@@ -4956,24 +4963,26 @@ auto Server::process_response_transaction(
     }
 
     if (pItem) {
-        auto filename = response.GetSuccess()
-                            ? api::Legacy::GetFilenameSuccess(receiptID->Get())
-                            : api::Legacy::GetFilenameFail(receiptID->Get());
+        auto filename =
+            response.GetSuccess()
+                ? api::internal::Paths::GetFilenameSuccess(receiptID->Get())
+                : api::internal::Paths::GetFilenameFail(receiptID->Get());
         OTDB::StorePlainString(
             api_,
             encoded->Get(),
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Receipt(),
+            api_.Internal().Paths().Receipt(),
             server_id_.asBase58(api_.Crypto()),
             filename,
             "");
     } else {
-        auto filename = api::Legacy::GetFilenameError(receiptID->Get());
+        auto filename =
+            api::internal::Paths::GetFilenameError(receiptID->Get());
         OTDB::StorePlainString(
             api_,
             encoded->Get(),
             api_.DataFolder().string(),
-            api_.Internal().Legacy().Receipt(),
+            api_.Internal().Paths().Receipt(),
             server_id_.asBase58(api_.Crypto()),
             filename,
             "");
@@ -5021,7 +5030,7 @@ auto Server::process_response_transaction_cash_deposit(
         return;
     }
 
-    auto pItem = api_.Factory().InternalSession().Item(serializedRequest);
+    auto pItem = api_.Factory().Internal().Session().Item(serializedRequest);
 
     if (false == bool(pItem)) {
         LogError()()("Failed to instantiate request").Flush();
@@ -5040,7 +5049,7 @@ auto Server::process_response_transaction_cash_deposit(
         return;
     }
 
-    auto purse = api_.Factory().InternalSession().Purse(serializedPurse);
+    auto purse = api_.Factory().Internal().Session().Purse(serializedPurse);
 
     if (false == bool(purse)) {
         LogError()()("Failed to instantiate request purse").Flush();
@@ -5096,7 +5105,7 @@ auto Server::process_response_transaction_cheque_deposit(
     const Item& replyItem,
     const PasswordPrompt& reason) -> void
 {
-    auto empty = client.Factory().InternalSession().Message();
+    auto empty = client.Factory().Internal().Session().Message();
 
     assert_false(nullptr == Signer());
     assert_false(nullptr == empty);
@@ -5113,7 +5122,7 @@ auto Server::process_response_transaction_cheque_deposit(
     Item* pOriginal{nullptr};
     replyItem.GetReferenceString(serializedOriginal);
     auto instantiatedOriginal =
-        api_.Factory().InternalSession().Transaction(serializedOriginal);
+        api_.Factory().Internal().Session().Transaction(serializedOriginal);
 
     if (false == bool(instantiatedOriginal)) {
         LogError()()("Failed to deserialized original item").Flush();
@@ -5130,7 +5139,7 @@ auto Server::process_response_transaction_cheque_deposit(
     }
 
     auto& originalItem = *pOriginal;
-    auto pCheque = api_.Factory().InternalSession().Cheque();
+    auto pCheque = api_.Factory().Internal().Session().Cheque();
 
     if (false == bool(pCheque)) { return; }
 
@@ -5256,7 +5265,7 @@ auto Server::process_response_transaction_cron(
         return;
     }
 
-    auto pCronItem = api_.Factory().InternalSession().CronItem(serialized);
+    auto pCronItem = api_.Factory().Internal().Session().CronItem(serialized);
 
     if (false == bool(pCronItem)) {
         LogError()()("Failed to instantiate serialized cron item").Flush();
@@ -5346,26 +5355,26 @@ auto Server::process_response_transaction_cron(
         const bool bExists1 = OTDB::Exists(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().PaymentInbox(),
+            api_.Internal().Paths().PaymentInbox(),
             server_id_.asBase58(api_.Crypto()),
             nymID.asBase58(api_.Crypto()),
             "");
         const bool bExists2 = OTDB::Exists(
             api_,
             api_.DataFolder().string(),
-            api_.Internal().Legacy().RecordBox(),
+            api_.Internal().Paths().RecordBox(),
             server_id_.asBase58(api_.Crypto()),
             nymID.asBase58(api_.Crypto()),
             "");
 
-        auto thePmntInbox = api_.Factory().InternalSession().Ledger(
+        auto thePmntInbox = api_.Factory().Internal().Session().Ledger(
             nymID,
             nymID,
             server_id_);  // payment inbox
 
         assert_false(nullptr == thePmntInbox);
 
-        auto theRecordBox = api_.Factory().InternalSession().Ledger(
+        auto theRecordBox = api_.Factory().Internal().Session().Ledger(
             nymID,
             nymID,
             server_id_);  // record box
@@ -5461,7 +5470,7 @@ auto Server::process_response_transaction_cron(
             // is equivalent to saying: if ("X,Y".VerifyAny("X")) which
             // RETURNS TRUE -- and we have found the instrument!
 
-            auto theOutpayment = api_.Factory().InternalSession().Payment();
+            auto theOutpayment = api_.Factory().Internal().Session().Payment();
 
             assert_false(nullptr == theOutpayment);
 
@@ -5616,7 +5625,7 @@ auto Server::process_response_transaction_cron(
                 }
 
                 auto pNewTransaction =
-                    api_.Factory().InternalSession().Transaction(
+                    api_.Factory().Internal().Session().Transaction(
                         *theRecordBox,  // recordbox.
                         transactionType::notice,
                         theOriginType,
@@ -5631,7 +5640,7 @@ auto Server::process_response_transaction_cron(
                     // (The one I just activated -- since I was the final
                     // signer...)
                     //
-                    auto pNewItem = api_.Factory().InternalSession().Item(
+                    auto pNewItem = api_.Factory().Internal().Session().Item(
                         *pNewTransaction,
                         itemType::notice,
                         identifier::Account{});
@@ -5782,7 +5791,7 @@ auto Server::process_response_transaction_exchange_basket(
                 return;
             }
 
-            auto pBasket = api_.Factory().InternalSession().Basket();
+            auto pBasket = api_.Factory().Internal().Session().Basket();
 
             assert_false(nullptr == pBasket);
 
@@ -5883,7 +5892,7 @@ auto Server::process_response_transaction_transfer(
         return;
     }
 
-    auto pTransfer = api_.Factory().InternalSession().Item(
+    auto pTransfer = api_.Factory().Internal().Session().Item(
         serialized,
         responseItem.GetRealNotaryID(),
         responseItem.GetReferenceToNum());
@@ -5934,7 +5943,7 @@ auto Server::process_response_transaction_withdrawal(
         if ((itemType::atWithdrawVoucher == pItem->GetType()) &&
             (Item::acknowledgement == pItem->GetStatus())) {
             auto strVoucher = String::Factory();
-            auto theVoucher = api_.Factory().InternalSession().Cheque();
+            auto theVoucher = api_.Factory().Internal().Session().Cheque();
 
             assert_false(nullptr == theVoucher);
 
@@ -6023,7 +6032,8 @@ auto Server::process_incoming_cash_withdrawal(
     }
 
     LogInsane()()("Serialized purse is valid").Flush();
-    auto requestPurse = api_.Factory().InternalSession().Purse(serializedPurse);
+    auto requestPurse =
+        api_.Factory().Internal().Session().Purse(serializedPurse);
 
     if (requestPurse) {
         LogInsane()()("Purse instantiated").Flush();
@@ -6093,7 +6103,7 @@ auto Server::process_unregister_account_response(
         reply.in_reference_to_->GetString(serialized);
     }
 
-    auto originalMessage = api_.Factory().InternalSession().Message();
+    auto originalMessage = api_.Factory().Internal().Session().Message();
 
     assert_false(nullptr == originalMessage);
 
@@ -6133,7 +6143,7 @@ auto Server::process_unregister_nym_response(
     const PasswordPrompt& reason) -> bool
 {
     auto serialized = String::Factory();
-    auto originalMessage = api_.Factory().InternalSession().Message();
+    auto originalMessage = api_.Factory().Internal().Session().Message();
 
     assert_false(nullptr == originalMessage);
 
@@ -6187,7 +6197,7 @@ auto Server::process_unseen_reply(
     }
 
     std::shared_ptr<Message> message{
-        api_.Factory().InternalSession().Message()};
+        api_.Factory().Internal().Session().Message()};
 
     assert_false(nullptr == message);
 
@@ -6348,7 +6358,7 @@ auto Server::remove_nymbox_item(
     auto serialized = String::Factory();
     replyItem.GetReferenceString(serialized);
     auto processNymboxItem =
-        api_.Factory().InternalSession().Item(serialized, server_id_, 0);
+        api_.Factory().Internal().Session().Item(serialized, server_id_, 0);
 
     if (false == bool(processNymboxItem)) {
         LogError()()("Unable to find original item in original processNymbox "
@@ -6425,12 +6435,12 @@ auto Server::remove_nymbox_item(
 
             auto pOriginalCronItem =
                 (strOriginalCronItem->Exists()
-                     ? api_.Factory().InternalSession().CronItem(
+                     ? api_.Factory().Internal().Session().CronItem(
                            strOriginalCronItem)
                      : nullptr);
             auto pUpdatedCronItem =
                 (strUpdatedCronItem->Exists()
-                     ? api_.Factory().InternalSession().CronItem(
+                     ? api_.Factory().Internal().Session().CronItem(
                            strUpdatedCronItem)
                      : nullptr);
             std::unique_ptr<OTCronItem>& pCronItem =
@@ -6509,23 +6519,23 @@ auto Server::remove_nymbox_item(
                 const bool exists1 = OTDB::Exists(
                     api_,
                     api_.DataFolder().string(),
-                    api_.Internal().Legacy().PaymentInbox(),
+                    api_.Internal().Paths().PaymentInbox(),
                     notaryID->Get(),
                     nymID.asBase58(api_.Crypto()),
                     "");
                 const bool exists2 = OTDB::Exists(
                     api_,
                     api_.DataFolder().string(),
-                    api_.Internal().Legacy().RecordBox(),
+                    api_.Internal().Paths().RecordBox(),
                     notaryID->Get(),
                     nymID.asBase58(api_.Crypto()),
                     "");
-                auto paymentInbox = api_.Factory().InternalSession().Ledger(
+                auto paymentInbox = api_.Factory().Internal().Session().Ledger(
                     nymID, nymID, server_id_);
 
                 assert_false(nullptr == paymentInbox);
 
-                auto recordBox = api_.Factory().InternalSession().Ledger(
+                auto recordBox = api_.Factory().Internal().Session().Ledger(
                     nymID, nymID, server_id_);
 
                 assert_false(nullptr == recordBox);
@@ -6564,7 +6574,7 @@ auto Server::remove_nymbox_item(
                         .Flush();
                 } else {
                     auto theOutpayment =
-                        api_.Factory().InternalSession().Payment();
+                        api_.Factory().Internal().Session().Payment();
 
                     assert_false(nullptr == theOutpayment);
 
@@ -6576,7 +6586,7 @@ auto Server::remove_nymbox_item(
                     }
 
                     auto tempPayment =
-                        api_.Factory().InternalSession().Payment();
+                        api_.Factory().Internal().Session().Payment();
 
                     assert_false(nullptr == tempPayment);
 
@@ -6665,7 +6675,7 @@ auto Server::remove_nymbox_item(
                     }
 
                     std::shared_ptr<OTTransaction> newTransaction{
-                        api_.Factory().InternalSession().Transaction(
+                        api_.Factory().Internal().Session().Transaction(
                             *recordBox,
                             transactionType::notice,
                             theOriginType,
@@ -6674,7 +6684,7 @@ auto Server::remove_nymbox_item(
                     if (newTransaction) {
                         if (false != bool(pNoticeItem)) {
                             std::shared_ptr<Item> newItem{
-                                api_.Factory().InternalSession().Item(
+                                api_.Factory().Internal().Session().Item(
                                     *newTransaction,
                                     itemType::notice,
                                     identifier::Account{})};
@@ -6694,7 +6704,7 @@ auto Server::remove_nymbox_item(
                             !theOutpayment->GetTransNumDisplay(
                                 lTransNumForDisplay)) {
                             auto temp =
-                                api_.Factory().InternalSession().Payment();
+                                api_.Factory().Internal().Session().Payment();
 
                             assert_true(false != bool(temp));
 
@@ -7098,7 +7108,7 @@ auto Server::statement(
     // marketOffer that triggered the need for this transaction statement.
     // Since it uses up a transaction number, I will be sure to remove that one
     // from my list before signing the list.
-    output = api_.Factory().InternalSession().Item(
+    output = api_.Factory().Internal().Session().Item(
         transaction, itemType::transactionStatement, identifier::Account{});
 
     if (false == bool(output)) { return output; }

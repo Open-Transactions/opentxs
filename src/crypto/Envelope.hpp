@@ -34,6 +34,7 @@ namespace identity
 {
 class Authority;
 }  // namespace identity
+
 class Armored;
 class PasswordPrompt;
 class Writer;

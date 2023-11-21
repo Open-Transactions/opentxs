@@ -15,7 +15,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace blockchain
@@ -31,9 +34,9 @@ class Manager;
 namespace opentxs::factory
 {
 auto FeeSources(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void;
 auto BTCFeeSources(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void;
 }  // namespace opentxs::factory

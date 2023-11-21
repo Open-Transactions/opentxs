@@ -10,10 +10,10 @@
 #include <cstdint>
 #include <memory>
 
-#include "2_Factory.hpp"
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 

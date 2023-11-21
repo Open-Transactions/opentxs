@@ -19,13 +19,13 @@
 
 #include "api/session/Storage.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -69,14 +69,14 @@ using enum opentxs::network::zeromq::socket::Type;
 using namespace std::literals;
 
 Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<api::session::imp::Storage> parent,
     opentxs::network::zeromq::BatchID batchID,
     std::chrono::seconds interval,
     CString endpoint,
     allocator_type alloc) noexcept
     : opentxs::Actor<tree::Actor, Job>(
-          *api,
+          api->Self(),
           LogTrace(),
           {"storage garbage collector", alloc},
           0ms,
@@ -91,7 +91,7 @@ Actor::Actor(
     , api_p_(std::move(api))
     , parent_p_(std::move(parent))
     , self_()
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , parent_(*parent_p_)
     , interval_(std::max<decltype(interval_)>(interval, 1min))
     , push_([&] {
@@ -159,7 +159,7 @@ auto Actor::reset_gc_timer(std::chrono::microseconds wait) noexcept -> void
 }
 
 auto Actor::run_gc(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<api::session::imp::Storage> parent,
     std::shared_ptr<Actor> self,
     const GCParams& params) noexcept -> void

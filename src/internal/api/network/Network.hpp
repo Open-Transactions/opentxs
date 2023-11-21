@@ -20,13 +20,23 @@ namespace crypto
 class Blockchain;
 }  // namespace crypto
 
+namespace internal
+{
+class Paths;
+}  // namespace internal
+
 namespace session
 {
+namespace internal
+{
+class Client;
+class Notary;
+}  // namespace internal
+
 class Client;
 class Notary;
 }  // namespace session
 
-class Legacy;
 class Session;
 }  // namespace api
 
@@ -47,15 +57,15 @@ public:
     auto Internal() noexcept -> internal::Network& final { return *this; }
     virtual auto Shutdown() noexcept -> void = 0;
     virtual auto Start(
-        std::shared_ptr<const api::session::Client> api,
+        std::shared_ptr<const api::session::internal::Client> api,
         const api::crypto::Blockchain& crypto,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept -> void = 0;
     virtual auto Start(
-        std::shared_ptr<const api::session::Notary> api,
+        std::shared_ptr<const api::session::internal::Notary> api,
         const api::crypto::Blockchain& crypto,
-        const api::Legacy& legacy,
+        const api::internal::Paths& legacy,
         const std::filesystem::path& dataFolder,
         const Options& args) noexcept -> void = 0;
 

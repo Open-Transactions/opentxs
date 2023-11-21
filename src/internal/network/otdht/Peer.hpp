@@ -17,7 +17,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
@@ -34,7 +37,7 @@ public:
     auto Init() noexcept -> void;
 
     Peer(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Node::Shared> shared,
         std::string_view routingID,
         std::string_view toRemote,

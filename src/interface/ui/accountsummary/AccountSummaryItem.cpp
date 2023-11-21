@@ -9,15 +9,16 @@
 #include <utility>
 
 #include "interface/ui/base/Widget.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/api/session/Storage.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/contract/Unit.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
@@ -93,7 +94,7 @@ auto AccountSummaryItem::load_unit(
             api.Storage().Internal().AccountContract(id));
     } catch (...) {
 
-        return api.Factory().InternalSession().UnitDefinition();
+        return api.Factory().Internal().Session().UnitDefinition();
     }
 }
 

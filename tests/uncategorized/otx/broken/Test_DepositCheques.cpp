@@ -9,11 +9,12 @@
 #include <memory>
 #include <utility>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
+#include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/otx/broken/DepositCheques.hpp"
 
 #define UNIT_DEFINITION_CONTRACT_NAME "Mt Gox USD"
@@ -174,13 +175,15 @@ TEST_F(DepositCheques, add_contacts)
 TEST_F(DepositCheques, issue_dollars)
 {
     auto reasonI = issuer_client_.Factory().PasswordPrompt(__func__);
-    const auto contract = issuer_client_.Wallet().Internal().CurrencyContract(
-        issuer_nym_id_.asBase58(alice_client_.Crypto()),
-        UNIT_DEFINITION_CONTRACT_NAME,
-        UNIT_DEFINITION_TERMS,
-        UNIT_DEFINITION_UNIT_OF_ACCOUNT,
-        1,
-        reasonI);
+    const auto contract =
+        Base::InternalWallet(issuer_client_)
+            .CurrencyContract(
+                issuer_nym_id_.asBase58(alice_client_.Crypto()),
+                UNIT_DEFINITION_CONTRACT_NAME,
+                UNIT_DEFINITION_TERMS,
+                UNIT_DEFINITION_UNIT_OF_ACCOUNT,
+                1,
+                reasonI);
 
     EXPECT_EQ(ot::contract::UnitType::Currency, contract->Type());
     EXPECT_TRUE(unit_id_.empty());
@@ -266,7 +269,7 @@ TEST_F(DepositCheques, process_inbox_issuer)
     ASSERT_TRUE(message);
 
     const auto account =
-        issuer_client_.Wallet().Internal().Account(issuer_account_id_);
+        Base::InternalWallet(issuer_client_).Account(issuer_account_id_);
 
     EXPECT_EQ(-1 * CHEQUE_AMOUNT_1, account.get().GetBalance());
 }

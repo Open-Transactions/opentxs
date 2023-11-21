@@ -14,6 +14,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -40,7 +45,7 @@ public:
     auto Start() noexcept -> void;
 
     BlockIndexer(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::shared_ptr<Shared> shared) noexcept;
     BlockIndexer(const BlockIndexer&) = delete;

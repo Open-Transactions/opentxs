@@ -21,6 +21,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Contacts;
@@ -325,7 +330,8 @@ public:
     {
         return {id_};
     }
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final
+    auto Start(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void final
     {
     }
     auto SubaccountList(const identifier::Nym&, const Chain) const noexcept

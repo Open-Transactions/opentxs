@@ -15,8 +15,8 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/api/session/Client.hpp"
 #include "internal/otx/client/Pair.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/Client.hpp"
 #include "ottest/fixtures/common/Notary.hpp"

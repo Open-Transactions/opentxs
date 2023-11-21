@@ -20,7 +20,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Session;
+}  // namespace internal
 }  // namespace api
 
 namespace proto
@@ -96,7 +99,7 @@ public:
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::symmetric::Key final;
 
-    Symmetric(const api::Session& api) noexcept;
+    Symmetric(const api::internal::Session& api) noexcept;
     Symmetric() = delete;
     Symmetric(const Symmetric&) = delete;
     Symmetric(Symmetric&&) = delete;
@@ -106,6 +109,6 @@ public:
     ~Symmetric() final = default;
 
 private:
-    const api::Session& api_;
+    const api::internal::Session& api_;
 };
 }  // namespace opentxs::api::crypto::imp

@@ -20,17 +20,17 @@
 
 #include "blockchain/node/wallet/feeoracle/Shared.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/wallet/Factory.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/display/Factory.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -46,13 +46,13 @@ namespace opentxs::blockchain::node::wallet
 using enum opentxs::network::zeromq::socket::Direction;
 
 FeeOracle::Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const node::Manager> node,
     std::shared_ptr<Shared> shared,
     network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
     : opentxs::Actor<FeeOracle::Actor, FeeOracleJobs>(
-          *api,
+          api->Self(),
           LogTrace(),
           [&] {
               auto out = CString{print(node->Internal().Chain()), alloc};
@@ -73,7 +73,7 @@ FeeOracle::Actor::Actor(
     , api_p_(std::move(api))
     , node_p_(std::move(node))
     , shared_p_(std::move(shared))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , node_(*node_p_)
     , chain_(node_.Internal().Chain())
     , timer_(api_.Network().Asio().Internal().GetTimer())

@@ -15,6 +15,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 }  // namespace opentxs
@@ -30,8 +35,8 @@ public:
         return *this;
     }
 
-    virtual auto Start(std::shared_ptr<const api::Session> api) noexcept
-        -> void = 0;
+    virtual auto Start(
+        std::shared_ptr<const api::internal::Session> api) noexcept -> void = 0;
     auto Internal() noexcept -> internal::OTDHT& final { return *this; }
 
     OTDHT(const OTDHT&) = delete;

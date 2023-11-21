@@ -28,12 +28,8 @@ class ZMQ;
 
 namespace session
 {
-namespace imp
-{
-class Client;
-}  // namespace imp
-
 class Activity;
+class ClientPrivate;
 class Contacts;
 }  // namespace session
 
@@ -867,7 +863,7 @@ public:
     ~OTAPI_Exec() override = default;
 
 private:
-    friend api::session::imp::Client;
+    friend api::session::ClientPrivate;
 
     const api::Session& api_;
     const OT_API& ot_api_;

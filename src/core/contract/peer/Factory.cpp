@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "core/contract/peer/Object.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/crypto/Envelope.hpp"
@@ -19,9 +18,11 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -167,7 +168,7 @@ auto PeerObject(
     try {
         auto notUsed = Nym_p{};
         auto output = std::unique_ptr<opentxs::PeerObject>{};
-        auto input = api.Factory().InternalSession().Envelope(encrypted);
+        auto input = api.Factory().Internal().Session().Envelope(encrypted);
         auto contents = String::Factory();
 
         if (false ==

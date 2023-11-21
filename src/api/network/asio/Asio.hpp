@@ -19,7 +19,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
 {
-
 namespace json
 {
 class value;
@@ -30,6 +29,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Context;
+}  // namespace internal
+
 namespace network
 {
 namespace asio
@@ -37,8 +41,6 @@ namespace asio
 class Shared;
 }  // namespace asio
 }  // namespace network
-
-class Context;
 }  // namespace api
 
 namespace network
@@ -89,7 +91,7 @@ public:
         const ReadView bytes,
         SocketImp socket) const noexcept -> bool final;
 
-    auto Init(std::shared_ptr<const api::Context> context) noexcept
+    auto Init(std::shared_ptr<const api::internal::Context> context) noexcept
         -> void final;
     auto Shutdown() noexcept -> void final;
 

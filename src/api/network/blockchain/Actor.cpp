@@ -11,12 +11,12 @@
 
 #include "internal/api/network/Types.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
@@ -68,11 +68,11 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Actor::Actor(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     opentxs::network::zeromq::BatchID batchID,
     allocator_type alloc) noexcept
     : opentxs::Actor<blockchain::Actor, Work>(
-          *api,
+          api->Self(),
           LogTrace(),
           {"blockchain status router", alloc},
           0ms,
@@ -143,7 +143,7 @@ Actor::Actor(
                }},
           })
     , api_p_(std::move(api))
-    , api_(*api_p_)
+    , api_(api_p_->Self())
     , active_peers_(pipeline_.Internal().ExtraSocket(0))
     , block_available_(pipeline_.Internal().ExtraSocket(1))
     , block_queue_(pipeline_.Internal().ExtraSocket(2))

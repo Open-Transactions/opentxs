@@ -118,8 +118,23 @@ public:
     static auto load_unit(
         const ot::api::Session& api,
         const ot::UnallocatedCString& id) noexcept -> ot::OTUnitDefinition;
+    static auto payment_from_cheque(
+        const ot::api::Session& api,
+        const ot::String& cheque) noexcept -> std::shared_ptr<ot::OTPayment>;
     static auto translate_result(const ot::otx::LastReplyStatus status)
         -> ot::otx::client::SendResult;
+    static auto write_cheque(
+        const ot::api::session::Client& api,
+        const ot::identifier::Notary& NOTARY_ID,
+        const ot::Amount& chequeAmount,
+        const ot::Time& VALID_FROM,
+        const ot::Time& VALID_TO,
+        const ot::identifier::Account& SENDER_accountID,
+        const ot::identifier::Nym& SENDER_NYM_ID,
+        const ot::String& chequeMemo,
+        const ot::identifier::Nym& pRECIPIENT_NYM_ID)
+        -> std::unique_ptr<ot::Cheque>;
+
     void break_consensus();
     void import_server_contract(
         const ot::contract::Server& contract,
@@ -218,5 +233,4 @@ public:
         const std::size_t expectedNymboxItems,
         ot::RequestNumber& counter);
 };
-
 }  // namespace ottest

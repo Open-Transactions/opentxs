@@ -7,7 +7,6 @@
 
 #include "api/crypto/base/Crypto.hpp"  // IWYU pragma: associated
 
-#include "2_Factory.hpp"
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/Crypto.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"        // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -182,7 +182,8 @@ auto Crypto::Init() noexcept -> void
     Init_Libsecp256k1();
 }
 
-auto Crypto::Init(const std::shared_ptr<const api::Factory>& factory) noexcept
+auto Crypto::Init(
+    const std::shared_ptr<const api::internal::Factory>& factory) noexcept
     -> void
 {
     bip32_.Internal().Init(factory);

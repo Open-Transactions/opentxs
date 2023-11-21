@@ -9,12 +9,12 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -27,10 +27,7 @@ namespace api
 {
 namespace session
 {
-namespace imp
-{
-class Factory;
-}  // namespace imp
+class FactoryPrivate;
 }  // namespace session
 
 class Session;
@@ -397,7 +394,7 @@ protected:
     auto GetNextProcessDate() const -> const Time { return next_process_date_; }
 
 private:
-    friend api::session::imp::Factory;
+    friend api::session::FactoryPrivate;
 
     // In OTSmartContract, none of this normal crap is used.
     // The Sender/Recipient are unused.

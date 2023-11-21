@@ -43,13 +43,17 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace session
 {
 class Factory;
 }  // namespace session
 
 class Crypto;
-class Session;
 }  // namespace api
 
 namespace crypto
@@ -501,7 +505,8 @@ public:
 
     auto DoGC(const opentxs::storage::tree::GCParams& params) noexcept -> bool;
     auto FinishGC(bool success) noexcept -> void;
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto Start(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void final;
     auto StartGC() const noexcept
         -> std::optional<opentxs::storage::tree::GCParams>;
     auto Upgrade() noexcept -> void final;

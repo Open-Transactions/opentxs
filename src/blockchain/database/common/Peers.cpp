@@ -18,8 +18,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -31,10 +29,12 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
-#include "opentxs/OT.hpp"
+#include "opentxs/Context.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
@@ -416,14 +416,14 @@ auto Peers::Import(Vector<network::blockchain::Address>&& peers) noexcept
 
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 auto Peers::init(
-    std::shared_ptr<const api::Session> p,
+    std::shared_ptr<const api::internal::Session> p,
     std::shared_ptr<std::promise<GuardedData&>> promise) noexcept -> void
 {
     assert_false(nullptr == p);
     assert_false(nullptr == promise);
 
     const auto post = ScopeGuard{[&] { promise->set_value(data_); }};
-    const auto& api = p->Internal();
+    const auto& api = *p;
 
     {
         auto handle = data_.lock();
@@ -493,7 +493,7 @@ auto Peers::init(
                     return true;
                 }),
         };
-        init_tables(api, work);
+        init_tables(api.Self(), work);
 
         if (api.ShuttingDown()) { return; }
 
@@ -511,7 +511,7 @@ auto Peers::init(
 
             return out;
         }();
-        init_chains(api, Clock::now(), data, chains);
+        init_chains(api.Self(), Clock::now(), data, chains);
     }
 }
 // NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)

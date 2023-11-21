@@ -91,5 +91,4 @@ private:
     static ot::UnallocatedVector<bool> push_results_;
     static std::size_t push_results_count_;
 };
-
 }  // namespace ottest

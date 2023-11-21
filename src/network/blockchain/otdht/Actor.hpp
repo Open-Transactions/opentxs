@@ -38,6 +38,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -70,7 +75,7 @@ class OTDHT::Actor : public opentxs::Actor<OTDHT::Actor, DHTJob>
 {
 public:
     static auto Factory(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> node,
         network::zeromq::BatchID batchID) noexcept -> void;
 
@@ -84,7 +89,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const opentxs::blockchain::node::Manager> node,
         network::zeromq::BatchID batchID,
         allocator_type alloc) noexcept;
@@ -99,7 +104,7 @@ public:
 protected:
     using PeerID = CString;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<const opentxs::blockchain::node::Manager> node_p_;
     const api::Session& api_;
     const opentxs::blockchain::node::Manager& node_;

@@ -7,9 +7,11 @@
 
 #include <opentxs/opentxs.hpp>
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string_view>
 #include <tuple>
 
@@ -88,6 +90,16 @@ protected:
     CfilterListener& cfilter_2_;
     SyncListener& sync_client_1_;
     SyncListener& sync_client_2_;
+
+    static auto Mine(
+        const ot::api::Session& api,
+        const ot::blockchain::block::Header& previous,
+        ot::blockchain::block::Transaction generationTransaction,
+        std::uint32_t nBits,
+        std::span<ot::blockchain::block::Transaction> extraTransactions,
+        std::int32_t version,
+        std::function<bool()> abort,
+        ot::alloc::Default alloc) noexcept -> ot::blockchain::block::Block;
 
     auto Account(const User& user, ot::blockchain::Type chain) noexcept
         -> const ot::blockchain::crypto::Account&;

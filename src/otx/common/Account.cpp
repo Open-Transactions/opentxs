@@ -10,9 +10,6 @@
 #include <memory>
 #include <string_view>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
@@ -28,9 +25,13 @@
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
@@ -239,7 +240,8 @@ auto Account::create_box(
     const auto& accountID = GetRealAccountID();
     const auto& serverID = GetRealNotaryID();
     box.reset(api_.Factory()
-                  .InternalSession()
+                  .Internal()
+                  .Session()
                   .Ledger(nymID, accountID, serverID)
                   .release());
 
@@ -285,7 +287,7 @@ auto Account::LoadContractFromString(const String& theStr) -> bool
 auto Account::LoadInbox(const identity::Nym& nym) const
     -> std::unique_ptr<Ledger>
 {
-    auto box{api_.Factory().InternalSession().Ledger(
+    auto box{api_.Factory().Internal().Session().Ledger(
         GetNymID(), GetRealAccountID(), GetRealNotaryID())};
 
     assert_true(false != bool(box));
@@ -305,7 +307,7 @@ auto Account::LoadInbox(const identity::Nym& nym) const
 auto Account::LoadOutbox(const identity::Nym& nym) const
     -> std::unique_ptr<Ledger>
 {
-    auto box{api_.Factory().InternalSession().Ledger(
+    auto box{api_.Factory().Internal().Session().Ledger(
         GetNymID(), GetRealAccountID(), GetRealNotaryID())};
 
     assert_true(false != bool(box));
@@ -387,7 +389,7 @@ auto Account::GetInboxHash(identifier::Generic& output) -> bool
     } else if (
         !GetNymID().empty() && !GetRealAccountID().empty() &&
         !GetRealNotaryID().empty()) {
-        auto inbox{api_.Factory().InternalSession().Ledger(
+        auto inbox{api_.Factory().Internal().Session().Ledger(
             GetNymID(), GetRealAccountID(), GetRealNotaryID())};
 
         assert_true(false != bool(inbox));
@@ -417,7 +419,7 @@ auto Account::GetOutboxHash(identifier::Generic& output) -> bool
     } else if (
         !GetNymID().empty() && !GetRealAccountID().empty() &&
         !GetRealNotaryID().empty()) {
-        auto outbox{api_.Factory().InternalSession().Ledger(
+        auto outbox{api_.Factory().Internal().Session().Ledger(
             GetNymID(), GetRealAccountID(), GetRealNotaryID())};
 
         assert_true(false != bool(outbox));
@@ -495,15 +497,14 @@ auto Account::LoadContract() -> bool
     auto id = String::Factory();
     GetIdentifier(id);
 
-    return Contract::LoadContract(
-        api_.Internal().Legacy().Account(), id->Get());
+    return Contract::LoadContract(api_.Internal().Paths().Account(), id->Get());
 }
 
 auto Account::SaveAccount() -> bool
 {
     auto id = String::Factory();
     GetIdentifier(id);
-    return SaveContract(api_.Internal().Legacy().Account(), id->Get());
+    return SaveContract(api_.Internal().Paths().Account(), id->Get());
 }
 
 // Debit a certain amount from the account (presumably the same amount is being
@@ -620,14 +621,14 @@ auto Account::LoadExistingAccount(
     auto strDataFolder = api.DataFolder().string();
     auto strAccountPath = std::filesystem::path{};
 
-    if (!api.Internal().Legacy().AppendFolder(
-            strAccountPath, strDataFolder, api.Internal().Legacy().Account())) {
+    if (!api.Internal().Paths().AppendFolder(
+            strAccountPath, strDataFolder, api.Internal().Paths().Account())) {
         LogAbort()().Abort();
     }
 
-    if (!api.Internal().Legacy().ConfirmCreateFolder(strAccountPath)) {
+    if (!api.Internal().Paths().ConfirmCreateFolder(strAccountPath)) {
         LogError()()("Unable to find or create accounts folder: ")(
-            api.Internal().Legacy().Account())(".")
+            api.Internal().Paths().Account())(".")
             .Flush();
         return nullptr;
     }
@@ -639,7 +640,7 @@ auto Account::LoadExistingAccount(
     account->SetRealAccountID(accountId);
     account->SetRealNotaryID(notaryID);
     auto strAcctID = String::Factory(accountId, api.Crypto());
-    account->foldername_ = String::Factory(api.Internal().Legacy().Account());
+    account->foldername_ = String::Factory(api.Internal().Paths().Account());
     account->filename_ = String::Factory(strAcctID->Get());
 
     if (!OTDB::Exists(
@@ -730,7 +731,7 @@ auto Account::GenerateNewAccount(
     name_->Set(strID);
 
     // Next we create the full path filename for the account using the ID.
-    foldername_ = String::Factory(api_.Internal().Legacy().Account());
+    foldername_ = String::Factory(api_.Internal().Paths().Account());
     filename_ = String::Factory(strID->Get());
 
     // Then we try to load it, in order to make sure that it doesn't already

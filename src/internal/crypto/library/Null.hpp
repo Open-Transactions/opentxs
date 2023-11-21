@@ -16,7 +16,10 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Factory;
+}  // namespace internal
 }  // namespace api
 
 class Writer;
@@ -100,7 +103,8 @@ public:
         return false;
     }
 
-    auto Init(const std::shared_ptr<const api::Factory>&) noexcept -> void final
+    auto Init(const std::shared_ptr<const api::internal::Factory>&) noexcept
+        -> void final
     {
     }
 

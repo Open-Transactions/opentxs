@@ -23,11 +23,11 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"

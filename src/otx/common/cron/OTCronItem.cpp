@@ -10,10 +10,6 @@
 #include <filesystem>
 #include <memory>
 
-#include "internal/api/Legacy.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
-#include "internal/api/session/Session.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/Types.hpp"
@@ -26,10 +22,15 @@
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Paths.internal.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/api/session/Session.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
@@ -110,9 +111,9 @@ auto OTCronItem::LoadCronReceipt(
     const api::Session& api,
     const TransactionNumber& lTransactionNum) -> std::unique_ptr<OTCronItem>
 {
-    auto filename = api::Legacy::GetFilenameCrn(lTransactionNum);
+    auto filename = api::internal::Paths::GetFilenameCrn(lTransactionNum);
 
-    const char* szFoldername = api.Internal().Legacy().Cron();
+    const char* szFoldername = api.Internal().Paths().Cron();
     if (!OTDB::Exists(
             api, api.DataFolder().string(), szFoldername, filename, "", "")) {
         LogError()()("File does not exist: ")(szFoldername)('/')(filename)(".")
@@ -143,7 +144,7 @@ auto OTCronItem::LoadCronReceipt(
         // Therefore there's no need HERE in
         // THIS function to do any decoding...
         //
-        return api.Factory().InternalSession().CronItem(strFileContents);
+        return api.Factory().Internal().Session().CronItem(strFileContents);
     }
 }
 
@@ -155,9 +156,9 @@ auto OTCronItem::LoadActiveCronReceipt(
     -> std::unique_ptr<OTCronItem>  // Client-side only.
 {
     auto strNotaryID = String::Factory(notaryID, api.Crypto());
-    auto filename = api::Legacy::GetFilenameCrn(lTransactionNum);
+    auto filename = api::internal::Paths::GetFilenameCrn(lTransactionNum);
 
-    const char* szFoldername = api.Internal().Legacy().Cron();
+    const char* szFoldername = api.Internal().Paths().Cron();
 
     if (!OTDB::Exists(
             api,
@@ -193,7 +194,7 @@ auto OTCronItem::LoadActiveCronReceipt(
         // Therefore there's no need HERE in
         // THIS function to do any decoding...
         //
-        return api.Factory().InternalSession().CronItem(strFileContents);
+        return api.Factory().Internal().Session().CronItem(strFileContents);
     }
 }
 
@@ -206,14 +207,15 @@ auto OTCronItem::GetActiveCronTransNums(
     const identifier::Nym& nymID,
     const identifier::Notary& notaryID) -> bool
 {
-    const char* szFoldername = api.Internal().Legacy().Cron();
+    const char* szFoldername = api.Internal().Paths().Cron();
 
     output.Release();
 
     // We need to load up the local list of active (recurring) transactions.
     //
     auto strNotaryID = String::Factory(notaryID, api.Crypto());
-    auto filename = api::Legacy::GetFilenameLst(nymID.asBase58(api.Crypto()));
+    auto filename =
+        api::internal::Paths::GetFilenameLst(nymID.asBase58(api.Crypto()));
 
     if (OTDB::Exists(
             api, dataFolder, szFoldername, strNotaryID->Get(), filename, "")) {
@@ -252,9 +254,9 @@ auto OTCronItem::EraseActiveCronReceipt(
     const identifier::Notary& notaryID) -> bool
 {
     auto strNotaryID = String::Factory(notaryID, api.Crypto());
-    auto filename = api::Legacy::GetFilenameCrn(lTransactionNum);
+    auto filename = api::internal::Paths::GetFilenameCrn(lTransactionNum);
 
-    const char* szFoldername = api.Internal().Legacy().Cron();
+    const char* szFoldername = api.Internal().Paths().Cron();
 
     // Before we remove the cron item receipt itself, first we need to load up
     // the local list of active (recurring) transactions, and remove the number
@@ -262,7 +264,7 @@ auto OTCronItem::EraseActiveCronReceipt(
     // is active in cron.
     //
     auto list_filename =
-        api::Legacy::GetFilenameLst(nymID.asBase58(api.Crypto()));
+        api::internal::Paths::GetFilenameLst(nymID.asBase58(api.Crypto()));
 
     if (OTDB::Exists(
             api,
@@ -380,10 +382,10 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
     const std::int64_t lOpeningNum = GetOpeningNumber(theNymID);
 
     auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
-    auto filename =
-        api::Legacy::GetFilenameCrn(lOpeningNum);  // cron/TRANSACTION_NUM.crn
+    auto filename = api::internal::Paths::GetFilenameCrn(
+        lOpeningNum);  // cron/TRANSACTION_NUM.crn
 
-    const char* szFoldername = api_.Internal().Legacy().Cron();  // cron
+    const char* szFoldername = api_.Internal().Paths().Cron();  // cron
 
     if (OTDB::Exists(
             api_,
@@ -403,8 +405,8 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
     } else  // It wasn't there already, so we need to save the number in our
             // local list of trans nums.
     {
-        auto list_filename =
-            api::Legacy::GetFilenameLst(theNymID.asBase58(api_.Crypto()));
+        auto list_filename = api::internal::Paths::GetFilenameLst(
+            theNymID.asBase58(api_.Crypto()));
         NumList numlist;
 
         if (OTDB::Exists(
@@ -520,9 +522,9 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
 
 auto OTCronItem::SaveCronReceipt() -> bool
 {
-    auto filename = api::Legacy::GetFilenameCrn(
+    auto filename = api::internal::Paths::GetFilenameCrn(
         GetTransactionNum());  // cron/TRANSACTION_NUM.crn
-    const char* szFoldername = api_.Internal().Legacy().Cron();  // cron
+    const char* szFoldername = api_.Internal().Paths().Cron();  // cron
 
     if (OTDB::Exists(
             api_, api_.DataFolder().string(), szFoldername, filename, "", "")) {
@@ -1039,7 +1041,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
 
     const identity::Nym& pServerNym = *server_nym_;
     // Load the inbox in case it already exists.
-    auto theInbox{api_.Factory().InternalSession().Ledger(
+    auto theInbox{api_.Factory().Internal().Session().Ledger(
         NYM_ID, ACCOUNT_ID, GetNotaryID())};
 
     assert_true(false != bool(theInbox));
@@ -1067,7 +1069,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
     } else {
         // Start generating the receipts
 
-        auto pTrans1{api_.Factory().InternalSession().Transaction(
+        auto pTrans1{api_.Factory().Internal().Session().Transaction(
             *theInbox,
             transactionType::finalReceipt,
             theOriginType,
@@ -1081,7 +1083,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
 
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
-        auto pItem1{api_.Factory().InternalSession().Item(
+        auto pItem1{api_.Factory().Internal().Session().Item(
             *pTrans1, itemType::finalReceipt, identifier::Account{})};
 
         assert_true(false != bool(pItem1));
@@ -1217,8 +1219,8 @@ auto OTCronItem::DropFinalReceiptToNymbox(
 
     Nym_p pServerNym(server_nym_);
 
-    auto theLedger{
-        api_.Factory().InternalSession().Ledger(NYM_ID, NYM_ID, GetNotaryID())};
+    auto theLedger{api_.Factory().Internal().Session().Ledger(
+        NYM_ID, NYM_ID, GetNotaryID())};
 
     assert_true(false != bool(theLedger));
 
@@ -1243,7 +1245,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
         return false;
     }
 
-    auto pTransaction{api_.Factory().InternalSession().Transaction(
+    auto pTransaction{api_.Factory().Internal().Session().Transaction(
         *theLedger,
         transactionType::finalReceipt,
         theOriginType,
@@ -1258,7 +1260,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
 
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
-        auto pItem1{api_.Factory().InternalSession().Item(
+        auto pItem1{api_.Factory().Internal().Session().Item(
             *pTransaction, itemType::finalReceipt, identifier::Account{})};
 
         assert_true(false != bool(pItem1));

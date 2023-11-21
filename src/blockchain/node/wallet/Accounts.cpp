@@ -11,7 +11,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/api/session/Session.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Wallet.hpp"
@@ -25,9 +24,11 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -90,13 +91,13 @@ using enum opentxs::network::zeromq::socket::Policy;
 using enum opentxs::network::zeromq::socket::Type;
 
 Accounts::Imp::Imp(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     network::zeromq::BatchID batch,
     CString&& toChildren,
     allocator_type alloc) noexcept
     : Actor(
-          *api,
+          api->asClientPublic(),
           LogTrace(),
           [&] {
               auto out = CString{print(node->Internal().Chain()), alloc};
@@ -126,7 +127,7 @@ Accounts::Imp::Imp(
           })
     , api_p_(std::move(api))
     , node_p_(std::move(node))
-    , api_(*api_p_)
+    , api_(api_p_->asClientPublic())
     , node_(*node_p_)
     , db_(node_.Internal().DB())
     , mempool_(node_.Internal().Mempool())
@@ -143,7 +144,7 @@ Accounts::Imp::Imp(
 }
 
 Accounts::Imp::Imp(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node,
     const network::zeromq::BatchID batch,
     allocator_type alloc) noexcept
@@ -495,7 +496,7 @@ Accounts::Imp::~Imp() = default;
 namespace opentxs::blockchain::node::wallet
 {
 Accounts::Accounts(
-    std::shared_ptr<const api::session::Client> api,
+    std::shared_ptr<const api::session::internal::Client> api,
     std::shared_ptr<const node::Manager> node) noexcept
     : imp_([&] {
         assert_false(nullptr == api);

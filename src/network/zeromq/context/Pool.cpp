@@ -22,7 +22,6 @@
 #include <thread>
 #include <type_traits>
 
-#include "internal/api/Legacy.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Handle.hpp"
@@ -31,6 +30,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Thread.hpp"
 #include "network/zeromq/context/Thread.hpp"
+#include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
@@ -48,7 +48,7 @@ Pool::Pool(
     : parent_p_(parent)
     , parent_(*parent_p_)
     , count_(MaxJobs())
-    , log_dir_(api::Legacy::Home(args) / "alloc" / "batch")
+    , log_dir_(api::internal::Paths::Home(args) / "alloc" / "batch")
     , write_(args.DebugAllocations())
     , shutdown_counter_()
     , running_(true)

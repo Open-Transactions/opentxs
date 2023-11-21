@@ -9,8 +9,6 @@
 #include <cstdint>
 #include <exception>
 
-#include "internal/api/session/Client.hpp"
-#include "internal/api/session/Wallet.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/String.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -21,9 +19,12 @@
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
+#include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
+#include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Generic.hpp"
@@ -348,7 +349,7 @@ OTAPI_Func::OTAPI_Func(
         contract_.reset(contract.release());  // the smart contract itself.;
 
         std::int32_t nNumsNeeded =
-            api_.InternalClient().Exec().SmartContract_CountNumsNeeded(
+            api_.Internal().asClient().Exec().SmartContract_CountNumsNeeded(
                 String::Factory(*contract_)->Get(), agent_name_);
 
         if (nNumsNeeded > 0) { trans_nums_needed_ = nNumsNeeded; }
@@ -494,57 +495,52 @@ void OTAPI_Func::run()
         switch (type_) {
             case DELETE_NYM: {
                 last_attempt_ =
-       api_.InternalClient().OTAPI().unregisterNym(context_); } break; case
+       api_.Internal().asClient().OTAPI().unregisterNym(context_); } break; case
        GET_NYM_MARKET_OFFERS: { last_attempt_ =
-       api_.InternalClient().OTAPI().getNymMarketOffers(context_); } break; case
-       DELETE_ASSET_ACCT: { last_attempt_ =
-                    api_.InternalClient().OTAPI().deleteAssetAccount(context_,
+       api_.Internal().asClient().OTAPI().getNymMarketOffers(context_); } break;
+case DELETE_ASSET_ACCT: { last_attempt_ =
+                    api_.Internal().asClient().OTAPI().deleteAssetAccount(context_,
        account_id_); } break; case ACTIVATE_SMART_CONTRACT: {
                 assert_true(contract_);
 
                 last_attempt_ =
-       api_.InternalClient().OTAPI().activateSmartContract( context_,
+       api_.Internal().asClient().OTAPI().activateSmartContract( context_,
        String::Factory(*contract_)); } break; case TRIGGER_CLAUSE: {
-                last_attempt_ = api_.InternalClient().OTAPI().triggerClause(
-                    context_,
-                    transaction_number_,
+                last_attempt_ =
+api_.Internal().asClient().OTAPI().triggerClause( context_, transaction_number_,
                     String::Factory(clause_.c_str()),
                     triggerParameter->Exists() ? triggerParameter
                                                : String::Factory());
             } break;
             case EXCHANGE_BASKET: {
-                last_attempt_ = api_.InternalClient().OTAPI().exchangeBasket(
-                    context_,
+                last_attempt_ =
+api_.Internal().asClient().OTAPI().exchangeBasket( context_,
                     instrument_definition_id_,
                     String::Factory(basket_id_),
                     direction_);
             } break;
             case ISSUE_BASKET: {
                 last_attempt_ =
-                    api_.InternalClient().OTAPI().issueBasket(context_,
+                    api_.Internal().asClient().OTAPI().issueBasket(context_,
        unit_definition_, label_); } break; case KILL_MARKET_OFFER: {
-                last_attempt_ = api_.InternalClient().OTAPI().cancelCronItem(
-                    context_, account_id_, transaction_number_);
-            } break;
-            case KILL_PAYMENT_PLAN: {
-                last_attempt_ = api_.InternalClient().OTAPI().cancelCronItem(
-                    context_, account_id_, transaction_number_);
-            } break;
-            case DEPOSIT_PAYMENT_PLAN: {
+                last_attempt_ =
+api_.Internal().asClient().OTAPI().cancelCronItem( context_, account_id_,
+transaction_number_); } break; case KILL_PAYMENT_PLAN: { last_attempt_ =
+api_.Internal().asClient().OTAPI().cancelCronItem( context_, account_id_,
+transaction_number_); } break; case DEPOSIT_PAYMENT_PLAN: {
                 assert_true(payment_plan_);
 
                 last_attempt_ =
-       api_.InternalClient().OTAPI().depositPaymentPlan( context_,
+       api_.Internal().asClient().OTAPI().depositPaymentPlan( context_,
        String::Factory(*payment_plan_)); } break; case WITHDRAW_VOUCHER: {
-                last_attempt_ = api_.InternalClient().OTAPI().withdrawVoucher(
-                    context_,
-                    account_id_,
+                last_attempt_ =
+api_.Internal().asClient().OTAPI().withdrawVoucher( context_, account_id_,
                     recipient_id_,
                     String::Factory(message_.c_str()),
                     amount_);
             } break;
             case PAY_DIVIDEND: {
-                last_attempt_ = api_.InternalClient().OTAPI().payDividend(
+                last_attempt_ = api_.Internal().asClient().OTAPI().payDividend(
                     context_,
                     account_id_,
                     instrument_definition_id_,
@@ -553,12 +549,12 @@ void OTAPI_Func::run()
             } break;
             case GET_MARKET_LIST: {
                 last_attempt_ =
-       api_.InternalClient().OTAPI().getMarketList(context_); } break; case
+       api_.Internal().asClient().OTAPI().getMarketList(context_); } break; case
        GET_MARKET_OFFERS: { last_attempt_ =
-                    api_.InternalClient().OTAPI().getMarketOffers(context_,
+                    api_.Internal().asClient().OTAPI().getMarketOffers(context_,
        market_id_, depth_); } break; case GET_MARKET_RECENT_TRADES: {
                 last_attempt_ =
-                    api_.InternalClient().OTAPI().getMarketRecentTrades(context_,
+                    api_.Internal().asClient().OTAPI().getMarketRecentTrades(context_,
        market_id_); } break; case CREATE_MARKET_OFFER: { const auto
 ASSET_ACCT_ID = identifier::Generic::Factory(account_id_); const auto
 CURRENCY_ACCT_ID = identifier::Generic::Factory(currency_account_id_); const
@@ -587,14 +583,14 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
                 }
 
                 const auto str_asset_notary_id =
-                    api_.InternalClient().Exec().GetAccountWallet_NotaryID(account_id_->str());
+                    api_.Internal().asClient().Exec().GetAccountWallet_NotaryID(account_id_->str());
                 const auto str_currency_notary_id =
-                    api_.InternalClient().Exec().GetAccountWallet_NotaryID(
+                    api_.Internal().asClient().Exec().GetAccountWallet_NotaryID(
                         currency_account_id_->str());
                 const auto str_asset_nym_id =
-                    api_.InternalClient().Exec().GetAccountWallet_NymID(account_id_->str());
+                    api_.Internal().asClient().Exec().GetAccountWallet_NymID(account_id_->str());
                 const auto str_currency_nym_id =
-                    api_.InternalClient().Exec().GetAccountWallet_NymID(currency_account_id_->str());
+                    api_.Internal().asClient().Exec().GetAccountWallet_NymID(currency_account_id_->str());
 
                 if (str_asset_notary_id.empty() ||
        str_currency_notary_id.empty() || str_asset_nym_id.empty() ||
@@ -606,9 +602,8 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
                     return;
                 }
 
-                last_attempt_ = api_.InternalClient().OTAPI().issueMarketOffer(
-                    context_,
-                    ASSET_ACCT_ID,
+                last_attempt_ =
+api_.Internal().asClient().OTAPI().issueMarketOffer( context_, ASSET_ACCT_ID,
                     CURRENCY_ACCT_ID,
                     (0 == MARKET_SCALE) ? 1 : MARKET_SCALE,
                     (0 == MINIMUM_INCREMENT) ? 1 : MINIMUM_INCREMENT,
@@ -621,7 +616,7 @@ ACTIVATION_PRICE = activation_price_; char cStopSign = 0;
             } break;
             case ADJUST_USAGE_CREDITS: {
                 last_attempt_ =
-                    api_.InternalClient().OTAPI().usageCredits(context_,
+                    api_.Internal().asClient().OTAPI().usageCredits(context_,
        target_id_, adjustment_); } break; default: {
                 LogError()()("Error: unhandled function
        " "type: ")(type_)(".") .Flush();

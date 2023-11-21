@@ -13,6 +13,8 @@
 
 #include "internal/core/String.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
@@ -39,25 +41,6 @@ const Envelope::Expected Envelope::expected_{
     {true, {false, true, true}},
     {true, {true, true, true}},
 };
-
-auto Envelope::can_seal(const std::size_t row) -> bool
-{
-    return expected_.at(row).first;
-}
-auto Envelope::can_open(const std::size_t row, const std::size_t column) -> bool
-{
-    return can_seal(row) && should_seal(row, column);
-}
-auto Envelope::is_active(const std::size_t row, const std::size_t column)
-    -> bool
-{
-    return 0 != (row & (1_uz << column));
-}
-auto Envelope::should_seal(const std::size_t row, const std::size_t column)
-    -> bool
-{
-    return expected_.at(row).second.at(column);
-}
 
 Envelope::Envelope()
     : sender_(OTTestEnvironment::GetOT().StartClientSession(0))
@@ -163,5 +146,53 @@ Envelope::Envelope()
             opentxs::assert_false(nullptr == *nyms_.crbegin());
         }
     }
+}
+
+auto Envelope::can_seal(const std::size_t row) -> bool
+{
+    return expected_.at(row).first;
+}
+
+auto Envelope::can_open(const std::size_t row, const std::size_t column) -> bool
+{
+    return can_seal(row) && should_seal(row, column);
+}
+
+auto Envelope::get_armored(const ot::api::Session& api) noexcept
+    -> opentxs::OTArmored
+{
+    return api.Factory().Internal().Armored();
+}
+
+auto Envelope::get_envelope(const ot::api::Session& api) noexcept
+    -> opentxs::OTEnvelope
+{
+    return api.Factory().Internal().Session().Envelope();
+}
+
+auto Envelope::get_envelope(
+    const ot::api::Session& api,
+    const opentxs::Armored& ciphertext) noexcept(false) -> opentxs::OTEnvelope
+{
+    return api.Factory().Internal().Session().Envelope(ciphertext);
+}
+
+auto Envelope::get_envelope(
+    const ot::api::Session& api,
+    const opentxs::ReadView& ciphertext) noexcept(false) -> opentxs::OTEnvelope
+{
+    return api.Factory().Internal().Session().Envelope(ciphertext);
+}
+
+auto Envelope::is_active(const std::size_t row, const std::size_t column)
+    -> bool
+{
+    return 0 != (row & (1_uz << column));
+}
+
+auto Envelope::should_seal(const std::size_t row, const std::size_t column)
+    -> bool
+{
+    return expected_.at(row).second.at(column);
 }
 }  // namespace ottest

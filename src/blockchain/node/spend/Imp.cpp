@@ -24,8 +24,6 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "internal/api/FactoryAPI.hpp"
-#include "internal/api/session/FactoryAPI.hpp"
 #include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
@@ -39,11 +37,13 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
 #include "matterfi/PaymentCode.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
@@ -353,7 +353,7 @@ auto SpendPrivate::deserialize_notification(
     -> void
 {
     const auto sender =
-        api_.Factory().InternalSession().PaymentCode(in.sender());
+        api_.Factory().Internal().Session().PaymentCode(in.sender());
 
     if (sender != sender_payment_code()) {
         throw std::runtime_error{"invalid sender payment code in notification"};
@@ -364,7 +364,7 @@ auto SpendPrivate::deserialize_notification(
     }
 
     notifications_.emplace(
-        api_.Factory().InternalSession().PaymentCode(in.recipient()));
+        api_.Factory().Internal().Session().PaymentCode(in.recipient()));
 }
 
 auto SpendPrivate::deserialize_output(

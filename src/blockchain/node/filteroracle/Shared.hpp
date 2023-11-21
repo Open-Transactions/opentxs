@@ -27,6 +27,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -120,7 +125,7 @@ public:
     auto Heartbeat() noexcept -> void;
     auto Init() noexcept -> void;
     auto Init(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         std::shared_ptr<Shared> shared) noexcept -> void;
     auto Lock() noexcept -> GuardedData::handle;

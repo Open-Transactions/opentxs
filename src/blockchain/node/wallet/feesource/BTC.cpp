@@ -16,8 +16,8 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/session/Session.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -37,7 +37,7 @@ public:
     }
 
     Bitcoiner_live(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -79,7 +79,7 @@ public:
     }
 
     BitGo(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -120,7 +120,7 @@ public:
     }
 
     Bitpay(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -161,7 +161,7 @@ public:
     }
 
     Blockchain_info(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -202,7 +202,7 @@ public:
     }
 
     Blockchair(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -245,7 +245,7 @@ public:
     }
 
     BlockCypher(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -286,7 +286,7 @@ public:
     }
 
     Blockstream(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -327,7 +327,7 @@ public:
     }
 
     BTC_com(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -369,7 +369,7 @@ public:
     }
 
     Earn(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<const node::Manager> node,
         network::zeromq::BatchID batch,
         allocator_type alloc) noexcept
@@ -405,7 +405,7 @@ private:
 namespace opentxs::factory
 {
 auto BTCFeeSources(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const blockchain::node::Manager> node) noexcept -> void
 {
     assert_false(nullptr == api);

@@ -23,5 +23,4 @@ public:
 
     NymData();
 };
-
 }  // namespace ottest

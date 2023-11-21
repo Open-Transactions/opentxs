@@ -19,7 +19,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
 class Factory;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -98,7 +102,7 @@ public:
         const crypto::HashType hashType) const -> bool = 0;
 
     virtual auto Init(
-        const std::shared_ptr<const api::Factory>& factory) noexcept
+        const std::shared_ptr<const api::internal::Factory>& factory) noexcept
         -> void = 0;
 
     AsymmetricProvider(const AsymmetricProvider&) = delete;

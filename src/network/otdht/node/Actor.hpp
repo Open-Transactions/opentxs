@@ -42,6 +42,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 class Session;
 }  // namespace api
 
@@ -78,7 +83,7 @@ public:
     }
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Shared> shared,
         zeromq::BatchID batchID,
         allocator_type alloc) noexcept;
@@ -126,7 +131,7 @@ private:
         frozen::unordered_set<zeromq::SocketID, external_router_limit_>;
     using ExternalIndex = FlatMap<zeromq::SocketID, ExternalSocketIndex>;
 
-    std::shared_ptr<const api::Session> api_p_;
+    std::shared_ptr<const api::internal::Session> api_p_;
     std::shared_ptr<Shared> shared_p_;
     const Shared& shared_;
     const api::Session& api_;
@@ -198,7 +203,7 @@ private:
     auto work(allocator_type monotonic) noexcept -> bool;
 
     Actor(
-        std::shared_ptr<const api::Session> api,
+        std::shared_ptr<const api::internal::Session> api,
         std::shared_ptr<Shared> shared,
         zeromq::BatchID batchID,
         Vector<network::zeromq::socket::SocketRequest> extra,

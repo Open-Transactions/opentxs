@@ -44,7 +44,7 @@ class Address;
 namespace opentxs::factory
 {
 auto BlockchainPeerBitcoin(
-    std::shared_ptr<const api::Session> api,
+    std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> network,
     network::blockchain::bitcoin::message::Nonce nonce,
     int peerID,

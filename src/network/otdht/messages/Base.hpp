@@ -20,7 +20,6 @@ namespace opentxs
 {
 namespace network
 {
-
 namespace zeromq
 {
 class Message;

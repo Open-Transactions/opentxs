@@ -8,11 +8,11 @@
 #include <cs_plain_guarded.h>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 #include "internal/api/network/OTDHT.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
@@ -32,6 +32,11 @@ namespace opentxs
 {
 namespace api
 {
+namespace internal
+{
+class Session;
+}  // namespace internal
+
 namespace network
 {
 class Blockchain;
@@ -41,8 +46,6 @@ namespace session
 {
 class Endpoints;
 }  // namespace session
-
-class Session;
 }  // namespace api
 
 namespace network
@@ -63,10 +66,7 @@ class OTDHT final : public internal::OTDHT
 {
 public:
     auto AddPeer(std::string_view endpoint) const noexcept -> bool final;
-    auto CurvePublicKey() const noexcept -> ReadView final
-    {
-        return public_key_.get().Bytes();
-    }
+    auto CurvePublicKey() const noexcept -> ReadView final;
     auto DeletePeer(std::string_view endpoint) const noexcept -> bool final;
     auto KnownPeers(alloc::Default alloc) const noexcept -> Endpoints final;
     auto StartListener(
@@ -75,10 +75,11 @@ public:
         std::string_view updateEndpoint,
         std::string_view publicUpdateEndpoint) const noexcept -> bool final;
 
-    auto Start(std::shared_ptr<const api::Session> api) noexcept -> void final;
+    auto Start(std::shared_ptr<const api::internal::Session> api) noexcept
+        -> void final;
 
     OTDHT(
-        const api::Session& api,
+        const api::internal::Session& api,
         const opentxs::network::zeromq::Context& zmq,
         const api::session::Endpoints& endpoints,
         const api::network::Blockchain& blockchain) noexcept;
@@ -91,31 +92,38 @@ public:
     ~OTDHT() final;
 
 private:
-    using GuardedSocket =
-        libguarded::plain_guarded<opentxs::network::zeromq::socket::Raw>;
-
     static constexpr auto key_size_ = 32_uz;
     static constexpr auto encoded_key_size_ = key_size_ * 5_uz / 4_uz;
     static constexpr auto encoded_buffer_size_ = encoded_key_size_ + 1_uz;
     static constexpr auto seckey_json_key_ = "curve_secret_key"sv;
     static constexpr auto pubkey_json_key_ = "curve_public_key"sv;
 
-    const api::Session& api_;
+    struct Data {
+        opentxs::network::zeromq::socket::Raw to_node_;
+        std::optional<Secret> private_key_;
+        std::optional<FixedByteArray<key_size_>> public_key_;
+        bool init_;
+
+        Data(
+            const opentxs::network::zeromq::Context& zmq,
+            const api::session::Endpoints& endpoints) noexcept;
+    };
+
+    using Guarded = libguarded::plain_guarded<Data>;
+
+    const api::internal::Session& api_;
     const api::network::Blockchain& blockchain_;
-    DeferredConstruction<Secret> private_key_;
-    DeferredConstruction<FixedByteArray<key_size_>> public_key_;
-    mutable GuardedSocket to_node_;
+    mutable Guarded data_;
 
     static auto write_config(
         const boost::json::object& json,
         const std::filesystem::path& path) noexcept -> void;
 
-    auto create_config(
-        const api::Session& api,
-        const std::filesystem::path& path) noexcept -> void;
-    auto load_config(const api::Session& api) noexcept -> void;
-    auto read_config(
-        const api::Session& api,
-        const std::filesystem::path& path) noexcept -> void;
+    auto create_config(const std::filesystem::path& path, Data& data)
+        const noexcept -> void;
+    auto get_data() const noexcept -> Guarded::handle;
+    auto load_config(Data& data) const noexcept -> void;
+    auto read_config(const std::filesystem::path& path, Data& data)
+        const noexcept -> void;
 };
 }  // namespace opentxs::api::network::implementation

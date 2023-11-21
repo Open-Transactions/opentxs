@@ -143,5 +143,4 @@ public:
         Tag& parent,
         bool bCalculatingID = false) const;
 };
-
 }  // namespace opentxs
