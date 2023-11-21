@@ -181,12 +181,16 @@ auto AccountCache::load_nym(
     };
     using enum opentxs::blockchain::crypto::SubaccountType;
     auto populate_hd = [&](auto& id) { populate(HD, id); };
+    auto populate_eth = [&](auto& id) { populate(Imported, id); };
     auto populate_pc = [&](auto& id) { populate(PaymentCode, id); };
     auto hd = api_.Storage().Internal().BlockchainAccountList(
+        nym, blockchain_to_unit(chain));
+    auto eth = api_.Storage().Internal().BlockchainEthereumAccountList(
         nym, blockchain_to_unit(chain));
     auto pc = api_.Storage().Internal().Bip47ChannelsByChain(
         nym, blockchain_to_unit(chain));
     std::ranges::for_each(hd, populate_hd);
+    std::ranges::for_each(eth, populate_eth);
     std::ranges::for_each(pc, populate_pc);
 }
 

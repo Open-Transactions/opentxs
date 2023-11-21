@@ -7,6 +7,8 @@
 
 #include <BlockchainAccountData.pb.h>
 #include <BlockchainDeterministicAccountData.pb.h>
+#include <BlockchainEthereumAccountData.pb.h>
+#include <BlockchainImportedAccountData.pb.h>
 #include <Enums.pb.h>
 #include <HDAccount.pb.h>
 #include <Nym.pb.h>
@@ -23,6 +25,7 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/verify/BlockchainEthereumAccountData.hpp"
 #include "internal/serialization/protobuf/verify/HDAccount.hpp"
 #include "internal/serialization/protobuf/verify/Nym.hpp"
 #include "internal/serialization/protobuf/verify/Purse.hpp"
@@ -153,6 +156,10 @@ Nym::Nym(
     , workflows_lock_()
     , workflows_(nullptr)
     , purse_id_()
+    , ethereum_lock_()
+    , ethereum_account_types_()
+    , ethereum_account_index_()
+    , ethereum_accounts_()
 {
     if (is_valid(hash)) {
         init(hash);
@@ -185,6 +192,18 @@ auto Nym::BlockchainAccountList(const UnitType type) const
     return it->second;
 }
 
+auto Nym::BlockchainEthereumAccountList(const UnitType type) const
+    -> UnallocatedSet<identifier::Account>
+{
+    Lock lock(ethereum_lock_);
+
+    auto it = ethereum_account_types_.find(type);
+
+    if (ethereum_account_types_.end() == it) { return {}; }
+
+    return it->second;
+}
+
 auto Nym::BlockchainAccountType(const identifier::Account& accountID) const
     -> UnitType
 {
@@ -193,6 +212,20 @@ auto Nym::BlockchainAccountType(const identifier::Account& accountID) const
     try {
 
         return blockchain_account_index_.at(accountID);
+    } catch (...) {
+
+        return UnitType::Error;
+    }
+}
+
+auto Nym::BlockchainEthereumAccountType(
+    const identifier::Account& accountID) const -> UnitType
+{
+    Lock lock(ethereum_lock_);
+
+    try {
+
+        return ethereum_account_index_.at(accountID);
     } catch (...) {
 
         return UnitType::Error;
@@ -389,6 +422,30 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
         switch (set_original_version(proto.version())) {
+            case 10u: {
+                for (const auto& it : proto.ethereum_hd_index()) {
+                    const auto& id = it.id();
+                    const auto type = ClaimToUnit(translate(id));
+                    auto& accountSet = ethereum_account_types_[type];
+
+                    for (const auto& base58 : it.list()) {
+                        const auto accountID =
+                            factory_.AccountIDFromBase58(base58);
+                        accountSet.emplace(accountID);
+                        ethereum_account_index_.emplace(accountID, type);
+                    }
+                }
+
+                for (const auto& account : proto.ethereum_hd()) {
+                    ethereum_accounts_.emplace(
+                        factory_.AccountIDFromBase58(
+                            account.imported().common().id()),
+                        std::make_shared<proto::BlockchainEthereumAccountData>(
+                            account));
+                }
+
+                [[fallthrough]];
+            }
             case 9u: {
                 // NOTE txo field is no longer used
                 [[fallthrough]];
@@ -416,7 +473,7 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
                 [[fallthrough]];
             }
             case 4u: {
-                for (const auto& it : proto.blockchainaccountindex()) {
+                for (const auto& it : proto.bitcoin_hd_index()) {
                     const auto& id = it.id();
                     const auto type = ClaimToUnit(translate(id));
                     auto& accountSet = blockchain_account_types_[type];
@@ -429,7 +486,7 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
                     }
                 }
 
-                for (const auto& account : proto.hdaccount()) {
+                for (const auto& account : proto.bitcoin_hd()) {
                     blockchain_accounts_.emplace(
                         factory_.AccountIDFromBase58(
                             account.deterministic().common().id()),
@@ -500,6 +557,30 @@ auto Nym::issuers() const -> tree::Issuers*
 }
 
 auto Nym::Issuers() const -> const tree::Issuers& { return *issuers(); }
+
+auto Nym::Load(
+    const identifier::Account& id,
+    std::shared_ptr<proto::BlockchainEthereumAccountData>& output,
+    ErrorReporting checking) const -> bool
+{
+    Lock lock(ethereum_lock_);
+
+    const auto it = ethereum_accounts_.find(id);
+
+    if (ethereum_accounts_.end() == it) {
+        using enum ErrorReporting;
+
+        if (verbose == checking) {
+            LogError()()("Account does not exist.").Flush();
+        }
+
+        return false;
+    }
+
+    output = it->second;
+
+    return bool(output);
+}
 
 auto Nym::Load(
     const identifier::Account& id,
@@ -828,7 +909,7 @@ auto Nym::serialize() const -> proto::StorageNym
     for (const auto& it : blockchain_account_types_) {
         const auto& chainType = it.first;
         const auto& accountSet = it.second;
-        auto& index = *proto.add_blockchainaccountindex();
+        auto& index = *proto.add_bitcoin_hd_index();
         index.set_version(blockchain_index_version_);
         index.set_id(translate(UnitToClaim(chainType)));
 
@@ -841,7 +922,7 @@ auto Nym::serialize() const -> proto::StorageNym
         assert_false(nullptr == it.second);
 
         const auto& account = *it.second;
-        *proto.add_hdaccount() = account;
+        *proto.add_bitcoin_hd() = account;
     }
 
     write(issuers_root_, *proto.mutable_issuers());
@@ -857,6 +938,25 @@ auto Nym::serialize() const -> proto::StorageNym
         set_hash(unit, hash, *purse.mutable_purse());
     }
 
+    for (const auto& it : ethereum_account_types_) {
+        const auto& chainType = it.first;
+        const auto& accountSet = it.second;
+        auto& index = *proto.add_ethereum_hd_index();
+        index.set_version(blockchain_index_version_);
+        index.set_id(translate(UnitToClaim(chainType)));
+
+        for (const auto& accountID : accountSet) {
+            index.add_list(accountID.asBase58(crypto_));
+        }
+    }
+
+    for (const auto& it : ethereum_accounts_) {
+        assert_false(nullptr == it.second);
+
+        const auto& account = *it.second;
+        *proto.add_ethereum_hd() = account;
+    }
+
     return proto;
 }
 
@@ -867,6 +967,52 @@ auto Nym::SetAlias(std::string_view alias) -> bool
     alias_ = alias;
 
     return true;
+}
+
+auto Nym::Store(
+    const UnitType type,
+    const proto::BlockchainEthereumAccountData& data) -> bool
+{
+    const auto& accountID =
+        factory_.AccountIDFromBase58(data.imported().common().id());
+
+    if (accountID.empty()) {
+        LogError()()("Invalid account ID.").Flush();
+
+        return false;
+    }
+
+    if (false == proto::Validate(data, VERBOSE)) {
+        LogError()()("Invalid account.").Flush();
+
+        return false;
+    }
+
+    Lock writeLock(write_lock_, std::defer_lock);
+    Lock ethereumLock(ethereum_lock_, std::defer_lock);
+    std::lock(writeLock, ethereumLock);
+    auto accountItem = ethereum_accounts_.find(accountID);
+
+    if (ethereum_accounts_.end() == accountItem) {
+        ethereum_accounts_[accountID] =
+            std::make_shared<proto::BlockchainEthereumAccountData>(data);
+    } else {
+        auto& existing = accountItem->second;
+
+        if (existing->imported().common().revision() >
+            data.imported().common().revision()) {
+            LogError()()("Not saving object with older revision.").Flush();
+        } else {
+            existing =
+                std::make_shared<proto::BlockchainEthereumAccountData>(data);
+        }
+    }
+
+    ethereum_account_types_[type].insert(accountID);
+    ethereum_account_index_.emplace(accountID, type);
+    ethereumLock.unlock();
+
+    return save(writeLock);
 }
 
 auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool

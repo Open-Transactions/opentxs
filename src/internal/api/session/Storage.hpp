@@ -64,6 +64,7 @@ class UnitDefinition;
 namespace proto
 {
 class Bip47Channel;
+class BlockchainEthereumAccountData;
 class Ciphertext;
 class Contact;
 class Context;
@@ -129,6 +130,10 @@ public:
         const identifier::Nym& nymID,
         const UnitType type) const noexcept
         -> UnallocatedSet<identifier::Account> = 0;
+    virtual auto BlockchainEthereumAccountList(
+        const identifier::Nym& nymID,
+        const UnitType type) const noexcept
+        -> UnallocatedSet<identifier::Account> = 0;
     virtual auto BlockchainSubaccountAccountType(
         const identifier::Nym& owner,
         const identifier::Account& id) const noexcept -> UnitType = 0;
@@ -183,6 +188,12 @@ public:
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
         proto::Bip47Channel& output,
+        ErrorReporting checking = ErrorReporting::silent) const noexcept
+        -> bool = 0;
+    virtual auto Load(
+        const identifier::Nym& nymID,
+        const identifier::Account& accountID,
+        proto::BlockchainEthereumAccountData& output,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
@@ -423,6 +434,11 @@ public:
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
         const proto::Bip47Channel& data) const noexcept -> bool = 0;
+    virtual auto Store(
+        const identifier::Nym& nymID,
+        const UnitType type,
+        const proto::BlockchainEthereumAccountData& data) const noexcept
+        -> bool = 0;
     virtual auto Store(const proto::Ciphertext& serialized) const noexcept
         -> bool = 0;
     virtual auto Store(const proto::Contact& data) const noexcept -> bool = 0;
@@ -431,7 +447,7 @@ public:
         -> bool = 0;
     virtual auto Store(
         const identifier::Nym& nymID,
-        const opentxs::identity::wot::claim::ClaimType type,
+        const UnitType type,
         const proto::HDAccount& data) const noexcept -> bool = 0;
     virtual auto Store(const identifier::Nym& nymID, const proto::Issuer& data)
         const noexcept -> bool = 0;

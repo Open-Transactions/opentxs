@@ -27,6 +27,8 @@ auto StorageItemHashAllowedIdentifier() noexcept -> const VersionMap&;
 auto StorageItemsAllowedSymmetricKey() noexcept -> const VersionMap&;
 auto StorageNotaryAllowedBlindedSeriesList() noexcept -> const VersionMap&;
 auto StorageNymAllowedBlockchainAccountList() noexcept -> const VersionMap&;
+auto StorageNymAllowedBlockchainEthereumAccountData() noexcept
+    -> const VersionMap&;
 auto StorageNymAllowedHDAccount() noexcept -> const VersionMap&;
 auto StorageNymAllowedStorageBip47AddressIndex() noexcept -> const VersionMap&;
 auto StorageNymAllowedStorageItemHash() noexcept -> const VersionMap&;

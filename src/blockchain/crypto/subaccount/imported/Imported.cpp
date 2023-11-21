@@ -29,6 +29,11 @@ Imported::Imported(Imported&& rhs) noexcept
 
 auto Imported::asEthereum() const noexcept -> const crypto::Ethereum&
 {
+    return const_cast<Imported*>(this)->asEthereum();
+}
+
+auto Imported::asEthereum() noexcept -> crypto::Ethereum&
+{
     if (auto p = imp_.lock(); p) {
         return p->asImported().asEthereumPublic();
     } else {
@@ -41,16 +46,6 @@ auto Imported::Blank() noexcept -> Imported&
     static auto blank = Imported{std::make_shared<internal::Imported>()};
 
     return blank;
-}
-
-auto Imported::Key() const noexcept
-    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
-{
-    if (auto p = imp_.lock(); p) {
-        return p->asImported().Key();
-    } else {
-        return internal::Imported::Blank().Key();
-    }
 }
 
 Imported::~Imported() = default;

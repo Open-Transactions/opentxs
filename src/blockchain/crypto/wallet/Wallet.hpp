@@ -71,6 +71,11 @@ public:
     }
     auto size() const noexcept -> std::size_t final;
 
+    auto AddEthereum(
+        const identifier::Nym& nym,
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
     auto AddHD(
         const identifier::Nym& nym,
         const proto::HDPath& path,
@@ -121,6 +126,7 @@ private:
     auto factory(
         const identifier::Nym& nym,
         const Accounts& hd,
+        const Accounts& ethereum,
         const Accounts& paymentCode) const noexcept
         -> std::unique_ptr<crypto::Account>;
     auto get_or_create(Data& data, const identifier::Nym& id) const noexcept

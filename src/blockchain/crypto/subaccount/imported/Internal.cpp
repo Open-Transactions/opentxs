@@ -7,7 +7,6 @@
 
 #include "internal/blockchain/crypto/Ethereum.hpp"
 #include "opentxs/blockchain/crypto/Ethereum.hpp"
-#include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {
@@ -34,14 +33,6 @@ auto Imported::asEthereumPublic() noexcept -> crypto::Ethereum&
 auto Imported::Blank() noexcept -> Imported&
 {
     static auto blank = Imported{};
-
-    return blank;
-}
-
-auto Imported::Key() const noexcept
-    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
-{
-    static const auto blank = opentxs::crypto::asymmetric::key::EllipticCurve{};
 
     return blank;
 }

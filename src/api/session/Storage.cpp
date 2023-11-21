@@ -8,6 +8,7 @@
 #include "api/session/Storage.hpp"  // IWYU pragma: associated
 
 #include <Bip47Channel.pb.h>
+#include <BlockchainEthereumAccountData.pb.h>
 #include <Ciphertext.pb.h>
 #include <Contact.pb.h>
 #include <Context.pb.h>
@@ -52,7 +53,6 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -246,14 +246,24 @@ auto Storage::BlockchainAccountList(
     return Root().Trunk().Nyms().Nym(nymID).BlockchainAccountList(type);
 }
 
+auto Storage::BlockchainEthereumAccountList(
+    const identifier::Nym& nymID,
+    const UnitType type) const noexcept -> UnallocatedSet<identifier::Account>
+{
+    return Root().Trunk().Nyms().Nym(nymID).BlockchainEthereumAccountList(type);
+}
+
 auto Storage::BlockchainSubaccountAccountType(
     const identifier::Nym& owner,
     const identifier::Account& subaccount) const noexcept -> UnitType
 {
+    using enum UnitType;
     const auto& nym = Root().Trunk().Nyms().Nym(owner);
     auto out = nym.BlockchainAccountType(subaccount);
 
-    if (UnitType::Error == out) { out = nym.Bip47Channels().Chain(subaccount); }
+    if (Error == out) { out = nym.Bip47Channels().Chain(subaccount); }
+
+    if (Error == out) { out = nym.BlockchainEthereumAccountType(subaccount); }
 
     return out;
 }
@@ -493,6 +503,21 @@ auto Storage::Load(
     auto temp = std::make_shared<proto::Bip47Channel>(output);
     const auto rc = Root().Trunk().Nyms().Nym(nymID).Bip47Channels().Load(
         channelID, temp, checking);
+
+    if (rc && temp) { output = *temp; }
+
+    return rc;
+}
+
+auto Storage::Load(
+    const identifier::Nym& nymID,
+    const identifier::Account& accountID,
+    proto::BlockchainEthereumAccountData& output,
+    ErrorReporting checking) const noexcept -> bool
+{
+    auto temp = std::make_shared<proto::BlockchainEthereumAccountData>(output);
+    const auto rc =
+        Root().Trunk().Nyms().Nym(nymID).Load(accountID, temp, checking);
 
     if (rc && temp) { output = *temp; }
 
@@ -1831,7 +1856,7 @@ auto Storage::Store(
 
 auto Storage::Store(
     const identifier::Nym& nymID,
-    const identity::wot::claim::ClaimType type,
+    const UnitType type,
     const proto::HDAccount& data) const noexcept -> bool
 {
     return mutable_Root()
@@ -1842,7 +1867,7 @@ auto Storage::Store(
         .get()
         .mutable_Nym(nymID)
         .get()
-        .Store(ClaimToUnit(type), data);
+        .Store(type, data);
 }
 
 auto Storage::Store(
@@ -1869,6 +1894,22 @@ auto Storage::Store(
         .mutable_Bip47Channels()
         .get()
         .Store(channelID, data);
+}
+
+auto Storage::Store(
+    const identifier::Nym& nymID,
+    const UnitType type,
+    const proto::BlockchainEthereumAccountData& data) const noexcept -> bool
+{
+    return mutable_Root()
+        .get()
+        .mutable_Trunk()
+        .get()
+        .mutable_Nyms()
+        .get()
+        .mutable_Nym(nymID)
+        .get()
+        .Store(type, data);
 }
 
 auto Storage::Store(const proto::Contact& data) const noexcept -> bool

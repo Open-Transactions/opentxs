@@ -9,6 +9,36 @@
 
 namespace opentxs::blockchain::crypto::internal
 {
+auto Ethereum::AddIncoming(
+    const Amount&,
+    const block::TransactionHash&,
+    bool) noexcept -> bool
+{
+    return {};
+}
+
+auto Ethereum::AddIncoming(const block::TransactionHash&, bool) noexcept -> bool
+{
+    return {};
+}
+
+auto Ethereum::AddOutgoing(
+    const Amount&,
+    protocol::ethereum::AccountNonce,
+    const block::TransactionHash&,
+    bool) noexcept -> bool
+{
+    return {};
+}
+
+auto Ethereum::AddOutgoing(
+    protocol::ethereum::AccountNonce,
+    const block::TransactionHash&,
+    bool) noexcept -> bool
+{
+    return {};
+}
+
 auto Ethereum::Balance() const noexcept -> Amount { return {}; }
 
 auto Ethereum::Blank() noexcept -> Ethereum&
@@ -18,26 +48,28 @@ auto Ethereum::Blank() noexcept -> Ethereum&
     return blank;
 }
 
-auto Ethereum::KnownTransactions(alloc::Strategy alloc) const noexcept
+auto Ethereum::KnownIncoming(alloc::Strategy alloc) const noexcept
+    -> Set<block::TransactionHash>
+{
+    return Set<block::TransactionHash>{alloc.result_};
+}
+
+auto Ethereum::KnownOutgoing(alloc::Strategy alloc) const noexcept
+    -> Set<block::TransactionHash>
+{
+    return Set<block::TransactionHash>{alloc.result_};
+}
+
+auto Ethereum::MissingOutgoing(alloc::Strategy alloc) const noexcept
     -> Set<protocol::ethereum::AccountNonce>
 {
     return Set<protocol::ethereum::AccountNonce>{alloc.result_};
 }
 
-auto Ethereum::MissingTransactions(alloc::Strategy alloc) const noexcept
-    -> Set<protocol::ethereum::AccountNonce>
-{
-    return Set<protocol::ethereum::AccountNonce>{alloc.result_};
-}
-
-auto Ethereum::NextNonce() const noexcept -> protocol::ethereum::AccountNonce
+auto Ethereum::NextOutgoing() const noexcept -> protocol::ethereum::AccountNonce
 {
     return {};
 }
 
-auto Ethereum::UpdateBalance(const Amount&, protocol::ethereum::AccountNonce)
-    const noexcept -> bool
-{
-    return {};
-}
+auto Ethereum::UpdateBalance(const Amount&) noexcept -> bool { return {}; }
 }  // namespace opentxs::blockchain::crypto::internal

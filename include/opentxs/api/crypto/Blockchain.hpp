@@ -15,6 +15,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -150,10 +151,6 @@ public:
     virtual auto AssignTransactionMemo(
         const TxidHex& id,
         const UnallocatedCString& label) const noexcept -> bool = 0;
-    virtual auto CalculateAddress(
-        const opentxs::blockchain::Type chain,
-        const opentxs::blockchain::crypto::AddressStyle format,
-        const Data& pubkey) const noexcept -> UnallocatedCString = 0;
     virtual auto Confirm(const Key key, const Txid& tx) const noexcept
         -> bool = 0;
     virtual auto DecodeAddress(std::string_view encoded) const noexcept
@@ -199,6 +196,17 @@ public:
         const UnallocatedCString& address) const noexcept -> ContactList = 0;
     virtual auto LookupContacts(const Data& pubkeyHash) const noexcept
         -> ContactList = 0;
+    virtual auto NewEthereumSubaccount(
+        const identifier::Nym& nymID,
+        const opentxs::blockchain::crypto::HDProtocol standard,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept -> identifier::Account = 0;
+    virtual auto NewEthereumSubaccount(
+        const identifier::Nym& nymID,
+        const opentxs::blockchain::crypto::HDProtocol standard,
+        const Chain derivationChain,
+        const Chain targetChain,
+        const PasswordPrompt& reason) const noexcept -> identifier::Account = 0;
     virtual auto NewHDSubaccount(
         const identifier::Nym& nymID,
         const opentxs::blockchain::crypto::HDProtocol standard,

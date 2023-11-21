@@ -27,9 +27,11 @@ set(PROTO_SOURCES
     BlockchainBlockLocalData.proto
     BlockchainDeterministicAccountData.proto
     BlockchainEnums.proto
+    BlockchainEthereumAccountData.proto
     BlockchainExternalAddress.proto
     BlockchainFilterHeader.proto
     BlockchainHDAccountData.proto
+    BlockchainImportedAccountData.proto
     BlockchainInputWitness.proto
     BlockchainOutputMultisigDetails.proto
     BlockchainPeerAddress.proto
@@ -262,9 +264,11 @@ if(OT_PCH)
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainBlockLocalData.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainDeterministicAccountData.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainEthereumAccountData.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainExternalAddress.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainFilterHeader.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainHDAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainImportedAccountData.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainInputWitness.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainOutputMultisigDetails.pb.h$<ANGLE-R>>"
     "$<$<COMPILE_LANGUAGE:CXX>:<BlockchainPeerAddress.pb.h$<ANGLE-R>>"

@@ -31,12 +31,14 @@ auto CheckProto_1(const StorageNym& input, const bool silent) -> bool
     CHECK_EXCLUDED(threads);
     CHECK_EXCLUDED(contexts);
     CHECK_EXCLUDED(accounts);
-    CHECK_NONE(blockchainaccountindex);
-    CHECK_NONE(hdaccount);
+    CHECK_NONE(bitcoin_hd_index);
+    CHECK_NONE(bitcoin_hd);
     CHECK_EXCLUDED(issuers);
     CHECK_EXCLUDED(paymentworkflow);
     CHECK_EXCLUDED(bip47);
     CHECK_NONE(purse);
+    CHECK_NONE(ethereum_hd_index);
+    CHECK_NONE(ethereum_hd);
 
     return true;
 }

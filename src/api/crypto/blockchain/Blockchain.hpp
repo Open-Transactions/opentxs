@@ -134,10 +134,6 @@ public:
         const UnallocatedCString& id,
         const UnallocatedCString& label) const noexcept -> bool final;
     auto BalanceOracleEndpoint() const noexcept -> std::string_view final;
-    auto CalculateAddress(
-        const Chain chain,
-        const opentxs::blockchain::crypto::AddressStyle format,
-        const Data& pubkey) const noexcept -> UnallocatedCString final;
     auto Confirm(
         const Key key,
         const opentxs::blockchain::block::TransactionHash& tx) const noexcept
@@ -194,6 +190,19 @@ public:
         -> ContactList final;
     auto LookupContacts(const Data& pubkeyHash) const noexcept
         -> ContactList final;
+    auto NewEthereumSubaccount(
+        const identifier::Nym& nymID,
+        const opentxs::blockchain::crypto::HDProtocol standard,
+        const Chain chain,
+        const PasswordPrompt& reason) const noexcept
+        -> identifier::Account final;
+    auto NewEthereumSubaccount(
+        const identifier::Nym& nymID,
+        const opentxs::blockchain::crypto::HDProtocol standard,
+        const Chain derivationChain,
+        const Chain targetChain,
+        const PasswordPrompt& reason) const noexcept
+        -> identifier::Account final;
     auto NewHDSubaccount(
         const identifier::Nym& nymID,
         const opentxs::blockchain::crypto::HDProtocol standard,

@@ -13,12 +13,18 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
 namespace blockchain
 {
+namespace block
+{
+class TransactionHash;
+}  // namespace block
+
 namespace crypto
 {
 namespace internal
@@ -69,7 +75,19 @@ public:
     auto asDeterministic() noexcept -> crypto::Deterministic&;
     auto asImported() noexcept -> crypto::Imported&;
     auto asNotification() noexcept -> crypto::Notification&;
+    auto Confirm(
+        const Subchain type,
+        const Bip32Index index,
+        const block::TransactionHash& tx) noexcept -> bool;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Subaccount&;
+    auto SetScanProgress(
+        const block::Position& progress,
+        Subchain type) noexcept -> void;
+    auto Unconfirm(
+        const Subchain type,
+        const Bip32Index index,
+        const block::TransactionHash& tx,
+        const Time time) noexcept -> bool;
 
     OPENTXS_NO_EXPORT Subaccount(
         std::shared_ptr<internal::Subaccount> imp) noexcept;

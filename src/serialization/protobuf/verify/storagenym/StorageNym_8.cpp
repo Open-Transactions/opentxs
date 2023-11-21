@@ -35,12 +35,14 @@ auto CheckProto_8(const StorageNym& input, const bool silent) -> bool
     OPTIONAL_SUBOBJECT(contexts, StorageNymAllowedStorageItemHash());
     OPTIONAL_SUBOBJECT(accounts, StorageNymAllowedStorageItemHash());
     CHECK_SUBOBJECTS(
-        blockchainaccountindex, StorageNymAllowedBlockchainAccountList());
-    CHECK_SUBOBJECTS(hdaccount, StorageNymAllowedHDAccount());
+        bitcoin_hd_index, StorageNymAllowedBlockchainAccountList());
+    CHECK_SUBOBJECTS(bitcoin_hd, StorageNymAllowedHDAccount());
     OPTIONAL_IDENTIFIER(issuers);
     OPTIONAL_IDENTIFIER(paymentworkflow);
     OPTIONAL_IDENTIFIER(bip47);
     OPTIONAL_SUBOBJECTS(purse, StorageNymAllowedStoragePurse());
+    CHECK_NONE(ethereum_hd_index);
+    CHECK_NONE(ethereum_hd);
 
     return true;
 }

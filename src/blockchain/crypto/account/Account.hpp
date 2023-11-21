@@ -103,6 +103,10 @@ public:
         -> crypto::Subaccount& final;
     auto Target() const noexcept -> crypto::Target final { return chain_; }
 
+    auto AddEthereum(
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
     auto AddHD(
         const proto::HDPath& path,
         const crypto::HDProtocol standard,
@@ -122,7 +126,7 @@ public:
         const crypto::Wallet& parent,
         const identifier::Nym& nym,
         const Accounts& hd,
-        const Accounts& imported,
+        const Accounts& ethereum,
         const Accounts& paymentCode) noexcept;
     Account() = delete;
     Account(const Account&) = delete;
@@ -164,6 +168,15 @@ private:
     auto get_subaccounts(SubaccountType type, Data& map) const noexcept
         -> UnallocatedVector<crypto::Subaccount>;
 
+    auto init_ethereum(const Accounts& accounts, Data& data) noexcept -> void;
+    auto init_ethereum(
+        const identifier::Account& id,
+        Data& data,
+        bool checking) noexcept -> crypto::Subaccount&;
+    auto init_ethereum(
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
     auto init_hd(const Accounts& HDAccounts, Data& data) noexcept -> void;
     auto init_hd(
         const identifier::Account& id,

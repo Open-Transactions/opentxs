@@ -29,6 +29,58 @@ Ethereum::Ethereum(Ethereum&& rhs) noexcept
 {
 }
 
+auto Ethereum::AddIncoming(
+    const Amount& balance,
+    const block::TransactionHash& txid,
+    bool confirmed) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().AddIncoming(
+            balance, txid, confirmed);
+    } else {
+        return internal::Ethereum::Blank().AddIncoming(
+            balance, txid, confirmed);
+    }
+}
+
+auto Ethereum::AddIncoming(
+    const block::TransactionHash& txid,
+    bool confirmed) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().AddIncoming(txid, confirmed);
+    } else {
+        return internal::Ethereum::Blank().AddIncoming(txid, confirmed);
+    }
+}
+
+auto Ethereum::AddOutgoing(
+    const Amount& balance,
+    protocol::ethereum::AccountNonce nonce,
+    const block::TransactionHash& txid,
+    bool confirmed) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().AddOutgoing(
+            balance, nonce, txid, confirmed);
+    } else {
+        return internal::Ethereum::Blank().AddOutgoing(
+            balance, nonce, txid, confirmed);
+    }
+}
+
+auto Ethereum::AddOutgoing(
+    protocol::ethereum::AccountNonce nonce,
+    const block::TransactionHash& txid,
+    bool confirmed) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().AddOutgoing(nonce, txid, confirmed);
+    } else {
+        return internal::Ethereum::Blank().AddOutgoing(nonce, txid, confirmed);
+    }
+}
+
 auto Ethereum::Balance() const noexcept -> Amount
 {
     if (auto p = imp_.lock(); p) {
@@ -45,43 +97,51 @@ auto Ethereum::Blank() noexcept -> Ethereum&
     return blank;
 }
 
-auto Ethereum::KnownTransactions(alloc::Strategy alloc) const noexcept
+auto Ethereum::KnownIncoming(alloc::Strategy alloc) const noexcept
+    -> Set<block::TransactionHash>
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().KnownIncoming(alloc);
+    } else {
+        return internal::Ethereum::Blank().KnownIncoming(alloc);
+    }
+}
+
+auto Ethereum::KnownOutgoing(alloc::Strategy alloc) const noexcept
+    -> Set<block::TransactionHash>
+{
+    if (auto p = imp_.lock(); p) {
+        return p->asImported().asEthereum().KnownOutgoing(alloc);
+    } else {
+        return internal::Ethereum::Blank().KnownOutgoing(alloc);
+    }
+}
+
+auto Ethereum::MissingOutgoing(alloc::Strategy alloc) const noexcept
     -> Set<protocol::ethereum::AccountNonce>
 {
     if (auto p = imp_.lock(); p) {
-        return p->asImported().asEthereum().KnownTransactions(alloc);
+        return p->asImported().asEthereum().MissingOutgoing(alloc);
     } else {
-        return internal::Ethereum::Blank().KnownTransactions(alloc);
+        return internal::Ethereum::Blank().MissingOutgoing(alloc);
     }
 }
 
-auto Ethereum::MissingTransactions(alloc::Strategy alloc) const noexcept
-    -> Set<protocol::ethereum::AccountNonce>
+auto Ethereum::NextOutgoing() const noexcept -> protocol::ethereum::AccountNonce
 {
     if (auto p = imp_.lock(); p) {
-        return p->asImported().asEthereum().MissingTransactions(alloc);
+        return p->asImported().asEthereum().NextOutgoing();
     } else {
-        return internal::Ethereum::Blank().MissingTransactions(alloc);
+        return internal::Ethereum::Blank().NextOutgoing();
     }
 }
 
-auto Ethereum::NextNonce() const noexcept -> protocol::ethereum::AccountNonce
+auto Ethereum::UpdateBalance(const Amount& balance) noexcept -> bool
 {
     if (auto p = imp_.lock(); p) {
-        return p->asImported().asEthereum().NextNonce();
+        return p->asImported().asEthereum().UpdateBalance(balance);
     } else {
-        return internal::Ethereum::Blank().NextNonce();
-    }
-}
-
-auto Ethereum::UpdateBalance(
-    const Amount& balance,
-    protocol::ethereum::AccountNonce nonce) const noexcept -> bool
-{
-    if (auto p = imp_.lock(); p) {
-        return p->asImported().asEthereum().UpdateBalance(balance, nonce);
-    } else {
-        return internal::Ethereum::Blank().UpdateBalance(balance, nonce);
+        return internal::Ethereum::Blank().UpdateBalance(balance);
     }
 }
 

@@ -38,6 +38,11 @@ class PasswordPrompt;
 namespace opentxs::blockchain::crypto::internal
 {
 struct Wallet : virtual public crypto::Wallet {
+    virtual auto AddEthereum(
+        const identifier::Nym& nym,
+        const proto::HDPath& path,
+        const crypto::HDProtocol standard,
+        const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddHD(
         const identifier::Nym& nym,
         const proto::HDPath& path,

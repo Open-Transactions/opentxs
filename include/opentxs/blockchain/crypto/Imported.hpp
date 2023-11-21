@@ -25,17 +25,6 @@ class Subaccount;
 class Ethereum;
 }  // namespace crypto
 }  // namespace blockchain
-
-namespace crypto
-{
-namespace asymmetric
-{
-namespace key
-{
-class EllipticCurve;
-}  // namespace key
-}  // namespace asymmetric
-}  // namespace crypto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -47,8 +36,6 @@ public:
     OPENTXS_NO_EXPORT static auto Blank() noexcept -> Imported&;
 
     auto asEthereum() const noexcept -> const crypto::Ethereum&;
-    auto Key() const noexcept
-        -> const opentxs::crypto::asymmetric::key::EllipticCurve&;
 
     auto asEthereum() noexcept -> crypto::Ethereum&;
 

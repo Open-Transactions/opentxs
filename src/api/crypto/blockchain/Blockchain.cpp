@@ -21,6 +21,7 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
@@ -171,14 +172,6 @@ auto Blockchain::BalanceOracleEndpoint() const noexcept -> std::string_view
     return imp_->BalanceOracleEndpoint();
 }
 
-auto Blockchain::CalculateAddress(
-    const Chain chain,
-    const Style format,
-    const Data& pubkey) const noexcept -> UnallocatedCString
-{
-    return imp_->CalculateAddress(chain, format, pubkey);
-}
-
 auto Blockchain::Confirm(
     const Key key,
     const opentxs::blockchain::block::TransactionHash& tx) const noexcept
@@ -317,6 +310,26 @@ auto Blockchain::LookupContacts(const Data& pubkeyHash) const noexcept
     return imp_->LookupContacts(pubkeyHash);
 }
 
+auto Blockchain::NewEthereumSubaccount(
+    const identifier::Nym& nymID,
+    const opentxs::blockchain::crypto::HDProtocol standard,
+    const Chain chain,
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
+{
+    return imp_->NewEthereumSubaccount(nymID, standard, chain, chain, reason);
+}
+
+auto Blockchain::NewEthereumSubaccount(
+    const identifier::Nym& nymID,
+    const opentxs::blockchain::crypto::HDProtocol standard,
+    const Chain derivationChain,
+    const Chain targetChain,
+    const PasswordPrompt& reason) const noexcept -> identifier::Account
+{
+    return imp_->NewEthereumSubaccount(
+        nymID, standard, derivationChain, targetChain, reason);
+}
+
 auto Blockchain::NewHDSubaccount(
     const identifier::Nym& nymID,
     const opentxs::blockchain::crypto::HDProtocol standard,
@@ -387,11 +400,10 @@ auto Blockchain::ProcessTransactions(
     return imp_->ProcessTransactions(chain, std::move(in), reason, {});
 }
 
-auto Blockchain::PubkeyHash(
-    [[maybe_unused]] const Chain chain,
-    const Data& pubkey) const noexcept(false) -> ByteArray
+auto Blockchain::PubkeyHash(const Chain chain, const Data& pubkey) const
+    noexcept(false) -> ByteArray
 {
-    return imp_->PubkeyHash(chain, pubkey);
+    return imp_->PubkeyHash(chain, pubkey.Bytes());
 }
 
 auto Blockchain::RecipientContact(const Key& key) const noexcept

@@ -10,10 +10,11 @@ option java_package = "org.opentransactions.proto";
 option java_outer_classname = "OTStorageNym";
 option optimize_for = LITE_RUNTIME;
 
+import public "BlockchainEthereumAccountData.proto";
 import public "HDAccount.proto";
 import public "StorageBlockchainAccountList.proto";
-import public "StoragePurse.proto";
 import public "StorageItemHash.proto";
+import public "StoragePurse.proto";
 
 message StorageNym
 {
@@ -33,10 +34,12 @@ message StorageNym
     optional StorageItemHash Threads = 14;
     optional StorageItemHash Contexts = 15;
     optional StorageItemHash Accounts = 16;
-    repeated StorageBlockchainAccountList BlockchainAccountIndex = 17;
-    repeated HDAccount HDAccount = 18;
+    repeated StorageBlockchainAccountList bitcoin_hd_index = 17;
+    repeated HDAccount bitcoin_hd = 18;
     optional string issuers = 19;
     optional string PaymentWorkflow = 20;
     optional string bip47 = 21;
     repeated StoragePurse purse = 22;
+    repeated StorageBlockchainAccountList ethereum_hd_index = 23;
+    repeated BlockchainEthereumAccountData ethereum_hd = 24;
 }

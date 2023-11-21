@@ -186,26 +186,6 @@ auto SubaccountPrivate::init(bool existing) noexcept(false) -> void
     }
 }
 
-auto SubaccountPrivate::PrivateKey(
-    const implementation::Element& element,
-    const Subchain type,
-    const Bip32Index index,
-    const PasswordPrompt& reason) const noexcept
-    -> const opentxs::crypto::asymmetric::key::EllipticCurve&
-{
-    static const auto blank = opentxs::crypto::asymmetric::key::EllipticCurve{};
-
-    return blank;
-}
-
-auto SubaccountPrivate::ScanProgress(Subchain type) const noexcept
-    -> block::Position
-{
-    static const auto blank = block::Position{-1, block::Hash{}};
-
-    return blank;
-}
-
 auto SubaccountPrivate::serialize_common(
     const rLock&,
     proto::BlockchainAccountData& out) const noexcept -> void

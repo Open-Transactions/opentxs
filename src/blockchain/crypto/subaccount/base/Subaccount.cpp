@@ -110,6 +110,18 @@ auto Subaccount::Blank() noexcept -> Subaccount&
     return blank;
 }
 
+auto Subaccount::Confirm(
+    const Subchain type,
+    const Bip32Index index,
+    const block::TransactionHash& tx) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->Confirm(type, index, tx);
+    } else {
+        return internal::Subaccount::Blank().Confirm(type, index, tx);
+    }
+}
+
 auto Subaccount::Describe() const noexcept -> std::string_view
 {
     if (auto p = imp_.lock(); p) {
@@ -172,12 +184,36 @@ auto Subaccount::ScanProgress(Subchain subchain) const noexcept
     }
 }
 
+auto Subaccount::SetScanProgress(
+    const block::Position& progress,
+    Subchain type) noexcept -> void
+{
+    if (auto p = imp_.lock(); p) {
+        p->SetScanProgress(progress, type);
+    } else {
+        internal::Subaccount::Blank().SetScanProgress(progress, type);
+    }
+}
+
 auto Subaccount::Type() const noexcept -> SubaccountType
 {
     if (auto p = imp_.lock(); p) {
         return p->Type();
     } else {
         return internal::Subaccount::Blank().Type();
+    }
+}
+
+auto Subaccount::Unconfirm(
+    const Subchain type,
+    const Bip32Index index,
+    const block::TransactionHash& tx,
+    const Time time) noexcept -> bool
+{
+    if (auto p = imp_.lock(); p) {
+        return p->Unconfirm(type, index, tx, time);
+    } else {
+        return internal::Subaccount::Blank().Unconfirm(type, index, tx, time);
     }
 }
 

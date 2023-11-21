@@ -118,7 +118,7 @@ public:
     auto PrivateKey(const PasswordPrompt& reason) const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve& final;
     auto PubkeyHash() const noexcept -> ByteArray final;
-    auto Serialize() const noexcept -> SerializedType final;
+    auto Serialize(bool withPrivate) const noexcept -> SerializedType final;
     auto Subchain() const noexcept -> crypto::Subchain final
     {
         return subchain_;

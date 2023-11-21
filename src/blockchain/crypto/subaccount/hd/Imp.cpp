@@ -8,13 +8,8 @@
 #include <BlockchainAddress.pb.h>
 #include <BlockchainDeterministicAccountData.pb.h>
 #include <BlockchainHDAccountData.pb.h>
-#include <HDPath.pb.h>
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
 #include <cstdint>
 #include <memory>
-#include <sstream>
-#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -23,6 +18,7 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
+#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -32,7 +28,6 @@
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
-#include "opentxs/blockchain/crypto/HDProtocol.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
@@ -40,14 +35,11 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/HDIndex.hpp"
 
 namespace opentxs::blockchain::crypto
 {
@@ -66,7 +58,7 @@ HDPrivate::HDPrivate(
           id,
           seed,
           api.Crypto().Seed().SeedDescription(seed),
-          name(path, standard),
+          get_name(path, standard),
           path,
           {api, internal_type_, false, external_type_, true})
     , standard_(standard)
@@ -93,7 +85,7 @@ HDPrivate::HDPrivate(
           serialized.deterministic(),
           seed,
           api.Crypto().Seed().SeedDescription(seed),
-          name(serialized.deterministic().path(), standard),
+          get_name(serialized.deterministic().path(), standard),
           serialized.internaladdress().size(),
           serialized.externaladdress().size(),
           [&] {
@@ -151,31 +143,10 @@ HDPrivate::HDPrivate(
         if (serialized.has_hd() && (0 != serialized.hd().standard())) {
 
             return static_cast<HDProtocol>(serialized.hd().standard());
+        } else {
+
+            return get_standard(serialized.deterministic().path());
         }
-
-        const auto& path = serialized.deterministic().path();
-
-        if (0 < path.child().size()) {
-            using Index = opentxs::HDIndex<Bip43Purpose>;
-            using enum Bip43Purpose;
-            using enum Bip32Child;
-            using enum HDProtocol;
-
-            static const auto map =
-                frozen::make_unordered_map<Bip32Index, HDProtocol>({
-                    {Index{HDWALLET, HARDENED}, BIP_44},
-                    {Index{P2SH_P2WPKH, HARDENED}, BIP_49},
-                    {Index{P2WPKH, HARDENED}, BIP_84},
-                });
-
-            try {
-
-                return map.at(path.child(0));
-            } catch (...) {
-            }
-        }
-
-        return HDProtocol::BIP_32;
     }())
 {
 }
@@ -191,17 +162,6 @@ auto HDPrivate::account_already_exists(const rLock&) const noexcept -> bool
 auto HDPrivate::InitSelf(std::shared_ptr<Subaccount> me) noexcept -> void
 {
     self_.emplace(me);
-}
-
-auto HDPrivate::name(const proto::HDPath& path, HDProtocol type) noexcept
-    -> UnallocatedCString
-{
-    auto out = std::stringstream{};
-    out << print(type);
-    out << ": ";
-    out << opentxs::crypto::Print(path, false);
-
-    return out.str();
 }
 
 auto HDPrivate::PrivateKey(
@@ -252,7 +212,6 @@ auto HDPrivate::PrivateKey(
 
 auto HDPrivate::save(const rLock& lock) const noexcept -> bool
 {
-    const auto type = target_to_unit(target_);
     auto serialized = SerializedType{};
     serialized.set_version(version_);
     serialize_deterministic(lock, *serialized.mutable_deterministic());
@@ -272,7 +231,7 @@ auto HDPrivate::save(const rLock& lock) const noexcept -> bool
     }
 
     const bool saved = api_.Storage().Internal().Store(
-        parent_.NymID(), UnitToClaim(type), serialized);
+        parent_.NymID(), target_to_unit(target_), serialized);
 
     if (saved) {
         LogTrace()()("Saved ")(print(parent_.Target()))(" HD subaccount ")(
