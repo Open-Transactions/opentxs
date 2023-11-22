@@ -5,10 +5,28 @@
 
 #include "opentxs/blockchain/token/Descriptor.hpp"  // IWYU pragma: associated
 
+#include <algorithm>
+#include <cstring>
+
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 
 namespace opentxs::blockchain::token
 {
+auto from_hex(
+    blockchain::Type chain,
+    token::Type type,
+    std::string_view hex) noexcept -> Descriptor
+{
+    auto out = Descriptor{chain, type};
+    auto bytes = ByteArray{};
+    bytes.DecodeHex(hex);
+    using namespace std;
+    memcpy(out.id_.data(), bytes.data(), min(out.id_.size(), bytes.size()));
+
+    return out;
+}
+
 auto operator==(const Descriptor& lhs, const Descriptor& rhs) noexcept -> bool
 {
     if (lhs.host_ != rhs.host_) { return false; }

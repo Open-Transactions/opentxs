@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(api)
+add_subdirectory(blockchain)
 
 configure_file(
   "Context.version.cpp.in"
