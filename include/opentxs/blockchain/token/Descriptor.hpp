@@ -23,35 +23,22 @@ namespace blockchain
 {
 namespace token
 {
-struct Descriptor;
+struct Descriptor;  // IWYU pragma: keep
 }  // namespace token
 }  // namespace blockchain
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace std
-{
 template <>
-struct OPENTXS_EXPORT hash<opentxs::blockchain::token::Descriptor> {
+struct OPENTXS_EXPORT std::hash<opentxs::blockchain::token::Descriptor> {
     using is_transparent = void;
     using is_avalanching = void;
 
     auto operator()(const opentxs::blockchain::token::Descriptor& data)
         const noexcept -> std::size_t;
 };
-}  // namespace std
 
-namespace opentxs::blockchain::token
-{
-OPENTXS_EXPORT auto operator==(const Descriptor&, const Descriptor&) noexcept
-    -> bool;
-OPENTXS_EXPORT auto operator<=>(const Descriptor&, const Descriptor&) noexcept
-    -> std::strong_ordering;
-}  // namespace opentxs::blockchain::token
-
-namespace opentxs::blockchain::token
-{
-struct OPENTXS_EXPORT Descriptor {
+struct OPENTXS_EXPORT opentxs::blockchain::token::Descriptor {
     blockchain::Type host_{};
     token::Type type_{};
     FixedByteArray<32> id_{};
@@ -82,4 +69,15 @@ struct OPENTXS_EXPORT Descriptor {
     }
     // NOLINTEND(modernize-use-equals-default)
 };
+
+namespace opentxs::blockchain::token
+{
+OPENTXS_EXPORT auto from_hex(
+    blockchain::Type chain,
+    token::Type type,
+    std::string_view hex) noexcept -> Descriptor;
+OPENTXS_EXPORT auto operator==(const Descriptor&, const Descriptor&) noexcept
+    -> bool;
+OPENTXS_EXPORT auto operator<=>(const Descriptor&, const Descriptor&) noexcept
+    -> std::strong_ordering;
 }  // namespace opentxs::blockchain::token

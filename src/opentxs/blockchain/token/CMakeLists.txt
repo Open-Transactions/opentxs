@@ -9,7 +9,7 @@ libopentxs_add_public_header("blockchain/token" "Types.hpp")
 
 target_sources(opentxs-common PRIVATE "Descriptor.cpp")
 
-add_library(opentxs-blockchain-token OBJECT "Common.cpp")
+add_library(opentxs-blockchain-token OBJECT "Types.cpp")
 target_include_directories(
   opentxs-blockchain-token SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/external/frozen/include"

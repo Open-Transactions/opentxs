@@ -3,11 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+
 #include "internal/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/identity/wot/claim/Types.hpp"   // IWYU pragma: associated
 
 #include <ContactItemAttribute.pb.h>
 #include <ContactSectionName.pb.h>
+#include <boost/container_hash/hash.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
@@ -22,6 +26,7 @@
 #include "opentxs/identity/wot/claim/Attribute.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
+#include "util/Container.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -52,12 +57,16 @@ constexpr auto sectiontype_map_ = [] {
     });
 }();
 
-constexpr auto unittype_map_ = [] {
+static const auto unittype_map_ = [] {
     using enum UnitType;
-
-    return frozen::make_unordered_map<UnitType, ClaimType>({
+    // NOTE this could be a constexpr frozen map however it takes too long to
+    // compile that way.
+    auto map = boost::unordered_flat_map<UnitType, ClaimType>({
 #include "identity/wot/claim/conversions/unit_to_claim"  // IWYU pragma: keep
     });
+    map.rehash(map.size());
+
+    return map;
 }();
 }  // namespace opentxs::identity::wot::claim
 
@@ -80,10 +89,13 @@ auto ClaimToNym(const identity::wot::claim::ClaimType in) noexcept
 
 auto ClaimToUnit(const identity::wot::claim::ClaimType in) noexcept -> UnitType
 {
-    static constexpr auto map =
-        frozen::invert_unordered_map(identity::wot::claim::unittype_map_);
+    static const auto map = reverse_arbitrary_map<
+        ClaimType,
+        UnitType,
+        boost::unordered_flat_map<ClaimType, UnitType>,
+        boost::unordered_flat_map<UnitType, ClaimType>>(unittype_map_);
 
-    if (const auto* i = map.find(in); map.end() != i) {
+    if (const auto i = map.find(in); map.end() != i) {
 
         return i->second;
     } else {
@@ -192,7 +204,7 @@ auto UnitToClaim(const UnitType in) noexcept -> identity::wot::claim::ClaimType
 {
     const auto& map = identity::wot::claim::unittype_map_;
 
-    if (const auto* i = map.find(in); map.end() != i) {
+    if (const auto i = map.find(in); map.end() != i) {
 
         return i->second;
     } else {

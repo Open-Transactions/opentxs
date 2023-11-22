@@ -68,7 +68,7 @@ constexpr auto make_id(
 {
     static_assert(test_decode_hex());
 
-    auto out = Descriptor{};
+    auto out = Descriptor{chain, type};
 
     if (false == decode_hex(hex, out.id_.get())) { std::terminate(); }
 
@@ -81,10 +81,10 @@ constexpr auto unit_to_token_map_ = [] {
     using enum opentxs::blockchain::token::Type;
     using T = opentxs::UnitType;
     using U = Descriptor;
-    constexpr auto N = 1753_uz;
+    constexpr auto N = 1793_uz;
 
     return frozen::unordered_map<T, U, N>{std::array<std::pair<T, U>, N>{
-#include "blockchain/token/unit_to_token"  // IWYU pragma: keep
+#include "opentxs/blockchain/token/unit_to_token.inc"  // IWYU pragma: keep
     }};
 }();
 

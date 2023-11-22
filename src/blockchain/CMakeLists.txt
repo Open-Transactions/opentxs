@@ -10,7 +10,6 @@ add_subdirectory(crypto)
 add_subdirectory(node)
 add_subdirectory(params)
 add_subdirectory(protocol)
-add_subdirectory(token)
 add_subdirectory(work)
 
 if(OT_BLOCKCHAIN_EXPORT)
