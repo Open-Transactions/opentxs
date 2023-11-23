@@ -126,6 +126,7 @@ FROM build AS opentxs-devel
 COPY --from=boost /usr/local /usr
 COPY --from=compile /usr/local /usr
 COPY --from=iwyu /usr/local /usr
+COPY --from=otcommon /usr/local /usr
 RUN ldconfig
 COPY --from=ci /usr/bin/run-iwyu.sh /usr/bin/run-iwyu.sh
 COPY --from=ci /usr/bin/build-opentxs.sh /usr/bin/build-opentxs.sh
