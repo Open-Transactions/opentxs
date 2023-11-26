@@ -36,7 +36,8 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -90,7 +91,7 @@ Activity::Activity(
     : api_(api)
     , contact_(contact)
     , message_loaded_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto rc = out->Start(api_.Endpoints().MessageLoaded().data());
 
         assert_true(rc);
@@ -681,7 +682,7 @@ auto Activity::publish(
 auto Activity::start_publisher(
     const UnallocatedCString& endpoint) const noexcept -> OTZMQPublishSocket
 {
-    auto output = api_.Network().ZeroMQ().Internal().PublishSocket();
+    auto output = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
     const auto started = output->Start(endpoint);
 
     assert_true(started);

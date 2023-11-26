@@ -11,6 +11,14 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace api
+{
+namespace session
+{
+class ZeroMQ;
+}  // namespace session
+}  // namespace api
+
 namespace identifier
 {
 class Nym;
@@ -53,7 +61,7 @@ public:
         -> std::shared_ptr<const internal::Client> = 0;
     virtual auto UI() const -> const session::UI& = 0;
     virtual auto Workflow() const -> const session::Workflow& = 0;
-    virtual auto ZMQ() const -> const network::ZMQ& = 0;
+    virtual auto ZMQ() const -> const session::ZeroMQ& = 0;
 
     virtual auto Init() -> void = 0;
     virtual auto Start(std::shared_ptr<internal::Client> api) noexcept

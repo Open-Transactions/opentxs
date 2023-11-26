@@ -11,8 +11,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -137,7 +138,7 @@ auto Shared::Start(
     assert_false(nullptr == me);
 
     data_.lock()->Init(api->Self(), endpoint_);
-    const auto& zmq = api->Network().ZeroMQ().Internal();
+    const auto& zmq = api->Network().ZeroMQ().Context().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
     auto actor = std::allocate_shared<Actor>(

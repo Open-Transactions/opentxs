@@ -114,7 +114,9 @@ public:
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { cb(std::move(in)); }))
         , socket_([&] {
-            auto out = api.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
+            auto out =
+                api.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                    cb_);
             out->Start(ot::UnallocatedCString{
                 api.Endpoints().Internal().BlockchainStartupPublish()});
 

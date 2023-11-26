@@ -29,11 +29,6 @@ class Paths;
 class Session;  // IWYU pragma: keep
 }  // namespace internal
 
-namespace network
-{
-class Network;
-}  // namespace network
-
 namespace session
 {
 namespace internal
@@ -52,6 +47,7 @@ class Storage;
 class Wallet;
 }  // namespace session
 
+class Network;
 class Session;
 class Settings;
 }  // namespace api
@@ -116,7 +112,7 @@ public:
     virtual auto Lock() const -> std::mutex& = 0;
     virtual auto MasterKey(const opentxs::Lock& lock) const
         -> const opentxs::crypto::symmetric::Key& = 0;
-    virtual auto Network() const noexcept -> const network::Network& = 0;
+    virtual auto Network() const noexcept -> const api::Network& = 0;
     virtual auto NewNym(const identifier::Nym& id) const noexcept -> void = 0;
     virtual auto Paths() const noexcept -> const api::internal::Paths& = 0;
     virtual auto QtRootObject() const noexcept -> QObject* = 0;

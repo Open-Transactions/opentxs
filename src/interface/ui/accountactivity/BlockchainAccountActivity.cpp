@@ -29,10 +29,11 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -110,7 +111,7 @@ BlockchainAccountActivity::BlockchainAccountActivity(
     , confirmed_(0)
     , balance_cb_(network::zeromq::ListenCallback::Factory(
           [this](auto&& in) { pipeline_.Push(std::move(in)); }))
-    , balance_socket_(api_.Network().ZeroMQ().Internal().DealerSocket(
+    , balance_socket_(api_.Network().ZeroMQ().Context().Internal().DealerSocket(
           balance_cb_,
           network::zeromq::socket::Direction::Connect,
           "BlockchainAccountActivity"))

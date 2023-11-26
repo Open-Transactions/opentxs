@@ -21,10 +21,11 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -95,7 +96,7 @@ Actor::Actor(
     , parent_(*parent_p_)
     , interval_(std::max<decltype(interval_)>(interval, 1min))
     , push_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api_.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(endpoint.c_str());
 
         assert_true(rc);

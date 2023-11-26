@@ -15,14 +15,15 @@
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/network/ZMQ.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/api/session/ZeroMQ.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -37,8 +38,10 @@ namespace opentxs::api::session::client
 WalletPrivate::WalletPrivate(const api::session::Client& parent)
     : ot_super(parent)
     , client_(parent)
-    , request_sent_(client_.Network().ZeroMQ().Internal().PublishSocket())
-    , reply_received_(client_.Network().ZeroMQ().Internal().PublishSocket())
+    , request_sent_(
+          client_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , reply_received_(
+          client_.Network().ZeroMQ().Context().Internal().PublishSocket())
 {
     auto bound =
         request_sent_->Start(api_.Endpoints().ServerRequestSent().data());

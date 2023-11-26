@@ -80,7 +80,9 @@ public:
     }
 
     Imp(const ot::api::Session& api, std::string_view name) noexcept
-        : Imp(api, name, api.Network().ZeroMQ().Internal().PreallocateBatch())
+        : Imp(api,
+              name,
+              api.Network().ZeroMQ().Context().Internal().PreallocateBatch())
     {
     }
 
@@ -140,7 +142,10 @@ private:
     Imp(const ot::api::Session& api,
         std::string_view name,
         ot::network::zeromq::BatchID batch)
-        : Imp(api, name, batch, api.Network().ZeroMQ().Internal().Alloc(batch))
+        : Imp(api,
+              name,
+              batch,
+              api.Network().ZeroMQ().Context().Internal().Alloc(batch))
     {
     }
     Imp(const ot::api::Session& api,

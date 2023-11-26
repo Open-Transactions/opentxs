@@ -16,7 +16,8 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"         // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
@@ -233,7 +234,7 @@ auto Wallet::Init(
     if (node->Internal().GetConfig().disable_wallet_) {
         shared_ = std::make_shared<Shared>();
     } else {
-        const auto& asio = api->Network().ZeroMQ().Internal();
+        const auto& asio = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
         shared_ = std::make_shared<wallet::Shared>(api, node);
         auto actor = std::allocate_shared<Wallet::Actor>(

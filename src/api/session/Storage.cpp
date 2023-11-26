@@ -41,8 +41,9 @@
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "internal/util/storage/tree/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"  // IWYU pragma: keep
 #include "opentxs/api/session/internal.factory.hpp"
@@ -1800,7 +1801,7 @@ auto Storage::Start(std::shared_ptr<const api::internal::Session> api) noexcept
 
     assert_false(nullptr == me);
 
-    const auto& zmq = api->Network().ZeroMQ().Internal();
+    const auto& zmq = api->Network().ZeroMQ().Context().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
     using Actor = opentxs::storage::tree::Actor;

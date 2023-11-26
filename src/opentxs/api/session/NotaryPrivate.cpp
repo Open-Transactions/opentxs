@@ -11,8 +11,6 @@
 #include <functional>
 #include <utility>
 
-#include "internal/api/network/Factory.hpp"
-#include "internal/api/network/Network.hpp"
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/blind/Mint.hpp"
@@ -22,12 +20,15 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Context.internal.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/Network.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/SessionPrivate.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/Settings.internal.hpp"
+#include "opentxs/api/internal.factory.hpp"
 #include "opentxs/api/network/Blockchain.hpp"  // IWYU pragma: keep
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/internal.factory.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"  // IWYU pragma: keep
@@ -99,6 +100,7 @@ NotaryPrivate::NotaryPrivate(
                   *this,
                   parent.Asio(),
                   zmq,
+                  parent.ZAP(),
                   endpoints,
                   factory::BlockchainNetworkAPINull());
           },
@@ -445,7 +447,7 @@ auto NotaryPrivate::Start(std::shared_ptr<internal::Notary> api) noexcept
     assert_false(nullptr == me);
 
     SessionPrivate::start(api);
-    network_->Internal().Start(
+    network_.Internal().Start(
         me,
         crypto_.Blockchain(),
         parent_.Internal().Paths(),

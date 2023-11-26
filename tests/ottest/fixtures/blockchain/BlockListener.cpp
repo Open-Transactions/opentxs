@@ -103,7 +103,7 @@ BlockListener::BlockListener(
 {
     using namespace opentxs::network::zeromq;
     using enum socket::Direction;
-    api.Network().ZeroMQ().SpawnActor(
+    api.Network().ZeroMQ().Context().SpawnActor(
         api,
         name,
         DefaultStartup(),

@@ -15,8 +15,9 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -41,7 +42,7 @@ Update::Update(
     , pending_(alloc)
     , to_actor_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(endpoints.block_oracle_pull_.c_str());
 
         assert_true(rc);

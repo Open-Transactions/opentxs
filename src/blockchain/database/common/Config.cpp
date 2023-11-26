@@ -17,8 +17,9 @@ extern "C" {
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
@@ -35,7 +36,7 @@ Configuration::Configuration(
     , lmdb_(lmdb)
     , config_table_(Table::ConfigMulti)
     , socket_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto rc =
             out->Start(api_.Endpoints().BlockchainSyncServerUpdated().data());
 

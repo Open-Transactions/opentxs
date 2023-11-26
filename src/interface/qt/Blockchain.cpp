@@ -11,9 +11,9 @@
 #include <utility>
 
 #include "interface/qt/SendMonitor.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Funding.hpp"           // IWYU pragma: keep

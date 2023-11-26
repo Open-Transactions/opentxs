@@ -68,9 +68,10 @@
 #include "network/blockchain/bitcoin/Inventory.hpp"
 #include "network/blockchain/bitcoin/Peer.tpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
@@ -144,7 +145,7 @@ auto BlockchainPeerBitcoin(
         }
     }
 
-    const auto& zmq = api->Network().ZeroMQ().Internal();
+    const auto& zmq = api->Network().ZeroMQ().Context().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto alloc = alloc::PMR<ReturnType>{zmq.Alloc(batchID)};
     auto actor = std::allocate_shared<ReturnType>(

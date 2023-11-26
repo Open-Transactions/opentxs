@@ -28,8 +28,9 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -457,7 +458,7 @@ namespace opentxs::blockchain::node::wallet
 Process::Process(
     const std::shared_ptr<const SubchainStateData>& parent) noexcept
     : imp_([&] {
-        const auto& asio = parent->api_.Network().ZeroMQ().Internal();
+        const auto& asio = parent->api_.Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

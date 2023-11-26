@@ -58,7 +58,7 @@ auto Session::Internal() const noexcept -> const internal::Session&
 
 auto Session::Internal() noexcept -> internal::Session& { return *imp_; }
 
-auto Session::Network() const noexcept -> const network::Network&
+auto Session::Network() const noexcept -> const api::Network&
 {
     return imp_->Network();
 }

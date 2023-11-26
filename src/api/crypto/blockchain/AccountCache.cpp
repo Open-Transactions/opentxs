@@ -15,8 +15,9 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Storage.hpp"
@@ -49,7 +50,8 @@ AccountCache::AccountCache(
     , subaccount_params_(child_alloc_)
     , socket_([&] {
         using enum opentxs::network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Publish);
+        auto out =
+            api_.Network().ZeroMQ().Context().Internal().RawSocket(Publish);
         const auto rc =
             out.Bind(api_.Endpoints().BlockchainAccountCreated().data());
 

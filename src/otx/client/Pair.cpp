@@ -35,10 +35,11 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -118,16 +119,19 @@ Pair::Pair(const Flag& running, const api::session::Client& client)
           [this](const auto& in) -> void { callback_peer_reply(in); }))
     , peer_request_callback_(zmq::ListenCallback::Factory(
           [this](const auto& in) -> void { callback_peer_request(in); }))
-    , pair_event_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , pending_bailment_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , nym_subscriber_(api_.Network().ZeroMQ().Internal().SubscribeSocket(
-          nym_callback_,
-          "Pair nym"))
-    , peer_reply_subscriber_(api_.Network().ZeroMQ().Internal().SubscribeSocket(
-          peer_reply_callback_,
-          "Pair reply"))
+    , pair_event_(api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , pending_bailment_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , nym_subscriber_(
+          api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+              nym_callback_,
+              "Pair nym"))
+    , peer_reply_subscriber_(
+          api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+              peer_reply_callback_,
+              "Pair reply"))
     , peer_request_subscriber_(
-          api_.Network().ZeroMQ().Internal().SubscribeSocket(
+          api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
               peer_request_callback_,
               "Pair request"))
 {

@@ -9,6 +9,7 @@
 #include "opentxs/Export.hpp"                             // IWYU pragma: export
 #include "opentxs/api/Context.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Factory.hpp"                        // IWYU pragma: export
+#include "opentxs/api/Network.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Periodic.hpp"                       // IWYU pragma: export
 #include "opentxs/api/Session.hpp"                        // IWYU pragma: export
 #include "opentxs/api/Settings.hpp"                       // IWYU pragma: export
@@ -24,10 +25,10 @@
 #include "opentxs/api/network/Asio.hpp"                   // IWYU pragma: export
 #include "opentxs/api/network/Blockchain.hpp"             // IWYU pragma: export
 #include "opentxs/api/network/BlockchainHandle.hpp"       // IWYU pragma: export
-#include "opentxs/api/network/Network.hpp"                // IWYU pragma: export
 #include "opentxs/api/network/OTDHT.hpp"                  // IWYU pragma: export
+#include "opentxs/api/network/Types.hpp"                  // IWYU pragma: export
 #include "opentxs/api/network/ZAP.hpp"                    // IWYU pragma: export
-#include "opentxs/api/network/ZMQ.hpp"                    // IWYU pragma: export
+#include "opentxs/api/network/ZeroMQ.hpp"                 // IWYU pragma: export
 #include "opentxs/api/session/Activity.hpp"               // IWYU pragma: export
 #include "opentxs/api/session/Client.hpp"                 // IWYU pragma: export
 #include "opentxs/api/session/Contacts.hpp"               // IWYU pragma: export
@@ -40,6 +41,7 @@
 #include "opentxs/api/session/UI.hpp"                     // IWYU pragma: export
 #include "opentxs/api/session/Wallet.hpp"                 // IWYU pragma: export
 #include "opentxs/api/session/Workflow.hpp"               // IWYU pragma: export
+#include "opentxs/api/session/ZeroMQ.hpp"                 // IWYU pragma: export
 #include "opentxs/blockchain/Blockchain.hpp"              // IWYU pragma: export
 #include "opentxs/blockchain/BlockchainType.hpp"          // IWYU pragma: export
 #include "opentxs/blockchain/Category.hpp"                // IWYU pragma: export
@@ -275,7 +277,6 @@
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: export
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: export
 #include "opentxs/network/zeromq/socket/Types.hpp"       // IWYU pragma: export
-#include "opentxs/network/zeromq/zap/Types.hpp"          // IWYU pragma: export
 #include "opentxs/otx/ConsensusType.hpp"                 // IWYU pragma: export
 #include "opentxs/otx/LastReplyStatus.hpp"               // IWYU pragma: export
 #include "opentxs/otx/OTXPushType.hpp"                   // IWYU pragma: export

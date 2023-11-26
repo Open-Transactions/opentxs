@@ -12,8 +12,6 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/api/network/Blockchain.hpp"
-#include "internal/api/network/Factory.hpp"
-#include "internal/api/network/Network.hpp"
 #include "internal/api/session/Contacts.hpp"
 #include "internal/api/session/Crypto.hpp"
 #include "internal/api/session/UI.hpp"
@@ -26,11 +24,13 @@
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Context.internal.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/Network.internal.hpp"
 #include "opentxs/api/SessionPrivate.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
+#include "opentxs/api/internal.factory.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
-#include "opentxs/api/network/ZMQ.hpp"
+#include "opentxs/api/network/internal.factory.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -44,7 +44,6 @@
 #include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -74,6 +73,7 @@ ClientPrivate::ClientPrivate(
                   *this,
                   parent.Asio(),
                   zmq,
+                  parent.ZAP(),
                   endpoints,
                   factory::BlockchainNetworkAPI(self_, endpoints, zmq));
           },
@@ -81,7 +81,7 @@ ClientPrivate::ClientPrivate(
               *static_cast<internal::Client*>(this),
               parent.Factory()))
     , self_(this)
-    , zeromq_(opentxs::Factory::ZMQ(self_, running_))
+    , zeromq_(factory::SessionZMQ(self_, running_))
     , contacts_(factory::ContactAPI(self_))
     , activity_(factory::ActivityAPI(self_, *contacts_))
     , blockchain_(factory::BlockchainAPI(
@@ -94,16 +94,10 @@ ClientPrivate::ClientPrivate(
     , workflow_(factory::Workflow(self_, *activity_, *contacts_))
     , ot_api_(new OT_API(
           self_,
-          *activity_,
-          *contacts_,
           *workflow_,
-          *zeromq_,
           [this](const auto& id) -> auto& { return get_lock(id); }))
     , otapi_exec_(new OTAPI_Exec(
           self_,
-          *activity_,
-          *contacts_,
-          *zeromq_,
           *ot_api_,
           [this](const auto& id) -> auto& { return get_lock(id); }))
     , server_action_(factory::ServerAction(
@@ -122,7 +116,6 @@ ClientPrivate::ClientPrivate(
     wallet_ = factory::WalletAPI(self_);
 
     assert_false(nullptr == wallet_);
-    assert_false(nullptr == zeromq_);
     assert_false(nullptr == contacts_);
     assert_false(nullptr == activity_);
     assert_false(nullptr == blockchain_);
@@ -153,13 +146,12 @@ auto ClientPrivate::Cleanup() -> void
     otapi_exec_.reset();
     ot_api_.reset();
     workflow_.reset();
-    network_->Internal().Shutdown();
+    network_.Internal().Shutdown();
     contacts_->Internal().prepare_shutdown();
     crypto_.InternalSession().PrepareShutdown();
     blockchain_.reset();
     activity_.reset();
     contacts_.reset();
-    zeromq_.reset();
     SessionPrivate::cleanup();
 }
 
@@ -263,7 +255,7 @@ auto ClientPrivate::Start(std::shared_ptr<internal::Client> api) noexcept
     assert_false(nullptr == me);
 
     SessionPrivate::start(api);
-    network_->Internal().Start(
+    network_.Internal().Start(
         me,
         crypto_.Blockchain(),
         parent_.Internal().Paths(),
@@ -276,10 +268,10 @@ auto ClientPrivate::Start(std::shared_ptr<internal::Client> api) noexcept
 auto ClientPrivate::StartBlockchain() noexcept -> void
 {
     for (const auto chain : args_.DisabledBlockchains()) {
-        network_->Blockchain().Disable(chain);
+        network_.Blockchain().Disable(chain);
     }
 
-    network_->Blockchain().Internal().RestoreNetworks();
+    network_.Blockchain().Internal().RestoreNetworks();
 }
 
 auto ClientPrivate::StartContacts() -> void
@@ -301,13 +293,6 @@ auto ClientPrivate::Workflow() const -> const session::Workflow&
     assert_false(nullptr == workflow_);
 
     return *workflow_;
-}
-
-auto ClientPrivate::ZMQ() const -> const api::network::ZMQ&
-{
-    assert_false(nullptr == zeromq_);
-
-    return *zeromq_;
 }
 
 ClientPrivate::~ClientPrivate()

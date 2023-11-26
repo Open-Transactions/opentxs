@@ -19,14 +19,23 @@ namespace internal
 class Context;
 class Factory;
 class Log;
+class Network;
 class Paths;
+class Session;
 class Settings;
 }  // namespace internal
 
 namespace network
 {
 class Asio;
+class Blockchain;
+class ZAP;
 }  // namespace network
+
+namespace session
+{
+class Endpoints;
+}  // namespace session
 
 class Crypto;
 }  // namespace api
@@ -63,6 +72,14 @@ auto FactoryAPI(const api::Crypto& crypto) noexcept
 auto Log(
     const network::zeromq::Context& zmq,
     std::string_view endpoint) noexcept -> api::internal::Log;
+auto NetworkAPI(
+    const api::internal::Session& api,
+    const api::network::Asio& asio,
+    const network::zeromq::Context& zmq,
+    const api::network::ZAP& zap,
+    const api::session::Endpoints& endpoints,
+    std::unique_ptr<api::network::Blockchain> blockchain) noexcept
+    -> api::internal::Network*;
 auto Paths(const std::filesystem::path& home) noexcept -> api::internal::Paths;
 auto Settings(
     const api::internal::Paths& paths,

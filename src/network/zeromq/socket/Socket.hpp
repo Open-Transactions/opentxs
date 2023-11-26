@@ -22,6 +22,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -72,6 +73,7 @@ public:
     {
         return context_;
     }
+    auto SetIdentity(ReadView identity) const noexcept -> bool final;
     auto SetTimeouts(
         const std::chrono::milliseconds& linger,
         const std::chrono::milliseconds& send,

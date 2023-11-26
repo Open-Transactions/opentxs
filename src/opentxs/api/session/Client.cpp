@@ -37,7 +37,7 @@ auto Client::Workflow() const -> const session::Workflow&
     return imp_->asClient().Workflow();
 }
 
-auto Client::ZMQ() const -> const network::ZMQ&
+auto Client::ZMQ() const -> const session::ZeroMQ&
 {
     return imp_->asClient().ZMQ();
 }

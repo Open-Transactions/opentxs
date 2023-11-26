@@ -19,10 +19,11 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -384,7 +385,7 @@ BalanceOracle::BalanceOracle(
     std::shared_ptr<const api::internal::Session> api,
     std::string_view endpoint) noexcept
     : imp_([&] {
-        const auto& asio = api->Network().ZeroMQ().Internal();
+        const auto& asio = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

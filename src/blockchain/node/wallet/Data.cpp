@@ -9,7 +9,8 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -24,7 +25,7 @@ Data::Data(
     database::Wallet& db) noexcept
     : to_actor_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api->Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api->Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc =
             out.Connect(node->Internal().Endpoints().wallet_pull_.c_str());
 

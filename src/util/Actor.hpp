@@ -34,9 +34,10 @@
 #include "internal/util/Timer.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/api/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -97,7 +98,7 @@ protected:
     {
         assert_false(msg.get().empty());
 
-        return msg.Internal().ExtractFront().as<network::zeromq::SocketID>();
+        return msg.ExtractFront().as<network::zeromq::SocketID>();
     }
 
     auto trigger() const noexcept -> void
@@ -268,7 +269,7 @@ protected:
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               api.Network().Asio(),
-              api.Network().ZeroMQ(),
+              api.Network().ZeroMQ().Context(),
               logger,
               api.Instance(),
               std::move(name),

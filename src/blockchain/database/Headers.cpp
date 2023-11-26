@@ -29,8 +29,9 @@
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -116,7 +117,8 @@ Headers::Headers(
     , lock_()
     , publish_tip_internal_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Publish);
+        auto out =
+            api.Network().ZeroMQ().Context().Internal().RawSocket(Publish);
         const auto rc = out.Bind(endpoints.new_header_publish_.c_str());
 
         assert_true(rc);
@@ -125,7 +127,7 @@ Headers::Headers(
     }())
     , to_blockchain_api_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(
             api.Endpoints().Internal().BlockchainMessageRouter().data());
 

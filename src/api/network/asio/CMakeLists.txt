@@ -8,7 +8,6 @@ libopentxs_add_public_header("api/network" "Asio.hpp")
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/api/network/Factory.hpp"
     "Acceptor.cpp"
     "Acceptor.hpp"
     "Acceptors.cpp"

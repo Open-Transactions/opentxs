@@ -32,8 +32,9 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -94,7 +95,7 @@ BlockOracle::Shared::Shared(
     , update_(api_, node_.Internal().Endpoints(), log_, name_, alloc)
     , to_blockchain_api_([&, this] {
         using enum network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api_.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(
             api_.Endpoints().Internal().BlockchainMessageRouter().data());
 
@@ -104,7 +105,7 @@ BlockOracle::Shared::Shared(
     }())
     , to_header_oracle_([&, this] {
         using enum network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api_.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(
             node_.Internal().Endpoints().header_oracle_pull_.c_str());
 
@@ -114,7 +115,8 @@ BlockOracle::Shared::Shared(
     }())
     , publish_([&, this] {
         using enum network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Publish);
+        auto out =
+            api_.Network().ZeroMQ().Context().Internal().RawSocket(Publish);
         const auto rc = out.Bind(
             node_.Internal().Endpoints().block_oracle_publish_.c_str());
 

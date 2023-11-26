@@ -36,10 +36,11 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -949,7 +950,7 @@ BlockIndexer::BlockIndexer(
         assert_false(nullptr == node);
         assert_false(nullptr == shared);
 
-        const auto& zmq = shared->api_.Network().ZeroMQ().Internal();
+        const auto& zmq = shared->api_.Network().ZeroMQ().Context().Internal();
         const auto batchID = zmq.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

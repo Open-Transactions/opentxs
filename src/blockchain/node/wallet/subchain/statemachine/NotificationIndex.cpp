@@ -14,8 +14,9 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -31,7 +32,7 @@ auto Index::NotificationFactory(
     const std::shared_ptr<const SubchainStateData>& parent,
     const PaymentCode& code) noexcept -> Index
 {
-    const auto& asio = parent->api_.Network().ZeroMQ().Internal();
+    const auto& asio = parent->api_.Network().ZeroMQ().Context().Internal();
     const auto batchID = asio.PreallocateBatch();
 
     return Index{std::allocate_shared<NotificationIndex>(

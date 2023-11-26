@@ -319,21 +319,31 @@ auto Message::Imp::Payload() noexcept -> std::span<Frame>
     }
 }
 
-auto Message::Imp::Prepend(SocketID id) noexcept -> zeromq::Frame&
+auto Message::Imp::Prepend(ReadView frame) noexcept -> zeromq::Frame&
+{
+    return Prepend(factory::ZMQFrame(frame.data(), frame.size()));
+}
+
+auto Message::Imp::Prepend(zeromq::Frame frame) noexcept -> zeromq::Frame&
 {
     if (frames_.empty()) {
-        AddFrame(id);
+        AddFrame(std::move(frame));
         StartBody();
     } else if (delimiter_.has_value()) {
-        frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
+        frames_.emplace(frames_.begin(), std::move(frame));
         ++*delimiter_;
     } else {
         frames_.emplace(frames_.begin());
-        frames_.emplace(frames_.begin(), factory::ZMQFrame(&id, sizeof(id)));
+        frames_.emplace(frames_.begin(), std::move(frame));
         delimiter_.emplace(1_uz);
     }
 
     return frames_.front();
+}
+
+auto Message::Imp::Prepend(SocketID id) noexcept -> zeromq::Frame&
+{
+    return Prepend(factory::ZMQFrame(&id, sizeof(id)));
 }
 
 auto Message::Imp::set_field(
@@ -460,6 +470,11 @@ auto Message::Envelope() && noexcept -> zeromq::Envelope
     return pmr::construct<EnvelopePrivate>(alloc.result_, std::move(*this));
 }
 
+auto Message::ExtractFront() noexcept -> zeromq::Frame
+{
+    return imp_->ExtractFront();
+}
+
 auto Message::get() const noexcept -> std::span<const Frame>
 {
     return imp_->get();
@@ -485,6 +500,16 @@ auto Message::Payload() const noexcept -> std::span<const Frame>
 }
 
 auto Message::Payload() noexcept -> std::span<Frame> { return imp_->Payload(); }
+
+auto Message::Prepend(ReadView frame) noexcept -> zeromq::Frame&
+{
+    return imp_->Prepend(frame);
+}
+
+auto Message::Prepend(zeromq::Frame frame) noexcept -> zeromq::Frame&
+{
+    return imp_->Prepend(std::move(frame));
+}
 
 auto Message::StartBody() noexcept -> void { return imp_->StartBody(); }
 

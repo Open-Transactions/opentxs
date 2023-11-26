@@ -111,7 +111,9 @@ struct ScanListener::Imp {
         : api_(api)
         , cb_(Callback::Factory([&](auto&& msg) { cb(std::move(msg)); }))
         , socket_([&] {
-            auto out = api_.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
+            auto out =
+                api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                    cb_);
             const auto rc =
                 out->Start(api_.Endpoints().BlockchainScanProgress().data());
 

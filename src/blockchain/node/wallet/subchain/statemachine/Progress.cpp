@@ -21,8 +21,9 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -136,7 +137,7 @@ namespace opentxs::blockchain::node::wallet
 Progress::Progress(
     const std::shared_ptr<const SubchainStateData>& parent) noexcept
     : imp_([&] {
-        const auto& asio = parent->api_.Network().ZeroMQ().Internal();
+        const auto& asio = parent->api_.Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

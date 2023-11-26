@@ -16,8 +16,8 @@
 
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -46,6 +46,7 @@ class Symmetric;
 
 namespace internal
 {
+class Network;
 class Paths;
 }  // namespace internal
 
@@ -148,9 +149,9 @@ public:
     auto MasterKey(const opentxs::Lock& lock) const
         -> const opentxs::crypto::symmetric::Key& final;
     auto NewNym(const identifier::Nym& id) const noexcept -> void override {}
-    auto Network() const noexcept -> const network::Network& final
+    auto Network() const noexcept -> const api::Network& final
     {
-        return *network_;
+        return network_;
     }
     auto QtRootObject() const noexcept -> QObject* final
     {
@@ -179,7 +180,7 @@ public:
     ~SessionPrivate() override;
 
 protected:
-    std::unique_ptr<network::Network> network_;
+    api::Network network_;
     opentxs::internal::ShutdownSender shutdown_sender_;
     std::unique_ptr<api::session::internal::Wallet> wallet_;
 
@@ -187,7 +188,7 @@ private:
     proto::Ciphertext encrypted_secret_;
 
 protected:
-    using NetworkMaker = std::function<std::unique_ptr<api::network::Network>(
+    using NetworkMaker = std::function<api::internal::Network*(
         const opentxs::network::zeromq::Context& zmq,
         const api::session::Endpoints& endpoints,
         api::session::base::Scheduler& config)>;

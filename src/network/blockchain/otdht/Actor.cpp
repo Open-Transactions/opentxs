@@ -31,10 +31,11 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
 #include "network/blockchain/otdht/Server.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -285,7 +286,7 @@ auto OTDHT::Actor::Factory(
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
     network::zeromq::BatchID batchID) noexcept -> void
 {
-    const auto& zmq = api->Network().ZeroMQ().Internal();
+    const auto& zmq = api->Network().ZeroMQ().Context().Internal();
     auto actor = [&]() -> std::shared_ptr<Actor> {
         switch (node->Internal().GetConfig().profile_) {
             case BlockchainProfile::mobile:

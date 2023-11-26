@@ -20,9 +20,10 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -176,7 +177,8 @@ struct Mempool::Imp {
         , unexpired_tx_()
         , to_blockchain_api_([&] {
             using Type = opentxs::network::zeromq::socket::Type;
-            auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+            auto out = api.Network().ZeroMQ().Context().Internal().RawSocket(
+                Type::Push);
             const auto endpoint = UnallocatedCString{
                 api.Endpoints().Internal().BlockchainMessageRouter()};
             const auto rc = out.Connect(endpoint.c_str());

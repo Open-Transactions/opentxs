@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "blockchain/node/stats/Shared.hpp"
-#include "internal/api/network/Types.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
@@ -21,6 +20,7 @@
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
+#include "opentxs/api/network/Types.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"

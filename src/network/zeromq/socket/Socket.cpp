@@ -250,6 +250,26 @@ auto Socket::set_socks_proxy(const UnallocatedCString& proxy) const noexcept
     return apply_socket(std::move(cb));
 }
 
+auto Socket::SetIdentity(ReadView id) const noexcept -> bool
+{
+    assert_false(nullptr == socket_);
+
+    return apply_socket(SocketCallback{[&](const auto& lock) -> bool {
+        assert_false(nullptr == socket_);
+        assert_true(verify_lock(lock));
+        auto set = zmq_setsockopt(socket_, ZMQ_IDENTITY, id.data(), id.size());
+
+        if (0 != set) {
+            std::cerr << "Failed to set ZMQ_LINGER\n";
+            std::cerr << zmq_strerror(zmq_errno()) << '\n';
+
+            return false;
+        }
+
+        return true;
+    }});
+}
+
 auto Socket::SetTimeouts(
     const std::chrono::milliseconds& linger,
     const std::chrono::milliseconds& send,

@@ -100,7 +100,8 @@ struct SyncSubscriber::Imp {
         , errors_(0)
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [&](auto&& in) { check_update(std::move(in)); }))
-        , socket_(api_.Network().ZeroMQ().Internal().SubscribeSocket(cb_))
+        , socket_(
+              api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(cb_))
     {
         if (false == socket_->Start(sync_server_push_endpoint_)) {
             throw std::runtime_error("Failed to subscribe to updates");

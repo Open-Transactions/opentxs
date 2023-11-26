@@ -200,10 +200,7 @@ auto VerifyBalanceReceipt(
 
 OT_API::OT_API(
     const api::Session& api,
-    const api::session::Activity& activity,
-    const api::session::Contacts& contacts,
     const api::session::Workflow& workflow,
-    const api::network::ZMQ& zmq,
     ContextLockCallback lockCallback)
     : api_(api)
     , workflow_(workflow)

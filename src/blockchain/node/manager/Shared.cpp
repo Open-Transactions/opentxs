@@ -30,9 +30,10 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -88,7 +89,7 @@ Shared::Shared(
     , command_line_peers_(seednode)
     , shutdown_sender_(
           api.Network().Asio(),
-          api.Network().ZeroMQ(),
+          api.Network().ZeroMQ().Context(),
           endpoints_.shutdown_publish_,
           CString{print(chain_)}
               .append(" on api instance ")

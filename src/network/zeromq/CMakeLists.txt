@@ -7,7 +7,6 @@ add_subdirectory(context)
 add_subdirectory(curve)
 add_subdirectory(message)
 add_subdirectory(socket)
-add_subdirectory(zap)
 
 libopentxs_add_public_header("network/zeromq" "Types.hpp")
 

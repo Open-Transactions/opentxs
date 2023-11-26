@@ -40,9 +40,10 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -98,7 +99,7 @@ Output::Output(
     , cache_dont_use_without_populating_(api_, lmdb_, chain_, blank_)
     , to_balance_oracle_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api_.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(api_.Crypto()
                                         .Blockchain()
                                         .Internal()

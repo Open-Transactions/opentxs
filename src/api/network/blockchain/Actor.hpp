@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "internal/api/network/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/api/network/Types.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "util/Actor.hpp"
 

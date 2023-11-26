@@ -44,10 +44,11 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/Settings.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -240,7 +241,7 @@ OTX::OTX(
     , account_subscriber_([&] {
         const auto endpoint = api_.Endpoints().AccountUpdate();
         LogDetail()()("Connecting to ")(endpoint.data()).Flush();
-        auto out = api_.Network().ZeroMQ().Internal().SubscribeSocket(
+        auto out = api_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
             account_subscriber_callback_.get(), "OTX account");
         const auto start = out->Start(endpoint.data());
 
@@ -253,7 +254,7 @@ OTX::OTX(
               this->process_notification(message);
           }))
     , notification_listener_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
+        auto out = api_.Network().ZeroMQ().Context().Internal().PullSocket(
             notification_listener_callback_,
             zmq::socket::Direction::Bind,
             "OTX notification listener");
@@ -269,7 +270,7 @@ OTX::OTX(
               this->find_nym(message);
           }))
     , find_nym_listener_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
+        auto out = api_.Network().ZeroMQ().Context().Internal().PullSocket(
             find_nym_callback_,
             zmq::socket::Direction::Bind,
             "OTX nym listener");
@@ -284,7 +285,7 @@ OTX::OTX(
               this->find_server(message);
           }))
     , find_server_listener_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
+        auto out = api_.Network().ZeroMQ().Context().Internal().PullSocket(
             find_server_callback_,
             zmq::socket::Direction::Bind,
             "OTX server listener");
@@ -299,7 +300,7 @@ OTX::OTX(
               this->find_unit(message);
           }))
     , find_unit_listener_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PullSocket(
+        auto out = api_.Network().ZeroMQ().Context().Internal().PullSocket(
             find_unit_callback_,
             zmq::socket::Direction::Bind,
             "OTX unit listener");
@@ -311,7 +312,7 @@ OTX::OTX(
         return out;
     }())
     , task_finished_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto start = out->Start(api_.Endpoints().TaskComplete().data());
 
         assert_true(start);
@@ -319,7 +320,7 @@ OTX::OTX(
         return out;
     }())
     , messagability_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto start = out->Start(api_.Endpoints().Messagability().data());
 
         assert_true(start);

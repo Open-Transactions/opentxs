@@ -18,8 +18,9 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
@@ -103,7 +104,7 @@ auto BlockOracle::Start(
     assert_false(nullptr == api);
     assert_false(nullptr == node);
 
-    const auto& zmq = api->Network().ZeroMQ().Internal();
+    const auto& zmq = api->Network().ZeroMQ().Context().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
     shared_ = std::allocate_shared<BlockOracle::Shared>(

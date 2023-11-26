@@ -53,9 +53,10 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -103,8 +104,9 @@ Notary::Notary(
     : server_(server)
     , reason_(reason)
     , api_(manager)
-    , notification_socket_(api_.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
+    , notification_socket_(
+          api_.Network().ZeroMQ().Context().Internal().PushSocket(
+              zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
         api_.Endpoints().Internal().PushNotification().data());
