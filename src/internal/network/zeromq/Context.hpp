@@ -122,10 +122,12 @@ public:
     virtual auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        socket::EndpointRequests subscribe = {},
-        socket::EndpointRequests pull = {},
-        socket::EndpointRequests dealer = {},
-        socket::SocketRequests extra = {},
+        socket::EndpointRequests::span subscribe = {},
+        socket::EndpointRequests::span pull = {},
+        socket::EndpointRequests::span dealer = {},
+        socket::SocketRequests::span extra = {},
+        socket::CurveClientRequests::span curveClient = {},
+        socket::CurveServerRequests::span curveServer = {},
         const std::optional<BatchID>& preallocated = std::nullopt,
         alloc::Default pmr = {}) const noexcept -> zeromq::Pipeline = 0;
     virtual auto Proxy(

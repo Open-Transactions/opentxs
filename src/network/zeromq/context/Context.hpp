@@ -120,10 +120,12 @@ public:
     auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        socket::EndpointRequests subscribe,
-        socket::EndpointRequests pull,
-        socket::EndpointRequests dealer,
-        socket::SocketRequests extra,
+        socket::EndpointRequests::span subscribe,
+        socket::EndpointRequests::span pull,
+        socket::EndpointRequests::span dealer,
+        socket::SocketRequests::span extra,
+        socket::CurveClientRequests::span curveClient,
+        socket::CurveServerRequests::span curveServer,
         const std::optional<BatchID>& preallocated,
         alloc::Default pmr) const noexcept -> zeromq::Pipeline final;
     auto PreallocateBatch() const noexcept -> BatchID final;
@@ -168,7 +170,10 @@ public:
         socket::EndpointRequests subscribe,
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
-        socket::SocketRequests extra) const noexcept -> BatchID final;
+        socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer) const noexcept
+        -> BatchID final;
     auto SpawnActor(
         const api::Session& context,
         std::string_view name,
@@ -179,7 +184,10 @@ public:
         socket::EndpointRequests subscribe,
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
-        socket::SocketRequests extra) const noexcept -> BatchID final;
+        socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer) const noexcept
+        -> BatchID final;
     auto Start(BatchID id, StartArgs&& sockets) const noexcept
         -> internal::Thread* final;
     auto Stop(BatchID id) const noexcept -> void final;

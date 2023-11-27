@@ -58,6 +58,8 @@ public:
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
         socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer,
         zeromq::BatchID batchID,
         std::size_t extraCount,
         allocator_type alloc) noexcept;
@@ -72,6 +74,8 @@ public:
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
         socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer,
         zeromq::BatchID batchID,
         std::size_t extraCount,
         allocator_type alloc) noexcept;

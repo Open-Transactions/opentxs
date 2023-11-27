@@ -43,6 +43,7 @@ constexpr auto SubscribeIndex = SocketIndex{0};
 constexpr auto PullIndex = SocketIndex{1};
 constexpr auto DealerIndex = SocketIndex{2};
 constexpr auto LoopbackIndex = SocketIndex{3};
+constexpr auto FirstUserDefinedIndex = SocketIndex{4};
 }  // namespace opentxs::network::zeromq::actor
 
 namespace opentxs::network::zeromq

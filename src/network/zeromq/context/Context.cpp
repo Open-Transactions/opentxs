@@ -207,10 +207,12 @@ auto Context::PairSocket(
 auto Context::Pipeline(
     std::function<void(zeromq::Message&&)>&& callback,
     const std::string_view threadname,
-    socket::EndpointRequests subscribe,
-    socket::EndpointRequests pull,
-    socket::EndpointRequests dealer,
-    socket::SocketRequests extra,
+    socket::EndpointRequests::span subscribe,
+    socket::EndpointRequests::span pull,
+    socket::EndpointRequests::span dealer,
+    socket::SocketRequests::span extra,
+    socket::CurveClientRequests::span curveClient,
+    socket::CurveServerRequests::span curveServer,
     const std::optional<BatchID>& preallocated,
     alloc::Default pmr) const noexcept -> zeromq::Pipeline
 {
@@ -221,6 +223,8 @@ auto Context::Pipeline(
         pull,
         dealer,
         extra,
+        curveClient,
+        curveServer,
         threadname,
         preallocated,
         pmr);
@@ -348,9 +352,12 @@ auto Context::SpawnActor(
     socket::EndpointRequests subscribe,
     socket::EndpointRequests pull,
     socket::EndpointRequests dealer,
-    socket::SocketRequests extra) const noexcept -> BatchID
+    socket::SocketRequests extra,
+    socket::CurveClientRequests curveClient,
+    socket::CurveServerRequests curveServer) const noexcept -> BatchID
 {
-    const auto extraCount = extra.get().size();
+    const auto extraCount = extra.get().size() + curveClient.get().size() +
+                            curveServer.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
     auto actor = std::allocate_shared<Actor>(
@@ -365,6 +372,8 @@ auto Context::SpawnActor(
         std::move(pull),
         std::move(dealer),
         std::move(extra),
+        std::move(curveClient),
+        std::move(curveServer),
         batchID,
         extraCount);
 
@@ -385,9 +394,12 @@ auto Context::SpawnActor(
     socket::EndpointRequests subscribe,
     socket::EndpointRequests pull,
     socket::EndpointRequests dealer,
-    socket::SocketRequests extra) const noexcept -> BatchID
+    socket::SocketRequests extra,
+    socket::CurveClientRequests curveClient,
+    socket::CurveServerRequests curveServer) const noexcept -> BatchID
 {
-    const auto extraCount = extra.get().size();
+    const auto extraCount = extra.get().size() + curveClient.get().size() +
+                            curveServer.get().size();
     const auto batchID = PreallocateBatch();
     auto* alloc = Alloc(batchID);
     auto actor = std::allocate_shared<Actor>(
@@ -402,6 +414,8 @@ auto Context::SpawnActor(
         std::move(pull),
         std::move(dealer),
         std::move(extra),
+        std::move(curveClient),
+        std::move(curveServer),
         batchID,
         extraCount);
 

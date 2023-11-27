@@ -73,10 +73,12 @@ auto PairSocket(
 auto Pipeline(
     const network::zeromq::Context& context,
     std::function<void(network::zeromq::Message&&)>&& callback,
-    network::zeromq::socket::EndpointRequests subscribe,
-    network::zeromq::socket::EndpointRequests pull,
-    network::zeromq::socket::EndpointRequests dealer,
-    network::zeromq::socket::SocketRequests extra,
+    network::zeromq::socket::EndpointRequests::span subscribe,
+    network::zeromq::socket::EndpointRequests::span pull,
+    network::zeromq::socket::EndpointRequests::span dealer,
+    network::zeromq::socket::SocketRequests::span extra,
+    network::zeromq::socket::CurveClientRequests::span curveClient,
+    network::zeromq::socket::CurveServerRequests::span curveServer,
     const std::string_view threadname,
     const std::optional<network::zeromq::BatchID>& preallocated,
     alloc::Strategy alloc) noexcept -> opentxs::network::zeromq::Pipeline;

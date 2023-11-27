@@ -132,4 +132,41 @@ TEST(Message, size)
     size = multipartMessage.get().size();
     ASSERT_EQ(size, 3);
 }
+
+TEST(Message, zap_message)
+{
+    const auto msg = [] {
+        auto out = ot::network::zeromq::Message{};
+        out.AddFrame("11111");
+        out.AddFrame("22222");
+        out.AddFrame();
+        out.AddFrame("1.0");
+        out.AddFrame("0");
+        out.AddFrame("0000000000000000000000000");
+        out.AddFrame("000000000");
+        out.AddFrame();
+        out.AddFrame("CURVE");
+        out.AddFrame("00000000000000000000000000000000");
+
+        return out;
+    }();
+    const auto envelope = msg.Envelope();
+    const auto all = msg.get();
+    const auto route = envelope.get();
+    const auto payload = msg.Payload();
+
+    EXPECT_EQ(all[0].size(), 5);
+    EXPECT_EQ(all[1].size(), 5);
+    EXPECT_EQ(all[2].size(), 0);
+    EXPECT_EQ(all[3].size(), 3);
+    EXPECT_EQ(all[4].size(), 1);
+    EXPECT_EQ(all[5].size(), 25);
+    EXPECT_EQ(all[6].size(), 9);
+    EXPECT_EQ(all[7].size(), 0);
+    EXPECT_EQ(all[8].size(), 5);
+    EXPECT_EQ(all[9].size(), 32);
+
+    EXPECT_EQ(route.size(), 2);
+    EXPECT_EQ(payload.size(), 7);
+}
 }  // namespace ottest

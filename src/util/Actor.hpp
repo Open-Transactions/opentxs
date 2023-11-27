@@ -216,6 +216,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : name_([&] {
             // TODO c++20 allocator
@@ -237,10 +239,12 @@ protected:
         , pipeline_(zmq.Internal().Pipeline(
               {},
               name,
-              std::move(subscribe),
-              std::move(pull),
-              std::move(dealer),
-              std::move(extra),
+              subscribe,
+              pull,
+              dealer,
+              extra,
+              curveClient,
+              curveServer,
               batch,
               alloc.resource()))
         , rate_limit_(std::move(rateLimit))
@@ -266,6 +270,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               api.Network().Asio(),
@@ -280,6 +286,8 @@ protected:
               pull,
               dealer,
               extra,
+              curveClient,
+              curveServer,
               std::move(neverDrop))
     {
     }
@@ -294,6 +302,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               context.Asio(),
@@ -308,6 +318,8 @@ protected:
               pull,
               dealer,
               extra,
+              curveClient,
+              curveServer,
               std::move(neverDrop))
     {
     }
