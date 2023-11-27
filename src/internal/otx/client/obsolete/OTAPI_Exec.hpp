@@ -21,16 +21,9 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class ZMQ;
-}  // namespace network
-
 namespace session
 {
-class Activity;
 class ClientPrivate;
-class Contacts;
 }  // namespace session
 
 class Session;
@@ -871,9 +864,6 @@ private:
 
     OTAPI_Exec(
         const api::Session& api,
-        const api::session::Activity& activity,
-        const api::session::Contacts& contacts,
-        const api::network::ZMQ& zeromq,
         const OT_API& otapi,
         ContextLockCallback lockCallback);
 };

@@ -46,10 +46,12 @@ public:
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
     auto AppendBytes() noexcept -> Writer;
     auto EnsureDelimiter() noexcept -> void final;
-    auto ExtractFront() noexcept -> zeromq::Frame final;
+    auto ExtractFront() noexcept -> zeromq::Frame;
     auto get() noexcept -> std::span<Frame> { return frames_; }
     auto Envelope() noexcept -> std::span<Frame> final;
     auto Payload() noexcept -> std::span<Frame>;
+    auto Prepend(ReadView frame) noexcept -> zeromq::Frame&;
+    auto Prepend(zeromq::Frame frame) noexcept -> zeromq::Frame&;
     auto Prepend(SocketID id) noexcept -> zeromq::Frame& final;
     auto StartBody() noexcept -> void;
 

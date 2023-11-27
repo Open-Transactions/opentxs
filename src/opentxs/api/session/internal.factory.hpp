@@ -33,6 +33,7 @@ class Client;
 class Factory;
 class Notary;
 class Wallet;
+class ZeroMQ;
 }  // namespace internal
 
 class Activity;
@@ -123,6 +124,8 @@ auto SessionFactoryAPI(
     const api::session::internal::Notary& api,
     const api::Factory& parent) noexcept
     -> std::unique_ptr<api::session::internal::Factory>;
+auto SessionZMQ(const api::Session& api, const Flag& running) noexcept
+    -> api::session::internal::ZeroMQ*;
 auto StorageAPI(
     const api::Crypto& crypto,
     const api::session::Factory& factory,

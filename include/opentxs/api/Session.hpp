@@ -24,11 +24,6 @@ namespace internal
 class Session;
 }  // namespace internal
 
-namespace network
-{
-class Network;
-}  // namespace network
-
 namespace session
 {
 class Crypto;
@@ -38,6 +33,7 @@ class Storage;
 class Wallet;
 }  // namespace session
 
+class Network;
 class Session;  // IWYU pragma: keep
 class Settings;
 }  // namespace api
@@ -70,7 +66,7 @@ public:
     OPENTXS_NO_EXPORT auto Internal() const noexcept
         -> const internal::Session&;
     /// Returns the network API for this session.
-    auto Network() const noexcept -> const network::Network&;
+    auto Network() const noexcept -> const api::Network&;
     auto QtRootObject() const noexcept -> QObject*;
     /// Reschedules a periodic task.
     auto Reschedule(TaskID task, std::chrono::seconds interval) const noexcept

@@ -15,10 +15,13 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
+namespace session
 {
-class ZMQ;
-}  // namespace network
+namespace internal
+{
+class ZeroMQ;
+}  // namespace internal
+}  // namespace session
 
 class Session;
 }  // namespace api
@@ -63,7 +66,7 @@ public:
 
     static auto Factory(
         const api::Session& api,
-        const api::network::ZMQ& zmq,
+        const api::session::internal::ZeroMQ& zmq,
         const zeromq::socket::Publish& updates,
         const OTServerContract& contract) -> ServerConnection;
 

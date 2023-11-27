@@ -13,6 +13,7 @@ libopentxs_add_public_header("api/session" "OTX.hpp")
 libopentxs_add_public_header("api/session" "Storage.hpp")
 libopentxs_add_public_header("api/session" "UI.hpp")
 libopentxs_add_public_header("api/session" "Workflow.hpp")
+libopentxs_add_public_header("api/session" "ZeroMQ.hpp")
 
 target_sources(
   opentxs-common

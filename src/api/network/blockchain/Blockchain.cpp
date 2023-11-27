@@ -10,8 +10,8 @@
 #include "api/network/blockchain/Base.hpp"
 #include "api/network/blockchain/Blockchain.hpp"
 #include "internal/api/network/Blockchain.hpp"
-#include "internal/api/network/Factory.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
+#include "opentxs/api/network/internal.factory.hpp"
 
 namespace opentxs::factory
 {

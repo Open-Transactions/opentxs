@@ -43,11 +43,11 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/api/session/ZeroMQ.internal.hpp"
 #include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
@@ -72,7 +72,7 @@ namespace opentxs::network
 {
 auto ServerConnection::Factory(
     const api::Session& api,
-    const api::network::ZMQ& zmq,
+    const api::session::internal::ZeroMQ& zmq,
     const zeromq::socket::Publish& updates,
     const OTServerContract& contract) -> ServerConnection
 {
@@ -134,7 +134,7 @@ auto ServerConnection::Status() const -> bool { return imp_->Status(); }
 
 ServerConnection::Imp::Imp(
     const api::Session& api,
-    const api::network::ZMQ& zmq,
+    const api::session::internal::ZeroMQ& zmq,
     const zeromq::socket::Publish& updates,
     const OTServerContract& contract)
     : zmq_(zmq)

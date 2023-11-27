@@ -42,10 +42,10 @@ Pair::Pair()
     , chris_rename_notary_cb_(ot::network::zeromq::ListenCallback::Factory(
           [this](auto&& in) { chris_rename_notary(std::move(in)); }))
     , issuer_peer_request_listener_(
-          api_issuer_.Network().ZeroMQ().Internal().SubscribeSocket(
+          api_issuer_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
               issuer_peer_request_cb_))
     , chris_rename_notary_listener_(
-          api_chris_.Network().ZeroMQ().Internal().SubscribeSocket(
+          api_chris_.Network().ZeroMQ().Context().Internal().SubscribeSocket(
               chris_rename_notary_cb_))
 {
     subscribe_sockets();

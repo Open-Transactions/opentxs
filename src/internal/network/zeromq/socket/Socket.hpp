@@ -14,6 +14,7 @@
 
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -50,6 +51,7 @@ public:
     virtual auto Close() const noexcept -> bool = 0;
     virtual auto Context() const noexcept -> const zeromq::Context& = 0;
     virtual auto Internal() const noexcept -> const internal::Socket& = 0;
+    virtual auto SetIdentity(ReadView identity) const noexcept -> bool = 0;
     virtual auto SetTimeouts(
         const std::chrono::milliseconds& linger,
         const std::chrono::milliseconds& send,

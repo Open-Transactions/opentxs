@@ -34,10 +34,13 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
+namespace session
 {
-class ZMQ;
-}  // namespace network
+namespace internal
+{
+class ZeroMQ;
+}  // namespace internal
+}  // namespace session
 
 class Session;
 }  // namespace api
@@ -99,7 +102,7 @@ public:
 private:
     friend opentxs::network::ServerConnection;
 
-    const api::network::ZMQ& zmq_;
+    const api::session::internal::ZeroMQ& zmq_;
     const api::Session& api_;
     const zeromq::socket::Publish& updates_;
     const identifier::Notary server_id_;
@@ -146,7 +149,7 @@ private:
     auto reset_timer() -> void;
 
     Imp(const api::Session& api,
-        const api::network::ZMQ& zmq,
+        const api::session::internal::ZeroMQ& zmq,
         const zeromq::socket::Publish& updates,
         const OTServerContract& contract);
 };

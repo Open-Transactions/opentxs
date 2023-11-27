@@ -55,8 +55,9 @@ struct SyncRequestor::Imp {
         , buffer_()
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [&](auto&& msg) { cb(std::move(msg)); }))
-        , socket_(
-              api.Network().ZeroMQ().Internal().DealerSocket(cb_, Dir::Connect))
+        , socket_(api.Network().ZeroMQ().Context().Internal().DealerSocket(
+              cb_,
+              Dir::Connect))
     {
         socket_->Start(sync_server_main_endpoint_);
     }

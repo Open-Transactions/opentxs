@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "api/network/asio/Asio.hpp"         // IWYU pragma: associated
-#include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
+#include "api/network/asio/Asio.hpp"                 // IWYU pragma: associated
+#include "opentxs/api/network/internal.factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>  // IWYU pragma: keep
 #include <cstddef>

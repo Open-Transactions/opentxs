@@ -27,9 +27,10 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/storage/Types.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -84,8 +85,8 @@ Contacts::Contacts(const api::session::Client& api)
     , blockchain_()
     , contact_map_()
     , contact_name_map_()
-    , publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , pipeline_(api_.Network().ZeroMQ().Internal().Pipeline(
+    , publisher_(api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , pipeline_(api_.Network().ZeroMQ().Context().Internal().Pipeline(
           [this](auto&& in) { pipeline(std::move(in)); },
           "api::session::Contacts",
           {{CString{api_.Endpoints().NymCreated()},

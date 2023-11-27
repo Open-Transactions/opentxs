@@ -5,8 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::Data
 
-#include "api/network/otdht/OTDHT.hpp"       // IWYU pragma: associated
-#include "internal/api/network/Factory.hpp"  // IWYU pragma: associated
+#include "api/network/otdht/OTDHT.hpp"               // IWYU pragma: associated
+#include "opentxs/api/network/internal.factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>
 #include <zmq.h>

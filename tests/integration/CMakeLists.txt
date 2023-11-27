@@ -5,3 +5,4 @@
 
 add_subdirectory(blockchain)
 add_subdirectory(core)
+add_subdirectory(network)

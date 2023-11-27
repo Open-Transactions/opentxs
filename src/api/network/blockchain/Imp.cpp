@@ -21,8 +21,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -200,7 +201,7 @@ auto BlockchainImp::Init(
     }());
     db_.set_value(DB{api_, crypto, legacy, dataFolder, options});
     {
-        const auto& zmq = api->Network().ZeroMQ().Internal();
+        const auto& zmq = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = zmq.PreallocateBatch();
         auto* alloc = zmq.Alloc(batchID);
         auto actor = std::allocate_shared<blockchain::Actor>(

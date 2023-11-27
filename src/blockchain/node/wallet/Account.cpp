@@ -25,8 +25,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -197,7 +198,7 @@ auto Account::Imp::check(
             subaccount.ID(), api_.Crypto())(" ")(print(subchain))(
             " subchain for ")(subaccount.Parent().NymID(), api_.Crypto())
             .Flush();
-        const auto& asio = api_.Network().ZeroMQ().Internal();
+        const auto& asio = api_.Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
         auto ptr = std::allocate_shared<DeterministicStateData>(
             alloc::PMR<DeterministicStateData>{asio.Alloc(batchID)},
@@ -241,7 +242,7 @@ auto Account::Imp::check_notification(crypto::Notification& subaccount) noexcept
         const auto& code = subaccount.LocalPaymentCode();
         log_("Initializing payment code ")(code.asBase58())(" on ")(name_)
             .Flush();
-        const auto& asio = api_.Network().ZeroMQ().Internal();
+        const auto& asio = api_.Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
         auto ptr = std::allocate_shared<NotificationStateData>(
             alloc::PMR<NotificationStateData>{asio.Alloc(batchID)},
@@ -651,7 +652,7 @@ Account::Account(
         assert_false(nullptr == api);
         assert_false(nullptr == node);
 
-        const auto& asio = api->Network().ZeroMQ().Internal();
+        const auto& asio = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

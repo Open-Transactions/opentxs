@@ -28,10 +28,11 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -75,7 +76,7 @@ BlockchainImp::BlockchainImp(
     , key_generated_endpoint_(opentxs::network::zeromq::MakeArbitraryInproc())
     , lock_()
     , transaction_updates_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto listen =
             out->Start(api_.Endpoints().BlockchainTransactions().data());
 
@@ -84,7 +85,7 @@ BlockchainImp::BlockchainImp(
         return out;
     }())
     , key_updates_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto listen = out->Start(key_generated_endpoint_);
 
         assert_true(listen);
@@ -92,7 +93,7 @@ BlockchainImp::BlockchainImp(
         return out;
     }())
     , scan_updates_([&] {
-        auto out = api_.Network().ZeroMQ().Internal().PublishSocket();
+        auto out = api_.Network().ZeroMQ().Context().Internal().PublishSocket();
         const auto listen =
             out->Start(api_.Endpoints().BlockchainScanProgress().data());
 

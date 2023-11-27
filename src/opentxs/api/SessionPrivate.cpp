@@ -13,12 +13,12 @@
 #include <utility>
 
 #include "internal/api/crypto/Symmetric.hpp"
-#include "internal/api/network/Network.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Context.internal.hpp"
+#include "opentxs/api/Network.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -114,7 +114,7 @@ SessionPrivate::SessionPrivate(
           std::move(factory))
     , network_(network(zmq_context_, endpoints_, *this))
     , shutdown_sender_(
-          network_->Asio(),
+          network_.Asio(),
           zmq_context_,
           endpoints_.Shutdown(),
           CString{"api instance "}.append(std::to_string(instance_)))
@@ -133,7 +133,6 @@ SessionPrivate::SessionPrivate(
     external_password_callback_ = &caller;
 
     assert_false(nullptr == external_password_callback_);
-    assert_false(nullptr == network_);
 
     if (master_secret_) {
         opentxs::Lock lock(master_key_lock_);
@@ -169,7 +168,7 @@ auto SessionPrivate::bump_password_timer(const opentxs::Lock& lock) const
 
 auto SessionPrivate::cleanup() noexcept -> void
 {
-    network_->Internal().Shutdown();
+    network_.Internal().Shutdown();
     wallet_.reset();
     Storage::cleanup();
 }

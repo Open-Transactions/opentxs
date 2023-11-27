@@ -40,8 +40,9 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -454,8 +455,9 @@ Workflow::Workflow(
     : api_(api)
     , activity_(activity)
     , contact_(contact)
-    , account_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , rpc_publisher_(api_.Network().ZeroMQ().Internal().PushSocket(
+    , account_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , rpc_publisher_(api_.Network().ZeroMQ().Context().Internal().PushSocket(
           zmq::socket::Direction::Connect))
     , workflow_locks_()
 {

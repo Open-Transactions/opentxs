@@ -31,17 +31,13 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class ZMQ;
-}  // namespace network
-
 namespace session
 {
 class Activity;
 class ClientPrivate;
 class Contacts;
 class Workflow;
+class ZeroMQ;
 }  // namespace session
 
 class Session;
@@ -675,10 +671,7 @@ private:
 
     OT_API(
         const api::Session& api,
-        const api::session::Activity& activity,
-        const api::session::Contacts& contacts,
         const api::session::Workflow& workflow,
-        const api::network::ZMQ& zmq,
         ContextLockCallback lockCallback);
 };
 }  // namespace opentxs

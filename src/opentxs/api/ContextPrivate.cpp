@@ -34,6 +34,7 @@
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/internal.factory.hpp"
+#include "opentxs/api/network/internal.factory.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -102,6 +103,7 @@ ContextPrivate::ContextPrivate(
     , running_(Flag::Factory(true))
     , args_(args)
     , zmq_context_(zmq)
+    , zap_(factory::ZAP(zmq_context_))
     , asio_(asio)
     , shutdown_sender_(sender)
     , home_(args_.Home().string().c_str())
@@ -130,7 +132,6 @@ ContextPrivate::ContextPrivate(
     , config_()
     , crypto_(nullptr)
     , factory_(nullptr)
-    , zap_(nullptr)
     , sessions_()
     , rpc_(nullptr)
     , file_lock_()
@@ -141,6 +142,7 @@ ContextPrivate::ContextPrivate(
     assert_false(nullptr == null_callback_);
     assert_false(nullptr == default_external_password_callback_);
     assert_true(zmq_context_);
+    assert_true(zap_.has_value());
     assert_false(nullptr == external_password_callback_);
     assert_true(external_password_callback_->HaveCallback());
 }
@@ -225,7 +227,6 @@ auto ContextPrivate::Init(
     Init_Profile();
     Init_Rlimit();
     Init_CoreDump();
-    Init_Zap();
 }
 
 auto ContextPrivate::Init_Crypto() -> void
@@ -326,13 +327,6 @@ auto ContextPrivate::Init_Profile() -> void
             new_or_update);
         profile_id_.set_value(new_profile_id->Get());
     }
-}
-
-auto ContextPrivate::Init_Zap() -> void
-{
-    zap_.reset(opentxs::Factory::ZAP(zmq_context_));
-
-    assert_false(nullptr == zap_);
 }
 
 auto ContextPrivate::JobCount() noexcept -> std::atomic<unsigned int>&
@@ -549,13 +543,6 @@ auto ContextPrivate::StartNotarySession(const int instance) const
     static const auto blank = opentxs::Options{};
 
     return StartNotarySession(blank, instance);
-}
-
-auto ContextPrivate::ZAP() const noexcept -> const api::network::ZAP&
-{
-    assert_false(nullptr == zap_);
-
-    return *zap_;
 }
 
 auto ContextPrivate::ZMQ() const noexcept

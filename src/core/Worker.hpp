@@ -14,8 +14,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Types.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -108,7 +109,7 @@ protected:
         , running_(true)
         , shutdown_promise_()
         , shutdown_(shutdown_promise_.get_future())
-        , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
+        , pipeline_(api.Network().ZeroMQ().Context().Internal().Pipeline(
               [this](auto&& in) { downcast().pipeline(std::move(in)); },
               name,
               std::move(subscribe),

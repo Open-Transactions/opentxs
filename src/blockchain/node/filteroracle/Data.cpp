@@ -8,8 +8,9 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
@@ -26,7 +27,8 @@ Data::Data(
     , last_broadcast_()  // TODO allocator
     , to_blockchain_api_([&] {
         using Type = opentxs::network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Type::Push);
+        auto out =
+            api.Network().ZeroMQ().Context().Internal().RawSocket(Type::Push);
         const auto endpoint = UnallocatedCString{
             api.Endpoints().Internal().Internal().BlockchainMessageRouter()};
         const auto rc = out.Connect(endpoint.c_str());
@@ -37,8 +39,8 @@ Data::Data(
     }())
     , filter_notifier_internal_([&] {
         using Socket = network::zeromq::socket::Type;
-        auto socket =
-            api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
+        auto socket = api.Network().ZeroMQ().Context().Internal().RawSocket(
+            Socket::Publish);
         auto rc = socket.Bind(endpoints.new_filter_publish_.c_str());
 
         assert_true(rc);
@@ -47,8 +49,8 @@ Data::Data(
     }())
     , reindex_blocks_([&] {
         using Socket = network::zeromq::socket::Type;
-        auto socket =
-            api.Network().ZeroMQ().Internal().RawSocket(Socket::Publish);
+        auto socket = api.Network().ZeroMQ().Context().Internal().RawSocket(
+            Socket::Publish);
         auto rc = socket.Bind(endpoints.filter_oracle_reindex_publish_.c_str());
 
         assert_true(rc);

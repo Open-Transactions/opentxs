@@ -33,13 +33,14 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/OTDHT.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -617,7 +618,7 @@ auto Node::Actor::process_add_listener(Message&& msg) noexcept -> void
         CString{routerAdvertise, alloc},
         Listener::NextID(alloc),
         zeromq::MakeArbitraryInproc(alloc),
-        api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
+        api_.Network().ZeroMQ().Context().Internal().RawSocket(Socket::Push));
 
     if (added) {
         auto& [routingID, pushEndpoint, socket] = it->second;
@@ -982,7 +983,7 @@ auto Node::Actor::process_peer(std::string_view endpoint) noexcept -> void
         CString{endpoint, alloc},
         Peer::NextID(alloc),
         zeromq::MakeArbitraryInproc(alloc),
-        api_.Network().ZeroMQ().Internal().RawSocket(Socket::Push));
+        api_.Network().ZeroMQ().Context().Internal().RawSocket(Socket::Push));
 
     assert_true(rc);
 

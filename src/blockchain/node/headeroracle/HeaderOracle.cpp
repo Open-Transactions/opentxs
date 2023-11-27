@@ -19,8 +19,9 @@
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"  // IWYU pragma: keep
@@ -40,7 +41,7 @@ auto HeaderOracle(
     -> blockchain::node::internal::HeaderOracle
 {
     using ReturnType = blockchain::node::internal::HeaderOracle::Shared;
-    const auto& zmq = api.Network().ZeroMQ().Internal();
+    const auto& zmq = api.Network().ZeroMQ().Context().Internal();
     const auto batchID = zmq.PreallocateBatch();
     auto* alloc = zmq.Alloc(batchID);
 

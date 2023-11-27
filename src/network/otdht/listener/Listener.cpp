@@ -13,8 +13,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/listener/Actor.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -69,7 +70,7 @@ Listener::Listener(
         assert_false(nullptr == api);
         assert_false(nullptr == shared);
 
-        const auto& zmq = api->Network().ZeroMQ().Internal();
+        const auto& zmq = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = zmq.PreallocateBatch();
 
         return std::allocate_shared<Actor>(

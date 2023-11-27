@@ -16,8 +16,9 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -412,7 +413,7 @@ auto BTCFeeSources(
     assert_false(nullptr == node);
 
     using Source = blockchain::node::wallet::FeeSource;
-    const auto& asio = api->Network().ZeroMQ().Internal();
+    const auto& asio = api->Network().ZeroMQ().Context().Internal();
     Source{[&]() -> std::shared_ptr<Source::Imp> {
         using Imp = blockchain::node::wallet::Bitcoiner_live;
         const auto batchID = asio.PreallocateBatch();

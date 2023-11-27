@@ -11,8 +11,9 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/network/zeromq/Context.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -40,7 +41,7 @@ Futures::Futures(
     , pending_(alloc)
     , to_blockchain_api_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api.Network().ZeroMQ().Internal().RawSocket(Push);
+        auto out = api.Network().ZeroMQ().Context().Internal().RawSocket(Push);
         const auto rc = out.Connect(
             api.Endpoints().Internal().BlockchainMessageRouter().data());
 

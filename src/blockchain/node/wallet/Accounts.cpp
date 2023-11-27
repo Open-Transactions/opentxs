@@ -24,9 +24,10 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -502,7 +503,7 @@ Accounts::Accounts(
         assert_false(nullptr == api);
         assert_false(nullptr == node);
 
-        const auto& asio = api->Network().ZeroMQ().Internal();
+        const auto& asio = api->Network().ZeroMQ().Context().Internal();
         const auto batchID = asio.PreallocateBatch();
 
         return std::allocate_shared<Imp>(

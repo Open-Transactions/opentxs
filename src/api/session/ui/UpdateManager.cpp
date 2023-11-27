@@ -16,7 +16,8 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -87,8 +88,9 @@ struct UpdateManager::Imp {
         : api_(api)
         , lock_()
         , map_()
-        , publisher_(api.Network().ZeroMQ().Internal().PublishSocket())
-        , pipeline_(api.Network().ZeroMQ().Internal().Pipeline(
+        , publisher_(
+              api.Network().ZeroMQ().Context().Internal().PublishSocket())
+        , pipeline_(api.Network().ZeroMQ().Context().Internal().Pipeline(
               [this](auto&& in) { pipeline(std::move(in)); },
               "UpdateManager"))
     {

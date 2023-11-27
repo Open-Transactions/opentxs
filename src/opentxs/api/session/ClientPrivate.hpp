@@ -15,7 +15,6 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/SessionPrivate.hpp"
-#include "opentxs/api/network/ZMQ.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
@@ -23,6 +22,7 @@
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/api/session/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -90,7 +90,7 @@ public:
         -> std::shared_ptr<const internal::Client> final;
     auto UI() const -> const session::UI& final;
     auto Workflow() const -> const session::Workflow& final;
-    auto ZMQ() const -> const api::network::ZMQ& final;
+    auto ZMQ() const -> const session::ZeroMQ& final { return zeromq_; }
 
     using SessionPrivate::asClient;
     auto asClient() noexcept -> session::internal::Client& final
@@ -124,7 +124,7 @@ public:
 
 private:
     session::Client self_;
-    std::unique_ptr<network::ZMQ> zeromq_;
+    session::ZeroMQ zeromq_;
     std::unique_ptr<session::Contacts> contacts_;
     std::unique_ptr<session::Activity> activity_;
     std::shared_ptr<crypto::Blockchain> blockchain_;

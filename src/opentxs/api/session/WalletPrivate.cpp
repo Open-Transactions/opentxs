@@ -69,9 +69,10 @@
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -153,25 +154,32 @@ WalletPrivate::WalletPrivate(const api::Session& api)
     , nymfile_lock_()
     , purse_lock_()
     , purse_map_()
-    , account_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , issuer_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , nym_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , nym_created_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , server_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , unit_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
-    , peer_reply_publisher_(api_.Network().ZeroMQ().Internal().PublishSocket())
+    , account_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , issuer_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , nym_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , nym_created_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , server_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , unit_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , peer_reply_publisher_(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
     , peer_reply_new_publisher_(
-          api_.Network().ZeroMQ().Internal().PublishSocket())
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
     , peer_request_publisher_(
-          api_.Network().ZeroMQ().Internal().PublishSocket())
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
     , peer_request_new_publisher_(
-          api_.Network().ZeroMQ().Internal().PublishSocket())
-    , find_nym_(api_.Network().ZeroMQ().Internal().PushSocket(
+          api_.Network().ZeroMQ().Context().Internal().PublishSocket())
+    , find_nym_(api_.Network().ZeroMQ().Context().Internal().PushSocket(
           opentxs::network::zeromq::socket::Direction::Connect))
     , handle_([&] {
         using Type = opentxs::network::zeromq::socket::Type;
 
-        return api_.Network().ZeroMQ().Internal().MakeBatch(
+        return api_.Network().ZeroMQ().Context().Internal().MakeBatch(
             {
                 Type::Router,  // NOTE p2p_socket_
                 Type::Pull,    // NOTE loopback_
@@ -203,7 +211,7 @@ WalletPrivate::WalletPrivate(const api::Session& api)
     , to_loopback_([&] {
         using Type = opentxs::network::zeromq::socket::Type;
         const auto endpoint = opentxs::network::zeromq::MakeArbitraryInproc();
-        const auto& context = api_.Network().ZeroMQ();
+        const auto& context = api_.Network().ZeroMQ().Context();
         auto socket = factory::ZMQSocket(context, Type::Push);
         auto rc = loopback_.Bind(endpoint.c_str());
 
@@ -215,7 +223,7 @@ WalletPrivate::WalletPrivate(const api::Session& api)
 
         return socket;
     }())
-    , thread_(api_.Network().ZeroMQ().Internal().Start(
+    , thread_(api_.Network().ZeroMQ().Context().Internal().Start(
           batch_.id_,
           {
               {p2p_socket_.ID(),

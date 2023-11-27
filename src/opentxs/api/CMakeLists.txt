@@ -3,10 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+add_subdirectory(network)
 add_subdirectory(session)
 
 libopentxs_add_public_header("api" "Context.hpp")
 libopentxs_add_public_header("api" "Factory.hpp")
+libopentxs_add_public_header("api" "Network.hpp")
 libopentxs_add_public_header("api" "Periodic.hpp")
 libopentxs_add_public_header("api" "Session.hpp")
 libopentxs_add_public_header("api" "Settings.hpp")
@@ -31,6 +33,12 @@ target_sources(
     "Log.internal.hpp"
     "LogPrivate.cpp"
     "LogPrivate.hpp"
+    "Network.cpp"
+    "Network.factory.cpp"
+    "Network.internal.cpp"
+    "Network.internal.hpp"
+    "NetworkPrivate.cpp"
+    "NetworkPrivate.hpp"
     "Paths.factory.cpp"
     "Paths.internal.cpp"
     "Paths.internal.hpp"

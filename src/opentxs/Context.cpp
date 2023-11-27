@@ -25,7 +25,6 @@
 
 #include "TBB.hpp"
 #include "internal/api/network/Asio.hpp"
-#include "internal/api/network/Factory.hpp"
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -36,6 +35,7 @@
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/api/internal.factory.hpp"
 #include "opentxs/api/network/Asio.hpp"
+#include "opentxs/api/network/internal.factory.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/Shutdown.hpp"

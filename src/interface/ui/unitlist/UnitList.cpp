@@ -16,8 +16,9 @@
 #include "internal/identity/wot/claim/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
@@ -61,10 +62,11 @@ UnitList::UnitList(
     , api_(api)
     , blockchain_balance_cb_(zmq::ListenCallback::Factory(
           [this](const auto& in) { process_blockchain_balance(in); }))
-    , blockchain_balance_(api.Network().ZeroMQ().Internal().DealerSocket(
-          blockchain_balance_cb_,
-          zmq::socket::Direction::Connect,
-          "UnitList"))
+    , blockchain_balance_(
+          api.Network().ZeroMQ().Context().Internal().DealerSocket(
+              blockchain_balance_cb_,
+              zmq::socket::Direction::Connect,
+              "UnitList"))
     , listeners_{
           {api.Endpoints().AccountUpdate().data(),
            new MessageProcessor<UnitList>(&UnitList::process_account)}}

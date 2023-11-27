@@ -16,8 +16,9 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
 #include "network/otdht/node/Shared.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -65,7 +66,7 @@ Node::Node(
     const ReadView publicKey,
     const Secret& secretKey) noexcept
     : shared_([&] {
-        const auto& zmq = api.Network().ZeroMQ().Internal();
+        const auto& zmq = api.Network().ZeroMQ().Context().Internal();
         const auto batchID = zmq.PreallocateBatch();
 
         return std::allocate_shared<Shared>(

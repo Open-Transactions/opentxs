@@ -168,7 +168,10 @@ public:
         const -> const session::Notary& final;
     auto StartNotarySession(const int instance) const
         -> const session::Notary& final;
-    auto ZAP() const noexcept -> const api::network::ZAP& final;
+    auto ZAP() const noexcept -> const api::network::ZAP& final
+    {
+        return *zap_;
+    }
     auto ZMQ() const noexcept -> const opentxs::network::zeromq::Context& final;
 
     auto Init(std::shared_ptr<const api::internal::Context> me) noexcept
@@ -215,6 +218,7 @@ private:
     mutable OTFlag running_;
     const opentxs::Options args_;
     const opentxs::network::zeromq::Context& zmq_context_;
+    std::optional<api::network::ZAP> zap_;
     const network::Asio& asio_;
     const opentxs::internal::ShutdownSender& shutdown_sender_;
     const std::filesystem::path home_;
@@ -227,7 +231,6 @@ private:
     mutable GuardedConfig config_;
     std::shared_ptr<api::Crypto> crypto_;
     std::shared_ptr<api::internal::Factory> factory_;
-    std::unique_ptr<api::network::ZAP> zap_;
     mutable GuardedSessions sessions_;
     std::unique_ptr<rpc::internal::RPC> rpc_;
     mutable boost::interprocess::file_lock file_lock_;
@@ -249,6 +252,5 @@ private:
     auto Init_Periodic() -> void;
     auto Init_Profile() -> void;
     auto Init_Rlimit() noexcept -> void;
-    auto Init_Zap() -> void;
     auto shutdown_qt() noexcept -> void;
 };

@@ -97,13 +97,19 @@ struct PeerListener::Imp {
                   cb(std::move(msg), parent_.client_2_peers_);
               }))
         , m_socket_(
-              miner.Network().ZeroMQ().Internal().SubscribeSocket(miner_1_cb_))
-        , ss_socket_(
-              syncServer.Network().ZeroMQ().Internal().SubscribeSocket(ss_cb_))
-        , c1_socket_(client1.Network().ZeroMQ().Internal().SubscribeSocket(
-              client_1_cb_))
-        , c2_socket_(client2.Network().ZeroMQ().Internal().SubscribeSocket(
-              client_2_cb_))
+              miner.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                  miner_1_cb_))
+        , ss_socket_(syncServer.Network()
+                         .ZeroMQ()
+                         .Context()
+                         .Internal()
+                         .SubscribeSocket(ss_cb_))
+        , c1_socket_(
+              client1.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                  client_1_cb_))
+        , c2_socket_(
+              client2.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                  client_2_cb_))
     {
         if (false == m_socket_->Start(
                          (waitForHandshake

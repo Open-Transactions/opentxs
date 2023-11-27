@@ -34,7 +34,6 @@ public:
         -> zeromq::Frame& = 0;
     virtual auto EnsureDelimiter() noexcept -> void = 0;
     virtual auto Envelope() noexcept -> std::span<zeromq::Frame> = 0;
-    virtual auto ExtractFront() noexcept -> zeromq::Frame = 0;
     virtual auto Prepend(SocketID id) noexcept -> zeromq::Frame& = 0;
 
     virtual ~Message() = default;

@@ -18,7 +18,7 @@ PeerRequestListener::PeerRequestListener(
 {
     using namespace opentxs::network::zeromq;
     using enum socket::Direction;
-    requestor.Network().ZeroMQ().SpawnActor(
+    requestor.Network().ZeroMQ().Context().SpawnActor(
         requestor,
         "requestor",
         DefaultStartup(),
@@ -34,7 +34,7 @@ PeerRequestListener::PeerRequestListener(
             {requestor.Endpoints().Shutdown(), Connect},
             {requestor.Endpoints().PeerReply(), Connect},
         });
-    responder.Network().ZeroMQ().SpawnActor(
+    responder.Network().ZeroMQ().Context().SpawnActor(
         responder,
         "responder",
         DefaultStartup(),

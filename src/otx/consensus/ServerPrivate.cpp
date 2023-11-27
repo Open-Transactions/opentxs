@@ -15,7 +15,8 @@
 #include "internal/otx/OTX.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Flag.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"
@@ -56,12 +57,13 @@ ServerPrivate::ServerPrivate(
     , inbox_()
     , outbox_()
     , numbers_(nullptr)
-    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
+    , find_nym_(api.Network().ZeroMQ().Context().Internal().PushSocket(
           network::zeromq::socket::Direction::Connect))
-    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
+    , find_server_(api.Network().ZeroMQ().Context().Internal().PushSocket(
           network::zeromq::socket::Direction::Connect))
-    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
-          network::zeromq::socket::Direction::Connect))
+    , find_unit_definition_(
+          api.Network().ZeroMQ().Context().Internal().PushSocket(
+              network::zeromq::socket::Direction::Connect))
 
 {
 }
@@ -103,12 +105,13 @@ ServerPrivate::ServerPrivate(
     , inbox_()
     , outbox_()
     , numbers_(nullptr)
-    , find_nym_(api.Network().ZeroMQ().Internal().PushSocket(
+    , find_nym_(api.Network().ZeroMQ().Context().Internal().PushSocket(
           network::zeromq::socket::Direction::Connect))
-    , find_server_(api.Network().ZeroMQ().Internal().PushSocket(
+    , find_server_(api.Network().ZeroMQ().Context().Internal().PushSocket(
           network::zeromq::socket::Direction::Connect))
-    , find_unit_definition_(api.Network().ZeroMQ().Internal().PushSocket(
-          network::zeromq::socket::Direction::Connect))
+    , find_unit_definition_(
+          api.Network().ZeroMQ().Context().Internal().PushSocket(
+              network::zeromq::socket::Direction::Connect))
 {
     for (const auto& it : serialized.servercontext().tentativerequestnumber()) {
         tentative_transaction_numbers_.insert(it);

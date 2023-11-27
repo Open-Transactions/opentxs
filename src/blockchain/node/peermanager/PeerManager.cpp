@@ -49,13 +49,14 @@
 #include "internal/util/Timer.hpp"
 #include "network/blockchain/Seednodes.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Util.hpp"
 #include "opentxs/api/network/Asio.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/network/OTDHT.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -563,7 +564,7 @@ auto Actor::add_peer(
         auto [it, isNew] = peers_.try_emplace(
             ++next_id_,
             endpoint.ID(),
-            api_.Network().ZeroMQ().Internal().RawSocket(Push),
+            api_.Network().ZeroMQ().Context().Internal().RawSocket(Push),
             connection,
             endpoint.Type(),
             incoming,

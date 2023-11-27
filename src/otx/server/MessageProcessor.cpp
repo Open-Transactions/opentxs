@@ -36,8 +36,9 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -99,7 +100,7 @@ MessageProcessor::Imp::Imp(
     , server_(server)
     , reason_(reason)
     , running_(true)
-    , zmq_handle_(api_.Network().ZeroMQ().Internal().MakeBatch(
+    , zmq_handle_(api_.Network().ZeroMQ().Context().Internal().MakeBatch(
           {
               zmq::socket::Type::Router,  // NOTE frontend_
               zmq::socket::Type::Pull,    // NOTE notification_
@@ -131,7 +132,7 @@ MessageProcessor::Imp::Imp(
 
     assert_true(rc);
 
-    zmq_thread_ = api_.Network().ZeroMQ().Internal().Start(
+    zmq_thread_ = api_.Network().ZeroMQ().Context().Internal().Start(
         zmq_batch_.id_,
         {
             {frontend_.ID(),
@@ -227,7 +228,7 @@ auto MessageProcessor::Imp::init(
 {
     if (port == 0) { LogAbort()().Abort(); }
 
-    api_.Network().ZeroMQ().Internal().Modify(
+    api_.Network().ZeroMQ().Context().Internal().Modify(
         frontend_id_,
         [this, inproc, port, key = Secret{privkey}](auto& socket) {
             auto set = socket.SetPrivateKey(key.Bytes());
@@ -266,7 +267,7 @@ auto MessageProcessor::Imp::old_pipeline(zmq::Message&& message) noexcept
 
         assert_true(header.IsValid());
 
-        const auto socket = message.Internal().ExtractFront();
+        const auto socket = message.ExtractFront();
         const auto output = (frontend_id_ == socket.as<zmq::SocketID>());
 
         return output;

@@ -31,9 +31,10 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -127,7 +128,8 @@ Account::Account(
     , subaccounts_()
     , find_nym_([&] {
         using Dir = network::zeromq::socket::Direction;
-        auto out = api_.Network().ZeroMQ().Internal().PushSocket(Dir::Connect);
+        auto out = api_.Network().ZeroMQ().Context().Internal().PushSocket(
+            Dir::Connect);
         const auto started = out->Start(api_.Endpoints().FindNym().data());
 
         assert_true(started);

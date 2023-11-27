@@ -6,6 +6,8 @@
 target_sources(
   opentxs-testlib
   PRIVATE
+    "CustomZAPHandler.cpp"
+    "CustomZAPHandler.hpp"
     "DealerReply.cpp"
     "DealerReply.hpp"
     "DealerRouter.cpp"
@@ -44,4 +46,6 @@ target_sources(
     "RouterSocket.hpp"
     "SubscribeSocket.cpp"
     "SubscribeSocket.hpp"
+    "ZAP.cpp"
+    "ZAP.hpp"
 )

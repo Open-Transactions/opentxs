@@ -44,7 +44,9 @@ struct Listener::Imp {
         , cb_(ot::network::zeromq::ListenCallback::Factory(
               [this](auto&& in) { cb(std::move(in)); }))
         , socket_([&] {
-            auto out = api.Network().ZeroMQ().Internal().SubscribeSocket(cb_);
+            auto out =
+                api.Network().ZeroMQ().Context().Internal().SubscribeSocket(
+                    cb_);
 
             if (false == out->Start(endpoint)) {
                 throw std::runtime_error{"failed to connect to endpoint"};

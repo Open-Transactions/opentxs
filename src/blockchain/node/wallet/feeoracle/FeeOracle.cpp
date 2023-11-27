@@ -17,8 +17,9 @@
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -59,7 +60,7 @@ FeeOracle::FeeOracle(
     assert_false(nullptr == node);
     assert_false(nullptr == shared_);
 
-    const auto& asio = api->Network().ZeroMQ().Internal();
+    const auto& asio = api->Network().ZeroMQ().Context().Internal();
     const auto batchID = asio.PreallocateBatch();
     auto actor = std::allocate_shared<Actor>(
         alloc::PMR<Actor>{asio.Alloc(batchID)},

@@ -30,12 +30,6 @@ namespace opentxs
 {
 namespace api
 {
-namespace network
-{
-class ZAP;
-class ZMQ;
-}  // namespace network
-
 namespace session
 {
 class Client;
@@ -111,14 +105,6 @@ namespace internal
 struct NymFile;
 }  // namespace internal
 
-namespace network
-{
-namespace zeromq
-{
-class Context;
-}  // namespace zeromq
-}  // namespace network
-
 namespace otx
 {
 namespace client
@@ -167,7 +153,6 @@ struct RPC;
 
 class Armored;
 class Data;
-class Flag;
 class PasswordCallback;
 class PasswordPrompt;
 class String;
@@ -441,9 +426,5 @@ public:
         const identifier::Nym& nym,
         const proto::VerificationSet& serialized)
         -> identity::wot::verification::internal::Set*;
-    static auto ZAP(const network::zeromq::Context& context)
-        -> api::network::ZAP*;
-    static auto ZMQ(const api::Session& api, const Flag& running)
-        -> api::network::ZMQ*;
 };
 }  // namespace opentxs

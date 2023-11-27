@@ -309,7 +309,7 @@ auto Regtest_fixture_simple::CreateClient(
         ot::network::zeromq::ListenCallback::Factory(
             [&](auto&& msg) { cb_connected(std::move(msg), client_peers); }));
     ot::OTZMQSubscribeSocket client_socket(
-        userNym.api_->Network().ZeroMQ().Internal().SubscribeSocket(
+        userNym.api_->Network().ZeroMQ().Context().Internal().SubscribeSocket(
             client_cb_));
     if (!client_socket->Start(
             (wait_for_handshake_

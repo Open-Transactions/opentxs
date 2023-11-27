@@ -18,11 +18,6 @@ namespace internal
 class Session;
 }  // namespace internal
 
-namespace network
-{
-class ZMQ;
-}  // namespace network
-
 namespace session
 {
 class Activity;
@@ -31,6 +26,7 @@ class Contacts;
 class OTX;
 class UI;
 class Workflow;
+class ZeroMQ;
 }  // namespace session
 }  // namespace api
 }  // namespace opentxs
@@ -53,7 +49,7 @@ public:
     /// Returns the Workflow API for this session.
     auto Workflow() const -> const session::Workflow&;
     /// Returns the ZMQ API for this session. For message passing.
-    auto ZMQ() const -> const network::ZMQ&;
+    auto ZMQ() const -> const session::ZeroMQ&;
 
     OPENTXS_NO_EXPORT Client(api::internal::Session* imp) noexcept;
     Client() = delete;

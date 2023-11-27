@@ -31,13 +31,14 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/Settings.hpp"
 #include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -104,8 +105,9 @@ Server::Server(
     , server_nym_id_()
     , nym_server_(nullptr)
     , cron_(manager.Factory().Internal().Session().Cron())
-    , notification_socket_(api_.Network().ZeroMQ().Internal().PushSocket(
-          zmq::socket::Direction::Connect))
+    , notification_socket_(
+          api_.Network().ZeroMQ().Context().Internal().PushSocket(
+              zmq::socket::Direction::Connect))
 {
     const auto bound = notification_socket_->Start(
         api_.Endpoints().Internal().PushNotification().data());

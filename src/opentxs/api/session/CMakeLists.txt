@@ -35,5 +35,11 @@ target_sources(
     "Wallet.internal.hpp"
     "WalletPrivate.cpp"
     "WalletPrivate.hpp"
+    "ZeroMQ.cpp"
+    "ZeroMQ.factory.cpp"
+    "ZeroMQ.internal.cpp"
+    "ZeroMQ.internal.hpp"
+    "ZeroMQPrivate.cpp"
+    "ZeroMQPrivate.hpp"
     "internal.factory.hpp"
 )

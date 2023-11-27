@@ -38,8 +38,9 @@ extern "C" {
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -165,7 +166,8 @@ SyncPrivate::SyncPrivate(
     }())
     , checksum_failure_([&] {
         using enum network::zeromq::socket::Type;
-        auto out = api_.Network().ZeroMQ().Internal().RawSocket(Publish);
+        auto out =
+            api_.Network().ZeroMQ().Context().Internal().RawSocket(Publish);
         const auto rc = out.Bind(
             api_.Endpoints().Internal().BlockchainSyncChecksumFailure().data());
 

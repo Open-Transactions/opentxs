@@ -14,8 +14,8 @@
 
 #include "internal/api/network/Blockchain.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
-#include "opentxs/api/network/Network.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"

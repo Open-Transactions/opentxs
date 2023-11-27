@@ -8,8 +8,9 @@
 #include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/network/Network.hpp"
+#include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Log.hpp"
@@ -34,7 +35,7 @@ auto Data::Init(const api::Session& api, std::string_view endpoint) noexcept
 
     using Type = network::zeromq::socket::Type;
     auto& socket = to_actor_.emplace(
-        api.Network().ZeroMQ().Internal().RawSocket(Type::Push));
+        api.Network().ZeroMQ().Context().Internal().RawSocket(Type::Push));
     const auto rc = socket.Bind(endpoint.data());
 
     assert_true(rc);

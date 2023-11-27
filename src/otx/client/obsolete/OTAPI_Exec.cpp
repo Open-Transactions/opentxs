@@ -59,9 +59,6 @@ const std::int32_t OT_ERROR = (-1);
 
 OTAPI_Exec::OTAPI_Exec(
     const api::Session& api,
-    const api::session::Activity& activity,
-    const api::session::Contacts& contacts,
-    const api::network::ZMQ& zeromq,
     const OT_API& otapi,
     ContextLockCallback lockCallback)
     : api_(api)

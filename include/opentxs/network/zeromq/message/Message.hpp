@@ -11,6 +11,7 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -118,10 +119,13 @@ public:
     auto AppendBytes() noexcept -> Writer;
     auto CopyFrames(std::span<const Frame> frames) noexcept -> void;
     auto Envelope() && noexcept -> zeromq::Envelope;
+    auto ExtractFront() noexcept -> zeromq::Frame;
     auto get() noexcept -> std::span<Frame>;
     OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Message&;
     auto MoveFrames(std::span<Frame> frames) noexcept -> void;
     auto Payload() noexcept -> std::span<Frame>;
+    auto Prepend(ReadView frame) noexcept -> zeromq::Frame&;
+    auto Prepend(zeromq::Frame frame) noexcept -> zeromq::Frame&;
     auto StartBody() noexcept -> void;
     virtual auto swap(Message& rhs) noexcept -> void;
 
