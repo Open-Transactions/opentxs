@@ -10,10 +10,10 @@
 #include <memory>
 #include <source_location>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Container.hpp"

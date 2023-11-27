@@ -22,12 +22,12 @@
 #include "internal/network/zeromq/Handle.hpp"
 #include "internal/network/zeromq/Pool.hpp"
 #include "internal/network/zeromq/Thread.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Gatekeeper.hpp"

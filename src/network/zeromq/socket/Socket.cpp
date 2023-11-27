@@ -13,9 +13,9 @@
 #include <span>
 #include <utility>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep

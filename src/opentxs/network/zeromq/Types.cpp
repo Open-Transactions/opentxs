@@ -3,16 +3,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/network/zeromq/Types.hpp"  // IWYU pragma: associated
-#include "opentxs/network/zeromq/Types.hpp"   // IWYU pragma: associated
+#include "opentxs/network/zeromq/Types.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>
 #include <atomic>
 #include <cstdint>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 
+#include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Secret.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -25,6 +28,87 @@ using namespace std::literals;
 
 constexpr auto inproc_prefix_{"inproc://opentxs/"sv};
 constexpr auto path_seperator_{"/"sv};
+constexpr auto z85_size_ = 41_uz;
+
+auto CurveKeypair(Writer&& sec, Writer&& pub) noexcept -> bool
+{
+    try {
+        constexpr auto decodedSize = 32_uz;
+        static_assert(1_uz + decodedSize * 5_uz / 4_uz == z85_size_);
+        auto pubkey = FixedByteArray<z85_size_>{};
+        auto seckey = factory::Secret(z85_size_);
+
+        if (false == CurveKeypairZ85(seckey.WriteInto(), pubkey.WriteInto())) {
+            throw std::runtime_error{"failed to derive keys"};
+        }
+
+        {
+            auto buf = sec.Reserve(decodedSize);
+
+            if (false == buf.IsValid(decodedSize)) {
+                throw std::runtime_error{
+                    "failed to reserve space for secret key"};
+            }
+
+            const auto* result = ::zmq_z85_decode(
+                buf.as<std::uint8_t>(),
+                static_cast<const char*>(seckey.data()));
+
+            if (nullptr == result) {
+                throw std::runtime_error{"failed to decode secret key"};
+            }
+        }
+        {
+            auto buf = pub.Reserve(decodedSize);
+
+            if (false == buf.IsValid(decodedSize)) {
+                throw std::runtime_error{
+                    "failed to reserve space for public key"};
+            }
+
+            const auto* result = ::zmq_z85_decode(
+                buf.as<std::uint8_t>(),
+                static_cast<const char*>(pubkey.data()));
+
+            if (nullptr == result) {
+                throw std::runtime_error{"failed to decode public key"};
+            }
+        }
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(e.what()).Flush();
+
+        return false;
+    }
+}
+
+auto CurveKeypairZ85(Writer&& sec, Writer&& pub) noexcept -> bool
+{
+    try {
+        auto pubkey = pub.Reserve(z85_size_);
+        auto seckey = sec.Reserve(z85_size_);
+
+        if (false == pubkey.IsValid(z85_size_)) {
+            throw std::runtime_error{"failed to reserve space for public key"};
+        }
+
+        if (false == seckey.IsValid(z85_size_)) {
+            throw std::runtime_error{"failed to reserve space for secret key"};
+        }
+
+        const auto rc =
+            ::zmq_curve_keypair(pubkey.as<char>(), seckey.as<char>());
+
+        if (0 != rc) { throw std::runtime_error{"failed to derive key"}; }
+
+        return true;
+    } catch (const std::exception& e) {
+        LogError()(e.what()).Flush();
+
+        return false;
+    }
+}
 
 auto DefaultProcessor() noexcept -> actor::Processor
 {

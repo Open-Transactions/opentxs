@@ -9,7 +9,6 @@
 #include "opentxs/api/network/internal.factory.hpp"  // IWYU pragma: associated
 
 #include <boost/json.hpp>
-#include <zmq.h>
 #include <array>
 #include <fstream>
 #include <stdexcept>
@@ -30,6 +29,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -107,12 +107,15 @@ auto OTDHT::create_config(const std::filesystem::path& path, Data& data)
     auto bufPublic = std::array<char, encoded_buffer_size_>{};
     auto bufSecret = std::array<char, encoded_buffer_size_>{};
     {
-        auto rc = ::zmq_curve_keypair(bufPublic.data(), bufSecret.data());
+        const auto rc = opentxs::network::zeromq::CurveKeypairZ85(
+            preallocated(bufSecret.size(), bufSecret.data()),
+            preallocated(bufPublic.size(), bufPublic.data()));
 
-        assert_true(0 == rc);
+        assert_true(rc);
     }
     const auto pubkey = std::string_view{bufPublic.data(), encoded_key_size_};
     const auto seckey = std::string_view{bufSecret.data(), encoded_key_size_};
+
     // NOTE in some versions of Boost on some platforms boost::json::string_view
     // can be implicitly converted to and from std::string_view. In some
     // configurations they can't.

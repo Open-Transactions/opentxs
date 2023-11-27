@@ -8,8 +8,8 @@
 #include <optional>
 #include <string_view>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 

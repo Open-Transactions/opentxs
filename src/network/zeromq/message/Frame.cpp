@@ -16,9 +16,7 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Factory.hpp"
-#include "internal/util/P0330.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -55,45 +53,10 @@ auto operator==(const Frame& lhs, const Frame& rhs) noexcept -> bool
     return lhs.Bytes() == rhs.Bytes();
 }
 
-auto operator==(std::span<const Frame> lhs, std::span<const Frame> rhs) noexcept
-    -> bool
-{
-    const auto count = lhs.size();
-
-    if (rhs.size() != count) { return false; }
-
-    for (auto n = 0_uz; n < count; ++n) {
-        if (lhs[n] != rhs[n]) { return false; }
-    }
-
-    return true;
-}
-
 auto operator<=>(const Frame& lhs, const Frame& rhs) noexcept
     -> std::strong_ordering
 {
     return lhs.Bytes() <=> rhs.Bytes();
-}
-
-auto operator<=>(
-    std::span<const Frame> lhs,
-    std::span<const Frame> rhs) noexcept -> std::strong_ordering
-{
-    if (auto s1 = lhs.size(), s2 = rhs.size(); s1 < s2) {
-
-        return std::strong_ordering::less;
-    } else if (s2 < s1) {
-
-        return std::strong_ordering::greater;
-    } else {
-        constexpr auto same = std::strong_ordering::equal;
-
-        for (auto n = 0_uz; n < s1; ++n) {
-            if (auto val = lhs[n] <=> rhs[n]; same != val) { return val; }
-        }
-
-        return same;
-    }
 }
 }  // namespace opentxs::network::zeromq
 

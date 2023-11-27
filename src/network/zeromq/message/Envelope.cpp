@@ -7,9 +7,9 @@
 
 #include <utility>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/zeromq/message/EnvelopePrivate.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 

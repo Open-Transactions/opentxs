@@ -12,13 +12,13 @@
 #include <span>
 #include <utility>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Factory.hpp"
 #include "internal/network/zeromq/message/Frame.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/zeromq/message/EnvelopePrivate.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

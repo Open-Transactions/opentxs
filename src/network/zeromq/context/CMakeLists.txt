@@ -13,7 +13,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Handle.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Pool.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Thread.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/Types.hpp"
     "Batch.cpp"
     "Context.cpp"
     "Context.hpp"

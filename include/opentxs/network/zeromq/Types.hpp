@@ -50,6 +50,9 @@ namespace opentxs::network::zeromq
 using BatchID = std::size_t;
 using SocketID = std::size_t;
 
+OPENTXS_EXPORT auto CurveKeypair(Writer&& sec, Writer&& pub) noexcept -> bool;
+OPENTXS_EXPORT auto CurveKeypairZ85(Writer&& sec, Writer&& pub) noexcept
+    -> bool;
 OPENTXS_EXPORT auto DefaultProcessor() noexcept -> actor::Processor;
 OPENTXS_EXPORT auto DefaultShutdown() noexcept -> actor::Shutdown;
 OPENTXS_EXPORT auto DefaultStartup() noexcept -> actor::StateMachine;

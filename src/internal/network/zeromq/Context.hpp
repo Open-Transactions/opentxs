@@ -12,7 +12,6 @@
 #include <thread>
 #include <tuple>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -27,6 +26,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

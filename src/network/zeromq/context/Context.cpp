@@ -48,23 +48,6 @@ auto ZMQContext(const opentxs::Options& args) noexcept
 }
 }  // namespace opentxs::factory
 
-namespace opentxs::network::zeromq
-{
-auto GetBatchID() noexcept -> BatchID
-{
-    static auto counter = std::atomic<BatchID>{};
-
-    return ++counter;
-}
-
-auto GetSocketID() noexcept -> SocketID
-{
-    static auto counter = std::atomic<SocketID>{};
-
-    return ++counter;
-}
-}  // namespace opentxs::network::zeromq
-
 namespace opentxs::network::zeromq::implementation
 {
 Context::Context(const opentxs::Options& args) noexcept

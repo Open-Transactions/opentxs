@@ -14,27 +14,21 @@
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/Writer.hpp"
 
 namespace opentxs::network::zeromq
 {
 auto curve::Client::RandomKeypair() noexcept
     -> std::pair<UnallocatedCString, UnallocatedCString>
 {
-    std::pair<UnallocatedCString, UnallocatedCString> output{};
+    auto output = std::pair<UnallocatedCString, UnallocatedCString>{};
     auto& [privKey, pubKey] = output;
 
-    std::array<char, CURVE_KEY_Z85_BYTES + 1> secretKey{};
-    std::array<char, CURVE_KEY_Z85_BYTES + 1> publicKey{};
-    auto* privkey = &secretKey[0];
-    auto* pubkey = &publicKey[0];
-    auto set = zmq_curve_keypair(pubkey, privkey);
-
-    if (0 == set) {
-        privKey.assign(secretKey.data(), secretKey.size());
-        pubKey.assign(publicKey.data(), publicKey.size());
-    } else {
-        LogError()()("Failed to generate keypair.").Flush();
+    if (false == CurveKeypairZ85(writer(privKey), writer(pubKey))) {
+        LogError()()("Failed to generate keypair").Flush();
     }
 
     return output;
