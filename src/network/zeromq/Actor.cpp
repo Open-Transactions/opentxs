@@ -32,6 +32,8 @@ Actor::Actor(
     socket::EndpointRequests pull,
     socket::EndpointRequests dealer,
     socket::SocketRequests extra,
+    socket::CurveClientRequests curveClient,
+    socket::CurveServerRequests curveServer,
     zeromq::BatchID batchID,
     std::size_t extraCount,
     allocator_type alloc) noexcept
@@ -45,7 +47,9 @@ Actor::Actor(
           std::move(subscribe),
           std::move(pull),
           std::move(dealer),
-          std::move(extra))
+          std::move(extra),
+          std::move(curveClient),
+          std::move(curveServer))
     , index_([&] {
         using namespace actor;
         auto out = decltype(index_){alloc};
@@ -82,6 +86,8 @@ Actor::Actor(
     socket::EndpointRequests pull,
     socket::EndpointRequests dealer,
     socket::SocketRequests extra,
+    socket::CurveClientRequests curveClient,
+    socket::CurveServerRequests curveServer,
     zeromq::BatchID batchID,
     std::size_t extraCount,
     allocator_type alloc) noexcept
@@ -95,7 +101,9 @@ Actor::Actor(
           std::move(subscribe),
           std::move(pull),
           std::move(dealer),
-          std::move(extra))
+          std::move(extra),
+          std::move(curveClient),
+          std::move(curveServer))
     , index_([&] {
         using namespace actor;
         auto out = decltype(index_){alloc};

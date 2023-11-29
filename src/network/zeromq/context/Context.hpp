@@ -19,7 +19,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/Proxy.hpp"
 #include "internal/network/zeromq/Thread.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -34,6 +33,7 @@
 #include "network/zeromq/context/Pool.hpp"
 #include "opentxs/api/Log.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -120,10 +120,12 @@ public:
     auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        socket::EndpointRequests subscribe,
-        socket::EndpointRequests pull,
-        socket::EndpointRequests dealer,
-        socket::SocketRequests extra,
+        socket::EndpointRequests::span subscribe,
+        socket::EndpointRequests::span pull,
+        socket::EndpointRequests::span dealer,
+        socket::SocketRequests::span extra,
+        socket::CurveClientRequests::span curveClient,
+        socket::CurveServerRequests::span curveServer,
         const std::optional<BatchID>& preallocated,
         alloc::Default pmr) const noexcept -> zeromq::Pipeline final;
     auto PreallocateBatch() const noexcept -> BatchID final;
@@ -168,7 +170,10 @@ public:
         socket::EndpointRequests subscribe,
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
-        socket::SocketRequests extra) const noexcept -> BatchID final;
+        socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer) const noexcept
+        -> BatchID final;
     auto SpawnActor(
         const api::Session& context,
         std::string_view name,
@@ -179,7 +184,10 @@ public:
         socket::EndpointRequests subscribe,
         socket::EndpointRequests pull,
         socket::EndpointRequests dealer,
-        socket::SocketRequests extra) const noexcept -> BatchID final;
+        socket::SocketRequests extra,
+        socket::CurveClientRequests curveClient,
+        socket::CurveServerRequests curveServer) const noexcept
+        -> BatchID final;
     auto Start(BatchID id, StartArgs&& sockets) const noexcept
         -> internal::Thread* final;
     auto Stop(BatchID id) const noexcept -> void final;

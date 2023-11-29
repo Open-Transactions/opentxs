@@ -11,7 +11,6 @@
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <sodium.h>
-#include <zmq.h>
 #include <algorithm>
 #include <compare>
 #include <functional>
@@ -68,6 +67,7 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -264,10 +264,10 @@ Peer::Imp::Imp(
         auto out =
             std::make_pair(api_.Factory().Secret(41_uz), FixedByteArray<41>{});
         auto& [sec, pub] = out;
-        const auto rc = ::zmq_curve_keypair(
-            static_cast<char*>(pub.data()), static_cast<char*>(sec.data()));
+        const auto rc =
+            zeromq::CurveKeypairZ85(sec.WriteInto(), pub.WriteInto());
 
-        assert_true(0 == rc);
+        assert_true(rc);
 
         return out;
     }())

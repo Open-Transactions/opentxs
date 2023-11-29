@@ -8,8 +8,6 @@ add_subdirectory(curve)
 add_subdirectory(message)
 add_subdirectory(socket)
 
-libopentxs_add_public_header("network/zeromq" "Types.hpp")
-
 target_sources(
   opentxs-common
   PRIVATE
@@ -21,7 +19,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/ReplyCallback.hpp"
     "Actor.cpp"
     "Actor.hpp"
-    "Common.cpp"
     "ListenCallback.cpp"
     "ListenCallback.hpp"
     "PairEventCallback.cpp"

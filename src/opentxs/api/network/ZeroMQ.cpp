@@ -27,6 +27,8 @@ auto ZeroMQ::Internal() const noexcept -> const internal::ZeroMQ&
 
 auto ZeroMQ::Internal() noexcept -> internal::ZeroMQ& { return *imp_; }
 
+auto ZeroMQ::ZAP() const noexcept -> const network::ZAP& { return imp_->ZAP(); }
+
 ZeroMQ::~ZeroMQ()
 {
     if (nullptr != imp_) {

@@ -18,8 +18,8 @@
 #include <thread>
 
 #include "internal/network/zeromq/Thread.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -86,7 +86,6 @@ private:
     boost::thread thread_;
 
     auto poll() noexcept -> void;
-    auto receive_message(void* socket, Message& message) noexcept -> bool;
     auto modify(Message&& message) noexcept -> void;
     auto run() noexcept -> void;
 };

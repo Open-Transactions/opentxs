@@ -8,7 +8,6 @@
 #include "network/zeromq/context/Thread.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>
-#include <cerrno>
 #include <chrono>
 #include <cstdlib>
 #include <exception>
@@ -21,13 +20,13 @@
 
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pool.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
@@ -198,7 +197,8 @@ auto Thread::poll() noexcept -> void
                 const auto& socket = item.socket;
                 auto message = Message{};
 
-                if (receive_message(socket, message)) {
+                if (receive_to_message(
+                        std::cerr, socket, message, ZMQ_DONTWAIT)) {
                     const auto& callback = *c;
 
                     try {
@@ -217,62 +217,13 @@ auto Thread::poll() noexcept -> void
 
         auto* socket = v.begin()->socket;
         auto message = Message{};
-        const auto rc = receive_message(socket, message);
+        const auto rc =
+            receive_to_message(std::cerr, socket, message, ZMQ_DONTWAIT);
 
         if (false == rc) { std::terminate(); }
 
         this->modify(std::move(message));
     }
-}
-
-auto Thread::receive_message(void* socket, Message& message) noexcept -> bool
-{
-    auto receiving{true};
-
-    while (receiving) {
-        auto frame = Frame{};
-        const bool received =
-            (-1 != ::zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
-
-        if (false == received) {
-            auto zerr = ::zmq_errno();
-            if (EAGAIN == zerr) {
-                std::cerr
-                    << std::source_location::current().function_name() << ": "
-                    << "zmq_msg_recv returns EAGAIN. This should never happen."
-                    << std::endl;
-            } else {
-                std::cerr << std::source_location::current().function_name()
-                          << ": "
-                          << ": Receive error: " << ::zmq_strerror(zerr)
-                          << std::endl;
-            }
-
-            return false;
-        }
-
-        message.AddFrame(std::move(frame));
-        int option{0};
-        std::size_t optionBytes{sizeof(option)};
-
-        const bool haveOption =
-            (-1 !=
-             ::zmq_getsockopt(socket, ZMQ_RCVMORE, &option, &optionBytes));
-
-        if (false == haveOption) {
-            std::cerr << std::source_location::current().function_name() << ": "
-                      << "Failed to check socket options error:\n"
-                      << ::zmq_strerror(zmq_errno()) << std::endl;
-
-            return false;
-        }
-
-        if (optionBytes != sizeof(option)) { std::terminate(); }
-
-        if (1 != option) { receiving = false; }
-    }
-
-    return true;
 }
 
 auto Thread::run() noexcept -> void

@@ -56,7 +56,10 @@ public:
         socket::EndpointRequests subscribe = {},
         socket::EndpointRequests pull = {},
         socket::EndpointRequests dealer = {},
-        socket::SocketRequests extra = {}) const noexcept -> BatchID = 0;
+        socket::SocketRequests extra = {},
+        socket::CurveClientRequests curveClient = {},
+        socket::CurveServerRequests curveServer = {}) const noexcept
+        -> BatchID = 0;
     virtual auto SpawnActor(
         const api::Session& session,
         std::string_view name,
@@ -67,7 +70,10 @@ public:
         socket::EndpointRequests subscribe = {},
         socket::EndpointRequests pull = {},
         socket::EndpointRequests dealer = {},
-        socket::SocketRequests extra = {}) const noexcept -> BatchID = 0;
+        socket::SocketRequests extra = {},
+        socket::CurveClientRequests curveClient = {},
+        socket::CurveServerRequests curveServer = {}) const noexcept
+        -> BatchID = 0;
 
     OPENTXS_NO_EXPORT virtual auto Internal() noexcept
         -> internal::Context& = 0;

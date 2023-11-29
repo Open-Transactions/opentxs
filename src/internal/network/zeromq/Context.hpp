@@ -12,7 +12,6 @@
 #include <thread>
 #include <tuple>
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/socket/Dealer.hpp"
 #include "internal/network/zeromq/socket/Pair.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
@@ -27,6 +26,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -122,10 +122,12 @@ public:
     virtual auto Pipeline(
         std::function<void(zeromq::Message&&)>&& callback,
         const std::string_view threadname,
-        socket::EndpointRequests subscribe = {},
-        socket::EndpointRequests pull = {},
-        socket::EndpointRequests dealer = {},
-        socket::SocketRequests extra = {},
+        socket::EndpointRequests::span subscribe = {},
+        socket::EndpointRequests::span pull = {},
+        socket::EndpointRequests::span dealer = {},
+        socket::SocketRequests::span extra = {},
+        socket::CurveClientRequests::span curveClient = {},
+        socket::CurveServerRequests::span curveServer = {},
         const std::optional<BatchID>& preallocated = std::nullopt,
         alloc::Default pmr = {}) const noexcept -> zeromq::Pipeline = 0;
     virtual auto Proxy(

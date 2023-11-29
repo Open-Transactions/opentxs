@@ -24,7 +24,6 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
@@ -42,6 +41,7 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
@@ -216,6 +216,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : name_([&] {
             // TODO c++20 allocator
@@ -237,10 +239,12 @@ protected:
         , pipeline_(zmq.Internal().Pipeline(
               {},
               name,
-              std::move(subscribe),
-              std::move(pull),
-              std::move(dealer),
-              std::move(extra),
+              subscribe,
+              pull,
+              dealer,
+              extra,
+              curveClient,
+              curveServer,
               batch,
               alloc.resource()))
         , rate_limit_(std::move(rateLimit))
@@ -266,6 +270,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               api.Network().Asio(),
@@ -280,6 +286,8 @@ protected:
               pull,
               dealer,
               extra,
+              curveClient,
+              curveServer,
               std::move(neverDrop))
     {
     }
@@ -294,6 +302,8 @@ protected:
         network::zeromq::socket::EndpointRequests pull = {},
         network::zeromq::socket::EndpointRequests dealer = {},
         network::zeromq::socket::SocketRequests extra = {},
+        network::zeromq::socket::CurveClientRequests curveClient = {},
+        network::zeromq::socket::CurveServerRequests curveServer = {},
         Set<Work>&& neverDrop = {}) noexcept
         : Actor(
               context.Asio(),
@@ -308,6 +318,8 @@ protected:
               pull,
               dealer,
               extra,
+              curveClient,
+              curveServer,
               std::move(neverDrop))
     {
     }

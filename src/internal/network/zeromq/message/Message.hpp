@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -16,7 +16,6 @@
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
-#include "internal/network/zeromq/Types.hpp"
 #include "internal/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
@@ -24,6 +23,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"     // IWYU pragma: keep
@@ -38,10 +38,12 @@ namespace opentxs::factory
 auto Pipeline(
     const network::zeromq::Context& context,
     std::function<void(network::zeromq::Message&&)>&& callback,
-    network::zeromq::socket::EndpointRequests subscribe,
-    network::zeromq::socket::EndpointRequests pull,
-    network::zeromq::socket::EndpointRequests dealer,
-    network::zeromq::socket::SocketRequests extra,
+    network::zeromq::socket::EndpointRequests::span subscribe,
+    network::zeromq::socket::EndpointRequests::span pull,
+    network::zeromq::socket::EndpointRequests::span dealer,
+    network::zeromq::socket::SocketRequests::span extra,
+    network::zeromq::socket::CurveClientRequests::span curveClient,
+    network::zeromq::socket::CurveServerRequests::span curveServer,
     const std::string_view threadname,
     const std::optional<network::zeromq::BatchID>& preallocated,
     alloc::Strategy alloc) noexcept -> opentxs::network::zeromq::Pipeline
@@ -54,6 +56,8 @@ auto Pipeline(
         pull,
         dealer,
         extra,
+        curveClient,
+        curveServer,
         threadname,
         preallocated);
 }
@@ -64,10 +68,12 @@ namespace opentxs::network::zeromq
 Pipeline::Imp::Imp(
     const zeromq::Context& context,
     Callback&& callback,
-    socket::EndpointRequests subscribe,
-    socket::EndpointRequests pull,
-    socket::EndpointRequests dealer,
-    socket::SocketRequests extra,
+    socket::EndpointRequests::span subscribe,
+    socket::EndpointRequests::span pull,
+    socket::EndpointRequests::span dealer,
+    socket::SocketRequests::span extra,
+    socket::CurveClientRequests::span curveClient,
+    socket::CurveServerRequests::span curveServer,
     const std::string_view threadname,
     const std::optional<zeromq::BatchID>& preallocated,
     allocator_type alloc) noexcept
@@ -79,6 +85,8 @@ Pipeline::Imp::Imp(
           pull,
           dealer,
           extra,
+          curveClient,
+          curveServer,
           threadname,
           preallocated,
           alloc)
@@ -90,16 +98,20 @@ Pipeline::Imp::Imp(
     Callback&& callback,
     const CString internalEndpoint,
     const CString outgoingEndpoint,
-    socket::EndpointRequests subscribe,
-    socket::EndpointRequests pull,
-    socket::EndpointRequests dealer,
-    socket::SocketRequests extra,
+    socket::EndpointRequests::span subscribe,
+    socket::EndpointRequests::span pull,
+    socket::EndpointRequests::span dealer,
+    socket::SocketRequests::span extra,
+    socket::CurveClientRequests::span curveClient,
+    socket::CurveServerRequests::span curveServer,
     const std::string_view threadname,
     const std::optional<zeromq::BatchID>& preallocated,
     allocator_type alloc) noexcept
     : Allocated(alloc)
     , context_(context)
-    , total_socket_count_(fixed_sockets_ + extra.get().size())
+    , total_socket_count_(
+          fixed_sockets_ + extra.size() + curveClient.size() +
+          curveServer.size())
     , gate_()
     , shutdown_(false)
     , handle_([&] {
@@ -112,7 +124,16 @@ Pipeline::Imp::Imp(
             out.emplace_back(socket::Type::Dealer);     // NOTE dealer_
             out.emplace_back(socket::Type::Pair);       // NOTE internal_
 
-            for (const auto& [type, args, external] : extra.get()) {
+            for (const auto& [type, args, external] : extra) {
+                out.emplace_back(type);
+            }
+
+            for (const auto& [type, sec, pub, remote, domain, external] :
+                 curveClient) {
+                out.emplace_back(type);
+            }
+
+            for (const auto& [type, sec, domain, external] : curveServer) {
                 out.emplace_back(type);
             }
 
@@ -235,13 +256,14 @@ Pipeline::Imp::Imp(
 
               assert_true(batch_.sockets_.size() == total_socket_count_);
               assert_true(
-                  (fixed_sockets_ + extra.get().size()) == total_socket_count_);
+                  (fixed_sockets_ + extra.size() + curveClient.size() +
+                   curveServer.size()) == total_socket_count_);
 
               // NOTE adjust to the last fixed socket because the iterator will
               // be preincremented
               auto s = std::next(batch_.sockets_.begin(), fixed_sockets_ - 1_z);
 
-              for (const auto& [type, policy, args] : extra.get()) {
+              for (const auto& [type, policy, args] : extra) {
                   auto& socket = *(++s);
                   using enum socket::Policy;
 
@@ -251,6 +273,45 @@ Pipeline::Imp::Imp(
                       assert_true(rc);
                   }
 
+                  apply(args, socket, alloc);
+                  out.emplace_back(
+                      socket.ID(),
+                      &socket,
+                      [id = socket.ID(),
+                       &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                          m.Internal().Prepend(id);
+                          cb.Process(std::move(m));
+                      });
+              }
+
+              for (const auto& [type, sec, pub, remote, domain, args] :
+                   curveClient) {
+                  auto& socket = *(++s);
+                  auto rc = socket.SetExposedUntrusted();
+                  assert_true(rc);
+                  rc = socket.EnableCurveClient(remote, pub, sec);
+                  assert_true(rc);
+                  rc = socket.SetZAPDomain(domain);
+                  assert_true(rc);
+                  apply(args, socket, alloc);
+                  out.emplace_back(
+                      socket.ID(),
+                      &socket,
+                      [id = socket.ID(),
+                       &cb = batch_.listen_callbacks_.at(0).get()](auto&& m) {
+                          m.Internal().Prepend(id);
+                          cb.Process(std::move(m));
+                      });
+              }
+
+              for (const auto& [type, sec, domain, args] : curveServer) {
+                  auto& socket = *(++s);
+                  auto rc = socket.SetExposedUntrusted();
+                  assert_true(rc);
+                  rc = socket.EnableCurveServer(sec);
+                  assert_true(rc);
+                  rc = socket.SetZAPDomain(domain);
+                  assert_true(rc);
                   apply(args, socket, alloc);
                   out.emplace_back(
                       socket.ID(),
@@ -277,19 +338,44 @@ Pipeline::Imp::Imp(
         }
     }())
     , external_([&, this] {
-        const auto span = extra.get();
-        const auto count = span.size();
-
-        assert_true(extra_.size() == count);
-
         auto out = decltype(external_){alloc};
+        auto offset = 0_uz;
 
-        for (auto n = 0_uz; n < count; ++n) {
-            const auto& [_1, policy, _2] = span[n];
-            const auto& socket = extra_[n];
-            using enum socket::Policy;
+        {
+            const auto span = extra;
+            const auto count = span.size();
 
-            if (External == policy) { out.emplace(socket.ID()); }
+            for (auto n = 0_uz; n < count; ++n) {
+                const auto& [_1, policy, _2] = span[n];
+                const auto& socket = extra_[offset + n];
+                using enum socket::Policy;
+
+                if (External == policy) { out.emplace(socket.ID()); }
+            }
+
+            offset += count;
+        }
+        {
+            const auto span = curveClient;
+            const auto count = span.size();
+
+            for (auto n = 0_uz; n < count; ++n) {
+                const auto& socket = extra_[offset + n];
+                out.emplace(socket.ID());
+            }
+
+            offset += count;
+        }
+        {
+            const auto span = curveServer;
+            const auto count = span.size();
+
+            for (auto n = 0_uz; n < count; ++n) {
+                const auto& socket = extra_[offset + n];
+                out.emplace(socket.ID());
+            }
+
+            offset += count;
         }
 
         out.reserve(out.size());

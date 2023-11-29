@@ -8,12 +8,10 @@
 #include <opentxs/opentxs.hpp>
 #include <zmq.h>
 #include <array>
-#include <cerrno>
 #include <chrono>
 #include <iostream>
 #include <memory>
 #include <thread>
-#include <utility>
 
 #include "internal/util/Signals.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
@@ -78,48 +76,12 @@ auto RouterRouterF::thread() noexcept -> void
 
         if (ZMQ_POLLIN != item.revents) { continue; }
 
-        auto* socket = item.socket;
-        auto receiving{true};
         auto msg = opentxs::network::zeromq::Message{};
+        using opentxs::network::zeromq::receive_to_message;
 
-        while (receiving) {
-            auto frame = opentxs::network::zeromq::Frame{};
-            const auto received =
-                (-1 != zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
-
-            if (false == received) {
-                auto zerr = zmq_errno();
-
-                if (EAGAIN == zerr) {
-                    std::cerr << ": zmq_msg_recv returns EAGAIN. This "
-                                 "should never happen."
-                              << std::endl;
-                } else {
-                    std::cerr << ": Receive error: " << zmq_strerror(zerr)
-                              << std::endl;
-                }
-
-                continue;
-            }
-
-            msg.AddFrame(std::move(frame));
-            auto option = int{0};
-            auto optionBytes = sizeof(option);
-            const auto haveOption =
-                (-1 !=
-                 zmq_getsockopt(socket, ZMQ_RCVMORE, &option, &optionBytes));
-
-            if (false == haveOption) {
-                std::cerr << ": Failed to check socket options error:\n"
-                          << zmq_strerror(zmq_errno()) << std::endl;
-
-                continue;
-            }
-
-            if (1 != option) { receiving = false; }
+        if (receive_to_message(std::cerr, item.socket, msg, ZMQ_DONTWAIT)) {
+            queue_.receive(msg);
         }
-
-        queue_.receive(msg);
     }
 }
 }  // namespace ottest

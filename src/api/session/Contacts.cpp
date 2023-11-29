@@ -89,12 +89,13 @@ Contacts::Contacts(const api::session::Client& api)
     , pipeline_(api_.Network().ZeroMQ().Context().Internal().Pipeline(
           [this](auto&& in) { pipeline(std::move(in)); },
           "api::session::Contacts",
-          {{CString{api_.Endpoints().NymCreated()},
-            opentxs::network::zeromq::socket::Direction::Connect},
-           {CString{api_.Endpoints().NymDownload()},
-            opentxs::network::zeromq::socket::Direction::Connect},
-           {CString{api_.Endpoints().Shutdown()},
-            opentxs::network::zeromq::socket::Direction::Connect}}))
+          opentxs::network::zeromq::socket::EndpointRequests{
+              {CString{api_.Endpoints().NymCreated()},
+               opentxs::network::zeromq::socket::Direction::Connect},
+              {CString{api_.Endpoints().NymDownload()},
+               opentxs::network::zeromq::socket::Direction::Connect},
+              {CString{api_.Endpoints().Shutdown()},
+               opentxs::network::zeromq::socket::Direction::Connect}}))
     , timer_(api_.Network().Asio().Internal().GetTimer())
 {
     // WARNING: do not access api_.Wallet() during construction
