@@ -7,9 +7,9 @@
 #include <opentxs/opentxs.hpp>
 #include <zmq.h>
 #include <chrono>
+#include <iostream>
 #include <span>
 
-#include "internal/util/P0330.hpp"
 #include "ottest/fixtures/zeromq/Helpers.hpp"
 #include "ottest/fixtures/zeromq/RouterRouter.hpp"
 
@@ -36,24 +36,17 @@ TEST_F(RouterRouterF, test)
 
     ot::Sleep(1s);
 
-    auto msg = opentxs::network::zeromq::Message{};
-    msg.AddFrame(endpoint_);
-    msg.StartBody();
-    msg.AddFrame("test");
-    auto sent{true};
-    auto frames = msg.get();
-    const auto parts = frames.size();
-    using namespace opentxs::literals;
-    using namespace std::literals;
-    auto counter = 0_uz;
+    const auto sent = opentxs::network::zeromq::send_from_message(
+        std::cerr,
+        [&] {
+            auto msg = opentxs::network::zeromq::Message{};
+            msg.AddFrame(endpoint_);
+            msg.StartBody();
+            msg.AddFrame("test");
 
-    for (auto& frame : frames) {
-        int flags{0};
-
-        if (++counter < parts) { flags = ZMQ_SNDMORE; }
-
-        sent &= (-1 != ::zmq_msg_send(frame, client_.get(), flags));
-    }
+            return msg;
+        }(),
+        client_.get());
 
     EXPECT_TRUE(sent);
 

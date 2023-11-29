@@ -6,17 +6,13 @@
 #include "network/zeromq/socket/Socket.hpp"  // IWYU pragma: associated
 
 #include <zmq.h>
-#include <cerrno>
-#include <cstddef>
 #include <iostream>
 #include <source_location>
-#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/socket/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.internal.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
@@ -156,46 +152,7 @@ auto Socket::receive_message(
     void* socket,
     zeromq::Message& message) noexcept -> bool
 {
-    bool receiving{true};
-
-    while (receiving) {
-        auto frame = Frame{};
-        const bool received = (-1 != zmq_msg_recv(frame, socket, ZMQ_DONTWAIT));
-
-        if (false == received) {
-            auto zerr = zmq_errno();
-            if (EAGAIN == zerr) {
-                std::cerr
-                    << "zmq_msg_recv returns EAGAIN. This should never happen."
-                    << std::endl;
-            } else {
-                std::cerr << ": Receive error: " << zmq_strerror(zerr)
-                          << std::endl;
-            }
-
-            return false;
-        }
-
-        message.AddFrame(std::move(frame));
-        int option{0};
-        std::size_t optionBytes{sizeof(option)};
-
-        const bool haveOption =
-            (-1 != zmq_getsockopt(socket, ZMQ_RCVMORE, &option, &optionBytes));
-
-        if (false == haveOption) {
-            std::cerr << "Failed to check socket options error:\n"
-                      << zmq_strerror(zmq_errno()) << std::endl;
-
-            return false;
-        }
-
-        assert_true(optionBytes == sizeof(option));
-
-        if (1 != option) { receiving = false; }
-    }
-
-    return true;
+    return receive_to_message(std::cerr, socket, message, ZMQ_DONTWAIT);
 }
 
 auto Socket::send_message(
@@ -203,24 +160,7 @@ auto Socket::send_message(
     void* socket,
     Message&& message) noexcept -> bool
 {
-    bool sent{true};
-    auto frames = message.get();
-    const auto parts = frames.size();
-    std::size_t counter{0};
-
-    for (auto& frame : frames) {
-        int flags{0};
-
-        if (++counter < parts) { flags = ZMQ_SNDMORE; }
-
-        sent |= (-1 != zmq_msg_send(frame, socket, flags));
-    }
-
-    if (false == sent) {
-        std::cerr << "Send error: " << zmq_strerror(zmq_errno()) << '\n';
-    }
-
-    return sent;
+    return send_from_message(std::cerr, std::move(message), socket);
 }
 
 auto Socket::send_message(const Lock& lock, Message&& message) const noexcept

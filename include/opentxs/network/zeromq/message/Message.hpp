@@ -7,6 +7,8 @@
 
 #include <compare>
 #include <functional>
+#include <ostream>
+#include <source_location>
 #include <span>
 #include <type_traits>
 
@@ -53,6 +55,17 @@ namespace opentxs::network::zeromq
 OPENTXS_EXPORT auto operator==(const Message&, const Message&) noexcept -> bool;
 OPENTXS_EXPORT auto operator<=>(const Message&, const Message&) noexcept
     -> std::strong_ordering;
+OPENTXS_EXPORT auto receive_to_message(
+    std::ostream& logTo,
+    void* socket,
+    Message& msg,
+    int flags = 0,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> bool;
+OPENTXS_EXPORT auto receive_to_message(
+    void* socket,
+    Message& msg,
+    int flags = 0) noexcept -> void;
 OPENTXS_EXPORT auto reply_to_message(
     const Envelope& envelope,
     bool addDelimiter) noexcept -> Message;
@@ -76,6 +89,17 @@ OPENTXS_EXPORT auto reply_to_message(
     const Message& request,
     const void* tag,
     const std::size_t tagBytes) noexcept -> Message;
+OPENTXS_EXPORT auto send_from_message(
+    std::ostream& logTo,
+    Message&& msg,
+    void* socket,
+    int flags = 0,
+    const std::source_location& loc = std::source_location::current()) noexcept
+    -> bool;
+OPENTXS_EXPORT auto send_from_message(
+    Message&& msg,
+    void* socket,
+    int flags = 0) noexcept -> void;
 OPENTXS_EXPORT auto swap(Message& lhs, Message& rhs) noexcept -> void;
 OPENTXS_EXPORT auto tagged_message(
     const void* tag,

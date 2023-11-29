@@ -5,11 +5,15 @@
 
 #include "network/zeromq/message/Message.hpp"  // IWYU pragma: associated
 
+#include <zmq.h>
 #include <compare>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <numeric>
+#include <source_location>
 #include <span>
+#include <stdexcept>
 #include <utility>
 
 #include "internal/network/zeromq/message/Factory.hpp"
@@ -39,6 +43,64 @@ auto operator<=>(const Message& lhs, const Message& rhs) noexcept
     -> std::strong_ordering
 {
     return lhs.get() <=> rhs.get();
+}
+
+static auto receive_to_message(
+    void* socket,
+    Message& msg,
+    int flags,
+    bool logErrors,
+    const std::source_location& loc = {},
+    std::ostream& logTo = std::cerr) noexcept -> bool
+{
+    try {
+        auto more = int{};
+        auto moreBytes = sizeof(more);
+
+        do {
+            auto frame = Frame{};
+            auto rc = ::zmq_msg_recv(frame, socket, flags);
+
+            if (-1 == rc) {
+                throw std::runtime_error{::zmq_strerror(::zmq_errno())};
+            }
+
+            rc = ::zmq_getsockopt(socket, ZMQ_RCVMORE, &more, &moreBytes);
+
+            if (0 != rc) {
+                throw std::runtime_error{::zmq_strerror(::zmq_errno())};
+            }
+
+            msg.AddFrame(std::move(frame));
+        } while (0 != more);
+
+        return true;
+    } catch (const std::exception& e) {
+        if (logErrors) {
+            logTo << loc.function_name() << " in " << loc.file_name() << ": "
+                  << e.what() << std::endl;
+
+            return false;
+        } else {
+
+            return true;
+        }
+    }
+}
+
+auto receive_to_message(
+    std::ostream& logTo,
+    void* socket,
+    Message& msg,
+    int flags,
+    const std::source_location& loc) noexcept -> bool
+{
+    return receive_to_message(socket, msg, flags, true, loc, logTo);
+}
+
+auto receive_to_message(void* socket, Message& msg, int flags) noexcept -> void
+{
+    receive_to_message(socket, msg, flags, false);
 }
 
 auto reply_to_message(const Envelope& envelope, bool addDelimiter) noexcept
@@ -112,6 +174,66 @@ auto reply_to_message(
     const auto addDelimiter = envelope.IsValid();
 
     return reply_to_message(std::move(envelope), tag, tagBytes, addDelimiter);
+}
+
+static auto send_from_message(
+    Message&& msg,
+    void* socket,
+    int flags,
+    bool logErrors,
+    const std::source_location& loc = {},
+    std::ostream& logTo = std::cerr) noexcept -> bool
+{
+    try {
+        const auto transmit = [=](::zmq_msg_t* part, int f) {
+            if (-1 == ::zmq_msg_send(part, socket, f)) {
+                throw std::runtime_error{::zmq_strerror(::zmq_errno())};
+            }
+        };
+        const auto transmit_more = [=](::zmq_msg_t* part) {
+            transmit(part, flags | ZMQ_SNDMORE);
+        };
+        const auto transmit_last = [=](::zmq_msg_t* part) {
+            transmit(part, flags);
+        };
+        auto frames = msg.get();
+        const auto count = frames.size();
+
+        if (0_uz == count) { return true; }
+
+        const auto last = count - 1_uz;
+
+        for (auto n = 0_uz; n < last; ++n) { transmit_more(frames[n]); }
+
+        transmit_last(frames[last]);
+
+        return true;
+    } catch (const std::exception& e) {
+        if (logErrors) {
+            logTo << loc.function_name() << " in " << loc.file_name() << ": "
+                  << e.what() << std::endl;
+
+            return false;
+        } else {
+
+            return true;
+        }
+    }
+}
+
+auto send_from_message(
+    std::ostream& logTo,
+    Message&& msg,
+    void* socket,
+    int flags,
+    const std::source_location& loc) noexcept -> bool
+{
+    return send_from_message(std::move(msg), socket, flags, true, loc, logTo);
+}
+
+auto send_from_message(Message&& msg, void* socket, int flags) noexcept -> void
+{
+    send_from_message(std::move(msg), socket, flags, false);
 }
 
 auto swap(Message& lhs, Message& rhs) noexcept -> void { return lhs.swap(rhs); }

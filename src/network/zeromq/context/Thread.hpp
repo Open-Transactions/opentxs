@@ -86,7 +86,6 @@ private:
     boost::thread thread_;
 
     auto poll() noexcept -> void;
-    auto receive_message(void* socket, Message& message) noexcept -> bool;
     auto modify(Message&& message) noexcept -> void;
     auto run() noexcept -> void;
 };

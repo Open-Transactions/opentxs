@@ -11,15 +11,12 @@
 #include <exception>
 #include <iostream>
 #include <limits>
-#include <span>
 #include <utility>
 
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Types.hpp"
-#include "internal/util/P0330.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/util/Log.hpp"
@@ -233,31 +230,19 @@ auto Raw::SendExternal(
 
 auto Raw::send(
     Message&& msg,
-    const int baseFlags,
+    const int flags,
     const std::source_location& loc,
     bool silent) noexcept -> bool
 {
-    auto sent{true};
-    auto frames = msg.get();
-    const auto parts = frames.size();
-    auto counter = 0_uz;
+    if (silent) {
+        send_from_message(std::move(msg), Native(), flags);
 
-    for (auto& frame : frames) {
-        auto flags{baseFlags};
+        return true;
+    } else {
 
-        if (++counter < parts) { flags |= ZMQ_SNDMORE; }
-
-        sent &= (-1 != ::zmq_msg_send(frame, Native(), flags));
+        return send_from_message(
+            std::cerr, std::move(msg), Native(), flags, loc);
     }
-
-    if ((false == sent) && (false == silent)) {
-        std::cerr << "Send error from " << loc.function_name() << " in "
-                  << loc.file_name() << ": " << std::to_string(loc.line())
-                  << ": " << ::zmq_strerror(zmq_errno()) << '\n'
-                  << PrintStackTrace();
-    }
-
-    return sent;
 }
 
 auto Raw::SetExposedUntrusted() noexcept -> bool
