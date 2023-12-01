@@ -28,7 +28,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::network::blockchain
 {

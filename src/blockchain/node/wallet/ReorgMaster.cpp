@@ -21,7 +21,7 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

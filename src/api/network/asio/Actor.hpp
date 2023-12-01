@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "internal/util/PMR.hpp"
-#include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Types.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

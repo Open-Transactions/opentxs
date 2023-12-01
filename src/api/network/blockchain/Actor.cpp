@@ -23,7 +23,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::api::network
 {

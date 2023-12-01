@@ -39,8 +39,8 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
-#include "util/Work.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

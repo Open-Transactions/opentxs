@@ -37,9 +37,9 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Types.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "util/Work.hpp"
 
 namespace opentxs::factory
 {

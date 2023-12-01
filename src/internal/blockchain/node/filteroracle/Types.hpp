@@ -11,7 +11,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::filteroracle
 {

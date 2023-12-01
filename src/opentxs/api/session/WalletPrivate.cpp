@@ -124,9 +124,9 @@
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
-#include "util/Work.hpp"
 
 template class opentxs::Exclusive<opentxs::Account>;
 template class opentxs::Shared<opentxs::Account>;

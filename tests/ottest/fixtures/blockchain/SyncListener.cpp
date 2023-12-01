@@ -19,8 +19,8 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "util/Actor.hpp"
-#include "util/Work.hpp"
 
 namespace ottest
 {

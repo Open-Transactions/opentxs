@@ -7,8 +7,9 @@
 
 #include <string_view>
 
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::api::network
 {

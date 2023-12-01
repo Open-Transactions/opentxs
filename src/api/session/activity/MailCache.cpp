@@ -40,10 +40,10 @@
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/JobCounter.hpp"
 #include "util/ScopeGuard.hpp"
-#include "util/Work.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 

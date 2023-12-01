@@ -66,9 +66,9 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"  // IWYU pragma: keep
-#include "util/Work.hpp"
 
 namespace opentxs::factory
 {

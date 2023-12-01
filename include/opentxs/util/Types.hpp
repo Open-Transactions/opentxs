@@ -27,10 +27,11 @@ class value;
 
 namespace opentxs
 {
-// IWYU pragma: begin_exports
-enum class BlockchainProfile : std::uint8_t;  // IWYU pragma: keep
-enum class ConnectionMode : std::int8_t;      // IWYU pragma: keep
-// IWYU pragma: end_exports
+using OTZMQWorkType = std::uint16_t;
+
+enum class BlockchainProfile : std::uint8_t;  // IWYU pragma: export
+enum class ConnectionMode : std::int8_t;      // IWYU pragma: export
+enum class WorkType : OTZMQWorkType;          // IWYU pragma: export
 
 /** A list of object IDs and their associated aliases
  *  * string: id of the stored object
@@ -47,8 +48,15 @@ auto OPENTXS_EXPORT print(
     const boost::json::value& jv,
     std::ostream& os,
     std::string* indent = nullptr) noexcept -> bool;
+auto OPENTXS_EXPORT print(OTZMQWorkType in) noexcept -> std::string_view;
+auto OPENTXS_EXPORT print(WorkType in) noexcept -> std::string_view;
+
 constexpr auto value(ConnectionMode val) noexcept -> std::int8_t
 {
     return static_cast<std::int8_t>(val);
+}
+constexpr auto value(const WorkType in) noexcept
+{
+    return static_cast<OTZMQWorkType>(in);
 }
 }  // namespace opentxs

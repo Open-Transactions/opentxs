@@ -10,11 +10,11 @@
 
 #include "internal/core/contract/Unit.hpp"
 #include "internal/util/Lockable.hpp"
-#include "internal/util/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
