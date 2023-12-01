@@ -16,7 +16,7 @@
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/util/Types.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

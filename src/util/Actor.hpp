@@ -52,8 +52,8 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

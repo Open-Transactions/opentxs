@@ -24,7 +24,6 @@ libopentxs_add_public_header("util" "PasswordCallback.hpp")
 libopentxs_add_public_header("util" "PasswordCaller.hpp")
 libopentxs_add_public_header("util" "PasswordPrompt.hpp")
 libopentxs_add_public_header("util" "Time.hpp")
-libopentxs_add_public_header("util" "Types.hpp")
 libopentxs_add_public_header("util" "WorkType.hpp")
 libopentxs_add_public_header("util" "WriteBuffer.hpp")
 libopentxs_add_public_header("util" "Writer.hpp")
@@ -52,7 +51,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/Thread.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Time.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Timer.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/Types.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/UniqueQueue.hpp"
     "Actor.hpp"
     "Allocator.cpp"
@@ -60,7 +58,6 @@ target_sources(
     "Backoff.hpp"
     "Blank.hpp"
     "Bytes.cpp"
-    "Common.cpp"
     "Container.hpp"
     "Exclusive.tpp"
     "Flag.cpp"
@@ -96,8 +93,6 @@ target_sources(
     "Time.cpp"
     "Timer.cpp"
     "Timer.hpp"
-    "Work.cpp"
-    "Work.hpp"
     "WriteBuffer.cpp"
     "Writer.cpp"
     "WriterPrivate.cpp"

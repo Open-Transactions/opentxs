@@ -19,7 +19,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

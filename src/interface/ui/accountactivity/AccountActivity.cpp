@@ -20,7 +20,7 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::ui::implementation
 {

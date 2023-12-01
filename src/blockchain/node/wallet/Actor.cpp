@@ -29,7 +29,7 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

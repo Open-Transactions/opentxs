@@ -10,7 +10,6 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "internal/util/Future.hpp"
-#include "util/Work.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 
 namespace ottest
 {

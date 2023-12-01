@@ -67,7 +67,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

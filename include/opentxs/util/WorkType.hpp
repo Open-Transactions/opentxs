@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string_view>
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {
-using OTZMQWorkType = std::uint16_t;
-
 // NOTE 16384 - 32767 are reserved for client applications
 enum class WorkType : OTZMQWorkType {
     Shutdown = 0,
@@ -76,13 +73,6 @@ enum class WorkType : OTZMQWorkType {
     PeerRequest = 5120,
     PeerReply = 5121,
 };  // IWYU pragma: export
-
-constexpr auto value(const WorkType in) noexcept
-{
-    return static_cast<OTZMQWorkType>(in);
-}
-
-auto print(OTZMQWorkType in) noexcept -> std::string_view;
 
 /*** Tagged Status Message Format
  *

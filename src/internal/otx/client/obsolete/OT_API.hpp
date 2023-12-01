@@ -19,12 +19,12 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

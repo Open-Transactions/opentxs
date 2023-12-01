@@ -55,10 +55,10 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/ServerSettings.hpp"
-#include "util/Work.hpp"
 
 namespace opentxs
 {

@@ -64,6 +64,7 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WorkType.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/UserCommandProcessor.hpp"

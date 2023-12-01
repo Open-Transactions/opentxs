@@ -13,7 +13,7 @@
 #include "internal/network/otdht/Types.hpp"
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::otdht
 {

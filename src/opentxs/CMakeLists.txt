@@ -6,6 +6,7 @@
 add_subdirectory(api)
 add_subdirectory(blockchain)
 add_subdirectory(network)
+add_subdirectory(util)
 
 configure_file(
   "Context.version.cpp.in"

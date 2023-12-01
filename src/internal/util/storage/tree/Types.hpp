@@ -14,8 +14,8 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/WorkType.hpp"
+#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/storage/Types.hpp"
-#include "util/Work.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
