@@ -2080,5 +2080,7 @@ enum class UnitType : std::uint32_t {
     erc20_ethsepolia_busd2 = 2056,     // Binance USD
     erc20_ethsepolia_tusdc2 = 2057,    // USDC
     erc20_ethsepolia_usdd2 = 2058,     // USDD Stablecoin
+    erc20_ethsepolia_xaut4 = 2059,     // Tether Gold on Sepolia
+    erc20_ethsepolia_dawgs3 = 2060,    // SpaceDawgs
 };
 }  // namespace opentxs

@@ -3847,3 +3847,7 @@ static constexpr auto scale_2057_0_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"TUS
 static constexpr auto scale_2057_1_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"atomic"sv, ScaleInit{u8""sv, u8""sv, ratio_2057_1_, 0, 0}}};
 static constexpr auto scale_2058_0_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"USDD2"sv, ScaleInit{u8""sv, u8""sv, ratio_2058_0_, 0, 18}}};
 static constexpr auto scale_2058_1_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"atomic"sv, ScaleInit{u8""sv, u8""sv, ratio_2058_1_, 0, 0}}};
+static constexpr auto scale_2059_0_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"XAUT4"sv, ScaleInit{u8""sv, u8""sv, ratio_2059_0_, 0, 6}}};
+static constexpr auto scale_2059_1_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"atomic"sv, ScaleInit{u8""sv, u8""sv, ratio_2059_1_, 0, 0}}};
+static constexpr auto scale_2060_0_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"DAWGS3"sv, ScaleInit{u8""sv, u8""sv, ratio_2060_0_, 0, 9}}};
+static constexpr auto scale_2060_1_ = std::array<ScaleDef, 1_uz>{ScaleDef{u8"atomic"sv, ScaleInit{u8""sv, u8""sv, ratio_2060_1_, 0, 0}}};

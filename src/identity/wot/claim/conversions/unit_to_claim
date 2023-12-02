@@ -2058,3 +2058,5 @@
 {erc20_ethsepolia_busd2, ClaimType::erc20_ethsepolia_busd2},
 {erc20_ethsepolia_tusdc2, ClaimType::erc20_ethsepolia_tusdc2},
 {erc20_ethsepolia_usdd2, ClaimType::erc20_ethsepolia_usdd2},
+{erc20_ethsepolia_xaut4, ClaimType::erc20_ethsepolia_xaut4},
+{erc20_ethsepolia_dawgs3, ClaimType::erc20_ethsepolia_dawgs3},

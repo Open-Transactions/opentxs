@@ -7635,3 +7635,11 @@ static constexpr auto scale_2058_ = std::array<ScaleRef, 2>{
     ScaleRef{scale_2058_0_},
     ScaleRef{scale_2058_1_},
 };
+static constexpr auto scale_2059_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_2059_0_},
+    ScaleRef{scale_2059_1_},
+};
+static constexpr auto scale_2060_ = std::array<ScaleRef, 2>{
+    ScaleRef{scale_2060_0_},
+    ScaleRef{scale_2060_1_},
+};

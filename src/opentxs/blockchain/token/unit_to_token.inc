@@ -1791,3 +1791,5 @@ std::make_pair(erc20_ethsepolia_rpl3, make_id(Type::Ethereum_sepolia, erc20, "e2
 std::make_pair(erc20_ethsepolia_busd2, make_id(Type::Ethereum_sepolia, erc20, "f3e9d12f14dd9038e0dcf04aa4064f1e71646dac000000000000000000000000"sv)),
 std::make_pair(erc20_ethsepolia_tusdc2, make_id(Type::Ethereum_sepolia, erc20, "f487b060235cd4f43301b4a8193396bfbbb5bbf9000000000000000000000000"sv)),
 std::make_pair(erc20_ethsepolia_usdd2, make_id(Type::Ethereum_sepolia, erc20, "f6e0d68124da7adda277e8dd5ec1bc854e7363b6000000000000000000000000"sv)),
+std::make_pair(erc20_ethsepolia_xaut4, make_id(Type::Ethereum_sepolia, erc20, "4922a015c4407f87432b179bb209e125432e4a2a000000000000000000000000"sv)),
+std::make_pair(erc20_ethsepolia_dawgs3, make_id(Type::Ethereum_sepolia, erc20, "5616d4494fc94906af4ab504f3214d7c89284e5a000000000000000000000000"sv)),

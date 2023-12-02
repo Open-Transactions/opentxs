@@ -2199,5 +2199,7 @@ enum class ClaimType : std::uint32_t {
     erc20_ethsepolia_busd2 = 2182,     // Binance USD
     erc20_ethsepolia_tusdc2 = 2183,    // USDC
     erc20_ethsepolia_usdd2 = 2184,     // USDD Stablecoin
+    erc20_ethsepolia_xaut4 = 2185,     // Tether Gold on Sepolia
+    erc20_ethsepolia_dawgs3 = 2186,    // SpaceDawgs
 };
 }  // namespace opentxs::identity::wot::claim

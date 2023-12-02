@@ -3847,3 +3847,7 @@ static constexpr auto ratio_2057_0_ = std::array<Ratio, 1>{Ratio{10, 18}};
 static constexpr auto ratio_2057_1_ = std::array<Ratio, 1>{Ratio{10, 0}};
 static constexpr auto ratio_2058_0_ = std::array<Ratio, 1>{Ratio{10, 18}};
 static constexpr auto ratio_2058_1_ = std::array<Ratio, 1>{Ratio{10, 0}};
+static constexpr auto ratio_2059_0_ = std::array<Ratio, 1>{Ratio{10, 6}};
+static constexpr auto ratio_2059_1_ = std::array<Ratio, 1>{Ratio{10, 0}};
+static constexpr auto ratio_2060_0_ = std::array<Ratio, 1>{Ratio{10, 9}};
+static constexpr auto ratio_2060_1_ = std::array<Ratio, 1>{Ratio{10, 0}};
