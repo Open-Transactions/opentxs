@@ -1892,3 +1892,5 @@ static constexpr auto def_2055_ = std::array<DefInit, 1_uz>{DefInit{u8"RPL3"sv, 
 static constexpr auto def_2056_ = std::array<DefInit, 1_uz>{DefInit{u8"BUSD2"sv, 0, 1, scale_2056_}};
 static constexpr auto def_2057_ = std::array<DefInit, 1_uz>{DefInit{u8"TUSDC2"sv, 0, 1, scale_2057_}};
 static constexpr auto def_2058_ = std::array<DefInit, 1_uz>{DefInit{u8"USDD2"sv, 0, 1, scale_2058_}};
+static constexpr auto def_2059_ = std::array<DefInit, 1_uz>{DefInit{u8"XAUT4"sv, 0, 1, scale_2059_}};
+static constexpr auto def_2060_ = std::array<DefInit, 1_uz>{DefInit{u8"DAWGS3"sv, 0, 1, scale_2060_}};
