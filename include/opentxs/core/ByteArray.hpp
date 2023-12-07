@@ -43,7 +43,7 @@ struct OPENTXS_EXPORT hash<opentxs::ByteArray> {
 
 namespace opentxs
 {
-auto swap(ByteArray&, ByteArray&) noexcept -> void;
+auto OPENTXS_EXPORT swap(ByteArray&, ByteArray&) noexcept -> void;
 }  // namespace opentxs
 
 namespace opentxs
