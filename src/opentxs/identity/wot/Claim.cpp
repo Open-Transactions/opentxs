@@ -7,10 +7,10 @@
 
 #include <utility>
 
-#include "identity/wot/claim/claim/ClaimPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identity/wot/Claim.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -32,14 +32,14 @@ auto swap(Claim& lhs, Claim& rhs) noexcept -> void { lhs.swap(rhs); }
 
 namespace opentxs::identity::wot
 {
-Claim::Claim(ClaimPrivate* imp) noexcept
+Claim::Claim(internal::Claim* imp) noexcept
     : imp_(imp)
 {
     assert_false(nullptr == imp_);
 }
 
 Claim::Claim(allocator_type alloc) noexcept
-    : Claim(ClaimPrivate::Blank(alloc))
+    : Claim(internal::Claim::Blank(alloc))
 {
 }
 
@@ -61,25 +61,25 @@ Claim::Claim(Claim&& rhs, allocator_type alloc) noexcept
 
 auto Claim::Add(claim::Attribute attr) noexcept -> void { imp_->Add(attr); }
 
-auto Claim::Attributes() const noexcept -> UnallocatedSet<claim::Attribute>
-{
-    return imp_->Attributes();
-}
-
-auto Claim::Attributes(alloc::Strategy alloc) const noexcept
-    -> Set<claim::Attribute>
-{
-    return imp_->Attributes(alloc);
-}
-
-auto Claim::ChangeValue(ReadView value) noexcept -> Claim
-{
-    return imp_->ChangeValue(value);
-}
-
-auto Claim::Claimant() const noexcept -> const identifier::Nym&
+auto Claim::Claimant() const noexcept -> const identity::wot::Claimant&
 {
     return imp_->Claimant();
+}
+
+auto Claim::CreateModified(
+    std::optional<std::string_view> value,
+    std::optional<ReadView> subtype,
+    std::optional<Time> start,
+    std::optional<Time> end,
+    allocator_type alloc) const noexcept -> wot::Claim
+{
+    return imp_->CreateModified(value, subtype, start, end, alloc);
+}
+
+auto Claim::for_each_attribute(
+    std::function<void(claim::Attribute)> f) const noexcept -> void
+{
+    return imp_->for_each_attribute(std::move(f));
 }
 
 auto Claim::get_allocator() const noexcept -> allocator_type
@@ -90,6 +90,11 @@ auto Claim::get_allocator() const noexcept -> allocator_type
 auto Claim::get_deleter() noexcept -> delete_function
 {
     return pmr::make_deleter(this);
+}
+
+auto Claim::HasAttribute(claim::Attribute value) const noexcept -> bool
+{
+    return imp_->HasAttribute(value);
 }
 
 auto Claim::ID() const noexcept -> const identifier_type& { return imp_->ID(); }
@@ -126,6 +131,11 @@ auto Claim::Section() const noexcept -> claim::SectionType
 auto Claim::Serialize(Writer&& out) const noexcept -> bool
 {
     return imp_->Serialize(std::move(out));
+}
+
+auto Claim::SetVersion(VersionNumber value) noexcept -> void
+{
+    imp_->SetVersion(value);
 }
 
 auto Claim::Start() const noexcept -> Time { return imp_->Start(); }

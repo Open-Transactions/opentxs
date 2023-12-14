@@ -9,8 +9,8 @@
 #include <PeerRequest.pb.h>
 #include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 
 namespace opentxs::contract::peer::request::faucet
 {

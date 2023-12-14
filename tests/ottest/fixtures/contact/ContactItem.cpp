@@ -5,30 +5,60 @@
 
 #include "ottest/fixtures/contact/ContactItem.hpp"  // IWYU pragma: associated
 
+#include <ContactItem.pb.h>
 #include <opentxs/opentxs.hpp>
+#include <span>
+#include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/identity/wot/claim/internal.factory.hpp"
 
 namespace ottest
 {
-namespace ot = opentxs;
-
 ContactItem::ContactItem()
-    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
-    , contact_item_(
-          dynamic_cast<const ot::api::session::Client&>(api_),
-          ot::UnallocatedCString("testNym"),
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
-          ot::identity::wot::claim::SectionType::Identifier,
-          ot::identity::wot::claim::ClaimType::Employee,
-          ot::UnallocatedCString("testValue"),
-          {ot::identity::wot::claim::Attribute::Active},
-          {},
-          {},
-          "")
-    , nym_id_(api_.Factory().NymIDFromRandom())
+    : nym_id_(client_1_.Factory().NymIDFromRandom())
+    , contact_item_(claim_to_contact_item(client_1_.Factory().Claim(
+          {nym_id_},
+          opentxs::identity::wot::claim::SectionType::Identifier,
+          opentxs::identity::wot::claim::ClaimType::Employee,
+          "testValue",
+          active_)))
 {
+}
+}  // namespace ottest
+
+namespace ottest
+{
+auto claim_to_contact_item(const ot::identity::wot::Claim& claim) noexcept
+    -> ot::identity::wot::claim::Item
+{
+    return opentxs::factory::ContactItem(claim, {});
+}
+
+auto deserialize_contact_item(
+    const opentxs::api::Session& api,
+    const opentxs::identity::wot::Claimant& claimant,
+    opentxs::identity::wot::claim::SectionType section,
+    opentxs::ReadView bytes) noexcept -> opentxs::identity::wot::claim::Item
+{
+    const auto proto = opentxs::proto::Factory<opentxs::proto::ContactItem>(
+        bytes.data(), bytes.size());
+
+    return opentxs::factory::ContactItem(api, proto, claimant, section, {});
+}
+
+auto modify_item(
+    const opentxs::identity::wot::claim::Item& item,
+    std::optional<std::string_view> value,
+    std::optional<opentxs::ReadView> subtype,
+    std::optional<opentxs::Time> start,
+    std::optional<opentxs::Time> end) noexcept
+    -> opentxs::identity::wot::claim::Item
+{
+    return claim_to_contact_item(item.asClaim().CreateModified(
+        std::move(value),
+        std::move(subtype),
+        std::move(start),
+        std::move(end)));
 }
 }  // namespace ottest

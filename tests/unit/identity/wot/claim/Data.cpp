@@ -10,9 +10,9 @@
 #include <utility>
 
 #include "internal/core/String.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "ottest/fixtures/contact/ContactData.hpp"
+#include "ottest/fixtures/contact/ContactItem.hpp"
 
 namespace ottest
 {
@@ -82,35 +82,36 @@ auto add_phone_number(
 
 static const ot::UnallocatedCString expectedStringOutput =
     ot::UnallocatedCString{"Version "} +
-    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::identity::wot::claim::DefaultVersion()) +
     ot::UnallocatedCString(
         " contact data\nSections found: 1\n- Section: Identifier, version: ") +
-    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::identity::wot::claim::DefaultVersion()) +
     ot::UnallocatedCString{
         " containing 1 item(s).\n-- Item type: \"employee of\", value: "
         "\"activeContactItemValue\", start: 0, end: 0, version: "} +
-    std::to_string(opentxs::CONTACT_CONTACT_DATA_VERSION) +
+    std::to_string(opentxs::identity::wot::claim::DefaultVersion()) +
     ot::UnallocatedCString{"\n--- Attributes: Active \n"};
 
 TEST_F(ContactData, first_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
-        api_,
+        client_1_,
         "testContactSectionNym1",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Identifier,
         active_contact_item_));
 
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
     const claim::Data contactData(
-        api_,
-        nym_id_1_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_1_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         map);
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(), contactData.Version());
     ASSERT_NE(nullptr, contactData.Section(claim::SectionType::Identifier));
     ASSERT_NE(
         nullptr,
@@ -125,48 +126,52 @@ TEST_F(ContactData, first_constructor)
 TEST_F(ContactData, first_constructor_no_sections)
 {
     const claim::Data contactData(
-        api_,
-        nym_id_1_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_1_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         {});
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(), contactData.Version());
 }
 
 TEST_F(ContactData, first_constructor_different_versions)
 {
     const claim::Data contactData(
-        api_,
-        nym_id_1_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,  // previous version
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_1_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion() - 1,  // previous
+                                                              // version
+        opentxs::identity::wot::claim::DefaultVersion(),
         {});
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(), contactData.Version());
 }
 
 TEST_F(ContactData, copy_constructor)
 {
     const std::shared_ptr<claim::Section> section1(new claim::Section(
-        api_,
+        client_1_,
         "testContactSectionNym1",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Identifier,
         active_contact_item_));
 
     const claim::Data::SectionMap map{{section1->Type(), section1}};
 
     const claim::Data contactData(
-        api_,
-        nym_id_1_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_1_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         map);
 
     const claim::Data copiedContactData(contactData);
 
     ASSERT_EQ(
-        opentxs::CONTACT_CONTACT_DATA_VERSION, copiedContactData.Version());
+        opentxs::identity::wot::claim::DefaultVersion(),
+        copiedContactData.Version());
     ASSERT_NE(
         nullptr, copiedContactData.Section(claim::SectionType::Identifier));
     ASSERT_NE(
@@ -184,31 +189,26 @@ TEST_F(ContactData, operator_plus)
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     // Add a ContactData object with a section of the same type.
     const auto contactItem2 = std::make_shared<claim::Item>(
-        api_,
-        "contactItem2"s,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        claim::SectionType::Identifier,
-        claim::ClaimType::Employee,
-        "contactItemValue2"s,
-        ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        ot::Time{},
-        ot::Time{},
-        "");
+        claim_to_contact_item(client_1_.Factory().Claim(
+            nym_id_1_,
+            claim::SectionType::Identifier,
+            claim::ClaimType::Employee,
+            "contactItemValue2",
+            active_attr_)));
     const auto group2 = std::make_shared<claim::Group>(
         "contactGroup2", claim::SectionType::Identifier, contactItem2);
     const auto section2 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym2",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Identifier,
         claim::Section::GroupMap{{contactItem2->Type(), group2}});
     const auto data2 = claim::Data{
-        api_,
-        nym_id_3_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_3_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::Data::SectionMap{{claim::SectionType::Identifier, section2}}};
     const auto data3 = data1 + data2;
 
@@ -229,31 +229,26 @@ TEST_F(ContactData, operator_plus)
 
     // Add a ContactData object with a section of a different type.
     const auto contactItem4 = std::make_shared<claim::Item>(
-        api_,
-        "contactItem4"s,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        claim::SectionType::Address,
-        claim::ClaimType::Physical,
-        "contactItemValue4"s,
-        ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        ot::Time{},
-        ot::Time{},
-        "");
+        claim_to_contact_item(client_1_.Factory().Claim(
+            nym_id_1_,
+            claim::SectionType::Address,
+            claim::ClaimType::Physical,
+            "contactItemValue4",
+            active_attr_)));
     const auto group4 = std::make_shared<claim::Group>(
         "contactGroup4", claim::SectionType::Address, contactItem4);
     const auto section4 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym4",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Address,
         claim::Section::GroupMap{{contactItem4->Type(), group4}});
     const auto data4 = claim::Data{
-        api_,
-        nym_id_4_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_4_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::Data::SectionMap{{claim::SectionType::Address, section4}}};
     const auto data5 = data3 + data4;
 
@@ -291,20 +286,24 @@ TEST_F(ContactData, operator_plus_different_version)
 {
     // rhs version less than lhs
     const claim::Data contactData2(
-        api_,
-        nym_id_1_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
-        opentxs::CONTACT_CONTACT_DATA_VERSION - 1,
+        client_1_,
+        nym_id_1_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion() - 1,
+        opentxs::identity::wot::claim::DefaultVersion() - 1,
         {});
 
     const auto contactData3 = contact_data_ + contactData2;
     // Verify the new contact data has the latest version.
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData3.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(),
+        contactData3.Version());
 
     // lhs version less than rhs
     const auto contactData4 = contactData2 + contact_data_;
     // Verify the new contact data has the latest version.
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contactData4.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(),
+        contactData4.Version());
 }
 
 TEST_F(ContactData, operator_string)
@@ -323,7 +322,7 @@ TEST_F(ContactData, Serialize)
     EXPECT_TRUE(data1.Serialize(ot::writer(bytes), false));
 
     auto restored1 = claim::Data{
-        api_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
+        client_1_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
 
     ASSERT_EQ(restored1.Version(), data1.Version());
     auto section_iterator = restored1.begin();
@@ -348,7 +347,7 @@ TEST_F(ContactData, Serialize)
     EXPECT_TRUE(data1.Serialize(ot::writer(bytes), true));
 
     auto restored2 = claim::Data{
-        api_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
+        client_1_, "ContactDataNym1", data1.Version(), ot::reader(bytes)};
 
     ASSERT_EQ(restored2.Version(), data1.Version());
     section_iterator = restored2.begin();
@@ -412,12 +411,11 @@ TEST_F(ContactData, AddEmail)
 TEST_F(ContactData, AddItem_claim)
 {
     static constexpr auto attrib = {claim::Attribute::Active};
-    const auto claim = api_.Factory().Claim(
+    const auto claim = client_1_.Factory().Claim(
         nym_id_1_,
         claim::SectionType::Contract,
         claim::ClaimType::Usd,
         "contactItemValue",
-        {},
         attrib);
     const auto data1 = contact_data_.AddItem(claim);
     // Verify the section was added.
@@ -441,7 +439,7 @@ TEST_F(ContactData, AddItem_claim_different_versions)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym1",
         3,  // version of CONTACTSECTION_CONTRACT section before
             // CITEMTYPE_BCH was added
@@ -450,20 +448,19 @@ TEST_F(ContactData, AddItem_claim_different_versions)
         claim::Section::GroupMap{{claim::ClaimType::Bch, group1}});
 
     const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
+        client_1_,
+        nym_id_2_.asBase58(client_1_.Crypto()),
         3,  // version of CONTACTSECTION_CONTRACT section before CITEMTYPE_BCH
             // was added
         3,
         claim::Data::SectionMap{{claim::SectionType::Contract, section1}});
 
     static constexpr auto attrib = {claim::Attribute::Active};
-    const auto claim = api_.Factory().Claim(
+    const auto claim = client_1_.Factory().Claim(
         nym_id_2_,
         claim::SectionType::Contract,
         claim::ClaimType::Bch,
         "contactItemValue",
-        {},
         attrib);
 
     const auto data2 = data1.AddItem(claim);
@@ -490,17 +487,12 @@ TEST_F(ContactData, AddItem_item)
 
     // Add an item to a ContactData with a section.
     const auto contactItem2 = std::make_shared<claim::Item>(
-        api_,
-        "contactItem2"s,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        claim::SectionType::Identifier,
-        claim::ClaimType::Employee,
-        "contactItemValue2"s,
-        ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        ot::Time{},
-        ot::Time{},
-        "");
+        claim_to_contact_item(client_1_.Factory().Claim(
+            nym_id_1_,
+            claim::SectionType::Identifier,
+            claim::ClaimType::Employee,
+            "contactItemValue2",
+            active_attr_)));
     const auto data2 = data1.AddItem(contactItem2);
     // Verify the item was added.
     ASSERT_TRUE(data2.HaveClaim(
@@ -521,7 +513,7 @@ TEST_F(ContactData, AddItem_item_different_versions)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym1",
         3,  // version of CONTACTSECTION_CONTRACT section before
             // CITEMTYPE_BCH was added
@@ -530,25 +522,20 @@ TEST_F(ContactData, AddItem_item_different_versions)
         claim::Section::GroupMap{{claim::ClaimType::Bch, group1}});
 
     const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
+        client_1_,
+        nym_id_2_.asBase58(client_1_.Crypto()),
         3,  // version of CONTACTSECTION_CONTRACT section before CITEMTYPE_BCH
             // was added
         3,
         claim::Data::SectionMap{{claim::SectionType::Contract, section1}});
 
     const auto contactItem1 = std::make_shared<claim::Item>(
-        api_,
-        "contactItem1"s,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        claim::SectionType::Contract,
-        claim::ClaimType::Bch,
-        "contactItemValue1"s,
-        ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        ot::Time{},
-        ot::Time{},
-        "");
+        claim_to_contact_item(client_1_.Factory().Claim(
+            nym_id_1_,
+            claim::SectionType::Contract,
+            claim::ClaimType::Bch,
+            "contactItemValue1",
+            active_attr_)));
 
     const auto data2 = data1.AddItem(contactItem1);
 
@@ -606,91 +593,91 @@ TEST_F(ContactData, AddPreferredOTServer)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym1",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Communication,
         claim::Section::GroupMap{{claim::ClaimType::Opentxs, group1}});
 
     const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_2_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::Data::SectionMap{{claim::SectionType::Communication, section1}});
 
-    const ot::identifier::Generic serverIdentifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                "serverID1"s,
-                "")));
+    const ot::identifier::Generic serverIdentifier1 =
+        ot::identity::credential::Contact::ClaimID(
+            client_1_,
+            nym_id_2_,
+            claim::SectionType::Communication,
+            claim::ClaimType::Opentxs,
+            {},
+            {},
+            "serverID1"s,
+            "",
+            ot::identity::wot::claim::DefaultVersion());
     const auto data2 = data1.AddPreferredOTServer(serverIdentifier1, false);
 
     // Verify that the item was made primary.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                ot::String::Factory(serverIdentifier1, api_.Crypto())->Get(),
-                "")));
+    const auto identifier1 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_2_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Opentxs,
+        {},
+        {},
+        ot::String::Factory(serverIdentifier1, client_1_.Crypto())->Get(),
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem1 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, contactItem1);
-    ASSERT_TRUE(contactItem1->isPrimary());
+    ASSERT_TRUE(contactItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 
     // Add a server to a group with a primary.
-    const ot::identifier::Generic serverIdentifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                "serverID2"s,
-                "")));
+    const ot::identifier::Generic serverIdentifier2 =
+        ot::identity::credential::Contact::ClaimID(
+            client_1_,
+            nym_id_2_,
+            claim::SectionType::Communication,
+            claim::ClaimType::Opentxs,
+            {},
+            {},
+            "serverID2"s,
+            "",
+            ot::identity::wot::claim::DefaultVersion());
     const auto data3 = data2.AddPreferredOTServer(serverIdentifier2, false);
 
     // Verify that the item wasn't made primary.
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_2_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                ot::String::Factory(serverIdentifier2, api_.Crypto())->Get(),
-                "")));
+    const auto identifier2 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_2_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Opentxs,
+        {},
+        {},
+        ot::String::Factory(serverIdentifier2, client_1_.Crypto())->Get(),
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem2 = data3.Claim(identifier2);
     ASSERT_NE(nullptr, contactItem2);
-    ASSERT_FALSE(contactItem2->isPrimary());
+    ASSERT_FALSE(contactItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 
     // Add a server to a ContactData with no group.
-    const ot::identifier::Generic serverIdentifier3(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                "serverID3"s,
-                "")));
+    const ot::identifier::Generic serverIdentifier3 =
+        ot::identity::credential::Contact::ClaimID(
+            client_1_,
+            nym_id_1_,
+            claim::SectionType::Communication,
+            claim::ClaimType::Opentxs,
+            {},
+            {},
+            "serverID3"s,
+            "",
+            ot::identity::wot::claim::DefaultVersion());
     const auto data4 =
         contact_data_.AddPreferredOTServer(serverIdentifier3, false);
 
@@ -700,54 +687,55 @@ TEST_F(ContactData, AddPreferredOTServer)
         data4.Group(
             claim::SectionType::Communication, claim::ClaimType::Opentxs));
     // Verify that the item was made primary.
-    const ot::identifier::Generic identifier3(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                ot::String::Factory(serverIdentifier3, api_.Crypto())->Get(),
-                "")));
+    const auto identifier3 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Opentxs,
+        {},
+        {},
+        ot::String::Factory(serverIdentifier3, client_1_.Crypto())->Get(),
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem3 = data4.Claim(identifier3);
     ASSERT_NE(nullptr, contactItem3);
-    ASSERT_TRUE(contactItem3->isPrimary());
+    ASSERT_TRUE(contactItem3->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 
     // Add a primary server.
-    const ot::identifier::Generic serverIdentifier4(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                "serverID4"s,
-                "")));
+    const ot::identifier::Generic serverIdentifier4 =
+        ot::identity::credential::Contact::ClaimID(
+            client_1_,
+            nym_id_1_,
+            claim::SectionType::Communication,
+            claim::ClaimType::Opentxs,
+            {},
+            {},
+            "serverID4"s,
+            "",
+            ot::identity::wot::claim::DefaultVersion());
     const auto data5 = data4.AddPreferredOTServer(serverIdentifier4, true);
 
     // Verify that the item was made primary.
-    const ot::identifier::Generic identifier4(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                ot::String::Factory(serverIdentifier4, api_.Crypto())->Get(),
-                "")));
+    const auto identifier4 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Opentxs,
+        {},
+        {},
+        ot::String::Factory(serverIdentifier4, client_1_.Crypto())->Get(),
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem4 = data5.Claim(identifier4);
     ASSERT_NE(nullptr, contactItem4);
-    ASSERT_TRUE(contactItem4->isPrimary());
+    ASSERT_TRUE(contactItem4->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
     // Verify the previous preferred server is no longer primary.
     const auto contactItem5 = data5.Claim(identifier3);
     ASSERT_NE(nullptr, contactItem5);
-    ASSERT_FALSE(contactItem5->isPrimary());
+    ASSERT_FALSE(contactItem5->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 }
 
 // Nothing to test for required version of contact section for OTServer
@@ -766,89 +754,87 @@ TEST_F(ContactData, AddSocialMediaProfile)
     const auto data2 = contact_data_.AddSocialMediaProfile(
         "profileValue1", claim::ClaimType::Aboutme, false, false);
     // Verify that the item was made primary.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Aboutme,
-                {},
-                {},
-                "profileValue1",
-                "")));
+    const auto identifier1 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Aboutme,
+        {},
+        {},
+        "profileValue1",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem1 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, contactItem1);
-    ASSERT_TRUE(contactItem1->isPrimary());
+    ASSERT_TRUE(contactItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 
     // Add a primary profile.
     const auto data3 = data2.AddSocialMediaProfile(
         "profileValue2", claim::ClaimType::Aboutme, true, false);
     // Verify that the item was made primary.
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Aboutme,
-                {},
-                {},
-                "profileValue2",
-                "")));
+    const auto identifier2 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Aboutme,
+        {},
+        {},
+        "profileValue2",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem2 = data3.Claim(identifier2);
     ASSERT_NE(nullptr, contactItem2);
-    ASSERT_TRUE(contactItem2->isPrimary());
+    ASSERT_TRUE(contactItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
 
     // Add an active profile.
     const auto data4 = data3.AddSocialMediaProfile(
         "profileValue3", claim::ClaimType::Aboutme, false, true);
     // Verify that the item was made active.
-    const ot::identifier::Generic identifier3(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Aboutme,
-                {},
-                {},
-                "profileValue3",
-                "")));
+    const auto identifier3 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Aboutme,
+        {},
+        {},
+        "profileValue3",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem3 = data4.Claim(identifier3);
     ASSERT_NE(nullptr, contactItem3);
-    ASSERT_TRUE(contactItem3->isActive());
+    ASSERT_TRUE(contactItem3->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 
     // Add a profile that resides in the profile and communication sections.
 
     const auto data5 = contact_data_.AddSocialMediaProfile(
         "profileValue4", claim::ClaimType::Linkedin, false, false);
     // Verify that it was added to the profile section.
-    const ot::identifier::Generic identifier4(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Linkedin,
-                {},
-                {},
-                "profileValue4",
-                "")));
+    const auto identifier4 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Linkedin,
+        {},
+        {},
+        "profileValue4",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem4 = data5.Claim(identifier4);
     ASSERT_NE(nullptr, contactItem4);
     // Verify that it was added to the communication section.
-    const ot::identifier::Generic identifier5(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Linkedin,
-                {},
-                {},
-                "profileValue4",
-                "")));
+    const auto identifier5 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Linkedin,
+        {},
+        {},
+        "profileValue4",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem5 = data5.Claim(identifier5);
     ASSERT_NE(nullptr, contactItem5);
 
@@ -857,31 +843,29 @@ TEST_F(ContactData, AddSocialMediaProfile)
     const auto data6 = data5.AddSocialMediaProfile(
         "profileValue5", claim::ClaimType::Yahoo, false, false);
     // Verify that it was added to the profile section.
-    const ot::identifier::Generic identifier6(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Yahoo,
-                {},
-                {},
-                "profileValue5",
-                "")));
+    const auto identifier6 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Yahoo,
+        {},
+        {},
+        "profileValue5",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem6 = data6.Claim(identifier6);
     ASSERT_NE(nullptr, contactItem6);
     // Verify that it was added to the identifier section.
-    const ot::identifier::Generic identifier7(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Identifier,
-                claim::ClaimType::Yahoo,
-                {},
-                {},
-                "profileValue5",
-                "")));
+    const auto identifier7 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Identifier,
+        claim::ClaimType::Yahoo,
+        {},
+        {},
+        "profileValue5",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem7 = data6.Claim(identifier7);
     ASSERT_NE(nullptr, contactItem7);
 
@@ -890,45 +874,42 @@ TEST_F(ContactData, AddSocialMediaProfile)
     const auto data7 = data6.AddSocialMediaProfile(
         "profileValue6", claim::ClaimType::Twitter, false, false);
     // Verify that it was added to the profile section.
-    const ot::identifier::Generic identifier8(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Profile,
-                claim::ClaimType::Twitter,
-                {},
-                {},
-                "profileValue6",
-                "")));
+    const auto identifier8 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Profile,
+        claim::ClaimType::Twitter,
+        {},
+        {},
+        "profileValue6",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem8 = data7.Claim(identifier8);
     ASSERT_NE(nullptr, contactItem8);
     // Verify that it was added to the communication section.
-    const ot::identifier::Generic identifier9(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Twitter,
-                {},
-                {},
-                "profileValue6",
-                "")));
+    const auto identifier9 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Twitter,
+        {},
+        {},
+        "profileValue6",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem9 = data7.Claim(identifier9);
     ASSERT_NE(nullptr, contactItem9);
     // Verify that it was added to the identifier section.
-    const ot::identifier::Generic identifier10(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Identifier,
-                claim::ClaimType::Twitter,
-                {},
-                {},
-                "profileValue6",
-                "")));
+    const auto identifier10 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Identifier,
+        claim::ClaimType::Twitter,
+        {},
+        {},
+        "profileValue6",
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem10 = data7.Claim(identifier10);
     ASSERT_NE(nullptr, contactItem10);
 }
@@ -1076,17 +1057,12 @@ TEST_F(ContactData, Delete)
 {
     const auto data1 = contact_data_.AddItem(active_contact_item_);
     const auto contactItem2 = std::make_shared<claim::Item>(
-        api_,
-        "contactItem2"s,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        claim::SectionType::Identifier,
-        claim::ClaimType::Employee,
-        "contactItemValue2"s,
-        ot::UnallocatedSet<claim::Attribute>{claim::Attribute::Active},
-        ot::Time{},
-        ot::Time{},
-        "");
+        claim_to_contact_item(client_1_.Factory().Claim(
+            nym_id_1_,
+            claim::SectionType::Identifier,
+            claim::ClaimType::Employee,
+            "contactItemValue2",
+            active_attr_)));
     const auto data2 = data1.AddItem(contactItem2);
 
     const auto data3 = data2.Delete(active_contact_item_->ID());
@@ -1180,18 +1156,18 @@ TEST_F(ContactData, Name)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym1",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Scope,
         claim::Section::GroupMap{{claim::ClaimType::Individual, group1}});
 
     const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_2_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::Data::SectionMap{{claim::SectionType::Scope, section1}});
     // Verify that Name returns an empty string.
     ASSERT_STREQ("", data1.Name().c_str());
@@ -1237,35 +1213,34 @@ TEST_F(ContactData, PreferredOTServer)
         claim::Group::ItemMap{});
 
     const auto section1 = std::make_shared<claim::Section>(
-        api_,
+        client_1_,
         "contactSectionNym1",
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::SectionType::Communication,
         claim::Section::GroupMap{{claim::ClaimType::Opentxs, group1}});
 
     const claim::Data data1(
-        api_,
-        nym_id_2_.asBase58(api_.Crypto()),
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
-        opentxs::CONTACT_CONTACT_DATA_VERSION,
+        client_1_,
+        nym_id_2_.asBase58(client_1_.Crypto()),
+        opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::identity::wot::claim::DefaultVersion(),
         claim::Data::SectionMap{{claim::SectionType::Communication, section1}});
 
     const auto identifier2 = data1.PreferredOTServer();
     ASSERT_TRUE(identifier2.empty());
 
     // Test getting the preferred server.
-    const ot::identifier::Generic serverIdentifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Communication,
-                claim::ClaimType::Opentxs,
-                {},
-                {},
-                "serverID2"s,
-                "")));
+    const auto serverIdentifier2 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Communication,
+        claim::ClaimType::Opentxs,
+        {},
+        {},
+        "serverID2"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto data2 =
         contact_data_.AddPreferredOTServer(serverIdentifier2, true);
     const auto preferredServer = data2.PreferredOTServer();
@@ -1284,21 +1259,22 @@ TEST_F(ContactData, Section)
 TEST_F(ContactData, SetCommonName)
 {
     const auto data1 = contact_data_.SetCommonName("commonName");
-    const ot::identifier::Generic identifier(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Identifier,
-                claim::ClaimType::Commonname,
-                {},
-                {},
-                "commonName"s,
-                "")));
+    const auto identifier = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Identifier,
+        claim::ClaimType::Commonname,
+        {},
+        {},
+        "commonName"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto commonNameItem = data1.Claim(identifier);
     ASSERT_NE(nullptr, commonNameItem);
-    ASSERT_TRUE(commonNameItem->isPrimary());
-    ASSERT_TRUE(commonNameItem->isActive());
+    ASSERT_TRUE(commonNameItem->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
+    ASSERT_TRUE(commonNameItem->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 }
 
 TEST_F(ContactData, SetName)
@@ -1309,40 +1285,42 @@ TEST_F(ContactData, SetName)
     // Test that SetName creates a scope item.
     const auto data2 = data1.SetName("secondName");
     // Verify the item was created in the scope section and made primary.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Scope,
-                claim::ClaimType::Individual,
-                {},
-                {},
-                "secondName"s,
-                "")));
+    const auto identifier1 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Scope,
+        claim::ClaimType::Individual,
+        {},
+        {},
+        "secondName"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto scopeItem1 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, scopeItem1);
-    ASSERT_TRUE(scopeItem1->isPrimary());
-    ASSERT_TRUE(scopeItem1->isActive());
+    ASSERT_TRUE(scopeItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
+    ASSERT_TRUE(scopeItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 
     // Test that SetName creates an item in the scope section without making it
     // primary.
     const auto data3 = data2.SetName("thirdName", false);
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Scope,
-                claim::ClaimType::Individual,
-                {},
-                {},
-                "thirdName"s,
-                "")));
+    const auto identifier2 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Scope,
+        claim::ClaimType::Individual,
+        {},
+        {},
+        "thirdName"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto contactItem2 = data3.Claim(identifier2);
     ASSERT_NE(nullptr, contactItem2);
-    ASSERT_FALSE(contactItem2->isPrimary());
-    ASSERT_TRUE(contactItem2->isActive());
+    ASSERT_FALSE(contactItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
+    ASSERT_TRUE(contactItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 }
 
 TEST_F(ContactData, SetScope)
@@ -1350,49 +1328,51 @@ TEST_F(ContactData, SetScope)
     const auto data1 = contact_data_.SetScope(
         claim::ClaimType::Organization, "organizationScope");
     // Verify the scope item was created.
-    const ot::identifier::Generic identifier1(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Scope,
-                claim::ClaimType::Organization,
-                {},
-                {},
-                "organizationScope"s,
-                "")));
+    const auto identifier1 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Scope,
+        claim::ClaimType::Organization,
+        {},
+        {},
+        "organizationScope"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     const auto scopeItem1 = data1.Claim(identifier1);
     ASSERT_NE(nullptr, scopeItem1);
-    ASSERT_TRUE(scopeItem1->isPrimary());
-    ASSERT_TRUE(scopeItem1->isActive());
+    ASSERT_TRUE(scopeItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
+    ASSERT_TRUE(scopeItem1->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 
     // Test when there is an existing scope.
     const auto data2 =
         data1.SetScope(claim::ClaimType::Organization, "businessScope");
     // Verify the item wasn't added.
-    const ot::identifier::Generic identifier2(
-        api_.Factory().IdentifierFromBase58(
-            ot::identity::credential::Contact::ClaimID(
-                api_,
-                nym_id_1_.asBase58(api_.Crypto()),
-                claim::SectionType::Scope,
-                claim::ClaimType::Business,
-                {},
-                {},
-                "businessScope"s,
-                "")));
+    const auto identifier2 = ot::identity::credential::Contact::ClaimID(
+        client_1_,
+        nym_id_1_,
+        claim::SectionType::Scope,
+        claim::ClaimType::Business,
+        {},
+        {},
+        "businessScope"s,
+        "",
+        ot::identity::wot::claim::DefaultVersion());
     ASSERT_FALSE(data2.Claim(identifier2));
     // Verify the scope wasn't changed.
     const auto scopeItem2 = data2.Claim(identifier1);
     ASSERT_NE(nullptr, scopeItem2);
-    ASSERT_TRUE(scopeItem2->isPrimary());
-    ASSERT_TRUE(scopeItem2->isActive());
+    ASSERT_TRUE(scopeItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Primary));
+    ASSERT_TRUE(scopeItem2->HasAttribute(
+        opentxs::identity::wot::claim::Attribute::Active));
 }
 
 TEST_F(ContactData, SetScope_different_versions)
 {
     const claim::Data data1(
-        api_,
+        client_1_,
         "dataNym1"s,
         3,  // version of CONTACTSECTION_SCOPE section before CITEMTYPE_BOT
             // was added
@@ -1439,6 +1419,8 @@ TEST_F(ContactData, Type)
 
 TEST_F(ContactData, Version)
 {
-    ASSERT_EQ(opentxs::CONTACT_CONTACT_DATA_VERSION, contact_data_.Version());
+    ASSERT_EQ(
+        opentxs::identity::wot::claim::DefaultVersion(),
+        contact_data_.Version());
 }
 }  // namespace ottest

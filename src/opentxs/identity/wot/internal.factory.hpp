@@ -7,8 +7,10 @@
 
 #include <span>
 
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
+#include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
 
@@ -20,16 +22,14 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace identifier
-{
-class Nym;
-}  // namespace identifier
-
 namespace identity
 {
 namespace wot
 {
-class ClaimPrivate;
+namespace internal
+{
+class Claim;
+}  // namespace internal
 }  // namespace wot
 }  // namespace identity
 
@@ -45,7 +45,7 @@ namespace opentxs::factory
 {
 auto Claim(
     const api::Session& api,
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
@@ -53,15 +53,16 @@ auto Claim(
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*;
+    VersionNumber version,
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 auto Claim(
     const api::Session& api,
     const proto::Claim& proto,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*;
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 auto Claim(
     const api::Session& api,
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
     const proto::ContactItem& proto,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*;
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 }  // namespace opentxs::factory

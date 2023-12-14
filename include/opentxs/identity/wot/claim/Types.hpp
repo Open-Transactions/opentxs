@@ -10,6 +10,7 @@
 #include "opentxs/Export.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/util/Numbers.hpp"
 
 namespace opentxs::identity::wot::claim
 {
@@ -19,6 +20,7 @@ enum class SectionType : std::uint8_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto ClaimToNym(const ClaimType in) noexcept -> identity::Type;
 OPENTXS_EXPORT auto ClaimToUnit(const ClaimType in) noexcept -> UnitType;
+OPENTXS_EXPORT auto DefaultVersion() noexcept -> VersionNumber;
 }  // namespace opentxs::identity::wot::claim
 
 namespace opentxs::identity

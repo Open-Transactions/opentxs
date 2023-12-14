@@ -18,7 +18,6 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Seed.hpp"
-#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace std
@@ -49,13 +48,6 @@ auto less<opentxs::crypto::Seed>::operator()(
     const opentxs::crypto::Seed& rhs) const noexcept -> bool
 {
     return lhs < rhs;
-}
-
-auto less<opentxs::identity::wot::Claim>::operator()(
-    const opentxs::identity::wot::Claim& lhs,
-    const opentxs::identity::wot::Claim& rhs) const noexcept -> bool
-{
-    return lhs.ID() < rhs.ID();
 }
 
 auto less<opentxs::otx::client::MessageTask>::operator()(

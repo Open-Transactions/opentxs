@@ -10,6 +10,7 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

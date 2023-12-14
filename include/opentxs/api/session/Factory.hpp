@@ -324,24 +324,26 @@ public:
     auto BlockHeaderFromProtobuf(const ReadView bytes, alloc::Default alloc)
         const noexcept -> blockchain::block::Header;
     auto Claim(
-        const identifier::Nym& claimant,
+        const identity::wot::Claimant& claimant,
         identity::wot::claim::SectionType section,
         identity::wot::claim::ClaimType type,
         ReadView value,
-        ReadView subtype,
         std::span<const identity::wot::claim::Attribute> attributes = {},
         Time start = {},
         Time stop = {},
+        ReadView subtype = {},
+        VersionNumber version = identity::wot::claim::DefaultVersion(),
         alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim;
     auto Claim(
         const identity::Nym& claimant,
         identity::wot::claim::SectionType section,
         identity::wot::claim::ClaimType type,
         ReadView value,
-        ReadView subtype,
         std::span<const identity::wot::claim::Attribute> attributes = {},
         Time start = {},
         Time stop = {},
+        ReadView subtype = {},
+        VersionNumber version = identity::wot::claim::DefaultVersion(),
         alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim;
     auto Claim(ReadView serialized, alloc::Strategy alloc = {}) const noexcept
         -> identity::wot::Claim;

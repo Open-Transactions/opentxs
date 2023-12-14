@@ -337,7 +337,7 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
             if (auto best = group->Best(); best) {
                 if (auto value = best->Value(); false == value.empty()) {
 
-                    return best->Value();
+                    return UnallocatedCString{best->Value()};
                 }
             }
         }
@@ -356,7 +356,7 @@ auto Contacts::ContactName(const identifier::Generic& id, UnitType currencyHint)
 
                 if (auto value = item->Value(); false == value.empty()) {
 
-                    return value;
+                    return UnallocatedCString{value};
                 }
             }
         }

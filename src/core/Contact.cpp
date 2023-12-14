@@ -9,6 +9,7 @@
 
 #include <Contact.pb.h>
 #include <ContactItem.pb.h>
+#include <boost/container/flat_set.hpp>
 #include <boost/container_hash/hash.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
@@ -17,13 +18,13 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/core/String.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/ContactItem.hpp"
@@ -49,17 +50,23 @@
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
+#include "opentxs/identity/wot/claim/Item.internal.hpp"
 #include "opentxs/identity/wot/claim/Section.hpp"      // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/identity/wot/claim/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
+#include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 #define ID_BYTES 32
 
@@ -162,8 +169,8 @@ struct Contact::Imp {
     static auto translate(
         const api::session::Client& api,
         const UnitType chain,
-        const UnallocatedCString& value,
-        const UnallocatedCString& subtype) noexcept(false) -> std::
+        std::string_view value,
+        ReadView subtype) noexcept(false) -> std::
         tuple<ByteArray, blockchain::crypto::AddressStyle, blockchain::Type>
     {
         auto output = std::tuple<
@@ -198,8 +205,8 @@ struct Contact::Imp {
         , contact_data_(new identity::wot::claim::Data(
               api_,
               serialized.id(),
-              CONTACT_CONTACT_DATA_VERSION,
-              CONTACT_CONTACT_DATA_VERSION,
+              identity::wot::claim::DefaultVersion(),
+              identity::wot::claim::DefaultVersion(),
               identity::wot::claim::Data::SectionMap{}))
         , cached_contact_data_()
         , revision_(serialized.revision())
@@ -208,7 +215,7 @@ struct Contact::Imp {
             contact_data_ = std::make_unique<identity::wot::claim::Data>(
                 api_,
                 serialized.id(),
-                CONTACT_CONTACT_DATA_VERSION,
+                identity::wot::claim::DefaultVersion(),
                 serialized.contactdata());
         }
 
@@ -239,8 +246,8 @@ struct Contact::Imp {
         contact_data_ = std::make_unique<identity::wot::claim::Data>(
             api_,
             String::Factory(id_, api_.Crypto())->Get(),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
+            identity::wot::claim::DefaultVersion(),
+            identity::wot::claim::DefaultVersion(),
             identity::wot::claim::Data::SectionMap{});
 
         assert_false(nullptr == contact_data_);
@@ -270,7 +277,7 @@ struct Contact::Imp {
             item->Version(), identity::wot::claim::translate(item->Section()));
         const auto proto = [&] {
             auto out = proto::ContactItem{};
-            item->Serialize(out, true);
+            item->Internal().Serialize(out, true);
             return out;
         }();
 
@@ -324,26 +331,22 @@ struct Contact::Imp {
     {
         assert_true(verify_write_lock(lock));
 
-        UnallocatedSet<identity::wot::claim::Attribute> attr{
+        auto attr = boost::container::flat_set{
             identity::wot::claim::Attribute::Local,
             identity::wot::claim::Attribute::Active};
 
         if (primary) { attr.emplace(identity::wot::claim::Attribute::Primary); }
 
-        std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
-        claim.reset(new identity::wot::claim::Item(
-            api_,
-            String::Factory(id_, api_.Crypto())->Get(),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
-            identity::wot::claim::SectionType::Relationship,
-            identity::wot::claim::ClaimType::Contact,
-            String::Factory(nymID, api_.Crypto())->Get(),
-            attr,
-            {},
-            {},
-            ""));
-
+        auto claim =
+            std::make_shared<identity::wot::claim::Item>(factory::ContactItem(
+                api_.Factory().Claim(
+                    id_,
+                    identity::wot::claim::SectionType::Relationship,
+                    identity::wot::claim::ClaimType::Contact,
+                    nymID.asBase58(api_.Crypto()),
+                    attr),
+                {}  // TODO allocator
+                ));
         add_claim(lock, claim);
     }
 
@@ -583,21 +586,22 @@ auto Contact::AddBlockchainAddress(
     const opentxs::Data& bytes) -> bool
 {
     auto lock = Lock{imp_->lock_};
-
-    std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
-    claim.reset(new identity::wot::claim::Item(
-        imp_->api_,
-        String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
-        identity::wot::claim::SectionType::Address,
-        UnitToClaim(blockchain_to_unit(chain)),
-        bytes.asHex(),
-        {identity::wot::claim::Attribute::Local,
-         identity::wot::claim::Attribute::Active},
-        {},
-        {},
-        UnallocatedCString{translate_style(style)}));
+    using enum identity::wot::claim::Attribute;
+    static const auto attrib =
+        Vector<identity::wot::claim::Attribute>{Active, Local};
+    auto claim =
+        std::make_shared<identity::wot::claim::Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->id_,
+                identity::wot::claim::SectionType::Address,
+                UnitToClaim(blockchain_to_unit(chain)),
+                bytes.asHex(),
+                attrib,
+                {},
+                {},
+                translate_style(style)),
+            {}  // TODO allocator
+            ));
 
     return imp_->add_claim(lock, claim);
 }
@@ -652,27 +656,24 @@ auto Contact::AddPaymentCode(
     const UnitType currency,
     const bool active) -> bool
 {
-    UnallocatedSet<identity::wot::claim::Attribute> attr{
-        identity::wot::claim::Attribute::Local};
+    auto attr =
+        boost::container::flat_set{identity::wot::claim::Attribute::Local};
 
     if (active) { attr.emplace(identity::wot::claim::Attribute::Active); }
 
     if (primary) { attr.emplace(identity::wot::claim::Attribute::Primary); }
 
-    const UnallocatedCString value = code.asBase58();
-    std::shared_ptr<identity::wot::claim::Item> claim{nullptr};
-    claim.reset(new identity::wot::claim::Item(
-        imp_->api_,
-        String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
-        CONTACT_CONTACT_DATA_VERSION,
-        CONTACT_CONTACT_DATA_VERSION,
-        identity::wot::claim::SectionType::Procedure,
-        UnitToClaim(currency),
-        value,
-        attr,
-        {},
-        {},
-        ""));
+    auto claim =
+        std::make_shared<identity::wot::claim::Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->id_,
+                identity::wot::claim::SectionType::Procedure,
+                UnitToClaim(currency),
+                code.asBase58(),
+                attr),
+            {}  // TODO allocator
+            ));
+    claim->SetVersion(identity::wot::claim::DefaultVersion());
 
     if (false == imp_->add_claim(claim)) {
         LogError()()("Unable to add claim.").Flush();
@@ -739,7 +740,9 @@ auto Contact::Best(const identity::wot::claim::Group& group)
     for (const auto& it : group) {
         const auto& claim = it.second;
 
-        if (claim->isActive()) { return claim; }
+        if (claim->HasAttribute(identity::wot::claim::Attribute::Active)) {
+            return claim;
+        }
     }
 
     return group.begin()->second;
@@ -881,15 +884,17 @@ auto Contact::LastUpdated() const -> std::time_t
     if (false == bool(claim)) { return {}; }
 
     try {
+        const auto stlWorkaround = UnallocatedCString{claim->Value()};
+
         if (sizeof(int) == sizeof(std::time_t)) {
 
-            return std::stoi(claim->Value());
+            return std::stoi(stlWorkaround);
         } else if (sizeof(long) == sizeof(std::time_t)) {
 
-            return std::stol(claim->Value());
+            return std::stol(stlWorkaround);
         } else if (sizeof(long long) == sizeof(std::time_t)) {
 
-            return std::stoll(claim->Value());
+            return std::stoll(stlWorkaround);
         } else {
             LogAbort()().Abort();
         }
@@ -928,7 +933,11 @@ auto Contact::Nyms(const bool includeInactive) const
 
         const auto& itemID = item->ID();
 
-        if (false == (includeInactive || item->isActive())) { continue; }
+        if (false ==
+            (includeInactive ||
+             item->HasAttribute(identity::wot::claim::Attribute::Active))) {
+            continue;
+        }
 
         if (primaryID == itemID) {
             output.emplace(
@@ -957,7 +966,7 @@ auto Contact::PaymentCode(
 
     if (false == bool(item)) { return {}; }
 
-    return item->Value();
+    return UnallocatedCString{item->Value()};
 }
 
 auto Contact::PaymentCode(const UnitType currency) const -> UnallocatedCString
@@ -1174,24 +1183,23 @@ void Contact::Update(const proto::Nym& serialized)
     }
 
     imp_->update_label(lock, *nym);
-    std::shared_ptr<identity::wot::claim::Item> claim(
-        new identity::wot::claim::Item(
-            imp_->api_,
-            String::Factory(imp_->id_, imp_->api_.Crypto())->Get(),
-            CONTACT_CONTACT_DATA_VERSION,
-            CONTACT_CONTACT_DATA_VERSION,
-            identity::wot::claim::SectionType::Event,
-            identity::wot::claim::ClaimType::Refreshed,
-            std::to_string(std::time(nullptr)),
-            {identity::wot::claim::Attribute::Primary,
-             identity::wot::claim::Attribute::Active,
-             identity::wot::claim::Attribute::Local},
-            {},
-            {},
-            ""));
+    using enum identity::wot::claim::Attribute;
+    static const auto attrib =
+        Vector<identity::wot::claim::Attribute>{Primary, Active, Local};
+    const auto now = Clock::to_time_t(Clock::now());
+    auto claim =
+        std::make_shared<identity::wot::claim::Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->id_,
+                identity::wot::claim::SectionType::Event,
+                identity::wot::claim::ClaimType::Refreshed,
+                std::to_string(now),
+                attrib),
+            {}  // TODO allocator
+            ));
+    claim->SetVersion(identity::wot::claim::DefaultVersion());
     imp_->add_claim(lock, claim);
 }
 
 Contact::~Contact() = default;
-
 }  // namespace opentxs

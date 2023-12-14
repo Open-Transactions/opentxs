@@ -13,15 +13,14 @@
 #include <memory>
 #include <span>
 #include <stdexcept>
+#include <string_view>
 
 #include "identity/credential/Base.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -29,11 +28,12 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/internal.factory.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {
@@ -85,25 +85,19 @@ namespace opentxs::identity::credential
 {
 auto Contact::ClaimID(
     const api::Session& api,
-    const UnallocatedCString& nymid,
+    const identity::wot::Claimant& claimant,
     const wot::claim::SectionType section,
     const wot::claim::ClaimType type,
-    const Time start,
-    const Time end,
-    const UnallocatedCString& value,
-    const UnallocatedCString& subtype) -> UnallocatedCString
+    Time start,
+    Time end,
+    std::string_view value,
+    ReadView subtype,
+    VersionNumber version) -> identifier::Generic
 {
     const auto claim = api.Factory().Claim(
-        api.Factory().NymIDFromBase58(nymid),
-        section,
-        type,
-        value,
-        subtype,
-        {},
-        start,
-        end);
+        claimant, section, type, value, {}, start, end, subtype, version);
 
-    return claim.ID().asBase58(api.Crypto());
+    return claim.ID();
 }
 }  // namespace opentxs::identity::credential
 

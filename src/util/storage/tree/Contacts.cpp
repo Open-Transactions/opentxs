@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include <tuple>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Contact.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"

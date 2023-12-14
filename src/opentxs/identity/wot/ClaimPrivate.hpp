@@ -6,20 +6,25 @@
 #pragma once
 
 #include <Claim.pb.h>
+#include <boost/container/flat_set.hpp>
 #include <cs_shared_guarded.h>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <shared_mutex>
+#include <span>
+#include <string_view>
 
-#include "identity/wot/claim/claim/ClaimPrivate.hpp"
 #include "internal/util/PMR.hpp"
+#include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Claim.internal.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -36,28 +41,34 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::identity::wot::claim::implementation
+namespace opentxs::identity::wot::claim
 {
-class Claim final : public ClaimPrivate
+class ClaimPrivate final : public internal::Claim
 {
 public:
-    [[nodiscard]] auto Attributes() const noexcept
-        -> UnallocatedSet<claim::Attribute> final;
-    [[nodiscard]] auto Attributes(alloc::Strategy alloc) const noexcept
-        -> Set<claim::Attribute> final;
-    [[nodiscard]] auto Claimant() const noexcept -> const identifier::Nym& final
+    [[nodiscard]] auto Claimant() const noexcept -> const wot::Claimant& final
     {
         return claimant_;
     }
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> ClaimPrivate* final
     {
-        return pmr::clone(this, alloc::PMR<Claim>{alloc});
+        return pmr::clone(this, alloc::PMR<ClaimPrivate>{alloc});
     }
+    [[nodiscard]] auto CreateModified(
+        std::optional<std::string_view> value,
+        std::optional<ReadView> subtype,
+        std::optional<Time> start,
+        std::optional<Time> end,
+        allocator_type) const noexcept -> wot::Claim final;
+    auto for_each_attribute(
+        std::function<void(claim::Attribute)>) const noexcept -> void final;
     [[nodiscard]] auto get_deleter() noexcept -> delete_function final
     {
         return pmr::make_deleter(this);
     }
+    [[nodiscard]] auto HasAttribute(claim::Attribute) const noexcept
+        -> bool final;
     [[nodiscard]] auto ID() const noexcept
         -> const wot::Claim::identifier_type& final
     {
@@ -86,56 +97,65 @@ public:
     }
     [[nodiscard]] auto Version() const noexcept -> VersionNumber final
     {
-        return version_;
+        return data_.lock_shared()->version_;
     }
 
     auto Add(claim::Attribute) noexcept -> void final;
-    [[nodiscard]] auto ChangeValue(ReadView value) noexcept -> wot::Claim final;
     auto Remove(claim::Attribute) noexcept -> void final;
+    auto SetVersion(VersionNumber) noexcept -> void final;
 
-    Claim(
+    ClaimPrivate(
         const api::Session& api,
-        identifier::Nym claimant,
-        claim::SectionType section,
-        claim::ClaimType type,
-        ReadView value,
-        ReadView subtype,
-        Time start,
-        Time stop,
-        Set<claim::Attribute> attributes,
-        std::optional<proto::Claim> preimage,
-        allocator_type alloc) noexcept;
-    Claim(
-        const api::Session& api,
+        const wot::Claimant& claimant,
         VersionNumber version,
-        identifier::Nym claimant,
         claim::SectionType section,
         claim::ClaimType type,
         ReadView value,
         ReadView subtype,
         Time start,
         Time stop,
-        Set<claim::Attribute> attributes,
+        std::span<const claim::Attribute> attributes,
         std::optional<proto::Claim> preimage,
         allocator_type alloc) noexcept;
-    Claim() = delete;
-    Claim(const Claim& rhs, allocator_type alloc) noexcept;
-    Claim(const Claim&) = delete;
-    Claim(Claim&&) = delete;
-    auto operator=(const Claim&) -> Claim& = delete;
-    auto operator=(Claim&&) -> Claim& = delete;
+    ClaimPrivate() = delete;
+    ClaimPrivate(const ClaimPrivate& rhs, allocator_type alloc) noexcept;
+    ClaimPrivate(const ClaimPrivate&) = delete;
+    ClaimPrivate(ClaimPrivate&&) = delete;
+    auto operator=(const ClaimPrivate&) -> ClaimPrivate& = delete;
+    auto operator=(ClaimPrivate&&) -> ClaimPrivate& = delete;
 
-    ~Claim() final = default;
+    ~ClaimPrivate() final = default;
 
 private:
-    using GuardedAttributes =
-        libguarded::shared_guarded<Set<claim::Attribute>, std::shared_mutex>;
+    struct Data final : public opentxs::pmr::Allocated {
+        using Attributes = boost::container::flat_set<
+            claim::Attribute,
+            std::less<claim::Attribute>,
+            alloc::PMR<claim::Attribute>>;
 
-    static constexpr auto default_version_ = VersionNumber{6u};
+        Attributes attributes_;
+        VersionNumber version_;
+
+        [[nodiscard]] auto get_deleter() noexcept -> delete_function final
+        {
+            return pmr::make_deleter(this);
+        }
+
+        Data(
+            std::span<const claim::Attribute> attributes,
+            VersionNumber version,
+            allocator_type alloc) noexcept;
+        Data(const Data& rhs, allocator_type alloc = {}) noexcept;
+        Data(const Data&) = delete;
+        Data(Data&&) = delete;
+        auto operator=(const Data&) -> Data& = delete;
+        auto operator=(Data&&) -> Data& = delete;
+    };
+
+    using Guarded = libguarded::shared_guarded<Data, std::shared_mutex>;
 
     const api::Session& api_;
-    const VersionNumber version_;
-    const identifier::Nym claimant_;
+    const wot::Claimant claimant_;
     const claim::SectionType section_;
     const claim::ClaimType type_;
     const ByteArray value_;
@@ -144,6 +164,6 @@ private:
     const Time stop_;
     const proto::Claim preimage_;
     const wot::Claim::identifier_type id_;
-    GuardedAttributes attributes_;
+    Guarded data_;
 };
-}  // namespace opentxs::identity::wot::claim::implementation
+}  // namespace opentxs::identity::wot::claim

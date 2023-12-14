@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/core/Types.hpp"
@@ -129,7 +130,7 @@ public:
     auto HaveClaim(
         const claim::SectionType section,
         const claim::ClaimType type,
-        const UnallocatedCString& value) const -> bool;
+        std::string_view value) const -> bool;
     auto Name() const -> UnallocatedCString;
     auto PhoneNumbers(bool active = true) const -> UnallocatedCString;
     auto PreferredOTServer() const -> identifier::Notary;

@@ -6,15 +6,21 @@
 #include "opentxs/identity/wot/claim/Group.hpp"  // IWYU pragma: associated
 
 #include <ContactSection.pb.h>
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <ranges>
 #include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
+#include "opentxs/identity/wot/claim/Item.internal.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::identity::wot::claim
@@ -28,21 +34,15 @@ struct Group::Imp {
 
     static auto get_primary_item(const ItemMap& items) -> identifier::Generic
     {
-        auto primary = identifier::Generic{};
-
         for (const auto& it : items) {
-            const auto& item = it.second;
+            const auto& p = it.second;
+            assert_false(nullptr == p);
+            const auto& item = *p;
 
-            assert_false(nullptr == item);
-
-            if (item->isPrimary()) {
-                primary = item->ID();
-
-                break;
-            }
+            if (item.HasAttribute(Attribute::Primary)) { return item.ID(); }
         }
 
-        return primary;
+        return {};
     }
 
     Imp(const UnallocatedCString& nym,
@@ -53,9 +53,8 @@ struct Group::Imp {
         , section_(section)
         , type_(type)
         , primary_(get_primary_item(items))
-        , items_(normalize_items(items))
+        , items_(normalize_items(primary_, items))
     {
-        for (const auto& it : items_) { assert_false(nullptr == it.second); }
     }
 
     Imp(const Imp& rhs)
@@ -71,24 +70,14 @@ struct Group::Imp {
     {
     }
 
-    static auto normalize_items(const ItemMap& items) -> Group::ItemMap
+    static auto normalize_items(const identifier::Generic& primary, ItemMap map)
+        -> Group::ItemMap
     {
-        auto primary = identifier::Generic{};
+        for (auto& it : map) {
+            auto& i = *it.second;
 
-        auto map = items;
-
-        for (const auto& it : map) {
-            const auto& item = it.second;
-
-            assert_false(nullptr == item);
-
-            if (item->isPrimary()) {
-                if (primary.empty()) {
-                    primary = item->ID();
-                } else {
-                    const auto& id = item->ID();
-                    map[id].reset(new Item(item->SetPrimary(false)));
-                }
+            if (i.HasAttribute(Attribute::Primary) && (i.ID() != primary)) {
+                i.Remove(Attribute::Primary);
             }
         }
 
@@ -141,41 +130,27 @@ auto Group::operator+(const Group& rhs) const -> Group
 {
     assert_true(imp_->section_ == rhs.imp_->section_);
 
-    auto primary = identifier::Generic{};
-
-    if (imp_->primary_.empty()) { primary = rhs.imp_->primary_; }
-
-    auto map{imp_->items_};
-
-    for (const auto& it : rhs.imp_->items_) {
-        const auto& item = it.second;
-
-        assert_false(nullptr == item);
-        const auto& id = item->ID();
-        const bool exists = (1 == map.count(id));
-
-        if (exists) { continue; }
-
-        const bool isPrimary = item->isPrimary();
-        const bool designated = (id == primary);
-
-        if (isPrimary && (false == designated)) {
-            map.emplace(id, new Item(item->SetPrimary(false)));
+    const auto& primary =
+        imp_->primary_.empty() ? rhs.imp_->primary_ : imp_->primary_;
+    auto copy{imp_->items_};
+    std::ranges::copy(rhs.imp_->items_, std::inserter(copy, copy.end()));
+    const auto set_primary = [&](auto& item) {
+        if (item->ID() == primary) {
+            item->Add(Attribute::Primary);
         } else {
-            map.emplace(id, item);
+            item->Remove(Attribute::Primary);
         }
+    };
+    std::ranges::for_each(copy | std::views::values, set_primary);
 
-        assert_false(nullptr == map[id]);
-    }
-
-    return {imp_->nym_, imp_->section_, imp_->type_, map};
+    return {imp_->nym_, imp_->section_, imp_->type_, copy};
 }
 
 auto Group::AddItem(const std::shared_ptr<Item>& item) const -> Group
 {
     assert_false(nullptr == item);
 
-    if (item->isPrimary()) { return AddPrimary(item); }
+    if (item->HasAttribute(Attribute::Primary)) { return AddPrimary(item); }
 
     const auto& id = item->ID();
     const bool alreadyExists =
@@ -197,23 +172,17 @@ auto Group::AddPrimary(const std::shared_ptr<Item>& item) const -> Group
     const bool isExistingPrimary = (imp_->primary_ == incomingID);
     const bool haveExistingPrimary =
         ((false == imp_->primary_.empty()) && (false == isExistingPrimary));
-    auto map = imp_->items_;
-    auto& newPrimary = map[incomingID];
-    newPrimary.reset(new Item(item->SetPrimary(true)));
 
-    assert_false(nullptr == newPrimary);
+    auto copy = imp_->items_;
 
     if (haveExistingPrimary) {
-        auto& oldPrimary = map.at(imp_->primary_);
-
-        assert_false(nullptr == oldPrimary);
-
-        oldPrimary.reset(new Item(oldPrimary->SetPrimary(false)));
-
-        assert_false(nullptr == oldPrimary);
+        copy[imp_->primary_]->Remove(Attribute::Primary);
     }
 
-    return {imp_->nym_, imp_->section_, imp_->type_, map};
+    auto [it, _] = copy.try_emplace(incomingID, item);
+    it->second->Add(Attribute::Primary);
+
+    return {imp_->nym_, imp_->section_, imp_->type_, copy};
 }
 
 auto Group::begin() const -> Group::ItemMap::const_iterator
@@ -234,7 +203,7 @@ auto Group::Best() const -> std::shared_ptr<Item>
 
         assert_false(nullptr == claim);
 
-        if (claim->isActive()) { return claim; }
+        if (claim->HasAttribute(Attribute::Active)) { return claim; }
     }
 
     return imp_->items_.begin()->second;
@@ -291,7 +260,7 @@ auto Group::SerializeTo(proto::ContactSection& section, const bool withIDs)
 
         assert_false(nullptr == item);
 
-        item->Serialize(*section.add_item(), withIDs);
+        item->Internal().Serialize(*section.add_item(), withIDs);
     }
 
     return true;

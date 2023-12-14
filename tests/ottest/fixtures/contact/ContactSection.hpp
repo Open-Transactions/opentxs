@@ -5,22 +5,28 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 #include <memory>
+
+#include "ottest/fixtures/common/OneClientSession.hpp"
 
 namespace ottest
 {
 namespace ot = opentxs;
 
-class OPENTXS_EXPORT ContactSection : public ::testing::Test
+class OPENTXS_EXPORT ContactSection : public OneClientSession
 {
 public:
-    ContactSection();
+    static constexpr auto local_attr_ = {
+        ot::identity::wot::claim::Attribute::Local};
+    static constexpr auto active_attr_ = {
+        opentxs::identity::wot::claim::Attribute::Active};
 
-    const ot::api::session::Client& api_;
+    const opentxs::identifier::Nym nym_id_;
     const ot::identity::wot::claim::Section contact_section_;
     const std::shared_ptr<ot::identity::wot::claim::Group> contact_group_;
     const std::shared_ptr<ot::identity::wot::claim::Item> active_contact_item_;
+
+    ContactSection();
 };
 }  // namespace ottest

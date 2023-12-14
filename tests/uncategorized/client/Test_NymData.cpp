@@ -14,8 +14,8 @@
 #include <iterator>
 #include <span>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "ottest/fixtures/client/NymData.hpp"
 
 namespace ot = opentxs;
@@ -30,12 +30,11 @@ TEST_F(NymData, AddClaim)
 {
     static constexpr auto attrib = {
         ot::identity::wot::claim::Attribute::Active};
-    const auto claim = client_.Factory().Claim(
+    const auto claim = client_1_.Factory().Claim(
         nym_data_.Nym().ID(),
         ot::identity::wot::claim::SectionType::Contract,
         ot::identity::wot::claim::ClaimType::Usd,
         "claimValue",
-        {},
         attrib);
     auto added = nym_data_.AddClaim(claim, reason_);
 
@@ -46,25 +45,17 @@ TEST_F(NymData, AddContract)
 {
     auto added =
         nym_data_.AddContract("", ot::UnitType::Usd, false, false, reason_);
+
     EXPECT_FALSE(added);
 
-    const auto identifier1(client_.Factory().UnitIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Contract,
-            ot::identity::wot::claim::ClaimType::Usd,
-            {},
-            {},
-            "instrumentDefinitionID1",
-            "")));
-
+    const auto identifier1 = client_1_.Factory().UnitIDFromRandom();
     added = nym_data_.AddContract(
-        identifier1.asBase58(client_.Crypto()),
+        identifier1.asBase58(client_1_.Crypto()),
         ot::UnitType::Usd,
         false,
         false,
         reason_);
+
     EXPECT_TRUE(added);
 }
 
@@ -99,22 +90,14 @@ TEST_F(NymData, AddPhoneNumber)
 
 TEST_F(NymData, AddPreferredOTServer)
 {
-    const auto identifier(client_.Factory().NotaryIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Communication,
-            ot::identity::wot::claim::ClaimType::Opentxs,
-            {},
-            {},
-            "localhost",
-            "")));
-
+    const auto identifier = client_1_.Factory().NotaryIDFromRandom();
     auto added = nym_data_.AddPreferredOTServer(
-        identifier.asBase58(client_.Crypto()), false, reason_);
+        identifier.asBase58(client_1_.Crypto()), false, reason_);
+
     EXPECT_TRUE(added);
 
     added = nym_data_.AddPreferredOTServer("", false, reason_);
+
     EXPECT_FALSE(added);
 }
 
@@ -202,30 +185,15 @@ TEST_F(NymData, DeleteClaim)
 {
     static constexpr auto attrib = {
         ot::identity::wot::claim::Attribute::Active};
-    const auto claim = client_.Factory().Claim(
+    const auto claim = client_1_.Factory().Claim(
         nym_data_.Nym().ID(),
         ot::identity::wot::claim::SectionType::Contract,
         ot::identity::wot::claim::ClaimType::Usd,
         "claimValue",
-        {},
         attrib);
-    auto added = nym_data_.AddClaim(claim, reason_);
 
-    ASSERT_TRUE(added);
-
-    const auto identifier(client_.Factory().UnitIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Contract,
-            ot::identity::wot::claim::ClaimType::Usd,
-            {},
-            {},
-            "claimValue",
-            "")));
-    auto deleted = nym_data_.DeleteClaim(identifier, reason_);
-
-    EXPECT_TRUE(deleted);
+    EXPECT_TRUE(nym_data_.AddClaim(claim, reason_));
+    EXPECT_TRUE(nym_data_.DeleteClaim(claim.ID(), reason_));
 }
 
 TEST_F(NymData, EmailAddresses)
@@ -255,19 +223,9 @@ TEST_F(NymData, EmailAddresses)
 
 TEST_F(NymData, HaveContract)
 {
-    const auto identifier1(client_.Factory().UnitIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Contract,
-            ot::identity::wot::claim::ClaimType::Usd,
-            {},
-            {},
-            "instrumentDefinitionID1",
-            "")));
-
+    const auto identifier1 = client_1_.Factory().UnitIDFromRandom();
     auto added = nym_data_.AddContract(
-        identifier1.asBase58(client_.Crypto()),
+        identifier1.asBase58(client_1_.Crypto()),
         ot::UnitType::Usd,
         false,
         false,
@@ -290,19 +248,10 @@ TEST_F(NymData, HaveContract)
         nym_data_.HaveContract(identifier1, ot::UnitType::Usd, false, false);
     EXPECT_TRUE(haveContract);
 
-    const auto identifier2(client_.Factory().UnitIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Contract,
-            ot::identity::wot::claim::ClaimType::Usd,
-            {},
-            {},
-            "instrumentDefinitionID2",
-            "")));
+    const auto identifier2 = client_1_.Factory().UnitIDFromRandom();
 
     added = nym_data_.AddContract(
-        identifier2.asBase58(client_.Crypto()),
+        identifier2.asBase58(client_1_.Crypto()),
         ot::UnitType::Usd,
         false,
         false,
@@ -324,13 +273,6 @@ TEST_F(NymData, HaveContract)
     haveContract =
         nym_data_.HaveContract(identifier2, ot::UnitType::Usd, true, true);
     EXPECT_FALSE(haveContract);
-}
-
-TEST_F(NymData, Name) { EXPECT_STREQ("testNym", nym_data_.Name().c_str()); }
-
-TEST_F(NymData, Nym)
-{
-    EXPECT_STREQ("testNym", nym_data_.Nym().Name().c_str());
 }
 
 TEST_F(NymData, PaymentCode)
@@ -375,26 +317,20 @@ TEST_F(NymData, PhoneNumbers)
 TEST_F(NymData, PreferredOTServer)
 {
     auto preferred = nym_data_.PreferredOTServer();
+
     EXPECT_TRUE(preferred.empty());
 
-    const auto identifier(client_.Factory().NotaryIDFromBase58(
-        ot::identity::credential::Contact::ClaimID(
-            dynamic_cast<const ot::api::session::Client&>(client_),
-            "testNym",
-            ot::identity::wot::claim::SectionType::Communication,
-            ot::identity::wot::claim::ClaimType::Opentxs,
-            {},
-            {},
-            "localhost",
-            "")));
-    auto added = nym_data_.AddPreferredOTServer(
-        identifier.asBase58(client_.Crypto()), true, reason_);
+    const auto identifier = client_1_.Factory().NotaryIDFromRandom();
+    const auto added = nym_data_.AddPreferredOTServer(
+        identifier.asBase58(client_1_.Crypto()), true, reason_);
+
     EXPECT_TRUE(added);
 
     preferred = nym_data_.PreferredOTServer();
+
     EXPECT_TRUE(!preferred.empty());
     EXPECT_STREQ(
-        identifier.asBase58(client_.Crypto()).c_str(), preferred.c_str());
+        identifier.asBase58(client_1_.Crypto()).c_str(), preferred.c_str());
 }
 
 TEST_F(NymData, PrintContactData)
@@ -409,7 +345,7 @@ TEST_F(NymData, PrintContactData)
 TEST_F(NymData, SetContactData)
 {
     const ot::identity::wot::claim::Data contactData(
-        dynamic_cast<const ot::api::session::Client&>(client_),
+        client_1_,
         ot::UnallocatedCString("contactData"),
         nym_data_.Nym().ContactDataVersion(),
         nym_data_.Nym().ContactDataVersion(),
@@ -484,7 +420,7 @@ TEST_F(NymData, SocialMediaProfileTypes)
 {
     auto profileTypes =
         ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
-            opentxs::CONTACT_CONTACT_DATA_VERSION,
+            opentxs::identity::wot::claim::DefaultVersion(),
             translate(ot::identity::wot::claim::SectionType::Profile)));
 
     ot::UnallocatedSet<ot::identity::wot::claim::ClaimType> output;

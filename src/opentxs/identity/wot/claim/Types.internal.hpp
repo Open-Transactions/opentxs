@@ -6,7 +6,6 @@
 #pragma once
 
 #include "opentxs/identity/wot/claim/Types.hpp"
-
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -20,11 +19,6 @@ enum ContactSectionName : int;
 }  // namespace proto
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
-
-namespace opentxs
-{
-constexpr auto CONTACT_CONTACT_DATA_VERSION = 6;
-}  // namespace opentxs
 
 namespace opentxs::proto
 {

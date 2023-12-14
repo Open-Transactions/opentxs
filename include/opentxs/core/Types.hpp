@@ -11,8 +11,20 @@
 
 #include "opentxs/Export.hpp"
 
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
+
+namespace opentxs
+{
+using ContactID = identifier::Generic;
+
 struct OPENTXS_EXPORT HexType {
 };
 

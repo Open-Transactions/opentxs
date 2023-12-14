@@ -14,7 +14,7 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -54,7 +54,6 @@ namespace opentxs::blockchain::node::internal
 class Spend
 {
 public:
-    using ContactID = identifier::Generic;
     using Address = ByteArray;
     using AddressRecipient =
         std::tuple<ContactID, Amount, crypto::AddressStyle, Address>;

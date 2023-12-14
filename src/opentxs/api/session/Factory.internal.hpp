@@ -412,30 +412,32 @@ public:
     virtual auto Claim(ReadView serialized, alloc::Strategy alloc = {})
         const noexcept -> identity::wot::Claim = 0;
     virtual auto Claim(
-        const identifier::Nym& claimant,
+        const identity::wot::Claimant& claimant,
         const identity::wot::claim::SectionType section,
         const proto::ContactItem& proto,
         alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
     virtual auto Claim(
-        const identifier::Nym& claimant,
+        const identity::wot::Claimant& claimant,
         identity::wot::claim::SectionType section,
         identity::wot::claim::ClaimType type,
         ReadView value,
         ReadView subtype,
-        std::span<const identity::wot::claim::Attribute> attributes = {},
-        Time start = {},
-        Time stop = {},
-        alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
+        std::span<const identity::wot::claim::Attribute> attributes,
+        Time start,
+        Time stop,
+        VersionNumber version,
+        alloc::Strategy alloc) const noexcept -> identity::wot::Claim = 0;
     virtual auto Claim(
         const identity::Nym& claimant,
         identity::wot::claim::SectionType section,
         identity::wot::claim::ClaimType type,
         ReadView value,
         ReadView subtype,
-        std::span<const identity::wot::claim::Attribute> attributes = {},
-        Time start = {},
-        Time stop = {},
-        alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
+        std::span<const identity::wot::claim::Attribute> attributes,
+        Time start,
+        Time stop,
+        VersionNumber version,
+        alloc::Strategy alloc) const noexcept -> identity::wot::Claim = 0;
     virtual auto Claim(const proto::Claim& proto, alloc::Strategy alloc = {})
         const noexcept -> identity::wot::Claim = 0;
     virtual auto ConnectionReply(
