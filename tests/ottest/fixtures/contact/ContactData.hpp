@@ -5,13 +5,11 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
-#include <cstdint>
 #include <memory>
 #include <string_view>
 
-#include "internal/identity/wot/claim/Types.hpp"
+#include "ottest/fixtures/common/OneClientSession.hpp"
 
 namespace ottest
 {
@@ -19,12 +17,12 @@ namespace ot = opentxs;
 namespace claim = ot::identity::wot::claim;
 using namespace std::literals;
 
-class OPENTXS_EXPORT ContactData : public ::testing::Test
+class OPENTXS_EXPORT ContactData : public OneClientSession
 {
 public:
-    ContactData();
+    static constexpr auto active_attr_ = {
+        opentxs::identity::wot::claim::Attribute::Active};
 
-    const ot::api::session::Client& api_;
     const ot::identifier::Nym nym_id_1_;
     const ot::identifier::Nym nym_id_2_;
     const ot::identifier::Nym nym_id_3_;
@@ -47,14 +45,18 @@ public:
     void testAddItemMethod(
         const CallbackType1 contactDataMethod,
         claim::SectionType sectionName,
-        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
-        std::uint32_t targetVersion = 0);
+        opentxs::VersionNumber version =
+            opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::VersionNumber targetVersion = 0);
 
     void testAddItemMethod2(
         const CallbackType2 contactDataMethod,
         claim::SectionType sectionName,
         claim::ClaimType itemType,
-        std::uint32_t version = opentxs::CONTACT_CONTACT_DATA_VERSION,
-        std::uint32_t targetVersion = 0);
+        opentxs::VersionNumber version =
+            opentxs::identity::wot::claim::DefaultVersion(),
+        opentxs::VersionNumber targetVersion = 0);
+
+    ContactData();
 };
 }  // namespace ottest

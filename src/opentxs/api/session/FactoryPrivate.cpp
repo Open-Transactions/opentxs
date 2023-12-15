@@ -43,7 +43,6 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
 #include "internal/crypto/symmetric/Factory.hpp"
-#include "internal/identity/wot/claim/Factory.hpp"
 #include "internal/identity/wot/verification/Factory.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/otx/blind/Factory.hpp"
@@ -129,6 +128,7 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/Verification.hpp"
+#include "opentxs/identity/wot/internal.factory.hpp"
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -748,7 +748,7 @@ auto FactoryPrivate::Cheque(
 }
 
 auto FactoryPrivate::Claim(
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
@@ -756,6 +756,7 @@ auto FactoryPrivate::Claim(
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
+    VersionNumber version,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return factory::Claim(
@@ -768,6 +769,7 @@ auto FactoryPrivate::Claim(
         attributes,
         start,
         stop,
+        version,
         alloc);
 }
 
@@ -780,6 +782,7 @@ auto FactoryPrivate::Claim(
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
+    VersionNumber version,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return Claim(
@@ -791,6 +794,7 @@ auto FactoryPrivate::Claim(
         attributes,
         start,
         stop,
+        version,
         alloc);
 }
 
@@ -801,7 +805,7 @@ auto FactoryPrivate::Claim(ReadView serialized, alloc::Strategy alloc)
 }
 
 auto FactoryPrivate::Claim(
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
     const proto::ContactItem& proto,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim

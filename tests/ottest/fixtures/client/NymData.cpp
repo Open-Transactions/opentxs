@@ -9,11 +9,16 @@
 #include <cstdint>
 #include <memory>
 
-#include "ottest/env/OTTestEnvironment.hpp"
-
 namespace ottest
 {
-namespace ot = opentxs;
+NymData::NymData()
+    : nym_id_(client_1_.Factory().NymIDFromRandom())
+    , reason_(client_1_.Factory().PasswordPrompt(__func__))
+    , nym_data_(client_1_.Wallet().mutable_Nym(
+          client_1_.Wallet().Nym(reason_, "testNym")->ID(),
+          reason_))
+{
+}
 
 auto NymData::ExpectedStringOutput(const std::uint32_t version)
     -> ot::UnallocatedCString
@@ -29,14 +34,4 @@ auto NymData::ExpectedStringOutput(const std::uint32_t version)
            std::to_string(version) +
            ot::UnallocatedCString{"\n--- Attributes: Active Primary \n"};
 }
-
-NymData::NymData()
-    : client_(OTTestEnvironment::GetOT().StartClientSession(0))
-    , reason_(client_.Factory().PasswordPrompt(__func__))
-    , nym_data_(client_.Wallet().mutable_Nym(
-          client_.Wallet().Nym(reason_, "testNym")->ID(),
-          reason_))
-{
-}
-
 }  // namespace ottest

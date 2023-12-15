@@ -16,10 +16,10 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Writer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -78,6 +78,7 @@ class BlockchainTransactionOutput;
 
 class Amount;
 class Log;
+class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -87,7 +88,6 @@ class Output
 {
 public:
     using SerializeType = proto::BlockchainTransactionOutput;
-    using ContactID = identifier::Generic;
 
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,

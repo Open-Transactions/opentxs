@@ -14,7 +14,9 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -60,13 +62,13 @@ public:
     {
         sLock lock(shared_lock_);
 
-        return item_->isActive();
+        return item_->HasAttribute(identity::wot::claim::Attribute::Active);
     }
     auto IsPrimary() const noexcept -> bool final
     {
         sLock lock(shared_lock_);
 
-        return item_->isPrimary();
+        return item_->HasAttribute(identity::wot::claim::Attribute::Primary);
     }
     auto SetActive(const bool& active) const noexcept -> bool final;
     auto SetPrimary(const bool& primary) const noexcept -> bool final;
@@ -75,7 +77,7 @@ public:
     {
         sLock lock(shared_lock_);
 
-        return item_->Value();
+        return UnallocatedCString{item_->Value()};
     }
 
     ProfileItem(

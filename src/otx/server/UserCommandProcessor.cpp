@@ -16,6 +16,7 @@
 #include <UnitDefinition.pb.h>
 #include <filesystem>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 

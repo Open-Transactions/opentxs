@@ -17,7 +17,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Bip47Channel.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"

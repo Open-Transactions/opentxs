@@ -3,17 +3,19 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-libopentxs_add_public_header("identity/wot" "Claim.hpp")
+add_subdirectory(claim)
 
 target_sources(
   opentxs-common
   PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/Claim.hpp"
     "Claim.cpp"
+    "Claim.factory.cpp"
+    "Claim.hash.cpp"
+    "Claim.internal.cpp"
+    "Claim.internal.hpp"
+    "Claim.less.cpp"
     "ClaimPrivate.cpp"
+    "ClaimPrivate.data.cpp"
     "ClaimPrivate.hpp"
-    "Factory.cpp"
-    "Implementation.cpp"
-    "Implementation.hpp"
-    "Internal.cpp"
+    "Types.cpp"
 )

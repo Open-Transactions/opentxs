@@ -5,12 +5,16 @@
 
 #pragma once
 
-#include <memory>
+#include <compare>
+#include <cstddef>
+#include <functional>
+#include <string_view>
+#include <variant>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -18,105 +22,97 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-class Session;
-}  // namespace api
-
-namespace identifier
-{
-class Generic;
-}  // namespace identifier
-
 namespace identity
 {
 namespace wot
 {
+namespace claim
+{
+namespace internal
+{
+class Item;
+}  // namespace internal
+
+class Item;
+}  // namespace claim
+
 class Claim;
 }  // namespace wot
 }  // namespace identity
-
-namespace proto
-{
-class ContactItem;
-}  // namespace proto
 
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
+template <>
+struct OPENTXS_EXPORT std::hash<opentxs::identity::wot::claim::Item> {
+    using is_transparent = void;
+    using is_avalanching = void;
+
+    auto operator()(const opentxs::identity::wot::claim::Item&) const noexcept
+        -> std::size_t;
+};
+
+template <>
+struct OPENTXS_EXPORT std::less<opentxs::identity::wot::claim::Item> {
+    auto operator()(
+        const opentxs::identity::wot::claim::Item& lhs,
+        const opentxs::identity::wot::claim::Item& rhs) const noexcept -> bool;
+};
+
 namespace opentxs::identity::wot::claim
 {
-class OPENTXS_EXPORT Item
+OPENTXS_EXPORT auto operator==(const Item& lhs, const Item& rhs) noexcept
+    -> bool;
+OPENTXS_EXPORT auto operator<=>(const Item& lhs, const Item& rhs) noexcept
+    -> std::strong_ordering;
+OPENTXS_EXPORT auto swap(Item& lhs, Item& rhs) noexcept -> void;
+}  // namespace opentxs::identity::wot::claim
+
+class OPENTXS_EXPORT opentxs::identity::wot::claim::Item
+    : virtual public Allocated
 {
 public:
-    auto operator==(const Item& rhs) const -> bool;
+    using identifier_type = ClaimID;
 
-    auto asClaim(alloc::Strategy alloc = {}) const noexcept -> Claim;
-    auto End() const -> const Time&;
-    auto ID() const -> const identifier::Generic&;
-    auto isActive() const -> bool;
-    auto isLocal() const -> bool;
-    auto isPrimary() const -> bool;
-    auto Section() const -> const claim::SectionType&;
-    auto Serialize(Writer&& destination, const bool withID = false) const
-        -> bool;
-    OPENTXS_NO_EXPORT auto Serialize(
-        proto::ContactItem& out,
-        const bool withID = false) const -> bool;
-    auto SetActive(const bool active) const -> Item;
-    auto SetEnd(const Time end) const -> Item;
-    auto SetLocal(const bool local) const -> Item;
-    auto SetPrimary(const bool primary) const -> Item;
-    auto SetStart(const Time start) const -> Item;
-    auto SetValue(const UnallocatedCString& value) const -> Item;
-    auto Start() const -> const Time&;
-    auto Subtype() const -> const UnallocatedCString&;
-    auto Type() const -> const claim::ClaimType&;
-    auto Value() const -> const UnallocatedCString&;
-    auto Version() const -> VersionNumber;
+    [[nodiscard]] operator bool() const noexcept { return IsValid(); }
 
-    Item(
-        const api::Session& api,
-        const UnallocatedCString& nym,
-        const VersionNumber version,
-        const VersionNumber parentVersion,
-        const claim::SectionType section,
-        const claim::ClaimType& type,
-        const UnallocatedCString& value,
-        const UnallocatedSet<claim::Attribute>& attributes,
-        const Time start,
-        const Time end,
-        const UnallocatedCString subtype);
-    Item(
-        const api::Session& api,
-        const UnallocatedCString& nym,
-        const VersionNumber version,
-        const VersionNumber parentVersion,
-        const Claim& claim);
-    OPENTXS_NO_EXPORT Item(
-        const api::Session& api,
-        const UnallocatedCString& nym,
-        const VersionNumber parentVersion,
-        const claim::SectionType section,
-        const proto::ContactItem& serialized);
-    Item(
-        const api::Session& api,
-        const UnallocatedCString& nym,
-        const VersionNumber parentVersion,
-        const claim::SectionType section,
-        const ReadView& serialized);
-    Item() = delete;
-    Item(const Item&) noexcept;
-    Item(Item&&) noexcept;
-    auto operator=(const Item&) -> Item& = delete;
-    auto operator=(Item&&) -> Item& = delete;
+    [[nodiscard]] auto asClaim() const noexcept -> const Claim&;
+    [[nodiscard]] auto End() const noexcept -> Time;
+    auto for_each_attribute(
+        std::function<void(claim::Attribute)>) const noexcept -> void;
+    [[nodiscard]] auto get_allocator() const noexcept -> allocator_type final;
+    [[nodiscard]] auto HasAttribute(claim::Attribute) const noexcept -> bool;
+    [[nodiscard]] auto ID() const noexcept -> const identifier_type&;
+    [[nodiscard]] OPENTXS_NO_EXPORT auto Internal() const noexcept
+        -> const internal::Item&;
+    [[nodiscard]] auto IsValid() const noexcept -> bool;
+    [[nodiscard]] auto Section() const noexcept -> claim::SectionType;
+    [[nodiscard]] auto Serialize(Writer&& destination, bool withID = false)
+        const noexcept -> bool;
+    [[nodiscard]] auto Start() const noexcept -> Time;
+    [[nodiscard]] auto Subtype() const noexcept -> ReadView;
+    [[nodiscard]] auto Type() const noexcept -> claim::ClaimType;
+    [[nodiscard]] auto Value() const noexcept -> std::string_view;
+    [[nodiscard]] auto Version() const noexcept -> VersionNumber;
 
-    ~Item();
+    auto Add(claim::Attribute) noexcept -> void;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function final;
+    [[nodiscard]] OPENTXS_NO_EXPORT auto Internal() noexcept -> internal::Item&;
+    auto Remove(claim::Attribute) noexcept -> void;
+    auto SetVersion(VersionNumber) noexcept -> void;
+    auto swap(Item& rhs) noexcept -> void;
 
-private:
-    struct Imp;
+    OPENTXS_NO_EXPORT Item(internal::Item* imp) noexcept;
+    Item(allocator_type alloc = {}) noexcept;
+    Item(const Item& rhs, allocator_type alloc = {}) noexcept;
+    Item(Item&& rhs) noexcept;
+    Item(Item&& rhs, allocator_type alloc) noexcept;
+    auto operator=(const Item& rhs) noexcept -> Item&;
+    auto operator=(Item&& rhs) noexcept -> Item&;
 
-    std::unique_ptr<Imp> imp_;
+    ~Item() override;
+
+protected:
+    internal::Item* imp_;
 };
-}  // namespace opentxs::identity::wot::claim

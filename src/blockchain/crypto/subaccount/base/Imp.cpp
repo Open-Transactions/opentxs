@@ -12,7 +12,6 @@
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

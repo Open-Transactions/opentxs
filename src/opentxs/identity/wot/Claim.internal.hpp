@@ -5,13 +5,16 @@
 
 #pragma once
 
-#include "internal/identity/wot/Claim.hpp"
+#include <functional>
+#include <optional>
+#include <string_view>
+
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 #include "opentxs/util/Types.hpp"
@@ -19,48 +22,47 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace identifier
+namespace proto
 {
-class Nym;
-}  // namespace identifier
+class Claim;
+}  // namespace proto
 
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::identity::wot
+namespace opentxs::identity::wot::internal
 {
-class ClaimPrivate : virtual public internal::Claim,
-                     public opentxs::pmr::Allocated
+class Claim : public opentxs::pmr::Allocated
 {
 public:
-    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept
-        -> ClaimPrivate*
+    [[nodiscard]] static auto Blank(allocator_type alloc) noexcept -> Claim*
     {
-        return pmr::default_construct<ClaimPrivate>(
-            alloc::PMR<ClaimPrivate>{alloc});
+        return pmr::default_construct<Claim>(alloc::PMR<Claim>{alloc});
     }
 
-    [[nodiscard]] virtual auto Attributes() const noexcept
-        -> UnallocatedSet<claim::Attribute>;
-    [[nodiscard]] virtual auto Attributes(alloc::Strategy alloc) const noexcept
-        -> Set<claim::Attribute>;
     [[nodiscard]] virtual auto Claimant() const noexcept
-        -> const identifier::Nym&;
+        -> const wot::Claimant&;
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
-        -> ClaimPrivate*
+        -> Claim*
     {
-        return pmr::clone(this, alloc::PMR<ClaimPrivate>{alloc});
+        return pmr::clone(this, alloc::PMR<Claim>{alloc});
     }
-    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
-    {
-        return pmr::make_deleter(this);
-    }
+    [[nodiscard]] virtual auto CreateModified(
+        std::optional<std::string_view> value = std::nullopt,
+        std::optional<ReadView> subtype = std::nullopt,
+        std::optional<Time> start = std::nullopt,
+        std::optional<Time> end = std::nullopt,
+        allocator_type = {}) const noexcept -> wot::Claim;
+    virtual auto for_each_attribute(
+        std::function<void(claim::Attribute)>) const noexcept -> void;
+    [[nodiscard]] virtual auto HasAttribute(claim::Attribute) const noexcept
+        -> bool;
     [[nodiscard]] virtual auto ID() const noexcept
         -> const wot::Claim::identifier_type&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
     [[nodiscard]] virtual auto Section() const noexcept -> claim::SectionType;
-    using internal::Claim::Serialize;
+    virtual auto Serialize(proto::Claim& out) const noexcept -> void;
     [[nodiscard]] virtual auto Serialize(Writer&& out) const noexcept -> bool;
     [[nodiscard]] virtual auto Start() const noexcept -> Time;
     [[nodiscard]] virtual auto Stop() const noexcept -> Time;
@@ -70,18 +72,21 @@ public:
     [[nodiscard]] virtual auto Version() const noexcept -> VersionNumber;
 
     virtual auto Add(claim::Attribute) noexcept -> void;
-    [[nodiscard]] virtual auto ChangeValue(ReadView value) noexcept
-        -> wot::Claim;
+    [[nodiscard]] auto get_deleter() noexcept -> delete_function override
+    {
+        return pmr::make_deleter(this);
+    }
     virtual auto Remove(claim::Attribute) noexcept -> void;
+    virtual auto SetVersion(VersionNumber) noexcept -> void;
 
-    ClaimPrivate(allocator_type alloc) noexcept;
-    ClaimPrivate() = delete;
-    ClaimPrivate(const ClaimPrivate& rhs, allocator_type alloc) noexcept;
-    ClaimPrivate(const ClaimPrivate&) = delete;
-    ClaimPrivate(ClaimPrivate&&) = delete;
-    auto operator=(const ClaimPrivate&) -> ClaimPrivate& = delete;
-    auto operator=(ClaimPrivate&&) -> ClaimPrivate& = delete;
+    Claim(allocator_type alloc) noexcept;
+    Claim() = delete;
+    Claim(const Claim& rhs, allocator_type alloc) noexcept;
+    Claim(const Claim&) = delete;
+    Claim(Claim&&) = delete;
+    auto operator=(const Claim&) -> Claim& = delete;
+    auto operator=(Claim&&) -> Claim& = delete;
 
-    ~ClaimPrivate() override = default;
+    ~Claim() override = default;
 };
-}  // namespace opentxs::identity::wot
+}  // namespace opentxs::identity::wot::internal

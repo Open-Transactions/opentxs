@@ -9,12 +9,12 @@
 #include <VerificationRequest.pb.h>
 #include <utility>
 
-#include "internal/identity/wot/Claim.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
+#include "opentxs/identity/wot/Claim.internal.hpp"
 
 namespace opentxs::contract::peer::request::verification
 {

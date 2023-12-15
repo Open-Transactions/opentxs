@@ -308,14 +308,15 @@ auto Factory::BlockHeaderFromProtobuf(
 }
 
 auto Factory::Claim(
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
-    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
+    ReadView subtype,
+    VersionNumber version,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return imp_->Session().Claim(
@@ -327,6 +328,7 @@ auto Factory::Claim(
         attributes,
         start,
         stop,
+        version,
         alloc);
 }
 
@@ -335,10 +337,11 @@ auto Factory::Claim(
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
-    ReadView subtype,
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
+    ReadView subtype,
+    VersionNumber version,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return imp_->Session().Claim(
@@ -350,6 +353,7 @@ auto Factory::Claim(
         attributes,
         start,
         stop,
+        version,
         alloc);
 }
 

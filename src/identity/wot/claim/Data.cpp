@@ -13,27 +13,27 @@
 #include <ContactItemType.pb.h>
 #include <ContactSection.pb.h>
 #include <ContactSectionName.pb.h>
+#include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <span>
 #include <sstream>
 #include <string_view>
 #include <utility>
 
-#include "internal/core/String.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
-#include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
@@ -42,8 +42,9 @@
 #include "opentxs/identity/wot/claim/Section.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/identity/wot/claim/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::wot::claim
@@ -218,7 +219,7 @@ auto Data::AddContract(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    UnallocatedSet<claim::Attribute> attrib{};
+    auto attrib = boost::container::flat_set<claim::Attribute>{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(claim::Attribute::Active);
@@ -226,21 +227,23 @@ auto Data::AddContract(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto version = proto::RequiredVersion(
+    const auto version = proto::RequiredVersion(
         translate(section), translate(UnitToClaim(currency)), imp_->version_);
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        section,
-        UnitToClaim(currency),
-        instrumentDefinitionID,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            UnitToClaim(currency),
+            instrumentDefinitionID,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -259,7 +262,7 @@ auto Data::AddEmail(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    UnallocatedSet<claim::Attribute> attrib{};
+    auto attrib = boost::container::flat_set<claim::Attribute>{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(claim::Attribute::Active);
@@ -267,21 +270,23 @@ auto Data::AddEmail(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto version = proto::RequiredVersion(
+    const auto version = proto::RequiredVersion(
         translate(section), translate(type), imp_->version_);
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        section,
-        type,
-        value,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            value,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -290,10 +295,12 @@ auto Data::AddEmail(
 
 auto Data::AddItem(const wot::Claim& claim) const -> Data
 {
-    auto version = proto::RequiredVersion(
-        translate(claim.Section()), translate(claim.Type()), imp_->version_);
-    auto item =
-        std::make_shared<Item>(imp_->api_, imp_->nym_, version, version, claim);
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        claim, {}  // TODO allocator
+        ));
+    assert_false(nullptr == item);
+    item->SetVersion(proto::RequiredVersion(
+        translate(claim.Section()), translate(claim.Type()), imp_->version_));
 
     return AddItem(item);
 }
@@ -341,7 +348,7 @@ auto Data::AddPaymentCode(
     if (group) { needPrimary = group->Primary().empty(); }
 
     const auto attrib = [&] {
-        auto out = UnallocatedSet<claim::Attribute>{};
+        auto out = boost::container::flat_set<claim::Attribute>{};
 
         if (active || primary || needPrimary) {
             out.emplace(claim::Attribute::Active);
@@ -351,8 +358,9 @@ auto Data::AddPaymentCode(
 
         return out;
     }();
+    const auto type = UnitToClaim(currency);
     const auto version = proto::RequiredVersion(
-        translate(section), translate(UnitToClaim(currency)), imp_->version_);
+        translate(section), translate(type), imp_->version_);
 
     if (0 == version) {
         LogError()()("This currency is not allowed to set a procedure").Flush();
@@ -360,18 +368,21 @@ auto Data::AddPaymentCode(
         return *this;
     }
 
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        section,
-        UnitToClaim(currency),
-        code,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            code,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -390,7 +401,7 @@ auto Data::AddPhoneNumber(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    UnallocatedSet<claim::Attribute> attrib{};
+    auto attrib = boost::container::flat_set<claim::Attribute>{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(claim::Attribute::Active);
@@ -398,21 +409,23 @@ auto Data::AddPhoneNumber(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto version = proto::RequiredVersion(
+    const auto version = proto::RequiredVersion(
         translate(section), translate(type), imp_->version_);
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        section,
-        type,
-        value,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            value,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -430,25 +443,27 @@ auto Data::AddPreferredOTServer(
 
     if (group) { needPrimary = group->Primary().empty(); }
 
-    UnallocatedSet<claim::Attribute> attrib{claim::Attribute::Active};
+    auto attrib = boost::container::flat_set{claim::Attribute::Active};
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto version = proto::RequiredVersion(
+    const auto version = proto::RequiredVersion(
         translate(section), translate(type), imp_->version_);
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        section,
-        type,
-        String::Factory(id, imp_->api_.Crypto())->Get(),
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            id.asBase58(imp_->api_.Crypto()),
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -472,7 +487,7 @@ auto Data::AddSocialMediaProfile(
         if (group) { needPrimary = group->Primary().empty(); }
     }
 
-    UnallocatedSet<claim::Attribute> attrib{};
+    auto attrib = boost::container::flat_set<claim::Attribute>{};
 
     if (active || primary || needPrimary) {
         attrib.emplace(claim::Attribute::Active);
@@ -480,23 +495,25 @@ auto Data::AddSocialMediaProfile(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto version = proto::RequiredVersion(
+    const auto version = proto::RequiredVersion(
         translate(claim::SectionType::Profile),
         translate(type),
         imp_->version_);
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        version,
-        version,
-        claim::SectionType::Profile,
-        type,
-        value,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            claim::SectionType::Profile,
+            type,
+            value,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -537,18 +554,21 @@ auto Data::AddSocialMediaProfile(
             attrib.emplace(claim::Attribute::Primary);
         }
 
-        item = std::make_shared<Item>(
-            imp_->api_,
-            imp_->nym_,
-            version,
-            version,
-            claim::SectionType::Communication,
-            type,
-            value,
-            attrib,
-            Time{},
-            Time{},
-            "");
+        item = std::make_shared<Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+                claim::SectionType::Communication,
+                type,
+                value,
+                attrib,
+                {},
+                {},
+                {},
+                version,
+                {}  // TODO allocator
+                ),
+            {}  // TODO allocator
+            ));
 
         assert_false(nullptr == item);
 
@@ -590,18 +610,21 @@ auto Data::AddSocialMediaProfile(
             attrib.emplace(claim::Attribute::Primary);
         }
 
-        item = std::make_shared<Item>(
-            imp_->api_,
-            imp_->nym_,
-            version,
-            version,
-            claim::SectionType::Identifier,
-            type,
-            value,
-            attrib,
-            Time{},
-            Time{},
-            "");
+        item = std::make_shared<Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+                claim::SectionType::Identifier,
+                type,
+                value,
+                attrib,
+                {},
+                {},
+                {},
+                version,
+                {}  // TODO allocator
+                ),
+            {}  // TODO allocator
+            ));
 
         assert_false(nullptr == item);
 
@@ -706,7 +729,8 @@ auto Data::Contracts(const UnitType currency, const bool onlyActive) const
 
             const auto& claim = *it.second;
 
-            if ((false == onlyActive) || claim.isActive()) {
+            if ((false == onlyActive) ||
+                claim.HasAttribute(Attribute::Active)) {
                 output.insert(id);
             }
         }
@@ -755,7 +779,7 @@ auto Data::EmailAddresses(bool active) const -> UnallocatedCString
 
             const auto& claim = *it.second;
 
-            if ((false == active) || claim.isActive()) {
+            if ((false == active) || claim.HasAttribute(Attribute::Active)) {
                 stream << claim.Value() << ',';
             }
         }
@@ -799,7 +823,7 @@ auto Data::HaveClaim(const identifier::Generic& item) const -> bool
 auto Data::HaveClaim(
     const claim::SectionType section,
     const claim::ClaimType type,
-    const UnallocatedCString& value) const -> bool
+    std::string_view value) const -> bool
 {
     auto group = Group(section, type);
 
@@ -826,7 +850,7 @@ auto Data::Name() const -> UnallocatedCString
 
     if (false == bool(claim)) { return {}; }
 
-    return claim->Value();
+    return UnallocatedCString{claim->Value()};
 }
 
 auto Data::PhoneNumbers(bool active) const -> UnallocatedCString
@@ -841,7 +865,7 @@ auto Data::PhoneNumbers(bool active) const -> UnallocatedCString
 
             const auto& claim = *it.second;
 
-            if ((false == active) || claim.isActive()) {
+            if ((false == active) || claim.HasAttribute(Attribute::Active)) {
                 stream << claim.Value() << ',';
             }
         }
@@ -915,21 +939,25 @@ auto Data::SetCommonName(const UnallocatedCString& name) const -> Data
 {
     const claim::SectionType section{claim::SectionType::Identifier};
     const claim::ClaimType type{claim::ClaimType::Commonname};
-    UnallocatedSet<claim::Attribute> attrib{
+    auto attrib = boost::container::flat_set{
         claim::Attribute::Active, claim::Attribute::Primary};
-
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        imp_->version_,
-        imp_->version_,
-        section,
-        type,
-        name,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    const auto version = proto::RequiredVersion(
+        translate(section), translate(type), imp_->version_);
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            name,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -946,22 +974,27 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
     const claim::SectionType section{claim::SectionType::Scope};
     const claim::ClaimType type = scopeInfo.first;
 
-    UnallocatedSet<claim::Attribute> attrib{claim::Attribute::Active};
+    auto attrib = boost::container::flat_set{claim::Attribute::Active};
 
     if (primary) { attrib.emplace(claim::Attribute::Primary); }
 
-    auto item = std::make_shared<Item>(
-        imp_->api_,
-        imp_->nym_,
-        imp_->version_,
-        imp_->version_,
-        section,
-        type,
-        name,
-        attrib,
-        Time{},
-        Time{},
-        "");
+    const auto version = proto::RequiredVersion(
+        translate(section), translate(type), imp_->version_);
+    auto item = std::make_shared<Item>(factory::ContactItem(
+        imp_->api_.Factory().Claim(
+            imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+            section,
+            type,
+            name,
+            attrib,
+            {},
+            {},
+            {},
+            version,
+            {}  // TODO allocator
+            ),
+        {}  // TODO allocator
+        ));
 
     assert_false(nullptr == item);
 
@@ -978,24 +1011,25 @@ auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
     if (claim::ClaimType::Unknown == imp_->scope().first) {
         auto mapCopy = imp_->sections_;
         mapCopy.erase(section);
-        UnallocatedSet<claim::Attribute> attrib{
+        auto attrib = boost::container::flat_set{
             claim::Attribute::Active, claim::Attribute::Primary};
-
-        auto version = proto::RequiredVersion(
+        const auto version = proto::RequiredVersion(
             translate(section), translate(type), imp_->version_);
-
-        auto item = std::make_shared<Item>(
-            imp_->api_,
-            imp_->nym_,
-            version,
-            version,
-            section,
-            type,
-            name,
-            attrib,
-            Time{},
-            Time{},
-            "");
+        auto item = std::make_shared<Item>(factory::ContactItem(
+            imp_->api_.Factory().Claim(
+                imp_->api_.Factory().NymIDFromBase58(imp_->nym_),
+                section,
+                type,
+                name,
+                attrib,
+                {},
+                {},
+                {},
+                version,
+                {}  // TODO allocator
+                ),
+            {}  // TODO allocator
+            ));
 
         assert_false(nullptr == item);
 
@@ -1054,7 +1088,7 @@ auto Data::SocialMediaProfiles(const claim::ClaimType type, bool active) const
 
             const auto& claim = *it.second;
 
-            if ((false == active) || claim.isActive()) {
+            if ((false == active) || claim.HasAttribute(Attribute::Active)) {
                 stream << claim.Value() << ',';
             }
         }
@@ -1073,7 +1107,7 @@ auto Data::SocialMediaProfileTypes() const
     try {
         auto profiletypes =
             proto::AllowedItemTypes().at(proto::ContactSectionVersion(
-                CONTACT_CONTACT_DATA_VERSION, proto::CONTACTSECTION_PROFILE));
+                DefaultVersion(), proto::CONTACTSECTION_PROFILE));
 
         UnallocatedSet<claim::ClaimType> output;
         std::ranges::transform(

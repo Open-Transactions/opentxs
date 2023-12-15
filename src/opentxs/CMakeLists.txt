@@ -5,6 +5,7 @@
 
 add_subdirectory(api)
 add_subdirectory(blockchain)
+add_subdirectory(identity)
 add_subdirectory(network)
 add_subdirectory(util)
 

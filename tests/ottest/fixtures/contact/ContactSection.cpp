@@ -7,21 +7,21 @@
 
 #include <opentxs/opentxs.hpp>
 #include <memory>
+#include <span>
 
-#include "internal/identity/wot/claim/Types.hpp"
-#include "ottest/env/OTTestEnvironment.hpp"
+#include "ottest/fixtures/contact/ContactItem.hpp"
 
 namespace ottest
 {
 namespace ot = opentxs;
 
 ContactSection::ContactSection()
-    : api_(OTTestEnvironment::GetOT().StartClientSession(0))
+    : nym_id_(client_1_.Factory().NymIDFromRandom())
     , contact_section_(
-          dynamic_cast<const ot::api::session::Client&>(api_),
+          dynamic_cast<const ot::api::session::Client&>(client_1_),
           ot::UnallocatedCString("testContactSectionNym1"),
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
+          opentxs::identity::wot::claim::DefaultVersion(),
+          opentxs::identity::wot::claim::DefaultVersion(),
           ot::identity::wot::claim::SectionType::Identifier,
           ot::identity::wot::claim::Section::GroupMap{})
     , contact_group_(new ot::identity::wot::claim::Group(
@@ -29,18 +29,13 @@ ContactSection::ContactSection()
           ot::identity::wot::claim::SectionType::Identifier,
           ot::identity::wot::claim::ClaimType::Employee,
           {}))
-    , active_contact_item_(new ot::identity::wot::claim::Item(
-          dynamic_cast<const ot::api::session::Client&>(api_),
-          ot::UnallocatedCString("activeContactItem"),
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
-          opentxs::CONTACT_CONTACT_DATA_VERSION,
-          ot::identity::wot::claim::SectionType::Identifier,
-          ot::identity::wot::claim::ClaimType::Employee,
-          ot::UnallocatedCString("activeContactItemValue"),
-          {ot::identity::wot::claim::Attribute::Active},
-          {},
-          {},
-          ""))
+    , active_contact_item_(std::make_shared<ot::identity::wot::claim::Item>(
+          claim_to_contact_item(client_1_.Factory().Claim(
+              nym_id_,
+              ot::identity::wot::claim::SectionType::Identifier,
+              ot::identity::wot::claim::ClaimType::Employee,
+              "activeContactItemValue",
+              active_attr_))))
 {
 }
 }  // namespace ottest

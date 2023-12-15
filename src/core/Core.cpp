@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Session.hpp"
@@ -34,6 +33,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain

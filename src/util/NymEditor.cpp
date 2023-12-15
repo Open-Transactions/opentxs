@@ -19,6 +19,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/util/Log.hpp"
@@ -226,7 +227,10 @@ auto NymData::HaveContract(
 
         if (false == (instrumentDefinitionID == value)) { continue; }
 
-        if ((false == primary) || claim->isPrimary()) { return true; }
+        if ((false == primary) ||
+            claim->HasAttribute(identity::wot::claim::Attribute::Primary)) {
+            return true;
+        }
     }
 
     return false;

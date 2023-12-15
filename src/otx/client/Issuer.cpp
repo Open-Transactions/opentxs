@@ -17,7 +17,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Types.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/otx/client/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -46,6 +45,7 @@
 #include "opentxs/identity/wot/claim/Section.hpp"      // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

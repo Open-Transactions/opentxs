@@ -32,6 +32,7 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

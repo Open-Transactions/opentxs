@@ -15,7 +15,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageAccounts.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 

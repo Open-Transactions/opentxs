@@ -5,20 +5,41 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <optional>
+#include <string_view>
+
+#include "ottest/fixtures/common/OneClientSession.hpp"
 
 namespace ottest
 {
 namespace ot = opentxs;
 
-class OPENTXS_EXPORT ContactItem : public ::testing::Test
+class OPENTXS_EXPORT ContactItem : public OneClientSession
 {
 public:
+    static constexpr auto active_ = {
+        opentxs::identity::wot::claim::Attribute::Active};
+
     ContactItem();
 
-    const ot::api::session::Client& api_;
-    const ot::identity::wot::claim::Item contact_item_;
-    const ot::identifier::Nym nym_id_;
+    const opentxs::identifier::Nym nym_id_;
+    const opentxs::identity::wot::claim::Item contact_item_;
 };
+
+OPENTXS_EXPORT auto claim_to_contact_item(
+    const opentxs::identity::wot::Claim&) noexcept
+    -> opentxs::identity::wot::claim::Item;
+OPENTXS_EXPORT auto deserialize_contact_item(
+    const opentxs::api::Session& api,
+    const opentxs::identity::wot::Claimant& claimant,
+    opentxs::identity::wot::claim::SectionType section,
+    opentxs::ReadView bytes) noexcept -> opentxs::identity::wot::claim::Item;
+OPENTXS_EXPORT auto modify_item(
+    const opentxs::identity::wot::claim::Item& item,
+    std::optional<std::string_view> value = std::nullopt,
+    std::optional<opentxs::ReadView> subtype = std::nullopt,
+    std::optional<opentxs::Time> start = std::nullopt,
+    std::optional<opentxs::Time> end = std::nullopt) noexcept
+    -> opentxs::identity::wot::claim::Item;
 }  // namespace ottest

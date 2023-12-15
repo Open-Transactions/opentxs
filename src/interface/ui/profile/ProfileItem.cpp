@@ -6,6 +6,7 @@
 #include "interface/ui/profile/ProfileItem.hpp"  // IWYU pragma: associated
 
 #include <memory>
+#include <optional>
 
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
@@ -124,8 +125,6 @@ auto ProfileItem::SetPrimary(const bool& primary) const noexcept -> bool
 auto ProfileItem::SetValue(const UnallocatedCString& newValue) const noexcept
     -> bool
 {
-    const auto claim = as_claim().ChangeValue(newValue);
-
-    return add_claim(claim);
+    return add_claim(as_claim().CreateModified(newValue));
 }
 }  // namespace opentxs::ui::implementation

@@ -9,9 +9,12 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/identity/credential/Base.hpp"
+#include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
+#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -20,6 +23,11 @@ namespace api
 {
 class Session;
 }  // namespace api
+
+namespace identifier
+{
+class Generic;
+}  // namespace identifier
 
 namespace identity
 {
@@ -44,13 +52,14 @@ class OPENTXS_EXPORT Contact : virtual public Base
 public:
     static auto ClaimID(
         const api::Session& api,
-        const UnallocatedCString& nymid,
+        const identity::wot::Claimant& claimant,
         const wot::claim::SectionType section,
         const wot::claim::ClaimType type,
-        const Time start,
-        const Time end,
-        const UnallocatedCString& value,
-        const UnallocatedCString& subtype) -> UnallocatedCString;
+        Time start,
+        Time end,
+        std::string_view value,
+        ReadView subtype,
+        VersionNumber version) -> identifier::Generic;
 
     Contact(const Contact&) = delete;
     Contact(Contact&&) = delete;

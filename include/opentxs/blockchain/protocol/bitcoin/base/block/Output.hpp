@@ -12,6 +12,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -71,8 +72,6 @@ namespace opentxs::blockchain::protocol::bitcoin::base::block
 class OPENTXS_EXPORT Output : public opentxs::Allocated
 {
 public:
-    using ContactID = identifier::Generic;
-
     OPENTXS_NO_EXPORT static auto Blank() noexcept -> Output&;
 
     operator bool() const noexcept { return IsValid(); }

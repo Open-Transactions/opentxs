@@ -12,15 +12,20 @@
 #include <functional>
 #include <utility>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/identity/wot/claim/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -53,15 +58,18 @@ static auto extract_groups(
 
     for (const auto& item : serialized.item()) {
         const auto& itemType = item.type();
-        auto instantiated = std::make_shared<Item>(
+        auto instantiated = std::make_shared<Item>(factory::ContactItem(
             api,
-            nym,
-            check_version(serialized.version(), parentVersion),
+            item,
+            api.Factory().NymIDFromBase58(nym),
             translate(section),
-            item);
+            {}  // TODO allocator
+            ));
 
         assert_false(nullptr == instantiated);
 
+        instantiated->SetVersion(
+            check_version(serialized.version(), parentVersion));
         const auto& itemID = instantiated->ID();
         auto& itemMap = itemMaps[translate(itemType)];
         itemMap.emplace(itemID, instantiated);
@@ -98,12 +106,12 @@ struct Section::Imp {
 
         if (group) { needsPrimary = (1 > group->Size()); }
 
-        if (needsPrimary && false == scope->isPrimary()) {
-            scope.reset(new Item(scope->SetPrimary(true)));
+        if (needsPrimary && false == scope->HasAttribute(Attribute::Primary)) {
+            scope->Add(Attribute::Primary);
         }
 
-        if (false == scope->isActive()) {
-            scope.reset(new Item(scope->SetActive(true)));
+        if (false == scope->HasAttribute(Attribute::Active)) {
+            scope->Add(Attribute::Active);
         }
 
         groups[groupID].reset(new claim::Group(nym_, section_, scope));

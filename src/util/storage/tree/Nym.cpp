@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <variant>
 
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/BlockchainEthereumAccountData.hpp"
@@ -42,6 +41,7 @@
 #include "opentxs/core/identifier/Notary.hpp"
 #include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Bip47Channels.hpp"
 #include "util/storage/tree/Contexts.hpp"

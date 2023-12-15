@@ -5,7 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
 
-#include "internal/identity/wot/claim/Factory.hpp"  // IWYU pragma: associated
+#include "opentxs/identity/wot/internal.factory.hpp"  // IWYU pragma: associated
 
 #include <Claim.pb.h>
 #include <ContactItem.pb.h>
@@ -16,22 +16,27 @@
 #include <optional>
 #include <stdexcept>
 
-#include "identity/wot/claim/claim/ClaimPrivate.hpp"
-#include "identity/wot/claim/claim/Implementation.hpp"
-#include "internal/identity/wot/claim/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identity/wot/Claim.internal.hpp"
+#include "opentxs/identity/wot/ClaimPrivate.hpp"
+#include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
+using namespace std::literals;
+
 auto Claim(
     const api::Session& api,
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     identity::wot::claim::ClaimType type,
     ReadView value,
@@ -39,29 +44,25 @@ auto Claim(
     std::span<const identity::wot::claim::Attribute> attributes,
     Time start,
     Time stop,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*
+    VersionNumber version,
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::implementation::Claim;
-    using BlankType = identity::wot::ClaimPrivate;
+    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using BlankType = identity::wot::internal::Claim;
 
     try {
         return pmr::construct<ReturnType>(
             alloc.result_,
             api,
             claimant,
+            version,
             section,
             type,
             value,
             subtype,
             start,
             stop,
-            [&] {
-                auto a = Set<identity::wot::claim::Attribute>{alloc.result_};
-                a.clear();
-                std::ranges::copy(attributes, std::inserter(a, a.end()));
-
-                return a;
-            }(),
+            attributes,
             std::nullopt);
     } catch (const std::exception& e) {
         LogError()()(e.what()).Flush();
@@ -73,25 +74,51 @@ auto Claim(
 auto Claim(
     const api::Session& api,
     const proto::Claim& proto,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::implementation::Claim;
-    using BlankType = identity::wot::ClaimPrivate;
+    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using BlankType = identity::wot::internal::Claim;
 
     try {
         const auto& item = proto.item();
+        const auto claimant = [&]() -> identity::wot::Claimant {
+            const auto id = api.Factory().Internal().Identifier(proto.nym());
+            const auto type = id.Type();
+
+            switch (type) {
+                using enum identifier::Type;
+                case generic: {
+
+                    return id;
+                }
+                case nym: {
+
+                    return api.Factory().Internal().NymID(proto.nym());
+                }
+                case invalid:
+                case notary:
+                case unitdefinition:
+                case account:
+                case hdseed:
+                default: {
+                    throw std::runtime_error{
+                        "invalid identifier type: "s.append(print(type))};
+                }
+            }
+        }();
 
         return pmr::construct<ReturnType>(
             alloc.result_,
             api,
-            api.Factory().Internal().NymID(proto.nym()),
+            claimant,
+            proto.version(),
             translate(proto.section()),
             translate(item.type()),
             item.value(),
             item.subtype(),
             convert_stime(item.start()),
             convert_stime(item.end()),
-            Set<identity::wot::claim::Attribute>{alloc.result_},
+            Vector<identity::wot::claim::Attribute>{alloc.work_},
             proto);
     } catch (const std::exception& e) {
         LogError()()(e.what()).Flush();
@@ -102,20 +129,20 @@ auto Claim(
 
 auto Claim(
     const api::Session& api,
-    const identifier::Nym& claimant,
+    const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
     const proto::ContactItem& proto,
-    alloc::Strategy alloc) noexcept -> identity::wot::ClaimPrivate*
+    alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::implementation::Claim;
-    using BlankType = identity::wot::ClaimPrivate;
+    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using BlankType = identity::wot::internal::Claim;
 
     try {
         return pmr::construct<ReturnType>(
             alloc.result_,
             api,
-            proto.version(),
             claimant,
+            proto.version(),
             section,
             translate(proto.type()),
             proto.value(),
@@ -123,14 +150,16 @@ auto Claim(
             convert_stime(proto.start()),
             convert_stime(proto.end()),
             [&] {
-                auto a = Set<identity::wot::claim::Attribute>{alloc.result_};
+                const auto& in = proto.attribute();
+                auto a = Vector<identity::wot::claim::Attribute>{alloc.result_};
+                a.reserve(in.size());
                 a.clear();
-                static const auto translate = [](const auto& in) {
+                static const auto translate = [](const auto& v) {
                     return proto::translate(
-                        static_cast<proto::ContactItemAttribute>(in));
+                        static_cast<proto::ContactItemAttribute>(v));
                 };
                 std::ranges::transform(
-                    proto.attribute(), std::inserter(a, a.end()), translate);
+                    in, std::inserter(a, a.end()), translate);
 
                 return a;
             }(),

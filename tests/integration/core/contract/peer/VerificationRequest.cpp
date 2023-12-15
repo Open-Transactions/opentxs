@@ -7,6 +7,7 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 #include <optional>
+#include <span>
 
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/common/User.hpp"
