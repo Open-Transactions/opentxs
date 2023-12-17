@@ -21,6 +21,7 @@ endmacro()
 
 macro(libopentxs_link_external LIB)
   target_link_libraries(libopentxs PUBLIC "${LIB}")
+  target_link_libraries(opentxs-common PUBLIC "${LIB}")
 
   if(OPENTXS_BUILD_TESTS)
     target_link_libraries(opentxs-testlib PUBLIC "${LIB}")
