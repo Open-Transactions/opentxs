@@ -22,7 +22,9 @@ target_sources(
 )
 
 add_library(opentxs-core-display OBJECT "Common.cpp")
-target_link_libraries(opentxs-core-display PRIVATE Boost::headers)
+target_link_libraries(
+  opentxs-core-display PRIVATE Boost::headers opentxs-common
+)
 target_include_directories(
   opentxs-core-display SYSTEM
   PRIVATE "${opentxs_SOURCE_DIR}/external/frozen/include"

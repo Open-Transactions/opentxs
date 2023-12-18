@@ -5,6 +5,8 @@
 
 add_subdirectory(claim)
 
+libopentxs_add_public_header("identity/wot" "Claim.hpp")
+
 target_sources(
   opentxs-common
   PRIVATE
