@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace opentxs::identity::wot::claim
+namespace opentxs::identity::wot
 {
 ClaimPrivate::Data::Data(
     std::span<const claim::Attribute> attributes,
@@ -31,4 +31,4 @@ ClaimPrivate::Data::Data(const Data& rhs, allocator_type alloc) noexcept
     , version_(rhs.version_)
 {
 }
-}  // namespace opentxs::identity::wot::claim
+}  // namespace opentxs::identity::wot

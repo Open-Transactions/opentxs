@@ -37,13 +37,19 @@ namespace api
 class Session;
 }  // namespace api
 
+namespace identity
+{
+namespace wot
+{
+class ClaimPrivate;  // IWYU pragma: keep
+}  // namespace wot
+}  // namespace identity
+
 class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::identity::wot::claim
-{
-class ClaimPrivate final : public internal::Claim
+class opentxs::identity::wot::ClaimPrivate final : public internal::Claim
 {
 public:
     [[nodiscard]] auto Claimant() const noexcept -> const wot::Claimant& final
@@ -166,4 +172,3 @@ private:
     const wot::Claim::identifier_type id_;
     Guarded data_;
 };
-}  // namespace opentxs::identity::wot::claim

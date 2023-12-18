@@ -15,9 +15,10 @@ if(OT_QT_EXPORT)
     opentxs-moc PRIVATE "${opentxs_BINARY_DIR}/include"
                         "${opentxs_SOURCE_DIR}/include"
   )
+  include(libopentxs-add-private-moc-header)
+  include(libopentxs-add-public-header-qt)
+  include(libopentxs-add-public-moc-header)
 endif()
-
-include(libopentxs-add-public-header-qt)
 
 if(OT_PCH)
   target_precompile_headers(
@@ -127,9 +128,6 @@ if(OT_PCH)
   endif()
 endif()
 
-set(OPENTXS_QT_PUBLIC_HEADERS "")
-set(OPENTXS_QT_PRIVATE_HEADERS "")
-
 add_subdirectory(opentxs)
 
 add_subdirectory(api)
@@ -146,6 +144,17 @@ add_subdirectory(std)
 add_subdirectory(util)
 
 if(OT_QT_EXPORT)
+  get_target_property(
+    OPENTXS_QT_PUBLIC_HEADERS
+    opentxs-common
+    QT_MOC_PUBLIC
+  )
+  get_target_property(
+    OPENTXS_QT_PRIVATE_HEADERS
+    opentxs-common
+    QT_MOC_PRIVATE
+  )
+
   qt_wrap_cpp(
     OPENTXS_MOC_SOURCES
     ${OPENTXS_QT_PUBLIC_HEADERS}
@@ -181,7 +190,8 @@ if(OT_QT_EXPORT)
   target_compile_definitions(
     opentxs-moc PRIVATE "${OT_EXPORT_MACRO}" "QT_NO_KEYWORDS"
   )
-  target_compile_definitions(opentxs-common PRIVATE "QT_NO_KEYWORDS")
+  target_compile_definitions(opentxs-common PUBLIC "QT_NO_KEYWORDS")
+  target_compile_definitions(libopentxs PUBLIC "QT_NO_KEYWORDS")
   libopentxs_add_sources($<TARGET_OBJECTS:opentxs-moc>)
 endif()
 

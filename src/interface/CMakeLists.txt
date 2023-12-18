@@ -6,12 +6,3 @@
 add_subdirectory(qt)
 add_subdirectory(rpc)
 add_subdirectory(ui)
-
-set(OPENTXS_QT_PUBLIC_HEADERS
-    ${OPENTXS_QT_PUBLIC_HEADERS}
-    PARENT_SCOPE
-)
-set(OPENTXS_QT_PRIVATE_HEADERS
-    ${OPENTXS_QT_PRIVATE_HEADERS}
-    PARENT_SCOPE
-)

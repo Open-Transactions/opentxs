@@ -24,7 +24,7 @@
 
 namespace opentxs::identity::wot::claim
 {
-constexpr auto identitytype_map_ = [] {
+static constexpr auto identitytype_map_ = [] {
     using enum identity::Type;
     using enum ClaimType;
 

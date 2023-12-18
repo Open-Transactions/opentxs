@@ -22,6 +22,17 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
+namespace identity
+{
+namespace wot
+{
+namespace internal
+{
+class Claim;  // IWYU pragma: keep
+}  // namespace internal
+}  // namespace wot
+}  // namespace identity
+
 namespace proto
 {
 class Claim;
@@ -31,9 +42,7 @@ class Writer;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
-namespace opentxs::identity::wot::internal
-{
-class Claim : public opentxs::pmr::Allocated
+class opentxs::identity::wot::internal::Claim : public opentxs::pmr::Allocated
 {
 public:
     [[nodiscard]] static auto Blank(allocator_type alloc) noexcept -> Claim*
@@ -89,4 +98,3 @@ public:
 
     ~Claim() override = default;
 };
-}  // namespace opentxs::identity::wot::internal

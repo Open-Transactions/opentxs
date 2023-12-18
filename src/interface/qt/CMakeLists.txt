@@ -12,6 +12,9 @@ endif()
 add_subdirectory(qml)
 
 if(OT_QT_EXPORT)
+  libopentxs_add_private_moc_header(
+    "${CMAKE_CURRENT_SOURCE_DIR}/DraftValidator.hpp"
+  )
   libopentxs_add_public_header_qt("AccountActivity.hpp")
   libopentxs_add_public_header_qt("AccountList.hpp")
   libopentxs_add_public_header_qt("AccountSummary.hpp")
@@ -37,11 +40,6 @@ if(OT_QT_EXPORT)
   libopentxs_add_public_header_qt("SeedTree.hpp")
   libopentxs_add_public_header_qt("UnitList.hpp")
 
-  list(
-    APPEND
-    OPENTXS_QT_PRIVATE_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/DraftValidator.hpp"
-  )
   target_sources(
     opentxs-common
     PRIVATE
@@ -91,12 +89,3 @@ if(OT_QT_EXPORT)
 else()
   target_sources(opentxs-common PRIVATE "no-Qt.cpp")
 endif()
-
-set(OPENTXS_QT_PUBLIC_HEADERS
-    ${OPENTXS_QT_PUBLIC_HEADERS}
-    PARENT_SCOPE
-)
-set(OPENTXS_QT_PRIVATE_HEADERS
-    ${OPENTXS_QT_PRIVATE_HEADERS}
-    PARENT_SCOPE
-)

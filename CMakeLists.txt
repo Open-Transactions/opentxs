@@ -740,7 +740,12 @@ set_target_properties(
     SOVERSION 1
 )
 
+define_property(TARGET PROPERTY QT_MOC_PUBLIC)
+define_property(TARGET PROPERTY QT_MOC_PRIVATE)
 add_library(opentxs-common OBJECT "")
+set_target_properties(
+  opentxs-common PROPERTIES QT_MOC_PUBLIC "" QT_MOC_PRIVATE ""
+)
 otcommon_pch_pic_workaround(libopentxs)
 otcommon_pch_pic_workaround(opentxs-common)
 libopentxs_configure_cxx_target(libopentxs)
