@@ -47,7 +47,7 @@ auto Claim(
     VersionNumber version,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using ReturnType = identity::wot::ClaimPrivate;
     using BlankType = identity::wot::internal::Claim;
 
     try {
@@ -76,7 +76,7 @@ auto Claim(
     const proto::Claim& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using ReturnType = identity::wot::ClaimPrivate;
     using BlankType = identity::wot::internal::Claim;
 
     try {
@@ -134,7 +134,7 @@ auto Claim(
     const proto::ContactItem& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
-    using ReturnType = identity::wot::claim::ClaimPrivate;
+    using ReturnType = identity::wot::ClaimPrivate;
     using BlankType = identity::wot::internal::Claim;
 
     try {

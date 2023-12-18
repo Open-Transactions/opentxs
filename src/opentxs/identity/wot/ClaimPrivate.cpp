@@ -22,7 +22,7 @@
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace opentxs::identity::wot::claim
+namespace opentxs::identity::wot
 {
 ClaimPrivate::ClaimPrivate(
     const api::Session& api,
@@ -175,4 +175,4 @@ auto ClaimPrivate::SetVersion(VersionNumber value) noexcept -> void
 {
     data_.lock()->version_ = value;
 }
-}  // namespace opentxs::identity::wot::claim
+}  // namespace opentxs::identity::wot
