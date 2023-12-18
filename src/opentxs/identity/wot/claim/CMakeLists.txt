@@ -26,12 +26,11 @@ target_sources(
     "ItemPrivate.cpp"
     "ItemPrivate.hpp"
     "SectionType.cpp"
-    "Types.cpp"
     "Types.internal.hpp"
     "internal.factory.hpp"
 )
 
-add_library(opentxs-identity-wot-claim OBJECT "Types.internal.cpp")
+add_library(opentxs-identity-wot-claim OBJECT "Types.cpp" "Types.internal.cpp")
 target_link_libraries(
   opentxs-identity-wot-claim PRIVATE opentxs-common opentxs-protobuf
 )
