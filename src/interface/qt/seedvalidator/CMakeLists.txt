@@ -8,12 +8,3 @@ target_sources(opentxs-common PRIVATE "SeedValidator.cpp")
 target_link_libraries(opentxs-moc PRIVATE Qt::Gui)
 libopentxs_link_internal(Qt::Gui)
 libopentxs_link_external(Qt::Gui)
-
-set(OPENTXS_QT_PUBLIC_HEADERS
-    ${OPENTXS_QT_PUBLIC_HEADERS}
-    PARENT_SCOPE
-)
-set(OPENTXS_QT_PRIVATE_HEADERS
-    ${OPENTXS_QT_PRIVATE_HEADERS}
-    PARENT_SCOPE
-)

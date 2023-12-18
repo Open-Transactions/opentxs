@@ -3,12 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-macro(libopentxs_add_public_header_qt header_name)
+function(libopentxs_add_public_header_qt header_name)
   include(libopentxs-add-public-header)
+  include(libopentxs-add-public-moc-header)
   libopentxs_add_public_header("interface/qt" "${header_name}")
-  list(
-    APPEND
-    OPENTXS_QT_PUBLIC_HEADERS
+  libopentxs_add_public_moc_header(
     "${opentxs_SOURCE_DIR}/include/opentxs/interface/qt/${header_name}"
   )
-endmacro()
+endfunction()
