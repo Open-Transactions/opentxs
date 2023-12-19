@@ -59,6 +59,7 @@ OPENTXS_EXPORT auto InitContext(
  */
 OPENTXS_EXPORT auto Join() noexcept -> void;
 OPENTXS_EXPORT auto LicenseData() noexcept -> const LicenseMap&;
+OPENTXS_EXPORT auto RegisterQMLTypes() noexcept -> void;
 OPENTXS_EXPORT auto RunJob(SimpleCallback cb) noexcept -> void;
 OPENTXS_EXPORT auto VersionMajor() noexcept -> unsigned int;
 OPENTXS_EXPORT auto VersionMinor() noexcept -> unsigned int;

@@ -42,6 +42,14 @@ if(OT_QT_EXPORT)
   libopentxs_add_public_header("" "Qt.hpp")
 endif()
 
+if(OT_WITH_QML)
+  target_sources(opentxs-common PRIVATE "Context.qml.cpp")
+  libopentxs_link_internal(Qt::Qml)
+  libopentxs_link_external(Qt::Qml)
+else()
+  target_sources(opentxs-common PRIVATE "Context.no-qml.cpp")
+endif()
+
 target_sources(
   opentxs-common
   PRIVATE
