@@ -27,7 +27,8 @@
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
-#include "opentxs/core/UnitType.hpp"              // IWYU pragma: keep
+#include "opentxs/core/Types.hpp"
+#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/display/Definition.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Hasher.hpp"

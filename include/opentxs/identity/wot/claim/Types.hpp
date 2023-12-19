@@ -7,8 +7,8 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Export.hpp"      // IWYU pragma: keep
+#include "opentxs/core/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 

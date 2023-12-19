@@ -8,6 +8,7 @@ add_subdirectory(display)
 add_subdirectory(identifier)
 add_subdirectory(paymentcode)
 
+libopentxs_add_enum_header("core" "UnitType")
 libopentxs_add_public_header("core" "AccountType.hpp")
 libopentxs_add_public_header("core" "AddressType.hpp")
 libopentxs_add_public_header("core" "Amount.hpp")
@@ -17,7 +18,6 @@ libopentxs_add_public_header("core" "Data.hpp")
 libopentxs_add_public_header("core" "FixedByteArray.hpp")
 libopentxs_add_public_header("core" "Secret.hpp")
 libopentxs_add_public_header("core" "Types.hpp")
-libopentxs_add_public_header("core" "UnitType.hpp")
 
 target_sources(
   opentxs-common
@@ -45,6 +45,8 @@ target_sources(
     "StateMachine.hpp"
     "String.cpp"
     "String.hpp"
+    "Types.cpp"
+    "UnitType.cpp"
     "Worker.hpp"
 )
 

@@ -46,6 +46,7 @@
 { "include": ["<qnamespace.h>", "private", "<QObject>", "public"] },
 { "include": ["<qobject.h>", "private", "<QObject>", "public"] },
 { "include": ["<qobjectdefs.h>", "private", "<QObject>", "public"] },
+{ "include": ["<qqml.h>", "private", "<QQmlEngine>", "public"] },
 { "include": ["<qqmlengine.h>", "private", "<QQmlEngine>", "public"] },
 { "include": ["<qsortfilterproxymodel.h>", "private", "<QSortFilterProxyModel>", "public"] },
 { "include": ["<qstring.h>", "private", "<QString>", "public"] },

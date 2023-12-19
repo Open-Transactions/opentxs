@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include <cstdint>
-#include <limits>
+#include "opentxs/core/Types.hpp"  // IWYU pragma: associated
 
-#include "opentxs/Export.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
+@MAYBE_INCLUDE_QOBJECT@#include <limits>
+#include <type_traits>
 
 namespace opentxs
 {
-enum class UnitType : std::uint32_t {
+inline namespace unittype
+@MAYBE_OPEN_NAMESPACE@
+enum class UnitType : std::underlying_type<UnitType>::type {
     Unknown = std::numeric_limits<int>::max(),
     Error = 0,
     Btc = 1,
@@ -2082,5 +2082,6 @@ enum class UnitType : std::uint32_t {
     erc20_ethsepolia_usdd2 = 2058,     // USDD Stablecoin
     erc20_ethsepolia_xaut4 = 2059,     // Tether Gold on Sepolia
     erc20_ethsepolia_dawgs3 = 2060,    // SpaceDawgs
-};
+@MAYBE_EXPORT_ENUM@
+}  // namespace unittype
 }  // namespace opentxs

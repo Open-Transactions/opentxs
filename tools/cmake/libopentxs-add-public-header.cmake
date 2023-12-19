@@ -8,16 +8,22 @@ function(
   install_location
   header_name
 )
-  set(HEADER_FILE
-      "${opentxs_SOURCE_DIR}/include/opentxs/${install_location}/${header_name}"
+  if(EXISTS
+     "${opentxs_SOURCE_DIR}/include/opentxs/${install_location}/${header_name}"
   )
-
-  if(NOT
-     EXISTS
-     "${HEADER_FILE}"
+    set(HEADER_FILE
+        "${opentxs_SOURCE_DIR}/include/opentxs/${install_location}/${header_name}"
+    )
+  elseif(
+    EXISTS
+    "${opentxs_BINARY_DIR}/include/opentxs/${install_location}/${header_name}"
   )
     set(HEADER_FILE
         "${opentxs_BINARY_DIR}/include/opentxs/${install_location}/${header_name}"
+    )
+  else()
+    message(
+      FATAL_ERROR "Unable to find header ${install_location}/${header_name}"
     )
   endif()
 

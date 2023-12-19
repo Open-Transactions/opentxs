@@ -22,6 +22,7 @@
 #include "opentxs/blockchain/token/Descriptor.hpp"
 #include "opentxs/blockchain/token/TokenType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/core/Types.hpp"
 #include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::token
