@@ -3,8 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-include(libopentxs-add-sources)
-include(libopentxs-include-directories)
-include(libopentxs-link-external)
-include(libopentxs-link-internal)
-include(libopentxs-parallel-algorithms)
+macro(libopentxs_add_sources SOURCES)
+  target_sources(libopentxs PRIVATE "${SOURCES}")
+
+  if(OPENTXS_BUILD_TESTS)
+    target_sources(opentxs-testlib PRIVATE "${SOURCES}")
+  endif()
+endmacro()
