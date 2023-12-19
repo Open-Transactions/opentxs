@@ -28,11 +28,11 @@ project(opentxs)
 
 find_package(
   otcommon
-  1
+  2
   CONFIG
   REQUIRED
 )
-otcommon_version_from_git()
+otcommon_set_version_from_git()
 otcommon_set_build_type()
 otcommon_require_out_of_source_build()
 otcommon_update_submodules()
