@@ -1,0 +1,48 @@
+#!/bin/bash
+
+ARCH="${1}"
+ANDROID_PLATFORM="android-33"
+SRC="/home/src"
+WORK="/tmp/build"
+OUT="/home/output"
+
+if [ ! -d "${SRC}" ]; then
+    echo "Source tree missing. Mount opentxs source directory at ${SRC}"
+    exit 1
+fi
+
+if [ ! -d "${OUT}" ]; then
+    echo "Output directory missing. Mount output directory at ${OUT}"
+    exit 1
+fi
+
+if [ "${ARCH}" == "" ]; then
+    echo "Target architecture not set. Allowed values: arm64 arm x64 x86"
+    exit 1
+elif [ "${ARCH}" == "arm64" ]; then
+    :
+elif [ "${ARCH}" == "arm" ]; then
+    :
+elif [ "${ARCH}" == "x64" ]; then
+    :
+elif [ "${ARCH}" == "x86" ]; then
+    :
+else
+    echo "Unknown architecture: ${ARCH}"
+    echo "Allowed values: arm64 arm x64 x86"
+    exit 1
+fi
+
+set -e
+
+rm -rf "${OUT}/"*
+/usr/local/bin/cmake \
+    -S "${SRC}" \
+    -B "${WORK}" \
+    --preset "android-${ARCH}" \
+    -DANDROID_PLATFORM="${ANDROID_PLATFORM}"
+/usr/local/bin/cmake \
+    --build "${WORK}" \
+    -- -k 0
+/usr/local/bin/cmake \
+    --install "${WORK}"

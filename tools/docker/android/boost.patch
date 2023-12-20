@@ -1,0 +1,12 @@
+diff -urN boost_1_70_0/boostcpp.jam boost_1_70_0.new/boostcpp.jam
+--- boost_1_70_0/boostcpp.jam	2019-04-09 14:35:15.000000000 -0500
++++ boost_1_70_0.new/boostcpp.jam	2020-03-14 17:13:09.896646964 -0500
+@@ -210,7 +210,7 @@
+           ! [ $(property-set).get <target-os> ] in windows cygwin darwin aix &&
+           ! [ $(property-set).get <toolset> ] in pgi
+         {
+-            result = $(result).$(BOOST_VERSION)  ;
++            result = $(result)  ;
+         }
+ 
+         return $(result) ;

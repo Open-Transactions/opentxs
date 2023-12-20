@@ -74,7 +74,10 @@
         "libsodium",
         "lmdb",
         "openssl",
-        "otcommon",
+        {
+            "name": "otcommon",
+            "version>=": "2.0.0"
+        },
         "protobuf",
         "pthread",
         "qtbase",
