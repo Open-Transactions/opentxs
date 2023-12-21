@@ -15,19 +15,19 @@ jobs:
         preset: [test01, test02, test03, test04, test05, test06, test07, test08, nopch, full, notbb, release, matterfi]
         include:
           - toolchain: gcc-12.2
-            docker: 37_11
+            docker: 37_12
             compiler: gcc
           - toolchain: gcc-13.0
-            docker: 38_8
+            docker: 38_9
             compiler: gcc
           - toolchain: gcc-13.2
-            docker: 39_2
+            docker: 39_3
             compiler: gcc
           - toolchain: clang-16
-            docker: 38_8
+            docker: 38_9
             compiler: clang
           - toolchain: clang-17
-            docker: 39_2
+            docker: 39_3
             compiler: clang
     steps:
     - name: Checkout opentxs
