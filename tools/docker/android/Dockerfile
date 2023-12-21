@@ -1,29 +1,42 @@
+ARG BASE_FEDORA_VERSION="39"
 ARG ANDROID_BUILD_TOOLS=33.0.0
 ARG ANDROID_LEVEL=33
 ARG ANDROID_LEVEL_TOOLCHAIN=33
 ARG ANDROID_TOOLS=8092744
-ARG BOOST_FOR_ANDROID_COMMIT_HASH=294a0e1cc152f3ebe325a2b1a8319ac75789e524
+ARG BOOST_FOR_ANDROID_COMMIT_HASH=64a5ba21b3ce0ca192d0ea0fbc8e21854f0ffcc7
 ARG CMAKE_BUILD_TYPE=Release
-ARG CMAKE_VERSION="3.26.3"
+ARG CMAKE_VERSION="3.28.1"
 ARG GTEST=f8d7d77c06936315286eb55f8de22cd23c188571
 ARG JAVA_HOME_ARG=/usr/lib/jvm/java
 ARG JOBS=2
 ARG LIBZMQ_COMMIT_HASH=4097855ddaaa65ed7b5e8cb86d143842a594eebd
 ARG LMDB_COMMIT_HASH=8d0cbbc936091eb85972501a9b31a8f86d4c51a7
 ARG NDK_VERSION=26.0.10792818
-ARG OPENSSL_VERSION=3.1.2
+ARG OPENSSL_VERSION=3.1.4
 ARG OTCOMMON_VERSION="2.0.0"
 ARG PROTOBUF_COMMIT_HASH=2c5fa078d8e86e5f4bd34e6f4c9ea9e8d7d4d44a
 ARG QT_BRANCH=6.6
 ARG QT_RELEASE=official_releases
-ARG QT_VERSION=6.6.0
+ARG QT_VERSION=6.6.1
 ARG SODIUM_COMMIT_HASH=940ef42797baa0278df6b7fd9e67c7590f87744b
 
-FROM fedora:38 AS run
+FROM fedora:${BASE_FEDORA_VERSION} AS run
+ARG BASE_FEDORA_VERSION
 RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
     git \
     ninja-build \
     pcre2-devel
+
+FROM alpine AS download
+RUN mkdir -p /usr/src
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
+    bzip2 \
+    git \
+    lzo \
+    p7zip \
+    rsync \
+    wget \
+    xz
 
 FROM run AS tools
 RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
@@ -45,7 +58,7 @@ RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
     which \
     xz
 
-FROM tools as android
+FROM tools AS android
 ARG ANDROID_TOOLS
 ARG ANDROID_LEVEL
 ARG ANDROID_BUILD_TOOLS
@@ -63,7 +76,7 @@ RUN mkdir -p /opt/android && \
     yes | /opt/android/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux "build-tools;${ANDROID_BUILD_TOOLS}" && \
     find /opt/android-sdk-linux/ndk -name libz.a -delete
 
-FROM tools AS openssl_download
+FROM download AS openssl_download
 ARG OPENSSL_VERSION
 RUN mkdir -p /usr/src \
     && cd /usr/src \
@@ -80,7 +93,7 @@ RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
     && make -j${JOBS} build_sw \
     && make install_sw
 
-FROM tools AS cmake-download
+FROM download AS cmake-download
 ARG CMAKE_VERSION
 RUN mkdir -p /usr/src \
     && cd /usr/src \
@@ -106,7 +119,7 @@ RUN ln -s "/opt/android-sdk-linux/ndk/${NDK_VERSION}" /opt/ndk
 COPY --from=cmake /usr/local /usr/local
 COPY --from=openssl_host /usr/local /usr/local
 
-FROM tools AS boost_download
+FROM download AS boost_download
 ARG BOOST_FOR_ANDROID_COMMIT_HASH
 RUN mkdir -p /usr/src && cd /usr/src \
     && wget "https://github.com/Open-Transactions/Boost-for-Android/archive/${BOOST_FOR_ANDROID_COMMIT_HASH}.zip" \
@@ -114,22 +127,22 @@ RUN mkdir -p /usr/src && cd /usr/src \
     && rm "${BOOST_FOR_ANDROID_COMMIT_HASH}.zip" \
     && mv "Boost-for-Android-${BOOST_FOR_ANDROID_COMMIT_HASH}" boost \
     && cd /usr/src/boost \
-    && wget https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
+    && wget https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.bz2
 
 FROM build_base AS boost
 COPY --from=boost_download /usr/src/boost /usr/src/boost
 ARG ANDROID_LEVEL
-COPY ./boost.patch /usr/src/boost/patches/boost-1_82_0/suffix.patch
+COPY ./boost.patch /usr/src/boost/patches/boost-1_84_0/suffix.patch
 RUN --mount=type=tmpfs,target=/tmp/build rsync -a /usr/src/boost/ /tmp/build/ \
     && cd /tmp/build \
-    && ./build-android.sh --boost=1.82.0 --arch=armeabi-v7a,arm64-v8a,x86,x86_64 --target-version="${ANDROID_LEVEL}" --layout=system /opt/ndk \
+    && ./build-android.sh --boost=1.84.0 --arch=armeabi-v7a,arm64-v8a,x86,x86_64 --target-version="${ANDROID_LEVEL}" --layout=system /opt/ndk \
     && mkdir -p /usr/android \
     && mv /tmp/build/build/out/arm64-v8a /usr/android/arm64 \
     && mv /tmp/build/build/out/armeabi-v7a /usr/android/arm \
     && mv /tmp/build/build/out/x86_64 /usr/android/x64 \
     && mv /tmp/build/build/out/x86 /usr/android/x86
 
-FROM tools AS sodium_download
+FROM download AS sodium_download
 ARG SODIUM_COMMIT_HASH
 RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/jedisct1/libsodium/archive/${SODIUM_COMMIT_HASH}.zip" \
     && unzip "${SODIUM_COMMIT_HASH}.zip" && rm "${SODIUM_COMMIT_HASH}.zip" && mv "libsodium-${SODIUM_COMMIT_HASH}" sodium
@@ -212,7 +225,7 @@ RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
         --disable-static \
     && make -j$JOBS install
 
-FROM tools AS lmdb_download
+FROM download AS lmdb_download
 ARG LMDB_COMMIT_HASH
 RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/LMDB/lmdb/archive/${LMDB_COMMIT_HASH}.zip" \
     && unzip "${LMDB_COMMIT_HASH}.zip" && rm "${LMDB_COMMIT_HASH}.zip" && mv "lmdb-${LMDB_COMMIT_HASH}" lmdb
@@ -254,7 +267,7 @@ RUN --mount=type=tmpfs,target=/tmp/build \
     && cd /tmp/build \
     && make -j$JOBS install
 
-FROM tools AS protobuf_download
+FROM download AS protobuf_download
 ARG PROTOBUF_COMMIT_HASH
 RUN mkdir -p /usr/src \
     && cd /usr/src \
@@ -377,7 +390,7 @@ RUN --mount=type=tmpfs,target=/tmp/build export export PATH="${ANDROID_NDK_ROOT}
     && make -j${JOBS} build_sw \
     && make install_sw
 
-FROM tools AS zeromq_download
+FROM download AS zeromq_download
 ARG LIBZMQ_COMMIT_HASH
 RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/zeromq/libzmq/archive/${LIBZMQ_COMMIT_HASH}.zip" \
     && unzip "${LIBZMQ_COMMIT_HASH}.zip" && rm "${LIBZMQ_COMMIT_HASH}.zip" && mv "libzmq-${LIBZMQ_COMMIT_HASH}" zeromq
@@ -508,7 +521,7 @@ RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
         /usr/src/zeromq \
     && ninja install
 
-FROM tools AS gtest_download
+FROM download AS gtest_download
 ARG GTEST
 RUN mkdir -p /usr/src && cd /usr/src && git clone https://github.com/google/googletest.git \
     && cd googletest && git checkout "${GTEST}" && git submodule update --init --recursive
@@ -570,7 +583,7 @@ RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
         /usr/src/googletest \
     && ninja install
 
-FROM tools AS otcommon_download
+FROM download AS otcommon_download
 ARG OTCOMMON_VERSION
 RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
     && wget -O /tmp/download/otcommon.tar.gz "https://github.com/Open-Transactions/otcommon/archive/refs/tags/${OTCOMMON_VERSION}.tar.gz" \
@@ -588,7 +601,7 @@ RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
         /usr/src/otcommon \
     && cmake --install .
 
-FROM tools AS qt_download
+FROM download AS qt_download
 ARG QT_RELEASE
 ARG QT_BRANCH
 ARG QT_VERSION
