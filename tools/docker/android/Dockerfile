@@ -526,7 +526,7 @@ ARG GTEST
 RUN mkdir -p /usr/src && cd /usr/src && git clone https://github.com/google/googletest.git \
     && cd googletest && git checkout "${GTEST}" && git submodule update --init --recursive
 
-FROM build_base as gtest
+FROM build_base AS gtest
 COPY --from=gtest_download /usr/src/googletest /usr/src/googletest
 ARG ANDROID_LEVEL
 ARG CMAKE_BUILD_TYPE
@@ -611,7 +611,7 @@ RUN mkdir -p /usr/src && cd /usr/src \
     && rm "qt-everywhere-src-${QT_VERSION}.tar.xz" \
     && mv qt-everywhere-src-${QT_VERSION} qt
 
-FROM build_base as host_qt
+FROM build_base AS host_qt
 RUN --mount=type=tmpfs,target=/var/cache/dnf \
     dnf install -y \
     SDL2-devel \
@@ -689,7 +689,7 @@ RUN mkdir -p /tmp/build && cd /tmp/build && /usr/src/qt/configure \
     && ninja install \
     && rm -rf /tmp/build
 
-FROM host_qt as qt
+FROM host_qt AS qt
 ARG JAVA_HOME_ARG
 ENV JAVA_HOME=$JAVA_HOME_ARG
 ARG JOBS

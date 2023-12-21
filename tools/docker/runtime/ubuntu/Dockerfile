@@ -1,8 +1,7 @@
-ARG BASE_FEDORA_VERSION="39"
+ARG BASE_UBUNTU_VERSION="22.04"
 ARG OTCOMMON_COMMIT_HASH="a8cb2a10e7eff4fdece28feea681541b70728053"
 ARG OTCOMMON_VERSION="2.0.0-0-ga8cb2a1"
 ARG OPENTXS_REPO="https://github.com/open-transactions/opentxs"
-ARG IWYU_COMMIT="dbecade3b575678cc3ccc4dd2d0942e8ff3c7527"
 ARG BOOST_MAJOR="1"
 ARG BOOST_MINOR="84"
 ARG BOOST_PATCH="0"
@@ -19,51 +18,40 @@ RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
     wget \
     xz
 
-FROM fedora:${BASE_FEDORA_VERSION} AS base
+FROM ubuntu:${BASE_UBUNTU_VERSION} AS base
 
 FROM base AS build
-RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
-    clang-devel \
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
     cmake \
-    gcc \
-    gcc-c++ \
+    g++-12 \
+    gcc-12 \
     git \
-    libsodium-devel \
-    llvm-devel \
-    lmdb-devel \
+    libgl1-mesa-dev \
+    liblmdb-dev \
+    libprotobuf-dev \
+    libsodium-dev \
+    libssl-dev \
+    libtbb-dev \
+    libzmq3-dev \
     ninja-build \
-    openssl-devel \
     protobuf-compiler \
-    protobuf-lite-devel \
-    qt6-qtbase-devel \
-    qt6-qtdeclarative-devel \
-    qt6-qtsvg-devel \
+    qt6-base-dev \
+    qt6-declarative-dev \
     rsync \
-    tbb-devel \
-    zeromq-devel
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
 
 FROM base AS run
-RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
-    libsodium \
-    lmdb \
-    openssl-libs \
-    protobuf-lite \
-    qt6-qtbase \
-    qt6-qtdeclarative \
-    qt6-qtsvg \
-    tbb \
-    zeromq
-
-FROM download AS iwyu-download
-ARG IWYU_COMMIT
-RUN mkdir -p /usr/src && git clone --recursive "https://github.com/include-what-you-use/include-what-you-use" /usr/src/iwyu && cd /usr/src/iwyu && git reset --hard "${IWYU_COMMIT}"
-
-FROM build AS iwyu
-COPY --from=iwyu-download /usr/src/iwyu /usr/src/iwyu
-RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
-    && cmake -GNinja /usr/src/iwyu \
-    && cmake --build . \
-    && cmake --install .
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    liblmdb0 \
+    libprotobuf-lite23 \
+    libqt6core6 \
+    libqt6gui6 \
+    libqt6qmlcore6 \
+    libsodium23 \
+    libtbb12 \
+    libzmq5
 
 FROM download AS boost-download
 ARG BOOST_MAJOR
@@ -106,9 +94,10 @@ RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
 
 FROM build AS otcommon
 ARG OTCOMMON_VERSION
+COPY --from=cmake /usr/local /usr/local
 COPY --from=otcommon-download /usr/src/otcommon /usr/src/otcommon
 RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
-    && /usr/bin/cmake \
+    && /usr/local/bin/cmake \
         -GNinja \
         -Dotcommon_GIT_VERSION=${OTCOMMON_VERSION} \
         /usr/src/otcommon \
@@ -122,9 +111,10 @@ RUN mkdir -p /usr/src && git clone --recursive "${OPENTXS_REPO}" /usr/src/opentx
 FROM build AS compile
 COPY --from=boost /usr/local /usr
 COPY --from=otcommon /usr/local /usr
+COPY --from=cmake /usr/local /usr/local
 RUN ldconfig
 COPY --from=opentxs-download /usr/src/opentxs /usr/src/opentxs
-RUN --mount=type=tmpfs,target=/tmp/opentxs /usr/bin/cmake \
+RUN --mount=type=tmpfs,target=/tmp/opentxs /usr/local/bin/cmake \
         -S /usr/src/opentxs \
         -B /tmp/opentxs \
         --preset prod \
@@ -137,7 +127,7 @@ RUN --mount=type=tmpfs,target=/tmp/opentxs /usr/bin/cmake \
 
 FROM run AS opentxs
 COPY --from=boost /usr/local/lib /usr/lib
-COPY --from=compile /usr/local/lib64 /usr/lib64
+COPY --from=compile /usr/local/lib /usr/lib
 RUN ldconfig
 
 FROM opentransactions/ci:39_0 AS ci
@@ -145,8 +135,7 @@ FROM opentransactions/ci:39_0 AS ci
 FROM build AS opentxs-devel
 COPY --from=boost /usr/local /usr
 COPY --from=compile /usr/local /usr
-COPY --from=iwyu /usr/local /usr
 COPY --from=otcommon /usr/local /usr
 RUN ldconfig
-COPY --from=ci /usr/bin/run-iwyu.sh /usr/bin/run-iwyu.sh
 COPY --from=ci /usr/bin/build-opentxs.sh /usr/bin/build-opentxs.sh
+RUN sed -i 's~/usr/bin/cmake~/usr/local/bin/cmake~' /usr/bin/build-opentxs.sh
