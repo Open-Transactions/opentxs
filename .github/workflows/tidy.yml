@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: true
     env:
-      docker: '39_2'
+      docker: '39_3'
       compiler: clang
       preset: tidy
     steps:

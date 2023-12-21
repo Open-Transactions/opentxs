@@ -5,12 +5,14 @@
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_map_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_set_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"  // IWYU pragma: associated
 
 #include <ContactItemAttribute.pb.h>
 #include <ContactItemType.pb.h>
-#include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 #include <functional>
 #include <iterator>

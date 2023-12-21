@@ -4,6 +4,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_map_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "network/zeromq/Actor.hpp"  // IWYU pragma: associated
 

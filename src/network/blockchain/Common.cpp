@@ -4,11 +4,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_map_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "internal/network/blockchain/Types.hpp"  // IWYU pragma: associated
 #include "opentxs/network/blockchain/Types.hpp"   // IWYU pragma: associated
 
-#include <boost/container_hash/hash.hpp>
 #include <boost/endian/conversion.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>

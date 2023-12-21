@@ -4,10 +4,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_map_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "blockchain/block/block/Imp.hpp"  // IWYU pragma: associated
 
-#include <boost/unordered/unordered_flat_map.hpp>
 #include <algorithm>
 #include <functional>
 #include <utility>

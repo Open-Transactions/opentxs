@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::api::session::Endpoints
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "api/session/Endpoints.hpp"  // IWYU pragma: associated
 

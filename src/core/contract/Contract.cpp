@@ -4,13 +4,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/flat_map_types.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "internal/core/contract/Contract.hpp"  // IWYU pragma: associated
 
 #include <ContractEnums.pb.h>
 #include <ServerContract.pb.h>
 #include <UnitDefinition.pb.h>
-#include <boost/container_hash/hash.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>

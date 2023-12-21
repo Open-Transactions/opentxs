@@ -5,7 +5,6 @@
 
 // IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
 
-#include <boost/container_hash/hash.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <boost/unordered/unordered_node_map.hpp>
 #include <cs_ordered_guarded.h>

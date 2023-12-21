@@ -5,6 +5,7 @@
 
 // IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
+// IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "opentxs/identity/wot/claim/Data.hpp"  // IWYU pragma: associated
 
