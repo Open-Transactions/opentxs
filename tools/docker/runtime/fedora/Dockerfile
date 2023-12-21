@@ -1,14 +1,17 @@
-ARG OTCOMMON_VERSION="1.0.2"
+ARG BASE_FEDORA_VERSION="39"
+ARG OTCOMMON_VERSION="2.0.0"
 ARG OPENTXS_REPO="https://github.com/open-transactions/opentxs"
 ARG IWYU_COMMIT="dbecade3b575678cc3ccc4dd2d0942e8ff3c7527"
 ARG BOOST_MAJOR="1"
-ARG BOOST_MINOR="83"
+ARG BOOST_MINOR="84"
 ARG BOOST_PATCH="0"
 
-FROM fedora:39 AS base
+FROM fedora:${BASE_FEDORA_VERSION} AS base
+ARG BASE_FEDORA_VERSION
 
-FROM base AS download
-RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+FROM alpine AS download
+RUN mkdir -p /usr/src
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
     bzip2 \
     git \
     lzo \
@@ -43,12 +46,13 @@ RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
     && tar -xf otcommon.tar.gz \
     && mv "otcommon-${OTCOMMON_VERSION}" /usr/src/otcommon
 
-FROM download AS build
+FROM base AS build
 RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
     clang-devel \
     cmake \
     gcc \
     gcc-c++ \
+    git \
     libsodium-devel \
     llvm-devel \
     lmdb-devel \
@@ -59,6 +63,7 @@ RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
     qt6-qtbase-devel \
     qt6-qtdeclarative-devel \
     qt6-qtsvg-devel \
+    rsync \
     tbb-devel \
     zeromq-devel
 
