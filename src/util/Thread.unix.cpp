@@ -13,12 +13,11 @@ extern "C" {
 
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
-#include <array>
 #include <cerrno>
-#include <cstring>
 #include <functional>  // IWYU pragma: keep
 #include <utility>
 
+#include "opentxs/strerror_r.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -39,13 +38,10 @@ auto SetThisThreadsPriority(ThreadPriority priority) noexcept -> void
     const auto nice = map.at(priority);
     const auto tid = ::gettid();
     const auto rc = ::setpriority(PRIO_PROCESS, tid, nice);
-    const auto error = errno;
 
     if (-1 == rc) {
-        auto buf = std::array<char, 1024>{};
-        const auto* text = ::strerror_r(error, buf.data(), buf.size());
         LogDebug()()("failed to set thread priority to ")(
-            opentxs::print(priority))(" due to: ")(text)
+            opentxs::print(priority))(" due to: ")(error_code_to_string(errno))
             .Flush();
     }
 }

@@ -56,7 +56,9 @@ target_sources(
     "${CMAKE_CURRENT_BINARY_DIR}/Context.version.cpp"
     "Context.cpp"
     "internal.factory.hpp"
+    "strerror_r.hpp"
 )
+libopentxs_add_platform_specific("strerror_r")
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_BINARY_DIR}/include"
 )
