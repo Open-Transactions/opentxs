@@ -1037,7 +1037,7 @@ auto Storage::MoveThreadItem(
 auto Storage::mutable_Root() const noexcept
     -> Editor<opentxs::storage::tree::Root>
 {
-    std::function<void(opentxs::storage::tree::Root*, Lock&)> callback =
+    const std::function<void(opentxs::storage::tree::Root*, Lock&)> callback =
         [&](opentxs::storage::tree::Root* in, Lock& lock) -> void {
         this->save(in, lock);
     };
@@ -1536,7 +1536,7 @@ auto Storage::RenameThread(
 
 auto Storage::root() const noexcept -> opentxs::storage::tree::Root*
 {
-    Lock lock(write_lock_);
+    auto lock = Lock{write_lock_};
 
     if (!root_) {
         root_ = std::make_unique<opentxs::storage::tree::Root>(

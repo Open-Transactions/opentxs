@@ -366,7 +366,7 @@ auto Sodium::Encrypt(
     auto& tag = *ciphertext.mutable_tag();
     auto& output = *ciphertext.mutable_data();
 
-    bool result = false;
+    const bool result = false;
 
     if (mode == opentxs::crypto::symmetric::Algorithm::Error) {
         LogError()()("Incorrect mode.").Flush();

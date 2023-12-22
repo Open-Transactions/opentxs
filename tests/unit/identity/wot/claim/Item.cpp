@@ -13,8 +13,6 @@
 
 #include "ottest/fixtures/contact/ContactItem.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace std::literals;

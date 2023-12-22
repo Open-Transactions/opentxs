@@ -60,7 +60,7 @@ auto Seeds::Alias(const opentxs::crypto::SeedID& id) const -> UnallocatedCString
 
 auto Seeds::Default() const -> opentxs::crypto::SeedID
 {
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return default_seed_;
 }

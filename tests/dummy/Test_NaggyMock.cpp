@@ -13,7 +13,7 @@
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"  // NOLINT
 namespace ottest
 {
-TEST(NaggyMock, constructor) { ::ottest::mock::Interface naggyMock; }
+TEST(NaggyMock, constructor) { const ::ottest::mock::Interface naggyMock; }
 
 TEST(NaggyMock, naggyMockOnFunction)
 {

@@ -14,6 +14,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <utility>
 
 #include "internal/api/session/Storage.hpp"
 #include "internal/core/Armored.hpp"
@@ -122,7 +123,7 @@ auto VerifyBalanceReceipt(
         return false;
     }
 
-    UnallocatedCString strFileContents(OTDB::QueryPlainString(
+    const UnallocatedCString strFileContents(OTDB::QueryPlainString(
         api,
         context.LegacyDataFolder(),
         szFolder1name,
@@ -180,7 +181,7 @@ auto VerifyBalanceReceipt(
             return false;
         }
     } else {
-        transaction.reset(tranOut.release());
+        transaction = std::move(tranOut);
     }
 
     if (!transaction->VerifySignature(SERVER_NYM)) {
@@ -290,7 +291,7 @@ auto OT_API::Cleanup() -> bool { return true; }
 //
 auto OT_API::LoadConfigFile() -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     // PID -- Make sure we're not running two copies of OT on the same data
     // simultaneously here.
@@ -1047,8 +1048,8 @@ auto OT_API::SmartContract_ConfirmParty(
              // party.
              // (For now, until I code entities)
 {
-    rLock lock(lock_callback_(
-        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
+    const auto lock = rLock{lock_callback_(
+        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Activating a smart contract");
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         NYM_ID, NOTARY_ID, reason);
@@ -1154,7 +1155,7 @@ auto OT_API::SmartContract_ConfirmParty(
     pMessage->SignContract(*pNym, reason);
     pMessage->SaveContract();
 
-    std::shared_ptr<Message> message{pMessage.release()};
+    const std::shared_ptr<Message> message{pMessage.release()};
     nymfile.get().AddOutpayments(message);
 
     return true;
@@ -1865,9 +1866,9 @@ auto OT_API::WriteCheque(
     const String& CHEQUE_MEMO,
     const identifier::Nym& pRECIPIENT_NYM_ID) const -> Cheque*
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {SENDER_NYM_ID.asBase58(api_.Crypto()),
-         NOTARY_ID.asBase58(api_.Crypto())}));
+         NOTARY_ID.asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         SENDER_NYM_ID, NOTARY_ID, reason);
@@ -1908,7 +1909,7 @@ auto OT_API::WriteCheque(
     assert_false(nullptr == pCheque, "Error allocating memory in the OT API.");
     // At this point, I know that pCheque is a good pointer that I either
     // have to delete, or return to the caller.
-    bool bIssueCheque = pCheque->IssueCheque(
+    const bool bIssueCheque = pCheque->IssueCheque(
         CHEQUE_AMOUNT,
         number.Value(),
         VALID_FROM,
@@ -2027,13 +2028,8 @@ auto OT_API::ProposePaymentPlan(
     // and
     // sent it to him.)
     if (pSENDER_accountID.empty()) {
-        pPlan.reset(
-            api_.Factory()
-                .Internal()
-                .Session()
-                .PaymentPlan(
-                    NOTARY_ID, account.get().GetInstrumentDefinitionID())
-                .release());
+        pPlan = api_.Factory().Internal().Session().PaymentPlan(
+            NOTARY_ID, account.get().GetInstrumentDefinitionID());
 
         assert_false(
             nullptr == pPlan,
@@ -2043,17 +2039,13 @@ auto OT_API::ProposePaymentPlan(
         pPlan->SetRecipientNymID(RECIPIENT_NYM_ID);
         pPlan->SetRecipientAcctID(RECIPIENT_accountID);
     } else {
-        pPlan.reset(api_.Factory()
-                        .Internal()
-                        .Session()
-                        .PaymentPlan(
-                            NOTARY_ID,
-                            account.get().GetInstrumentDefinitionID(),
-                            pSENDER_accountID,
-                            SENDER_NYM_ID,
-                            RECIPIENT_accountID,
-                            RECIPIENT_NYM_ID)
-                        .release());
+        pPlan = api_.Factory().Internal().Session().PaymentPlan(
+            NOTARY_ID,
+            account.get().GetInstrumentDefinitionID(),
+            pSENDER_accountID,
+            SENDER_NYM_ID,
+            RECIPIENT_accountID,
+            RECIPIENT_NYM_ID);
 
         assert_false(
             nullptr == pPlan,
@@ -2061,7 +2053,7 @@ auto OT_API::ProposePaymentPlan(
     }
     // At this point, I know that pPlan is a good pointer that I either
     // have to delete, or return to the caller. CLEANUP WARNING!
-    bool bSuccessSetProposal = pPlan->SetProposal(
+    const bool bSuccessSetProposal = pPlan->SetProposal(
         context.get(), account.get(), PLAN_CONSIDERATION, VALID_FROM, VALID_TO);
     // WARNING!!!! SetProposal() burns TWO transaction numbers for RECIPIENT.
     // (*nymfile)
@@ -2160,7 +2152,7 @@ auto OT_API::ProposePaymentPlan(
     pMessage->SignContract(*nym, reason);
     pMessage->SaveContract();
 
-    std::shared_ptr<Message> message{pMessage.release()};
+    const std::shared_ptr<Message> message{pMessage.release()};
     nymfile.get().AddOutpayments(message);
 
     return pPlan.release();
@@ -2186,9 +2178,9 @@ auto OT_API::ConfirmPaymentPlan(
     const identifier::Nym& RECIPIENT_NYM_ID,
     OTPaymentPlan& thePlan) const -> bool
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {SENDER_NYM_ID.asBase58(api_.Crypto()),
-         NOTARY_ID.asBase58(api_.Crypto())}));
+         NOTARY_ID.asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Activating a payment plan");
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         SENDER_NYM_ID, NOTARY_ID, reason);
@@ -2220,7 +2212,7 @@ auto OT_API::ConfirmPaymentPlan(
     // --------------------------------------------------------
     // The "Creation Date" of the agreement is re-set here.
     //
-    bool bConfirmed = thePlan.Confirm(
+    const bool bConfirmed = thePlan.Confirm(
         context.get(), account.get(), RECIPIENT_NYM_ID, pMerchantNym.get());
     //
     // WARNING:  The call to "Confirm()" uses TWO transaction numbers from
@@ -2267,7 +2259,7 @@ auto OT_API::ConfirmPaymentPlan(
     pMessage->SignContract(*nym, reason);
     pMessage->SaveContract();
 
-    std::shared_ptr<Message> message{pMessage.release()};
+    const std::shared_ptr<Message> message{pMessage.release()};
     nymfile.get().AddOutpayments(message);
 
     return true;
@@ -2280,8 +2272,8 @@ auto OT_API::LoadNymbox(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& NYM_ID) const -> std::unique_ptr<Ledger>
 {
-    rLock lock(lock_callback_(
-        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
+    const auto lock = rLock{lock_callback_(
+        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())})};
     auto context = api_.Wallet().Internal().ServerContext(NYM_ID, NOTARY_ID);
 
     if (false == bool(context)) {
@@ -2474,9 +2466,9 @@ auto OT_API::issueBasket(
     const proto::UnitDefinition& basket,
     const UnallocatedCString& label) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -2526,8 +2518,8 @@ auto OT_API::GenerateBasketExchange(
     const identifier::Account& accountID,
     std::int32_t TRANSFER_MULTIPLE) const -> Basket*
 {
-    rLock lock(lock_callback_(
-        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
+    const auto lock = rLock{lock_callback_(
+        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         NYM_ID, NOTARY_ID, reason);
@@ -2584,13 +2576,8 @@ auto OT_API::GenerateBasketExchange(
                          "exchange.")
                 .Flush();
         } else {
-            pRequestBasket.reset(api_.Factory()
-                                     .Internal()
-                                     .Session()
-                                     .Basket(
-                                         static_cast<std::int32_t>(currencies),
-                                         contract->Weight())
-                                     .release());
+            pRequestBasket = api_.Factory().Internal().Session().Basket(
+                static_cast<std::int32_t>(currencies), contract->Weight());
             assert_false(
                 nullptr == pRequestBasket,
                 "Error allocating memory in the OT API");
@@ -2625,8 +2612,8 @@ auto OT_API::AddBasketExchangeItem(
     const identifier::UnitDefinition& INSTRUMENT_DEFINITION_ID,
     const identifier::Account& ASSET_ACCOUNT_ID) const -> bool
 {
-    rLock lock(lock_callback_(
-        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())}));
+    const auto lock = rLock{lock_callback_(
+        {NYM_ID.asBase58(api_.Crypto()), NOTARY_ID.asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto context = api_.Wallet().Internal().mutable_ServerContext(
         NYM_ID, NOTARY_ID, reason);
@@ -2814,9 +2801,9 @@ auto OT_API::exchangeBasket(
     bool bExchangeInOrOut  // exchanging in == true, out == false.
 ) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Exchanging a basket currency");
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -2946,14 +2933,14 @@ auto OT_API::exchangeBasket(
     item->SetAttachment(strBasketInfo);
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     std::unique_ptr<Item> balanceItem(inbox->GenerateBalanceStatement(
         0, *transaction, context, account.get(), *outbox, reason));
 
     if (false == bool(balanceItem)) { return output; }
 
-    std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
+    const std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
     transaction->AddItem(pbalanceItem);
     AddHashesToTransaction(*transaction, context, account.get(), reason);
     transaction->SignContract(nym, reason);
@@ -2961,7 +2948,7 @@ auto OT_API::exchangeBasket(
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -3040,9 +3027,9 @@ auto OT_API::payDividend(
                       // PER SHARE (multiplied by total
                       // number of shares issued.)
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -3248,7 +3235,7 @@ auto OT_API::payDividend(
     item->SetAttachment(String::Factory(*theRequestVoucher));
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     std::unique_ptr<Item> balanceItem(inbox->GenerateBalanceStatement(
         totalCost * (-1),
@@ -3277,7 +3264,7 @@ auto OT_API::payDividend(
     // just this example.) This is already done with Cron, but just thinking
     // about how to best do it for "single action" transactions.
 
-    std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
+    const std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
     transaction->AddItem(pbalanceItem);
     AddHashesToTransaction(
         *transaction, context, dividendAccount.get(), reason);
@@ -3287,7 +3274,7 @@ auto OT_API::payDividend(
         nymID, DIVIDEND_FROM_accountID, serverID)};
     ledger->GenerateLedger(
         DIVIDEND_FROM_accountID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -3327,9 +3314,9 @@ auto OT_API::withdrawVoucher(
     const String& CHEQUE_MEMO,
     const Amount amount) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Withdrawing a voucher");
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -3390,7 +3377,7 @@ auto OT_API::withdrawVoucher(
 
     assert_true(false != bool(theRequestVoucher));
 
-    bool bIssueCheque = theRequestVoucher->IssueCheque(
+    const bool bIssueCheque = theRequestVoucher->IssueCheque(
         amount,
         voucherNumber.Value(),
         VALID_FROM,
@@ -3443,14 +3430,14 @@ auto OT_API::withdrawVoucher(
     item->SetAttachment(strVoucher);
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     std::unique_ptr<Item> balanceItem(inbox->GenerateBalanceStatement(
         amount * (-1), *transaction, context, account.get(), *outbox, reason));
 
     if (false == bool(item)) { return output; }
 
-    std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
+    const std::shared_ptr<Item> pbalanceItem{balanceItem.release()};
     transaction->AddItem(pbalanceItem);
     AddHashesToTransaction(*transaction, context, account.get(), reason);
     transaction->SignContract(nym, reason);
@@ -3458,7 +3445,7 @@ auto OT_API::withdrawVoucher(
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -3502,9 +3489,9 @@ auto OT_API::depositPaymentPlan(
     const String& THE_PAYMENT_PLAN) const -> CommandResult
 {
     auto reason = api_.Factory().PasswordPrompt("Depositing a payment plan");
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
     auto& [status, reply] = result;
@@ -3588,16 +3575,16 @@ auto OT_API::depositPaymentPlan(
     item->SetAttachment(String::Factory(*plan));
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     auto statement = context.Statement(*transaction, reason);
 
     if (false == bool(statement)) { return output; }
 
-    std::shared_ptr<Item> pstatement{statement.release()};
+    const std::shared_ptr<Item> pstatement{statement.release()};
     transaction->AddItem(pstatement);
-    std::unique_ptr<Ledger> inbox(account.get().LoadInbox(nym));
-    std::unique_ptr<Ledger> outbox(account.get().LoadOutbox(nym));
+    const std::unique_ptr<Ledger> inbox(account.get().LoadInbox(nym));
+    const std::unique_ptr<Ledger> outbox(account.get().LoadOutbox(nym));
     AddHashesToTransaction(*transaction, context, account.get(), reason);
     transaction->SignContract(nym, reason);
     transaction->SaveContract();
@@ -3607,7 +3594,7 @@ auto OT_API::depositPaymentPlan(
     assert_true(false != bool(ledger));
 
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     auto [newRequestNumber, message] =
@@ -3645,9 +3632,9 @@ auto OT_API::triggerClause(
     const String& strClauseName,
     const String& pStrParam) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -3694,9 +3681,9 @@ auto OT_API::activateSmartContract(
     otx::context::Server& context,
     const String& THE_SMART_CONTRACT) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Activating a smart contract");
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -3964,13 +3951,13 @@ auto OT_API::activateSmartContract(
     item->SetAttachment(String::Factory(*contract));
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     auto statement = context.Statement(*transaction, reason);
 
     if (false == bool(statement)) { return output; }
 
-    std::shared_ptr<Item> pstatement{statement.release()};
+    const std::shared_ptr<Item> pstatement{statement.release()};
     transaction->AddItem(pstatement);
     AddHashesToTransaction(*transaction, context, accountID, reason);
     transaction->SignContract(nym, reason);
@@ -3978,7 +3965,7 @@ auto OT_API::activateSmartContract(
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     ledger->GenerateLedger(accountID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -4052,9 +4039,9 @@ auto OT_API::cancelCronItem(
     const identifier::Account& ASSET_ACCOUNT_ID,
     const TransactionNumber& lTransactionNum) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason =
         api_.Factory().PasswordPrompt("Cancelling a recurring transaction");
     CommandResult output{};
@@ -4115,13 +4102,13 @@ auto OT_API::cancelCronItem(
     transaction->SetReferenceToNum(transactionNum);
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     auto statement = context.Statement(*transaction, reason);
 
     if (false == bool(statement)) { return output; }
 
-    std::shared_ptr<Item> pstatement{statement.release()};
+    const std::shared_ptr<Item> pstatement{statement.release()};
     transaction->AddItem(pstatement);
     AddHashesToTransaction(*transaction, context, ASSET_ACCOUNT_ID, reason);
     transaction->SignContract(nym, reason);
@@ -4131,7 +4118,7 @@ auto OT_API::cancelCronItem(
     auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, ASSET_ACCOUNT_ID, serverID)};
     ledger->GenerateLedger(ASSET_ACCOUNT_ID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -4185,9 +4172,9 @@ auto OT_API::issueMarketOffer(
     -> CommandResult  // For stop orders, this is
                       // threshhold price.
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt("Issuing a market offer");
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4337,13 +4324,14 @@ auto OT_API::issueMarketOffer(
         const auto price = displaydefinition.Format(lActivationPrice);
         offer_type.clear();
         if (lPriceLimit > 0) {
-            static UnallocatedCString msg{"stop limit order, at threshhold: "};
+            static const UnallocatedCString msg{
+                "stop limit order, at threshhold: "};
             offer_type.reserve(msg.length() + price.length());
             offer_type.append(msg);
             offer_type.append(&cStopSign);  // 1
             offer_type.append(price);
         } else {
-            static UnallocatedCString msg{"stop order, at threshhold: "};
+            static const UnallocatedCString msg{"stop order, at threshhold: "};
             offer_type.reserve(msg.length() + price.length());
             offer_type.append(msg);
             offer_type.append(&cStopSign);  // 1
@@ -4354,7 +4342,7 @@ auto OT_API::issueMarketOffer(
     UnallocatedCString price_limit;
 
     if (lPriceLimit > 0) {
-        static UnallocatedCString msg{"Price: "};
+        static const UnallocatedCString msg{"Price: "};
         auto limit = displaydefinition.Format(lPriceLimit);
         price_limit.reserve(msg.length() + limit.length());
         price_limit.append(msg);
@@ -4468,13 +4456,13 @@ auto OT_API::issueMarketOffer(
     item->SetAttachment(tradeAttachment);
     item->SignContract(nym, reason);
     item->SaveContract();
-    std::shared_ptr<Item> pitem{item.release()};
+    const std::shared_ptr<Item> pitem{item.release()};
     transaction->AddItem(pitem);
     auto statement = context.Statement(*transaction, reason);
 
     if (false == bool(statement)) { return output; }
 
-    std::shared_ptr<Item> pstatement{statement.release()};
+    const std::shared_ptr<Item> pstatement{statement.release()};
     transaction->AddItem(pstatement);
     AddHashesToTransaction(*transaction, context, ASSET_ACCOUNT_ID, reason);
     transaction->SignContract(nym, reason);
@@ -4485,7 +4473,7 @@ auto OT_API::issueMarketOffer(
     assert_true(false != bool(ledger));
 
     ledger->GenerateLedger(ASSET_ACCOUNT_ID, serverID, ledgerType::message);
-    std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+    const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
@@ -4527,9 +4515,9 @@ auto OT_API::issueMarketOffer(
 /// convenience.)
 auto OT_API::getMarketList(otx::context::Server& context) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4570,9 +4558,9 @@ auto OT_API::getMarketOffers(
     const identifier::Generic& MARKET_ID,
     const std::int64_t& lDepth) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4620,9 +4608,9 @@ auto OT_API::getMarketRecentTrades(
     otx::context::Server& context,
     const identifier::Generic& MARKET_ID) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4664,9 +4652,9 @@ auto OT_API::getMarketRecentTrades(
 auto OT_API::getNymMarketOffers(otx::context::Server& context) const
     -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4710,9 +4698,9 @@ auto OT_API::queryInstrumentDefinitions(
     otx::context::Server& context,
     const Armored& ENCODED_MAP) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4749,9 +4737,9 @@ auto OT_API::deleteAssetAccount(
     otx::context::Server& context,
     const identifier::Account& ACCOUNT_ID) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4796,9 +4784,9 @@ auto OT_API::usageCredits(
     const identifier::Nym& NYM_ID_CHECK,
     std::int64_t lAdjustment) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4833,9 +4821,9 @@ auto OT_API::usageCredits(
 
 auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     CommandResult output{};
     auto& [requestNum, transactionNum, result] = output;
@@ -4880,12 +4868,8 @@ auto OT_API::CreateProcessInbox(
     const auto& nymID = nym.ID();
     OT_API::ProcessInboxOnly output{};
     auto& [processInbox, number] = output;
-    processInbox.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Ledger(nymID, accountID, serverID, ledgerType::message)
-            .release());
+    processInbox = api_.Factory().Internal().Session().Ledger(
+        nymID, accountID, serverID, ledgerType::message);
 
     if (false == bool(processInbox)) {
         LogError()()("Error generating process inbox ledger for "
@@ -4916,9 +4900,9 @@ auto OT_API::IncludeResponse(
     OTTransaction& source,
     Ledger& response) const -> bool
 {
-    rLock lock(lock_callback_(
+    const auto lock = rLock{lock_callback_(
         {context.Signer()->ID().asBase58(api_.Crypto()),
-         context.Notary().asBase58(api_.Crypto())}));
+         context.Notary().asBase58(api_.Crypto())})};
     auto reason = api_.Factory().PasswordPrompt(__func__);
     const auto& serverID = context.Notary();
     const auto type = source.GetType();
@@ -5469,8 +5453,9 @@ auto OT_API::add_accept_item(
     OTTransaction& processInbox) const -> bool
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    std::shared_ptr<Item> acceptItem{api_.Factory().Internal().Session().Item(
-        processInbox, type, identifier::Account{})};
+    const std::shared_ptr<Item> acceptItem{
+        api_.Factory().Internal().Session().Item(
+            processInbox, type, identifier::Account{})};
 
     if (false == bool(acceptItem)) { return false; }
 

@@ -21,9 +21,10 @@ auto Write(
     FileMap& map) noexcept(false) -> void
 {
     const auto& [cb, size] = in;
-    const auto& [fileoffset, _] = location;
-    const auto& [filename, offset] = fileoffset;
     auto& file = [&]() -> auto& {
+        const auto& [fileoffset, _] = location;
+        const auto& [filename, offset] = fileoffset;
+
         if (auto i = map.find(filename); map.end() != i) {
 
             return i->second;
@@ -32,6 +33,8 @@ auto Write(
             return map.try_emplace(filename, filename.string()).first->second;
         }
     }();
+    const auto& [fileoffset, _] = location;
+    const auto& [filename, offset] = fileoffset;
 
     assert_true(file.is_open());
     assert_false(nullptr == cb);

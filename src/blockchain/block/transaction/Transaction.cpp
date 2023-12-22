@@ -176,11 +176,13 @@ auto Transaction::NetBalanceChange(
 
 auto Transaction::operator=(const Transaction& rhs) noexcept -> Transaction&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Transaction::operator=(Transaction&& rhs) noexcept -> Transaction&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

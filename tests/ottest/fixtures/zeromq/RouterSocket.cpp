@@ -9,9 +9,6 @@
 
 #include "ottest/env/OTTestEnvironment.hpp"
 
-namespace ot = opentxs;
-namespace zmq = ot::network::zeromq;
-
 namespace ottest
 {
 RouterSocket::RouterSocket()

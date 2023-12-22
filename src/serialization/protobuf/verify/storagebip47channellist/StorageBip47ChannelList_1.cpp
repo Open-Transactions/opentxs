@@ -19,7 +19,7 @@ auto CheckProto_1(const StorageBip47ChannelList& input, const bool silent)
 {
     CHECK_IDENTIFIER(channelid);
 
-    bool validChain =
+    const bool validChain =
         ValidContactItemType({6, CONTACTSECTION_CONTRACT}, input.chain());
 
     if (false == validChain) { FAIL_1("invalid chain"); }

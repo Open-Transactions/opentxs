@@ -185,7 +185,7 @@ protected:
     {
         if (id.empty()) { return false; }
 
-        Lock lock(write_lock_);
+        const auto lock = Lock{write_lock_};
         const auto& it = item_map_.find(id);
         const bool exists = (item_map_.end() != it);
 
@@ -232,7 +232,7 @@ protected:
         std::string_view alias,
         UnallocatedCString& plaintext) noexcept -> bool
     {
-        Lock lock(write_lock_);
+        const auto lock = Lock{write_lock_};
 
         return store_proto(lock, data, id, alias, plaintext);
     }

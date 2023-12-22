@@ -64,11 +64,13 @@ auto Verification::IsValid() const noexcept -> bool
 
 auto Verification::operator=(const Verification& rhs) noexcept -> Verification&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Verification::operator=(Verification&& rhs) noexcept -> Verification&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

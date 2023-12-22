@@ -9,8 +9,6 @@
 
 #include "ottest/fixtures/core/StateMachine.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(StateMachine, stop_constructed)

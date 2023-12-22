@@ -44,8 +44,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto SeedTreeModel(

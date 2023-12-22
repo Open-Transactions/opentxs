@@ -11,7 +11,6 @@
 
 namespace ottest
 {
-namespace ot = opentxs;
 
 PaymentCodeAPI::PaymentCodeAPI()
     : alice_(OTTestEnvironment::GetOT().StartClientSession(0))

@@ -54,11 +54,13 @@ auto Tx::Transaction(alloc::Default alloc) const noexcept
 
 auto Tx::operator=(const Tx& rhs) noexcept -> Tx&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Tx::operator=(Tx&& rhs) noexcept -> Tx&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

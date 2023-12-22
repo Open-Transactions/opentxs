@@ -185,7 +185,7 @@ auto OTAgent::VerifySignature(const Contract& theContract) const -> bool
 auto OTAgent::LoadNym() -> Nym_p
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     if (bNymID) {
         nym_ = api_.Wallet().Nym(theAgentNymID);
@@ -409,7 +409,7 @@ auto OTAgent::GetSignerID(identifier::Generic& theOutput) const -> bool
 auto OTAgent::IsValidSignerID(const identifier::Generic& theNymID) -> bool
 {
     auto theAgentNymID = identifier::Generic{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNymID...
     //
@@ -425,7 +425,7 @@ auto OTAgent::IsValidSignerID(const identifier::Generic& theNymID) -> bool
 auto OTAgent::IsValidSigner(const identity::Nym& theNym) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNym's ID...
     //
@@ -472,7 +472,7 @@ auto OTAgent::GetEntityID(identifier::Generic& theOutput) const -> bool
     if (DoesRepresentAnEntity() && (nullptr != for_party_) &&
         for_party_->IsEntity()) {
         bool bSuccessEntityID = false;
-        UnallocatedCString str_entity_id =
+        const UnallocatedCString str_entity_id =
             for_party_->GetEntityID(&bSuccessEntityID);
 
         if (bSuccessEntityID && (str_entity_id.size() > 0)) {
@@ -572,7 +572,7 @@ auto OTAgent::DropFinalReceiptToInbox(
     // accommodate them.
 
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.) But in the case of
     // Inboxes for asset accounts, shouldn't the agent be a Nym?
@@ -621,7 +621,7 @@ auto OTAgent::DropFinalReceiptToNymbox(
     OTString pstrAttachment) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)
 
@@ -658,7 +658,7 @@ auto OTAgent::DropServerNoticeToNymbox(
     identity::Nym* pActualNym) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)
 

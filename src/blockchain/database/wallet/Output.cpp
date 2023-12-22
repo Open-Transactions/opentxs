@@ -1305,6 +1305,7 @@ auto Output::publish_balance(const OutputCache& cache) const noexcept -> void
     }());
 
     for (const auto& [nym, balance] : byNym) {
+        // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
         handle->SendDeferred([&]() {
             auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
             out.AddFrame(chain_);
@@ -1314,6 +1315,7 @@ auto Output::publish_balance(const OutputCache& cache) const noexcept -> void
 
             return out;
         }());
+        // NOLINTEND(clang-analyzer-core.CallAndMessage)
     }
 }
 

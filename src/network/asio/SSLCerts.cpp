@@ -12,7 +12,7 @@ namespace opentxs::network::asio
 {
 auto HTTPS::ssl_certs() -> const Vector<CString>&
 {
-    static Vector<CString> ssl_certs = [] {
+    static const Vector<CString> ssl_certs = [] {
         auto out = Vector<CString>{alloc::System()};
         out.emplace_back(
             "# ISRG Root X1\n"

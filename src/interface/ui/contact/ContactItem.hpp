@@ -43,25 +43,25 @@ public:
 
     auto ClaimID() const noexcept -> UnallocatedCString final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return row_id_.asBase58(api_.Crypto());
     }
     auto IsActive() const noexcept -> bool final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return item_->HasAttribute(identity::wot::claim::Attribute::Active);
     }
     auto IsPrimary() const noexcept -> bool final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return item_->HasAttribute(identity::wot::claim::Attribute::Primary);
     }
     auto Value() const noexcept -> UnallocatedCString final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return UnallocatedCString{item_->Value()};
     }

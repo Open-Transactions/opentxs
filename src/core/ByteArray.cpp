@@ -129,11 +129,13 @@ ByteArray::ByteArray(
 
 auto ByteArray::operator=(const ByteArray& rhs) noexcept -> ByteArray&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto ByteArray::operator=(ByteArray&& rhs) noexcept -> ByteArray&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

@@ -682,7 +682,7 @@ auto OutputCache::Exists(const SubchainID& subchain, const block::Outpoint& id)
     if (auto it = subchains_.find(subchain); subchains_.end() != it) {
         const auto& set = it->second;
 
-        return 0 < set.count(id);
+        return set.contains(id);
     } else {
 
         return false;
@@ -848,7 +848,7 @@ auto OutputCache::GetOutput(
 {
     const auto& relevant = GetSubchain(subchain);
 
-    if (0u == relevant.count(id)) {
+    if (false == relevant.contains(id)) {
         throw std::out_of_range{"outpoint not found in this subchain"};
     }
 
@@ -980,7 +980,7 @@ auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
     auto it = outputs_.find(id);
 
     if (outputs_.end() != it) {
-        auto& out = it->second;
+        const auto& out = it->second;
 
         assert_true(0 < out.Keys({}).size());  // TODO monotonic allocator
 

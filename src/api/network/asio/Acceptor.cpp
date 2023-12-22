@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "BoostAsio.hpp"
@@ -52,8 +53,8 @@ struct Acceptor::Imp {
         if (running_) {
             LogTrace()()("shutting down ")(endpoint_.str()).Flush();
             auto ec = boost::system::error_code{};
-            acceptor_.cancel(ec);
-            acceptor_.close(ec);
+            std::ignore = acceptor_.cancel(ec);
+            std::ignore = acceptor_.close(ec);
             running_ = false;
             LogTrace()()(endpoint_.str())(" closed").Flush();
         }

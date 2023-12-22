@@ -45,8 +45,6 @@
 #include "util/JobCounter.hpp"
 #include "util/ScopeGuard.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::api::session::activity
 {
 struct MailCache::Imp : public std::enable_shared_from_this<Imp> {

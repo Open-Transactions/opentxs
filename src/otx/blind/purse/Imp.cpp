@@ -927,7 +927,7 @@ auto Purse::Verify(const api::session::Notary& server) const -> bool
             return false;
         }
 
-        if (0 == allowedStates.count(token.State())) {
+        if (false == allowedStates.contains(token.State())) {
             LogError()()("Incorrect token state").Flush();
 
             return false;

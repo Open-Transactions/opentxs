@@ -113,7 +113,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
         , zmq_([&]() -> decltype(zmq_) {
             // NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
             if (zmq.empty()) {
-                auto out = std::remove_const<decltype(zmq_)>::type{};
+                auto out = std::remove_const_t<decltype(zmq_)>{};
 
                 try {
                     using enum Transport;

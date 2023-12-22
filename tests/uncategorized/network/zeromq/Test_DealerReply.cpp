@@ -132,7 +132,7 @@ TEST_F(DealerReply, Dealer_2_Reply_1)
         [this](zmq::Message&& input) -> ot::network::zeromq::Message {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
@@ -180,8 +180,8 @@ TEST_F(DealerReply, Dealer_Reply_Multipart)
             }
 
             for (const auto& frame : payload) {
-                bool match = frame.Bytes() == test_message2_ ||
-                             frame.Bytes() == test_message3_;
+                bool const match = frame.Bytes() == test_message2_ ||
+                                   frame.Bytes() == test_message3_;
 
                 EXPECT_TRUE(match);
             }
@@ -220,7 +220,8 @@ TEST_F(DealerReply, Dealer_Reply_Multipart)
 
             for (auto i{3u}; i < input.get().size(); ++i) {
                 const auto& frame = input.get()[i].Bytes();
-                bool match = frame == test_message2_ || frame == test_message3_;
+                bool const match =
+                    frame == test_message2_ || frame == test_message3_;
 
                 EXPECT_TRUE(match);
             }

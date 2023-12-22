@@ -105,7 +105,7 @@
 #include "otx/common/OTStorage.hpp"
 
 #define START_OPERATION()                                                      \
-    Lock lock(decision_lock_);                                                 \
+    auto lock = Lock{decision_lock_};                                          \
                                                                                \
     if (running().load()) {                                                    \
         LogDebug()()("State machine is already running.").Flush();             \
@@ -293,8 +293,6 @@
         account_id_,                                                           \
         -1);                                                                   \
     FINISH_MESSAGE(notarizeTransaction)
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs
 {
@@ -661,12 +659,14 @@ auto Operation::construct_deposit_cash() -> std::shared_ptr<Message>
     auto& purse = *purse_;
     const Amount amount{purse.Value()};
 
+    // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
         transactionType::deposit,
         originType::not_applicable,
         itemType::deposit,
         {},
         amount);
+    // NOLINTEND(misc-const-correctness)
 
     const auto& unitID = account.get().GetInstrumentDefinitionID();
 
@@ -697,12 +697,14 @@ auto Operation::construct_deposit_cheque() -> std::shared_ptr<Message>
     auto& cheque = *cheque_;
     const Amount amount{cheque.GetAmount()};
 
+    // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
         transactionType::deposit,
         originType::not_applicable,
         itemType::depositCheque,
         {},
         amount);
+    // NOLINTEND(misc-const-correctness)
 
     if (cheque.GetNotaryID() != serverID) {
         LogError()()("NotaryID on cheque (")(
@@ -1308,11 +1310,13 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
 
 auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
 {
+    // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION_WITHOUT_BALANCE_ITEM(
         transactionType::transfer,
         originType::not_applicable,
         itemType::transfer,
         account_id2_);
+    // NOLINTEND(misc-const-correctness)
 
     item.SetAmount(amount_);
 
@@ -1327,7 +1331,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
     // balance agreement to be valid. Otherwise the server would have to refuse
     // it for being inaccurate (server can't sign something inaccurate!) So I
     // throw a dummy on there before generating balance statement.
-    std::shared_ptr<OTTransaction> outboxTransaction{
+    const std::shared_ptr<OTTransaction> outboxTransaction{
         api_.Factory()
             .Internal()
             .Session()
@@ -1344,6 +1348,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
     outboxTransaction->SetReferenceToNum(item.GetTransactionNum());
     outbox.AddTransaction(outboxTransaction);
 
+    // NOLINTBEGIN(misc-const-correctness)
     ADD_BALANCE_ITEM(amount_ * (-1));
     SIGN_TRANSACTION_AND_LEDGER();
     CREATE_MESSAGE(
@@ -1351,6 +1356,7 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
         Armored::Factory(api_.Crypto(), String::Factory(ledger)),
         account_id_,
         -1);
+    // NOLINTEND(misc-const-correctness)
 
     // Reset the temporary changes made above
     inbox_.reset(account.get().LoadInbox(nym).release());
@@ -1373,12 +1379,14 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
 {
     const Amount totalAmount(amount_);
 
+    // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
         transactionType::withdrawal,
         originType::not_applicable,
         itemType::withdrawal,
         {},
         totalAmount * (-1));
+    // NOLINTEND(misc-const-correctness)
 
     const auto& unitID = account.get().GetInstrumentDefinitionID();
     const bool exists = OTDB::Exists(
@@ -1545,10 +1553,12 @@ auto Operation::download_account(
     const identifier::Account& accountID,
     otx::context::Server::DeliveryResult& lastResult) -> std::size_t
 {
-    std::shared_ptr<Ledger> inbox{api_.Factory().Internal().Session().Ledger(
-        nym_id_, accountID, server_id_, ledgerType::inbox)};
-    std::shared_ptr<Ledger> outbox{api_.Factory().Internal().Session().Ledger(
-        nym_id_, accountID, server_id_, ledgerType::outbox)};
+    const std::shared_ptr<Ledger> inbox{
+        api_.Factory().Internal().Session().Ledger(
+            nym_id_, accountID, server_id_, ledgerType::inbox)};
+    const std::shared_ptr<Ledger> outbox{
+        api_.Factory().Internal().Session().Ledger(
+            nym_id_, accountID, server_id_, ledgerType::outbox)};
 
     assert_false(nullptr == inbox);
     assert_false(nullptr == outbox);
@@ -1610,7 +1620,7 @@ auto Operation::download_box_receipt(
         return false;
     }
 
-    std::shared_ptr<Message> command{message.release()};
+    const std::shared_ptr<Message> command{message.release()};
 
     assert_false(nullptr == command);
 
@@ -2675,7 +2685,7 @@ void Operation::transaction_numbers()
         return;
     }
 
-    std::shared_ptr<Message> message{
+    const std::shared_ptr<Message> message{
         api_.Internal().asClient().OTAPI().getTransactionNumbers(context)};
 
     if (false == bool(message)) { return; }

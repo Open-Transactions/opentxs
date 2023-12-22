@@ -59,43 +59,43 @@ auto swap(Amount& lhs, Amount& rhs) noexcept -> void { lhs.swap(rhs); }
 
 namespace opentxs
 {
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator==(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator==(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator!=(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator!=(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator<(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator<(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator<=(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator<=(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator>(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator>(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator>=(T lhs, const Amount& rhs) noexcept -> bool
 {
     return Amount{lhs}.operator>=(rhs);
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto operator*(T lhs, const Amount& rhs) noexcept(false) -> Amount
 {
     return rhs.operator*(lhs);
@@ -225,7 +225,7 @@ auto Amount::operator<(const Amount& rhs) const noexcept -> bool
     return *imp_ < *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator<(const T rhs) const noexcept -> bool
 {
     return *imp_ < rhs;
@@ -236,7 +236,7 @@ auto Amount::operator>(const Amount& rhs) const noexcept -> bool
     return *imp_ > *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator>(const T rhs) const noexcept -> bool
 {
     return *imp_ > rhs;
@@ -247,7 +247,7 @@ auto Amount::operator==(const Amount& rhs) const noexcept -> bool
     return *imp_ == *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator==(const T rhs) const noexcept -> bool
 {
     return *imp_ == rhs;
@@ -258,7 +258,7 @@ auto Amount::operator!=(const Amount& rhs) const noexcept -> bool
     return *imp_ != *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator!=(const T rhs) const noexcept -> bool
 {
     return *imp_ != rhs;
@@ -269,7 +269,7 @@ auto Amount::operator<=(const Amount& rhs) const noexcept -> bool
     return *imp_ <= *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator<=(const T rhs) const noexcept -> bool
 {
     return *imp_ <= rhs;
@@ -280,7 +280,7 @@ auto Amount::operator>=(const Amount& rhs) const noexcept -> bool
     return *imp_ >= *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator>=(const T rhs) const noexcept -> bool
 {
     return *imp_ >= rhs;
@@ -301,7 +301,7 @@ auto Amount::operator*(const Amount& rhs) const noexcept(false) -> Amount
     return *imp_ * *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator*(const T rhs) const noexcept(false) -> Amount
 {
     return *imp_ * rhs;
@@ -312,7 +312,7 @@ auto Amount::operator/(const Amount& rhs) const noexcept(false) -> Amount
     return *imp_ / *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator/(const T rhs) const noexcept(false) -> Amount
 {
     return *imp_ / rhs;
@@ -323,7 +323,7 @@ auto Amount::operator%(const Amount& rhs) const noexcept(false) -> Amount
     return *imp_ % *rhs.imp_;
 }
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int>>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int>>
 auto Amount::operator%(const T rhs) const noexcept(false) -> Amount
 {
     return *imp_ % rhs;

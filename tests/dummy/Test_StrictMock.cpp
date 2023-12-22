@@ -15,7 +15,7 @@ namespace ottest
 {
 TEST(StrictMock, constructor)
 {
-    ::testing::StrictMock<::ottest::mock::Interface> strictMock;
+    const ::testing::StrictMock<::ottest::mock::Interface> strictMock;
 }
 
 TEST(StrictMock, strictMockOnFunction)
@@ -64,7 +64,7 @@ TEST(StrictMock, strictMockOnNoExceptFunction)
 
 TEST(StrictMock, strictMockOnNoExceptConstFunction)
 {
-    ::testing::StrictMock<::ottest::mock::Interface> strictMock;
+    const ::testing::StrictMock<::ottest::mock::Interface> strictMock;
     ON_CALL(strictMock, someConstFunctionWithNoExcept(0))
         .WillByDefault(::testing::Return(false));
     ON_CALL(strictMock, someConstFunctionWithNoExcept(1))

@@ -62,7 +62,7 @@ auto BlockchainSubchain::reindex(
     CustomData& custom) noexcept -> bool
 {
     auto progress = extract_custom<UnallocatedCString>(custom, 0);
-    eLock lock{shared_lock_};
+    const auto lock = eLock{shared_lock_};
     auto changed{false};
 
     if (name_ != key) {

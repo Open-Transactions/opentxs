@@ -274,7 +274,7 @@ auto Primary::Verify(
         return false;
     }
 
-    bool sameMaster = (ID() == masterID);
+    const bool sameMaster = (ID() == masterID);
 
     if (!sameMaster) {
         LogError()()(

@@ -509,7 +509,7 @@ if(OT_CLANG_TIDY)
 
   if(CLANG_TIDY_COMMAND)
     set(CMAKE_CXX_CLANG_TIDY
-        "${CLANG_TIDY_COMMAND};-header-filter=${CMAKE_CURRENT_SOURCE_DIR}/(include|src|tests)/.*.(h|t)pp;-fix-errors;-extra-arg=-Wno-unknown-warning-option"
+        "${CLANG_TIDY_COMMAND};-header-filter=(${CMAKE_CURRENT_SOURCE_DIR}|${CMAKE_CURRENT_BINARY_DIR})/(generated|include|src|tests)/.*.(h|t)pp;-fix-errors;-extra-arg=-Wno-unknown-warning-option;--warnings-as-errors=*"
     )
   else()
     message(FATAL_ERROR "clang-tidy not found")

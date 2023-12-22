@@ -125,16 +125,16 @@ public:
     template <
         typename Input,
         typename = std::enable_if_t<
-            std::is_pointer<decltype(std::declval<Input&>().data())>::value>,
+            std::is_pointer_v<decltype(std::declval<Input&>().data())>>,
         typename = std::enable_if_t<
-            std::is_integral<decltype(std::declval<Input&>().size())>::value>>
+            std::is_integral_v<decltype(std::declval<Input&>().size())>>>
     auto AddFrame(const Input& input) noexcept -> Frame&
     {
         return AddFrame(input.data(), input.size());
     }
     template <
         typename Input,
-        typename = std::enable_if_t<std::is_trivially_copyable<Input>::value>>
+        typename = std::enable_if_t<std::is_trivially_copyable_v<Input>>>
     auto AddFrame(const Input& input) noexcept -> Frame&
     {
         return AddFrame(&input, sizeof(input));

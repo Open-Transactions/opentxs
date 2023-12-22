@@ -194,7 +194,7 @@ auto Verification::verify_internally() const -> bool
 
     for (const auto& nym : data_.internal().identity()) {
         for (const auto& claim : nym.verification()) {
-            bool valid = parent_.Verify(claim);
+            const bool valid = parent_.Verify(claim);
 
             if (!valid) {
                 LogError()()("Invalid claim verification.").Flush();

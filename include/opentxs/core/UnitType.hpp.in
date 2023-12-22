@@ -10,11 +10,10 @@
 @MAYBE_INCLUDE_QOBJECT@#include <limits>
 #include <type_traits>
 
-namespace opentxs
-{
-inline namespace unittype
+namespace opentxs::inline unittype
 @MAYBE_OPEN_NAMESPACE@
-enum class UnitType : std::underlying_type<UnitType>::type {
+// NOLINTBEGIN(misc-confusable-identifiers)
+enum class UnitType : std::underlying_type_t<UnitType> {
     Unknown = std::numeric_limits<int>::max(),
     Error = 0,
     Btc = 1,
@@ -2083,5 +2082,5 @@ enum class UnitType : std::underlying_type<UnitType>::type {
     erc20_ethsepolia_xaut4 = 2059,     // Tether Gold on Sepolia
     erc20_ethsepolia_dawgs3 = 2060,    // SpaceDawgs
 @MAYBE_EXPORT_ENUM@
-}  // namespace unittype
-}  // namespace opentxs
+// NOLINTEND(misc-confusable-identifiers)
+}  // namespace opentxs::unittype

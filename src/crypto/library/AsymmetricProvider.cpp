@@ -196,7 +196,7 @@ auto AsymmetricProvider::SignContract(
         return out;
     }();
     auto signature = api.Factory().Data();
-    bool success =
+    const bool success =
         Sign(reader(plaintext), theKey, hashType, signature.WriteInto());
     output.SetData(signature, true);  // true means, "yes, with newlines in the
                                       // b64-encoded output, please."

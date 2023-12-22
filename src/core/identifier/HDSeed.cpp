@@ -45,11 +45,13 @@ HDSeed::HDSeed(HDSeed&& rhs, allocator_type alloc) noexcept
 
 auto HDSeed::operator=(const HDSeed& rhs) noexcept -> HDSeed&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto HDSeed::operator=(HDSeed&& rhs) noexcept -> HDSeed&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 

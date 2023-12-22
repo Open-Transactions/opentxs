@@ -70,8 +70,8 @@ void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
          REMITTER_NYM_ID = String::Factory(GetRemitterNymID(), api_.Crypto()),
          REMITTER_ACCT_ID = String::Factory(GetRemitterAcctID(), api_.Crypto());
 
-    UnallocatedCString from = formatTimestamp(GetValidFrom());
-    UnallocatedCString to = formatTimestamp(GetValidTo());
+    const UnallocatedCString from = formatTimestamp(GetValidFrom());
+    const UnallocatedCString to = formatTimestamp(GetValidTo());
 
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();

@@ -136,7 +136,7 @@ auto Nyms::LocalNyms() const noexcept -> Set<identifier::Nym>
 
 auto Nyms::mutable_Nym(const identifier::Nym& id) -> Editor<tree::Nym>
 {
-    std::function<void(tree::Nym*, Lock&)> callback =
+    const std::function<void(tree::Nym*, Lock&)> callback =
         [&](tree::Nym* in, Lock& lock) -> void { this->save(in, lock, id); };
 
     return {write_lock_, nym(id), callback};

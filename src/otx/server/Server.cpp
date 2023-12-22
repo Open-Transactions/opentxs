@@ -140,7 +140,7 @@ void Server::ProcessCron()
     // first.
     while (cron_->GetTransactionCount() < OTCron::GetCronRefillAmount()) {
         std::int64_t lTransNum = 0;
-        bool bSuccess = transactor_.issueNextTransactionNumber(lTransNum);
+        const bool bSuccess = transactor_.issueNextTransactionNumber(lTransNum);
 
         if (bSuccess) {
             cron_->AddTransactionNumber(lTransNum);
@@ -180,7 +180,7 @@ auto Server::parse_seed_backup(const UnallocatedCString& input) const
     auto& phrase = output.first;
     auto& words = output.second;
 
-    std::regex reg("\"passphrase\": \"(.*)\", \"words\": \"(.*)\"");
+    const std::regex reg("\"passphrase\": \"(.*)\", \"words\": \"(.*)\"");
     std::cmatch match{};
 
     if (std::regex_search(input.c_str(), match, reg)) {
@@ -713,8 +713,7 @@ auto Server::DropMessageToNymbox(
     const Message* message{nullptr};
 
     if (nullptr == pMsg) {
-        theMsgAngel.reset(
-            api_.Factory().Internal().Session().Message().release());
+        theMsgAngel = api_.Factory().Internal().Session().Message();
 
         if (nullptr != szCommand) {
             theMsgAngel->command_ = String::Factory(szCommand);
@@ -827,7 +826,8 @@ auto Server::DropMessageToNymbox(
 
             pTransaction->SignContract(*nym_server_, reason_);
             pTransaction->SaveContract();
-            std::shared_ptr<OTTransaction> transaction{pTransaction.release()};
+            const std::shared_ptr<OTTransaction> transaction{
+                pTransaction.release()};
             theLedger->AddTransaction(transaction);  // Add the message
                                                      // transaction to the
                                                      // nymbox. (It will

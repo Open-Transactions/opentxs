@@ -311,7 +311,7 @@ void OTTrade::UpdateContents(const PasswordPrompt& reason)
     // out.
 
     for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
-        std::int64_t closingNumber = GetClosingTransactionNoAt(i);
+        const std::int64_t closingNumber = GetClosingTransactionNoAt(i);
         assert_true(closingNumber > 0);
         TagPtr tagClosing(new Tag("closingTransactionNumber"));
         tagClosing->add_attribute("value", std::to_string(closingNumber));
@@ -928,7 +928,7 @@ void OTTrade::onFinalReceipt(
     // (With the SERVER's signature on it!)
     //
     auto updatedCronItem = String::Factory(*this);
-    OTString attachment = updatedCronItem;  // the Updated TRADE.
+    const OTString attachment = updatedCronItem;  // the Updated TRADE.
     auto updatedOffer = String::Factory();
     OTString note = String::Factory();  // the updated Offer (if available.)
 

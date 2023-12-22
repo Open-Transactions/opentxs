@@ -574,7 +574,7 @@ void Authority::extract_child(
 {
     if (role != serialized.role()) { return; }
 
-    bool valid = proto::Validate<proto::Credential>(
+    const bool valid = proto::Validate<proto::Credential>(
         serialized, VERBOSE, mode, role, true);
 
     if (false == valid) {
@@ -850,7 +850,7 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
 auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
     -> bool
 {
-    bool validProto = proto::Validate<proto::Credential>(
+    const bool validProto = proto::Validate<proto::Credential>(
         serializedCred, VERBOSE, mode_, proto::CREDROLE_ERROR, true);
 
     if (!validProto) {

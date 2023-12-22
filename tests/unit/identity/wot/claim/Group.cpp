@@ -16,8 +16,6 @@
 #include "ottest/fixtures/contact/ContactGroup.hpp"
 #include "ottest/fixtures/contact/ContactItem.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(ContactGroup, first_constructor)
@@ -87,7 +85,7 @@ TEST_F(ContactGroup, copy_constructor)
         ot::identity::wot::claim::SectionType::Identifier,
         active_);
 
-    ot::identity::wot::claim::Group copiedContactGroup(group1);
+    const ot::identity::wot::claim::Group copiedContactGroup(group1);
 
     EXPECT_EQ(1, copiedContactGroup.Size());
     // Verify the group type matches the type of the item.
@@ -97,7 +95,7 @@ TEST_F(ContactGroup, copy_constructor)
 
 TEST_F(ContactGroup, move_constructor)
 {
-    ot::identity::wot::claim::Group movedContactGroup(
+    const ot::identity::wot::claim::Group movedContactGroup(
         contact_group_.AddItem(active_));
 
     EXPECT_EQ(1, movedContactGroup.Size());

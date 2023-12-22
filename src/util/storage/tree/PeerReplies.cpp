@@ -85,13 +85,14 @@ auto PeerReplies::Load(
     UnallocatedCString notUsed;
     using enum ErrorReporting;
 
-    bool loaded = load_proto<proto::PeerReply>(id, output, notUsed, silent);
+    const bool loaded =
+        load_proto<proto::PeerReply>(id, output, notUsed, silent);
 
     if (loaded) { return true; }
 
     // The provided ID might actually be a request ID instead of a reply ID.
 
-    std::unique_lock<std::mutex> lock(write_lock_);
+    auto lock = Lock{write_lock_};
     auto realID = identifier::Generic{};
 
     for (const auto& it : item_map_) {

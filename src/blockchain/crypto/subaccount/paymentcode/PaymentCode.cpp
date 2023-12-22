@@ -16,10 +16,7 @@ PaymentCode::PaymentCode(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept
-    : Deterministic(rhs)
-{
-}
+PaymentCode::PaymentCode(const PaymentCode& rhs) noexcept = default;
 
 PaymentCode::PaymentCode(PaymentCode&& rhs) noexcept
     : Deterministic(std::move(rhs))

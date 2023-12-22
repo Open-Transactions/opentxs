@@ -11,7 +11,6 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "ottest/fixtures/zeromq/ListenCallback.hpp"
 
-namespace ot = opentxs;
 namespace zmq = opentxs::network::zeromq;
 
 namespace ottest

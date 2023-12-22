@@ -10,8 +10,6 @@
 #include "internal/api/Crypto.hpp"
 #include "ottest/fixtures/crypto/AsymmetricProvider.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace std::literals;

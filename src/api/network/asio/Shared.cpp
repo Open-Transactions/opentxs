@@ -56,7 +56,6 @@
 #include "opentxs/util/WorkType.internal.hpp"
 
 namespace algo = boost::algorithm;
-namespace ssl = boost::asio::ssl;
 
 namespace opentxs::api::network::asio
 {

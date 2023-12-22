@@ -87,7 +87,7 @@ private:
 
     auto effective_amount() const noexcept -> opentxs::Amount final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
         return amount_;
     }
 

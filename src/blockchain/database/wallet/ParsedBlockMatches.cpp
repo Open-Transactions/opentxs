@@ -587,19 +587,21 @@ auto ParsedBlockMatches::scan_transactions(
     Set<block::Transaction>& processed) const noexcept(false) -> void
 {
     for (auto& item : matches) {
-        auto& [txid, match] = item;
-        auto& [inputs, outputs, txn] = match;
-        log()("processing transaction ")
-            .asHex(txid)(" with ")(inputs.size())(" input matches and ")(
-                outputs.size())(" output matches")
-            .Flush();
         const auto& tx = [&]() -> const auto& {
+            auto& [txid, match] = item;
+            auto& [inputs, outputs, txn] = match;
+            log()("processing transaction ")
+                .asHex(txid)(" with ")(inputs.size())(" input matches and ")(
+                    outputs.size())(" output matches")
+                .Flush();
             auto& out = txn.Internal().asBitcoin();
             out.SetMinedPosition(block);
             processed.emplace(txn);
 
             return out;
         }();
+        auto& [txid, match] = item;
+        auto& [inputs, outputs, txn] = match;
         const auto txin = tx.Inputs();
         const auto txout = tx.Outputs();
 

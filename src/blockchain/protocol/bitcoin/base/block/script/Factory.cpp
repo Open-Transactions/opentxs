@@ -221,7 +221,6 @@ auto BitcoinScriptNullData(
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Script
 {
-    namespace b = opentxs::blockchain;
     namespace bb = blockchain::protocol::bitcoin::base::block;
     using enum blockchain::protocol::bitcoin::base::block::script::Position;
     using enum blockchain::protocol::bitcoin::base::block::script::OP;
@@ -246,7 +245,6 @@ auto BitcoinScriptP2MS(
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Script
 {
-    namespace b = opentxs::blockchain;
     namespace bb = blockchain::protocol::bitcoin::base::block;
     using enum blockchain::protocol::bitcoin::base::block::script::Position;
     using enum blockchain::protocol::bitcoin::base::block::script::OP;

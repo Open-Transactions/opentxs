@@ -70,7 +70,7 @@ auto Notary::CheckSpent(
 {
     if (key.empty()) { throw std::runtime_error("Invalid token key"); }
 
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto list = get_or_create_list(lock, unit, series);
 
     for (const auto& spent : list.spent()) {
@@ -198,7 +198,7 @@ auto Notary::MarkSpent(
         return false;
     }
 
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     auto list = get_or_create_list(lock, unit, series);
     list.add_spent(key.data(), key.size());
 

@@ -11,7 +11,7 @@
 
 namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
-enum class Capability : std::underlying_type<Capability>::type {
+enum class Capability : std::underlying_type_t<Capability> {
     none = 0,
     mutable_token = 1,
     minting = 2,

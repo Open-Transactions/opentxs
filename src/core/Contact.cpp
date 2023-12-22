@@ -257,7 +257,7 @@ struct Contact::Imp {
     auto add_claim(const std::shared_ptr<identity::wot::claim::Item>& item)
         -> bool
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         return add_claim(lock, item);
     }
@@ -506,8 +506,8 @@ Contact::Contact(const api::session::Client& api, std::string_view label)
 
 auto Contact::operator+=(Contact& rhs) -> Contact&
 {
-    Lock rlock(rhs.imp_->lock_, std::defer_lock);
-    Lock lock(imp_->lock_, std::defer_lock);
+    auto rlock = Lock{rhs.imp_->lock_, std::defer_lock};
+    auto lock = Lock{imp_->lock_, std::defer_lock};
     std::lock(rlock, lock);
 
     if (imp_->label_.empty()) { imp_->label_ = rhs.imp_->label_; }
@@ -522,7 +522,7 @@ auto Contact::operator+=(Contact& rhs) -> Contact&
         const auto& id = it.first;
         const auto& nym = it.second;
 
-        if (0 == imp_->nyms_.count(id)) { imp_->nyms_.emplace(id, nym); }
+        if (false == imp_->nyms_.contains(id)) { imp_->nyms_.emplace(id, nym); }
     }
 
     rhs.imp_->nyms_.clear();
@@ -572,7 +572,7 @@ auto Contact::AddBlockchainAddress(
         return false;
     }
 
-    if (0 == chains.count(type)) {
+    if (false == chains.contains(type)) {
         LogError()()("Address is not valid for specified chain").Flush();
 
         return false;
@@ -1013,12 +1013,12 @@ auto Contact::PaymentCodes(alloc::Default alloc) const
         return imp_->merged_data(lock);
     }();
 
-    if (!data) { return out; }
+    if (nullptr == data) { return out; }
 
     using SectionType = identity::wot::claim::SectionType;
     const auto section = data->Section(SectionType::Procedure);
 
-    if (!section) { return out; }
+    if (nullptr == section) { return out; }
 
     for (const auto& [type, group] : *section) {
         for (const auto& [id, item] : *group) {

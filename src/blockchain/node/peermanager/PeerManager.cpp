@@ -731,6 +731,7 @@ auto Actor::check_seeds() noexcept -> void
     for (auto& [host, seed] : seeds_) {
         if (seed.RetryDNS(now)) {
             log_()(name_)(": resolving seed peer ")(host).Flush();
+            // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
             pipeline_.Internal().SendFromThread([&]() {
                 auto out = MakeWork(WorkType::AsioResolve);
                 out.AddFrame(host.data(), host.size());
@@ -738,6 +739,7 @@ auto Actor::check_seeds() noexcept -> void
 
                 return out;
             }());
+            // NOLINTEND(clang-analyzer-core.CallAndMessage)
             seed.last_dns_query_.emplace(now);
         }
     }
@@ -886,6 +888,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 }
             } else {
                 log_()(name_)(": resolving seed peer ")(host).Flush();
+                // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
                 pipeline_.Internal().SendFromThread([&]() {
                     auto out = MakeWork(WorkType::AsioResolve);
                     out.AddFrame(host.data(), host.size());
@@ -893,6 +896,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
 
                     return out;
                 }());
+                // NOLINTEND(clang-analyzer-core.CallAndMessage)
                 seed.last_dns_query_.emplace(now);
             }
         }

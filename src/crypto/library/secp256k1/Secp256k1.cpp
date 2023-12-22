@@ -69,6 +69,7 @@ namespace opentxs::crypto::implementation
 {
 bool Secp256k1::Initialized_ = false;
 
+// NOLINTBEGIN(misc-redundant-expression)
 Secp256k1::Secp256k1(
     const api::Crypto& crypto,
     const api::crypto::Util& ssl) noexcept
@@ -78,6 +79,7 @@ Secp256k1::Secp256k1(
     , ssl_(ssl)
 {
 }
+// NOLINTEND(misc-redundant-expression)
 
 auto Secp256k1::blank_private() noexcept -> ReadView
 {

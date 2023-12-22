@@ -53,11 +53,13 @@ auto Getblocks::get() const noexcept
 
 auto Getblocks::operator=(const Getblocks& rhs) noexcept -> Getblocks&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getblocks::operator=(Getblocks&& rhs) noexcept -> Getblocks&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

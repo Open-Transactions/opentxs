@@ -129,7 +129,7 @@
 #define START_SERVER_CONTEXT()                                                 \
     auto handle = get_data();                                                  \
     auto& data = *handle;                                                      \
-    Lock decisionLock(decision_lock_);                                         \
+    auto decisionLock = Lock{decision_lock_};                                  \
                                                                                \
     if (running().load()) {                                                    \
         LogDebug()()("State machine is already running.").Flush();             \
@@ -259,14 +259,14 @@ auto Server::accept_entire_nymbox(
         return false;
     }
 
-    TransactionNumber lStoredTransactionNumber{0};
+    const TransactionNumber lStoredTransactionNumber{0};
     auto processLedger =
         api_.Factory().Internal().Session().Ledger(nymID, nymID, server_id_);
 
     assert_false(nullptr == processLedger);
 
     processLedger->GenerateLedger(nymID, server_id_, ledgerType::message);
-    std::shared_ptr<OTTransaction> acceptTransaction{
+    const std::shared_ptr<OTTransaction> acceptTransaction{
         api_.Factory().Internal().Session().Transaction(
             nymID,
             nym_to_account(nymID),
@@ -418,7 +418,7 @@ auto Server::accept_entire_nymbox(
         add_tentative_number(data, number);
     }
 
-    std::shared_ptr<Item> balanceItem{
+    const std::shared_ptr<Item> balanceItem{
         statement(data, *acceptTransaction, verifiedNumbers, reason)};
 
     assert_false(nullptr == balanceItem);
@@ -491,7 +491,7 @@ auto Server::accept_numbers(
         return;
     }
 
-    otx::context::TransactionStatement statement(api_, serialized);
+    const otx::context::TransactionStatement statement(api_, serialized);
     accept_issued_number(data, statement);
 }
 
@@ -589,7 +589,7 @@ auto Server::add_item_to_payment_inbox(
     // instrumentNotice for my Payments Inbox using Txn # X as well.
     // After all, if the notary had created it (as normally happens) then
     // that's the Txn# that would have been on it anyway.
-    std::shared_ptr<OTTransaction> transaction{
+    const std::shared_ptr<OTTransaction> transaction{
         api_.Factory().Internal().Session().Transaction(
             *paymentInbox,
             transactionType::instrumentNotice,
@@ -986,7 +986,7 @@ auto Server::extract_box_receipt(
         return {};
     }
 
-    std::shared_ptr<OTTransactionType> transaction{
+    const std::shared_ptr<OTTransactionType> transaction{
         api_.Factory().Internal().Session().Transaction(serialized)};
 
     if (false == bool(transaction)) {
@@ -1663,7 +1663,9 @@ auto Server::harvest_unused(Data& data, const api::session::Client& client)
             }
         }
 
-        if (0 == keepStates.count(translate(proto.state()))) { continue; }
+        if (false == keepStates.contains(translate(proto.state()))) {
+            continue;
+        }
 
         // At this point, this workflow contains a transaction whose
         // number(s) must not be added to the available list (recovered).
@@ -2009,8 +2011,9 @@ auto Server::make_accept_item(
     OTTransaction& acceptTransaction,
     const TransactionNumbers& accept) const -> const Item&
 {
-    std::shared_ptr<Item> acceptItem{api_.Factory().Internal().Session().Item(
-        acceptTransaction, type, identifier::Account{})};
+    const std::shared_ptr<Item> acceptItem{
+        api_.Factory().Internal().Session().Item(
+            acceptTransaction, type, identifier::Account{})};
 
     assert_false(nullptr == acceptItem);
 
@@ -2173,7 +2176,7 @@ void Server::need_box_items(
     const api::session::Client& client,
     const PasswordPrompt& reason)
 {
-    Lock messageLock(data.message_lock_);
+    const auto messageLock = Lock{data.message_lock_};
     auto nymbox{api_.Factory().Internal().Session().Ledger(
         Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
@@ -2284,7 +2287,7 @@ auto Server::need_nymbox(
     const api::session::Client& client,
     const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(data.message_lock_);
+    const auto messageLock = Lock{data.message_lock_};
     [[maybe_unused]] auto [number, message] =
         initialize_server_command(data, MessageType::getNymbox, -1, true, true);
 
@@ -2335,7 +2338,7 @@ auto Server::need_process_nymbox(
     const api::session::Client& client,
     const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(data.message_lock_);
+    const auto messageLock = Lock{data.message_lock_};
     auto nymbox{api_.Factory().Internal().Session().Ledger(
         Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
 
@@ -2491,7 +2494,7 @@ auto Server::need_process_nymbox(
 
 auto Server::need_request_number(const MessageType type) -> bool
 {
-    return 0 == do_not_need_request_number_.count(type);
+    return false == do_not_need_request_number_.contains(type);
 }
 
 auto Server::NextTransactionNumber(const MessageType reason)
@@ -2543,7 +2546,7 @@ auto Server::pending_send(
     const api::session::Client& client,
     const PasswordPrompt& reason) -> void
 {
-    Lock messageLock(data.message_lock_);
+    const auto messageLock = Lock{data.message_lock_};
 
     assert_false(nullptr == data.pending_message_);
 
@@ -2597,7 +2600,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 {
     auto handle = get_data();
     auto& data = *handle;
-    Lock lock(data.message_lock_);
+    const auto lock = Lock{data.message_lock_};
 
     assert_false(nullptr == Signer());
 
@@ -2726,8 +2729,10 @@ auto Server::process_accept_cron_receipt_reply(
     assert_false(nullptr == theTrade);
 
     api_.Factory().Internal().Session().Trade();
-    bool bLoadOfferFromString = theOffer->LoadContractFromString(strOffer);
-    bool bLoadTradeFromString = theTrade->LoadContractFromString(strTrade);
+    const bool bLoadOfferFromString =
+        theOffer->LoadContractFromString(strOffer);
+    const bool bLoadTradeFromString =
+        theTrade->LoadContractFromString(strTrade);
 
     if (bLoadOfferFromString && bLoadTradeFromString) {
         std::unique_ptr<OTDB::TradeDataNym> pData(
@@ -2749,10 +2754,10 @@ auto Server::process_accept_cron_receipt_reply(
 
         assert_true(account);
 
-        bool bIsAsset =
+        const bool bIsAsset =
             (theTrade->GetInstrumentDefinitionID() ==
              account.get().GetInstrumentDefinitionID());
-        bool bIsCurrency =
+        const bool bIsCurrency =
             (theTrade->GetCurrencyID() ==
              account.get().GetInstrumentDefinitionID());
         const auto strAcctID = String::Factory(accountID, api_.Crypto());
@@ -2845,7 +2850,7 @@ auto Server::process_accept_cron_receipt_reply(
         //
         bool bWeFoundIt = false;
 
-        std::size_t nTradeDataNymCount = pList->GetTradeDataNymCount();
+        const std::size_t nTradeDataNymCount = pList->GetTradeDataNymCount();
 
         for (auto nym_count = 0_uz; nym_count < nTradeDataNymCount;
              ++nym_count) {
@@ -3396,7 +3401,7 @@ auto Server::process_box_item(
         return false;
     }
 
-    std::shared_ptr<OTTransactionType> base{
+    const std::shared_ptr<OTTransactionType> base{
         api_.Factory().Internal().Session().Transaction(
             String::Factory(payload))};
 
@@ -3697,7 +3702,7 @@ auto Server::process_get_market_list_response(const Message& reply) const
     // display an empty list on the screen, instead of a list of outdated
     // items.)
     if (reply.depth_ == 0) {
-        bool success = storage.EraseValueByKey(
+        const bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Paths().Market(),  // "markets"
@@ -3749,7 +3754,7 @@ auto Server::process_get_market_list_response(const Message& reply) const
         return true;
     }
 
-    bool success = storage.StoreObject(
+    const bool success = storage.StoreObject(
         api_,
         *pMarketList,
         api_.DataFolder().string(),
@@ -3834,7 +3839,7 @@ auto Server::process_get_market_offers_response(const Message& reply) const
         return true;
     }
 
-    bool success = storage.StoreObject(
+    const bool success = storage.StoreObject(
         api_,
         *pOfferList,
         api_.DataFolder().string(),
@@ -3869,7 +3874,7 @@ auto Server::process_get_market_recent_trades_response(
     // items.)
     //
     if (reply.depth_ == 0) {
-        bool success = storage.EraseValueByKey(
+        const bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Paths().Market(),  // "markets"
@@ -3925,7 +3930,7 @@ auto Server::process_get_market_recent_trades_response(
         return true;
     }
 
-    bool success = storage.StoreObject(
+    const bool success = storage.StoreObject(
         api_,
         *pTradeList,
         api_.DataFolder().string(),
@@ -3982,7 +3987,7 @@ auto Server::process_get_nym_market_offers_response(const Message& reply) const
     // outdated items.)
     //
     if (reply.depth_ == 0) {
-        bool success = storage.EraseValueByKey(
+        const bool success = storage.EraseValueByKey(
             api_,
             api_.DataFolder().string(),
             api_.Internal().Paths().Nym(),  // "nyms"
@@ -4034,7 +4039,7 @@ auto Server::process_get_nym_market_offers_response(const Message& reply) const
         return true;
     }
 
-    bool success = storage.StoreObject(
+    const bool success = storage.StoreObject(
         api_,
         *pOfferList,
         api_.DataFolder().string(),
@@ -5655,7 +5660,7 @@ auto Server::process_response_transaction_cron(
                     pNewItem->SignContract(nym, reason);
                     pNewItem->SaveContract();
 
-                    std::shared_ptr<Item> newItem{pNewItem.release()};
+                    const std::shared_ptr<Item> newItem{pNewItem.release()};
                     pNewTransaction->AddItem(newItem);
                     // -----------------------------------------------------
                     // Referencing myself here. We'll see how it works out.
@@ -5671,7 +5676,7 @@ auto Server::process_response_transaction_cron(
                     pNewTransaction->SignContract(nym, reason);
                     pNewTransaction->SaveContract();
 
-                    std::shared_ptr<OTTransaction> newTransaction{
+                    const std::shared_ptr<OTTransaction> newTransaction{
                         pNewTransaction.release()};
                     const bool bAdded =
                         theRecordBox->AddTransaction(newTransaction);
@@ -6196,7 +6201,7 @@ auto Server::process_unseen_reply(
         return;
     }
 
-    std::shared_ptr<Message> message{
+    const std::shared_ptr<Message> message{
         api_.Factory().Internal().Session().Message()};
 
     assert_false(nullptr == message);
@@ -6210,7 +6215,7 @@ auto Server::process_unseen_reply(
         return;
     }
 
-    ReplyNoticeOutcome outcome{};
+    auto outcome = ReplyNoticeOutcome{};
     auto& [number, result] = outcome;
     auto& [status, reply] = result;
     number = String::StringToUlong(message->request_num_->Get());
@@ -6674,7 +6679,7 @@ auto Server::remove_nymbox_item(
                         }
                     }
 
-                    std::shared_ptr<OTTransaction> newTransaction{
+                    const std::shared_ptr<OTTransaction> newTransaction{
                         api_.Factory().Internal().Session().Transaction(
                             *recordBox,
                             transactionType::notice,
@@ -6683,7 +6688,7 @@ auto Server::remove_nymbox_item(
 
                     if (newTransaction) {
                         if (false != bool(pNoticeItem)) {
-                            std::shared_ptr<Item> newItem{
+                            const std::shared_ptr<Item> newItem{
                                 api_.Factory().Internal().Session().Item(
                                     *newTransaction,
                                     itemType::notice,
@@ -7357,7 +7362,7 @@ auto Server::UpdateRequestNumber(bool& sendStatus, const PasswordPrompt& reason)
 {
     auto handle = get_data();
     auto& data = *handle;
-    Lock messageLock(data.message_lock_);
+    const auto messageLock = Lock{data.message_lock_};
 
     return update_request_number(data, reason, messageLock, sendStatus);
 }

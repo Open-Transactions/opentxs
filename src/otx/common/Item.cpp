@@ -701,8 +701,8 @@ auto Item::VerifyBalanceStatement(
         return false;
     }
 
-    otx::context::TransactionStatement statement(api_, serialized);
-    UnallocatedSet<TransactionNumber> added;
+    const otx::context::TransactionStatement statement(api_, serialized);
+    const UnallocatedSet<TransactionNumber> added;
 
     return context.Verify(statement, removed, added);
 }
@@ -1497,7 +1497,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             // case.
             // That's okay, because I'm setting it below with
             // pItem->SetTransactionNum...
-            std::shared_ptr<Item> pItem{
+            const std::shared_ptr<Item> pItem{
                 new Item(api_, GetNymID(), *this)};  // But I've also got
                                                      // ITEM types with
                                                      // the same names...

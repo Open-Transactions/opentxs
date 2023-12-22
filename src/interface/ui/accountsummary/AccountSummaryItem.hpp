@@ -50,7 +50,7 @@ public:
     }
     auto Balance() const noexcept -> Amount final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
         return balance_;
     }
     auto DisplayBalance() const noexcept -> UnallocatedCString final;

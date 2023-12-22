@@ -57,11 +57,13 @@ auto Addr::get() noexcept -> std::span<value_type>
 
 auto Addr::operator=(const Addr& rhs) noexcept -> Addr&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Addr::operator=(Addr&& rhs) noexcept -> Addr&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

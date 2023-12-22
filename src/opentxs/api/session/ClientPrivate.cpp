@@ -165,7 +165,7 @@ auto ClientPrivate::Contacts() const -> const api::session::Contacts&
 auto ClientPrivate::get_lock(const ContextID context) const
     -> std::recursive_mutex&
 {
-    opentxs::Lock lock(map_lock_);
+    const auto lock = opentxs::Lock{map_lock_};
 
     return context_locks_[context];
 }

@@ -10,9 +10,7 @@
 
 #include "opentxs/Export.hpp"
 
-namespace opentxs
-{
-inline namespace literals
+namespace opentxs::inline literals
 {
 #if defined(__cpp_char8_t)
 inline auto operator"" _sv(const char8_t* ptr, std::size_t size)
@@ -30,5 +28,4 @@ inline auto operator"" _cstr(const char8_t* ptr, std::size_t) -> const char*
     return reinterpret_cast<const char*>(ptr);
 }
 #endif
-}  // namespace literals
-}  // namespace opentxs
+}  // namespace opentxs::inline literals

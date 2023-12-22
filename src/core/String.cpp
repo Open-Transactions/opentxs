@@ -131,9 +131,9 @@ auto String::StringToInt(const UnallocatedCString& strNumber) -> std::int32_t
     std::int32_t v = 0;
     std::size_t i = 0;
 
-    char sign = (strNumber[0] == '-' || strNumber[0] == '+')
-                    ? (static_cast<void>(++i), strNumber[0])
-                    : '+';
+    const char sign = (strNumber[0] == '-' || strNumber[0] == '+')
+                          ? (static_cast<void>(++i), strNumber[0])
+                          : '+';
 
     for (; i < strNumber.size(); ++i) {
         if (strNumber[i] < '0' || strNumber[i] > '9') { break; }
@@ -149,9 +149,9 @@ auto String::StringToLong(const UnallocatedCString& strNumber) -> std::int64_t
     std::int64_t v = 0;
     std::size_t i = 0;
 
-    char sign = (strNumber[0] == '-' || strNumber[0] == '+')
-                    ? (static_cast<void>(++i), strNumber[0])
-                    : '+';
+    const char sign = (strNumber[0] == '-' || strNumber[0] == '+')
+                          ? (static_cast<void>(++i), strNumber[0])
+                          : '+';
 
     for (; i < strNumber.size(); ++i) {
         if (strNumber[i] < '0' || strNumber[i] > '9') { break; }
@@ -190,7 +190,7 @@ auto String::StringToUlong(const UnallocatedCString& strNumber) -> std::uint64_t
 
 auto String::trim(UnallocatedCString& str) -> UnallocatedCString&
 {
-    UnallocatedCString whitespaces(" \t\f\v\n\r");
+    const UnallocatedCString whitespaces(" \t\f\v\n\r");
     std::size_t found = str.find_first_not_of(whitespaces);
 
     if (found != UnallocatedCString::npos) { str.erase(0, found); }
@@ -517,7 +517,7 @@ auto String::DecodeIfArmored(const api::Crypto& crypto, bool bEscapedIsAllowed)
         } else  // success loading the actual contents out of the ascii-armored
                 // version.
         {
-            String strTemp(ascTemp);  // <=== ascii-decoded here.
+            const String strTemp(ascTemp);  // <=== ascii-decoded here.
             UnallocatedCString str_temp(strTemp.Get(), strTemp.GetLength());
             str_Trim =
                 String::trim(str_temp);  // This is the UnallocatedCString for
@@ -584,7 +584,7 @@ void String::LowLevelSet(
     assert_true(internal_.empty());  // otherwise memory leak.
 
     if (nullptr != new_string) {
-        std::uint32_t nLength =
+        const std::uint32_t nLength =
             (nEnforcedMaxLength > 0)
                 ? static_cast<std::uint32_t>(String::safe_strlen(
                       new_string, static_cast<std::size_t>(nEnforcedMaxLength)))

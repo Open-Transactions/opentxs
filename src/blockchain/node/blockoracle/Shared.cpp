@@ -613,8 +613,8 @@ auto BlockOracle::Shared::load_blocks(
 
 auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 {
-    const auto& [jobs, downloading] = queue;
     to_blockchain_api_.lock()->SendDeferred([&]() {
+        const auto& [jobs, downloading] = queue;
         auto work = network::zeromq::tagged_message(
             WorkType::BlockchainBlockDownloadQueue, true);
         work.AddFrame(chain_);
@@ -622,6 +622,7 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 
         return work;
     }());
+    const auto& [jobs, downloading] = queue;
 
     if (0_uz < jobs) { work_available(); }
 }

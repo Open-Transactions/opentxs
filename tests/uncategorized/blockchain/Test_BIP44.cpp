@@ -11,8 +11,6 @@
 #include "internal/util/DeferredConstruction.hpp"
 #include "ottest/fixtures/blockchain/BIP44.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace opentxs::literals;

@@ -103,7 +103,7 @@ auto IssuerItem::construct_row(
 
 auto IssuerItem::Name() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return name_;
 }
@@ -162,7 +162,7 @@ void IssuerItem::refresh_accounts() noexcept
 auto IssuerItem::reindex(const AccountSummarySortKey& key, CustomData&) noexcept
     -> bool
 {
-    eLock lock(shared_lock_);
+    auto lock = eLock{shared_lock_};
     key_ = key;
     connection_.store(std::get<0>(key_));
     lock.unlock();

@@ -268,7 +268,7 @@ auto ClientContext::VerifyCronItem(const TransactionNumber number) const -> bool
     auto handle = get_data();
     const auto& data = *handle;
 
-    return (0 < data.open_cron_items_.count(number));
+    return (data.open_cron_items_.contains(number));
 }
 
 auto ClientContext::VerifyIssuedNumber(

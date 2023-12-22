@@ -438,11 +438,13 @@ auto Message::Network() const noexcept -> opentxs::blockchain::Type
 
 auto Message::operator=(const Message& rhs) noexcept -> Message&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Message::operator=(Message&& rhs) noexcept -> Message&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

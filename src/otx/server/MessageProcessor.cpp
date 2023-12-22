@@ -206,13 +206,13 @@ auto MessageProcessor::Imp::cleanup() noexcept -> void
 
 auto MessageProcessor::Imp::DropIncoming(const int count) const noexcept -> void
 {
-    Lock lock(counter_lock_);
+    const auto lock = Lock{counter_lock_};
     drop_incoming_ = count;
 }
 
 auto MessageProcessor::Imp::DropOutgoing(const int count) const noexcept -> void
 {
-    Lock lock(counter_lock_);
+    const auto lock = Lock{counter_lock_};
     drop_outgoing_ = count;
 }
 

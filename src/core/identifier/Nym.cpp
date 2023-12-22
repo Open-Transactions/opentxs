@@ -45,11 +45,13 @@ Nym::Nym(Nym&& rhs, allocator_type alloc) noexcept
 
 auto Nym::operator=(const Nym& rhs) noexcept -> Nym&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Nym::operator=(Nym&& rhs) noexcept -> Nym&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 

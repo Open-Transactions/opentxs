@@ -154,7 +154,7 @@ OTParty::OTParty(
                                                      // then you MUST pass an
                                                      // account name also.
 
-        bool bAdded = AddAccount(
+        const bool bAdded = AddAccount(
             String::Factory(str_agent_name.c_str()),
             pstr_account_name->c_str(),
             *pAccount,
@@ -876,7 +876,7 @@ auto OTParty::VerifyOwnershipOfAccount(const Account& theAccount) const -> bool
                   // solitary Nym (not an entity.)
     {
         bool bNymID = false;
-        UnallocatedCString str_nym_id =
+        const UnallocatedCString str_nym_id =
             GetNymID(&bNymID);  // If the party is a Nym, this is the Nym's
                                 // ID. Otherwise this is false.
 

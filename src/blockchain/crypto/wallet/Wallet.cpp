@@ -65,7 +65,7 @@ auto Wallet::add(
 {
     if (false == bool(tree)) { return false; }
 
-    if (0 < data.index_.count(id)) { return false; }
+    if (data.index_.contains(id)) { return false; }
 
     data.trees_.emplace_back(std::move(tree));
     const auto position = data.trees_.size() - 1_uz;

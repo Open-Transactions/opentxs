@@ -201,7 +201,8 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
     [[maybe_unused]] const auto& server = *pServer
 
 #define INIT_OTX(a, ...)                                                       \
-    api::session::OTX::Result result{otx::LastReplyStatus::NotSent, nullptr};  \
+    auto result =                                                              \
+        api::session::OTX::Result{otx::LastReplyStatus::NotSent, nullptr};     \
     [[maybe_unused]] const auto& [status, pReply] = result;                    \
     [[maybe_unused]] auto [taskID, future] = client.OTX().a(__VA_ARGS__);      \
     [[maybe_unused]] const auto ready = (0 != taskID)
@@ -329,7 +330,9 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                 continue;
             }
 
+            // NOLINTBEGIN(misc-const-correctness)
             INIT_OTX(DepositPayment, nymID, destinationaccountID, payment);
+            // NOLINTEND(misc-const-correctness)
 
             if (false == ready) {
                 add_output_task(output, "");
@@ -484,7 +487,9 @@ auto RPC::create_account(const proto::RPCCommand& command) const
 
     if (0 < command.identifier_size()) { label = command.identifier(0); }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterAccount, ownerID, notaryID, unitID, label);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -560,7 +565,9 @@ auto RPC::create_compatible_account(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterAccount, ownerID, notaryID, unitID, "");
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -620,8 +627,10 @@ auto RPC::create_issuer_account(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(
         IssueUnitDefinition, ownerID, notaryID, unitID, UnitType::Error, label);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -1600,6 +1609,7 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
             const auto notary =
                 client.Storage().Internal().AccountServer(sourceaccount);
 
+            // NOLINTBEGIN(misc-const-correctness)
             INIT_OTX(
                 SendTransfer,
                 sender,
@@ -1608,6 +1618,7 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
                 targetaccount,
                 factory::Amount(movefunds.amount()),
                 movefunds.memo());
+            // NOLINTEND(misc-const-correctness)
 
             if (false == ready) {
                 add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -1892,7 +1903,9 @@ auto RPC::register_nym(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterNymPublic, ownerID, notaryID, true);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_REGISTER_NYM_FAILED);

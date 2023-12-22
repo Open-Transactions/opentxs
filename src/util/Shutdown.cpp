@@ -17,8 +17,6 @@
 #include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/WorkType.internal.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::internal
 {
 using namespace std::literals;

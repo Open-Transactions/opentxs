@@ -94,7 +94,7 @@ private:
         SocketID,
         actor::SocketIndex,
         std::hash<SocketID>,
-        std::equal_to<SocketID>,
+        std::equal_to<>,
         alloc::PMR<std::pair<const SocketID, actor::SocketIndex>>>;
 
     static constexpr auto fixed_ = 4_uz;

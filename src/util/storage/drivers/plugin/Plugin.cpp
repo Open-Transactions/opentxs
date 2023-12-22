@@ -12,6 +12,7 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 
 #include "internal/util/P0330.hpp"
@@ -466,7 +467,7 @@ auto Plugin::migrate_primary(
         LogAbort()()("Failed to migrate from primary driver").Abort();
     }
 
-    old.reset(newDriver.release());
+    old = std::move(newDriver);
 }
 
 auto Plugin::Primary() const noexcept -> const storage::Driver&

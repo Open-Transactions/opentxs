@@ -165,7 +165,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
         // the temp values, then clean it up again before returning
         // success/fail.
         //
-        std::unique_ptr<OTTransaction> pNotice(InstantiateNotice());
+        const std::unique_ptr<OTTransaction> pNotice(InstantiateNotice());
 
         if (!pNotice) {
             LogError()()(
@@ -186,7 +186,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
             return false;
         }
         // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         Cheque* pCheque = nullptr;
         OTPaymentPlan* pPaymentPlan = nullptr;
@@ -378,7 +378,7 @@ auto OTPayment::SetTempValuesFromNotice(
                 .Flush();
             return false;
         }
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
         // -------------------------------------------
         auto* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
         auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -635,7 +635,7 @@ auto OTPayment::GetAllTransactionNumbers(
                 .Flush();
             return false;
         }  // Below THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         auto* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
         auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -764,7 +764,7 @@ auto OTPayment::HasTransactionNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTPaymentPlan* pPlan = nullptr;
         OTSmartContract* pSmartContract = nullptr;
@@ -878,7 +878,7 @@ auto OTPayment::GetClosingNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTSmartContract* pSmartContract = nullptr;
         pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -997,7 +997,7 @@ auto OTPayment::GetOpeningNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTSmartContract* pSmartContract = nullptr;
         pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);

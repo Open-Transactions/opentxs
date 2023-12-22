@@ -121,7 +121,7 @@ auto PayDividendVisitor::Trigger(
     TransactionNumber lNewTransactionNumber = 0;
     auto context = server_.API().Wallet().Internal().mutable_ClientContext(
         theServerNym.ID(), reason);
-    bool bGotNextTransNum =
+    const bool bGotNextTransNum =
         server_.GetTransactor().issueNextTransactionNumberToNym(
             context.get(), lNewTransactionNumber);  // We save the transaction
     // number on the server Nym (normally we'd discard it) because

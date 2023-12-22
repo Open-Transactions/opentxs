@@ -216,11 +216,13 @@ Generic::Generic(Generic&& rhs, allocator_type alloc) noexcept
 
 auto Generic::operator=(const Generic& rhs) noexcept -> Generic&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Generic::operator=(Generic&& rhs) noexcept -> Generic&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

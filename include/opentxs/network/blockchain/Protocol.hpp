@@ -18,6 +18,6 @@ enum class Protocol : std::uint8_t {
     bitcoin = 1,
     ethereum = 2,
     unknown_protocol =
-        std::numeric_limits<std::underlying_type<Protocol>::type>::max(),
+        std::numeric_limits<std::underlying_type_t<Protocol>>::max(),
 };
 }  // namespace opentxs::network::blockchain

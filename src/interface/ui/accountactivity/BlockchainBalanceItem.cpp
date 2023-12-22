@@ -102,14 +102,14 @@ auto BlockchainBalanceItem::Contacts() const noexcept
 
 auto BlockchainBalanceItem::DisplayAmount() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return blockchain::internal::Format(chain_, amount_);
 }
 
 auto BlockchainBalanceItem::Memo() const noexcept -> UnallocatedCString
 {
-    sLock lock{shared_lock_};
+    const auto lock = sLock{shared_lock_};
 
     return memo_;
 }
@@ -137,7 +137,7 @@ auto BlockchainBalanceItem::reindex(
     assert_true(chain_ == chain);
     assert_true(txid_ == txid);
 
-    eLock lock{shared_lock_};
+    const auto lock = eLock{shared_lock_};
     const auto oldAmount = amount_;
     amount_ = amount;
 

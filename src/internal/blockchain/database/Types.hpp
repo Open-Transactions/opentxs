@@ -67,8 +67,8 @@ using Segments = UnallocatedSet<ChainSegment>;
 // parent block hash, disconnected block hash
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
 using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
-using MatchingIndices = boost::container::
-    flat_set<Bip32Index, std::less<Bip32Index>, alloc::PMR<Bip32Index>>;
+using MatchingIndices =
+    boost::container::flat_set<Bip32Index, std::less<>, alloc::PMR<Bip32Index>>;
 using MatchingInputs = MatchingIndices;
 using MatchingOutputs = MatchingIndices;
 using MatchedTransaction =
@@ -79,7 +79,7 @@ using TXOs =
     Map<blockchain::block::Outpoint, protocol::bitcoin::base::block::Output>;
 using ConsumedTXOs = boost::container::flat_set<
     blockchain::block::Outpoint,
-    std::less<blockchain::block::Outpoint>,
+    std::less<>,
     alloc::PMR<blockchain::block::Outpoint>>;
 using node::UTXO;
 

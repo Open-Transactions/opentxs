@@ -23,8 +23,6 @@
 #define CHEQUE_AMOUNT_1 2000
 #define CHEQUE_MEMO_1 "memo"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(DepositCheques, payment_codes)

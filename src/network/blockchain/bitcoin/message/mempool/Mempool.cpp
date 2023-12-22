@@ -46,11 +46,13 @@ auto Mempool::Blank() noexcept -> Mempool&
 
 auto Mempool::operator=(const Mempool& rhs) noexcept -> Mempool&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Mempool::operator=(Mempool&& rhs) noexcept -> Mempool&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

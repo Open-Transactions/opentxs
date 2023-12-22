@@ -42,6 +42,7 @@ public:
     virtual auto getSize() -> std::int32_t = 0;
 
     virtual auto operator=(const String& rhs) -> StringXML& = 0;
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     virtual auto operator=(const StringXML& rhs) -> StringXML& = 0;
 
     StringXML(StringXML&&) = delete;

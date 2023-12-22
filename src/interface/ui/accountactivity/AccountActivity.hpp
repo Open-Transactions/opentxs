@@ -101,13 +101,13 @@ public:
     }
     auto Balance() const noexcept -> const Amount final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return balance_;
     }
     auto BalancePolarity() const noexcept -> int final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return polarity(balance_);
     }
@@ -132,7 +132,7 @@ public:
     }
     auto DisplayBalance() const noexcept -> UnallocatedCString final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return display_balance(balance_);
     }

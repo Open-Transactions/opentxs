@@ -215,7 +215,7 @@ auto PaymentCodePrivate::account_already_exists(const rLock&) const noexcept
     const auto existing = api_.Storage().Internal().Bip47ChannelsByChain(
         parent_.NymID(), target_to_unit(target_));
 
-    return 0 < existing.count(id_);
+    return existing.contains(id_);
 }
 
 auto PaymentCodePrivate::AddIncomingNotification(
@@ -338,7 +338,7 @@ auto PaymentCodePrivate::ReorgNotification(
 {
     auto lock = rLock{lock_};
 
-    if (0 == outgoing_notifications_.count(tx)) { return true; }
+    if (false == outgoing_notifications_.contains(tx)) { return true; }
 
     outgoing_notifications_.erase(tx);
     const auto out = save(lock);

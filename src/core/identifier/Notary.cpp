@@ -45,11 +45,13 @@ Notary::Notary(Notary&& rhs, allocator_type alloc) noexcept
 
 auto Notary::operator=(const Notary& rhs) noexcept -> Notary&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Notary::operator=(Notary&& rhs) noexcept -> Notary&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 

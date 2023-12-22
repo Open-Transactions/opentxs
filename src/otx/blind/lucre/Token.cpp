@@ -296,7 +296,7 @@ auto Lucre::GenerateTokenRequest(
     const PasswordPrompt& reason) -> bool
 {
     auto setDumper = LucreDumper{};
-    crypto::openssl::BIO bioBank = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioBank = ::BIO_new(::BIO_s_mem());
     auto armoredMint = Armored::Factory(api_.Crypto());
     mint.GetPublic(armoredMint, denomination_);
     auto serializedMint = String::Factory(armoredMint);
@@ -450,7 +450,7 @@ auto Lucre::ID(const PasswordPrompt& reason) const -> UnallocatedCString
     }
 
     UnallocatedCString output;
-    std::regex reg("id=([A-Z0-9]*)");
+    const std::regex reg("id=([A-Z0-9]*)");
     std::cmatch match{};
 
     if (std::regex_search(spendable->Get(), match, reg)) { output = match[1]; }

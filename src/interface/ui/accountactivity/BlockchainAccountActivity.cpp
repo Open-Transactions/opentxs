@@ -328,14 +328,14 @@ auto BlockchainAccountActivity::process_balance(const Message& in) noexcept
     assert_true(primary_id_ == nym);
 
     const auto oldBalance = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         const auto oldbalance = balance_;
         balance_ = unconfirmed;
         return oldbalance;
     }();
     const auto oldConfirmed = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         const auto oldconfirmed = confirmed_;
         confirmed_ = confirmed;
@@ -627,7 +627,7 @@ auto BlockchainAccountActivity::ValidateAddress(
 
     if (unknown_address_style == style) { return false; }
 
-    if (0 == chains.count(chain_)) { return false; }
+    if (false == chains.contains(chain_)) { return false; }
 
     return supported;
 }

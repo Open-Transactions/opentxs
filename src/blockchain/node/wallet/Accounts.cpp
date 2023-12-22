@@ -153,7 +153,7 @@ Accounts::Imp::Imp(
           std::move(node),
           std::move(batch),
           network::zeromq::MakeArbitraryInproc(alloc),
-          std::move(alloc))
+          alloc)
 {
 }
 

@@ -100,7 +100,7 @@ auto AccountSummary::extract_key(
         const auto server = api_.Wallet().Internal().Server(serverID);
         name = server->Alias();
         const auto& serverNymID = server->Signer()->ID();
-        eLock lock(shared_lock_);
+        const auto lock = eLock{shared_lock_};
         nym_server_map_.emplace(serverNymID, serverID);
         server_issuer_map_.emplace(serverID, issuerID);
     } catch (...) {
@@ -164,7 +164,7 @@ void AccountSummary::process_nym(const Message& message) noexcept
     assert_true(1 < body.size());
 
     const auto nymID = api_.Factory().NymIDFromHash(body[1].Bytes());
-    sLock lock(shared_lock_);
+    auto lock = sLock{shared_lock_};
     const auto it = nym_server_map_.find(nymID);
 
     if (nym_server_map_.end() == it) { return; }
@@ -191,7 +191,7 @@ void AccountSummary::process_server(const Message& message) noexcept
 
 void AccountSummary::process_server(const identifier::Notary& serverID) noexcept
 {
-    sLock lock(shared_lock_);
+    auto lock = sLock{shared_lock_};
     const auto it = server_issuer_map_.find(serverID);
 
     if (server_issuer_map_.end() == it) { return; }

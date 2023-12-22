@@ -13,8 +13,6 @@
 
 #include "internal/interface/ui/UI.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 auto Value::operator==(const Value& rhs) const noexcept -> bool

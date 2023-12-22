@@ -136,7 +136,7 @@ private:
     struct Data final : public opentxs::pmr::Allocated {
         using Attributes = boost::container::flat_set<
             claim::Attribute,
-            std::less<claim::Attribute>,
+            std::less<>,
             alloc::PMR<claim::Attribute>>;
 
         Attributes attributes_;

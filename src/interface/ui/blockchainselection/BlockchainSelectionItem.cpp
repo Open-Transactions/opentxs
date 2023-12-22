@@ -50,7 +50,7 @@ auto BlockchainSelectionItem::reindex(
     assert_true(testnet_ == key.second);
     assert_true(name_ == key.first);
 
-    Lock lock{lock_};
+    const auto lock = Lock{lock_};
 
     if (auto enabled = extract_custom<bool>(custom, 0); enabled_ != enabled) {
         enabled_ = enabled;

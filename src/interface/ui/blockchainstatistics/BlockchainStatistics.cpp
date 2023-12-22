@@ -34,8 +34,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto BlockchainStatisticsModel(

@@ -46,7 +46,6 @@ TEST_F(Regtest_stress, mine_initial_balance)
         listener_alex_.get_future(alex_account_, Subchain::Internal, 1);
 
     std::cout << "Block 1\n";
-    namespace c = std::chrono;
     EXPECT_TRUE(Mine(0, 1, mine_to_alex_));
     EXPECT_TRUE(listener_alex_.wait(future1));
     EXPECT_TRUE(listener_alex_.wait(future2));

@@ -25,6 +25,7 @@
 #include <string_view>
 #include <thread>
 #include <type_traits>
+#include <utility>
 
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/api/session/Storage.hpp"
@@ -275,7 +276,7 @@ auto WalletPrivate::account(
         return row;
     }
 
-    eLock rowLock(rowMutex);
+    const auto rowLock = eLock{rowMutex};
     // What if more than one thread tries to create the same row at the same
     // time? One thread will construct the Account object and the other(s) will
     // block until the lock is obtained. Therefore this check is necessary to
@@ -314,7 +315,7 @@ auto WalletPrivate::account(
 auto WalletPrivate::Account(const identifier::Account& accountID) const
     -> SharedAccount
 {
-    Lock mapLock(account_map_lock_);
+    const auto mapLock = Lock{account_map_lock_};
 
     try {
         auto& [rowMutex, pAccount] = account(mapLock, accountID, false);
@@ -470,7 +471,7 @@ auto WalletPrivate::BasketContract(
 {
     UnitDefinition(id, timeout);
 
-    Lock mapLock(unit_map_lock_);
+    const auto mapLock = Lock{unit_map_lock_};
     auto it = unit_map_.find(id);
 
     if (unit_map_.end() == it) {
@@ -496,7 +497,7 @@ auto WalletPrivate::CreateAccount(
     TransactionNumber stash,
     const PasswordPrompt& reason) const -> ExclusiveAccount
 {
-    Lock mapLock(account_map_lock_);
+    const auto mapLock = Lock{account_map_lock_};
 
     try {
         const auto contract = UnitDefinition(instrumentDefinitionID);
@@ -522,7 +523,7 @@ auto WalletPrivate::CreateAccount(
 
             return {};
         } else {
-            pAccount.reset(newAccount.release());
+            pAccount = std::move(newAccount);
 
             assert_false(nullptr == pAccount);
 
@@ -545,7 +546,7 @@ auto WalletPrivate::CreateAccount(
 
             assert_true(saved);
 
-            std::function<void(
+            const std::function<void(
                 std::unique_ptr<opentxs::Account>&, eLock&, bool)>
                 callback = [this, accountID, &reason](
                                std::unique_ptr<opentxs::Account>& in,
@@ -573,11 +574,11 @@ auto WalletPrivate::DefaultNym() const noexcept
 auto WalletPrivate::DeleteAccount(const identifier::Account& accountID) const
     -> bool
 {
-    Lock mapLock(account_map_lock_);
+    const auto mapLock = Lock{account_map_lock_};
 
     try {
         auto& [rowMutex, pAccount] = account(mapLock, accountID, false);
-        eLock lock(rowMutex);
+        const auto lock = eLock{rowMutex};
 
         if (pAccount) {
             const auto deleted =
@@ -601,7 +602,7 @@ auto WalletPrivate::IssuerAccount(
     const identifier::UnitDefinition& unitID) const -> SharedAccount
 {
     const auto accounts = api_.Storage().Internal().AccountsByContract(unitID);
-    Lock mapLock(account_map_lock_);
+    const auto mapLock = Lock{account_map_lock_};
 
     try {
         for (const auto& accountID : accounts) {
@@ -624,13 +625,13 @@ auto WalletPrivate::mutable_Account(
     const PasswordPrompt& reason,
     const AccountCallback callback) const -> ExclusiveAccount
 {
-    Lock mapLock(account_map_lock_);
+    const auto mapLock = Lock{account_map_lock_};
 
     try {
         auto& [rowMutex, pAccount] = account(mapLock, accountID, false);
 
         if (pAccount) {
-            std::function<void(
+            const std::function<void(
                 std::unique_ptr<opentxs::Account>&, eLock&, bool)>
                 save = [this, accountID, &reason](
                            std::unique_ptr<opentxs::Account>& in,
@@ -665,9 +666,9 @@ auto WalletPrivate::UpdateAccount(
     const UnallocatedCString& label,
     const PasswordPrompt& reason) const -> bool
 {
-    Lock mapLock(account_map_lock_);
+    auto mapLock = Lock{account_map_lock_};
     auto& [rowMutex, pAccount] = account(mapLock, accountID, true);
-    eLock rowLock(rowMutex);
+    const auto rowLock = eLock{rowMutex};
     mapLock.unlock();
     const auto& localNym = *context.Signer();
     std::unique_ptr<opentxs::Account> newAccount{nullptr};
@@ -718,7 +719,7 @@ auto WalletPrivate::UpdateAccount(
         return false;
     }
 
-    pAccount.reset(newAccount.release());
+    pAccount = std::move(newAccount);
 
     assert_false(nullptr == pAccount);
 
@@ -930,11 +931,11 @@ auto WalletPrivate::ImportAccount(
     }
 
     const auto& accountID = imported->GetRealAccountID();
-    Lock mapLock(account_map_lock_);
+    auto mapLock = Lock{account_map_lock_};
 
     try {
         auto& [rowMutex, pAccount] = account(mapLock, accountID, true);
-        eLock rowLock(rowMutex);
+        const auto rowLock = eLock{rowMutex};
         mapLock.unlock();
 
         if (pAccount) {
@@ -943,7 +944,7 @@ auto WalletPrivate::ImportAccount(
             return false;
         }
 
-        pAccount.reset(imported.release());
+        pAccount = std::move(imported);
 
         assert_false(nullptr == pAccount);
 
@@ -968,7 +969,7 @@ auto WalletPrivate::ImportAccount(
 
             if (false == saved) {
                 LogError()()("Failed to save account.").Flush();
-                imported.reset(pAccount.release());
+                imported = std::move(pAccount);
 
                 return false;
             }
@@ -976,7 +977,7 @@ auto WalletPrivate::ImportAccount(
             return true;
         } catch (...) {
             LogError()()("Unable to load unit definition.").Flush();
-            imported.reset(pAccount.release());
+            imported = std::move(pAccount);
 
             return false;
         }
@@ -1019,7 +1020,7 @@ auto WalletPrivate::mutable_Issuer(
 
     assert_false(nullptr == pIssuer);
 
-    std::function<void(otx::client::Issuer*, const Lock&)> callback =
+    const std::function<void(otx::client::Issuer*, const Lock&)> callback =
         [=, this](otx::client::Issuer* in, const Lock& lock) -> void {
         save(lock, in);
     };
@@ -1032,7 +1033,7 @@ auto WalletPrivate::issuer(
     const identifier::Nym& issuerID,
     const bool create) const -> WalletPrivate::IssuerLock&
 {
-    Lock lock(issuer_map_lock_);
+    const auto lock = Lock{issuer_map_lock_};
     const auto key = IssuerID{nymID, issuerID};
     auto& output = issuer_map_[key];
     auto& [issuerMutex, pIssuer] = output;
@@ -1092,7 +1093,7 @@ auto WalletPrivate::IsLocalNym(const std::string_view id) const -> bool
 
 auto WalletPrivate::IsLocalNym(const identifier::Nym& id) const -> bool
 {
-    return api_.Storage().LocalNyms().count(id);
+    return api_.Storage().LocalNyms().contains(id);
 }
 
 auto WalletPrivate::LocalNymCount() const -> std::size_t
@@ -1117,14 +1118,14 @@ auto WalletPrivate::Nym(
     }
 
     auto mapLock = Lock{nym_map_lock_};
-    bool inMap = (nym_map_.find(id) != nym_map_.end());
+    const bool inMap = (nym_map_.find(id) != nym_map_.end());
     bool valid = false;
 
     if (!inMap) {
         auto serialized = proto::Nym{};
         auto alias = UnallocatedCString{};
         using enum opentxs::storage::ErrorReporting;
-        bool loaded =
+        const bool loaded =
             api_.Storage().Internal().Load(id, serialized, alias, silent);
 
         if (loaded) {
@@ -1149,7 +1150,7 @@ auto WalletPrivate::Nym(
                 while (std::chrono::high_resolution_clock::now() < end) {
                     std::this_thread::sleep_for(interval);
                     mapLock.lock();
-                    bool found = (nym_map_.find(id) != nym_map_.end());
+                    const bool found = (nym_map_.find(id) != nym_map_.end());
                     mapLock.unlock();
 
                     if (found) { break; }
@@ -1332,8 +1333,8 @@ auto WalletPrivate::mutable_Nym(
 
     if (nym_map_.end() == it) { LogAbort()().Abort(); }
 
-    std::function<void(NymData*, Lock&)> callback = [&](NymData* nymData,
-                                                        Lock& lock) -> void {
+    const std::function<void(NymData*, Lock&)> callback =
+        [&](NymData* nymData, Lock& lock) -> void {
         this->save(nymData, lock);
     };
 
@@ -1350,7 +1351,7 @@ auto WalletPrivate::Nymfile(
     const PasswordPrompt& reason) const
     -> std::unique_ptr<const opentxs::NymFile>
 {
-    Lock lock(nymfile_lock(id));
+    const auto lock = Lock{nymfile_lock(id)};
     const auto targetNym = Nym(id);
     const auto signerNym = signer_nym(id);
 
@@ -1399,14 +1400,15 @@ auto WalletPrivate::mutable_nymfile(
     }
 
     using EditorType = Editor<opentxs::NymFile>;
-    EditorType::LockedSave callback = [&](opentxs::NymFile* in,
-                                          Lock& lock) -> void {
+    const EditorType::LockedSave callback = [&](opentxs::NymFile* in,
+                                                Lock& lock) -> void {
         this->save(reason, in, lock);
     };
-    EditorType::OptionalCallback deleter = [](const opentxs::NymFile& in) {
-        auto* p = &const_cast<opentxs::NymFile&>(in);
-        delete p;
-    };
+    const EditorType::OptionalCallback deleter =
+        [](const opentxs::NymFile& in) {
+            auto* p = &const_cast<opentxs::NymFile&>(in);
+            delete p;
+        };
 
     return {nymfile_lock(id), nymfile.release(), callback, deleter};
 }
@@ -1432,7 +1434,7 @@ auto WalletPrivate::notify_new(const identifier::Nym& id) const noexcept -> void
 auto WalletPrivate::nymfile_lock(const identifier::Nym& nymID) const
     -> std::mutex&
 {
-    Lock map_lock(nymfile_map_lock_);
+    auto map_lock = Lock{nymfile_map_lock_};
     auto& output = nymfile_lock_[nymID];
     map_lock.unlock();
 
@@ -1485,7 +1487,7 @@ auto WalletPrivate::NymNameByIndex(const std::size_t index, String& name) const
 auto WalletPrivate::peer_lock(const UnallocatedCString& nymID) const
     -> std::mutex&
 {
-    Lock map_lock(peer_map_lock_);
+    auto map_lock = Lock{peer_map_lock_};
     auto& output = peer_lock_[nymID];
     map_lock.unlock();
 
@@ -1527,7 +1529,7 @@ auto WalletPrivate::PeerReplyComplete(
 {
     const auto nymID = nym.asBase58(api_.Crypto());
     auto reply = proto::PeerReply{};
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
     using enum opentxs::storage::ErrorReporting;
     const bool haveReply = api_.Storage().Internal().Load(
         nym, replyID, otx::client::StorageBox::SENTPEERREPLY, reply, verbose);
@@ -1567,7 +1569,7 @@ auto WalletPrivate::PeerReplyCreate(
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto requestID = api_.Factory().Internal().Identifier(request.id());
     const auto cookie = api_.Factory().Internal().Identifier(reply.cookie());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     if (cookie != requestID) {
         LogError()()(" Reply cookie does not match request id.").Flush();
@@ -1616,7 +1618,7 @@ auto WalletPrivate::PeerReplyCreateRollback(
     const identifier::Generic& reply) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
     const auto replyID = reply.asBase58(api_.Crypto());
     auto requestItem = proto::PeerRequest{};
     bool output = true;
@@ -1667,7 +1669,7 @@ auto WalletPrivate::PeerReplySent(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::SENTPEERREPLY);
@@ -1677,7 +1679,7 @@ auto WalletPrivate::PeerReplyIncoming(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::INCOMINGPEERREPLY);
@@ -1687,7 +1689,7 @@ auto WalletPrivate::PeerReplyFinished(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::FINISHEDPEERREPLY);
@@ -1697,7 +1699,7 @@ auto WalletPrivate::PeerReplyProcessed(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::PROCESSEDPEERREPLY);
@@ -1729,7 +1731,7 @@ auto WalletPrivate::PeerReplyReceive(
     }
 
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
     const auto& requestID = request.ID();
     auto serializedRequest = proto::PeerRequest{};
     auto notUsed = Time{};
@@ -1843,7 +1845,7 @@ auto WalletPrivate::PeerRequestComplete(
     const identifier::Generic& replyID) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
     auto reply = proto::PeerReply{};
     using enum opentxs::storage::ErrorReporting;
     const bool haveReply = api_.Storage().Internal().Load(
@@ -1886,7 +1888,7 @@ auto WalletPrivate::PeerRequestCreate(
     const proto::PeerRequest& request) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().Store(
         request, nym, otx::client::StorageBox::SENTPEERREQUEST);
@@ -1897,7 +1899,7 @@ auto WalletPrivate::PeerRequestCreateRollback(
     const identifier::Generic& request) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().RemoveNymBoxItem(
         nym, otx::client::StorageBox::SENTPEERREQUEST, request);
@@ -1926,7 +1928,7 @@ auto WalletPrivate::PeerRequestSent(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::SENTPEERREQUEST);
@@ -1936,7 +1938,7 @@ auto WalletPrivate::PeerRequestIncoming(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::INCOMINGPEERREQUEST);
@@ -1946,7 +1948,7 @@ auto WalletPrivate::PeerRequestFinished(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::FINISHEDPEERREQUEST);
@@ -1956,7 +1958,7 @@ auto WalletPrivate::PeerRequestProcessed(const identifier::Nym& nym) const
     -> ObjectList
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    Lock lock(peer_lock(nymID));
+    const auto lock = Lock{peer_lock(nymID)};
 
     return api_.Storage().Internal().NymBoxList(
         nym, otx::client::StorageBox::PROCESSEDPEERREQUEST);
@@ -1990,7 +1992,7 @@ auto WalletPrivate::PeerRequestReceive(
 
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto saved = [&] {
-        Lock lock(peer_lock(nymID));
+        const auto lock = Lock{peer_lock(nymID)};
 
         return api_.Storage().Internal().Store(
             serialized, nym, otx::client::StorageBox::INCOMINGPEERREQUEST);
@@ -2478,7 +2480,7 @@ auto WalletPrivate::mutable_Purse(
 
 auto WalletPrivate::RemoveServer(const identifier::Notary& id) const -> bool
 {
-    Lock mapLock(server_map_lock_);
+    const auto mapLock = Lock{server_map_lock_};
     auto deleted = server_map_.erase(id);
 
     if (0 != deleted) { return api_.Storage().Internal().RemoveServer(id); }
@@ -2489,7 +2491,7 @@ auto WalletPrivate::RemoveServer(const identifier::Notary& id) const -> bool
 auto WalletPrivate::RemoveUnitDefinition(
     const identifier::UnitDefinition& id) const -> bool
 {
-    Lock mapLock(unit_map_lock_);
+    const auto mapLock = Lock{unit_map_lock_};
     auto deleted = unit_map_.erase(id);
 
     if (0 != deleted) {
@@ -2771,7 +2773,7 @@ auto WalletPrivate::SetDefaultNym(const identifier::Nym& id) const noexcept
         return false;
     }
 
-    if (0u == LocalNyms().count(id)) {
+    if (false == LocalNyms().contains(id)) {
         LogError()()("Nym ")(id, api_.Crypto())(" is not local").Flush();
 
         return false;
@@ -2807,15 +2809,15 @@ auto WalletPrivate::Server(
         throw std::runtime_error{"Attempting to load a null notary contract"};
     }
 
-    Lock mapLock(server_map_lock_);
-    bool inMap = (server_map_.find(id) != server_map_.end());
+    auto mapLock = Lock{server_map_lock_};
+    const bool inMap = (server_map_.find(id) != server_map_.end());
     bool valid = false;
 
     if (!inMap) {
         auto serialized = proto::ServerContract{};
         auto alias = UnallocatedCString{};
         using enum opentxs::storage::ErrorReporting;
-        bool loaded =
+        const bool loaded =
             api_.Storage().Internal().Load(id, serialized, alias, silent);
 
         if (loaded) {
@@ -2849,7 +2851,8 @@ auto WalletPrivate::Server(
                 while (std::chrono::high_resolution_clock::now() < end) {
                     std::this_thread::sleep_for(interval);
                     mapLock.lock();
-                    bool found = (server_map_.find(id) != server_map_.end());
+                    const bool found =
+                        (server_map_.find(id) != server_map_.end());
                     mapLock.unlock();
 
                     if (found) { break; }
@@ -2899,7 +2902,7 @@ auto WalletPrivate::server(std::unique_ptr<contract::Server> contract) const
 
     if (api_.Storage().Internal().Store(serialized, contract->Alias())) {
         {
-            Lock mapLock(server_map_lock_);
+            const auto mapLock = Lock{server_map_lock_};
             server_map_[id].reset(contract.release());
         }
 
@@ -2974,7 +2977,7 @@ auto WalletPrivate::Server(const proto::ServerContract& contract) const
     }
 
     {
-        Lock mapLock(server_map_lock_);
+        const auto mapLock = Lock{server_map_lock_};
         server_map_[serverID].reset(candidate.release());
     }
 
@@ -3092,7 +3095,7 @@ auto WalletPrivate::SetServerAlias(
 
     if (saved) {
         {
-            Lock mapLock(server_map_lock_);
+            const auto mapLock = Lock{server_map_lock_};
             server_map_.erase(id);
         }
 
@@ -3116,7 +3119,7 @@ auto WalletPrivate::SetUnitDefinitionAlias(
 
     if (saved) {
         {
-            Lock mapLock(unit_map_lock_);
+            const auto mapLock = Lock{unit_map_lock_};
             unit_map_.erase(id);
         }
 
@@ -3149,15 +3152,15 @@ auto WalletPrivate::UnitDefinition(
         throw std::runtime_error{"Attempting to load a null unit definition"};
     }
 
-    Lock mapLock(unit_map_lock_);
-    bool inMap = (unit_map_.find(id) != unit_map_.end());
+    auto mapLock = Lock{unit_map_lock_};
+    const bool inMap = (unit_map_.find(id) != unit_map_.end());
     bool valid = false;
 
     if (!inMap) {
         auto serialized = proto::UnitDefinition{};
         UnallocatedCString alias;
         using enum opentxs::storage::ErrorReporting;
-        bool loaded =
+        const bool loaded =
             api_.Storage().Internal().Load(id, serialized, alias, silent);
 
         if (loaded) {
@@ -3191,7 +3194,7 @@ auto WalletPrivate::UnitDefinition(
                 while (std::chrono::high_resolution_clock::now() < end) {
                     std::this_thread::sleep_for(interval);
                     mapLock.lock();
-                    bool found = (unit_map_.find(id) != unit_map_.end());
+                    const bool found = (unit_map_.find(id) != unit_map_.end());
                     mapLock.unlock();
 
                     if (found) { break; }
@@ -3237,7 +3240,7 @@ auto WalletPrivate::unit_definition(
 
     if (api_.Storage().Internal().Store(serialized, contract->Alias())) {
         {
-            Lock mapLock(unit_map_lock_);
+            const auto mapLock = Lock{unit_map_lock_};
             auto it = unit_map_.find(id);
 
             if (unit_map_.end() == it) {
@@ -3313,7 +3316,7 @@ auto WalletPrivate::UnitDefinition(const proto::UnitDefinition& contract) const
     }
 
     {
-        Lock mapLock(unit_map_lock_);
+        const auto mapLock = Lock{unit_map_lock_};
         unit_map_[unitID] = candidate;
     }
 
@@ -3436,7 +3439,7 @@ auto WalletPrivate::SecurityContract(
     const Amount& redemptionIncrement,
     const VersionNumber version) const -> OTUnitDefinition
 {
-    UnallocatedCString unit;
+    const UnallocatedCString unit;
     auto nym = Nym(api_.Factory().NymIDFromBase58(nymid));
 
     if (nym) {

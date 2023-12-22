@@ -468,7 +468,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
 
     const auto balance = factory::Amount(body[2]);
     const auto oldBalance = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         const auto oldbalance = balance_;
         balance_ = balance;
@@ -483,7 +483,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
         return account.get().Alias();
     }();
     const auto aliasChanged = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         if (alias != alias_) {
             alias_ = alias;
@@ -515,7 +515,7 @@ auto CustodialAccountActivity::process_notary(const Message& message) noexcept
     const auto oldName = NotaryName();
     const auto newName = [&] {
         {
-            eLock lock{shared_lock_};
+            auto lock = eLock{shared_lock_};
             notary_ = api_.Wallet().Internal().Server(
                 api_.Storage().Internal().AccountServer(account_id_));
         }
@@ -573,7 +573,7 @@ auto CustodialAccountActivity::process_unit(const Message& message) noexcept
     wait_for_startup();
     // TODO currently it doesn't matter if the unit definition alias changes
     // since we don't use it
-    eLock lock{shared_lock_};
+    auto lock = eLock{shared_lock_};
     contract_ = api_.Wallet().Internal().UnitDefinition(
         api_.Storage().Internal().AccountContract(account_id_));
 }
@@ -588,7 +588,7 @@ auto CustodialAccountActivity::startup() noexcept -> void
         return account.get().Alias();
     }();
     const auto aliasChanged = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         if (alias != alias_) {
             alias_ = alias;

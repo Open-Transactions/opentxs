@@ -170,7 +170,7 @@ auto Contacts::Load(
 auto Contacts::nomalize_id(const identifier::Generic& input) const
     -> const identifier::Generic&
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     const auto it = merged_.find(input);
 
@@ -181,7 +181,7 @@ auto Contacts::nomalize_id(const identifier::Generic& input) const
 
 auto Contacts::NymOwner(const identifier::Nym& nym) const -> identifier::Generic
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     const auto it = nym_contact_index_.find(nym);
 
@@ -250,7 +250,7 @@ auto Contacts::save(const Lock& lock) const -> bool
 
 auto Contacts::Save() const -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return save(lock);
 }
@@ -316,7 +316,7 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
 {
     if (false == proto::Validate(data, VERBOSE)) { return false; }
 
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     const auto id = factory_.IdentifierFromBase58(data.id());
     const auto incomingRevision = data.revision();

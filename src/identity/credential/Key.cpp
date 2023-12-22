@@ -139,11 +139,11 @@ auto Key::addKeyCredentialtoSerializedCredential(
     keyCredential->set_version(subversion_);
 
     // These must be serialized in this order
-    bool auth = addKeytoSerializedKeyCredential(
+    const bool auth = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_AUTH);
-    bool encrypt = addKeytoSerializedKeyCredential(
+    const bool encrypt = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_ENCRYPT);
-    bool sign = addKeytoSerializedKeyCredential(
+    const bool sign = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_SIGN);
 
     if (auth && encrypt && sign) {
@@ -659,7 +659,7 @@ auto Key::VerifySignedBySelf() const -> bool
         return false;
     }
 
-    bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
+    const bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
 
     if (!goodPublic) {
         LogError()()("Could not verify public self signature.").Flush();
@@ -676,7 +676,7 @@ auto Key::VerifySignedBySelf() const -> bool
             return false;
         }
 
-        bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
+        const bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
 
         if (!goodPrivate) {
             LogError()()("Could not verify private self signature.").Flush();

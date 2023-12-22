@@ -59,7 +59,7 @@ ZeroMQPrivate::ZeroMQPrivate(
     // WARNING: do not access api_.Wallet() during construction
     status_publisher_->Start(api_.Endpoints().ConnectionStatus().data());
 
-    Lock lock(lock_);
+    const auto lock = Lock{lock_};
 
     init(lock);
 }
@@ -168,7 +168,7 @@ auto ZeroMQPrivate::ReceiveTimeout() const noexcept -> std::chrono::seconds
 
 auto ZeroMQPrivate::RefreshConfig() const noexcept -> void
 {
-    Lock lock(lock_);
+    const auto lock = Lock{lock_};
 
     return init(lock);
 }
@@ -183,7 +183,7 @@ auto ZeroMQPrivate::SendTimeout() const noexcept -> std::chrono::seconds
 auto ZeroMQPrivate::Server(const identifier::Notary& id) const noexcept(false)
     -> opentxs::network::ServerConnection&
 {
-    Lock lock(lock_);
+    const auto lock = Lock{lock_};
     auto existing = server_connections_.find(id);
 
     if (server_connections_.end() != existing) { return existing->second; }
@@ -224,7 +224,7 @@ auto ZeroMQPrivate::SetSocksProxy(
         return false;
     }
 
-    Lock lock(lock_);
+    const auto lock = Lock{lock_};
     socks_proxy_ = proxy;
 
     for (auto& it : server_connections_) {
@@ -244,7 +244,7 @@ auto ZeroMQPrivate::SetSocksProxy(
 
 auto ZeroMQPrivate::SocksProxy(UnallocatedCString& proxy) const noexcept -> bool
 {
-    Lock lock(lock_);
+    const auto lock = Lock{lock_};
     proxy = socks_proxy_;
 
     return (!socks_proxy_.empty());
@@ -261,7 +261,7 @@ auto ZeroMQPrivate::SocksProxy() const noexcept -> UnallocatedCString
 auto ZeroMQPrivate::Status(const identifier::Notary& server) const noexcept
     -> opentxs::network::ConnectionState
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto it = server_connections_.find(server);
     const bool haveConnection = it != server_connections_.end();
     lock.unlock();

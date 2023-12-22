@@ -402,7 +402,7 @@ auto DeterministicPrivate::GenerateNext(
 {
     auto lock = rLock{lock_};
 
-    if (0 == generated_.count(type)) { return {}; }
+    if (false == generated_.contains(type)) { return {}; }
 
     try {
         auto generated = Batch{};

@@ -264,14 +264,15 @@ auto OTAgreement::DropServerNoticeToNymbox(
         pItem1->SaveContract();
 
         // the Transaction "owns" the item now and will handle cleaning it up.
-        std::shared_ptr<Item> item{pItem1.release()};
+        const std::shared_ptr<Item> item{pItem1.release()};
         pTransaction->AddItem(item);
 
         pTransaction->SignContract(theServerNym, reason);
         pTransaction->SaveContract();
 
         // Here the transaction we just created is actually added to the ledger.
-        std::shared_ptr<OTTransaction> transaction{pTransaction.release()};
+        const std::shared_ptr<OTTransaction> transaction{
+            pTransaction.release()};
         theLedger->AddTransaction(transaction);
 
         // Release any signatures that were there before (They won't
@@ -391,7 +392,7 @@ void OTAgreement::onFinalReceipt(
     // The finalReceipt Item's ATTACHMENT contains the UPDATED Cron Item.
     // (With the SERVER's signature on it!)
     auto strUpdatedCronItem = String::Factory(*this);
-    OTString pstrAttachment = strUpdatedCronItem;
+    const OTString pstrAttachment = strUpdatedCronItem;
     const auto strOrigCronItem = String::Factory(theOrigCronItem);
     const identifier::Nym NYM_ID = GetRecipientNymID();
 

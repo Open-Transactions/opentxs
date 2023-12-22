@@ -41,7 +41,7 @@ auto Value::bytes(
 {
     using namespace opentxs::network::blockchain::bitcoin;
     static constexpr auto marker = sizeof(
-        std::underlying_type<protocol::bitcoin::base::block::script::OP>::type);
+        std::underlying_type_t<protocol::bitcoin::base::block::script::OP>);
     static constexpr auto category = decltype(category_)::payload_size_;
     static constexpr auto bitfield = sizeof(marker_type);
     static_assert(marker + category + bitfield == 34_uz);
@@ -87,7 +87,7 @@ auto Value::Serialize(Writer&& out) const noexcept(false) -> void
     using namespace opentxs::network::blockchain::bitcoin;
     using protocol::bitcoin::base::block::script::OP;
     static constexpr auto marker =
-        static_cast<std::underlying_type<OP>::type>(OP::PREFIX_TOKEN);
+        static_cast<std::underlying_type_t<OP>>(OP::PREFIX_TOKEN);
     const auto bitfield = [this] {
         auto bf = marker_type{};
 
@@ -97,9 +97,8 @@ auto Value::Serialize(Writer&& out) const noexcept(false) -> void
 
         if (nft_) {
             bf |= nft_mask_;
-            bf |=
-                static_cast<std::underlying_type<decltype(capability_)>::type>(
-                    capability_);
+            bf |= static_cast<std::underlying_type_t<decltype(capability_)>>(
+                capability_);
         }
 
         if (amount_.has_value()) { bf |= amount_mask_; }
@@ -132,7 +131,7 @@ auto Value::Serialize(proto::BlockchainTransactionOutput& out) const noexcept
     proto.set_category(category_.data(), category_.size());
     proto.set_nft(nft_);
     proto.set_capability(
-        static_cast<std::underlying_type<decltype(capability_)>::type>(
+        static_cast<std::underlying_type_t<decltype(capability_)>>(
             capability_));
 
     if (has_commitment()) {
@@ -202,7 +201,7 @@ auto deserialize(ReadView& in, std::optional<Value>& out) noexcept(false)
 {
     using protocol::bitcoin::base::block::script::OP;
     static constexpr auto marker =
-        static_cast<std::underlying_type<OP>::type>(OP::PREFIX_TOKEN);
+        static_cast<std::underlying_type_t<OP>>(OP::PREFIX_TOKEN);
     out.reset();
 
     if (in.size() < sizeof(marker)) { return; }

@@ -19,10 +19,7 @@ Ethereum::Ethereum(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-Ethereum::Ethereum(const Ethereum& rhs) noexcept
-    : Imported(rhs)
-{
-}
+Ethereum::Ethereum(const Ethereum& rhs) noexcept = default;
 
 Ethereum::Ethereum(Ethereum&& rhs) noexcept
     : Imported(std::move(rhs))

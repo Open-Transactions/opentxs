@@ -297,7 +297,8 @@ auto Bip32::Imp::DeserializePrivate(
         return {};
     }
 
-    bool output = extract(input, network, depth, parent, index, chainCode);
+    const bool output =
+        extract(input, network, depth, parent, index, chainCode);
 
     if (std::byte(0) != input.get()[45]) {
         LogError()()("Invalid padding bit").Flush();

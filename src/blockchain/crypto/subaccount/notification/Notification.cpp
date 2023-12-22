@@ -17,10 +17,7 @@ Notification::Notification(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-Notification::Notification(const Notification& rhs) noexcept
-    : Subaccount(rhs)
-{
-}
+Notification::Notification(const Notification& rhs) noexcept = default;
 
 Notification::Notification(Notification&& rhs) noexcept
     : Subaccount(std::move(rhs))

@@ -17,8 +17,6 @@
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 Source::Source()

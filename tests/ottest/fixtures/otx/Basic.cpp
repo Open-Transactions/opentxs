@@ -103,7 +103,7 @@ auto Basic::find_id(
     const ot::UnallocatedCString& id,
     const ot::ObjectList& list) -> bool
 {
-    matchID matchid(id);
+    const matchID matchid(id);
 
     return std::find_if(list.begin(), list.end(), matchid) != list.end();
 }

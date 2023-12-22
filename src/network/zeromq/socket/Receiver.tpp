@@ -47,7 +47,7 @@ template <typename InterfaceType, typename MessageType>
 auto Receiver<InterfaceType, MessageType>::add_task(
     SocketCallback&& cb) const noexcept -> int
 {
-    Lock lock(task_lock_);
+    const auto lock = Lock{task_lock_};
     auto [it, success] = socket_tasks_.emplace(++next_task_, std::move(cb));
 
     assert_true(success);
@@ -92,7 +92,7 @@ template <typename InterfaceType, typename MessageType>
 void Receiver<InterfaceType, MessageType>::run_tasks(
     const Lock& lock) const noexcept
 {
-    Lock task_lock(task_lock_);
+    const auto task_lock = Lock{task_lock_};
     auto i = socket_tasks_.begin();
 
     while (i != socket_tasks_.end()) {
@@ -114,7 +114,7 @@ template <typename InterfaceType, typename MessageType>
 auto Receiver<InterfaceType, MessageType>::task_result(
     const int id) const noexcept -> bool
 {
-    Lock lock(task_lock_);
+    const auto lock = Lock{task_lock_};
     const auto it = task_result_.find(id);
 
     assert_true(task_result_.end() != it);
@@ -129,7 +129,7 @@ template <typename InterfaceType, typename MessageType>
 auto Receiver<InterfaceType, MessageType>::task_running(
     const int id) const noexcept -> bool
 {
-    Lock lock(task_lock_);
+    const auto lock = Lock{task_lock_};
 
     return (1 == socket_tasks_.count(id));
 }
@@ -153,7 +153,7 @@ void Receiver<InterfaceType, MessageType>::thread() noexcept
 
     while (running_.get()) {
         auto newEndpoints = endpoint_queue_.pop();
-        Lock lock(lock_, std::try_to_lock);
+        auto lock = Lock{lock_, std::try_to_lock};
 
         if (false == lock.owns_lock()) { continue; }
 

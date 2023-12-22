@@ -141,9 +141,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Reply)
             EXPECT_EQ(3, input.get().size());
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 
@@ -172,9 +172,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Reply)
             EXPECT_EQ(3, input.get().size());
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 
@@ -202,9 +202,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Reply)
         [this](auto&& input) -> ot::network::zeromq::Message {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 
@@ -268,9 +268,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Router)
             EXPECT_EQ(3, input.get().size());
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 
@@ -299,9 +299,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Router)
             EXPECT_EQ(3, input.get().size());
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 
@@ -332,9 +332,9 @@ TEST_F(RouterDealer, Dealer_3_Router_Dealer_Router)
          &replyMessages](const ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match = inputString == test_message_ ||
-                         inputString == test_message2_ ||
-                         inputString == test_message3_;
+            bool const match = inputString == test_message_ ||
+                               inputString == test_message2_ ||
+                               inputString == test_message3_;
 
             EXPECT_TRUE(match);
 

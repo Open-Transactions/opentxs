@@ -267,7 +267,7 @@ auto Section::AddItem(const std::shared_ptr<Item>& item) const -> Section
     if (specialCaseScope) { return imp_->add_scope(item); }
 
     const auto& groupID = item->Type();
-    const bool groupExists = imp_->groups_.count(groupID);
+    const bool groupExists = imp_->groups_.contains(groupID);
     auto map = imp_->groups_;
 
     if (groupExists) {

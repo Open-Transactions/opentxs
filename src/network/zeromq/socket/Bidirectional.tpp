@@ -63,7 +63,7 @@ auto Bidirectional<InterfaceType, MessageType>::apply_timeouts(
     std::mutex& socket_mutex) const noexcept -> bool
 {
     assert_false(nullptr == socket);
-    Lock lock(socket_mutex);
+    const auto lock = Lock{socket_mutex};
 
     auto set = zmq_setsockopt(socket, ZMQ_LINGER, &linger_, sizeof(linger_));
 
@@ -189,7 +189,7 @@ template <typename InterfaceType, typename MessageType>
 auto Bidirectional<InterfaceType, MessageType>::Send(
     zeromq::Message&& message) const noexcept -> bool
 {
-    Lock lock(send_lock_);
+    const auto lock = Lock{send_lock_};
 
     if (false == this->running_.get()) { return false; }
 
@@ -215,7 +215,7 @@ template <typename InterfaceType, typename MessageType>
 void Bidirectional<InterfaceType, MessageType>::shutdown(
     const Lock& lock) noexcept
 {
-    Lock send(send_lock_);
+    auto send = Lock{send_lock_};
 
     if (this->running_.get()) {
         if (push_socket_) {
@@ -249,7 +249,7 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
     while (this->running_.get()) {
         std::this_thread::yield();
         auto newEndpoints = this->endpoint_queue_.pop();
-        Lock lock(this->lock_, std::try_to_lock);
+        auto lock = Lock{this->lock_, std::try_to_lock};
         auto poll = std::array<::zmq_pollitem_t, 2>{};
         poll[0].socket = this->socket_;
         poll[0].events = ZMQ_POLLIN;

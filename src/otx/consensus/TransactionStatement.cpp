@@ -140,7 +140,7 @@ TransactionStatement::operator OTString() const
     serialized.add_attribute("nymID", nym_id_);
 
     if (0 < issued_.size()) {
-        NumList issuedList(issued_);
+        const NumList issuedList(issued_);
         auto issued = String::Factory();
         issuedList.Output(issued);
         TagPtr issuedTag(new Tag(
@@ -150,7 +150,7 @@ TransactionStatement::operator OTString() const
     }
 
     if (0 < available_.size()) {
-        NumList availableList(available_);
+        const NumList availableList(available_);
         auto available = String::Factory();
         availableList.Output(available);
         TagPtr availableTag(new Tag(

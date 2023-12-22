@@ -1839,15 +1839,10 @@ auto OTTransaction::VerifyBalanceReceipt(
             return false;
         }
 
-        pTransactionItem.reset(
-            api_.Factory()
-                .Internal()
-                .Session()
-                .Item(
-                    strBalanceItem,
-                    GetRealNotaryID(),
-                    pResponseTransactionItem->GetReferenceToNum())
-                .release());
+        pTransactionItem = api_.Factory().Internal().Session().Item(
+            strBalanceItem,
+            GetRealNotaryID(),
+            pResponseTransactionItem->GetReferenceToNum());
 
         if (false == bool(pTransactionItem)) {
             LogConsole()()(
@@ -1925,14 +1920,10 @@ auto OTTransaction::VerifyBalanceReceipt(
         return false;
     }
 
-    pBalanceItem.reset(api_.Factory()
-                           .Internal()
-                           .Session()
-                           .Item(
-                               strBalanceItem,
-                               GetRealNotaryID(),
-                               pResponseBalanceItem->GetReferenceToNum())
-                           .release());
+    pBalanceItem = api_.Factory().Internal().Session().Item(
+        strBalanceItem,
+        GetRealNotaryID(),
+        pResponseBalanceItem->GetReferenceToNum());
 
     if (false == bool(pBalanceItem)) {
         LogConsole()()(
@@ -1973,7 +1964,7 @@ auto OTTransaction::VerifyBalanceReceipt(
         return false;
     }
 
-    otx::context::TransactionStatement statement(api_, serialized);
+    const otx::context::TransactionStatement statement(api_, serialized);
 
     // Finally everything is loaded and verified!
     // I have the Nym and Server Nym
@@ -3021,18 +3012,18 @@ auto OTTransaction::DeleteBoxReceipt(Ledger& theLedger) -> bool
         return tmp;
     };
 
-    static UnallocatedCString marked_for_deletion{"MARKED_FOR_DELETION"};
+    static const UnallocatedCString marked_for_deletion{"MARKED_FOR_DELETION"};
     if (raw_file_->Exists()) {
         strOutput->Set(
             concatenation_lambda(strFinal->Get(), marked_for_deletion).c_str());
     } else {
-        static UnallocatedCString trx_empty{
+        static const UnallocatedCString trx_empty{
             "(Transaction was already empty -- strange.)"};
         strOutput->Set(
             concatenation_lambda(trx_empty, marked_for_deletion).c_str());
     }
 
-    bool bDeleted = OTDB::StorePlainString(
+    const bool bDeleted = OTDB::StorePlainString(
         api_,
         strOutput->Get(),
         api_.DataFolder().string(),
@@ -3110,7 +3101,7 @@ auto OTTransaction::SaveBoxReceipt(std::int64_t lLedgerType) -> bool
         return false;
     }
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strFinal->Get(),
         api_.DataFolder().string(),
@@ -3926,7 +3917,7 @@ auto OTTransaction::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         std::int64_t lRequestNumber = 0;
         bool bReplyTransSuccess = false;
 
-        std::int32_t nAbbrevRetVal = LoadAbbreviatedRecord(
+        const std::int32_t nAbbrevRetVal = LoadAbbreviatedRecord(
             xml,
             lNumberOfOrigin,
             theOriginType,
@@ -5364,7 +5355,7 @@ void OTTransaction::ProduceInboxReportItem(
     if (false != bool(pReportItem))  // above line will assert if mem allocation
                                      // fails.
     {
-        Amount lAmount = GetReceiptAmount(reason);
+        const Amount lAmount = GetReceiptAmount(reason);
         pReportItem->SetAmount(lAmount);
 
         pReportItem->SetTransactionNum(
@@ -5566,7 +5557,7 @@ auto OTTransaction::GetReceiptAmount(const PasswordPrompt& reason) -> Amount
             // Get the cheque from the Item and load it up into a Cheque
             // object.
             pOriginalItem->GetAttachment(strAttachment);
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theCheque->LoadContractFromString(strAttachment);
 
             if (!bLoadContractFromString) {
@@ -6282,7 +6273,7 @@ auto OTTransaction::GetSenderNymIDForDisplay(identifier::Nym& theReturnID)
             // Get the cheque from the Item and load it up into a Cheque
             // object.
             pOriginalItem->GetAttachment(strAttachment);
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theCheque->LoadContractFromString(strAttachment);
 
             if (!bLoadContractFromString) {
@@ -6546,7 +6537,7 @@ auto OTTransaction::GetRecipientNymIDForDisplay(identifier::Nym& theReturnID)
             // Get the cheque from the Item and load it up into a Cheque
             // object.
             pOriginalItem->GetAttachment(strAttachment);
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theCheque->LoadContractFromString(strAttachment);
 
             if (!bLoadContractFromString) {
@@ -6681,7 +6672,7 @@ auto OTTransaction::GetSenderAcctIDForDisplay(identifier::Generic& theReturnID)
             // Get the cheque from the Item and load it up into a Cheque
             // object.
             pOriginalItem->GetAttachment(strAttachment);
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theCheque->LoadContractFromString(strAttachment);
 
             if (!bLoadContractFromString) {

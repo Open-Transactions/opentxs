@@ -6,7 +6,6 @@
 #include "ottest/fixtures/blockchain/regtest/Stress.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
-#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -169,7 +168,6 @@ Regtest_stress::Regtest_stress()
     , mine_to_alex_([&](Height height) -> Transaction {
         using OutputBuilder = ot::blockchain::OutputBuilder;
         auto builder = [&] {
-            namespace c = std::chrono;
             auto output = ot::UnallocatedVector<OutputBuilder>{};
             const auto reason = client_1_.Factory().PasswordPrompt(__func__);
             const auto keys = ot::UnallocatedSet<ot::blockchain::crypto::Key>{};

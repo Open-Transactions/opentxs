@@ -15,7 +15,7 @@ namespace ottest
 {
 TEST(NiceMock, constructor)
 {
-    ::testing::NiceMock<::ottest::mock::Interface> mockInstance;
+    const ::testing::NiceMock<::ottest::mock::Interface> mockInstance;
 }
 
 TEST(NiceMock, niceMockOnFunction)

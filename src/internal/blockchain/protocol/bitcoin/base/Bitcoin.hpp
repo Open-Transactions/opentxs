@@ -153,6 +153,7 @@ struct EncodedInput final : opentxs::pmr::Allocated {
             return *this;
         } else {
 
+            // NOLINTNEXTLINE(misc-unconventional-assign-operator)
             return operator=(rhs);
         }
     }
@@ -225,6 +226,7 @@ struct EncodedOutput final : opentxs::pmr::Allocated {
             return *this;
         } else {
 
+            // NOLINTNEXTLINE(misc-unconventional-assign-operator)
             return operator=(rhs);
         }
     }
@@ -287,6 +289,7 @@ struct EncodedWitnessItem final : opentxs::pmr::Allocated {
             return *this;
         } else {
 
+            // NOLINTNEXTLINE(misc-unconventional-assign-operator)
             return operator=(rhs);
         }
     }
@@ -351,6 +354,7 @@ struct EncodedInputWitness final : opentxs::pmr::Allocated {
             return *this;
         } else {
 
+            // NOLINTNEXTLINE(misc-unconventional-assign-operator)
             return operator=(rhs);
         }
     }
@@ -503,6 +507,7 @@ struct EncodedTransaction final : opentxs::pmr::Allocated {
             return *this;
         } else {
 
+            // NOLINTNEXTLINE(misc-unconventional-assign-operator)
             return operator=(rhs);
         }
     }

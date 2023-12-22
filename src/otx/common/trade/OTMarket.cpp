@@ -1197,12 +1197,12 @@ void OTMarket::ProcessTrade(
     // We MIGHT use ONE, OR BOTH, of these, or none.
 
     // Find out if either Nym is actually also the server.
-    bool bFirstNymIsServerNym = (FIRST_NYM_ID == NOTARY_NYM_ID);
-    bool bOtherNymIsServerNym = (OTHER_NYM_ID == NOTARY_NYM_ID);
+    const bool bFirstNymIsServerNym = (FIRST_NYM_ID == NOTARY_NYM_ID);
+    const bool bOtherNymIsServerNym = (OTHER_NYM_ID == NOTARY_NYM_ID);
 
     // We also see, after all that is done, whether both pointers go to the same
     // entity. We'll want to know that later.
-    bool bTradersAreSameNym = (FIRST_NYM_ID == OTHER_NYM_ID);
+    const bool bTradersAreSameNym = (FIRST_NYM_ID == OTHER_NYM_ID);
 
     // Initially both nym pointers are set to their own blank objects
     Nym_p pFirstNym = nullptr;
@@ -1469,7 +1469,7 @@ void OTMarket::ProcessTrade(
             return;
         } else {
             // Generate new transaction numbers for these new transactions
-            std::int64_t lNewTransactionNumber =
+            const std::int64_t lNewTransactionNumber =
                 pCron->GetNextTransactionNumber();
 
             //            assert_true(lNewTransactionNumber > 0); // this can be
@@ -1561,10 +1561,10 @@ void OTMarket::ProcessTrade(
 
             assert_true(false != bool(pTrans4));
 
-            std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
-            std::shared_ptr<OTTransaction> trans2{pTrans2.release()};
-            std::shared_ptr<OTTransaction> trans3{pTrans3.release()};
-            std::shared_ptr<OTTransaction> trans4{pTrans4.release()};
+            const std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
+            const std::shared_ptr<OTTransaction> trans2{pTrans2.release()};
+            const std::shared_ptr<OTTransaction> trans3{pTrans3.release()};
+            const std::shared_ptr<OTTransaction> trans4{pTrans4.release()};
 
             // All four inboxes will get receipts with the same (new)
             // transaction ID.
@@ -1593,10 +1593,10 @@ void OTMarket::ProcessTrade(
             assert_true(false != bool(pItem3));
             assert_true(false != bool(pItem4));
 
-            std::shared_ptr<Item> item1{pItem1.release()};
-            std::shared_ptr<Item> item2{pItem2.release()};
-            std::shared_ptr<Item> item3{pItem3.release()};
-            std::shared_ptr<Item> item4{pItem4.release()};
+            const std::shared_ptr<Item> item1{pItem1.release()};
+            const std::shared_ptr<Item> item2{pItem2.release()};
+            const std::shared_ptr<Item> item3{pItem3.release()};
+            const std::shared_ptr<Item> item4{pItem4.release()};
 
             item1->SetStatus(Item::rejection);  // the default.
             item2->SetStatus(Item::rejection);  // the default.
@@ -1719,8 +1719,9 @@ void OTMarket::ProcessTrade(
                      ? theOtherOffer.GetAmountAvailable()
                      : theOffer.GetAmountAvailable());
 
-            Amount lTemp = lMostAvailable % GetScale();  // The Scale may not
-                                                         // evenly divide into
+            const Amount lTemp =
+                lMostAvailable % GetScale();  // The Scale may not
+                                              // evenly divide into
             // the amount available
 
             lMostAvailable -= lTemp;  // We'll subtract remainder amount, so
@@ -1820,12 +1821,13 @@ void OTMarket::ProcessTrade(
                 // accounts to cover the round, (for SURE.) So let's DO
                 // it.
 
-                bool bMove1 =
+                const bool bMove1 =
                     pAssetAccountToDebit.get().Debit(lMinIncrementPerRound);
-                bool bMove2 = pCurrencyAccountToDebit.get().Debit(lPrice);
-                bool bMove3 =
+                const bool bMove2 = pCurrencyAccountToDebit.get().Debit(lPrice);
+                const bool bMove3 =
                     pAssetAccountToCredit.get().Credit(lMinIncrementPerRound);
-                bool bMove4 = pCurrencyAccountToCredit.get().Credit(lPrice);
+                const bool bMove4 =
+                    pCurrencyAccountToCredit.get().Credit(lPrice);
 
                 // If ANY of these failed, then roll them all back and
                 // break.
@@ -2698,7 +2700,7 @@ auto OTMarket::ValidateOfferForMarket(OTOffer& theOffer) -> bool
         api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
             theOffer.GetInstrumentDefinitionID()));
 
-    UnallocatedVector<char> buf;
+    const UnallocatedVector<char> buf;
     if (GetNotaryID() != theOffer.GetNotaryID()) {
         bValidOffer = false;
         LogConsole()()("Offer is invalid for this market: "

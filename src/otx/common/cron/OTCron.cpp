@@ -365,7 +365,7 @@ auto OTCron::GetNextTransactionNumber() -> std::int64_t
 {
     if (list_transaction_numbers_.empty()) { return 0; }
 
-    std::int64_t lTransactionNum = list_transaction_numbers_.front();
+    const std::int64_t lTransactionNum = list_transaction_numbers_.front();
 
     list_transaction_numbers_.pop_front();
 
@@ -446,7 +446,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
             // and thus save myself the trouble of verifying the signature EVERY
             // ITERATION of ProcessCron().
             //
-            std::shared_ptr<OTCronItem> item{pItem.release()};
+            const std::shared_ptr<OTCronItem> item{pItem.release()};
             if (!item->VerifySignature(*server_nym_)) {
                 LogError()()("ERROR SECURITY: Server "
                              "signature failed to "
@@ -515,7 +515,7 @@ auto OTCron::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         // AddMarket normally saves to file, but we don't want that when
         // we're LOADING from file, now do we?
-        std::shared_ptr<OTMarket> market{pMarket.release()};
+        const std::shared_ptr<OTMarket> market{pMarket.release()};
         if (!market->LoadMarket() ||
             !market->VerifySignature(*GetServerNym()) ||
             !AddMarket(market, false))  // bSaveFile=false: don't save this
@@ -996,7 +996,7 @@ auto OTCron::AddMarket(
 
     auto MARKET_ID = api_.Factory().Internal().Identifier(*theMarket);
     auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
-    UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
+    const UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something else already there with the same market ID.
     auto it = markets_.find(std_MARKET_ID);
@@ -1076,8 +1076,8 @@ auto OTCron::GetOrCreateMarket(
     // Cron.
     // So let's add it...
     std::shared_ptr<OTMarket> market{pMarket.release()};
-    bool bAdded = AddMarket(market, true);  // bool bSaveMarketFile=true,
-                                            // since it was created new.
+    const bool bAdded = AddMarket(market, true);  // bool bSaveMarketFile=true,
+                                                  // since it was created new.
 
     if (bAdded) {
         LogConsole()()("New market created and added to Cron.").Flush();
@@ -1094,7 +1094,7 @@ auto OTCron::GetMarket(const identifier::Generic& MARKET_ID)
     -> std::shared_ptr<OTMarket>
 {
     auto str_MARKET_ID = String::Factory(MARKET_ID, api_.Crypto());
-    UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
+    const UnallocatedCString std_MARKET_ID = str_MARKET_ID->Get();
 
     // See if there's something there with that transaction number.
     auto it = markets_.find(std_MARKET_ID);

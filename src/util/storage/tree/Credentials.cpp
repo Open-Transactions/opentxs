@@ -125,7 +125,7 @@ auto Credentials::Load(
     std::shared_ptr<proto::Credential>& cred,
     ErrorReporting checking) const -> bool
 {
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const bool exists = (item_map_.end() != item_map_.find(id));
 
     if (false == exists) {
@@ -191,7 +191,7 @@ auto Credentials::SetAlias(
 auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
     -> bool
 {
-    std::unique_lock<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto id = factory_.Internal().Identifier(cred.id());
     const bool existingKey = (item_map_.end() != item_map_.find(id));
     const bool incomingPrivate = (proto::KEYMODE_PRIVATE == cred.mode());

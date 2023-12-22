@@ -60,8 +60,6 @@ template class std::tuple<
     opentxs::identifier::Generic>;
 // NOLINTEND(cert-dcl58-cpp)
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto ContactActivityModel(
@@ -460,7 +458,7 @@ auto ContactActivity::process_contact(const Message& in) noexcept -> void
             std::swap(me_, name);
             changed = true;
         }
-    } else if (0 < contacts_.count(contactID)) {
+    } else if (contacts_.contains(contactID)) {
         changed = update_display_name();
     } else {
 
@@ -573,7 +571,7 @@ auto ContactActivity::process_messagability(const Message& message) noexcept
 
     const auto contact = api_.Factory().IdentifierFromHash(body[2].Bytes());
 
-    if (0 == contacts_.count(contact)) { return; }
+    if (false == contacts_.contains(contact)) { return; }
 
     if (update_messagability(body[3].as<otx::client::Messagability>())) {
         UpdateNotify();

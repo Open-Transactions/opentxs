@@ -50,11 +50,13 @@ UnitDefinition::UnitDefinition(
 auto UnitDefinition::operator=(const UnitDefinition& rhs) noexcept
     -> UnitDefinition&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto UnitDefinition::operator=(UnitDefinition&& rhs) noexcept -> UnitDefinition&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 

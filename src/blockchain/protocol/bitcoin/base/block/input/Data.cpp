@@ -123,7 +123,7 @@ auto Data::merge(
     }
 
     for (const auto& key : rhs.Keys(get_allocator())) {
-        if (0u == keys_.count(key)) {
+        if (false == keys_.contains(key)) {
             log()("adding key ")(print(key, crypto))(" to input ")(index)
                 .Flush();
         } else {

@@ -148,7 +148,7 @@ auto WalletPrivate::mutable_ClientContext(
     auto handle = context_map_.lock();
     auto& map = *handle;
     auto base = context(serverNymID, remoteNymID, map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };
@@ -193,7 +193,7 @@ auto WalletPrivate::mutable_Context(
     auto handle = context_map_.lock();
     auto& map = *handle;
     auto base = context(server_.NymID(), clientNymID, map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };

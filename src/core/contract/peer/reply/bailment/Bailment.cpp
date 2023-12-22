@@ -63,11 +63,13 @@ auto Bailment::IsValid() const noexcept -> bool
 
 auto Bailment::operator=(const Bailment& rhs) noexcept -> Bailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Bailment::operator=(Bailment&& rhs) noexcept -> Bailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

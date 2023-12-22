@@ -5,15 +5,12 @@
 
 #include "ottest/fixtures/blockchain/NumericHash.hpp"  // IWYU pragma: associated
 
-#include <boost/endian/buffers.hpp>
 #include <opentxs/opentxs.hpp>
 
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ottest
 {
-namespace be = boost::endian;
-namespace ot = opentxs;
 
 NumericHash::NumericHash()
     : api_(OTTestEnvironment::GetOT().StartClientSession(0))

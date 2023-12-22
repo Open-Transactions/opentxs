@@ -29,8 +29,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto BlockchainAPI(

@@ -12,8 +12,6 @@
 #include "ottest/fixtures/blockchain/Basic.hpp"
 #include "ottest/fixtures/blockchain/SyncServerDB.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace opentxs::literals;

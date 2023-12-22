@@ -50,11 +50,13 @@ auto Ed25519::Blank() noexcept -> Ed25519&
 
 auto Ed25519::operator=(const Ed25519& rhs) noexcept -> Ed25519&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto Ed25519::operator=(Ed25519&& rhs) noexcept -> Ed25519&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
 

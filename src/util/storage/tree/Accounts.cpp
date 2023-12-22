@@ -49,7 +49,7 @@
 
 #define EXTRACT_FIELD(field)                                                   \
     {                                                                          \
-        Lock lock(write_lock_);                                                \
+        auto lock = Lock{write_lock_};                                         \
                                                                                \
         return std::get<field>(get_account_data(lock, id));                    \
     }                                                                          \
@@ -302,7 +302,7 @@ auto Accounts::check_update_account(
 
 auto Accounts::Delete(const identifier::Account& id) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     auto it = account_data_.find(id);
 
     if (account_data_.end() != it) {
@@ -352,7 +352,7 @@ auto Accounts::init(const Hash& hash) noexcept(false) -> void
             default: {
                 init_map(proto.account());
 
-                Lock lock(write_lock_);
+                const auto lock = Lock{write_lock_};
                 DESERIALIZE_INDEX(owner, owner_index_, 0, NymIDFromBase58);
                 DESERIALIZE_INDEX(signer, signer_index_, 1, NymIDFromBase58);
                 DESERIALIZE_INDEX(issuer, issuer_index_, 2, NymIDFromBase58);
@@ -464,7 +464,7 @@ auto Accounts::Store(
     const identifier::UnitDefinition& contract,
     const UnitType unit) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     if (!check_update_account(
             lock, id, owner, signer, issuer, server, contract, unit)) {

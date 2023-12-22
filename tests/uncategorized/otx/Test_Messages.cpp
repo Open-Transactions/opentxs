@@ -9,8 +9,6 @@
 
 #include "ottest/fixtures/otx/Messages.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 

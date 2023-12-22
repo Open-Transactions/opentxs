@@ -68,7 +68,7 @@ public:
     auto GetOutpaymentsCount() const -> std::int32_t final;
     auto GetUsageCredits() const -> const std::int64_t& final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return usage_credits_;
     }
@@ -85,7 +85,7 @@ public:
     void AddOutpayments(std::shared_ptr<Message> theMessage) final;
     auto GetSetAssetAccounts() -> UnallocatedSet<UnallocatedCString>& final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return accounts_;
     }
@@ -102,7 +102,7 @@ public:
         const identifier::Generic& theInput) -> bool final;  // client-side
     void SetUsageCredits(const std::int64_t& lUsage) final
     {
-        eLock lock(shared_lock_);
+        const auto lock = eLock{shared_lock_};
 
         usage_credits_ = lUsage;
     }

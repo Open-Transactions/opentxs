@@ -27,8 +27,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto BlockchainSelectionModel(
@@ -227,7 +225,7 @@ auto BlockchainSelection::process_state(
     const blockchain::Type chain,
     const bool enabled) const noexcept -> void
 {
-    if (0 == filter_.count(chain)) { return; }
+    if (false == filter_.contains(chain)) { return; }
 
     auto& isEnabled = chain_state_.at(chain);
 

@@ -408,7 +408,7 @@ auto StateMachine::deposit_cheque(
         return finish_task(taskID, false, error_result());
     }
 
-    std::shared_ptr<Cheque> cheque{
+    const std::shared_ptr<Cheque> cheque{
         api_.Factory().Internal().Session().Cheque()};
 
     assert_false(nullptr == cheque);
@@ -465,7 +465,7 @@ auto StateMachine::download_nym(const TaskID taskID, const CheckNymTask& id)
 {
     assert_false(id.empty());
 
-    otx::context::Server::ExtraArgs args{};
+    const otx::context::Server::ExtraArgs args{};
 
     DO_OPERATION(Start, otx::OperationType::CheckNym, id, args);
 
@@ -586,7 +586,7 @@ auto StateMachine::get_admin(const TaskID taskID, const Secret& password) const
 
 auto StateMachine::get_transaction_numbers(const TaskID taskID) const -> bool
 {
-    otx::context::Server::ExtraArgs args{};
+    const otx::context::Server::ExtraArgs args{};
 
     DO_OPERATION(Start, otx::OperationType::GetTransactionNumbers, args);
 
@@ -596,7 +596,7 @@ auto StateMachine::get_transaction_numbers(const TaskID taskID) const -> bool
 void StateMachine::increment_counter(const bool run)
 {
     ++counter_;
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     for (auto i = tasks_.begin(); i < tasks_.end();) {
         // auto& [limit, future] = *i;
@@ -651,7 +651,7 @@ auto StateMachine::issue_unit_definition(
 
             return finish_task(taskID, false, error_result());
         }
-        otx::context::Server::ExtraArgs args{label, false};
+        const otx::context::Server::ExtraArgs args{label, false};
 
         DO_OPERATION(IssueUnitDefinition, serialized, args);
 
@@ -747,7 +747,7 @@ auto StateMachine::main_loop() noexcept -> bool
     run_task<ProcessInboxTask>(&StateMachine::process_inbox);
     check_transaction_numbers(context);
 
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
     const bool run = 0 < (task_count_.load() + tasks + next);
     increment_counter(run);
 
@@ -869,7 +869,7 @@ auto StateMachine::queue_nyms() -> bool
     while (get_nym_fetch(op_.ServerID()).Pop(task_id_, nymID)) {
         SM_SHUTDOWN();
 
-        if (0 == unknown_nyms_.count(nymID)) {
+        if (false == unknown_nyms_.contains(nymID)) {
             bump_task(get_task<CheckNymTask>().Push(task_id_, nymID));
         }
     }
@@ -877,7 +877,7 @@ auto StateMachine::queue_nyms() -> bool
     while (get_nym_fetch(blank).Pop(task_id_, nymID)) {
         SM_SHUTDOWN();
 
-        if (0 == unknown_nyms_.count(nymID)) {
+        if (false == unknown_nyms_.contains(nymID)) {
             bump_task(get_task<CheckNymTask>().Push(task_id_, nymID));
         }
     }
@@ -903,7 +903,7 @@ auto StateMachine::register_account(
         }
     }
 
-    otx::context::Server::ExtraArgs args{label, false};
+    const otx::context::Server::ExtraArgs args{label, false};
 
     DO_OPERATION(
         Start, otx::OperationType::RegisterAccount, unitID, {label, false});
@@ -1079,7 +1079,7 @@ template <typename T>
 auto StateMachine::StartTask(const TaskID taskID, const T& params) const
     -> StateMachine::BackgroundTask
 {
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
 
     if (shutdown().load()) {
         LogVerbose()()("Shutting down").Flush();
@@ -1159,7 +1159,7 @@ auto StateMachine::write_and_send_cheque(
         return TaskDone::retry;
     }
 
-    std::unique_ptr<Cheque> cheque(
+    const std::unique_ptr<Cheque> cheque(
         api_.Internal().asClient().OTAPI().WriteCheque(
             op_.ServerID(),
             value,
@@ -1176,7 +1176,7 @@ auto StateMachine::write_and_send_cheque(
         return task_done(finish_task(taskID, false, error_result()));
     }
 
-    std::shared_ptr<OTPayment> payment{
+    const std::shared_ptr<OTPayment> payment{
         api_.Factory().Internal().Session().Payment(String::Factory(*cheque))};
 
     if (false == bool(payment)) {

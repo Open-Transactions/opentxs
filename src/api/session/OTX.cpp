@@ -721,15 +721,14 @@ auto OTX::AcknowledgeVerification(
 auto OTX::add_task(const TaskID taskID, const otx::client::ThreadStatus status)
     const -> OTX::BackgroundTask
 {
-    Lock lock(task_status_lock_);
+    const auto lock = Lock{task_status_lock_};
 
-    if (0 != task_status_.count(taskID)) { return error_task(); }
+    if (task_status_.contains(taskID)) { return error_task(); }
 
-    std::promise<Result> promise{};
-    [[maybe_unused]] auto [it, added] = task_status_.emplace(
+    auto [it, added] = task_status_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(taskID),
-        std::forward_as_tuple(status, std::move(promise)));
+        std::forward_as_tuple(status, std::promise<Result>{}));
 
     assert_true(added);
 
@@ -740,7 +739,7 @@ void OTX::associate_message_id(
     const identifier::Generic& messageID,
     const TaskID taskID) const
 {
-    Lock lock(task_status_lock_);
+    const auto lock = Lock{task_status_lock_};
     task_message_id_.emplace(taskID, messageID);
 }
 
@@ -1423,7 +1422,7 @@ auto OTX::get_introduction_server(const Lock& lock) const -> identifier::Notary
 auto OTX::get_nym_fetch(const identifier::Notary& serverID) const
     -> UniqueQueue<identifier::Nym>&
 {
-    Lock lock(nym_fetch_lock_);
+    const auto lock = Lock{nym_fetch_lock_};
 
     return server_nym_fetch_[serverID];
 }
@@ -1431,7 +1430,7 @@ auto OTX::get_nym_fetch(const identifier::Notary& serverID) const
 auto OTX::get_operations(const ContextID& id) const noexcept(false)
     -> otx::client::implementation::StateMachine&
 {
-    Lock lock(shutdown_lock_);
+    const auto lock = Lock{shutdown_lock_};
 
     if (shutdown_.load()) { throw; }
 
@@ -1441,7 +1440,7 @@ auto OTX::get_operations(const ContextID& id) const noexcept(false)
 auto OTX::get_task(const ContextID& id) const
     -> otx::client::implementation::StateMachine&
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto it = operations_.find(id);
 
     if (operations_.end() == it) {
@@ -1722,7 +1721,7 @@ auto OTX::InitiateVerification(
 
 auto OTX::IntroductionServer() const -> const identifier::Notary&
 {
-    Lock lock(introduction_server_lock_);
+    const auto lock = Lock{introduction_server_lock_};
 
     if (false == bool(introduction_server_id_)) {
         load_introduction_server(lock);
@@ -1799,7 +1798,7 @@ auto OTX::MessageStatus(const TaskID taskID) const
 {
     auto output = std::pair<otx::client::ThreadStatus, OTX::MessageID>{};
     auto& [threadStatus, messageID] = output;
-    Lock lock(task_status_lock_);
+    const auto lock = Lock{task_status_lock_};
     threadStatus = status(lock, taskID);
 
     if (threadStatus == otx::client::ThreadStatus::FINISHED_SUCCESS) {
@@ -2062,7 +2061,7 @@ auto OTX::queue_cheque_deposit(
         payment->SetTempRecipientNymID(nymID);
     }
 
-    std::shared_ptr<OTPayment> ppayment{payment.release()};
+    const std::shared_ptr<OTPayment> ppayment{payment.release()};
     const auto task = DepositPayment(nymID, ppayment);
     const auto taskID = std::get<0>(task);
 
@@ -2293,7 +2292,7 @@ auto OTX::RegisterNymPublic(
 auto OTX::SetIntroductionServer(const contract::Server& contract) const noexcept
     -> identifier::Notary
 {
-    Lock lock(introduction_server_lock_);
+    const auto lock = Lock{introduction_server_lock_};
 
     return set_introduction_server(lock, contract);
 }
@@ -2301,7 +2300,7 @@ auto OTX::SetIntroductionServer(const contract::Server& contract) const noexcept
 auto OTX::SetIntroductionServer(ReadView contract) const noexcept
     -> identifier::Notary
 {
-    Lock lock(introduction_server_lock_);
+    const auto lock = Lock{introduction_server_lock_};
 
     return set_introduction_server(
         lock, proto::Factory<proto::ServerContract>(contract));
@@ -2611,14 +2610,14 @@ auto OTX::status(const Lock& lock, const TaskID taskID) const
 
 auto OTX::Status(const TaskID taskID) const -> otx::client::ThreadStatus
 {
-    Lock lock(task_status_lock_);
+    const auto lock = Lock{task_status_lock_};
 
     return status(lock, taskID);
 }
 
 void OTX::trigger_all() const
 {
-    Lock lock(shutdown_lock_);
+    const auto lock = Lock{shutdown_lock_};
 
     for (const auto& [id, queue] : operations_) {
         if (false == queue.Trigger()) { return; }
@@ -2632,9 +2631,9 @@ void OTX::update_task(
 {
     if (0 == taskID) { return; }
 
-    Lock lock(task_status_lock_);
+    const auto lock = Lock{task_status_lock_};
 
-    if (0 == task_status_.count(taskID)) { return; }
+    if (false == task_status_.contains(taskID)) { return; }
 
     try {
         auto& row = task_status_.at(taskID);
@@ -2740,7 +2739,7 @@ auto OTX::valid_context(
 {
     const auto nyms = api_.Wallet().LocalNyms();
 
-    if (0 == nyms.count(nymID)) {
+    if (false == nyms.contains(nymID)) {
         LogError()()("Nym ")(nymID, api_.Crypto())(
             " does not belong to this wallet.")
             .Flush();
@@ -2816,7 +2815,7 @@ OTX::~OTX()
     find_server_listener_->Close();
     find_nym_listener_->Close();
 
-    Lock lock(shutdown_lock_);
+    auto lock = Lock{shutdown_lock_};
     shutdown_.store(true);
     lock.unlock();
     UnallocatedVector<otx::client::implementation::StateMachine::WaitFuture>

@@ -79,7 +79,7 @@ auto NotificationPrivate::ScanProgress(Subchain type) const noexcept
 {
     static const auto allowed = AllowedSubchains();
 
-    if (0u == allowed.count(type)) {
+    if (false == allowed.contains(type)) {
         LogError()()("Invalid subchain ")(print(type)).Flush();
 
         return Subaccount::ScanProgress(type);

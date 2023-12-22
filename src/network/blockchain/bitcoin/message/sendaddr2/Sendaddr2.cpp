@@ -46,11 +46,13 @@ auto Sendaddr2::Blank() noexcept -> Sendaddr2&
 
 auto Sendaddr2::operator=(const Sendaddr2& rhs) noexcept -> Sendaddr2&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Sendaddr2::operator=(Sendaddr2&& rhs) noexcept -> Sendaddr2&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

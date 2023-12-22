@@ -163,7 +163,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
         return false;
     }
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto initialHeight = best(lock).height_;
     auto parentTxn = lmdb_.TransactionRW();
 
@@ -369,7 +369,7 @@ auto Headers::BestBlock(const block::Height position) const noexcept(false)
 
 auto Headers::best() const noexcept -> block::Position
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return best(lock);
 }
@@ -452,14 +452,14 @@ auto Headers::CurrentBest() const noexcept -> block::Header
 
 auto Headers::CurrentCheckpoint() const noexcept -> block::Position
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return checkpoint(lock);
 }
 
 auto Headers::DisconnectedHashes() const noexcept -> database::DisconnectedList
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto output = database::DisconnectedList{};
     lmdb_.Read(
         BlockHeaderDisconnected,
@@ -476,14 +476,14 @@ auto Headers::DisconnectedHashes() const noexcept -> database::DisconnectedList
 auto Headers::HasDisconnectedChildren(const block::Hash& hash) const noexcept
     -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return lmdb_.Exists(BlockHeaderDisconnected, hash.Bytes());
 }
 
 auto Headers::HaveCheckpoint() const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return 0 < checkpoint(lock).height_;
 }
@@ -497,7 +497,7 @@ auto Headers::header_exists(const Lock& lock, const block::Hash& hash)
 
 auto Headers::HeaderExists(const block::Hash& hash) const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return header_exists(lock, hash);
 }
@@ -577,7 +577,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
 
 auto Headers::IsSibling(const block::Hash& hash) const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return lmdb_.Exists(BlockHeaderSiblings, hash.Bytes());
 }
@@ -635,7 +635,7 @@ auto Headers::push_best(
 auto Headers::RecentHashes(alloc::Default alloc) const noexcept
     -> Vector<block::Hash>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return recent_hashes(lock, alloc);
 }
@@ -688,7 +688,7 @@ auto Headers::ReportTip() noexcept -> void
 
 auto Headers::SiblingHashes() const noexcept -> database::Hashes
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto output = database::Hashes{};
     lmdb_.Read(
         BlockHeaderSiblings,

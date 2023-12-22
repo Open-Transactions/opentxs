@@ -210,6 +210,7 @@ auto Node::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
+// NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
 auto Node::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
@@ -220,6 +221,7 @@ auto Node::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 
     return false;
 }
+// NOLINTEND(clang-analyzer-cplusplus.StringChecker)
 
 auto Node::Actor::forward(
     const zeromq::Envelope& recipient,
@@ -439,12 +441,14 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv6 address"};
                 }
 
+                // NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
                 auto out = ParsedListener{
                     CString{"tcp://[", alloc}
                         .append(local->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                // NOLINTEND(clang-analyzer-cplusplus.StringChecker)
                 const auto bytes = external->to_v6().to_bytes();
                 std::get<1>(out).second.Assign(bytes.data(), bytes.size());
 
@@ -702,6 +706,7 @@ auto Node::Actor::process_blockchain_external(
                 queued.MoveFrames(payload);
             }
             const auto& endpoint = external_endpoints_[index];
+            // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
             router_.SendDeferred([&]() {
                 using enum opentxs::blockchain::node::PeerManagerJobs;
                 auto out = zeromq::tagged_reply_to_message(
@@ -712,6 +717,7 @@ auto Node::Actor::process_blockchain_external(
 
                 return out;
             }());
+            // NOLINTEND(clang-analyzer-core.CallAndMessage)
         } else {
             // NOTE there is no peer manager for this chain so drop the message
         }

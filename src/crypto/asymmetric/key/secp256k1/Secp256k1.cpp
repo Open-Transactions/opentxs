@@ -51,11 +51,13 @@ auto Secp256k1::Blank() noexcept -> Secp256k1&
 
 auto Secp256k1::operator=(const Secp256k1& rhs) noexcept -> Secp256k1&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto Secp256k1::operator=(Secp256k1&& rhs) noexcept -> Secp256k1&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
 

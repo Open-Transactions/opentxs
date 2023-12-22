@@ -656,7 +656,7 @@ auto Unit::VisitAccountRecords(
     const auto strInstrumentDefinitionID = ID().asBase58(api_.Crypto());
     auto record_file =
         api::internal::Paths::GetFilenameA(strInstrumentDefinitionID.c_str());
-    std::unique_ptr<OTDB::Storable> pStorable(OTDB::QueryObject(
+    const std::unique_ptr<OTDB::Storable> pStorable(OTDB::QueryObject(
         api_,
         OTDB::STORED_OBJ_STRING_MAP,
         dataFolder,

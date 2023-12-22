@@ -190,11 +190,13 @@ auto Reply::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Reply::operator=(const Reply& rhs) noexcept -> Reply&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Reply::operator=(Reply&& rhs) noexcept -> Reply&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

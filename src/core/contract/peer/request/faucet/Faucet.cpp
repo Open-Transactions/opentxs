@@ -71,11 +71,13 @@ auto Faucet::IsValid() const noexcept -> bool
 
 auto Faucet::operator=(const Faucet& rhs) noexcept -> Faucet&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Faucet::operator=(Faucet&& rhs) noexcept -> Faucet&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 

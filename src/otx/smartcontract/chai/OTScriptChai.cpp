@@ -73,7 +73,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
             OTParty* pParty = it.second;
             assert_false(nullptr == pParty);
 
-            UnallocatedCString party_name = pParty->GetPartyName();
+            const UnallocatedCString party_name = pParty->GetPartyName();
 
             //          std::cerr << " TESTING PARTY: " << party_name <<
             //            std::endl;
@@ -111,7 +111,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
             OTPartyAccount* pAcct = it.second;
             assert_false(nullptr == pAcct);
 
-            UnallocatedCString acct_name = pAcct->GetName().Get();
+            const UnallocatedCString acct_name = pAcct->GetName().Get();
 
             //          std::cerr << " TESTING ACCOUNT: " << acct_name <<
             //            std::endl;
@@ -246,7 +246,7 @@ auto OTScriptChai::ExecuteScript(OTVariable* pReturnVar) -> bool
                         pReturnVar->SetValue(nResult);
                     } break;
                     case OTVariable::Var_Bool: {
-                        bool bResult = chai_->eval<bool>(
+                        const bool bResult = chai_->eval<bool>(
                             script_.c_str(),
                             exception_specification<const std::exception&>(),
                             display_filename_);

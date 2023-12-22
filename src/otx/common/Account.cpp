@@ -239,11 +239,8 @@ auto Account::create_box(
     const auto& nymID = GetNymID();
     const auto& accountID = GetRealAccountID();
     const auto& serverID = GetRealNotaryID();
-    box.reset(api_.Factory()
-                  .Internal()
-                  .Session()
-                  .Ledger(nymID, accountID, serverID)
-                  .release());
+    box =
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID);
 
     if (false == bool(box)) {
         LogError()()("Failed to construct ledger.").Flush();

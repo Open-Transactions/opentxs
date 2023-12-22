@@ -46,11 +46,13 @@ auto Verack::Blank() noexcept -> Verack&
 
 auto Verack::operator=(const Verack& rhs) noexcept -> Verack&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Verack::operator=(Verack&& rhs) noexcept -> Verack&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

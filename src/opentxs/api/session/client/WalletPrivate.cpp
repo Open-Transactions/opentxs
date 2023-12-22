@@ -92,7 +92,7 @@ auto WalletPrivate::mutable_Context(
     auto& map = *handle;
     auto serverID{notaryID};
     auto base = context(clientNymID, server_to_nym(serverID), map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };
@@ -112,7 +112,7 @@ auto WalletPrivate::mutable_ServerContext(
     auto serverID = api_.Factory().Internal().NotaryIDConvertSafe(remoteID);
     const auto remoteNymID = server_to_nym(serverID);
     auto base = context(localNymID, remoteNymID, map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };

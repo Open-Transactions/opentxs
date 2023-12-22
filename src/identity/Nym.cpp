@@ -287,7 +287,7 @@ auto Nym::AddChildKeyCredential(
     const crypto::Parameters& nymParameters,
     const opentxs::PasswordPrompt& reason) -> identifier::Generic
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     auto output = identifier::Generic{};
     auto it = active_.find(masterID);
     const bool noMaster = (it == active_.end());
@@ -309,7 +309,7 @@ auto Nym::AddClaim(
     const wot::Claim& claim,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -339,7 +339,7 @@ auto Nym::AddContract(
 
     if (id.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -367,7 +367,7 @@ auto Nym::AddEmail(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -398,7 +398,7 @@ auto Nym::AddPaymentCode(
 
     if (paymentCode.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -426,7 +426,7 @@ auto Nym::AddPhoneNumber(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -451,7 +451,7 @@ auto Nym::AddPreferredOTServer(
     const opentxs::PasswordPrompt& reason,
     const bool primary) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -482,7 +482,7 @@ auto Nym::AddSocialMediaProfile(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -547,7 +547,7 @@ auto Nym::at(const std::size_t& index) const noexcept(false)
 
 auto Nym::BestEmail() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -558,7 +558,7 @@ auto Nym::BestEmail() const -> UnallocatedCString
 
 auto Nym::BestPhoneNumber() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -570,7 +570,7 @@ auto Nym::BestPhoneNumber() const -> UnallocatedCString
 auto Nym::BestSocialMediaProfile(const wot::claim::ClaimType type) const
     -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -581,7 +581,7 @@ auto Nym::BestSocialMediaProfile(const wot::claim::ClaimType type) const
 
 auto Nym::Claims() const -> const wot::claim::Data&
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -615,7 +615,7 @@ auto Nym::ContactCredentialVersion() const -> VersionNumber
 auto Nym::Contracts(const UnitType currency, const bool onlyActive) const
     -> UnallocatedSet<identifier::Generic>
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -652,7 +652,7 @@ auto Nym::DeleteClaim(
     const identifier::Generic& id,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -673,7 +673,7 @@ auto Nym::DeleteClaim(
 
 auto Nym::EmailAddresses(bool active) const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -996,7 +996,7 @@ auto Nym::has_capability(const eLock& lock, const NymCapability& capability)
 
 auto Nym::HasCapability(const NymCapability& capability) const -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return has_capability(lock, capability);
 }
@@ -1030,7 +1030,8 @@ void Nym::init_claims(const eLock& lock) const
             assert_true(
                 proto::Validate(serialized, VERBOSE, proto::ClaimType::Normal));
 
-            wot::claim::Data claimCred(api_, nymID, dataVersion, serialized);
+            const wot::claim::Data claimCred(
+                api_, nymID, dataVersion, serialized);
             // NOLINTNEXTLINE(modernize-make-unique)
             contact_data_.reset(
                 new wot::claim::Data(*contact_data_ + claimCred));
@@ -1106,7 +1107,7 @@ auto Nym::load_revoked(
 
 auto Nym::Name() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1297,7 +1298,7 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
 
 auto Nym::PhoneNumbers(bool active) const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1458,7 +1459,7 @@ auto Nym::set_contact_data(
 
 void Nym::SetAlias(std::string_view alias)
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     alias_ = alias;
     revision_++;
@@ -1468,7 +1469,7 @@ auto Nym::SetCommonName(
     const UnallocatedCString& name,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1499,7 +1500,7 @@ auto Nym::SetContactData(
     const proto::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     contact_data_ = std::make_unique<wot::claim::Data>(
         api_, id_.asBase58(api_.Crypto()), ContactDataVersion(), data);
 
@@ -1512,7 +1513,7 @@ auto Nym::SetScope(
     const opentxs::PasswordPrompt& reason,
     const bool primary) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1555,7 +1556,7 @@ auto Nym::Sign(
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
-            bool success = it.second->Internal().Sign(
+            const bool success = it.second->Internal().Sign(
                 preimage,
                 role,
                 opentxs::crypto::asymmetric::Role::Sign,
@@ -1585,7 +1586,7 @@ auto Nym::Sign(
 auto Nym::SocialMediaProfiles(const wot::claim::ClaimType type, bool active)
     const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1597,7 +1598,7 @@ auto Nym::SocialMediaProfiles(const wot::claim::ClaimType type, bool active)
 auto Nym::SocialMediaProfileTypes() const
     -> const UnallocatedSet<wot::claim::ClaimType>
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1713,7 +1714,7 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
 
 auto Nym::VerifyPseudonym() const -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return verify_pseudonym(lock);
 }

@@ -61,7 +61,7 @@ AccountSummaryItem::AccountSummaryItem(
 auto AccountSummaryItem::DisplayBalance() const noexcept -> UnallocatedCString
 {
     if (0 == contract_->Version()) {
-        eLock lock(shared_lock_);
+        const auto lock = eLock{shared_lock_};
 
         try {
             contract_ = api_.Wallet().Internal().UnitDefinition(
@@ -70,7 +70,7 @@ auto AccountSummaryItem::DisplayBalance() const noexcept -> UnallocatedCString
         }
     }
 
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     if (0 < contract_->Version()) {
         const auto& definition = display::GetDefinition(currency_);
@@ -100,7 +100,7 @@ auto AccountSummaryItem::load_unit(
 
 auto AccountSummaryItem::Name() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return name_;
 }
@@ -109,7 +109,7 @@ auto AccountSummaryItem::reindex(
     const IssuerItemSortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     balance_ = extract_custom<Amount>(custom);
     name_ = key;
 

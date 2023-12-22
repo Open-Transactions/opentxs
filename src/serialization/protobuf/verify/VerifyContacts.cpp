@@ -241,7 +241,7 @@ auto TranslateSectionName(
     const std::uint32_t enumValue,
     const std::string_view lang) -> std::string_view
 {
-    EnumLang langPair{enumValue, lang};
+    const EnumLang langPair{enumValue, lang};
 
     for (const auto& it : ContactSectionNames()) {
         if (langPair == it.first) { return it.second; }
@@ -253,7 +253,7 @@ auto TranslateItemType(
     const std::uint32_t enumValue,
     const std::string_view lang) -> std::string_view
 {
-    EnumLang langPair{enumValue, lang};
+    const EnumLang langPair{enumValue, lang};
 
     for (const auto& it : ContactItemTypes()) {
         if (langPair == it.first) { return it.second; }
@@ -265,7 +265,7 @@ auto TranslateItemAttributes(
     const std::uint32_t enumValue,
     const std::string_view lang) -> std::string_view
 {
-    EnumLang langPair{enumValue, lang};
+    const EnumLang langPair{enumValue, lang};
 
     for (const auto& it : ContactItemAttributes()) {
         if (langPair == it.first) { return it.second; }
@@ -278,7 +278,8 @@ auto ReciprocalRelationship(const std::uint32_t relationship) -> std::uint32_t
 {
     auto input = static_cast<ContactItemType>(relationship);
 
-    bool found = (RelationshipMap().find(input) != RelationshipMap().end());
+    const bool found =
+        (RelationshipMap().find(input) != RelationshipMap().end());
 
     if (found) {
         try {

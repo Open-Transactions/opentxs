@@ -73,7 +73,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
                 strBasketAcctID->Bytes());
         auto BASKET_CONTRACT_ID = identifier::UnitDefinition{};
 
-        bool bContractID =
+        const bool bContractID =
             server_.GetTransactor().lookupBasketContractIDByAccountID(
                 BASKET_ACCOUNT_ID, BASKET_CONTRACT_ID);
 
@@ -249,7 +249,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
         return false;
     }
 
-    bool bNeedToSaveAgain = false;
+    const bool bNeedToSaveAgain = false;
 
     bool bFailure = false;
 
@@ -269,7 +269,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
 
         irr::io::IrrXMLReader* xml =
             irr::io::createIrrXMLReader(xmlFileContents.get());
-        std::unique_ptr<irr::io::IrrXMLReader> theXMLGuardian(xml);
+        const std::unique_ptr<irr::io::IrrXMLReader> theXMLGuardian(xml);
 
         while (xml && xml->read()) {
             // strings for storing the data that we want to read out of the file

@@ -81,6 +81,7 @@ auto Outpoint::operator=(const Outpoint& rhs) noexcept -> Outpoint&
 
 auto Outpoint::operator=(Outpoint&& rhs) noexcept -> Outpoint&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return operator=(rhs);  // copy assignment, rhs is an lvalue
 }
 

@@ -131,7 +131,7 @@ exit:
 auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     -> identifier::Account
 {
-    Lock lock(payment_tasks_.GetAccountLock(unit));
+    const auto lock = Lock{payment_tasks_.GetAccountLock(unit)};
     const auto accounts =
         parent_.api().Storage().Internal().AccountsByContract(unit);
 

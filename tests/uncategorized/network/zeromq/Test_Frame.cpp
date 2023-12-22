@@ -11,7 +11,6 @@
 #include "ottest/fixtures/zeromq/Frame.hpp"
 
 namespace ot = opentxs;
-namespace zmq = opentxs::network::zeromq;
 
 namespace ottest
 {

@@ -215,7 +215,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
         return false;
     }
 
-    UnallocatedCString strFileContents(OTDB::QueryPlainString(
+    const UnallocatedCString strFileContents(OTDB::QueryPlainString(
         api_,
         api_.DataFolder().string(),
         szFolder1name,
@@ -236,7 +236,7 @@ auto Mint::LoadMint(std::string_view extension) -> bool
 
     auto strRawFile = String::Factory(strFileContents.c_str());
 
-    bool bSuccess = LoadContractFromString(
+    const bool bSuccess = LoadContractFromString(
         strRawFile);  // Note: This handles OT ARMORED file format.
 
     return bSuccess;
@@ -285,7 +285,7 @@ auto Mint::SaveMint(std::string_view extension) -> bool
         return false;
     }
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strFinal->Get(),
         api_.DataFolder().string(),

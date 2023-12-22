@@ -151,7 +151,7 @@ auto OTAPI_Exec::ProposePaymentPlan(
         angelSenderAcctId = api_.Factory().AccountIDFromBase58(SENDER_ACCT_ID);
     }
 
-    std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
+    const std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
         api_.Factory().NotaryIDFromBase58(NOTARY_ID),
         VALID_FROM,  // Default (0) == NOW
         VALID_TO,    // Default (0) == no expiry / cancel
@@ -376,7 +376,7 @@ auto OTAPI_Exec::ConfirmPaymentPlan(
         LogConsole()()("Failure loading payment plan from string.").Flush();
         return {};
     }
-    bool bConfirmed = ot_api_.ConfirmPaymentPlan(
+    const bool bConfirmed = ot_api_.ConfirmPaymentPlan(
         theNotaryID,
         theSenderNymID,
         theSenderAcctID,
@@ -2525,7 +2525,7 @@ auto OTAPI_Exec::Basket_GetMemberType(
 
     auto theOutputMemberType = identifier::UnitDefinition{};
 
-    bool bGotType = ot_api_.GetBasketMemberType(
+    const bool bGotType = ot_api_.GetBasketMemberType(
         theInstrumentDefinitionID, nIndex, theOutputMemberType);
     if (!bGotType) { return {}; }
 
@@ -2713,7 +2713,7 @@ auto OTAPI_Exec::GenerateBasketExchange(
     std::int32_t nTransferMultiple = 1;  // Just a default value.
 
     if (TRANSFER_MULTIPLE > 0) { nTransferMultiple = TRANSFER_MULTIPLE; }
-    std::unique_ptr<Basket> pBasket(ot_api_.GenerateBasketExchange(
+    const std::unique_ptr<Basket> pBasket(ot_api_.GenerateBasketExchange(
         theNotaryID,
         theNymID,
         theBasketInstrumentDefinitionID,

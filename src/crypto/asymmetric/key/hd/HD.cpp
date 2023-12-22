@@ -72,11 +72,13 @@ auto HD::Fingerprint() const noexcept -> Bip32Fingerprint
 
 auto HD::operator=(const HD& rhs) noexcept -> HD&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto HD::operator=(HD&& rhs) noexcept -> HD&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
 

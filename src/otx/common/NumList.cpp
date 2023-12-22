@@ -82,7 +82,7 @@ auto NumList::Add(const char* szNumbers) -> bool  // if false, means the numbers
     bool bSuccess = true;
     std::int64_t lNum = 0;
     const char* pChar = szNumbers;
-    std::locale loc;
+    const std::locale loc;
 
     // Skip any whitespace.
     while (std::isspace(*pChar, loc)) { pChar++; }
@@ -100,7 +100,7 @@ auto NumList::Add(const char* szNumbers) -> bool  // if false, means the numbers
         if (std::isdigit(*pChar, loc)) {
             bStartedANumber = true;
 
-            std::int32_t nDigit = (*pChar - '0');
+            const std::int32_t nDigit = (*pChar - '0');
 
             lNum *= 10;  // Move it up a decimal place.
             lNum += nDigit;

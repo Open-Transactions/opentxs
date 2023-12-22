@@ -17,8 +17,6 @@
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/zeromq/Helpers.hpp"
 
-namespace zmq = ot::network::zeromq;
-
 namespace ottest
 {
 using namespace std::literals::chrono_literals;

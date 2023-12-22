@@ -19,10 +19,7 @@ Subaccount::Subaccount(std::shared_ptr<internal::Subaccount> imp) noexcept
     assert_true(nullptr != p);
 }
 
-Subaccount::Subaccount(const Subaccount& rhs) noexcept
-    : imp_(rhs.imp_)
-{
-}
+Subaccount::Subaccount(const Subaccount& rhs) noexcept = default;
 
 Subaccount::Subaccount(Subaccount&& rhs) noexcept
     : imp_(std::move(rhs.imp_))

@@ -47,11 +47,13 @@ auto Getcfilters::Blank() noexcept -> Getcfilters&
 
 auto Getcfilters::operator=(const Getcfilters& rhs) noexcept -> Getcfilters&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getcfilters::operator=(Getcfilters&& rhs) noexcept -> Getcfilters&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

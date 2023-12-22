@@ -67,7 +67,7 @@ using TxidIndex = boost::unordered_flat_map<
     TransactionHash,
     std::size_t,
     std::hash<TransactionHash>,
-    std::equal_to<TransactionHash>,
+    std::equal_to<>,
     alloc::PMR<std::pair<const TransactionHash, std::size_t>>>;
 using TransactionMap = Vector<Transaction>;
 

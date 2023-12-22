@@ -14,8 +14,6 @@
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Basic.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace opentxs::literals;

@@ -230,7 +230,7 @@ void Notary::cancel_cheque(
 
     TransactionNumber receiptNumber{0};
     server_.GetTransactor().issueNextTransactionNumber(receiptNumber);
-    std::shared_ptr<OTTransaction> inboxTransaction{
+    const std::shared_ptr<OTTransaction> inboxTransaction{
         api_.Factory()
             .Internal()
             .Session()
@@ -637,7 +637,7 @@ auto Notary::extract_cheque(
 
     assert_false(nullptr == cheque);
 
-    bool loadedCheque = cheque->LoadContractFromString(serialized);
+    const bool loadedCheque = cheque->LoadContractFromString(serialized);
 
     if (false == loadedCheque) {
         LogError()()("Failed to load cheque.").Flush();
@@ -1039,7 +1039,7 @@ void Notary::NotarizeTransfer(
                 // No need to save a box receipt in this case, like we normally
                 // would
                 // when adding a transaction to a box.
-                std::shared_ptr<OTTransaction> TEMPOutboxTransaction{
+                const std::shared_ptr<OTTransaction> TEMPOutboxTransaction{
                     pTEMPOutboxTransaction.release()};
                 outbox.AddTransaction(TEMPOutboxTransaction);
 
@@ -1112,7 +1112,7 @@ void Notary::NotarizeTransfer(
                                                     // inside this block fails.
                         // Here the transactions we just created are actually
                         // added to the ledgers.
-                        std::shared_ptr<OTTransaction> outboxTransaction{
+                        const std::shared_ptr<OTTransaction> outboxTransaction{
                             pOutboxTransaction.release()};
                         theFromOutbox->AddTransaction(outboxTransaction);
                         recipientInbox->AddTransaction(inboxTransaction);
@@ -1428,7 +1428,7 @@ void Notary::NotarizeWithdrawal(
             auto theVoucherRequest{api_.Factory().Internal().Session().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
 
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theVoucherRequest->LoadContractFromString(strVoucherRequest);
 
             if (!bLoadContractFromString) {
@@ -1519,7 +1519,7 @@ void Notary::NotarizeWithdrawal(
                                                              // transaction # on
                                                              // the
                 // cheque (to prevent double-spending of cheques.)
-                bool bIssueVoucher = theVoucher->IssueCheque(
+                const bool bIssueVoucher = theVoucher->IssueCheque(
                     lAmount,  // The amount of the cheque.
                     theVoucherRequest->GetTransactionNum(),  // Requiring a
                     // transaction number
@@ -2563,7 +2563,7 @@ void Notary::NotarizeDeposit(
     const auto& nymID = context.Signer()->ID();
     output.SetType(transactionType::atDeposit);
     std::shared_ptr<const Item> depositItem{nullptr};
-    std::shared_ptr<const Item> balanceItem{
+    const std::shared_ptr<const Item> balanceItem{
         input.GetItem(itemType::balanceStatement)};
     std::shared_ptr<Item> responseItem{nullptr};
     std::shared_ptr<Item> responseBalanceItem{nullptr};
@@ -2604,7 +2604,7 @@ void Notary::NotarizeDeposit(
     assert_false(nullptr == responseItem);
     assert_false(nullptr == responseBalanceItem);
 
-    Finalize signer(
+    const Finalize signer(
         server_.GetServerNym(), *responseItem, *responseBalanceItem, reason_);
 
     if (false == permission) {
@@ -3262,7 +3262,7 @@ void Notary::NotarizePaymentPlan(
                                 // original receipt can always
                                 // be loaded when necessary.)
                                 //
-                                std::shared_ptr<OTPaymentPlan> plan{
+                                const std::shared_ptr<OTPaymentPlan> plan{
                                     pPlan.release()};
                                 if (!bCancelling &&
                                     server_.Cron().AddCronItem(
@@ -3448,9 +3448,9 @@ void Notary::NotarizePaymentPlan(
         }
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theDepositorAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theDepositorAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theDepositorAccount.get().GetIdentifier(accountHash);
@@ -4149,7 +4149,7 @@ void Notary::NotarizeSmartContract(
                     server_.GetTransactor().issueNextTransactionNumber(
                         lNewTransactionNumber);
 
-                    std::shared_ptr<OTSmartContract> contract{
+                    const std::shared_ptr<OTSmartContract> contract{
                         pContract.release()};
                     if (false == contract->SendNoticeToAllParties(
                                      true,
@@ -4216,9 +4216,9 @@ void Notary::NotarizeSmartContract(
         }
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theActivatingAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theActivatingAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theActivatingAccount.get().GetIdentifier(accountHash);
@@ -4438,9 +4438,9 @@ void Notary::NotarizeCancelCronItem(
             .Flush();
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theAssetAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theAssetAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theAssetAccount.get().GetIdentifier(accountHash);
@@ -4473,8 +4473,9 @@ void Notary::NotarizeExchangeBasket(
     // to the exchange basket request"
     tranOut.SetType(transactionType::atExchangeBasket);
 
-    std::shared_ptr<Item> pItem = tranIn.GetItem(itemType::exchangeBasket);
-    std::shared_ptr<Item> pBalanceItem =
+    const std::shared_ptr<Item> pItem =
+        tranIn.GetItem(itemType::exchangeBasket);
+    const std::shared_ptr<Item> pBalanceItem =
         tranIn.GetItem(itemType::balanceStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
@@ -4587,7 +4588,7 @@ void Notary::NotarizeExchangeBasket(
 
             auto BASKET_ACCOUNT_ID = identifier::Account{};
             ExclusiveAccount basketAccount{};
-            bool bLookup =
+            const bool bLookup =
                 server_.GetTransactor().lookupBasketAccountIDByContractID(
                     BASKET_CONTRACT_ID, BASKET_ACCOUNT_ID);
 
@@ -4640,7 +4641,8 @@ void Notary::NotarizeExchangeBasket(
                                 BASKET_CONTRACT_ID);
                         // Now let's load up the actual basket, from the actual
                         // asset contract.
-                        std::int64_t currencies = basket->Currencies().size();
+                        const std::int64_t currencies =
+                            basket->Currencies().size();
                         const Amount& weight = basket->Weight();
 
                         if (currencies == theRequestBasket->Count() &&
@@ -5003,8 +5005,9 @@ void Notary::NotarizeExchangeBasket(
                                                     reason_);
                                                 pItemInbox->SaveContract();
 
-                                                std::shared_ptr<Item> itemInbox{
-                                                    pItemInbox.release()};
+                                                const std::shared_ptr<Item>
+                                                    itemInbox{
+                                                        pItemInbox.release()};
                                                 pInboxTransaction->AddItem(
                                                     itemInbox);  // Add the
                                                                  // inbox item
@@ -5053,7 +5056,8 @@ void Notary::NotarizeExchangeBasket(
                                                 // Here the transaction we just
                                                 // created is actually added to
                                                 // the exchanger's inbox.
-                                                std::shared_ptr<OTTransaction>
+                                                const std::shared_ptr<
+                                                    OTTransaction>
                                                     inboxTransaction{
                                                         pInboxTransaction
                                                             .release()};
@@ -5217,7 +5221,7 @@ void Notary::NotarizeExchangeBasket(
                                             server_.GetServerNym(), reason_);
                                         pItemInbox->SaveContract();
 
-                                        std::shared_ptr<Item> itemInbox{
+                                        const std::shared_ptr<Item> itemInbox{
                                             pItemInbox.release()};
                                         pInboxTransaction->AddItem(
                                             itemInbox);  // Add the inbox item
@@ -5264,7 +5268,7 @@ void Notary::NotarizeExchangeBasket(
                                         // Here the transaction we just created
                                         // is actually added to the source
                                         // acct's inbox.
-                                        std::shared_ptr<OTTransaction>
+                                        const std::shared_ptr<OTTransaction>
                                             inboxTransaction{
                                                 pInboxTransaction.release()};
                                         inbox.AddTransaction(inboxTransaction);
@@ -5546,7 +5550,7 @@ void Notary::NotarizeMarketOffer(
 
             // First load the Trade up (from the string that was passed in
             // on the transaction item.)
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 pTrade->LoadContractFromString(strTrade);
 
             // If failed to load the trade...
@@ -5753,7 +5757,7 @@ void Notary::NotarizeMarketOffer(
                 // changes over time as cron processes. (The original
                 // receipt can always be loaded when necessary.)
                 //
-                std::shared_ptr<OTTrade> trade{pTrade.release()};
+                const std::shared_ptr<OTTrade> trade{pTrade.release()};
                 if (server_.Cron().AddCronItem(
                         trade,
                         true,
@@ -5805,9 +5809,9 @@ void Notary::NotarizeMarketOffer(
         }  // transaction statement verified.
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theAssetAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theAssetAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theAssetAccount.get().GetIdentifier(accountHash);
@@ -5861,7 +5865,7 @@ void Notary::NotarizeTransaction(
     };
 
     const auto& serverNym = server_.GetServerNym();
-    Cleanup cleanup(tranOut, serverNym, reason_);
+    const Cleanup cleanup(tranOut, serverNym, reason_);
     const auto lTransactionNumber = tranIn.GetTransactionNum();
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto strIDNym = String::Factory(NYM_ID, api_.Crypto());
@@ -6310,7 +6314,7 @@ auto Notary::NotarizeProcessNymbox(
     // to the process nymbox request"
     tranOut.SetType(transactionType::atProcessNymbox);
     std::shared_ptr<Item> pItem = nullptr;
-    std::shared_ptr<Item> pBalanceItem =
+    const std::shared_ptr<Item> pBalanceItem =
         tranIn.GetItem(itemType::transactionStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
@@ -6722,7 +6726,7 @@ auto Notary::NotarizeProcessNymbox(
                             // notice, instead of going out of sync.
                             //
                             auto lSuccessNoticeTransNum = TransactionNumber{};
-                            bool bGotNextTransNum =
+                            const bool bGotNextTransNum =
                                 server_.GetTransactor()
                                     .issueNextTransactionNumber(
                                         lSuccessNoticeTransNum);
@@ -6788,7 +6792,7 @@ auto Notary::NotarizeProcessNymbox(
                                         server_.GetServerNym(), reason_);
                                     pSuccessNotice->SaveContract();
 
-                                    std::shared_ptr<OTTransaction>
+                                    const std::shared_ptr<OTTransaction>
                                         successNotice{pSuccessNotice.release()};
                                     theNymbox->AddTransaction(
                                         successNotice);  // Add the
@@ -6961,8 +6965,8 @@ void Notary::NotarizeProcessInbox(
     // the process inbox request"
     processInboxResponse.SetType(transactionType::atProcessInbox);
 
-    std::shared_ptr<Item> pItem = nullptr;
-    std::shared_ptr<Item> pBalanceItem =
+    const std::shared_ptr<Item> pItem = nullptr;
+    const std::shared_ptr<Item> pBalanceItem =
         processInbox.GetItem(itemType::balanceStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
@@ -7085,7 +7089,7 @@ void Notary::NotarizeProcessInbox(
             default: {
                 auto strItemType = String::Factory();
                 item.GetTypeString(strItemType);
-                itemType nItemType = item.GetType();
+                const itemType nItemType = item.GetType();
                 bSuccessFindingAllTransactions = false;
                 LogError()()(" Wrong item type: ")(
                     strItemType->Exists() ? strItemType->Get() : "")("(")(
@@ -7480,7 +7484,7 @@ void Notary::NotarizeProcessInbox(
     // Remove certain receipts (determined in the big loop above) from the
     // inbox copy, to see if it will verify in the balance agreement.
     while (!theListOfInboxReceiptsBeingRemoved.empty()) {
-        std::int64_t lTemp = theListOfInboxReceiptsBeingRemoved.front();
+        const std::int64_t lTemp = theListOfInboxReceiptsBeingRemoved.front();
         theListOfInboxReceiptsBeingRemoved.pop_front();
 
         // Notice I don't call DeleteBoxReceipt(lTemp) here like I
@@ -8114,8 +8118,8 @@ void Notary::NotarizeProcessInbox(
                             // the trans #can be removed from
                             // his issued list.)
                             //
-                            std::shared_ptr<OTTransaction> inboxTransaction{
-                                pInboxTransaction.release()};
+                            const std::shared_ptr<OTTransaction>
+                                inboxTransaction{pInboxTransaction.release()};
                             theFromInbox->AddTransaction(inboxTransaction);
 
                             // The original item carries the
@@ -8516,7 +8520,7 @@ void Notary::process_cash_withdrawal(
     const auto& unit = account.get().GetInstrumentDefinitionID();
     const auto& accountID = requestItem.GetPurportedAccountID();
     bool bSuccess{false};
-    std::shared_ptr<otx::blind::Mint> pMint{nullptr};
+    const std::shared_ptr<otx::blind::Mint> pMint{nullptr};
     ExclusiveAccount pMintCashReserveAcct{};
 
     auto rawPurse = ByteArray{};

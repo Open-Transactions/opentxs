@@ -196,7 +196,7 @@ auto ProfileSection::construct_row(
 auto ProfileSection::Delete(const int type, const UnallocatedCString& claimID)
     const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const ProfileSectionRowID key{
         row_id_, static_cast<identity::wot::claim::ClaimType>(type)};
     const auto& group = lookup(lock, key);
@@ -256,7 +256,7 @@ auto ProfileSection::SetActive(
     const UnallocatedCString& claimID,
     const bool active) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const ProfileSectionRowID key{
         row_id_, static_cast<identity::wot::claim::ClaimType>(type)};
     const auto& group = lookup(lock, key);
@@ -271,7 +271,7 @@ auto ProfileSection::SetPrimary(
     const UnallocatedCString& claimID,
     const bool primary) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const ProfileSectionRowID key{
         row_id_, static_cast<identity::wot::claim::ClaimType>(type)};
     const auto& group = lookup(lock, key);
@@ -286,7 +286,7 @@ auto ProfileSection::SetValue(
     const UnallocatedCString& claimID,
     const UnallocatedCString& value) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const ProfileSectionRowID key{
         row_id_, static_cast<identity::wot::claim::ClaimType>(type)};
     const auto& group = lookup(lock, key);

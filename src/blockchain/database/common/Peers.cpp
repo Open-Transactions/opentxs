@@ -347,7 +347,7 @@ auto Peers::get_candidates(
 
             for (const auto& service : withServices) {
                 try {
-                    if (0 == data.services_.at(service).count(id)) {
+                    if (false == data.services_.at(service).contains(id)) {
                         haveAllServices = false;
                         break;
                     }

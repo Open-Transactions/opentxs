@@ -81,11 +81,13 @@ auto Input::Keys(allocator_type alloc) const noexcept -> Set<crypto::Key>
 
 auto Input::operator=(const Input& rhs) noexcept -> Input&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Input::operator=(Input&& rhs) noexcept -> Input&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

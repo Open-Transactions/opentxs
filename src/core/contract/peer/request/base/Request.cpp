@@ -189,11 +189,13 @@ auto Request::Name() const noexcept -> std::string_view { return imp_->Name(); }
 
 auto Request::operator=(const Request& rhs) noexcept -> Request&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Request::operator=(Request&& rhs) noexcept -> Request&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

@@ -110,11 +110,13 @@ auto Script::N() const noexcept -> std::optional<std::uint8_t>
 
 auto Script::operator=(const Script& rhs) noexcept -> Script&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Script::operator=(Script&& rhs) noexcept -> Script&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

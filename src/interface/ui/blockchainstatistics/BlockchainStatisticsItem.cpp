@@ -51,7 +51,7 @@ BlockchainStatisticsItem::BlockchainStatisticsItem(
 
 auto BlockchainStatisticsItem::Balance() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return blockchain::internal::Format(row_id_, balance_);
 }
@@ -74,8 +74,7 @@ auto BlockchainStatisticsItem::reindex(
     const auto oldActive = active_peers_.exchange(active);
     const auto oldBlocks = blocks_.exchange(blocks);
     const auto oldBalance = [&] {
-        eLock lock(shared_lock_);
-
+        const auto lock = eLock{shared_lock_};
         const auto oldbalance = balance_;
         balance_ = balance;
         return oldbalance;

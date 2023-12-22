@@ -59,7 +59,7 @@ auto Request::Send(zeromq::Message&& request) const noexcept
 {
     assert_false(nullptr == socket_);
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto output = SendResult{otx::client::SendResult::Error, {}};
     auto& [status, reply] = output;
 

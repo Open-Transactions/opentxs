@@ -415,7 +415,7 @@ auto LoadBoxReceipt(
 
     // Try to load the box receipt from local storage.
     //
-    UnallocatedCString strFileContents(OTDB::QueryPlainString(
+    const UnallocatedCString strFileContents(OTDB::QueryPlainString(
         api,
         api.DataFolder().string(),
         strFolder1name->Get(),  // <=== LOADING FROM DATA STORE.
@@ -473,7 +473,7 @@ auto LoadBoxReceipt(
     // abbreviated version.
     // It MUST either be returned or deleted.
 
-    bool bSuccess = theAbbrev.VerifyBoxReceipt(*pBoxReceipt);
+    const bool bSuccess = theAbbrev.VerifyBoxReceipt(*pBoxReceipt);
 
     if (!bSuccess) {
         LogError()()("Failed verifying Box Receipt: ")(strFolder1name.get())(

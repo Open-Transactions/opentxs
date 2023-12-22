@@ -14,7 +14,6 @@
 
 namespace ottest
 {
-namespace ot = opentxs;
 using namespace std::literals;
 
 CreateNymHD::CreateNymHD()

@@ -76,7 +76,7 @@ void Nym::_save(
         LogAbort()().Abort();
     }
 
-    Lock rootLock(mutex);
+    auto rootLock = Lock{mutex};
     root = input->Root();
     rootLock.unlock();
 
@@ -183,7 +183,7 @@ auto Nym::Bip47Channels() const -> const tree::Bip47Channels&
 auto Nym::BlockchainAccountList(const UnitType type) const
     -> UnallocatedSet<identifier::Account>
 {
-    Lock lock(blockchain_lock_);
+    const auto lock = Lock{blockchain_lock_};
 
     auto it = blockchain_account_types_.find(type);
 
@@ -195,7 +195,7 @@ auto Nym::BlockchainAccountList(const UnitType type) const
 auto Nym::BlockchainEthereumAccountList(const UnitType type) const
     -> UnallocatedSet<identifier::Account>
 {
-    Lock lock(ethereum_lock_);
+    const auto lock = Lock{ethereum_lock_};
 
     auto it = ethereum_account_types_.find(type);
 
@@ -207,7 +207,7 @@ auto Nym::BlockchainEthereumAccountList(const UnitType type) const
 auto Nym::BlockchainAccountType(const identifier::Account& accountID) const
     -> UnitType
 {
-    Lock lock(blockchain_lock_);
+    const auto lock = Lock{blockchain_lock_};
 
     try {
 
@@ -221,7 +221,7 @@ auto Nym::BlockchainAccountType(const identifier::Account& accountID) const
 auto Nym::BlockchainEthereumAccountType(
     const identifier::Account& accountID) const -> UnitType
 {
-    Lock lock(ethereum_lock_);
+    const auto lock = Lock{ethereum_lock_};
 
     try {
 
@@ -239,7 +239,7 @@ auto Nym::construct(
     const Hash& root,
     Args&&... params) const -> T*
 {
-    Lock lock(mutex);
+    auto lock = Lock{mutex};
 
     if (false == bool(pointer)) {
         pointer.reset(new T(crypto_, factory_, plugin_, root, params...));
@@ -360,9 +360,8 @@ template <typename T>
 auto Nym::editor(Hash& root, std::mutex& mutex, T* (Nym::*get)() const)
     -> Editor<T>
 {
-    std::function<void(T*, Lock&)> callback = [&](T* in, Lock& lock) -> void {
-        this->_save(in, lock, mutex, root);
-    };
+    const std::function<void(T*, Lock&)> callback =
+        [&](T* in, Lock& lock) -> void { this->_save(in, lock, mutex, root); };
 
     return Editor<T>(write_lock_, (this->*get)(), callback);
 }
@@ -563,7 +562,7 @@ auto Nym::Load(
     std::shared_ptr<proto::BlockchainEthereumAccountData>& output,
     ErrorReporting checking) const -> bool
 {
-    Lock lock(ethereum_lock_);
+    const auto lock = Lock{ethereum_lock_};
 
     const auto it = ethereum_accounts_.find(id);
 
@@ -587,7 +586,7 @@ auto Nym::Load(
     std::shared_ptr<proto::HDAccount>& output,
     ErrorReporting checking) const -> bool
 {
-    Lock lock(blockchain_lock_);
+    const auto lock = Lock{blockchain_lock_};
 
     const auto it = blockchain_accounts_.find(id);
 
@@ -611,7 +610,7 @@ auto Nym::Load(
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     using enum ErrorReporting;
 
     if (!is_valid(credentials_)) {
@@ -641,7 +640,7 @@ auto Nym::Load(
     std::shared_ptr<proto::Purse>& output,
     ErrorReporting checking) const -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const PurseID id{notary, unit};
     const auto it = purse_id_.find(id);
     using enum ErrorReporting;
@@ -850,7 +849,7 @@ void Nym::_save(O* input, const Lock& lock, std::mutex& mutex, Hash& root)
         LogAbort()().Abort();
     }
 
-    Lock rootLock(mutex);
+    auto rootLock = Lock{mutex};
     root = input->Root();
     rootLock.unlock();
 
@@ -962,7 +961,7 @@ auto Nym::serialize() const -> proto::StorageNym
 
 auto Nym::SetAlias(std::string_view alias) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     alias_ = alias;
 
@@ -988,8 +987,8 @@ auto Nym::Store(
         return false;
     }
 
-    Lock writeLock(write_lock_, std::defer_lock);
-    Lock ethereumLock(ethereum_lock_, std::defer_lock);
+    auto writeLock = Lock{write_lock_, std::defer_lock};
+    auto ethereumLock = Lock{ethereum_lock_, std::defer_lock};
     std::lock(writeLock, ethereumLock);
     auto accountItem = ethereum_accounts_.find(accountID);
 
@@ -1032,8 +1031,8 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
         return false;
     }
 
-    Lock writeLock(write_lock_, std::defer_lock);
-    Lock blockchainLock(blockchain_lock_, std::defer_lock);
+    auto writeLock = Lock{write_lock_, std::defer_lock};
+    auto blockchainLock = Lock{blockchain_lock_, std::defer_lock};
     std::lock(writeLock, blockchainLock);
     auto accountItem = blockchain_accounts_.find(accountID);
 
@@ -1063,7 +1062,7 @@ auto Nym::Store(
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     const std::uint64_t revision = data.revision();
     bool saveOk = false;
@@ -1112,7 +1111,7 @@ auto Nym::Store(
 
 auto Nym::Store(const proto::Purse& purse) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const PurseID id{
         factory_.NotaryIDFromBase58(purse.notary()),
         factory_.UnitIDFromBase58(purse.mint())};

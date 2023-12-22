@@ -194,7 +194,7 @@ auto Regtest_fixture_simple::MineBlocks(
             listeners.second.sync_listener_->GetFuture(target));
     }
 
-    Generator gen = [&](Height height) -> Transaction {
+    const Generator gen = [&](Height height) -> Transaction {
         return TransactionGenerator(user, height, transaction_number, amount);
     };
     auto mined_header = MineBlocks(ancestor, block_number, gen, {});
@@ -302,7 +302,7 @@ auto Regtest_fixture_simple::CreateClient(
     const auto [it, listener_added] = user_listeners_.emplace(name, client);
 
     std::promise<void> promise;
-    std::future<void> done = promise.get_future();
+    const std::future<void> done = promise.get_future();
     auto cb_connected = [&](auto&& msg, auto& counter) { promise.set_value(); };
     std::atomic_int client_peers;
     ot::OTZMQListenCallback client_cb_(

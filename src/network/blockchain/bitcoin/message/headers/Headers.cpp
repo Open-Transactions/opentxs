@@ -58,11 +58,13 @@ auto Headers::get() noexcept -> std::span<value_type>
 
 auto Headers::operator=(const Headers& rhs) noexcept -> Headers&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Headers::operator=(Headers&& rhs) noexcept -> Headers&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

@@ -101,11 +101,13 @@ auto EllipticCurve::MaxVersion() noexcept -> VersionNumber { return 2; }
 auto EllipticCurve::operator=(const EllipticCurve& rhs) noexcept
     -> EllipticCurve&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto EllipticCurve::operator=(EllipticCurve&& rhs) noexcept -> EllipticCurve&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
 

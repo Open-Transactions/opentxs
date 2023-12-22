@@ -241,7 +241,8 @@ auto UserCommandProcessor::add_numbers_to_nymbox(
         // receipt is removed from a box.
         transaction->SaveBoxReceipt(nymbox);
 
-        std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
+        const std::shared_ptr<OTTransaction> ptransaction{
+            transaction.release()};
         nymbox.AddTransaction(ptransaction);
         nymbox.ReleaseSignatures();
         nymbox.SignContract(server_.GetServerNym(), reason_);
@@ -1821,7 +1822,7 @@ auto UserCommandProcessor::cmd_query_instrument_definitions(
 
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_get_contract);
 
-    std::unique_ptr<OTDB::Storable> pStorable(OTDB::DecodeObject(
+    const std::unique_ptr<OTDB::Storable> pStorable(OTDB::DecodeObject(
         api_.Crypto(), OTDB::STORED_OBJ_STRING_MAP, msgIn.payload_->Get()));
     auto* inputMap = dynamic_cast<OTDB::StringMap*>(pStorable.get());
 
@@ -2565,14 +2566,14 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
     // MESSAGE was successful. (Meaning, the balance agreement might have
     // failed, and the transaction might have failed, but the MESSAGE ITSELF
     // must be a success, in order for the replyNotice to appear in the Nymbox.)
-    std::shared_ptr<Item> replyNoticeItem{pReplyNoticeItem.release()};
+    const std::shared_ptr<Item> replyNoticeItem{pReplyNoticeItem.release()};
     pReplyNotice->AddItem(replyNoticeItem);
     pReplyNotice->SetRequestNum(lRequestNum);
     pReplyNotice->SetReplyTransSuccess(bReplyTransSuccess);
     pReplyNotice->SignContract(serverNym, reason_);
     pReplyNotice->SaveContract();
     // Add the replyNotice to the nymbox.
-    std::shared_ptr<OTTransaction> replyNotice{pReplyNotice.release()};
+    const std::shared_ptr<OTTransaction> replyNotice{pReplyNotice.release()};
     theNymbox->AddTransaction(replyNotice);
     theNymbox->ReleaseSignatures();
     theNymbox->SignContract(serverNym, reason_);

@@ -42,7 +42,7 @@ class Message;
 #define SHUTDOWN_SOCKET                                                        \
     {                                                                          \
         running_->Off();                                                       \
-        Lock lock(lock_);                                                      \
+        auto lock = Lock{lock_};                                               \
         shutdown(lock);                                                        \
     }
 
@@ -101,7 +101,7 @@ protected:
         {
             auto output = Vector<CString>{};
 
-            Lock lock{lock_};
+            const auto lock = Lock{lock_};
             output.reserve(queue_.size());
 
             while (false == queue_.empty()) {

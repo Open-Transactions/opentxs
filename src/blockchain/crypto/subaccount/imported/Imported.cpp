@@ -17,10 +17,7 @@ Imported::Imported(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-Imported::Imported(const Imported& rhs) noexcept
-    : Subaccount(rhs)
-{
-}
+Imported::Imported(const Imported& rhs) noexcept = default;
 
 Imported::Imported(Imported&& rhs) noexcept
     : Subaccount(std::move(rhs))

@@ -983,9 +983,9 @@ auto HeaderOracle::Shared::initialize_candidate(
     block::Header& child,
     const block::Hash& stopHash) noexcept(false) -> Candidate&
 {
-    const auto blacklisted = connect_to_parent(data, update, parent, child);
     auto position{parent.Position()};
-    auto& output = candidates.emplace_back(Candidate{blacklisted, {}});
+    auto& output = candidates.emplace_back();
+    output.blacklisted_ = connect_to_parent(data, update, parent, child);
     auto& chain = output.chain_;
     const block::Header* grandparent = &parent;
     using StopFunction = std::function<bool(const block::Position&)>;

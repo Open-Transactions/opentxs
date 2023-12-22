@@ -14,14 +14,14 @@ namespace opentxs::network::zeromq
 {
 template <
     typename Tag,
-    typename = std::enable_if_t<std::is_trivially_copyable<Tag>::value>>
+    typename = std::enable_if_t<std::is_trivially_copyable_v<Tag>>>
 auto tagged_message(const Tag& tag, bool addDelimiter) noexcept -> Message
 {
     return tagged_message(&tag, sizeof(tag), addDelimiter);
 }
 template <
     typename Tag,
-    typename = std::enable_if_t<std::is_trivially_copyable<Tag>::value>>
+    typename = std::enable_if_t<std::is_trivially_copyable_v<Tag>>>
 auto tagged_reply_to_message(
     const Envelope& envelope,
     const Tag& tag,
@@ -31,7 +31,7 @@ auto tagged_reply_to_message(
 }
 template <
     typename Tag,
-    typename = std::enable_if_t<std::is_trivially_copyable<Tag>::value>>
+    typename = std::enable_if_t<std::is_trivially_copyable_v<Tag>>>
 auto tagged_reply_to_message(
     Envelope&& envelope,
     const Tag& tag,
@@ -42,7 +42,7 @@ auto tagged_reply_to_message(
 }
 template <
     typename Tag,
-    typename = std::enable_if_t<std::is_trivially_copyable<Tag>::value>>
+    typename = std::enable_if_t<std::is_trivially_copyable_v<Tag>>>
 auto tagged_reply_to_message(const Message& request, const Tag& tag) noexcept
     -> Message
 {

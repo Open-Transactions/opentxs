@@ -231,8 +231,8 @@ auto hash<opentxs::blockchain::token::Descriptor>::operator()(
     const opentxs::blockchain::token::Descriptor& data) const noexcept
     -> std::size_t
 {
-    using Host = std::underlying_type<decltype(data.host_)>::type;
-    using Token = std::underlying_type<decltype(data.type_)>::type;
+    using Host = std::underlying_type_t<decltype(data.host_)>;
+    using Token = std::underlying_type_t<decltype(data.type_)>;
     using Buffer = boost::endian::little_uint32_buf_t;
 
     static_assert(sizeof(Host) == sizeof(Buffer));

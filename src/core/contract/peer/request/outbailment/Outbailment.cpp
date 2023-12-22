@@ -80,11 +80,13 @@ auto Outbailment::Notary() const noexcept -> const identifier::Notary&
 
 auto Outbailment::operator=(const Outbailment& rhs) noexcept -> Outbailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Outbailment::operator=(Outbailment&& rhs) noexcept -> Outbailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 

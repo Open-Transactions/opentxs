@@ -14,8 +14,6 @@
 #include "crypto/Bip39.hpp"
 #include "ottest/fixtures/crypto/BIP39.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(BIP39, seed_types)

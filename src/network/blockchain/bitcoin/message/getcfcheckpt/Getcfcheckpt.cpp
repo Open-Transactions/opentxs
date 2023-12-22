@@ -49,11 +49,13 @@ auto Getcfcheckpt::Blank() noexcept -> Getcfcheckpt&
 
 auto Getcfcheckpt::operator=(const Getcfcheckpt& rhs) noexcept -> Getcfcheckpt&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Getcfcheckpt::operator=(Getcfcheckpt&& rhs) noexcept -> Getcfcheckpt&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

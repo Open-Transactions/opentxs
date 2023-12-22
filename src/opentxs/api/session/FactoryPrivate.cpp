@@ -951,7 +951,7 @@ auto FactoryPrivate::CronItem(const String& strCronItem) const
     }
 
     strContract->reset();  // for sgets
-    bool bGotLine = strContract->sgets(buf.data(), 40);
+    const bool bGotLine = strContract->sgets(buf.data(), 40);
 
     if (!bGotLine) { return nullptr; }
 
@@ -2121,7 +2121,7 @@ auto FactoryPrivate::Scriptable(const String& strInput) const
     // either way.)
     //
     strContract->reset();  // for sgets
-    bool bGotLine = strContract->sgets(buf.data(), 40);
+    const bool bGotLine = strContract->sgets(buf.data(), 40);
 
     if (!bGotLine) { return nullptr; }
 

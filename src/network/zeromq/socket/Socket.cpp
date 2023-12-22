@@ -49,13 +49,13 @@ Socket::operator void*() const noexcept { return socket_; }
 
 void Socket::add_endpoint(const std::string_view endpoint) const noexcept
 {
-    Lock lock(endpoint_lock_);
+    const auto lock = Lock{endpoint_lock_};
     endpoints_.emplace(endpoint);
 }
 
 auto Socket::apply_socket(SocketCallback&& cb) const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return cb(lock);
 }
@@ -138,7 +138,7 @@ auto Socket::connect(const Lock& lock, const std::string_view endpoint)
 auto Socket::Close() const noexcept -> bool
 {
     running_->Off();
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     if (nullptr == socket_) { return false; }
 
@@ -253,7 +253,7 @@ auto Socket::Start(const std::string_view endpoint) const noexcept -> bool
 
 auto Socket::StartAsync(const std::string_view endpoint) const noexcept -> void
 {
-    Lock lock{endpoint_queue_.lock_};
+    const auto lock = Lock{endpoint_queue_.lock_};
     endpoint_queue_.queue_.emplace(endpoint);
 }
 

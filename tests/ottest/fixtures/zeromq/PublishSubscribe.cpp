@@ -40,7 +40,7 @@ void PublishSubscribe::subscribeSocketThread(
         [this, msgs](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool found = msgs.count(inputString);
+            bool const found = msgs.contains(inputString);
             EXPECT_TRUE(found);
             ++callback_finished_count_;
         });
@@ -86,7 +86,7 @@ void PublishSubscribe::publishSocketThread(
         std::this_thread::sleep_for(1s);
     }
 
-    bool sent = publishSocket->Send([&] {
+    const bool sent = publishSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
         out.AddFrame(msg);
 

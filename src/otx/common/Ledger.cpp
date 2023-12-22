@@ -260,7 +260,7 @@ auto Ledger::LoadBoxReceipts(UnallocatedSet<std::int64_t>* psetUnloaded) -> bool
     bool bRetVal = true;
 
     for (const auto& it : the_set) {
-        std::int64_t lSetNum = it;
+        const std::int64_t lSetNum = it;
 
         const auto pTransaction = GetTransaction(lSetNum);
         assert_false(nullptr == pTransaction);
@@ -364,7 +364,7 @@ auto Ledger::LoadBoxReceipt(const std::int64_t& lTransactionNum) -> bool
         // abbreviated form again.)
         //
         RemoveTransaction(lTransactionNum);  // this deletes pTransaction
-        std::shared_ptr<OTTransaction> receipt{pBoxReceipt.release()};
+        const std::shared_ptr<OTTransaction> receipt{pBoxReceipt.release()};
         AddTransaction(receipt);
 
         return true;
@@ -406,7 +406,7 @@ auto Ledger::GetTransactionNums(
 
 auto Ledger::LoadInbox() -> bool
 {
-    bool bRetVal = LoadGeneric(ledgerType::inbox);
+    const bool bRetVal = LoadGeneric(ledgerType::inbox);
 
     return bRetVal;
 }
@@ -500,7 +500,7 @@ auto Ledger::LoadGeneric(ledgerType theType, const String& pString) -> bool
         }
 
         // Try to load the ledger from local storage.
-        UnallocatedCString strFileContents(OTDB::QueryPlainString(
+        const UnallocatedCString strFileContents(OTDB::QueryPlainString(
             api_,
             api_.DataFolder().string(),
             path1,
@@ -526,7 +526,7 @@ auto Ledger::LoadGeneric(ledgerType theType, const String& pString) -> bool
         return false;
     }
 
-    bool bSuccess = LoadContractFromString(strRawFile);
+    const bool bSuccess = LoadContractFromString(strRawFile);
 
     if (!bSuccess) {
         LogError()()("Failed loading ")(pszType)(" ")(
@@ -576,7 +576,7 @@ auto Ledger::SaveGeneric(ledgerType theType) -> bool
         return false;
     }
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strFinal->Get(),
         api_.DataFolder().string(),
@@ -1531,7 +1531,7 @@ auto Ledger::GenerateBalanceStatement(
         } break;
     }
 
-    UnallocatedSet<TransactionNumber> adding;
+    const UnallocatedSet<TransactionNumber> adding;
     auto statement = context.Statement(adding, removing, reason);
 
     if (!statement) { return nullptr; }
@@ -1699,7 +1699,7 @@ void Ledger::UpdateContents(const PasswordPrompt& reason)  // Before
     // box, and on client side when downloaded from the server. They must match
     // the hash that
     // appears in the box.
-    bool bSavingAbbreviated = GetType() != ledgerType::message;
+    const bool bSavingAbbreviated = GetType() != ledgerType::message;
 
     // We store this, so we know how many abbreviated records to read back
     // later.
@@ -1989,7 +1989,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                     std::int64_t lRequestNum = 0;
                     bool bReplyTransSuccess = false;
 
-                    std::int32_t nAbbrevRetVal = LoadAbbreviatedRecord(
+                    const std::int32_t nAbbrevRetVal = LoadAbbreviatedRecord(
                         xml,
                         lNumberOfOrigin,
                         theOriginType,
@@ -2106,7 +2106,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                     if (pTransaction->VerifyContractID()) {
                         // Add it to the ledger...
                         //
-                        std::shared_ptr<OTTransaction> transaction{
+                        const std::shared_ptr<OTTransaction> transaction{
                             pTransaction.release()};
                         transactions_[transaction->GetTransactionNum()] =
                             transaction;
@@ -2267,7 +2267,7 @@ auto Ledger::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 }
 
                 // It's not already there on this ledger -- so add it!
-                std::shared_ptr<OTTransaction> transaction{
+                const std::shared_ptr<OTTransaction> transaction{
                     pTransaction.release()};
                 transactions_[transaction->GetTransactionNum()] = transaction;
                 transaction->SetParent(*this);

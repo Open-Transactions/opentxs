@@ -52,11 +52,13 @@ auto Ping::Nonce() const noexcept -> message::Nonce
 
 auto Ping::operator=(const Ping& rhs) noexcept -> Ping&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Ping::operator=(Ping&& rhs) noexcept -> Ping&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

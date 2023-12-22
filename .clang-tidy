@@ -1,6 +1,6 @@
 {
   "InheritParentConfig": "false",
-  "Checks": "boost-use-to-string,bugprone-argument-comment,bugprone-assert-side-effect,bugprone-bad-signal-to-kill-thread,bugprone-unused-raii,bugprone-use-after-move,cert-*,-cert-oop54-cpp,-cert-err58-cpp,clang-diagnostic-*,clang-analyzer-*,-clang-diagnostic-unknown-warning-option,misc-*,-misc-include-cleaner,-misc-non-private-member-variables-in-classes,-misc-unused-parameters,modernize-*,-modernize-macro-to-enum,-modernize-pass-by-value,-modernize-use-default-member-init,-modernize-use-nodiscard,readability-braces-around-statements,readability-container-contains,readability-identifier-naming,readability-qualified-auto",
+  "Checks": "boost-use-to-string,bugprone-argument-comment,bugprone-assert-side-effect,bugprone-bad-signal-to-kill-thread,bugprone-unused-raii,bugprone-use-after-move,cert-*,-cert-oop54-cpp,-cert-err58-cpp,clang-diagnostic-*,clang-analyzer-*,-clang-diagnostic-unknown-warning-option,misc-*,-misc-confusable-identifiers,-misc-include-cleaner,-misc-no-recursion,-misc-non-private-member-variables-in-classes,-misc-unused-parameters,-misc-use-anonymous-namespace,modernize-*,-modernize-macro-to-enum,-modernize-pass-by-value,-modernize-use-default-member-init,-modernize-use-nodiscard,readability-braces-around-statements,readability-container-contains,readability-identifier-naming,readability-qualified-auto",
   "CheckOptions": [
     {
       "key": "bugprone-argument-comment.IgnoreSingleArgument",
@@ -31,10 +31,6 @@
       "value": "false"
     },
     {
-      "key": ",bugprone-assert-side-effect.AssertMacros",
-      "value": "OT_ASSERT,OT_ASSERT_MSG"
-    },
-    {
       "key": "readability-identifier-naming.MemberCase",
       "value": "lower_case"
     },
@@ -49,5 +45,11 @@
   ],
   "FormatStyle": "file",
   "WarningsAsErrors": "*",
-  "HeaderFileExtensions": "h,hh,hpp,hxx,tpp"
+  "HeaderFileExtensions": [
+      "h",
+      "hh",
+      "hpp",
+      "hxx",
+      "tpp"
+  ]
 }

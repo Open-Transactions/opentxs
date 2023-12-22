@@ -220,9 +220,9 @@ auto Lucre::SignToken(
     }
 
     auto& lToken = *lucre;
-    crypto::openssl::BIO bioBank = ::BIO_new(::BIO_s_mem());
-    crypto::openssl::BIO bioRequest = ::BIO_new(::BIO_s_mem());
-    crypto::openssl::BIO bioSignature = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioBank = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioRequest = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioSignature = ::BIO_new(::BIO_s_mem());
 
     auto armoredPrivate = Armored::Factory(api_.Crypto());
 
@@ -328,8 +328,8 @@ auto Lucre::VerifyToken(
 
     const auto& lucreToken = *lucre;
     auto setDumper = LucreDumper{};
-    crypto::openssl::BIO bioBank = ::BIO_new(::BIO_s_mem());
-    crypto::openssl::BIO bioCoin = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioBank = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioCoin = ::BIO_new(::BIO_s_mem());
     auto spendable = String::Factory();
 
     if (false == lucreToken.GetSpendable(spendable, reason)) {

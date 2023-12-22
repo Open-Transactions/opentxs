@@ -5,9 +5,7 @@
 
 #pragma once
 
-namespace opentxs
-{
-inline namespace literals
+namespace opentxs::inline literals
 {
 constexpr auto operator""_kib(const unsigned long long int in)
     -> unsigned long long int
@@ -34,5 +32,4 @@ constexpr auto operator""_tib(const unsigned long long int in)
 
     return in * 1024u * 1024u * 1024u * 1024u;
 }
-}  // namespace literals
-}  // namespace opentxs
+}  // namespace opentxs::inline literals

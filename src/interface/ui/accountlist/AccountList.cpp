@@ -43,8 +43,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto AccountListModel(

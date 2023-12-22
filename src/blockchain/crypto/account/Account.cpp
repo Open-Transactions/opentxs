@@ -94,7 +94,7 @@ auto Account::GetID(
     const auto preimage = [&] {
         auto out = api.Factory().DataFromBytes(owner.Bytes());
         auto type =
-            static_cast<std::underlying_type<blockchain::Type>::type>(chain);
+            static_cast<std::underlying_type_t<blockchain::Type>>(chain);
         boost::endian::native_to_little_inplace(type);
         out.Concatenate(&type, sizeof(type));
 

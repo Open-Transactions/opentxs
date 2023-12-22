@@ -126,7 +126,7 @@ auto Node::extract_revision(const proto::Seed& input) const -> std::uint64_t
 auto Node::get_alias(const identifier::Generic& id) const -> UnallocatedCString
 {
     UnallocatedCString output;
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto& it = item_map_.find(id);
 
     if (item_map_.end() != it) { output = std::get<1>(it->second); }
@@ -205,7 +205,7 @@ auto Node::load_raw(
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto& it = item_map_.find(id);
     const bool exists = (item_map_.end() != it);
 
@@ -228,7 +228,7 @@ auto Node::load_raw(
 
 auto Node::Root() const -> Hash
 {
-    Lock lock_(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return root_;
 }

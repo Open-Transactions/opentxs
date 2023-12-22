@@ -622,12 +622,14 @@ auto OTDHT::Actor::process_pushtx_external(
 auto OTDHT::Actor::process_pushtx_internal(Message&& msg) noexcept -> void
 {
     for (const auto& [peerid, _] : peers_) {
+        // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
         to_dht().SendDeferred([&]() {
             auto out = make_envelope(peerid);
             out.MoveFrames(msg.Payload());
 
             return out;
         }());
+        // NOLINTEND(clang-analyzer-core.CallAndMessage)
     }
 }
 
@@ -793,6 +795,7 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
 {
     for (auto& [peerid, peer] : peers_) {
         if (PeerData::Type::incoming == peer.type_) {
+            // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
             to_dht().SendDeferred([&]() {
                 auto out = make_envelope(peerid);
                 auto body = msg.Payload();
@@ -801,6 +804,7 @@ auto OTDHT::Actor::send_to_listeners(Message msg) noexcept -> void
 
                 return out;
             }());
+            // NOLINTEND(clang-analyzer-core.CallAndMessage)
         }
     }
 }

@@ -22,7 +22,7 @@ public:
 
     void CancelByValue(const T& in) const
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         if (0 == set_.count(in)) { return; }
 
@@ -41,7 +41,7 @@ public:
 
     void CancelByKey(const Key& in) const
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         for (auto i = queue_.cbegin(); i < queue_.cend(); ++i) {
             const auto& [key, value] = *i;
@@ -59,7 +59,7 @@ public:
     auto Copy() const -> UnallocatedMap<T, Key>
     {
         UnallocatedMap<T, Key> output{};
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         for (const auto& [key, value] : queue_) { output.emplace(value, key); }
 
@@ -68,7 +68,7 @@ public:
 
     auto empty() const -> bool
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         return queue_.empty();
     }
@@ -77,7 +77,7 @@ public:
     {
         assert(0 < key);
 
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         if (0 == set_.count(in)) {
             queue_.push_front({key, in});
@@ -93,7 +93,7 @@ public:
 
     auto Pop(Key& key, T& out) const -> bool
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         if (0 == queue_.size()) { return false; }
 
@@ -110,7 +110,7 @@ public:
 
     auto size() const -> std::size_t
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
 
         return queue_.size();
     }

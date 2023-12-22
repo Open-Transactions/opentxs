@@ -48,8 +48,6 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Log.hpp"
 
-namespace zmq = opentxs::network::zeromq;
-
 namespace opentxs::factory
 {
 auto AccountTreeModel(

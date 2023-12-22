@@ -119,7 +119,7 @@ public:
     ByteArray(const Data& rhs, allocator_type alloc = {}) noexcept;
     template <
         typename T,
-        std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
+        std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
     ByteArray(
         const T* data,
         std::size_t size,

@@ -139,11 +139,13 @@ auto Secret::get_deleter() noexcept -> delete_function
 
 auto Secret::operator=(const Secret& rhs) noexcept -> Secret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Secret::operator=(Secret&& rhs) noexcept -> Secret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

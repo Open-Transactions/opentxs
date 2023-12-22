@@ -1673,7 +1673,7 @@ auto Blockchain::Imp::validate_nym(const identifier::Nym& nymID) const noexcept
     -> bool
 {
     if (false == nymID.empty()) {
-        if (0 < api_.Wallet().LocalNyms().count(nymID)) { return true; }
+        if (api_.Wallet().LocalNyms().contains(nymID)) { return true; }
     }
 
     return false;

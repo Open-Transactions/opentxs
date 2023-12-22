@@ -11,8 +11,6 @@
 #include "ottest/fixtures/blockchain/BlockHeader.hpp"
 
 namespace b = ot::blockchain;
-namespace bb = b::block;
-namespace bc = b::node;
 
 namespace ottest
 {

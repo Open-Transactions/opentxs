@@ -293,7 +293,7 @@ auto BlockchainImp::start(
         }
     }
 
-    if (0 != networks_.count(type)) {
+    if (networks_.contains(type)) {
         LogVerbose()()("Chain already running").Flush();
 
         return true;

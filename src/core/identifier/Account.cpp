@@ -52,11 +52,13 @@ auto Account::AccountType() const noexcept -> opentxs::AccountType
 
 auto Account::operator=(const Account& rhs) noexcept -> Account&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Generic>(*this, rhs);
 }
 
 auto Account::operator=(Account&& rhs) noexcept -> Account&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Generic>(*this, std::move(rhs));
 }
 

@@ -70,11 +70,11 @@ TEST(Message, at)
     auto messageString = ot::UnallocatedCString{message.Bytes()};
     ASSERT_STREQ("msg1", messageString.c_str());
 
-    ot::network::zeromq::Frame& message2 = multipartMessage.get()[1];
+    const ot::network::zeromq::Frame& message2 = multipartMessage.get()[1];
     messageString = message2.Bytes();
     ASSERT_STREQ("msg2", messageString.c_str());
 
-    ot::network::zeromq::Frame& message3 = multipartMessage.get()[2];
+    const ot::network::zeromq::Frame& message3 = multipartMessage.get()[2];
     messageString = message3.Bytes();
     ASSERT_STREQ("msg3", messageString.c_str());
 }

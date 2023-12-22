@@ -185,7 +185,7 @@ auto Pair::State::Add(
     const identifier::Nym& issuerNymID,
     const bool trusted) noexcept -> void
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     Add(lock,
         identifier::Nym{localNymID},
         identifier::Nym{issuerNymID},
@@ -194,14 +194,14 @@ auto Pair::State::Add(
 
 auto Pair::State::CheckIssuer(const identifier::Nym& id) const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
-    return 0 < issuers_.count(id);
+    return issuers_.contains(id);
 }
 
 auto Pair::State::check_state() const noexcept -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     for (auto& [id, details] : state_) {
         auto& [mutex, serverID, serverNymID, status, trusted, offered, registered, accountDetails, pending, needRename] =
@@ -209,7 +209,7 @@ auto Pair::State::check_state() const noexcept -> bool
 
         assert_false(nullptr == mutex);
 
-        Lock rowLock(*mutex);
+        const auto rowLock = Lock{*mutex};
 
         if (Status::Registered != status) {
             LogTrace()()("Not registered").Flush();
@@ -322,7 +322,7 @@ auto Pair::State::GetDetails(
     const identifier::Nym& localNymID,
     const identifier::Nym& issuerNymID) noexcept -> StateMap::iterator
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return state_.find({localNymID, issuerNymID});
 }
@@ -331,7 +331,7 @@ auto Pair::State::IssuerList(
     const identifier::Nym& localNymID,
     const bool onlyTrusted) const noexcept -> UnallocatedSet<identifier::Nym>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     UnallocatedSet<identifier::Nym> output{};
 
     for (auto& [key, value] : state_) {
@@ -339,7 +339,7 @@ auto Pair::State::IssuerList(
 
         assert_false(nullptr == pMutex);
 
-        Lock rowLock(*pMutex);
+        const auto rowLock = Lock{*pMutex};
         const auto& issuerID = std::get<1>(key);
         const auto& trusted = std::get<4>(value);
 
@@ -355,7 +355,7 @@ auto Pair::State::run(const std::function<void(const IssuerID&)> fn) noexcept
     auto list = UnallocatedSet<IssuerID>{};
 
     {
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
         std::ranges::transform(
             state_,
             std::inserter(list, list.end()),
@@ -430,7 +430,7 @@ auto Pair::callback_nym(const zmq::Message& in) noexcept -> void
     auto trigger{state_.CheckIssuer(nymID)};
 
     {
-        Lock lock(decision_lock_);
+        const auto lock = Lock{decision_lock_};
 
         for (auto& [id, details] : state_) {
             auto& [mutex, serverID, serverNymID, status, trusted, offered, registered, accountDetails, pending, needRename] =
@@ -438,7 +438,7 @@ auto Pair::callback_nym(const zmq::Message& in) noexcept -> void
 
             assert_false(nullptr == mutex);
 
-            Lock rowLock(*mutex);
+            const auto rowLock = Lock{*mutex};
 
             if (serverNymID == nymID) { trigger = true; }
         }
@@ -463,24 +463,24 @@ auto Pair::callback_peer_reply(const zmq::Message& in) noexcept -> void
     switch (reply.Type()) {
         case contract::peer::RequestType::Bailment: {
             LogDetail()()("Received bailment reply.").Flush();
-            Lock lock(decision_lock_);
+            const auto lock = Lock{decision_lock_};
             trigger = process_request_bailment(lock, nymID, reply.asBailment());
         } break;
         case contract::peer::RequestType::OutBailment: {
             LogDetail()()("Received outbailment reply.").Flush();
-            Lock lock(decision_lock_);
+            const auto lock = Lock{decision_lock_};
             trigger =
                 process_request_outbailment(lock, nymID, reply.asOutbailment());
         } break;
         case contract::peer::RequestType::ConnectionInfo: {
             LogDetail()()(": Received connection info reply.").Flush();
-            Lock lock(decision_lock_);
+            const auto lock = Lock{decision_lock_};
             trigger =
                 process_connection_info(lock, nymID, reply.asConnection());
         } break;
         case contract::peer::RequestType::StoreSecret: {
             LogDetail()()("Received store secret reply.").Flush();
-            Lock lock(decision_lock_);
+            const auto lock = Lock{decision_lock_};
             trigger = process_store_secret(lock, nymID, reply.asStoreSecret());
         } break;
         case contract::peer::RequestType::Error:
@@ -509,7 +509,7 @@ auto Pair::callback_peer_request(const zmq::Message& in) noexcept -> void
 
     switch (request.Type()) {
         case contract::peer::RequestType::PendingBailment: {
-            Lock lock(decision_lock_);
+            const auto lock = Lock{decision_lock_};
             trigger = process_pending_bailment(
                 lock, nymID, request.asBailmentNotice());
         } break;
@@ -773,7 +773,7 @@ auto Pair::get_connection(
 
 auto Pair::init() noexcept -> void
 {
-    Lock lock(decision_lock_);
+    auto lock = Lock{decision_lock_};
 
     for (const auto& nymID : api_.Wallet().LocalNyms()) {
         for (const auto& issuerID : api_.Wallet().IssuerList(nymID)) {
@@ -1248,7 +1248,7 @@ auto Pair::state_machine(const IssuerID& id) const -> void
 
     if (0 < pending.size()) { return; }
 
-    Lock lock(*mutex);
+    const auto lock = Lock{*mutex};
     const auto issuerNym = api_.Wallet().Nym(issuerNymID);
 
     if (false == bool(issuerNym)) {

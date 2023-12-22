@@ -453,7 +453,7 @@ auto OTScriptable::CanExecuteClause(
 //
 auto OTScriptable::AllPartiesHaveSupposedlyConfirmed() -> bool
 {
-    bool bReturnVal = !parties_.empty();
+    const bool bReturnVal = !parties_.empty();
 
     for (auto& it : parties_) {
         OTParty* pParty = it.second;
@@ -1818,7 +1818,7 @@ auto OTScriptable::GetBylawByIndex(std::int32_t nIndex) const -> OTBylaw*
 //
 auto OTScriptable::VerifyThisAgainstAllPartiesSignedCopies() -> bool
 {
-    bool bReturnVal = !parties_.empty();
+    const bool bReturnVal = !parties_.empty();
 
     // MAKE SURE ALL SIGNED COPIES ARE OF THE SAME CONTRACT.
     // Loop through ALL the parties. For whichever ones are already signed,
@@ -1952,7 +1952,7 @@ auto OTScriptable::ConfirmParty(
         // Sign it and save it,
         auto strNewSignedCopy = String::Factory();
         ReleaseSignatures();
-        bool bSuccess = theParty.SignContract(*this, reason);
+        const bool bSuccess = theParty.SignContract(*this, reason);
         if (bSuccess) {
             SaveContract();
             SaveContractRaw(strNewSignedCopy);
@@ -3087,7 +3087,7 @@ auto OTScriptable::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                                                                    // expected
                                                                    // this much.
                             {
-                                UnallocatedCString& str_name = it->second;
+                                const UnallocatedCString& str_name = it->second;
 
                                 if (str_name.size() > 0)  // SUCCESS
                                 {

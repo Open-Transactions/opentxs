@@ -134,7 +134,7 @@ auto SettingsPrivate::Load(const std::filesystem::path& path) const noexcept
     {
         pvt_->ini_simple_.Reset();  // clean the config.
 
-        SI_Error rc = pvt_->ini_simple_.SaveFile(
+        const SI_Error rc = pvt_->ini_simple_.SaveFile(
             strConfigurationFileExactPath->Get());  // save a new file.
         if (0 > rc) {
             return false;  // error!
@@ -143,7 +143,7 @@ auto SettingsPrivate::Load(const std::filesystem::path& path) const noexcept
         pvt_->ini_simple_.Reset();  // clean the config (again).
     }
 
-    SI_Error rc =
+    const SI_Error rc =
         pvt_->ini_simple_.LoadFile(strConfigurationFileExactPath->Get());
     if (0 > rc) {
         return false;
@@ -162,7 +162,7 @@ auto SettingsPrivate::Save(const std::filesystem::path& path) const noexcept
         return false;
     }
 
-    SI_Error rc =
+    const SI_Error rc =
         pvt_->ini_simple_.SaveFile(strConfigurationFileExactPath->Get());
     if (0 > rc) {
         return false;
@@ -202,21 +202,21 @@ auto SettingsPrivate::LogChange_str(
 void SettingsPrivate::SetConfigFilePath(
     const String& strConfigFilePath) const noexcept
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
     configuration_file_exact_path_ =
         UnallocatedCString{strConfigFilePath.Bytes()};
 }
 
 auto SettingsPrivate::HasConfigFilePath() const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     return false == configuration_file_exact_path_.empty();
 }
 
 auto SettingsPrivate::Load() const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
     loaded_->Off();
 
     if (Load(configuration_file_exact_path_)) {
@@ -231,7 +231,7 @@ auto SettingsPrivate::Load() const noexcept -> bool
 
 auto SettingsPrivate::Save() const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     return Save(configuration_file_exact_path_);
 }
@@ -251,7 +251,7 @@ auto SettingsPrivate::Reset() noexcept -> bool
 
 auto SettingsPrivate::IsEmpty() const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     return pvt_->ini_simple_.IsEmpty();
 }
@@ -262,7 +262,7 @@ auto SettingsPrivate::Check_str(
     String& out_strResult,
     bool& out_bKeyExist) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -303,7 +303,7 @@ auto SettingsPrivate::Check_long(
     std::int64_t& out_lResult,
     bool& out_bKeyExist) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -345,7 +345,7 @@ auto SettingsPrivate::Check_bool(
     bool& out_bResult,
     bool& out_bKeyExist) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -401,7 +401,7 @@ auto SettingsPrivate::Set_str(
     bool& out_bNewOrUpdate,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection  is empty!").Flush();
@@ -446,7 +446,7 @@ auto SettingsPrivate::Set_str(
     if (!LogChange_str(strSection, strKey, strValue)) { return false; }
 
     // Set New Value
-    SI_Error rc = pvt_->ini_simple_.SetValue(
+    const SI_Error rc = pvt_->ini_simple_.SetValue(
         strSection.Get(), strKey.Get(), szValue, szComment, true);
     if (0 > rc) { return false; }
 
@@ -495,7 +495,7 @@ auto SettingsPrivate::Set_long(
     bool& out_bNewOrUpdate,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -541,7 +541,7 @@ auto SettingsPrivate::Set_long(
     if (!LogChange_str(strSection, strKey, strValue)) { return false; }
 
     // Set New Value
-    SI_Error rc = pvt_->ini_simple_.SetLongValue(
+    const SI_Error rc = pvt_->ini_simple_.SetLongValue(
         strSection.Get(),
         strKey.Get(),
         convert_to_size(lValue),
@@ -583,7 +583,7 @@ auto SettingsPrivate::Set_bool(
     bool& out_bNewOrUpdate,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -603,7 +603,7 @@ auto SettingsPrivate::CheckSetSection(
     const String& strComment,
     bool& out_bIsNewSection) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -618,12 +618,12 @@ auto SettingsPrivate::CheckSetSection(
         (strComment.Exists() && !strComment.Compare("")) ? strComment.Get()
                                                          : nullptr;
 
-    std::int64_t lSectionSize =
+    const std::int64_t lSectionSize =
         pvt_->ini_simple_.GetSectionSize(strSection.Get());
 
     if (1 > lSectionSize) {
         out_bIsNewSection = true;
-        SI_Error rc = pvt_->ini_simple_.SetValue(
+        const SI_Error rc = pvt_->ini_simple_.SetValue(
             strSection.Get(), nullptr, nullptr, szComment, false);
         if (0 > rc) { return false; }
     } else {
@@ -651,9 +651,9 @@ auto SettingsPrivate::CheckSet_str(
     bool& out_bIsNew,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
     UnallocatedCString temp = out_strResult.Get();
-    bool success = CheckSet_str(
+    const bool success = CheckSet_str(
         strSection, strKey, strDefault, temp, out_bIsNew, strComment);
     out_strResult.Set(String::Factory(temp));
 
@@ -679,7 +679,7 @@ auto SettingsPrivate::CheckSet_str(
     bool& out_bIsNew,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection  is empty!").Flush();
@@ -751,7 +751,7 @@ auto SettingsPrivate::CheckSet_long(
     bool& out_bIsNew,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection  is empty!").Flush();
@@ -809,7 +809,7 @@ auto SettingsPrivate::CheckSet_bool(
     bool& out_bIsNew,
     const String& strComment) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (!strSection.Exists()) {
         LogError()()("strSection is empty!").Flush();
@@ -852,7 +852,7 @@ auto SettingsPrivate::SetOption_bool(
     const String& strKey,
     bool& bVariableName) const noexcept -> bool
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     bool bNewOrUpdate;
     return CheckSet_bool(
@@ -953,7 +953,7 @@ auto SettingsPrivate::WriteString(
 
 SettingsPrivate::~SettingsPrivate()
 {
-    rLock lock(lock_);
+    const auto lock = rLock{lock_};
 
     if (false == Save()) { LogAbort()()("failed to save config file").Abort(); }
 

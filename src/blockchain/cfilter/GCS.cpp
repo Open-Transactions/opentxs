@@ -48,11 +48,13 @@ GCS::GCS(GCS&& rhs, allocator_type alloc) noexcept
 
 auto GCS::operator=(const GCS& rhs) noexcept -> GCS&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto GCS::operator=(GCS&& rhs) noexcept -> GCS&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

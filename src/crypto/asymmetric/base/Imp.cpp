@@ -770,7 +770,7 @@ auto Key::Sign(
         return false;
     }
 
-    bool success = provider_.Sign(
+    const bool success = provider_.Sign(
         preimage, private_key(lock, reason), hash, std::move(output));
 
     if (false == success) { LogError()()("Failed to sign preimage").Flush(); }

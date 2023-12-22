@@ -126,7 +126,7 @@ auto ContactListItem::translate_section(const Lock&) const noexcept
 {
     if (key_.second.empty()) { return {" "}; }
 
-    std::locale locale;
+    const std::locale locale;
     UnallocatedCString output{" "};
     output[0] = std::toupper(key_.second[0], locale);
 
