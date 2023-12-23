@@ -11,9 +11,9 @@
 #include <shared_mutex>
 #include <tuple>
 
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -66,9 +66,9 @@ using HashVector = Vector<block::Hash>;
 using Segments = UnallocatedSet<ChainSegment>;
 // parent block hash, disconnected block hash
 using DisconnectedList = UnallocatedMultimap<block::Hash, block::Hash>;
-using ElementMap = Map<Bip32Index, Vector<Vector<std::byte>>>;
-using MatchingIndices =
-    boost::container::flat_set<Bip32Index, std::less<>, alloc::PMR<Bip32Index>>;
+using ElementMap = Map<crypto::Bip32Index, Vector<Vector<std::byte>>>;
+using MatchingIndices = boost::container::
+    flat_set<crypto::Bip32Index, std::less<>, alloc::PMR<crypto::Bip32Index>>;
 using MatchingInputs = MatchingIndices;
 using MatchingOutputs = MatchingIndices;
 using MatchedTransaction =

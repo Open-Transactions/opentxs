@@ -17,12 +17,12 @@
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/addr2/MessagePrivate.hpp"
 #include "network/blockchain/bitcoin/message/base/Imp.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

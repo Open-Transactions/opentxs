@@ -34,21 +34,18 @@
 #include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"  // IWYU pragma: keep
 #include "internal/core/contract/SecurityContract.hpp"  // IWYU pragma: keep
-#include "internal/core/contract/Types.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/core/contract/peer/Reply.hpp"
 #include "internal/core/contract/peer/Request.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/network/otdht/Factory.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Batch.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Factory.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/OTX.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/client/Factory.hpp"
@@ -69,6 +66,9 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
@@ -82,22 +82,21 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/ContractType.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/ContractType.hpp"
-#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/crypto/Parameters.hpp"      // IWYU pragma: keep
+#include "opentxs/crypto/Parameters.hpp"  // IWYU pragma: keep
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/internal.factory.hpp"
@@ -108,6 +107,7 @@
 #include "opentxs/network/otdht/QueryContract.hpp"
 #include "opentxs/network/otdht/QueryContractReply.hpp"
 #include "opentxs/network/otdht/Types.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -118,14 +118,13 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
 
@@ -864,7 +863,7 @@ auto WalletPrivate::context(
         return nullptr;
     }
 
-    switch (translate(serialized.type())) {
+    switch (otx::translate(serialized.type())) {
         case otx::ConsensusType::Server: {
             instantiate_server_context(serialized, localNym, remoteNym, entry);
         } break;

@@ -27,7 +27,6 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -48,9 +47,6 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
@@ -58,6 +54,10 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -130,7 +130,7 @@ auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
 
 auto PaymentCode::AddPrivateKeys(
     const crypto::SeedID& seed,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const opentxs::PasswordPrompt& reason) noexcept -> bool
 {
     auto candidate =
@@ -506,8 +506,8 @@ auto PaymentCode::DecodeNotificationElements(
 
 auto PaymentCode::derive_keys(
     const opentxs::PaymentCode& other,
-    const Bip32Index local,
-    const Bip32Index remote,
+    const crypto::Bip32Index local,
+    const crypto::Bip32Index remote,
     const opentxs::PasswordPrompt& reason) const noexcept(false)
     -> std::pair<
         crypto::asymmetric::key::EllipticCurve,
@@ -675,7 +675,7 @@ auto PaymentCode::generate_elements_v3(
 
 auto PaymentCode::Incoming(
     const opentxs::PaymentCode& sender,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
@@ -821,7 +821,7 @@ auto PaymentCode::match_locator(
 
 auto PaymentCode::Outgoing(
     const opentxs::PaymentCode& recipient,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
@@ -1050,7 +1050,7 @@ auto PaymentCode::Unblind(
                        api_.Factory().SecretFromBytes(pre.xpub_.Chaincode()),
                        api_.Factory().DataFromBytes(pre.xpub_.Key()),
                        proto::HDPath{},
-                       Bip32Fingerprint{},
+                       crypto::Bip32Fingerprint{},
                        crypto::asymmetric::Role::Sign,
                        crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
                        reason,
@@ -1142,7 +1142,7 @@ auto PaymentCode::unblind_v1(
                    api_.Factory().SecretFromBytes(pre.xpub_.Chaincode()),
                    api_.Factory().DataFromBytes(pre.xpub_.Key()),
                    proto::HDPath{},
-                   Bip32Fingerprint{},
+                   crypto::Bip32Fingerprint{},
                    crypto::asymmetric::Role::Sign,
                    crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
                    reason,
@@ -1199,7 +1199,7 @@ auto PaymentCode::unblind_v3(
                    code,
                    api_.Factory().DataFromBytes(pre.Key()),
                    proto::HDPath{},
-                   Bip32Fingerprint{},
+                   crypto::Bip32Fingerprint{},
                    crypto::asymmetric::Role::Sign,
                    crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
                    reason,

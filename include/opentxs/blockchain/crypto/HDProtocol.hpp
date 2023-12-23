@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::crypto
 {
-enum class HDProtocol : std::uint16_t {
+enum class HDProtocol : std::underlying_type_t<HDProtocol> {
     Error = 0,
     BIP_32 = 32,
     BIP_44 = 44,

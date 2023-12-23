@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

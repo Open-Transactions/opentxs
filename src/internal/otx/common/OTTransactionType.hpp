@@ -8,13 +8,13 @@
 #include <cstdint>
 
 #include "internal/core/Armored.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -147,13 +147,13 @@ public:
 
     auto VerifyNumberOfOrigin(OTTransactionType& compareTo) -> bool;
     // --------------------------------------------------------
-    auto GetOriginType() const -> originType;      // NOTE: used for GUI display
-                                                   // purposes only.
-    void SetOriginType(originType theOriginType);  // (For paymentReceipts and
-                                                   // finalReceipts.)
+    auto GetOriginType() const -> otx::originType;  // NOTE: used for GUI
+                                                    // display purposes only.
+    void SetOriginType(otx::originType theOriginType);  // (For paymentReceipts
+                                                        // and finalReceipts.)
 
     static auto GetOriginTypeFromString(const String& strOriginType)
-        -> originType;
+        -> otx::originType;
 
     auto GetOriginTypeString() const -> const char*;
     // --------------------------------------------------------
@@ -681,8 +681,8 @@ protected:
     // In reference to in reference to in reference to in reference to the
     // origin.
     TransactionNumber number_of_origin_{0};
-    // (See originType comment.)
-    originType origin_type_{originType::not_applicable};
+    // (See otx::originType comment.)
+    otx::originType origin_type_{otx::originType::not_applicable};
     // This item may be in reference to a different item.
     OTArmored in_reference_to_;
     bool load_securely_{true};  // Defaults to true.
@@ -732,14 +732,14 @@ protected:
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        originType theOriginType = originType::not_applicable);
+        otx::originType theOriginType = otx::originType::not_applicable);
     explicit OTTransactionType(
         const api::Session& api,
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
-        originType theOriginType = originType::not_applicable);
+        otx::originType theOriginType = otx::originType::not_applicable);
     explicit OTTransactionType(const api::Session& api);
 
 private:

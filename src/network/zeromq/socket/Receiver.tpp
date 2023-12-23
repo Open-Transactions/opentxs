@@ -15,12 +15,12 @@
 #include <mutex>
 #include <thread>
 
-#include "internal/network/zeromq/socket/Types.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/network/zeromq/socket/Types.internal.hpp"
 #include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation

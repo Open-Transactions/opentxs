@@ -8,10 +8,10 @@
 #include <memory>
 #include <optional>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

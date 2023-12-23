@@ -9,8 +9,8 @@
 
 #include "identity/credential/Base.hpp"
 #include "identity/credential/Key.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

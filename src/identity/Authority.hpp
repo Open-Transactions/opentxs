@@ -15,20 +15,21 @@
 #include "internal/core/String.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -141,24 +142,24 @@ public:
     auto Serialize(Serialized& serialized, const CredentialIndexModeFlag mode)
         const -> bool final;
     auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         crypto::HashType hash,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         crypto::HashType hash,
@@ -262,7 +263,7 @@ private:
         const credential::internal::Primary& master,
         internal::Authority& parent,
         const VersionNumber parentVersion,
-        Bip32Index& index,
+        crypto::Bip32Index& index,
         const opentxs::PasswordPrompt& reason) noexcept(false)
         -> KeyCredentialMap;
     static auto create_contact_credental(
@@ -281,7 +282,7 @@ private:
         const credential::internal::Primary& master,
         internal::Authority& parent,
         const VersionNumber parentVersion,
-        Bip32Index& index,
+        crypto::Bip32Index& index,
         const opentxs::PasswordPrompt& reason) noexcept(false)
         -> KeyCredentialItem;
     static auto create_master(
@@ -290,7 +291,7 @@ private:
         const identity::Source& source,
         const VersionNumber version,
         const crypto::Parameters& parameters,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const opentxs::PasswordPrompt& reason) noexcept(false)
         -> std::unique_ptr<credential::internal::Primary>;
     template <typename Type>

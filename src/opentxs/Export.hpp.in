@@ -27,3 +27,5 @@
 #    endif
 #  endif
 #endif
+
+// IWYU pragma: always_keep

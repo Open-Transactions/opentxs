@@ -56,35 +56,35 @@ Bitcoin_Providers::Bitcoin_Providers()
               "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVv"
               "vNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"},
              {{
-                  0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                  0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
               },
               "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhw"
               "BZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw",
               "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rG"
               "L5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7"},
-             {{0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED), 1},
+             {{0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED), 1},
               "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAW"
               "bWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ",
               "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53K"
               "w1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs"},
-             {{0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+             {{0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1,
-               2 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED)},
+               2 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED)},
               "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM"
               "3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5",
               "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7Fw"
               "uEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM"},
-             {{0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+             {{0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1,
-               2 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+               2 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                2},
               "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBqaGJAyiLj"
               "TAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV",
               "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQ"
               "MuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334"},
-             {{0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+             {{0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1,
-               2 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+               2 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                2,
                1000000000},
               "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFg"
@@ -109,14 +109,14 @@ Bitcoin_Providers::Bitcoin_Providers()
               "jwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt"},
              {{0,
                2147483647 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED)},
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED)},
               "xpub6ASAVgeehLbnwdqV6UKMHVzgqAG8Gr6riv3Fxxpj8ksbH9ebxaEyBLZ85ySD"
               "hKiLDBrQSARLq1uNRts8RuJiHjaDMBU4Zn9h8LZNnBC5y4a",
               "xprv9wSp6B7kry3Vj9m1zSnLvN3xH8RdsPP1Mh7fAaR7aRLcQMKTR2vidYEeEg2m"
               "UCTAwCd6vnxVrcjfy2kRgVsFawNzmjuHc2YmYRmagcEPdU9"},
              {{0,
                2147483647 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1},
               "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdM"
               "VCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon",
@@ -124,20 +124,20 @@ Bitcoin_Providers::Bitcoin_Providers()
               "VuesF9yog62tGAQtHjXajPPdbRCHuWS6T8XA2ECKADdw4Ef"},
              {{0,
                2147483647 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1,
                2147483646 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED)},
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED)},
               "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkr"
               "gZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
               "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS3xz7iAxn"
               "8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc"},
              {{0,
                2147483647 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                1,
                2147483646 |
-                   static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                   static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
                2},
               "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8"
               "p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt",
@@ -153,7 +153,7 @@ Bitcoin_Providers::Bitcoin_Providers()
               "xprv9s21ZrQH143K25QhxbucbDDuQ4naNntJRi4KUfWT7xo4EKsHt2QJDu7KXp1A"
               "3u7Bi1j8ph3EGsZ9Xvz9dGuVrtHHs7pXeTzjuxBrCmmhgC6"},
              {{
-                  0 | static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED),
+                  0 | static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED),
               },
               "xpub68NZiKmJWnxxS6aaHmn81bvJeTESw724CRDs6HbuccFQN9Ku14VQrADWgqbh"
               "hTHBaohPX4CjNLf9fq9MYo6oDaPPLPxSb7gwQN3ih19Zm4Y",
@@ -478,10 +478,10 @@ auto Bitcoin_Providers::compare_private(
     const std::string_view rhs) const -> bool
 {
     bool output{true};
-    ot::Bip32Network lNetwork{}, rNetwork{};
-    ot::Bip32Depth lDepth{}, rDepth{};
-    ot::Bip32Fingerprint lParent{}, rParent{};
-    ot::Bip32Index lIndex{}, rIndex{};
+    ot::crypto::Bip32Network lNetwork{}, rNetwork{};
+    ot::crypto::Bip32Depth lDepth{}, rDepth{};
+    ot::crypto::Bip32Fingerprint lParent{}, rParent{};
+    ot::crypto::Bip32Index lIndex{}, rIndex{};
     auto lChainCode = client_.Factory().Data();
     auto rChainCode = client_.Factory().Data();
     auto lKey = client_.Factory().Secret(0);
@@ -520,10 +520,10 @@ auto Bitcoin_Providers::compare_public(
     const std::string_view rhs) const -> bool
 {
     bool output{true};
-    ot::Bip32Network lNetwork{}, rNetwork{};
-    ot::Bip32Depth lDepth{}, rDepth{};
-    ot::Bip32Fingerprint lParent{}, rParent{};
-    ot::Bip32Index lIndex{}, rIndex{};
+    ot::crypto::Bip32Network lNetwork{}, rNetwork{};
+    ot::crypto::Bip32Depth lDepth{}, rDepth{};
+    ot::crypto::Bip32Fingerprint lParent{}, rParent{};
+    ot::crypto::Bip32Index lIndex{}, rIndex{};
     auto lChainCode = client_.Factory().Data();
     auto rChainCode = client_.Factory().Data();
     auto lKey = client_.Factory().Data();

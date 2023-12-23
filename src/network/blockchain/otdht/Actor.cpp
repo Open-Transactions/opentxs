@@ -21,9 +21,7 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -31,6 +29,8 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "network/blockchain/otdht/Client.hpp"
 #include "network/blockchain/otdht/Server.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -47,6 +47,7 @@
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/PushTransaction.hpp"
@@ -54,6 +55,7 @@
 #include "opentxs/network/otdht/Request.hpp"
 #include "opentxs/network/otdht/State.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -65,8 +67,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::network::blockchain
 {

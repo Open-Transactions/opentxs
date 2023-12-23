@@ -13,10 +13,10 @@
 #include <string_view>
 
 #include "internal/util/Options.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Types.hpp"
 
 class QObject;
 

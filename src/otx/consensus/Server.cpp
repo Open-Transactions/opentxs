@@ -41,8 +41,6 @@
 #include "internal/network/ServerConnection.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/OTX.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -73,6 +71,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -89,27 +89,28 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/ConsensusType.hpp"                // IWYU pragma: keep
 #include "opentxs/otx/Reply.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
@@ -121,7 +122,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/consensus/Base.hpp"
@@ -178,10 +178,10 @@ auto ServerContext(
 
 namespace opentxs::otx::context::implementation
 {
-const UnallocatedSet<MessageType> Server::do_not_need_request_number_{
-    MessageType::pingNotary,
-    MessageType::registerNym,
-    MessageType::getRequestNumber,
+const UnallocatedSet<otx::MessageType> Server::do_not_need_request_number_{
+    otx::MessageType::pingNotary,
+    otx::MessageType::registerNym,
+    otx::MessageType::getRequestNumber,
 };
 
 Server::Server(
@@ -265,14 +265,14 @@ auto Server::accept_entire_nymbox(
 
     assert_false(nullptr == processLedger);
 
-    processLedger->GenerateLedger(nymID, server_id_, ledgerType::message);
+    processLedger->GenerateLedger(nymID, server_id_, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> acceptTransaction{
         api_.Factory().Internal().Session().Transaction(
             nymID,
             nym_to_account(nymID),
             server_id_,
-            transactionType::processNymbox,
-            originType::not_applicable,
+            otx::transactionType::processNymbox,
+            otx::originType::not_applicable,
             lStoredTransactionNumber)};
 
     assert_false(nullptr == acceptTransaction);
@@ -287,7 +287,7 @@ auto Server::accept_entire_nymbox(
         auto& transaction = *it.second;
 
         if (transaction.IsAbbreviated() &&
-            (transaction.GetType() != transactionType::replyNotice)) {
+            (transaction.GetType() != otx::transactionType::replyNotice)) {
             LogError()()(
                 "Error: Unexpected abbreviated receipt in Nymbox, even after "
                 "supposedly loading all box receipts. (And it's not a "
@@ -301,43 +301,43 @@ auto Server::accept_entire_nymbox(
         transaction.GetReferenceString(strRespTo);
 
         switch (transaction.GetType()) {
-            case transactionType::message: {
+            case otx::transactionType::message: {
                 make_accept_item(
                     reason,
-                    itemType::acceptMessage,
+                    otx::itemType::acceptMessage,
                     transaction,
                     *acceptTransaction);
             } break;
-            case transactionType::instrumentNotice: {
+            case otx::transactionType::instrumentNotice: {
                 make_accept_item(
                     reason,
-                    itemType::acceptNotice,
+                    otx::itemType::acceptNotice,
                     transaction,
                     *acceptTransaction);
             } break;
-            case transactionType::notice: {
+            case otx::transactionType::notice: {
                 make_accept_item(
                     reason,
-                    itemType::acceptNotice,
+                    otx::itemType::acceptNotice,
                     transaction,
                     *acceptTransaction);
             } break;
-            case transactionType::successNotice: {
+            case otx::transactionType::successNotice: {
                 verify_success(data, transaction, setNoticeNumbers);
                 make_accept_item(
                     reason,
-                    itemType::acceptNotice,
+                    otx::itemType::acceptNotice,
                     transaction,
                     *acceptTransaction);
             } break;
-            case transactionType::replyNotice: {
+            case otx::transactionType::replyNotice: {
                 const bool seen = verify_acknowledged_number(
                     data, transaction.GetRequestNum());
 
                 if (seen) {
                     ++alreadySeenNotices;
                 } else {
-                    auto item = transaction.GetItem(itemType::replyNotice);
+                    auto item = transaction.GetItem(otx::itemType::replyNotice);
 
                     if (item) {
                         process_unseen_reply(
@@ -348,21 +348,21 @@ auto Server::accept_entire_nymbox(
 
                     make_accept_item(
                         reason,
-                        itemType::acceptNotice,
+                        otx::itemType::acceptNotice,
                         transaction,
                         *acceptTransaction);
                 }
             } break;
-            case transactionType::blank: {
+            case otx::transactionType::blank: {
                 verify_blank(data, transaction, verifiedNumbers);
                 make_accept_item(
                     reason,
-                    itemType::acceptTransaction,
+                    otx::itemType::acceptTransaction,
                     transaction,
                     *acceptTransaction,
                     verifiedNumbers);
             } break;
-            case transactionType::finalReceipt: {
+            case otx::transactionType::finalReceipt: {
                 const auto number = transaction.GetReferenceToNum();
                 const bool removed = consume_issued(data, number);
 
@@ -386,7 +386,7 @@ auto Server::accept_entire_nymbox(
                     server_id_);
                 make_accept_item(
                     reason,
-                    itemType::acceptFinalReceipt,
+                    otx::itemType::acceptFinalReceipt,
                     transaction,
                     *acceptTransaction);
             } break;
@@ -445,7 +445,7 @@ auto Server::accept_entire_nymbox(
 
     const auto serialized = String::Factory(*processLedger);
     initialize_server_command(
-        data, MessageType::processNymbox, -1, true, true, output);
+        data, otx::MessageType::processNymbox, -1, true, true, output);
     ready &= output.payload_->SetString(serialized);
     finalize_server_command(output, reason);
 
@@ -459,7 +459,7 @@ auto Server::accept_numbers(
     OTTransaction& transaction,
     OTTransaction& replyTransaction) -> void
 {
-    auto item = transaction.GetItem(itemType::transactionStatement);
+    auto item = transaction.GetItem(otx::itemType::transactionStatement);
 
     if (false == bool(item)) {
         LogConsole()()(
@@ -584,16 +584,16 @@ auto Server::add_item_to_payment_inbox(
 
     // I create the client-side-created instrumentNotice using the same
     // transaction number that was already on the box receipt where it came
-    // from. Meaning the server already placed an "transactionType::message"
-    // in my Nymbox with Txn # X, so I will create the corresponding
-    // instrumentNotice for my Payments Inbox using Txn # X as well.
-    // After all, if the notary had created it (as normally happens) then
-    // that's the Txn# that would have been on it anyway.
+    // from. Meaning the server already placed an
+    // "otx::transactionType::message" in my Nymbox with Txn # X, so I will
+    // create the corresponding instrumentNotice for my Payments Inbox using Txn
+    // # X as well. After all, if the notary had created it (as normally
+    // happens) then that's the Txn# that would have been on it anyway.
     const std::shared_ptr<OTTransaction> transaction{
         api_.Factory().Internal().Session().Transaction(
             *paymentInbox,
-            transactionType::instrumentNotice,
-            originType::not_applicable,
+            otx::transactionType::instrumentNotice,
+            otx::originType::not_applicable,
             number)};
 
     assert_false(nullptr == transaction);
@@ -756,13 +756,13 @@ auto Server::add_transaction_to_ledger(
     bool saved{false};
 
     switch (ledger.GetType()) {
-        case ledgerType::paymentInbox: {
+        case otx::ledgerType::paymentInbox: {
             saved = ledger.SavePaymentInbox();
         } break;
-        case ledgerType::recordBox: {
+        case otx::ledgerType::recordBox: {
             saved = ledger.SaveRecordBox();
         } break;
-        case ledgerType::expiredBox: {
+        case otx::ledgerType::expiredBox: {
             saved = ledger.SaveExpiredBox();
         } break;
         default: {
@@ -1143,15 +1143,15 @@ auto Server::extract_payment_instrument_from_notice(
     const PasswordPrompt& reason) const -> std::shared_ptr<OTPayment>
 {
     const bool bValidNotice =
-        (transactionType::instrumentNotice == pTransaction->GetType()) ||
-        (transactionType::payDividend == pTransaction->GetType()) ||
-        (transactionType::notice == pTransaction->GetType());
+        (otx::transactionType::instrumentNotice == pTransaction->GetType()) ||
+        (otx::transactionType::payDividend == pTransaction->GetType()) ||
+        (otx::transactionType::notice == pTransaction->GetType());
     OT_NEW_ASSERT_MSG(
         bValidNotice, "Invalid receipt type passed to this function.");
     // ----------------------------------------------------------------
-    if ((transactionType::instrumentNotice ==
+    if ((otx::transactionType::instrumentNotice ==
          pTransaction->GetType()) ||  // It's encrypted.
-        (transactionType::payDividend == pTransaction->GetType())) {
+        (otx::transactionType::payDividend == pTransaction->GetType())) {
         auto strMsg = String::Factory();
         pTransaction->GetReferenceString(strMsg);
 
@@ -1227,7 +1227,7 @@ auto Server::extract_payment_instrument_from_notice(
                            "envelope: ")(strMsg.get())(".")
                 .Flush();
         }
-    } else if (transactionType::notice == pTransaction->GetType()) {
+    } else if (otx::transactionType::notice == pTransaction->GetType()) {
         auto strNotice = String::Factory(*pTransaction);
         auto pPayment{api.Factory().Internal().Session().Payment(strNotice)};
 
@@ -1248,9 +1248,9 @@ auto Server::extract_payment_instrument_from_notice(
 auto Server::extract_transfer(const OTTransaction& receipt) const
     -> std::unique_ptr<Item>
 {
-    if (transactionType::transferReceipt == receipt.GetType()) {
+    if (otx::transactionType::transferReceipt == receipt.GetType()) {
         return extract_transfer_receipt(receipt);
-    } else if (transactionType::pending == receipt.GetType()) {
+    } else if (otx::transactionType::pending == receipt.GetType()) {
         return extract_transfer_pending(receipt);
     } else {
         LogError()()("Incorrect receipt type: ")(receipt.GetTypeString())
@@ -1263,7 +1263,7 @@ auto Server::extract_transfer(const OTTransaction& receipt) const
 auto Server::extract_transfer_pending(const OTTransaction& receipt) const
     -> std::unique_ptr<Item>
 {
-    if (transactionType::pending != receipt.GetType()) {
+    if (otx::transactionType::pending != receipt.GetType()) {
         LogError()()("Incorrect receipt type: ")(receipt.GetTypeString())
             .Flush();
 
@@ -1288,7 +1288,7 @@ auto Server::extract_transfer_pending(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    if (itemType::transfer != transfer->GetType()) {
+    if (otx::itemType::transfer != transfer->GetType()) {
         LogError()()("Invalid transfer item type.").Flush();
 
         return nullptr;
@@ -1318,7 +1318,7 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    if (itemType::acceptPending != acceptPending->GetType()) {
+    if (otx::itemType::acceptPending != acceptPending->GetType()) {
         LogError()()("Invalid accept pending item type.").Flush();
 
         return nullptr;
@@ -1352,7 +1352,7 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    if (transactionType::pending != pending->GetType()) {
+    if (otx::transactionType::pending != pending->GetType()) {
         LogError()()("Invalid pending transaction type.").Flush();
 
         return nullptr;
@@ -1376,7 +1376,7 @@ auto Server::extract_transfer_receipt(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    if (itemType::transfer != transfer->GetType()) {
+    if (otx::itemType::transfer != transfer->GetType()) {
         LogError()()("Invalid transfer item type.").Flush();
 
         return nullptr;
@@ -1501,9 +1501,9 @@ auto Server::get_instrument(
     //  2. then decrypts the payload on that message, producing an OTPayment
     // object, 3. ...which contains the actual instrument.
 
-    if ((transactionType::instrumentNotice != pTransaction->GetType()) &&
-        (transactionType::payDividend != pTransaction->GetType()) &&
-        (transactionType::notice != pTransaction->GetType())) {
+    if ((otx::transactionType::instrumentNotice != pTransaction->GetType()) &&
+        (otx::transactionType::payDividend != pTransaction->GetType()) &&
+        (otx::transactionType::notice != pTransaction->GetType())) {
         LogConsole()()(
             "Failure: Expected OTTransaction::instrumentNotice, ::payDividend "
             "or ::notice, but found: OTTransaction::")(
@@ -1540,46 +1540,46 @@ auto Server::get_instrument_by_receipt_id(
     return get_instrument(api, theNym, ledger, pTransaction, reason);
 }
 
-auto Server::get_item_type(OTTransaction& input, itemType& output)
+auto Server::get_item_type(OTTransaction& input, otx::itemType& output)
     -> Server::Exit
 {
     switch (input.GetType()) {
-        case transactionType::atDeposit: {
-            output = itemType::atDeposit;
+        case otx::transactionType::atDeposit: {
+            output = otx::itemType::atDeposit;
         } break;
-        case transactionType::atWithdrawal: {
-            auto cash = input.GetItem(itemType::atWithdrawal);
-            auto voucher = input.GetItem(itemType::atWithdrawVoucher);
+        case otx::transactionType::atWithdrawal: {
+            auto cash = input.GetItem(otx::itemType::atWithdrawal);
+            auto voucher = input.GetItem(otx::itemType::atWithdrawVoucher);
 
             if (cash) {
-                output = itemType::atWithdrawal;
+                output = otx::itemType::atWithdrawal;
             } else if (voucher) {
-                output = itemType::atWithdrawVoucher;
+                output = otx::itemType::atWithdrawVoucher;
             }
         } break;
-        case transactionType::atPayDividend: {
-            output = itemType::atPayDividend;
+        case otx::transactionType::atPayDividend: {
+            output = otx::itemType::atPayDividend;
         } break;
-        case transactionType::atTransfer: {
-            output = itemType::atTransfer;
+        case otx::transactionType::atTransfer: {
+            output = otx::itemType::atTransfer;
         } break;
-        case transactionType::atMarketOffer: {
-            output = itemType::atMarketOffer;
+        case otx::transactionType::atMarketOffer: {
+            output = otx::itemType::atMarketOffer;
         } break;
-        case transactionType::atPaymentPlan: {
-            output = itemType::atPaymentPlan;
+        case otx::transactionType::atPaymentPlan: {
+            output = otx::itemType::atPaymentPlan;
         } break;
-        case transactionType::atSmartContract: {
-            output = itemType::atSmartContract;
+        case otx::transactionType::atSmartContract: {
+            output = otx::itemType::atSmartContract;
         } break;
-        case transactionType::atCancelCronItem: {
-            output = itemType::atCancelCronItem;
+        case otx::transactionType::atCancelCronItem: {
+            output = otx::itemType::atCancelCronItem;
         } break;
-        case transactionType::atExchangeBasket: {
-            output = itemType::atExchangeBasket;
+        case otx::transactionType::atExchangeBasket: {
+            output = otx::itemType::atExchangeBasket;
         } break;
         default:
-        case transactionType::atProcessInbox: {
+        case otx::transactionType::atProcessInbox: {
             return Exit::Yes;
         }
     }
@@ -1633,7 +1633,7 @@ auto Server::harvest_unused(Data& data, const api::session::Client& client)
             continue;
         }
 
-        switch (translate(proto.type())) {
+        switch (opentxs::translate(proto.type())) {
             case client::PaymentWorkflowType::OutgoingCheque:
             case client::PaymentWorkflowType::OutgoingInvoice: {
                 keepStates.insert(client::PaymentWorkflowState::Unsent);
@@ -1663,14 +1663,14 @@ auto Server::harvest_unused(Data& data, const api::session::Client& client)
             }
         }
 
-        if (false == keepStates.contains(translate(proto.state()))) {
+        if (false == keepStates.contains(opentxs::translate(proto.state()))) {
             continue;
         }
 
         // At this point, this workflow contains a transaction whose
         // number(s) must not be added to the available list (recovered).
 
-        switch (translate(proto.type())) {
+        switch (opentxs::translate(proto.type())) {
             case client::PaymentWorkflowType::OutgoingCheque:
             case client::PaymentWorkflowType::OutgoingInvoice: {
                 [[maybe_unused]] auto [state, cheque] =
@@ -1731,12 +1731,12 @@ auto Server::HaveAdminPassword() const -> bool
     return false == get_data()->admin_password_.empty();
 }
 
-auto Server::HaveSufficientNumbers(const MessageType reason) const -> bool
+auto Server::HaveSufficientNumbers(const otx::MessageType reason) const -> bool
 {
     auto handle = get_data();
     const auto& data = *handle;
 
-    if (MessageType::processInbox == reason) {
+    if (otx::MessageType::processInbox == reason) {
         return 0 < data.available_transaction_numbers_.size();
     }
 
@@ -1836,7 +1836,7 @@ void Server::init_sockets(Data& data)
     }
 }
 
-auto Server::initialize_server_command(const MessageType type) const
+auto Server::initialize_server_command(const otx::MessageType type) const
     -> std::unique_ptr<Message>
 {
     auto output = api_.Factory().Internal().Session().Message();
@@ -1848,8 +1848,9 @@ auto Server::initialize_server_command(const MessageType type) const
     return output;
 }
 
-auto Server::initialize_server_command(const MessageType type, Message& output)
-    const -> void
+auto Server::initialize_server_command(
+    const otx::MessageType type,
+    Message& output) const -> void
 {
     assert_false(nullptr == Signer());
 
@@ -1861,7 +1862,7 @@ auto Server::initialize_server_command(const MessageType type, Message& output)
 
 auto Server::initialize_server_command(
     Data& data,
-    const MessageType type,
+    const otx::MessageType type,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash,
@@ -1891,7 +1892,7 @@ auto Server::initialize_server_command(
 
 auto Server::initialize_server_command(
     Data& data,
-    const MessageType type,
+    const otx::MessageType type,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash)
@@ -1910,7 +1911,7 @@ auto Server::initialize_server_command(
 }
 
 auto Server::InitializeServerCommand(
-    const MessageType type,
+    const otx::MessageType type,
     const Armored& payload,
     const identifier::Account& accountID,
     const RequestNumber provided,
@@ -1930,7 +1931,7 @@ auto Server::InitializeServerCommand(
 }
 
 auto Server::InitializeServerCommand(
-    const MessageType type,
+    const otx::MessageType type,
     const identifier::Nym& recipientNymID,
     const RequestNumber provided,
     const bool withAcknowledgments,
@@ -1946,7 +1947,7 @@ auto Server::InitializeServerCommand(
 }
 
 auto Server::InitializeServerCommand(
-    const MessageType type,
+    const otx::MessageType type,
     const RequestNumber provided,
     const bool withAcknowledgments,
     const bool withNymboxHash)
@@ -1981,7 +1982,7 @@ auto Server::isAdmin() const -> bool
 
 auto Server::is_internal_transfer(const Item& item) const -> bool
 {
-    if (itemType::transfer != item.GetType()) {
+    if (otx::itemType::transfer != item.GetType()) {
         throw std::runtime_error("Not a transfer item");
     }
 
@@ -2006,7 +2007,7 @@ auto Server::Join() const -> void { Wait().get(); }
 
 auto Server::make_accept_item(
     const PasswordPrompt& reason,
-    const itemType type,
+    const otx::itemType type,
     const OTTransaction& input,
     OTTransaction& acceptTransaction,
     const TransactionNumbers& accept) const -> const Item&
@@ -2087,7 +2088,7 @@ auto Server::load_or_create_account_recordbox(
     if (false == output) {
         LogVerbose()()("Creating recordbox").Flush();
         output = recordBox->GenerateLedger(
-            accountID, server_id_, ledgerType::recordBox, true);
+            accountID, server_id_, otx::ledgerType::recordBox, true);
         recordBox->ReleaseSignatures();
         output &= recordBox->SignContract(nym, reason);
         output &= recordBox->SaveContract();
@@ -2136,7 +2137,7 @@ auto Server::load_or_create_payment_inbox(const PasswordPrompt& reason) const
     if (false == output) {
         LogVerbose()()("Creating payment inbox").Flush();
         output = paymentInbox->GenerateLedger(
-            nymID, server_id_, ledgerType::paymentInbox, true);
+            nymID, server_id_, otx::ledgerType::paymentInbox, true);
         paymentInbox->ReleaseSignatures();
         output &= paymentInbox->SignContract(nym, reason);
         output &= paymentInbox->SaveContract();
@@ -2178,7 +2179,7 @@ void Server::need_box_items(
 {
     const auto messageLock = Lock{data.message_lock_};
     auto nymbox{api_.Factory().Internal().Session().Ledger(
-        Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
+        Signer()->ID(), Signer()->ID(), server_id_, otx::ledgerType::nymbox)};
 
     assert_false(nullptr == nymbox);
 
@@ -2230,7 +2231,7 @@ void Server::need_box_items(
 
         [[maybe_unused]] auto [requestNumber, message] =
             initialize_server_command(
-                data, MessageType::getBoxReceipt, -1, false, false);
+                data, otx::MessageType::getBoxReceipt, -1, false, false);
 
         assert_false(nullptr == message);
 
@@ -2288,8 +2289,8 @@ auto Server::need_nymbox(
     const PasswordPrompt& reason) -> void
 {
     const auto messageLock = Lock{data.message_lock_};
-    [[maybe_unused]] auto [number, message] =
-        initialize_server_command(data, MessageType::getNymbox, -1, true, true);
+    [[maybe_unused]] auto [number, message] = initialize_server_command(
+        data, otx::MessageType::getNymbox, -1, true, true);
 
     assert_false(nullptr == message);
 
@@ -2340,7 +2341,7 @@ auto Server::need_process_nymbox(
 {
     const auto messageLock = Lock{data.message_lock_};
     auto nymbox{api_.Factory().Internal().Session().Ledger(
-        Signer()->ID(), Signer()->ID(), server_id_, ledgerType::nymbox)};
+        Signer()->ID(), Signer()->ID(), server_id_, otx::ledgerType::nymbox)};
 
     assert_false(nullptr == nymbox);
 
@@ -2444,7 +2445,7 @@ auto Server::need_process_nymbox(
 
             if (pReply->success_) {
                 [[maybe_unused]] auto [number, msg] = initialize_server_command(
-                    data, MessageType::getNymbox, -1, true, true);
+                    data, otx::MessageType::getNymbox, -1, true, true);
 
                 assert_false(nullptr == msg);
 
@@ -2492,21 +2493,22 @@ auto Server::need_process_nymbox(
     }
 }
 
-auto Server::need_request_number(const MessageType type) -> bool
+auto Server::need_request_number(const otx::MessageType type) -> bool
 {
     return false == do_not_need_request_number_.contains(type);
 }
 
-auto Server::NextTransactionNumber(const MessageType reason)
+auto Server::NextTransactionNumber(const otx::MessageType reason)
     -> otx::context::ManagedNumber
 {
     return next_transaction_number(*get_data(), reason);
 }
 
-auto Server::next_transaction_number(Data& data, const MessageType reason)
+auto Server::next_transaction_number(Data& data, const otx::MessageType reason)
     -> otx::context::ManagedNumber
 {
-    const std::size_t reserve = (MessageType::processInbox == reason) ? 0 : 1;
+    const std::size_t reserve =
+        (otx::MessageType::processInbox == reason) ? 0 : 1;
 
     if (0 == reserve) {
         LogVerbose()()("Allocating a transaction number for process inbox.")
@@ -2604,7 +2606,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
 
     assert_false(nullptr == Signer());
 
-    auto request = initialize_server_command(MessageType::pingNotary);
+    auto request = initialize_server_command(otx::MessageType::pingNotary);
 
     if (false == bool(request)) {
         LogError()()("Failed to initialize server message.").Flush();
@@ -2707,7 +2709,7 @@ auto Server::process_accept_cron_receipt_reply(
     const identifier::Account& accountID,
     OTTransaction& inboxTransaction) const -> void
 {
-    auto pServerItem = inboxTransaction.GetItem(itemType::marketReceipt);
+    auto pServerItem = inboxTransaction.GetItem(otx::itemType::marketReceipt);
 
     if (false == bool(pServerItem)) {
         // Only marketReceipts have required action here.
@@ -2985,7 +2987,7 @@ void Server::process_accept_item_receipt_reply(
     originalItem.GetTypeString(originalType);
 
     switch (originalItem.GetType()) {
-        case itemType::depositCheque: {
+        case otx::itemType::depositCheque: {
             auto serialized = String::Factory();
             originalItem.GetAttachment(serialized);
             auto cheque = api_.Factory().Internal().Session().Cheque();
@@ -3001,7 +3003,7 @@ void Server::process_accept_item_receipt_reply(
             const auto number = cheque->GetTransactionNum();
             consume_issued(data, number);
         } break;
-        case itemType::acceptPending: {
+        case otx::itemType::acceptPending: {
             consume_issued(data, originalItem.GetNumberOfOrigin());
 
             auto serialized = String::Factory();
@@ -3045,71 +3047,71 @@ void Server::process_accept_item_receipt_reply(
                 LogError()()("Invalid transfer").Flush();
             }
         } break;
-        case itemType::transfer:
-        case itemType::atTransfer:
-        case itemType::acceptTransaction:
-        case itemType::atAcceptTransaction:
-        case itemType::acceptMessage:
-        case itemType::atAcceptMessage:
-        case itemType::acceptNotice:
-        case itemType::atAcceptNotice:
-        case itemType::atAcceptPending:
-        case itemType::rejectPending:
-        case itemType::atRejectPending:
-        case itemType::acceptCronReceipt:
-        case itemType::atAcceptCronReceipt:
-        case itemType::acceptItemReceipt:
-        case itemType::atAcceptItemReceipt:
-        case itemType::disputeCronReceipt:
-        case itemType::atDisputeCronReceipt:
-        case itemType::disputeItemReceipt:
-        case itemType::atDisputeItemReceipt:
-        case itemType::acceptFinalReceipt:
-        case itemType::atAcceptFinalReceipt:
-        case itemType::acceptBasketReceipt:
-        case itemType::atAcceptBasketReceipt:
-        case itemType::disputeFinalReceipt:
-        case itemType::atDisputeFinalReceipt:
-        case itemType::disputeBasketReceipt:
-        case itemType::atDisputeBasketReceipt:
-        case itemType::serverfee:
-        case itemType::atServerfee:
-        case itemType::issuerfee:
-        case itemType::atIssuerfee:
-        case itemType::balanceStatement:
-        case itemType::atBalanceStatement:
-        case itemType::transactionStatement:
-        case itemType::atTransactionStatement:
-        case itemType::withdrawal:
-        case itemType::atWithdrawal:
-        case itemType::deposit:
-        case itemType::atDeposit:
-        case itemType::withdrawVoucher:
-        case itemType::atWithdrawVoucher:
-        case itemType::atDepositCheque:
-        case itemType::payDividend:
-        case itemType::atPayDividend:
-        case itemType::marketOffer:
-        case itemType::atMarketOffer:
-        case itemType::paymentPlan:
-        case itemType::atPaymentPlan:
-        case itemType::smartContract:
-        case itemType::atSmartContract:
-        case itemType::cancelCronItem:
-        case itemType::atCancelCronItem:
-        case itemType::exchangeBasket:
-        case itemType::atExchangeBasket:
-        case itemType::chequeReceipt:
-        case itemType::voucherReceipt:
-        case itemType::marketReceipt:
-        case itemType::paymentReceipt:
-        case itemType::transferReceipt:
-        case itemType::finalReceipt:
-        case itemType::basketReceipt:
-        case itemType::replyNotice:
-        case itemType::successNotice:
-        case itemType::notice:
-        case itemType::error_state:
+        case otx::itemType::transfer:
+        case otx::itemType::atTransfer:
+        case otx::itemType::acceptTransaction:
+        case otx::itemType::atAcceptTransaction:
+        case otx::itemType::acceptMessage:
+        case otx::itemType::atAcceptMessage:
+        case otx::itemType::acceptNotice:
+        case otx::itemType::atAcceptNotice:
+        case otx::itemType::atAcceptPending:
+        case otx::itemType::rejectPending:
+        case otx::itemType::atRejectPending:
+        case otx::itemType::acceptCronReceipt:
+        case otx::itemType::atAcceptCronReceipt:
+        case otx::itemType::acceptItemReceipt:
+        case otx::itemType::atAcceptItemReceipt:
+        case otx::itemType::disputeCronReceipt:
+        case otx::itemType::atDisputeCronReceipt:
+        case otx::itemType::disputeItemReceipt:
+        case otx::itemType::atDisputeItemReceipt:
+        case otx::itemType::acceptFinalReceipt:
+        case otx::itemType::atAcceptFinalReceipt:
+        case otx::itemType::acceptBasketReceipt:
+        case otx::itemType::atAcceptBasketReceipt:
+        case otx::itemType::disputeFinalReceipt:
+        case otx::itemType::atDisputeFinalReceipt:
+        case otx::itemType::disputeBasketReceipt:
+        case otx::itemType::atDisputeBasketReceipt:
+        case otx::itemType::serverfee:
+        case otx::itemType::atServerfee:
+        case otx::itemType::issuerfee:
+        case otx::itemType::atIssuerfee:
+        case otx::itemType::balanceStatement:
+        case otx::itemType::atBalanceStatement:
+        case otx::itemType::transactionStatement:
+        case otx::itemType::atTransactionStatement:
+        case otx::itemType::withdrawal:
+        case otx::itemType::atWithdrawal:
+        case otx::itemType::deposit:
+        case otx::itemType::atDeposit:
+        case otx::itemType::withdrawVoucher:
+        case otx::itemType::atWithdrawVoucher:
+        case otx::itemType::atDepositCheque:
+        case otx::itemType::payDividend:
+        case otx::itemType::atPayDividend:
+        case otx::itemType::marketOffer:
+        case otx::itemType::atMarketOffer:
+        case otx::itemType::paymentPlan:
+        case otx::itemType::atPaymentPlan:
+        case otx::itemType::smartContract:
+        case otx::itemType::atSmartContract:
+        case otx::itemType::cancelCronItem:
+        case otx::itemType::atCancelCronItem:
+        case otx::itemType::exchangeBasket:
+        case otx::itemType::atExchangeBasket:
+        case otx::itemType::chequeReceipt:
+        case otx::itemType::voucherReceipt:
+        case otx::itemType::marketReceipt:
+        case otx::itemType::paymentReceipt:
+        case otx::itemType::transferReceipt:
+        case otx::itemType::finalReceipt:
+        case otx::itemType::basketReceipt:
+        case otx::itemType::replyNotice:
+        case otx::itemType::successNotice:
+        case otx::itemType::notice:
+        case otx::itemType::error_state:
         default: {
             LogError()()("Unexpected original item type: ")(originalType.get())
                 .Flush();
@@ -3126,7 +3128,7 @@ auto Server::process_accept_pending_reply(
     assert_false(nullptr == Signer());
     assert_false(nullptr == remote_nym_);
 
-    if (itemType::acceptPending != acceptItemReceipt.GetType()) {
+    if (otx::itemType::acceptPending != acceptItemReceipt.GetType()) {
         auto type = String::Factory();
         acceptItemReceipt.GetTypeString(type);
         LogError()()("Invalid type: ")(type.get()).Flush();
@@ -3158,7 +3160,7 @@ auto Server::process_accept_pending_reply(
         return;
     }
 
-    if (transactionType::pending != pending->GetType()) {
+    if (otx::transactionType::pending != pending->GetType()) {
         LogError()()("Wrong item type").Flush();
 
         return;
@@ -3209,12 +3211,12 @@ auto Server::process_account_data(
             api_.Factory()
                 .Internal()
                 .Session()
-                .Ledger(nymID, accountID, server_id_, ledgerType::inbox)
+                .Ledger(nymID, accountID, server_id_, otx::ledgerType::inbox)
                 .release());
     }
 
     assert_false(nullptr == data.inbox_);
-    assert_true(ledgerType::inbox == data.inbox_->GetType());
+    assert_true(otx::ledgerType::inbox == data.inbox_->GetType());
 
     if (false == data.inbox_->LoadInboxFromString(inbox)) {
         LogError()()("Failed to deserialize inbox").Flush();
@@ -3252,7 +3254,7 @@ auto Server::process_account_data(
 
         auto& transaction = *pTransaction;
 
-        if (transactionType::finalReceipt == transaction.GetType()) {
+        if (otx::transactionType::finalReceipt == transaction.GetType()) {
             LogVerbose()()("*** Removing opening issued number (")(
                 transaction.GetReferenceToNum())(
                 "), since finalReceipt found when ")(
@@ -3292,12 +3294,12 @@ auto Server::process_account_data(
             api_.Factory()
                 .Internal()
                 .Session()
-                .Ledger(nymID, accountID, server_id_, ledgerType::outbox)
+                .Ledger(nymID, accountID, server_id_, otx::ledgerType::outbox)
                 .release());
     }
 
     assert_false(nullptr == data.outbox_);
-    assert_true(ledgerType::outbox == data.outbox_->GetType());
+    assert_true(otx::ledgerType::outbox == data.outbox_->GetType());
 
     if (false == data.outbox_->LoadOutboxFromString(outbox)) {
         LogError()()("Failed to deserialize outbox").Flush();
@@ -3601,15 +3603,15 @@ auto Server::process_get_box_receipt_response(
     bool processInbox{false};
 
     switch (receipt->GetType()) {
-        case transactionType::message: {
+        case otx::transactionType::message: {
             process_incoming_message(data, client, *receipt, reason);
         } break;
-        case transactionType::instrumentNotice:
-        case transactionType::instrumentRejection: {
+        case otx::transactionType::instrumentNotice:
+        case otx::transactionType::instrumentRejection: {
             processInbox = true;
             process_incoming_instrument(receipt, reason);
         } break;
-        case transactionType::transferReceipt: {
+        case otx::transactionType::transferReceipt: {
             processInbox = true;
             const auto pTransfer = extract_transfer(*receipt);
 
@@ -3627,7 +3629,7 @@ auto Server::process_get_box_receipt_response(
                 LogError()()("Invalid transfer").Flush();
             }
         } break;
-        case transactionType::pending: {
+        case otx::transactionType::pending: {
             processInbox = true;
             const auto pTransfer = extract_transfer(*receipt);
 
@@ -3647,9 +3649,9 @@ auto Server::process_get_box_receipt_response(
                 LogError()()("Invalid transfer").Flush();
             }
         } break;
-        case transactionType::chequeReceipt: {
+        case otx::transactionType::chequeReceipt: {
         } break;
-        case transactionType::voucherReceipt: {
+        case otx::transactionType::voucherReceipt: {
         } break;
         default: {
         }
@@ -4380,12 +4382,14 @@ auto Server::process_process_box_response(
 
     const auto notaryID = String::Factory(server_id_, api_.Crypto());
     auto receiptID = String::Factory("NOT_SET_YET");
-    auto replyItem = replyTransaction->GetItem(itemType::atBalanceStatement);
+    auto replyItem =
+        replyTransaction->GetItem(otx::itemType::atBalanceStatement);
 
     if (replyItem) {
         receiptID = reply.acct_id_;
     } else {
-        replyItem = replyTransaction->GetItem(itemType::atTransactionStatement);
+        replyItem =
+            replyTransaction->GetItem(otx::itemType::atTransactionStatement);
 
         if (replyItem) { Signer()->GetIdentifier(receiptID); }
     }
@@ -4449,9 +4453,9 @@ auto Server::process_process_inbox_response(
     const auto& nym = *Signer();
     const auto accountID =
         api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes());
-    transaction = ledger.GetTransaction(transactionType::processInbox);
+    transaction = ledger.GetTransaction(otx::transactionType::processInbox);
     replyTransaction =
-        responseLedger.GetTransaction(transactionType::atProcessInbox);
+        responseLedger.GetTransaction(otx::transactionType::atProcessInbox);
 
     if (false == (transaction && replyTransaction)) { return false; }
 
@@ -4483,31 +4487,31 @@ auto Server::process_process_inbox_response(
         auto& replyItem = *pReplyItem;
         auto replyItemType = String::Factory();
         replyItem.GetTypeString(replyItemType);
-        itemType requestType{itemType::error_state};
+        otx::itemType requestType{otx::itemType::error_state};
 
         switch (replyItem.GetType()) {
-            case itemType::atAcceptPending: {
-                requestType = itemType::acceptPending;
+            case otx::itemType::atAcceptPending: {
+                requestType = otx::itemType::acceptPending;
             } break;
-            case itemType::atAcceptCronReceipt: {
-                requestType = itemType::acceptCronReceipt;
+            case otx::itemType::atAcceptCronReceipt: {
+                requestType = otx::itemType::acceptCronReceipt;
             } break;
-            case itemType::atAcceptItemReceipt: {
-                requestType = itemType::acceptItemReceipt;
+            case otx::itemType::atAcceptItemReceipt: {
+                requestType = otx::itemType::acceptItemReceipt;
             } break;
-            case itemType::atAcceptFinalReceipt: {
-                requestType = itemType::acceptFinalReceipt;
+            case otx::itemType::atAcceptFinalReceipt: {
+                requestType = otx::itemType::acceptFinalReceipt;
             } break;
-            case itemType::atAcceptBasketReceipt: {
-                requestType = itemType::acceptBasketReceipt;
+            case otx::itemType::atAcceptBasketReceipt: {
+                requestType = otx::itemType::acceptBasketReceipt;
             } break;
-            case itemType::atRejectPending:
-            case itemType::atDisputeCronReceipt:
-            case itemType::atDisputeItemReceipt:
-            case itemType::atDisputeFinalReceipt:
-            case itemType::atDisputeBasketReceipt:
-            case itemType::atBalanceStatement:
-            case itemType::atTransactionStatement: {
+            case otx::itemType::atRejectPending:
+            case otx::itemType::atDisputeCronReceipt:
+            case otx::itemType::atDisputeItemReceipt:
+            case otx::itemType::atDisputeFinalReceipt:
+            case otx::itemType::atDisputeBasketReceipt:
+            case otx::itemType::atBalanceStatement:
+            case otx::itemType::atTransactionStatement: {
                 continue;
             }
             default: {
@@ -4583,21 +4587,21 @@ auto Server::process_process_inbox_response(
         const auto inboxNumber = inboxTransaction.GetTransactionNum();
 
         switch (replyItem.GetType()) {
-            case itemType::atAcceptPending: {
+            case otx::itemType::atAcceptPending: {
                 process_accept_pending_reply(
                     client, accountID, referenceItem, reply);
             } break;
-            case itemType::atAcceptItemReceipt: {
+            case otx::itemType::atAcceptItemReceipt: {
                 process_accept_item_receipt_reply(
                     data, client, accountID, reply, inboxTransaction);
             } break;
-            case itemType::atAcceptCronReceipt: {
+            case otx::itemType::atAcceptCronReceipt: {
                 process_accept_cron_receipt_reply(accountID, inboxTransaction);
             } break;
-            case itemType::atAcceptFinalReceipt: {
+            case otx::itemType::atAcceptFinalReceipt: {
                 process_accept_final_receipt_reply(data, inboxTransaction);
             } break;
-            case itemType::atAcceptBasketReceipt: {
+            case otx::itemType::atAcceptBasketReceipt: {
                 process_accept_basket_receipt_reply(data, inboxTransaction);
             } break;
             default: {
@@ -4647,9 +4651,9 @@ auto Server::process_process_nymbox_response(
 
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
-    transaction = ledger.GetTransaction(transactionType::processNymbox);
+    transaction = ledger.GetTransaction(otx::transactionType::processNymbox);
     replyTransaction =
-        responseLedger.GetTransaction(transactionType::atProcessNymbox);
+        responseLedger.GetTransaction(otx::transactionType::atProcessNymbox);
 
     if (false == (transaction && replyTransaction)) { return false; }
 
@@ -4792,42 +4796,42 @@ auto Server::process_reply(
     }
 
     switch (Message::Type(reply.command_->Get())) {
-        case MessageType::checkNymResponse: {
+        case otx::MessageType::checkNymResponse: {
             return process_check_nym_response(data, client, reply);
         }
-        case MessageType::getAccountDataResponse: {
+        case otx::MessageType::getAccountDataResponse: {
             return process_get_account_data(data, reply, reason);
         }
-        case MessageType::getBoxReceiptResponse: {
+        case otx::MessageType::getBoxReceiptResponse: {
             return process_get_box_receipt_response(
                 data, client, reply, reason);
         }
-        case MessageType::getInstrumentDefinitionResponse: {
+        case otx::MessageType::getInstrumentDefinitionResponse: {
             return process_get_unit_definition_response(data, reply);
         }
-        case MessageType::getMarketListResponse: {
+        case otx::MessageType::getMarketListResponse: {
             return process_get_market_list_response(reply);
         }
-        case MessageType::getMarketOffersResponse: {
+        case otx::MessageType::getMarketOffersResponse: {
             return process_get_market_offers_response(reply);
         }
-        case MessageType::getMarketRecentTradesResponse: {
+        case otx::MessageType::getMarketRecentTradesResponse: {
             return process_get_market_recent_trades_response(reply);
         }
-        case MessageType::getMintResponse: {
+        case otx::MessageType::getMintResponse: {
             return process_get_mint_response(reply);
         }
-        case MessageType::getNymboxResponse: {
+        case otx::MessageType::getNymboxResponse: {
             return process_get_nymbox_response(data, reply, reason);
         }
-        case MessageType::getNymMarketOffersResponse: {
+        case otx::MessageType::getNymMarketOffersResponse: {
             return process_get_nym_market_offers_response(reply);
         }
-        case MessageType::notarizeTransactionResponse: {
+        case otx::MessageType::notarizeTransactionResponse: {
             return process_notarize_transaction_response(
                 data, client, reply, reason);
         }
-        case MessageType::processInboxResponse: {
+        case otx::MessageType::processInboxResponse: {
             return process_process_box_response(
                 data,
                 client,
@@ -4836,7 +4840,7 @@ auto Server::process_reply(
                 api_.Factory().AccountIDFromBase58(reply.acct_id_->Bytes()),
                 reason);
         }
-        case MessageType::processNymboxResponse: {
+        case otx::MessageType::processNymboxResponse: {
             return process_process_box_response(
                 data,
                 client,
@@ -4845,16 +4849,16 @@ auto Server::process_reply(
                 nym_to_account(nymID),
                 reason);
         }
-        case MessageType::registerAccountResponse: {
+        case otx::MessageType::registerAccountResponse: {
             return process_register_account_response(data, reply, reason);
         }
-        case MessageType::requestAdminResponse: {
+        case otx::MessageType::requestAdminResponse: {
             return process_request_admin_response(data, reply);
         }
-        case MessageType::registerInstrumentDefinitionResponse: {
+        case otx::MessageType::registerInstrumentDefinitionResponse: {
             return process_issue_unit_definition_response(data, reply, reason);
         }
-        case MessageType::registerNymResponse: {
+        case otx::MessageType::registerNymResponse: {
             update_nymbox_hash(data, reply);
             data.revision_.store(nym.Revision());
             const auto& resync = std::get<1>(data.pending_args_);
@@ -4865,14 +4869,14 @@ auto Server::process_reply(
 
             return true;
         }
-        case MessageType::triggerClauseResponse: {
+        case otx::MessageType::triggerClauseResponse: {
             update_nymbox_hash(data, reply);
             return true;
         }
-        case MessageType::unregisterAccountResponse: {
+        case otx::MessageType::unregisterAccountResponse: {
             return process_unregister_account_response(reply, reason);
         }
-        case MessageType::unregisterNymResponse: {
+        case otx::MessageType::unregisterNymResponse: {
             return process_unregister_nym_response(data, reply, reason);
         }
         default: {
@@ -4893,37 +4897,37 @@ auto Server::process_response_transaction(
     assert_false(nullptr == Signer());
 
     const auto& nym = *Signer();
-    itemType type{itemType::error_state};
+    otx::itemType type{otx::itemType::error_state};
 
     if (Exit::Yes == get_item_type(response, type)) { return; }
 
     switch (response.GetType()) {
-        case transactionType::atDeposit: {
+        case otx::transactionType::atDeposit: {
             process_response_transaction_deposit(
                 data, client, reply, type, response, reason);
         } break;
-        case transactionType::atPayDividend: {
+        case otx::transactionType::atPayDividend: {
             process_response_transaction_pay_dividend(
                 data, reply, type, response);
         } break;
-        case transactionType::atExchangeBasket: {
+        case otx::transactionType::atExchangeBasket: {
             process_response_transaction_exchange_basket(
                 data, reply, type, response);
         } break;
-        case transactionType::atCancelCronItem: {
+        case otx::transactionType::atCancelCronItem: {
             process_response_transaction_cancel(data, reply, type, response);
         } break;
-        case transactionType::atWithdrawal: {
+        case otx::transactionType::atWithdrawal: {
             process_response_transaction_withdrawal(
                 data, client, reply, type, response, reason);
         } break;
-        case transactionType::atTransfer: {
+        case otx::transactionType::atTransfer: {
             process_response_transaction_transfer(
                 data, client, reply, type, response);
         } break;
-        case transactionType::atMarketOffer:
-        case transactionType::atPaymentPlan:
-        case transactionType::atSmartContract: {
+        case otx::transactionType::atMarketOffer:
+        case otx::transactionType::atPaymentPlan:
+        case otx::transactionType::atSmartContract: {
             process_response_transaction_cron(
                 data, reply, type, response, reason);
         } break;
@@ -4935,12 +4939,12 @@ auto Server::process_response_transaction(
     }
 
     auto receiptID = String::Factory("ID_NOT_SET_YET");
-    auto pItem = response.GetItem(itemType::atBalanceStatement);
+    auto pItem = response.GetItem(otx::itemType::atBalanceStatement);
 
     if (pItem) {
         receiptID->Set(reply.acct_id_);
     } else {
-        pItem = response.GetItem(itemType::atTransactionStatement);
+        pItem = response.GetItem(otx::itemType::atTransactionStatement);
 
         if (pItem) {
             nym.GetIdentifier(receiptID);
@@ -4997,7 +5001,7 @@ auto Server::process_response_transaction(
 auto Server::process_response_transaction_cancel(
     Data& data,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response) -> void
 {
     consume_issued(data, response.GetTransactionNum());
@@ -5238,7 +5242,7 @@ auto Server::process_response_transaction_cheque_deposit(
 auto Server::process_response_transaction_cron(
     Data& data,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
@@ -5295,8 +5299,8 @@ auto Server::process_response_transaction_cron(
     }
 
     switch (response.GetType()) {
-        case transactionType::atPaymentPlan:
-        case transactionType::atSmartContract: {
+        case otx::transactionType::atPaymentPlan:
+        case otx::transactionType::atSmartContract: {
             break;
         }
         default: {
@@ -5400,7 +5404,7 @@ auto Server::process_response_transaction_cron(
             bSuccessLoading1 = thePmntInbox->GenerateLedger(
                 nymID,
                 server_id_,
-                ledgerType::paymentInbox,
+                otx::ledgerType::paymentInbox,
 
                 true);  // bGenerateFile=true
         }
@@ -5415,7 +5419,7 @@ auto Server::process_response_transaction_cron(
             bSuccessLoading2 = theRecordBox->GenerateLedger(
                 nymID,
                 server_id_,
-                ledgerType::recordBox,
+                otx::ledgerType::recordBox,
 
                 true);  // bGenerateFile=true
         }
@@ -5619,27 +5623,27 @@ auto Server::process_response_transaction_cron(
                 // placing in his recordbox WILL include Bob's transaction
                 // numbers and account number. (Which is how it should be.)
                 //
-                originType theOriginType = originType::not_applicable;
+                otx::originType theOriginType = otx::originType::not_applicable;
 
                 if (theOutpayment->IsValid()) {
                     if (theOutpayment->IsPaymentPlan()) {
-                        theOriginType = originType::origin_payment_plan;
+                        theOriginType = otx::originType::origin_payment_plan;
                     } else if (theOutpayment->IsSmartContract()) {
-                        theOriginType = originType::origin_smart_contract;
+                        theOriginType = otx::originType::origin_smart_contract;
                     }
                 }
 
                 auto pNewTransaction =
                     api_.Factory().Internal().Session().Transaction(
                         *theRecordBox,  // recordbox.
-                        transactionType::notice,
+                        otx::transactionType::notice,
                         theOriginType,
                         openingNumber);
 
                 if (pNewTransaction) {
                     // Whether the reply item we received was acknowledged
                     // or rejected, we create a corresponding
-                    // itemType::notice for our new record, to save that
+                    // otx::itemType::notice for our new record, to save that
                     // state for the client. Our record box will contain the
                     // server's most recent version of the payment plan,
                     // (The one I just activated -- since I was the final
@@ -5647,7 +5651,7 @@ auto Server::process_response_transaction_cron(
                     //
                     auto pNewItem = api_.Factory().Internal().Session().Item(
                         *pNewTransaction,
-                        itemType::notice,
+                        otx::itemType::notice,
                         identifier::Account{});
                     assert_false(nullptr == pNewItem);
                     // This may be unnecessary, I'll have to check
@@ -5733,7 +5737,7 @@ auto Server::process_response_transaction_deposit(
     Data& data,
     const api::session::Client& client,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
@@ -5746,13 +5750,13 @@ auto Server::process_response_transaction_deposit(
         // if pointer not null, and it's a deposit, and it's an
         // acknowledgement (not a rejection or error)
 
-        if ((itemType::atDeposit == item.GetType()) ||
-            (itemType::atDepositCheque == item.GetType())) {
+        if ((otx::itemType::atDeposit == item.GetType()) ||
+            (otx::itemType::atDepositCheque == item.GetType())) {
             if (Item::acknowledgement == item.GetStatus()) {
                 LogDetail()()("TRANSACTION SUCCESS -- Server acknowledges "
                               "deposit.")
                     .Flush();
-                if (itemType::atDepositCheque == item.GetType()) {
+                if (otx::itemType::atDepositCheque == item.GetType()) {
                     process_response_transaction_cheque_deposit(
                         data,
                         client,
@@ -5760,7 +5764,7 @@ auto Server::process_response_transaction_deposit(
                         &reply,
                         item,
                         reason);
-                } else if (itemType::atDeposit == item.GetType()) {
+                } else if (otx::itemType::atDeposit == item.GetType()) {
                     process_response_transaction_cash_deposit(item, reason);
                 }
             } else {
@@ -5776,7 +5780,7 @@ auto Server::process_response_transaction_deposit(
 auto Server::process_response_transaction_exchange_basket(
     Data& data,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response) -> void
 {
     consume_issued(data, response.GetTransactionNum());
@@ -5830,7 +5834,7 @@ auto Server::process_response_transaction_exchange_basket(
 auto Server::process_response_transaction_pay_dividend(
     Data& data,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response) -> void
 {
     // loop through the ALL items that make up this transaction and check to
@@ -5843,7 +5847,7 @@ auto Server::process_response_transaction_pay_dividend(
         // if pointer not null, and it's a dividend payout, and it's an
         // acknowledgement (not a rejection or error)
 
-        if (itemType::atPayDividend == pItem->GetType()) {
+        if (otx::itemType::atPayDividend == pItem->GetType()) {
             if (Item::acknowledgement == pItem->GetStatus()) {
                 LogConsole()()("TRANSACTION SUCCESS -- Server acknowledges "
                                "dividend "
@@ -5864,7 +5868,7 @@ auto Server::process_response_transaction_transfer(
     Data& data,
     const api::session::Client& client,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response) -> void
 {
     assert_false(nullptr == Signer());
@@ -5927,7 +5931,7 @@ auto Server::process_response_transaction_withdrawal(
     Data& data,
     const api::session::Client& client,
     const Message& reply,
-    const itemType type,
+    const otx::itemType type,
     OTTransaction& response,
     const PasswordPrompt& reason) -> void
 {
@@ -5945,7 +5949,7 @@ auto Server::process_response_transaction_withdrawal(
         //
         // If we got a reply to a voucher withdrawal, we'll just display the
         // voucher on the screen (if the server sent us one...)
-        if ((itemType::atWithdrawVoucher == pItem->GetType()) &&
+        if ((otx::itemType::atWithdrawVoucher == pItem->GetType()) &&
             (Item::acknowledgement == pItem->GetStatus())) {
             auto strVoucher = String::Factory();
             auto theVoucher = api_.Factory().Internal().Session().Cheque();
@@ -5965,7 +5969,7 @@ auto Server::process_response_transaction_withdrawal(
         // the coins into a purse somewhere on the computer. That's cash!
         // Gotta keep it safe.
         else if (
-            (itemType::atWithdrawal == pItem->GetType()) &&
+            (otx::itemType::atWithdrawal == pItem->GetType()) &&
             (Item::acknowledgement == pItem->GetStatus())) {
             process_incoming_cash_withdrawal(*pItem, reason);
         }
@@ -6318,24 +6322,24 @@ auto Server::remove_nymbox_item(
 
     const auto& nym = *Signer();
     const auto& nymID = nym.ID();
-    itemType requestType = itemType::error_state;
+    otx::itemType requestType = otx::itemType::error_state;
     auto replyType = String::Factory();
     replyItem.GetTypeString(replyType);
 
     switch (replyItem.GetType()) {
-        case itemType::atAcceptFinalReceipt: {
-            requestType = itemType::acceptFinalReceipt;
+        case otx::itemType::atAcceptFinalReceipt: {
+            requestType = otx::itemType::acceptFinalReceipt;
         } break;
-        case itemType::atAcceptMessage: {
-            requestType = itemType::acceptMessage;
+        case otx::itemType::atAcceptMessage: {
+            requestType = otx::itemType::acceptMessage;
         } break;
-        case itemType::atAcceptNotice: {
-            requestType = itemType::acceptNotice;
+        case otx::itemType::atAcceptNotice: {
+            requestType = otx::itemType::acceptNotice;
         } break;
-        case itemType::atAcceptTransaction: {
-            requestType = itemType::acceptTransaction;
+        case otx::itemType::atAcceptTransaction: {
+            requestType = otx::itemType::acceptTransaction;
         } break;
-        case itemType::atTransactionStatement: {
+        case otx::itemType::atTransactionStatement: {
             // (The transaction statement itself is already handled
 
             return true;
@@ -6390,10 +6394,10 @@ auto Server::remove_nymbox_item(
     std::shared_ptr<OTTransaction> serverTransaction;
 
     switch (replyItem.GetType()) {
-        case itemType::atAcceptNotice:
-        case itemType::atAcceptMessage:
-        case itemType::atAcceptTransaction:
-        case itemType::atAcceptFinalReceipt: {
+        case otx::itemType::atAcceptNotice:
+        case otx::itemType::atAcceptMessage:
+        case otx::itemType::atAcceptTransaction:
+        case otx::itemType::atAcceptFinalReceipt: {
             serverTransaction =
                 nymbox.GetTransaction(item->GetReferenceToNum());
         } break;
@@ -6420,8 +6424,8 @@ auto Server::remove_nymbox_item(
     }
 
     switch (replyItem.GetType()) {
-        case itemType::atAcceptNotice: {
-            if (transactionType::notice != serverTransaction->GetType()) {
+        case otx::itemType::atAcceptNotice: {
+            if (otx::transactionType::notice != serverTransaction->GetType()) {
                 break;
             }
 
@@ -6432,9 +6436,11 @@ auto Server::remove_nymbox_item(
 
             auto strOriginalCronItem = String::Factory();
             serverTransaction->GetReferenceString(strOriginalCronItem);
-            const originType theOriginType = serverTransaction->GetOriginType();
+            const otx::originType theOriginType =
+                serverTransaction->GetOriginType();
             auto strUpdatedCronItem = String::Factory();
-            auto pNoticeItem = serverTransaction->GetItem(itemType::notice);
+            auto pNoticeItem =
+                serverTransaction->GetItem(otx::itemType::notice);
 
             if ((pNoticeItem)) { pNoticeItem->GetNote(strUpdatedCronItem); }
 
@@ -6556,7 +6562,7 @@ auto Server::remove_nymbox_item(
                     loaded1 = paymentInbox->GenerateLedger(
                         nymID,
                         server_id_,
-                        ledgerType::paymentInbox,
+                        otx::ledgerType::paymentInbox,
 
                         true);
                 }
@@ -6567,7 +6573,7 @@ auto Server::remove_nymbox_item(
                          recordBox->VerifySignature(nym));
                 } else if (!exists2) {
                     loaded2 = recordBox->GenerateLedger(
-                        nymID, server_id_, ledgerType::recordBox, true);
+                        nymID, server_id_, otx::ledgerType::recordBox, true);
                 }
 
                 if (!loaded1 || !loaded2) {
@@ -6682,7 +6688,7 @@ auto Server::remove_nymbox_item(
                     const std::shared_ptr<OTTransaction> newTransaction{
                         api_.Factory().Internal().Session().Transaction(
                             *recordBox,
-                            transactionType::notice,
+                            otx::transactionType::notice,
                             theOriginType,
                             serverTransaction->GetTransactionNum())};
 
@@ -6691,7 +6697,7 @@ auto Server::remove_nymbox_item(
                             const std::shared_ptr<Item> newItem{
                                 api_.Factory().Internal().Session().Item(
                                     *newTransaction,
-                                    itemType::notice,
+                                    otx::itemType::notice,
                                     identifier::Account{})};
 
                             assert_false(nullptr == newItem);
@@ -6778,11 +6784,11 @@ auto Server::remove_nymbox_item(
                 }
             }
         } break;
-        case itemType::atAcceptMessage:
-        case itemType::atAcceptTransaction: {
+        case otx::itemType::atAcceptMessage:
+        case otx::itemType::atAcceptTransaction: {
             // I don't think we need to do anything here...
         } break;
-        case itemType::atAcceptFinalReceipt: {
+        case otx::itemType::atAcceptFinalReceipt: {
             LogVerbose()()(
                 "Successfully removed finalReceipt from Nymbox with opening "
                 "num: ")(serverTransaction->GetReferenceToNum())
@@ -7114,7 +7120,9 @@ auto Server::statement(
     // Since it uses up a transaction number, I will be sure to remove that one
     // from my list before signing the list.
     output = api_.Factory().Internal().Session().Item(
-        transaction, itemType::transactionStatement, identifier::Account{});
+        transaction,
+        otx::itemType::transactionStatement,
+        identifier::Account{});
 
     if (false == bool(output)) { return output; }
 
@@ -7124,7 +7132,7 @@ auto Server::statement(
     if (!statement) { return output; }
 
     switch (transaction.GetType()) {
-        case transactionType::cancelCronItem: {
+        case otx::transactionType::cancelCronItem: {
             if (transaction.GetTransactionNum() > 0) {
                 statement->Remove(transaction.GetTransactionNum());
             }
@@ -7133,9 +7141,9 @@ auto Server::statement(
         // case of market offers and payment plans, in which case the number
         // should NOT be removed, and remains in play until final closure from
         // Cron.
-        case transactionType::marketOffer:
-        case transactionType::paymentPlan:
-        case transactionType::smartContract:
+        case otx::transactionType::marketOffer:
+        case otx::transactionType::paymentPlan:
+        case otx::transactionType::smartContract:
         default: {
         }
     }
@@ -7375,7 +7383,8 @@ auto Server::update_request_number(
 {
     sendStatus = false;
 
-    auto request = initialize_server_command(MessageType::getRequestNumber);
+    auto request =
+        initialize_server_command(otx::MessageType::getRequestNumber);
 
     if (false == bool(request)) {
         LogError()()("Failed to initialize server message.").Flush();
@@ -7511,9 +7520,9 @@ auto Server::verify_success(
 {
     for (const auto& number : extract_numbers(blank)) {
         if (false == verify_tentative_number(data, number)) {
-            LogDetail()()(
-                "transactionType::successNotice: This wasn't on my tentative "
-                "list (")(
+            LogDetail()()("otx::transactionType::successNotice: This wasn't on "
+                          "my tentative "
+                          "list (")(
                 number)("), I must have already processed it. (Or there was a "
                         "dropped message when I did, or the server is trying "
                         "to slip me an old number).")

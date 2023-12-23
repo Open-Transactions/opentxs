@@ -9,7 +9,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

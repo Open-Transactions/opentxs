@@ -21,9 +21,9 @@
 
 #include "core/FixedByteArray.tpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Writer.hpp"
 

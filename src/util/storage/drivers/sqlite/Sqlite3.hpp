@@ -17,10 +17,10 @@ extern "C" {
 #include <span>
 #include <string_view>
 
+#include "opentxs/Types.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/drivers/Driver.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

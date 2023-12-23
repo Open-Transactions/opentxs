@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::blockchain
 {
-enum class Subchain : std::uint8_t {
+enum class Subchain : std::underlying_type_t<Subchain> {
     invalid = 0,
     primary = 1,
     testnet1 = 128,

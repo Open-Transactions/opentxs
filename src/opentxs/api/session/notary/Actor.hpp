@@ -9,7 +9,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "opentxs/api/session/notary/Types.internal.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/Actor.hpp"
 

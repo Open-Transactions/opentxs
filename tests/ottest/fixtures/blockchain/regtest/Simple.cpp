@@ -97,7 +97,7 @@ auto Regtest_fixture_simple::TransactionGenerator(
     unsigned amount) -> Transaction
 {
     using OutputBuilder = ot::blockchain::OutputBuilder;
-    using Index = ot::Bip32Index;
+    using Index = ot::crypto::Bip32Index;
 
     auto output = ot::UnallocatedVector<OutputBuilder>{};
     auto meta = ot::UnallocatedVector<OutpointMetadata>{};

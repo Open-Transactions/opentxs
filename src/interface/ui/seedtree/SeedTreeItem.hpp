@@ -15,8 +15,8 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

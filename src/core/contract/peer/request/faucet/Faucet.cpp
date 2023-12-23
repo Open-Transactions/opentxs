@@ -11,7 +11,7 @@
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "core/contract/peer/request/faucet/FaucetPrivate.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Types.hpp"

@@ -14,11 +14,11 @@
 namespace opentxs::blockchain::node::wallet
 {
 struct Matches final : public Allocated {
-    Set<Bip32Index> match_20_;
-    Set<Bip32Index> match_32_;
-    Set<Bip32Index> match_33_;
-    Set<Bip32Index> match_64_;
-    Set<Bip32Index> match_65_;
+    Set<crypto::Bip32Index> match_20_;
+    Set<crypto::Bip32Index> match_32_;
+    Set<crypto::Bip32Index> match_33_;
+    Set<crypto::Bip32Index> match_64_;
+    Set<crypto::Bip32Index> match_65_;
     Set<block::Outpoint> match_txo_;
 
     auto get_allocator() const noexcept -> allocator_type final;

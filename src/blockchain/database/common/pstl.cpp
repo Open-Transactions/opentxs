@@ -16,7 +16,7 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::database::common
 {

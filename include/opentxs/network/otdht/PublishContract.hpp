@@ -6,9 +6,9 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/network/otdht/Base.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/rpc/Types.hpp"
+#include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-enum class CommandType : TypeEnum {
+enum class CommandType : std::underlying_type_t<CommandType> {
     error = 0,
     add_client_session = 1,
     add_server_session = 2,

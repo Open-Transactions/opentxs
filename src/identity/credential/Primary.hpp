@@ -15,12 +15,12 @@
 
 #include "identity/credential/Base.hpp"
 #include "identity/credential/Key.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

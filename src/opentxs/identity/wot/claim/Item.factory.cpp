@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/ItemPrivate.hpp"
 #include "opentxs/identity/wot/internal.factory.hpp"

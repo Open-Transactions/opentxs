@@ -11,11 +11,11 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -66,7 +66,7 @@ namespace opentxs
 class OTCronItem : public OTTrackable
 {
 public:
-    virtual auto GetOriginType() const -> originType = 0;
+    virtual auto GetOriginType() const -> otx::originType = 0;
 
     // To force the Nym to close out the closing number on the receipt.
     auto DropFinalReceiptToInbox(
@@ -75,7 +75,7 @@ public:
         const std::int64_t& lNewTransactionNumber,
         const std::int64_t& lClosingNumber,
         const String& strOrigCronItem,
-        const originType theOriginType,
+        const otx::originType theOriginType,
         const PasswordPrompt& reason,
         OTString pstrNote = String::Factory(),
         OTString pstrAttachment = String::Factory()) -> bool;
@@ -86,7 +86,7 @@ public:
         const identifier::Nym& NYM_ID,
         const TransactionNumber& lNewTransactionNumber,
         const String& strOrigCronItem,
-        const originType theOriginType,
+        const otx::originType theOriginType,
         const PasswordPrompt& reason,
         OTString pstrNote = String::Factory(),
         OTString pstrAttachment = String::Factory()) -> bool;

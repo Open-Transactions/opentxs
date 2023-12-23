@@ -11,7 +11,6 @@
 #include <utility>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/client/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -19,12 +18,13 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -629,7 +629,7 @@ private:
         const PasswordPrompt& reason) const;
 
     auto add_accept_item(
-        const itemType type,
+        const otx::itemType type,
         const TransactionNumber originNumber,
         const TransactionNumber referenceNumber,
         const String& note,
@@ -662,8 +662,9 @@ private:
         const OTTransaction& source,
         String& note) const -> TransactionNumber;
     auto GetTime() const -> Time;
-    auto response_type(const transactionType sourceType, const bool success)
-        const -> itemType;
+    auto response_type(
+        const otx::transactionType sourceType,
+        const bool success) const -> otx::itemType;
 
     auto Cleanup() -> bool;
     auto Init() -> bool;

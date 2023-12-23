@@ -12,6 +12,7 @@
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/api/Crypto.hpp"
 #include "internal/crypto/library/Secp256k1.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -22,7 +23,6 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::crypto::asymmetric::key::implementation

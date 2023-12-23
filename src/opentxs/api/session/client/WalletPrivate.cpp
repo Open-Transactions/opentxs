@@ -25,8 +25,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/ZeroMQ.hpp"
 #include "opentxs/core/PaymentCode.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep

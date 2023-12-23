@@ -16,15 +16,15 @@
 #include <span>
 #include <utility>
 
-#include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/storage/Driver.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/drivers/plugin/PendingWrite.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

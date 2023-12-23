@@ -27,8 +27,8 @@ extern "C" {
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

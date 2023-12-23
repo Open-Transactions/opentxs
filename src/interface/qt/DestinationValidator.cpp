@@ -9,8 +9,8 @@
 #include <cctype>
 
 #include "interface/qt/DestinationValidator.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
+#include "opentxs/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

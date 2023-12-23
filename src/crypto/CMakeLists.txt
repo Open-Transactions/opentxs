@@ -12,18 +12,8 @@ add_subdirectory(parameters)
 add_subdirectory(symmetric)
 
 libopentxs_add_public_header("crypto" "Bip32.hpp")
-libopentxs_add_public_header("crypto" "Bip32Child.hpp")
 libopentxs_add_public_header("crypto" "Bip39.hpp")
-libopentxs_add_public_header("crypto" "Bip43Purpose.hpp")
-libopentxs_add_public_header("crypto" "Bip44Type.hpp")
-libopentxs_add_public_header("crypto" "HashType.hpp")
-libopentxs_add_public_header("crypto" "Language.hpp")
-libopentxs_add_public_header("crypto" "SecretStyle.hpp")
 libopentxs_add_public_header("crypto" "Seed.hpp")
-libopentxs_add_public_header("crypto" "SeedStrength.hpp")
-libopentxs_add_public_header("crypto" "SeedStyle.hpp")
-libopentxs_add_public_header("crypto" "SignatureRole.hpp")
-libopentxs_add_public_header("crypto" "Types.hpp")
 
 target_sources(
   opentxs-common
@@ -34,7 +24,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/crypto/Seed.hpp"
     "Bip39.cpp"
     "Bip39.hpp"
-    "Crypto.cpp"
     "Envelope.cpp"
     "Envelope.hpp"
     "HDNode.cpp"

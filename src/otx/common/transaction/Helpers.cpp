@@ -10,7 +10,6 @@
 
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
@@ -25,9 +24,10 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -35,7 +35,7 @@
 namespace
 {
 // NOTE: The below strings correspond to the transaction types
-// listed near the top of OTTransaction.hpp as enum transactionType.
+// listed near the top of OTTransaction.hpp as enum otx::transactionType.
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 char const* const TypeStrings[] = {
     "blank",    // freshly issued, not used yet  // comes from server, stored on
@@ -115,13 +115,13 @@ namespace opentxs
 {
 
 auto GetTransactionTypeString(int transactionTypeIndex) -> const
-    char*  // enum transactionType
+    char*  // enum otx::transactionType
 {
     return TypeStrings[transactionTypeIndex];
 }
 
 auto GetOriginTypeToString(int originTypeIndex) -> const
-    char*  // enum originType
+    char*  // enum otx::originType
 {
     return OriginTypeStrings[originTypeIndex];
 }
@@ -130,12 +130,12 @@ auto GetOriginTypeToString(int originTypeIndex) -> const
 auto LoadAbbreviatedRecord(
     irr::io::IrrXMLReader*& xml,
     std::int64_t& lNumberOfOrigin,
-    originType& theOriginType,
+    otx::originType& theOriginType,
     std::int64_t& lTransactionNum,
     std::int64_t& lInRefTo,
     std::int64_t& lInRefDisplay,
     Time& the_DATE_SIGNED,
-    transactionType& theType,
+    otx::transactionType& theType,
     String& strHash,
     Amount& lAdjustment,
     Amount& lDisplayValue,
@@ -148,7 +148,7 @@ auto LoadAbbreviatedRecord(
     const auto strOriginNum =
         String::Factory(xml->getAttributeValue("numberOfOrigin"));
     const auto strOriginType =
-        String::Factory(xml->getAttributeValue("originType"));
+        String::Factory(xml->getAttributeValue("otx::originType"));
     const auto strTransNum =
         String::Factory(xml->getAttributeValue("transactionNum"));
     const auto strInRefTo =
@@ -180,7 +180,7 @@ auto LoadAbbreviatedRecord(
     the_DATE_SIGNED = parseTimestamp(strDateSigned->Get());
 
     // Transaction TYPE for the abbreviated record...
-    theType = transactionType::error_state;  // default
+    theType = otx::transactionType::error_state;  // default
     const auto strAbbrevType = String::Factory(
         xml->getAttributeValue("type"));  // the type of inbox receipt, or
                                           // outbox receipt, or nymbox receipt.
@@ -188,7 +188,7 @@ auto LoadAbbreviatedRecord(
     if (strAbbrevType->Exists()) {
         theType = OTTransaction::GetTypeFromString(strAbbrevType);
 
-        if (transactionType::error_state == theType) {
+        if (otx::transactionType::error_state == theType) {
             LogError()()(
                 "Failure: Error_state was the found type (based on string ")(
                 strAbbrevType.get())(
@@ -233,7 +233,7 @@ auto LoadAbbreviatedRecord(
         lDisplayValue = factory::Amount(strAbbrevDisplayValue->Get());
     }
 
-    if (transactionType::replyNotice == theType) {
+    if (otx::transactionType::replyNotice == theType) {
         const auto strRequestNum =
             String::Factory(xml->getAttributeValue("requestNumber"));
 
@@ -256,8 +256,8 @@ auto LoadAbbreviatedRecord(
     // number.
     // (Grab that too.)
     //
-    if ((transactionType::finalReceipt == theType) ||
-        (transactionType::basketReceipt == theType)) {
+    if ((otx::transactionType::finalReceipt == theType) ||
+        (otx::transactionType::basketReceipt == theType)) {
         const auto strAbbrevClosingNum =
             String::Factory(xml->getAttributeValue("closingNum"));
 
@@ -274,8 +274,8 @@ auto LoadAbbreviatedRecord(
     // These types carry their own internal list of numbers.
     //
     if ((nullptr != pNumList) &&
-        ((transactionType::blank == theType) ||
-         (transactionType::successNotice == theType))) {
+        ((otx::transactionType::blank == theType) ||
+         (otx::transactionType::successNotice == theType))) {
         const auto strNumbers =
             String::Factory(xml->getAttributeValue("totalListOfNumbers"));
         pNumList->Release();
@@ -606,26 +606,26 @@ auto SetupBoxReceiptFilename(
     std::int64_t lLedgerType = 0;
 
     switch (theLedger.GetType()) {
-        case ledgerType::nymbox: {
+        case otx::ledgerType::nymbox: {
             lLedgerType = 0;
         } break;
-        case ledgerType::inbox: {
+        case otx::ledgerType::inbox: {
             lLedgerType = 1;
         } break;
-        case ledgerType::outbox: {
+        case otx::ledgerType::outbox: {
             lLedgerType = 2;
         } break;
-        case ledgerType::paymentInbox: {
+        case otx::ledgerType::paymentInbox: {
             lLedgerType = 4;
         } break;
-        case ledgerType::recordBox: {
+        case otx::ledgerType::recordBox: {
             lLedgerType = 5;
         } break;
-        case ledgerType::expiredBox: {
+        case otx::ledgerType::expiredBox: {
             lLedgerType = 6;
         } break;
-        case ledgerType::message:
-        case ledgerType::error_state:
+        case otx::ledgerType::message:
+        case otx::ledgerType::error_state:
         default: {
             LogError()()("Error: unknown box type. (This should never happen).")
                 .Flush();

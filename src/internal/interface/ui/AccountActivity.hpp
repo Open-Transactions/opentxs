@@ -11,9 +11,9 @@
 
 #include "internal/interface/ui/List.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/display/Types.hpp"
+#include "opentxs/display/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

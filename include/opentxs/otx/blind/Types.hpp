@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
+#include <span>
+#include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -22,17 +22,14 @@ class Amount;
 
 namespace opentxs::otx::blind
 {
+using Denomination = Amount;
+using MintSeries = std::uint64_t;
+
 enum class CashType : std::uint8_t;    // IWYU pragma: export
 enum class PurseType : std::uint8_t;   // IWYU pragma: export
 enum class TokenState : std::uint8_t;  // IWYU pragma: export
 
-using Denomination = Amount;
-using MintSeries = std::uint64_t;
+auto is_supported(CashType) noexcept -> bool;
+auto print(CashType) noexcept -> std::string_view;
+auto supported_types() noexcept -> std::span<const CashType>;
 }  // namespace opentxs::otx::blind
-
-namespace opentxs
-{
-auto print(otx::blind::CashType) noexcept -> UnallocatedCString;
-auto supported_otx_token_types() noexcept
-    -> UnallocatedSet<otx::blind::CashType>;
-}  // namespace opentxs

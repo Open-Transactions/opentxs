@@ -3,11 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-libopentxs_add_public_header("network/zeromq/socket" "Direction.hpp")
-libopentxs_add_public_header("network/zeromq/socket" "Policy.hpp")
-libopentxs_add_public_header("network/zeromq/socket" "SocketType.hpp")
-libopentxs_add_public_header("network/zeromq/socket" "Types.hpp")
-
 target_sources(
   opentxs-common
   PRIVATE
@@ -26,10 +21,8 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/socket/Socket.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/socket/SocketInternal.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/socket/Subscribe.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/network/zeromq/socket/Types.hpp"
     "Bidirectional.hpp"
     "Bidirectional.tpp"
-    "Common.cpp"
     "Dealer.cpp"
     "Dealer.hpp"
     "Pair.cpp"

@@ -9,8 +9,6 @@ libopentxs_add_public_header("identity/wot/verification" "Group.hpp")
 libopentxs_add_public_header("identity/wot/verification" "Item.hpp")
 libopentxs_add_public_header("identity/wot/verification" "Nym.hpp")
 libopentxs_add_public_header("identity/wot/verification" "Set.hpp")
-libopentxs_add_public_header("identity/wot/verification" "Types.hpp")
-libopentxs_add_public_header("identity/wot/verification" "VerificationType.hpp")
 
 target_sources(
   opentxs-common
@@ -20,8 +18,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Item.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Nym.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Set.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/identity/wot/verification/Types.hpp"
-    "Common.cpp"
     "Group.cpp"
     "Group.hpp"
     "Item.cpp"

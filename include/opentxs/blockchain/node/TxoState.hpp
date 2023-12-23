@@ -5,14 +5,15 @@
 
 #pragma once
 
+#include <cstdint>
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {
-enum class TxoState : std::uint16_t {
+enum class TxoState : std::underlying_type_t<TxoState> {
     Error = 0,
     UnconfirmedNew = 1,
     UnconfirmedSpend = 2,

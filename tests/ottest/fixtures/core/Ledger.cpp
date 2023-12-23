@@ -7,10 +7,10 @@
 
 #include <opentxs/opentxs.hpp>
 
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
 namespace ot = opentxs;
@@ -31,6 +31,6 @@ auto Ledger::get_nymbox(
     bool create) const noexcept -> std::unique_ptr<opentxs::Ledger>
 {
     return client_.Factory().Internal().Session().Ledger(
-        nym, nym, server, ot::ledgerType::nymbox, create);
+        nym, nym, server, ot::otx::ledgerType::nymbox, create);
 }
 }  // namespace ottest

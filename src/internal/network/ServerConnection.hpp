@@ -6,7 +6,7 @@
 #pragma once
 
 #include "internal/core/contract/ServerContract.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

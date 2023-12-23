@@ -6,13 +6,13 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/blockchain/cfilter/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::cfilter
 {
-enum class Type : TypeEnum {
+enum class Type : std::underlying_type_t<Type> {
     Basic_BIP158 = 0,
     Basic_BCHVariant = 1,
     ES = 88,

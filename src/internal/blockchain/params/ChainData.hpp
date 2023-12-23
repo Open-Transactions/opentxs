@@ -15,16 +15,14 @@
 #include <utility>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -68,10 +66,11 @@ class ChainData
 public:
     ChainDataPrivate* imp_;
 
-    using ZMQParams = std::pair<Bip44Type, network::blockchain::Subchain>;
+    using ZMQParams =
+        std::pair<crypto::Bip44Type, network::blockchain::Subchain>;
 
     auto AssociatedMainnet() const noexcept -> blockchain::Type;
-    auto Bip44Code() const noexcept -> Bip44Type;
+    auto Bip44Code() const noexcept -> crypto::Bip44Type;
     auto BlockDownloadBatch() const noexcept -> std::size_t;
     auto BlockHeaderAt(block::Height) const noexcept
         -> std::optional<block::Hash>;

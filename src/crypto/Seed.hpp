@@ -10,9 +10,9 @@
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 

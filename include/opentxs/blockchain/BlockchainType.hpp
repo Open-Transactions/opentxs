@@ -6,13 +6,13 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain
 {
-enum class Type : TypeEnum {
+enum class Type : std::underlying_type_t<Type> {
     UnknownBlockchain = 0,
     Bitcoin = 1,
     Bitcoin_testnet3 = 2,

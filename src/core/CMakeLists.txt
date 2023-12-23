@@ -4,20 +4,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(contract)
-add_subdirectory(display)
-add_subdirectory(identifier)
 add_subdirectory(paymentcode)
 
-libopentxs_add_enum_header("core" "UnitType")
-libopentxs_add_public_header("core" "AccountType.hpp")
-libopentxs_add_public_header("core" "AddressType.hpp")
 libopentxs_add_public_header("core" "Amount.hpp")
 libopentxs_add_public_header("core" "ByteArray.hpp")
 libopentxs_add_public_header("core" "Contact.hpp")
 libopentxs_add_public_header("core" "Data.hpp")
 libopentxs_add_public_header("core" "FixedByteArray.hpp")
 libopentxs_add_public_header("core" "Secret.hpp")
-libopentxs_add_public_header("core" "Types.hpp")
 
 target_sources(
   opentxs-common

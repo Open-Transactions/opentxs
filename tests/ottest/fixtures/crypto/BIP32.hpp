@@ -17,7 +17,7 @@ namespace ot = opentxs;
 class OPENTXS_EXPORT BIP32 : public ::testing::Test
 {
 protected:
-    using Path = ot::UnallocatedVector<ot::Bip32Index>;
+    using Path = ot::UnallocatedVector<ot::crypto::Bip32Index>;
 
     const ot::api::session::Client& api_;
     const ot::PasswordPrompt reason_;

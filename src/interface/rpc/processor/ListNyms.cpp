@@ -10,7 +10,7 @@
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"
 #include "opentxs/interface/rpc/request/Base.hpp"

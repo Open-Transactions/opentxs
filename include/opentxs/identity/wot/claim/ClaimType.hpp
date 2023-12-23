@@ -5,12 +5,14 @@
 
 #pragma once
 
-#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
+#include <type_traits>
+
+#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity::wot::claim
 {
 // NOLINTBEGIN(misc-confusable-identifiers)
-enum class ClaimType : std::uint32_t {
+enum class ClaimType : std::underlying_type_t<ClaimType> {
     Error = 0,
     Individual = 1,
     Organization = 2,

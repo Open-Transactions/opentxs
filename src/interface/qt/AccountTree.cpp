@@ -15,8 +15,8 @@
 #include "interface/ui/accounttree/AccountTreeItem.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 
 namespace opentxs::factory

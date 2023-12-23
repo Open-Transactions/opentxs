@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity
 {
-enum class CredentialType : std::uint32_t {
+enum class CredentialType : std::underlying_type_t<CredentialType> {
     Error = 0,
     Legacy = 1,
     HD = 2,

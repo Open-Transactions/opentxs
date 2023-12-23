@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::contract::peer
 {
-enum class SecretType : std::uint32_t {
+enum class SecretType : std::underlying_type_t<SecretType> {
     Error = 0,
     Bip39 = 1,
 };

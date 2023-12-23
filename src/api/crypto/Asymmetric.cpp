@@ -24,8 +24,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32.hpp"
+#include "opentxs/crypto/EcdsaCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
@@ -37,6 +37,7 @@
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/crypto/asymmetric/key/RSA.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

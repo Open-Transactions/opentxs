@@ -6,7 +6,7 @@
 #include "opentxs/identity/wot/Claim.hpp"  // IWYU pragma: associated
 
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 
 auto std::less<opentxs::identity::wot::Claim>::operator()(
     const opentxs::identity::wot::Claim& lhs,

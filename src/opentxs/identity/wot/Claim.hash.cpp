@@ -5,7 +5,7 @@
 
 #include "opentxs/identity/wot/Claim.hpp"  // IWYU pragma: associated
 
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 
 auto std::hash<opentxs::identity::wot::Claim>::operator()(
     const opentxs::identity::wot::Claim& rhs) const noexcept -> std::size_t

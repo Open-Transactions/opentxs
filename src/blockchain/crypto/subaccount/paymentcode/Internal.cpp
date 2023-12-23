@@ -5,15 +5,15 @@
 
 #include "internal/blockchain/crypto/PaymentCode.hpp"  // IWYU pragma: associated
 
-#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {

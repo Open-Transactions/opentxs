@@ -19,11 +19,11 @@
 #include "internal/util/Mutex.hpp"
 #include "network/asio/Endpoint.hpp"
 #include "network/asio/Socket.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace ip = boost::asio::ip;
 

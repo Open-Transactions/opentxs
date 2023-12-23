@@ -6,15 +6,15 @@
 #pragma once
 
 #include "internal/api/crypto/Blockchain.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -104,7 +104,7 @@ public:
         const identifier::Nym&,
         const identifier::Account&,
         const Subchain,
-        const Bip32Index,
+        const opentxs::crypto::Bip32Index,
         const identifier::Generic&) const noexcept -> bool final
     {
         return {};
@@ -113,7 +113,7 @@ public:
         const identifier::Nym&,
         const identifier::Account&,
         const Subchain,
-        const Bip32Index,
+        const opentxs::crypto::Bip32Index,
         const UnallocatedCString&) const noexcept -> bool final
     {
         return {};

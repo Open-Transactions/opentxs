@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::crypto
 {
-enum class Subchain : std::uint8_t {
+enum class Subchain : std::underlying_type_t<Subchain> {
     Error = 0,
     Internal = 1,
     External = 2,

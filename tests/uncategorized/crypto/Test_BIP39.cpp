@@ -343,7 +343,7 @@ TEST_F(BIP39, pkt_seed_import)
         account.GenerateNext(subchain, reason_);
     }
 
-    using Index = ot::Bip32Index;
+    using Index = ot::crypto::Bip32Index;
 
     for (auto i = Index{0}; i < 10u; ++i) {
         const auto& element = account.BalanceElement(subchain, i);

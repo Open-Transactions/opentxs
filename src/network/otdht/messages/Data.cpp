@@ -16,6 +16,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
 {

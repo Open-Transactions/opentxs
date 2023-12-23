@@ -15,12 +15,6 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(peermanager)
 endif()
 
-libopentxs_add_public_header("blockchain/node" "Funding.hpp")
-libopentxs_add_public_header("blockchain/node" "SendResult.hpp")
-libopentxs_add_public_header("blockchain/node" "TxoState.hpp")
-libopentxs_add_public_header("blockchain/node" "TxoTag.hpp")
-libopentxs_add_public_header("blockchain/node" "Types.hpp")
-
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common
@@ -31,8 +25,6 @@ if(OT_BLOCKCHAIN_EXPORT)
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Job.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Mempool.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/SpendPolicy.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/blockchain/node/Types.hpp"
-      "Common.cpp"
       "Config.cpp"
       "Downloader.cpp"
       "Downloader.hpp"

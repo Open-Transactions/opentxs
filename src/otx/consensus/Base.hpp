@@ -13,12 +13,12 @@
 #include <span>
 
 #include "core/contract/Signable.hpp"
-#include "internal/core/contract/Types.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/contract/Types.internal.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Types.hpp"

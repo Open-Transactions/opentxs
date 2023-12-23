@@ -3,8 +3,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/network/zeromq/socket/SocketType.hpp"
-
 #pragma once
 
 #include <cstdint>
@@ -12,9 +10,9 @@
 #include <tuple>
 #include <utility>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Multiple.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::zeromq::socket
 {

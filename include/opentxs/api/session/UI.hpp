@@ -9,11 +9,11 @@
 #include <iosfwd>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/interface/ui/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 class QAbstractItemModel;
 

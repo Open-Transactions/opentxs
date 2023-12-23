@@ -11,7 +11,7 @@
 #include <optional>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

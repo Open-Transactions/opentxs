@@ -15,13 +15,12 @@
 #include <utility>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -53,8 +52,8 @@ struct Data {
     blockchain::Category category_{};
     std::optional<blockchain::Type> forked_from_{};
     UnitType itemtype_{};
-    Bip44Type bip44_{};
-    Bip44Type parent_bip44_{};
+    crypto::Bip44Type bip44_{};
+    crypto::Bip44Type parent_bip44_{};
     network::blockchain::Subchain subchain_{};
     std::int32_t n_bits_{};
     std::string_view genesis_hash_hex_{};

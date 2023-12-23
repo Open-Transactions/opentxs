@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/util/P0330.hpp"
 #include "network/otdht/messages/Base.hpp"
+#include "opentxs/WorkType.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: keep
@@ -36,7 +37,6 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::network::otdht
 {

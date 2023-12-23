@@ -5,20 +5,17 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
+
+#include "opentxs/crypto/symmetric/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto::symmetric
 {
-enum class Source : std::uint8_t {
+enum class Source : std::underlying_type_t<Source> {
     Error = 0,
     Raw = 1,
     ECDH = 2,
     Argon2i = 3,
     Argon2id = 4,
 };
-
-constexpr auto value(const Source in) noexcept
-{
-    return static_cast<std::uint8_t>(in);
-}
 }  // namespace opentxs::crypto::symmetric

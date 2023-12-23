@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/blockchain/node/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {
-enum class TxoTag : std::uint16_t {
+enum class TxoTag : std::underlying_type_t<TxoTag> {
     Normal = 0,
     Generation = 1,
     Notification = 2,

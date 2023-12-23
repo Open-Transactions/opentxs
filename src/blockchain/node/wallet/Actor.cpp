@@ -16,6 +16,7 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
@@ -29,7 +30,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

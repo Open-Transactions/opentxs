@@ -10,12 +10,12 @@
 #include <memory>
 
 #include "internal/core/Armored.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -167,7 +167,7 @@ receipt itself is available for
  -- "Save To Abbreviated form" function.
 
  And what does it save?
- transactionType        type_;        // blank, pending, processInbox,
+ otx::transactionType        type_;        // blank, pending, processInbox,
 transfer, deposit, withdrawal, trade, etc.
  Time                    date_signed_;        // The date, in seconds, when
 the instrument was last signed.
@@ -366,7 +366,7 @@ public:
     // or pending (in the inbox/outbox)
     // or it can be a "process inbox" transaction
     // might also be in the nymbox.
-    // See transactionType in Types.hpp.
+    // See otx::transactionType in Types.hpp.
 
     void Release() override;
     auto GetNumberOfOrigin() -> std::int64_t override;
@@ -472,8 +472,8 @@ public:
     // it.
     auto GetReceiptAmount(const PasswordPrompt& reason) -> Amount;
 
-    auto GetType() const -> transactionType;
-    void SetType(transactionType theType);
+    auto GetType() const -> otx::transactionType;
+    void SetType(otx::transactionType theType);
 
     // This function assumes that theLedger is the owner of this transaction.
     // We pass the ledger in so we can determine the proper directory we're
@@ -512,7 +512,7 @@ public:
 
     // While processing a transaction, you may wish to query it for items of a
     // certain type.
-    auto GetItem(itemType theType) -> std::shared_ptr<Item>;
+    auto GetItem(otx::itemType theType) -> std::shared_ptr<Item>;
 
     auto GetItemInRefTo(std::int64_t lReference) -> std::shared_ptr<Item>;
 
@@ -543,7 +543,8 @@ public:
         Item& theBalanceItem,
         const PasswordPrompt& reason);
 
-    static auto GetTypeFromString(const String& strType) -> transactionType;
+    static auto GetTypeFromString(const String& strType)
+        -> otx::transactionType;
 
     auto GetTypeString() const -> const char*;
 
@@ -676,10 +677,10 @@ protected:
                                 // during construction.
     Time date_signed_;          // The date, in seconds, when the instrument was
                                 // last signed.
-    transactionType type_;      // blank, pending, processInbox,
-                                // transfer, deposit, withdrawal,
-                                // trade, etc.
-    listOfItems list_items_;    // the various items in this transaction.
+    otx::transactionType type_;  // blank, pending, processInbox,
+                                 // transfer, deposit, withdrawal,
+                                 // trade, etc.
+    listOfItems list_items_;     // the various items in this transaction.
     TransactionNumber closing_transaction_no_;  // used by finalReceipt
     OTArmored cancellation_request_;            // used by finalReceipt
 
@@ -746,14 +747,14 @@ private:
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        const originType theOriginType = originType::not_applicable);
+        const otx::originType theOriginType = otx::originType::not_applicable);
     OTTransaction(
         const api::Session& api,
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t lTransactionNum,
-        const originType theOriginType = originType::not_applicable);
+        const otx::originType theOriginType = otx::originType::not_applicable);
     // THIS constructor only used when loading an abbreviated box receipt
     // (inbox, nymbox, or outbox receipt).
     // The full receipt is loaded only after the abbreviated ones are loaded,
@@ -764,12 +765,12 @@ private:
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
-        const originType theOriginType,
+        const otx::originType theOriginType,
         const std::int64_t& lTransactionNum,
         const std::int64_t& lInRefTo,
         const std::int64_t& lInRefDisplay,
         const Time the_DATE_SIGNED,
-        const transactionType theType,
+        const otx::transactionType theType,
         const String& strHash,
         const Amount& lAdjustment,
         const Amount& lDisplayValue,

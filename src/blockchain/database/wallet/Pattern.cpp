@@ -21,7 +21,7 @@ auto operator==(const Pattern& lhs, const Pattern& rhs) noexcept -> bool
     return lhs.data_ == rhs.data_;
 }
 
-Pattern::Pattern(const Bip32Index index, const ReadView data) noexcept
+Pattern::Pattern(const crypto::Bip32Index index, const ReadView data) noexcept
     : data_([&] {
         auto out = space(fixed_ + data.size());
         auto* it = reinterpret_cast<std::byte*>(out.data());
@@ -58,9 +58,9 @@ auto Pattern::Data() const noexcept -> ReadView
     return {reinterpret_cast<const char*>(start), size};
 }
 
-auto Pattern::Index() const noexcept -> Bip32Index
+auto Pattern::Index() const noexcept -> crypto::Bip32Index
 {
-    auto out = Bip32Index{};
+    auto out = crypto::Bip32Index{};
     static constexpr auto offset = 0_uz;
     static constexpr auto size = sizeof(out);
     const auto* const start = std::next(data_.data(), offset);

@@ -9,7 +9,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/common/transaction/Helpers.hpp"
@@ -17,10 +16,11 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -36,7 +36,7 @@ OTTransactionType::OTTransactionType(const api::Session& api)
     , transaction_num_(0)
     , in_reference_to_transaction_(0)
     , number_of_origin_(0)
-    , origin_type_(originType::not_applicable)
+    , origin_type_(otx::originType::not_applicable)
     , in_reference_to_(Armored::Factory(api.Crypto()))
     , load_securely_(true)
     , numlist_()
@@ -52,7 +52,7 @@ OTTransactionType::OTTransactionType(
     const identifier::Nym& theNymID,
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
-    originType theOriginType)
+    otx::originType theOriginType)
     : Contract(api, theAccountID)
     , account_id_()
     , notary_id_(theNotaryID)
@@ -76,7 +76,7 @@ OTTransactionType::OTTransactionType(
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     std::int64_t lTransactionNum,
-    originType theOriginType)
+    otx::originType theOriginType)
     : Contract(api, theAccountID)
     , account_id_()
     , notary_id_(theNotaryID)
@@ -95,22 +95,22 @@ OTTransactionType::OTTransactionType(
 }
 
 auto OTTransactionType::GetOriginTypeFromString(const String& strType)
-    -> originType
+    -> otx::originType
 {
-    originType theType = originType::origin_error_state;
+    otx::originType theType = otx::originType::origin_error_state;
 
     if (strType.Compare("not_applicable")) {
-        theType = originType::not_applicable;
+        theType = otx::originType::not_applicable;
     } else if (strType.Compare("origin_market_offer")) {
-        theType = originType::origin_market_offer;
+        theType = otx::originType::origin_market_offer;
     } else if (strType.Compare("origin_payment_plan")) {
-        theType = originType::origin_payment_plan;
+        theType = otx::originType::origin_payment_plan;
     } else if (strType.Compare("origin_smart_contract")) {
-        theType = originType::origin_smart_contract;
+        theType = otx::originType::origin_smart_contract;
     } else if (strType.Compare("origin_pay_dividend")) {
-        theType = originType::origin_pay_dividend;
+        theType = otx::originType::origin_pay_dividend;
     } else {
-        theType = originType::origin_error_state;
+        theType = otx::originType::origin_error_state;
     }
 
     return theType;
@@ -119,13 +119,13 @@ auto OTTransactionType::GetOriginTypeFromString(const String& strType)
 // -----------------------------------
 
 // Used in finalReceipt and paymentReceipt
-auto OTTransactionType::GetOriginType() const -> originType
+auto OTTransactionType::GetOriginType() const -> otx::originType
 {
     return origin_type_;
 }
 
 // Used in finalReceipt and paymentReceipt
-void OTTransactionType::SetOriginType(originType theOriginType)
+void OTTransactionType::SetOriginType(otx::originType theOriginType)
 {
     origin_type_ = theOriginType;
 }

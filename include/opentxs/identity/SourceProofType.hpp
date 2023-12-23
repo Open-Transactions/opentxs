@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity
 {
-enum class SourceProofType : std::uint32_t {
+enum class SourceProofType : std::underlying_type_t<SourceProofType> {
     Error = 0,
     SelfSignature = 1,
     Signature = 2,

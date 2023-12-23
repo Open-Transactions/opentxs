@@ -11,14 +11,14 @@
 #include <span>
 #include <string_view>
 
-#include "internal/core/contract/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/DeferredConstruction.hpp"
+#include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

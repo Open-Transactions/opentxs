@@ -9,7 +9,7 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

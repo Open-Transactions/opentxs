@@ -8,7 +8,7 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

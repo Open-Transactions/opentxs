@@ -9,13 +9,13 @@
 #include <span>
 
 #include "blockchain/block/block/BlockPrivate.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 namespace opentxs::blockchain::block::implementation

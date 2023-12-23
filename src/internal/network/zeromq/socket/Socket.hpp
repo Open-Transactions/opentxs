@@ -12,7 +12,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "internal/network/zeromq/socket/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.internal.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

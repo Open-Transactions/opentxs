@@ -11,7 +11,7 @@
 #include <opentxs/opentxs.hpp>
 #include <memory>
 
-#include "internal/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "ottest/fixtures/blockchain/regtest/Normal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

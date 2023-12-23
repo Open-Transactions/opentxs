@@ -7,7 +7,7 @@
 
 #include <QQmlEngine>  // IWYU pragma: keep
 
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 
 namespace opentxs
 {

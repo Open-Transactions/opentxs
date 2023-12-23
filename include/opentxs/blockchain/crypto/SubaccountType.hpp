@@ -6,17 +6,18 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::crypto
 {
-enum class SubaccountType : std::uint16_t {
+enum class SubaccountType : std::underlying_type_t<SubaccountType> {
     Error = 0,
     HD = 1,
     PaymentCode = 2,
     Imported = 3,
-    Notification = std::numeric_limits<std::uint16_t>::max(),
+    Notification =
+        std::numeric_limits<std::underlying_type_t<SubaccountType>>::max(),
 };
 }  // namespace opentxs::blockchain::crypto

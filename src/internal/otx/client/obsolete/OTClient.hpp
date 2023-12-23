@@ -7,8 +7,8 @@
 
 #include <cstdint>
 
-#include "internal/otx/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -48,7 +48,7 @@ class OTClient
 {
 public:
     auto ProcessUserCommand(
-        const MessageType requestedCommand,
+        const otx::MessageType requestedCommand,
         otx::context::Server& context,
         Message& theMessage,
         const identifier::Generic& pHisNymID,

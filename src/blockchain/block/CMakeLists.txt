@@ -12,7 +12,6 @@ libopentxs_add_public_header("blockchain/block" "NumericHash.hpp")
 libopentxs_add_public_header("blockchain/block" "Outpoint.hpp")
 libopentxs_add_public_header("blockchain/block" "Position.hpp")
 libopentxs_add_public_header("blockchain/block" "TransactionHash.hpp")
-libopentxs_add_public_header("blockchain/block" "Types.hpp")
 
 target_sources(
   opentxs-common
@@ -34,9 +33,7 @@ if(OT_BLOCKCHAIN_EXPORT)
     PRIVATE
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/block/Parser.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/block/Factory.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/blockchain/block/Types.hpp"
       "${opentxs_SOURCE_DIR}/src/internal/blockchain/block/Validator.hpp"
-      "Common.cpp"
       "Hash.cpp"
       "Parser.cpp"
   )

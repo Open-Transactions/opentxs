@@ -9,7 +9,7 @@
 #include <cstddef>
 
 #include "internal/otx/consensus/Consensus.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"

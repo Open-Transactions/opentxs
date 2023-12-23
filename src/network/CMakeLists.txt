@@ -8,8 +8,6 @@ add_subdirectory(blockchain)
 add_subdirectory(otdht)
 add_subdirectory(zeromq)
 
-libopentxs_add_public_header("network" "Types.hpp")
-
 target_sources(
   opentxs-common
   PRIVATE

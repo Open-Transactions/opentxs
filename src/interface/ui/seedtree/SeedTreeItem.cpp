@@ -13,8 +13,8 @@
 #include "internal/interface/ui/SeedTreeNym.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

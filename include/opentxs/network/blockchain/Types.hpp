@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/identifier/Generic.hpp"
+
 #pragma once
 
 #include <cstddef>
@@ -24,11 +26,9 @@ class Generic;
 
 namespace opentxs::network::blockchain
 {
-// IWYU pragma: begin_exports
-enum class Protocol : std::uint8_t;   // IWYU pragma: keep
-enum class Subchain : std::uint8_t;   // IWYU pragma: keep
-enum class Transport : std::uint8_t;  // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class Protocol : std::uint8_t;   // IWYU pragma: export
+enum class Subchain : std::uint8_t;   // IWYU pragma: export
+enum class Transport : std::uint8_t;  // IWYU pragma: export
 
 using AddressID = identifier::Generic;
 

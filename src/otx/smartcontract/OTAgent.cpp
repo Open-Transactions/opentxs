@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/recurring/OTAgreement.hpp"
@@ -31,10 +30,11 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -673,7 +673,7 @@ auto OTAgent::DropServerNoticeToNymbox(
             lNewTransactionNumber,
             lInReferenceTo,
             strReference,
-            originType::origin_smart_contract,
+            otx::originType::origin_smart_contract,
             pstrNote,
             pstrAttachment,
             theAgentNymID,
@@ -926,7 +926,7 @@ auto OTAgent::ReserveClosingTransNum(
 
         // Need a closing number...
         const auto number = context.InternalServer().NextTransactionNumber(
-            MessageType::notarizeTransaction);
+            otx::MessageType::notarizeTransaction);
 
         if (0 == number.Value()) {
             LogError()()(
@@ -987,7 +987,7 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
 
         // Need opening number...
         const auto number = context.InternalServer().NextTransactionNumber(
-            MessageType::notarizeTransaction);
+            otx::MessageType::notarizeTransaction);
 
         if (0 == number.Value()) {
             LogError()()(

@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_forward_declare opentxs::blockchain::protocol::bitcoin::base::block::script::Element
+
 #include "internal/blockchain/protocol/bitcoin/base/block/Script.hpp"  // IWYU pragma: associated
 
 #include <cstdint>
@@ -10,7 +12,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

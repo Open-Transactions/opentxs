@@ -15,9 +15,9 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

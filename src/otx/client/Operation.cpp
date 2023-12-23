@@ -36,7 +36,6 @@
 #include "internal/core/contract/peer/Request.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/client/OTPayment.hpp"
@@ -71,20 +70,20 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
@@ -93,6 +92,7 @@
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/OperationType.hpp"    // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
@@ -131,7 +131,7 @@
 #define CREATE_MESSAGE(a, ...)                                                 \
     [[maybe_unused]] auto [nextNumber, pMessage] =                             \
         context.InternalServer().InitializeServerCommand(                      \
-            MessageType::a, __VA_ARGS__);                                      \
+            otx::MessageType::a, __VA_ARGS__);                                 \
                                                                                \
     if (false == bool(pMessage)) {                                             \
         LogError()()("Failed to construct ")(#a).Flush();                      \
@@ -166,7 +166,7 @@
     }                                                                          \
                                                                                \
     numbers_.insert(context.InternalServer().NextTransactionNumber(            \
-        MessageType::notarizeTransaction));                                    \
+        otx::MessageType::notarizeTransaction));                               \
     auto& managedNumber = *numbers_.rbegin();                                  \
     LogVerbose()()("Allocating transaction number ")(managedNumber.Value())    \
         .Flush();                                                              \
@@ -193,8 +193,8 @@
     }                                                                          \
                                                                                \
     auto& ledger = *pLedger;                                                   \
-    const bool generated =                                                     \
-        ledger.GenerateLedger(account_id_, serverID, ledgerType::message);     \
+    const bool generated = ledger.GenerateLedger(                              \
+        account_id_, serverID, otx::ledgerType::message);                      \
                                                                                \
     if (false == generated) {                                                  \
         LogError()()("Failed to generate transaction ledger").Flush();         \
@@ -661,9 +661,9 @@ auto Operation::construct_deposit_cash() -> std::shared_ptr<Message>
 
     // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
-        transactionType::deposit,
-        originType::not_applicable,
-        itemType::deposit,
+        otx::transactionType::deposit,
+        otx::originType::not_applicable,
+        otx::itemType::deposit,
         {},
         amount);
     // NOLINTEND(misc-const-correctness)
@@ -699,9 +699,9 @@ auto Operation::construct_deposit_cheque() -> std::shared_ptr<Message>
 
     // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
-        transactionType::deposit,
-        originType::not_applicable,
-        itemType::depositCheque,
+        otx::transactionType::deposit,
+        otx::originType::not_applicable,
+        otx::itemType::depositCheque,
         {},
         amount);
     // NOLINTEND(misc-const-correctness)
@@ -1168,7 +1168,7 @@ auto Operation::construct_send_message() -> std::shared_ptr<Message>
     const TransactionNumber number{output.request_num_->ToLong()};
     [[maybe_unused]] auto [notUsed, pOutmail] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::outmail, target_nym_id_, number, false, false);
+            otx::MessageType::outmail, target_nym_id_, number, false, false);
 
     if (false == bool(pOutmail)) {
         LogError()()("Failed to construct outmail").Flush();
@@ -1312,9 +1312,9 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
 {
     // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION_WITHOUT_BALANCE_ITEM(
-        transactionType::transfer,
-        originType::not_applicable,
-        itemType::transfer,
+        otx::transactionType::transfer,
+        otx::originType::not_applicable,
+        otx::itemType::transfer,
         account_id2_);
     // NOLINTEND(misc-const-correctness)
 
@@ -1337,8 +1337,8 @@ auto Operation::construct_send_transfer() -> std::shared_ptr<Message>
             .Session()
             .Transaction(
                 *outbox_,
-                transactionType::pending,
-                originType::not_applicable,
+                otx::transactionType::pending,
+                otx::originType::not_applicable,
                 1)
             .release()};
 
@@ -1381,9 +1381,9 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
 
     // NOLINTBEGIN(misc-const-correctness)
     PREPARE_TRANSACTION(
-        transactionType::withdrawal,
-        originType::not_applicable,
-        itemType::withdrawal,
+        otx::transactionType::withdrawal,
+        otx::originType::not_applicable,
+        otx::itemType::withdrawal,
         {},
         totalAmount * (-1));
     // NOLINTEND(misc-const-correctness)
@@ -1555,15 +1555,15 @@ auto Operation::download_account(
 {
     const std::shared_ptr<Ledger> inbox{
         api_.Factory().Internal().Session().Ledger(
-            nym_id_, accountID, server_id_, ledgerType::inbox)};
+            nym_id_, accountID, server_id_, otx::ledgerType::inbox)};
     const std::shared_ptr<Ledger> outbox{
         api_.Factory().Internal().Session().Ledger(
-            nym_id_, accountID, server_id_, ledgerType::outbox)};
+            nym_id_, accountID, server_id_, otx::ledgerType::outbox)};
 
     assert_false(nullptr == inbox);
     assert_false(nullptr == outbox);
-    assert_true(ledgerType::inbox == inbox->GetType());
-    assert_true(ledgerType::outbox == outbox->GetType());
+    assert_true(otx::ledgerType::inbox == inbox->GetType());
+    assert_true(otx::ledgerType::outbox == outbox->GetType());
 
     if (get_account_data(accountID, inbox, outbox, lastResult)) {
         LogDetail()()("Success downloading account ")(accountID, api_.Crypto())
@@ -1612,7 +1612,7 @@ auto Operation::download_box_receipt(
 
     [[maybe_unused]] auto [requestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::getBoxReceipt, -1, false, false);
+            otx::MessageType::getBoxReceipt, -1, false, false);
 
     if (false == bool(message)) {
         LogError()()("Failed to construct message").Flush();
@@ -1697,9 +1697,9 @@ auto Operation::evaluate_transaction_reply(
     }
 
     switch (Message::Type(reply.command_->Get())) {
-        case MessageType::notarizeTransactionResponse:
-        case MessageType::processInboxResponse:
-        case MessageType::processNymboxResponse:
+        case otx::MessageType::notarizeTransactionResponse:
+        case otx::MessageType::processInboxResponse:
+        case otx::MessageType::processNymboxResponse:
             break;
         default: {
             LogError()()(reply.command_.get())(" is not a transaction").Flush();
@@ -2154,8 +2154,8 @@ auto Operation::process_inbox(
 
     assert_false(nullptr == inbox);
     assert_false(nullptr == outbox);
-    assert_true(ledgerType::inbox == inbox->GetType());
-    assert_true(ledgerType::outbox == outbox->GetType());
+    assert_true(otx::ledgerType::inbox == inbox->GetType());
+    assert_true(otx::ledgerType::outbox == outbox->GetType());
 
     const auto count =
         (inbox->GetTransactionCount() > 0) ? inbox->GetTransactionCount() : 0;
@@ -2212,7 +2212,7 @@ auto Operation::process_inbox(
         }
 
         // TODO This should happen when the box receipt is downloaded
-        if (transactionType::chequeReceipt == transaction->GetType()) {
+        if (otx::transactionType::chequeReceipt == transaction->GetType()) {
             const auto workflowUpdated = api_.Workflow().ClearCheque(
                 context.Signer()->ID(), *transaction);
 

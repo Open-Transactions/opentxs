@@ -16,6 +16,7 @@
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/crypto/EcdsaCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"

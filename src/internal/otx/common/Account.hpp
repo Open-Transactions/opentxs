@@ -11,11 +11,11 @@
 #include <string_view>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -192,7 +192,7 @@ private:
     auto create_box(
         std::unique_ptr<Ledger>& box,
         const identity::Nym& signer,
-        const ledgerType type,
+        const otx::ledgerType type,
         const PasswordPrompt& reason) -> bool;
     auto GenerateNewAccount(
         const identity::Nym& server,

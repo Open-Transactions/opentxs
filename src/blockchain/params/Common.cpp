@@ -17,6 +17,7 @@
 
 #include "blockchain/params/ChainDataPrivate.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -24,13 +25,12 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"      // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"                    // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/Protocol.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/Subchain.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::params
 {

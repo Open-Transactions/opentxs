@@ -17,18 +17,19 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
+#include "opentxs/blockchain/crypto/Bip44Subchain.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/blockchain/protocol/ethereum/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -52,7 +53,7 @@ EthereumPrivate::EthereumPrivate(
           id,
           [&] {
               const auto key = api.Crypto().Seed().Internal().AccountKey(
-                  path, EXTERNAL_CHAIN, reason);
+                  path, Bip44Subchain::external, reason);
 
               if (false == key.IsValid()) {
 

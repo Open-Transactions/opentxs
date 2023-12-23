@@ -21,7 +21,6 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/BasketContract.hpp"
 #include "internal/core/contract/Contract.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/client/obsolete/OTClient.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
@@ -49,7 +48,6 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -64,17 +62,19 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -155,17 +155,17 @@ auto VerifyBalanceReceipt(
         std::int64_t lBoxType = 0;
 
         if (tranOut->Contains("nymboxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::nymbox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::nymbox);
         } else if (tranOut->Contains("inboxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::inbox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::inbox);
         } else if (tranOut->Contains("outboxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::outbox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::outbox);
         } else if (tranOut->Contains("paymentInboxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::paymentInbox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::paymentInbox);
         } else if (tranOut->Contains("recordBoxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::recordBox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::recordBox);
         } else if (tranOut->Contains("expiredBoxRecord")) {
-            lBoxType = static_cast<std::int64_t>(ledgerType::expiredBox);
+            lBoxType = static_cast<std::int64_t>(otx::ledgerType::expiredBox);
         } else {
             LogError()()("Error loading from abbreviated transaction: unknown "
                          "ledger type. (Probably message but who knows).")
@@ -1889,7 +1889,7 @@ auto OT_API::WriteCheque(
     // I'd have to ask the server to send me one first.)
     auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
     const auto number = context.get().InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
 
     if (false == number.Valid()) {
         LogError()()(
@@ -2286,7 +2286,7 @@ auto OT_API::LoadNymbox(
 
     auto nym = context->Signer();
     auto pLedger{api_.Factory().Internal().Session().Ledger(
-        NYM_ID, NYM_ID, NOTARY_ID, ledgerType::nymbox)};
+        NYM_ID, NYM_ID, NOTARY_ID, otx::ledgerType::nymbox)};
 
     OT_NEW_ASSERT_MSG(
         false != bool(pLedger), "Error allocating memory in the OT API.");
@@ -2314,7 +2314,7 @@ auto OT_API::IsBasketCurrency(const identifier::UnitDefinition& id) const
         return false;
     }
 
-    return (contract::UnitType::Basket == translate(contract.type()));
+    return (contract::UnitDefinitionType::Basket == translate(contract.type()));
 }
 
 // Get Basket Count (of member currency types.)
@@ -2332,7 +2332,7 @@ auto OT_API::GetBasketMemberCount(const identifier::UnitDefinition& id) const
         return 0;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         return 0;
     }
 
@@ -2357,7 +2357,7 @@ auto OT_API::GetBasketMemberType(
         return false;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         return false;
     }
 
@@ -2391,7 +2391,7 @@ auto OT_API::GetBasketMemberMinimumTransferAmount(
         return 0;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         return 0;
     }
 
@@ -2418,7 +2418,7 @@ auto OT_API::GetBasketMinimumTransferAmount(
         return 0;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         return 0;
     }
 
@@ -2479,7 +2479,7 @@ auto OT_API::issueBasket(
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::issueBasket,
+            otx::MessageType::issueBasket,
             api_.Factory().Internal().Armored(
                 api_.Factory().Internal().Data(basket)),
             identifier::Account{},
@@ -2659,7 +2659,7 @@ auto OT_API::AddBasketExchangeItem(
     // Account ID. account is good, and no need to clean it up.
     const auto strNotaryID = String::Factory(NOTARY_ID, api_.Crypto());
     const auto number = context.get().InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
 
     if (false == number.Valid()) {
         LogError()()("Failed getting next "
@@ -2879,7 +2879,7 @@ auto OT_API::exchangeBasket(
 
     UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.emplace(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& managedNumber = *managed.rbegin();
 
     if (false == managedNumber.Valid()) {
@@ -2898,19 +2898,19 @@ auto OT_API::exchangeBasket(
         nymID,
         accountID,
         serverID,
-        transactionType::exchangeBasket,
-        originType::not_applicable,
+        otx::transactionType::exchangeBasket,
+        otx::originType::not_applicable,
         transactionNum)};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::exchangeBasket, identifier::Account{})};
+        *transaction, otx::itemType::exchangeBasket, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& closingNumber = *managed.rbegin();
 
     if (false == closingNumber.Valid()) {
@@ -2947,14 +2947,14 @@ auto OT_API::exchangeBasket(
     transaction->SaveContract();
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
-    ledger->GenerateLedger(accountID, serverID, ledgerType::message);
+    ledger->GenerateLedger(accountID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
@@ -2984,7 +2984,7 @@ auto OT_API::getTransactionNumbers(otx::context::Server& context) const
     auto reason = api_.Factory().PasswordPrompt(__func__);
     auto output{api_.Factory().Internal().Session().Message()};
     auto requestNum = client_->ProcessUserCommand(
-        MessageType::getTransactionNumbers,
+        otx::MessageType::getTransactionNumbers,
         context,
         *output,
         identifier::Nym{},
@@ -3133,7 +3133,7 @@ auto OT_API::payDividend(
 
     UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& managedNumber = *managed.rbegin();
 
     if (false == managedNumber.Valid()) {
@@ -3214,14 +3214,14 @@ auto OT_API::payDividend(
         nymID,
         DIVIDEND_FROM_accountID,
         serverID,
-        transactionType::payDividend,
-        originType::not_applicable,
+        otx::transactionType::payDividend,
+        otx::originType::not_applicable,
         transactionNum)};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::payDividend, identifier::Account{})};
+        *transaction, otx::itemType::payDividend, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3273,14 +3273,14 @@ auto OT_API::payDividend(
     auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, DIVIDEND_FROM_accountID, serverID)};
     ledger->GenerateLedger(
-        DIVIDEND_FROM_accountID, serverID, ledgerType::message);
+        DIVIDEND_FROM_accountID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             DIVIDEND_FROM_accountID,
             requestNum);
@@ -3343,9 +3343,9 @@ auto OT_API::withdrawVoucher(
 
     const auto withdrawalNumber =
         context.InternalServer().NextTransactionNumber(
-            MessageType::notarizeTransaction);
+            otx::MessageType::notarizeTransaction);
     const auto voucherNumber = context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
 
     if ((!withdrawalNumber.Valid()) || (!voucherNumber.Valid())) {
         LogError()()("Not enough Transaction Numbers were available. "
@@ -3412,13 +3412,13 @@ auto OT_API::withdrawVoucher(
         nymID,
         accountID,
         serverID,
-        transactionType::withdrawal,
-        originType::not_applicable,
+        otx::transactionType::withdrawal,
+        otx::originType::not_applicable,
         withdrawalNumber.Value())};
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::withdrawVoucher, identifier::Account{})};
+        *transaction, otx::itemType::withdrawVoucher, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3444,14 +3444,14 @@ auto OT_API::withdrawVoucher(
     transaction->SaveContract();
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
-    ledger->GenerateLedger(accountID, serverID, ledgerType::message);
+    ledger->GenerateLedger(accountID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
@@ -3561,14 +3561,14 @@ auto OT_API::depositPaymentPlan(
         nymID,
         accountID,
         serverID,
-        transactionType::paymentPlan,
-        originType::origin_payment_plan,
+        otx::transactionType::paymentPlan,
+        otx::originType::origin_payment_plan,
         openingNumber)};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::paymentPlan, identifier::Account{})};
+        *transaction, otx::itemType::paymentPlan, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3593,13 +3593,13 @@ auto OT_API::depositPaymentPlan(
 
     assert_true(false != bool(ledger));
 
-    ledger->GenerateLedger(accountID, serverID, ledgerType::message);
+    ledger->GenerateLedger(accountID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
@@ -3651,7 +3651,7 @@ auto OT_API::triggerClause(
 
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::triggerClause,
+            otx::MessageType::triggerClause,
             payload,
             identifier::Account{},
             requestNum);
@@ -3937,14 +3937,14 @@ auto OT_API::activateSmartContract(
         nymID,
         accountID,
         serverID,
-        transactionType::smartContract,
-        originType::not_applicable,
+        otx::transactionType::smartContract,
+        otx::originType::not_applicable,
         contract->GetTransactionNum())};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::smartContract, identifier::Account{})};
+        *transaction, otx::itemType::smartContract, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -3964,7 +3964,7 @@ auto OT_API::activateSmartContract(
     transaction->SaveContract();
     auto ledger{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
-    ledger->GenerateLedger(accountID, serverID, ledgerType::message);
+    ledger->GenerateLedger(accountID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
@@ -3972,7 +3972,7 @@ auto OT_API::activateSmartContract(
 
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             accountID,
             requestNum);
@@ -4068,7 +4068,7 @@ auto OT_API::cancelCronItem(
 
     UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& managedNumber = *managed.rbegin();
 
     if (false == managedNumber.Valid()) {
@@ -4087,14 +4087,14 @@ auto OT_API::cancelCronItem(
         nymID,
         ASSET_ACCOUNT_ID,
         serverID,
-        transactionType::cancelCronItem,
-        originType::not_applicable,
+        otx::transactionType::cancelCronItem,
+        otx::originType::not_applicable,
         transactionNum)};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::cancelCronItem, identifier::Account{})};
+        *transaction, otx::itemType::cancelCronItem, identifier::Account{})};
 
     if (false == bool(item)) { return output; }
 
@@ -4117,7 +4117,8 @@ auto OT_API::cancelCronItem(
     // set up the ledger
     auto ledger{api_.Factory().Internal().Session().Ledger(
         nymID, ASSET_ACCOUNT_ID, serverID)};
-    ledger->GenerateLedger(ASSET_ACCOUNT_ID, serverID, ledgerType::message);
+    ledger->GenerateLedger(
+        ASSET_ACCOUNT_ID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
@@ -4125,7 +4126,7 @@ auto OT_API::cancelCronItem(
 
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             ASSET_ACCOUNT_ID,
             requestNum);
@@ -4231,7 +4232,7 @@ auto OT_API::issueMarketOffer(
 
     UnallocatedSet<otx::context::ManagedNumber> managed{};
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& openingNumber = *managed.rbegin();
 
     if (false == openingNumber.Valid()) {
@@ -4246,7 +4247,7 @@ auto OT_API::issueMarketOffer(
         .Flush();
     transactionNum = openingNumber.Value();
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& assetClosingNumber = *managed.rbegin();
 
     if (false == openingNumber.Valid()) {
@@ -4261,7 +4262,7 @@ auto OT_API::issueMarketOffer(
         ".")
         .Flush();
     managed.insert(context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction));
+        otx::MessageType::notarizeTransaction));
     const auto& currencyClosingNumber = *managed.rbegin();
 
     if (false == currencyClosingNumber.Valid()) {
@@ -4440,14 +4441,14 @@ auto OT_API::issueMarketOffer(
         nymID,
         ASSET_ACCOUNT_ID,
         serverID,
-        transactionType::marketOffer,
-        originType::origin_market_offer,
+        otx::transactionType::marketOffer,
+        otx::originType::origin_market_offer,
         openingNumber.Value())};
 
     if (false == bool(transaction)) { return output; }
 
     auto item{api_.Factory().Internal().Session().Item(
-        *transaction, itemType::marketOffer, CURRENCY_ACCOUNT_ID)};
+        *transaction, otx::itemType::marketOffer, CURRENCY_ACCOUNT_ID)};
 
     if (false == bool(item)) { return output; }
 
@@ -4472,14 +4473,15 @@ auto OT_API::issueMarketOffer(
 
     assert_true(false != bool(ledger));
 
-    ledger->GenerateLedger(ASSET_ACCOUNT_ID, serverID, ledgerType::message);
+    ledger->GenerateLedger(
+        ASSET_ACCOUNT_ID, serverID, otx::ledgerType::message);
     const std::shared_ptr<OTTransaction> ptransaction{transaction.release()};
     ledger->AddTransaction(ptransaction);
     ledger->SignContract(nym, reason);
     ledger->SaveContract();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::notarizeTransaction,
+            otx::MessageType::notarizeTransaction,
             Armored::Factory(api_.Crypto(), String::Factory(*ledger)),
             ASSET_ACCOUNT_ID,
             requestNum);
@@ -4528,7 +4530,7 @@ auto OT_API::getMarketList(otx::context::Server& context) const -> CommandResult
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::getMarketList, requestNum);
+            otx::MessageType::getMarketList, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4571,7 +4573,7 @@ auto OT_API::getMarketOffers(
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::getMarketOffers, requestNum);
+            otx::MessageType::getMarketOffers, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4621,7 +4623,7 @@ auto OT_API::getMarketRecentTrades(
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::getMarketRecentTrades, requestNum);
+            otx::MessageType::getMarketRecentTrades, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4665,7 +4667,7 @@ auto OT_API::getNymMarketOffers(otx::context::Server& context) const
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::getNymMarketOffers, requestNum);
+            otx::MessageType::getNymMarketOffers, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4711,7 +4713,7 @@ auto OT_API::queryInstrumentDefinitions(
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::queryInstrumentDefinitions, requestNum);
+            otx::MessageType::queryInstrumentDefinitions, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4757,7 +4759,7 @@ auto OT_API::deleteAssetAccount(
 
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::unregisterAccount, requestNum);
+            otx::MessageType::unregisterAccount, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4797,7 +4799,7 @@ auto OT_API::usageCredits(
     reply.reset();
     auto [newRequestNumber, message] =
         context.InternalServer().InitializeServerCommand(
-            MessageType::usageCredits, NYM_ID_CHECK, requestNum);
+            otx::MessageType::usageCredits, NYM_ID_CHECK, requestNum);
     requestNum = newRequestNumber;
 
     if (false == bool(message)) { return output; }
@@ -4834,7 +4836,7 @@ auto OT_API::unregisterNym(otx::context::Server& context) const -> CommandResult
     reply.reset();
     auto message{api_.Factory().Internal().Session().Message()};
     requestNum = client_->ProcessUserCommand(
-        MessageType::unregisterNym,
+        otx::MessageType::unregisterNym,
         context,
         *message,
         identifier::Nym{},
@@ -4869,7 +4871,7 @@ auto OT_API::CreateProcessInbox(
     OT_API::ProcessInboxOnly output{};
     auto& [processInbox, number] = output;
     processInbox = api_.Factory().Internal().Session().Ledger(
-        nymID, accountID, serverID, ledgerType::message);
+        nymID, accountID, serverID, otx::ledgerType::message);
 
     if (false == bool(processInbox)) {
         LogError()()("Error generating process inbox ledger for "
@@ -4909,14 +4911,14 @@ auto OT_API::IncludeResponse(
     const auto inRefTo = String::Factory(source);
 
     switch (type) {
-        case transactionType::pending:
-        case transactionType::chequeReceipt:
-        case transactionType::voucherReceipt:
-        case transactionType::transferReceipt:
-        case transactionType::marketReceipt:
-        case transactionType::paymentReceipt:
-        case transactionType::finalReceipt:
-        case transactionType::basketReceipt: {
+        case otx::transactionType::pending:
+        case otx::transactionType::chequeReceipt:
+        case otx::transactionType::voucherReceipt:
+        case otx::transactionType::transferReceipt:
+        case otx::transactionType::marketReceipt:
+        case otx::transactionType::paymentReceipt:
+        case otx::transactionType::finalReceipt:
+        case otx::transactionType::basketReceipt: {
         } break;
         default: {
             LogError()()("Wrong transaction type: ")(source.GetTypeString())
@@ -4976,8 +4978,8 @@ auto OT_API::FinalizeProcessInbox(
     Ledger& outbox,
     const PasswordPrompt& reason) const -> bool
 {
-    assert_true(ledgerType::inbox == inbox.GetType());
-    assert_true(ledgerType::outbox == outbox.GetType());
+    assert_true(otx::ledgerType::inbox == inbox.GetType());
+    assert_true(otx::ledgerType::outbox == outbox.GetType());
 
     class Cleanup
     {
@@ -5006,7 +5008,8 @@ auto OT_API::FinalizeProcessInbox(
     };
 
     auto nym = context.Signer();
-    auto processInbox = response.GetTransaction(transactionType::processInbox);
+    auto processInbox =
+        response.GetTransaction(otx::transactionType::processInbox);
 
     if (false == bool(processInbox)) {
         LogError()()("Response ledger does not contain processInbox.").Flush();
@@ -5014,7 +5017,8 @@ auto OT_API::FinalizeProcessInbox(
         return false;
     }
 
-    auto balanceStatement(processInbox->GetItem(itemType::balanceStatement));
+    auto balanceStatement(
+        processInbox->GetItem(otx::itemType::balanceStatement));
 
     if (true == bool(balanceStatement)) {
         LogError()()("This response has already been finalized.").Flush();
@@ -5057,8 +5061,8 @@ auto OT_API::FinalizeProcessInbox(
         acceptItem->GetTypeString(typeDescription);
 
         switch (type) {
-            case itemType::acceptPending:
-            case itemType::acceptItemReceipt: {
+            case otx::itemType::acceptPending:
+            case otx::itemType::acceptItemReceipt: {
                 allFound &= find_standard(
                     context,
                     *acceptItem,
@@ -5068,9 +5072,9 @@ auto OT_API::FinalizeProcessInbox(
                     totalAccepted,
                     issuedClosing);
             } break;
-            case itemType::acceptCronReceipt:
-            case itemType::acceptFinalReceipt:
-            case itemType::acceptBasketReceipt: {
+            case otx::itemType::acceptCronReceipt:
+            case otx::itemType::acceptFinalReceipt:
+            case otx::itemType::acceptBasketReceipt: {
                 allFound &= find_cron(
                     context,
                     *acceptItem,
@@ -5158,9 +5162,9 @@ auto OT_API::find_cron(
     const auto type = item.GetType();
 
     switch (type) {
-        case itemType::acceptCronReceipt: {
+        case otx::itemType::acceptCronReceipt: {
         } break;
-        case itemType::acceptFinalReceipt: {
+        case otx::itemType::acceptFinalReceipt: {
             const auto openingNumber = serverTransaction.GetReferenceToNum();
             const auto inboxCount = static_cast<std::size_t>(
                 inbox.GetTransactionCountInRefTo(openingNumber));
@@ -5189,7 +5193,7 @@ auto OT_API::find_cron(
             }
         }
             [[fallthrough]];
-        case itemType::acceptBasketReceipt: {
+        case otx::itemType::acceptBasketReceipt: {
             const auto closingNumber = serverTransaction.GetClosingNum();
             const bool verified = context.VerifyIssuedNumber(closingNumber);
 
@@ -5230,10 +5234,10 @@ auto OT_API::find_standard(
     const auto type = item.GetType();
 
     switch (type) {
-        case itemType::acceptPending: {
+        case otx::itemType::acceptPending: {
             amount += serverTransaction.GetReceiptAmount(reason);
         } break;
-        case itemType::acceptItemReceipt: {
+        case otx::itemType::acceptItemReceipt: {
             auto reference = String::Factory();
             serverTransaction.GetReferenceString(reference);
             auto original{api_.Factory().Internal().Session().Item(
@@ -5252,7 +5256,7 @@ auto OT_API::find_standard(
             const auto originalType = original->GetType();
 
             switch (originalType) {
-                case itemType::depositCheque: {
+                case otx::itemType::depositCheque: {
                     auto attachment = String::Factory();
                     original->GetAttachment(attachment);
                     auto cheque{api_.Factory().Internal().Session().Cheque()};
@@ -5273,74 +5277,74 @@ auto OT_API::find_standard(
 
                     issuedNumber = cheque->GetTransactionNum();
                 } break;
-                case itemType::acceptPending: {
+                case otx::itemType::acceptPending: {
                     issuedNumber = original->GetNumberOfOrigin();
                 } break;
-                case itemType::transfer:
-                case itemType::atTransfer:
-                case itemType::acceptTransaction:
-                case itemType::atAcceptTransaction:
-                case itemType::acceptMessage:
-                case itemType::atAcceptMessage:
-                case itemType::acceptNotice:
-                case itemType::atAcceptNotice:
-                case itemType::atAcceptPending:
-                case itemType::rejectPending:
-                case itemType::atRejectPending:
-                case itemType::acceptCronReceipt:
-                case itemType::atAcceptCronReceipt:
-                case itemType::acceptItemReceipt:
-                case itemType::atAcceptItemReceipt:
-                case itemType::disputeCronReceipt:
-                case itemType::atDisputeCronReceipt:
-                case itemType::disputeItemReceipt:
-                case itemType::atDisputeItemReceipt:
-                case itemType::acceptFinalReceipt:
-                case itemType::atAcceptFinalReceipt:
-                case itemType::acceptBasketReceipt:
-                case itemType::atAcceptBasketReceipt:
-                case itemType::disputeFinalReceipt:
-                case itemType::atDisputeFinalReceipt:
-                case itemType::disputeBasketReceipt:
-                case itemType::atDisputeBasketReceipt:
-                case itemType::serverfee:
-                case itemType::atServerfee:
-                case itemType::issuerfee:
-                case itemType::atIssuerfee:
-                case itemType::balanceStatement:
-                case itemType::atBalanceStatement:
-                case itemType::transactionStatement:
-                case itemType::atTransactionStatement:
-                case itemType::withdrawal:
-                case itemType::atWithdrawal:
-                case itemType::deposit:
-                case itemType::atDeposit:
-                case itemType::withdrawVoucher:
-                case itemType::atWithdrawVoucher:
-                case itemType::atDepositCheque:
-                case itemType::payDividend:
-                case itemType::atPayDividend:
-                case itemType::marketOffer:
-                case itemType::atMarketOffer:
-                case itemType::paymentPlan:
-                case itemType::atPaymentPlan:
-                case itemType::smartContract:
-                case itemType::atSmartContract:
-                case itemType::cancelCronItem:
-                case itemType::atCancelCronItem:
-                case itemType::exchangeBasket:
-                case itemType::atExchangeBasket:
-                case itemType::chequeReceipt:
-                case itemType::voucherReceipt:
-                case itemType::marketReceipt:
-                case itemType::paymentReceipt:
-                case itemType::transferReceipt:
-                case itemType::finalReceipt:
-                case itemType::basketReceipt:
-                case itemType::replyNotice:
-                case itemType::successNotice:
-                case itemType::notice:
-                case itemType::error_state:
+                case otx::itemType::transfer:
+                case otx::itemType::atTransfer:
+                case otx::itemType::acceptTransaction:
+                case otx::itemType::atAcceptTransaction:
+                case otx::itemType::acceptMessage:
+                case otx::itemType::atAcceptMessage:
+                case otx::itemType::acceptNotice:
+                case otx::itemType::atAcceptNotice:
+                case otx::itemType::atAcceptPending:
+                case otx::itemType::rejectPending:
+                case otx::itemType::atRejectPending:
+                case otx::itemType::acceptCronReceipt:
+                case otx::itemType::atAcceptCronReceipt:
+                case otx::itemType::acceptItemReceipt:
+                case otx::itemType::atAcceptItemReceipt:
+                case otx::itemType::disputeCronReceipt:
+                case otx::itemType::atDisputeCronReceipt:
+                case otx::itemType::disputeItemReceipt:
+                case otx::itemType::atDisputeItemReceipt:
+                case otx::itemType::acceptFinalReceipt:
+                case otx::itemType::atAcceptFinalReceipt:
+                case otx::itemType::acceptBasketReceipt:
+                case otx::itemType::atAcceptBasketReceipt:
+                case otx::itemType::disputeFinalReceipt:
+                case otx::itemType::atDisputeFinalReceipt:
+                case otx::itemType::disputeBasketReceipt:
+                case otx::itemType::atDisputeBasketReceipt:
+                case otx::itemType::serverfee:
+                case otx::itemType::atServerfee:
+                case otx::itemType::issuerfee:
+                case otx::itemType::atIssuerfee:
+                case otx::itemType::balanceStatement:
+                case otx::itemType::atBalanceStatement:
+                case otx::itemType::transactionStatement:
+                case otx::itemType::atTransactionStatement:
+                case otx::itemType::withdrawal:
+                case otx::itemType::atWithdrawal:
+                case otx::itemType::deposit:
+                case otx::itemType::atDeposit:
+                case otx::itemType::withdrawVoucher:
+                case otx::itemType::atWithdrawVoucher:
+                case otx::itemType::atDepositCheque:
+                case otx::itemType::payDividend:
+                case otx::itemType::atPayDividend:
+                case otx::itemType::marketOffer:
+                case otx::itemType::atMarketOffer:
+                case otx::itemType::paymentPlan:
+                case otx::itemType::atPaymentPlan:
+                case otx::itemType::smartContract:
+                case otx::itemType::atSmartContract:
+                case otx::itemType::cancelCronItem:
+                case otx::itemType::atCancelCronItem:
+                case otx::itemType::exchangeBasket:
+                case otx::itemType::atExchangeBasket:
+                case otx::itemType::chequeReceipt:
+                case otx::itemType::voucherReceipt:
+                case otx::itemType::marketReceipt:
+                case otx::itemType::paymentReceipt:
+                case otx::itemType::transferReceipt:
+                case otx::itemType::finalReceipt:
+                case otx::itemType::basketReceipt:
+                case otx::itemType::replyNotice:
+                case otx::itemType::successNotice:
+                case otx::itemType::notice:
+                case otx::itemType::error_state:
                 default: {
                     auto typeName = String::Factory();
                     original->GetTypeString(typeName);
@@ -5365,71 +5369,71 @@ auto OT_API::find_standard(
                 return false;
             }
         } break;
-        case itemType::transfer:
-        case itemType::atTransfer:
-        case itemType::acceptTransaction:
-        case itemType::atAcceptTransaction:
-        case itemType::acceptMessage:
-        case itemType::atAcceptMessage:
-        case itemType::acceptNotice:
-        case itemType::atAcceptNotice:
-        case itemType::atAcceptPending:
-        case itemType::rejectPending:
-        case itemType::atRejectPending:
-        case itemType::acceptCronReceipt:
-        case itemType::atAcceptCronReceipt:
-        case itemType::atAcceptItemReceipt:
-        case itemType::disputeCronReceipt:
-        case itemType::atDisputeCronReceipt:
-        case itemType::disputeItemReceipt:
-        case itemType::atDisputeItemReceipt:
-        case itemType::acceptFinalReceipt:
-        case itemType::atAcceptFinalReceipt:
-        case itemType::acceptBasketReceipt:
-        case itemType::atAcceptBasketReceipt:
-        case itemType::disputeFinalReceipt:
-        case itemType::atDisputeFinalReceipt:
-        case itemType::disputeBasketReceipt:
-        case itemType::atDisputeBasketReceipt:
-        case itemType::serverfee:
-        case itemType::atServerfee:
-        case itemType::issuerfee:
-        case itemType::atIssuerfee:
-        case itemType::balanceStatement:
-        case itemType::atBalanceStatement:
-        case itemType::transactionStatement:
-        case itemType::atTransactionStatement:
-        case itemType::withdrawal:
-        case itemType::atWithdrawal:
-        case itemType::deposit:
-        case itemType::atDeposit:
-        case itemType::withdrawVoucher:
-        case itemType::atWithdrawVoucher:
-        case itemType::depositCheque:
-        case itemType::atDepositCheque:
-        case itemType::payDividend:
-        case itemType::atPayDividend:
-        case itemType::marketOffer:
-        case itemType::atMarketOffer:
-        case itemType::paymentPlan:
-        case itemType::atPaymentPlan:
-        case itemType::smartContract:
-        case itemType::atSmartContract:
-        case itemType::cancelCronItem:
-        case itemType::atCancelCronItem:
-        case itemType::exchangeBasket:
-        case itemType::atExchangeBasket:
-        case itemType::chequeReceipt:
-        case itemType::voucherReceipt:
-        case itemType::marketReceipt:
-        case itemType::paymentReceipt:
-        case itemType::transferReceipt:
-        case itemType::finalReceipt:
-        case itemType::basketReceipt:
-        case itemType::replyNotice:
-        case itemType::successNotice:
-        case itemType::notice:
-        case itemType::error_state:
+        case otx::itemType::transfer:
+        case otx::itemType::atTransfer:
+        case otx::itemType::acceptTransaction:
+        case otx::itemType::atAcceptTransaction:
+        case otx::itemType::acceptMessage:
+        case otx::itemType::atAcceptMessage:
+        case otx::itemType::acceptNotice:
+        case otx::itemType::atAcceptNotice:
+        case otx::itemType::atAcceptPending:
+        case otx::itemType::rejectPending:
+        case otx::itemType::atRejectPending:
+        case otx::itemType::acceptCronReceipt:
+        case otx::itemType::atAcceptCronReceipt:
+        case otx::itemType::atAcceptItemReceipt:
+        case otx::itemType::disputeCronReceipt:
+        case otx::itemType::atDisputeCronReceipt:
+        case otx::itemType::disputeItemReceipt:
+        case otx::itemType::atDisputeItemReceipt:
+        case otx::itemType::acceptFinalReceipt:
+        case otx::itemType::atAcceptFinalReceipt:
+        case otx::itemType::acceptBasketReceipt:
+        case otx::itemType::atAcceptBasketReceipt:
+        case otx::itemType::disputeFinalReceipt:
+        case otx::itemType::atDisputeFinalReceipt:
+        case otx::itemType::disputeBasketReceipt:
+        case otx::itemType::atDisputeBasketReceipt:
+        case otx::itemType::serverfee:
+        case otx::itemType::atServerfee:
+        case otx::itemType::issuerfee:
+        case otx::itemType::atIssuerfee:
+        case otx::itemType::balanceStatement:
+        case otx::itemType::atBalanceStatement:
+        case otx::itemType::transactionStatement:
+        case otx::itemType::atTransactionStatement:
+        case otx::itemType::withdrawal:
+        case otx::itemType::atWithdrawal:
+        case otx::itemType::deposit:
+        case otx::itemType::atDeposit:
+        case otx::itemType::withdrawVoucher:
+        case otx::itemType::atWithdrawVoucher:
+        case otx::itemType::depositCheque:
+        case otx::itemType::atDepositCheque:
+        case otx::itemType::payDividend:
+        case otx::itemType::atPayDividend:
+        case otx::itemType::marketOffer:
+        case otx::itemType::atMarketOffer:
+        case otx::itemType::paymentPlan:
+        case otx::itemType::atPaymentPlan:
+        case otx::itemType::smartContract:
+        case otx::itemType::atSmartContract:
+        case otx::itemType::cancelCronItem:
+        case otx::itemType::atCancelCronItem:
+        case otx::itemType::exchangeBasket:
+        case otx::itemType::atExchangeBasket:
+        case otx::itemType::chequeReceipt:
+        case otx::itemType::voucherReceipt:
+        case otx::itemType::marketReceipt:
+        case otx::itemType::paymentReceipt:
+        case otx::itemType::transferReceipt:
+        case otx::itemType::finalReceipt:
+        case otx::itemType::basketReceipt:
+        case otx::itemType::replyNotice:
+        case otx::itemType::successNotice:
+        case otx::itemType::notice:
+        case otx::itemType::error_state:
         default: {
             auto typeName = String::Factory();
             item.GetTypeString(typeName);
@@ -5443,7 +5447,7 @@ auto OT_API::find_standard(
 }
 
 auto OT_API::add_accept_item(
-    const itemType type,
+    const otx::itemType type,
     const TransactionNumber originNumber,
     const TransactionNumber referenceNumber,
     const String& note,
@@ -5483,11 +5487,12 @@ auto OT_API::get_or_create_process_inbox(
 {
     const auto& nymID = context.Signer()->ID();
     const auto& serverID = context.Notary();
-    auto processInbox = response.GetTransaction(transactionType::processInbox);
+    auto processInbox =
+        response.GetTransaction(otx::transactionType::processInbox);
 
     if (nullptr == processInbox) {
         const auto number = context.InternalServer().NextTransactionNumber(
-            MessageType::processInbox);
+            otx::MessageType::processInbox);
 
         if (false == number.Valid()) {
             LogError()()("Nym ")(nymID, api_.Crypto())(
@@ -5504,8 +5509,8 @@ auto OT_API::get_or_create_process_inbox(
             nymID,
             accountID,
             serverID,
-            transactionType::processInbox,
-            originType::not_applicable,
+            otx::transactionType::processInbox,
+            otx::originType::not_applicable,
             number.Value())};
 
         if (false == bool(newProcessInbox)) {
@@ -5526,52 +5531,53 @@ auto OT_API::get_or_create_process_inbox(
     return processInbox.get();
 }
 
-auto OT_API::response_type(const transactionType sourceType, const bool success)
-    const -> itemType
+auto OT_API::response_type(
+    const otx::transactionType sourceType,
+    const bool success) const -> otx::itemType
 {
     switch (sourceType) {
-        case transactionType::pending: {
+        case otx::transactionType::pending: {
             if (success) {
-                return itemType::acceptPending;
+                return otx::itemType::acceptPending;
             } else {
-                return itemType::rejectPending;
+                return otx::itemType::rejectPending;
             }
         }
-        case transactionType::marketReceipt:
-        case transactionType::paymentReceipt: {
+        case otx::transactionType::marketReceipt:
+        case otx::transactionType::paymentReceipt: {
             if (success) {
-                return itemType::acceptCronReceipt;
+                return otx::itemType::acceptCronReceipt;
             } else {
-                return itemType::disputeCronReceipt;
+                return otx::itemType::disputeCronReceipt;
             }
         }
-        case transactionType::chequeReceipt:
-        case transactionType::voucherReceipt:
-        case transactionType::transferReceipt: {
+        case otx::transactionType::chequeReceipt:
+        case otx::transactionType::voucherReceipt:
+        case otx::transactionType::transferReceipt: {
             if (success) {
-                return itemType::acceptItemReceipt;
+                return otx::itemType::acceptItemReceipt;
             } else {
-                return itemType::disputeItemReceipt;
+                return otx::itemType::disputeItemReceipt;
             }
         }
-        case transactionType::finalReceipt: {
+        case otx::transactionType::finalReceipt: {
             if (success) {
-                return itemType::acceptFinalReceipt;
+                return otx::itemType::acceptFinalReceipt;
             } else {
-                return itemType::disputeFinalReceipt;
+                return otx::itemType::disputeFinalReceipt;
             }
         }
-        case transactionType::basketReceipt: {
+        case otx::transactionType::basketReceipt: {
             if (success) {
-                return itemType::acceptBasketReceipt;
+                return otx::itemType::acceptBasketReceipt;
             } else {
-                return itemType::disputeBasketReceipt;
+                return otx::itemType::disputeBasketReceipt;
             }
         }
         default: {
             LogError()()("Unexpected transaction type.")(".").Flush();
 
-            return itemType::error_state;
+            return otx::itemType::error_state;
         }
     }
 }
@@ -5585,16 +5591,16 @@ auto OT_API::get_origin(
     TransactionNumber originNumber{0};
 
     switch (sourceType) {
-        case transactionType::marketReceipt:
-        case transactionType::paymentReceipt:
-        case transactionType::finalReceipt:
-        case transactionType::basketReceipt: {
+        case otx::transactionType::marketReceipt:
+        case otx::transactionType::paymentReceipt:
+        case otx::transactionType::finalReceipt:
+        case otx::transactionType::basketReceipt: {
             originNumber = source.GetReferenceToNum();
         } break;
-        case transactionType::transferReceipt:
-        case transactionType::pending:
-        case transactionType::chequeReceipt:
-        case transactionType::voucherReceipt: {
+        case otx::transactionType::transferReceipt:
+        case otx::transactionType::pending:
+        case otx::transactionType::chequeReceipt:
+        case otx::transactionType::voucherReceipt: {
             auto reference = String::Factory();
             source.GetReferenceString(reference);
 
@@ -5625,11 +5631,11 @@ auto OT_API::get_origin(
             const auto originalType = original->GetType();
 
             switch (originalType) {
-                case itemType::acceptPending:
-                case itemType::depositCheque: {
+                case otx::itemType::acceptPending:
+                case otx::itemType::depositCheque: {
                     break;
                 }
-                case itemType::transfer: {
+                case otx::itemType::transfer: {
                     original->GetNote(note);
                 } break;
                 default: {

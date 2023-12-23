@@ -7,6 +7,7 @@
 
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Account.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

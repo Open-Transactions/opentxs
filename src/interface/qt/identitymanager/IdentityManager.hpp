@@ -9,7 +9,7 @@
 #include <QString>
 #include <shared_mutex>
 
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/interface/qt/IdentityManager.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

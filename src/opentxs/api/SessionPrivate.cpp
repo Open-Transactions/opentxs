@@ -16,7 +16,6 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/PasswordPrompt.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/api/Network.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordCaller.hpp"

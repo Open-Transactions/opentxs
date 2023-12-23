@@ -16,9 +16,9 @@
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Subchain.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Amount.hpp"                     // IWYU pragma: keep
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/core/Amount.hpp"                // IWYU pragma: keep
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::crypto

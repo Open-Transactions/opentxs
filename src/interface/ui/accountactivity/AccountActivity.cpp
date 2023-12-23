@@ -11,6 +11,7 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -18,9 +19,8 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
-#include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/identifier/Notary.hpp"          // IWYU pragma: keep
+#include "opentxs/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 
 namespace opentxs::ui::implementation
 {

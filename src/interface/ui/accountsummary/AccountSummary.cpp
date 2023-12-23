@@ -20,6 +20,7 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/ZeroMQ.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/network/ConnectionState.hpp"  // IWYU pragma: keep
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"

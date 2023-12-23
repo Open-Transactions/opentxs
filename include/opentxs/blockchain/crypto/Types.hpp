@@ -3,6 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/core/Amount.hpp"
+// IWYU pragma: no_include "opentxs/identifier/Account.hpp"
+// IWYU pragma: no_include "opentxs/opentxs.hpp"
+// IWYU pragma: no_include <coroutine>
+
 #pragma once
 
 #include <compare>
@@ -10,17 +15,16 @@
 #include <cstdint>
 #include <string_view>
 #include <tuple>
+#include <type_traits>
 #include <variant>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/token/Descriptor.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -46,12 +50,21 @@ class Script;
 }  // namespace bitcoin
 }  // namespace protocol
 }  // namespace blockchain
+
+namespace identifier
+{
+class Account;
+}  // namespace identifier
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::blockchain::crypto
 {
+using opentxs::crypto::Bip32Index;
+
 enum class AddressStyle : std::uint16_t;    // IWYU pragma: export
+enum class Bip44Subchain : Bip32Index;      // IWYU pragma: export
+enum class Bip44Type : Bip32Index;          // IWYU pragma: export
 enum class HDProtocol : std::uint16_t;      // IWYU pragma: export
 enum class SubaccountType : std::uint16_t;  // IWYU pragma: export
 enum class Subchain : std::uint8_t;         // IWYU pragma: export
@@ -85,6 +98,11 @@ OPENTXS_EXPORT auto print(const Target& target) noexcept -> UnallocatedCString;
 OPENTXS_EXPORT auto print(const Target& target, alloc::Strategy alloc) noexcept
     -> CString;
 OPENTXS_EXPORT auto target_to_unit(const Target&) noexcept -> opentxs::UnitType;
+
+constexpr auto value(Bip44Subchain in) noexcept
+{
+    return static_cast<std::underlying_type_t<Bip44Subchain>>(in);
+}
 }  // namespace opentxs::blockchain::crypto
 
 namespace opentxs::blockchain

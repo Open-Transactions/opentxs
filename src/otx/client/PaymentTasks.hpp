@@ -12,8 +12,8 @@
 #include "internal/otx/client/OTPayment.hpp"
 #include "opentxs/Export.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "otx/client/DepositPayment.hpp"
 

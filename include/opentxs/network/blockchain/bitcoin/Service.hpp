@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/network/blockchain/bitcoin/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::blockchain::bitcoin
 {
-enum class Service : std::uint8_t {
+enum class Service : std::underlying_type_t<Service> {
     None = 0,
     Avalanche = 1,
     BitcoinCash = 2,
@@ -25,6 +27,4 @@ enum class Service : std::uint8_t {
     XThin = 12,
     XThinner = 13,
 };
-
-OPENTXS_EXPORT auto print(Service) noexcept -> std::string_view;
 }  // namespace opentxs::network::blockchain::bitcoin

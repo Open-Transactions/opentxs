@@ -11,11 +11,11 @@
 #include <tuple>  // IWYU pragma: keep
 #include <utility>
 
-#include "opentxs/Export.hpp"                          // IWYU pragma: keep
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -12,11 +12,12 @@
 #include <utility>
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -65,7 +66,7 @@ enum class ScanState : std::uint8_t {
 
 using Cookie = unsigned long long int;
 using BlockMap = UnallocatedMap<Cookie, Work*>;
-using Indices = Vector<Bip32Index>;
+using Indices = Vector<crypto::Bip32Index>;
 using Result = std::pair<ReadView, Indices>;
 using Results = UnallocatedVector<Result>;
 using ProgressBatch = UnallocatedVector<

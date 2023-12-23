@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "internal/core/contract/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/contract/Types.internal.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 

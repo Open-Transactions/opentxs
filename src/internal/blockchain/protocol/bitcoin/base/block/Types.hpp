@@ -12,12 +12,13 @@
 #include <span>
 #include <utility>
 
-#include "internal/blockchain/block/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,6 +35,23 @@ namespace block
 class Hash;
 class TransactionHash;
 }  // namespace block
+
+namespace protocol
+{
+namespace bitcoin
+{
+namespace base
+{
+namespace block
+{
+namespace script
+{
+struct Element;
+}  // namespace script
+}  // namespace block
+}  // namespace base
+}  // namespace bitcoin
+}  // namespace protocol
 }  // namespace blockchain
 
 namespace network

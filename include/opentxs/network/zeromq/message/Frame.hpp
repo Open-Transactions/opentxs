@@ -11,8 +11,8 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 struct zmq_msg_t;
 

@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "internal/util/storage/Types.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/storage/Driver.hpp"
-#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

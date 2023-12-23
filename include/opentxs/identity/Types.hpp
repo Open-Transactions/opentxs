@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 #include <string_view>
+#include <type_traits>
 
 #include "opentxs/Export.hpp"
 
@@ -23,25 +24,23 @@ class Nym;
 
 namespace opentxs::identity
 {
-// IWYU pragma: begin_exports
-enum class CredentialRole : std::uint32_t;  // IWYU pragma: keep
-enum class CredentialType : std::uint32_t;  // IWYU pragma: keep
-enum class NymCapability : std::uint8_t {
-    SIGN_MESSAGE = 0,
-    ENCRYPT_MESSAGE = 1,
-    AUTHENTICATE_CONNECTION = 2,
-    SIGN_CHILDCRED = 3,
-};                                           // IWYU pragma: export
-enum class SourceProofType : std::uint32_t;  // IWYU pragma: keep
-enum class SourceType : std::uint32_t;       // IWYU pragma: keep
-enum class Type : std::uint32_t;             // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class CredentialRole : std::uint32_t;   // IWYU pragma: export
+enum class CredentialType : std::uint32_t;   // IWYU pragma: export
+enum class NymCapability : std::uint8_t;     // IWYU pragma: export
+enum class SourceProofType : std::uint32_t;  // IWYU pragma: export
+enum class SourceType : std::uint32_t;       // IWYU pragma: export
+enum class Type : std::uint32_t;             // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(CredentialRole value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(CredentialType value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Type value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SourceProofType value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(SourceType value) noexcept -> std::string_view;
+
+constexpr auto value(CredentialRole in) noexcept
+{
+    return static_cast<std::underlying_type_t<CredentialRole>>(in);
+}
 }  // namespace opentxs::identity
 
 namespace opentxs

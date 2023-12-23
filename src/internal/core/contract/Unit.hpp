@@ -8,9 +8,9 @@
 #include <cstdint>
 
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -64,7 +64,7 @@ public:
         -> bool = 0;
     virtual auto Serialize(Writer&& destination, bool includeNym) const
         -> bool = 0;
-    virtual auto Type() const -> contract::UnitType = 0;
+    virtual auto Type() const -> contract::UnitDefinitionType = 0;
     virtual auto UnitOfAccount() const -> opentxs::UnitType = 0;
     virtual auto VisitAccountRecords(
         const UnallocatedCString& dataFolder,

@@ -12,11 +12,11 @@
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

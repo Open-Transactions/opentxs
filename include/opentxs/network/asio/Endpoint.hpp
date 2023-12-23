@@ -8,8 +8,8 @@
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::asio
 {

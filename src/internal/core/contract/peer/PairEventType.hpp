@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "internal/core/contract/peer/Types.hpp"
+#include "opentxs/contract/peer/Types.internal.hpp"
 
 namespace opentxs::contract::peer::internal
 {

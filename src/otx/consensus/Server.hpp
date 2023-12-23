@@ -15,7 +15,6 @@
 
 #include "core/StateMachine.hpp"
 #include "internal/network/ServerConnection.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
@@ -24,11 +23,12 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Export.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
@@ -112,7 +112,8 @@ public:
     auto FinalizeServerCommand(Message& command, const PasswordPrompt& reason)
         const -> bool final;
     auto HaveAdminPassword() const -> bool final;
-    auto HaveSufficientNumbers(const MessageType reason) const -> bool final;
+    auto HaveSufficientNumbers(const otx::MessageType reason) const
+        -> bool final;
     auto Highest() const -> TransactionNumber final;
     auto isAdmin() const -> bool final;
     auto Purse(const identifier::UnitDefinition& id) const
@@ -145,7 +146,7 @@ public:
     auto CloseCronItem(const TransactionNumber) -> bool final { return false; }
     auto Connection() -> network::ServerConnection& final;
     auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const Armored& payload,
         const identifier::Account& accountID,
         const RequestNumber provided,
@@ -153,14 +154,14 @@ public:
         const bool withNymboxHash = true)
         -> std::pair<RequestNumber, std::unique_ptr<Message>> final;
     auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const identifier::Nym& recipientNymID,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false)
         -> std::pair<RequestNumber, std::unique_ptr<Message>> final;
     auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false)
@@ -170,7 +171,7 @@ public:
         const identifier::UnitDefinition& id,
         const PasswordPrompt& reason)
         -> Editor<blind::Purse, std::shared_mutex> final;
-    auto NextTransactionNumber(const MessageType reason)
+    auto NextTransactionNumber(const otx::MessageType reason)
         -> otx::context::ManagedNumber final;
     auto OpenCronItem(const TransactionNumber) -> bool final { return false; }
     auto PingNotary(const PasswordPrompt& reason)
@@ -273,19 +274,20 @@ private:
     static constexpr auto nymbox_box_type_{0};
     static constexpr auto failure_count_limit_{3};
 
-    static const UnallocatedSet<MessageType> do_not_need_request_number_;
+    static const UnallocatedSet<otx::MessageType> do_not_need_request_number_;
 
     GuardedData data_;
 
     static auto client(const api::Session& api) -> const api::session::Client&;
     static auto extract_numbers(OTTransaction& input) -> TransactionNumbers;
-    static auto get_item_type(OTTransaction& input, itemType& output) -> Exit;
+    static auto get_item_type(OTTransaction& input, otx::itemType& output)
+        -> Exit;
     static auto get_type(const std::int64_t depth) -> BoxType;
     static auto instantiate_message(
         const api::Session& api,
         const UnallocatedCString& serialized)
         -> std::unique_ptr<opentxs::Message>;
-    static auto need_request_number(const MessageType type) -> bool;
+    static auto need_request_number(const otx::MessageType type) -> bool;
     static auto scan_number_set(
         const TransactionNumbers& input,
         TransactionNumber& highest,
@@ -334,7 +336,7 @@ private:
         -> std::unique_ptr<Item>;
     auto extract_original_item(
         const Data& data,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response) const -> std::unique_ptr<Item>;
     auto extract_payment_instrument_from_notice(
         const api::Session& api,
@@ -366,9 +368,9 @@ private:
         const TransactionNumber lReceiptId,
         Ledger& ledger,
         const PasswordPrompt& reason) const -> std::shared_ptr<OTPayment>;
-    auto initialize_server_command(const MessageType type) const
+    auto initialize_server_command(const otx::MessageType type) const
         -> std::unique_ptr<Message>;
-    auto initialize_server_command(const MessageType type, Message& output)
+    auto initialize_server_command(const otx::MessageType type, Message& output)
         const -> void;
     auto is_internal_transfer(const Item& item) const -> bool;
     auto load_account_inbox(const identifier::Account& accountID) const
@@ -380,7 +382,7 @@ private:
         -> std::unique_ptr<Ledger>;
     auto make_accept_item(
         const PasswordPrompt& reason,
-        const itemType type,
+        const otx::itemType type,
         const OTTransaction& input,
         OTTransaction& acceptTransaction,
         const TransactionNumbers& accept = {}) const -> const Item&;
@@ -473,14 +475,14 @@ private:
     auto init_sockets(Data& data) -> void;
     auto initialize_server_command(
         Data& data,
-        const MessageType type,
+        const otx::MessageType type,
         const RequestNumber provided,
         const bool withAcknowledgments,
         const bool withNymboxHash)
         -> std::pair<RequestNumber, std::unique_ptr<Message>>;
     auto initialize_server_command(
         Data& data,
-        const MessageType type,
+        const otx::MessageType type,
         const RequestNumber provided,
         const bool withAcknowledgments,
         const bool withNymboxHash,
@@ -497,7 +499,7 @@ private:
         Data& data,
         const api::session::Client& client,
         const PasswordPrompt& reason) -> void;
-    auto next_transaction_number(Data& data, const MessageType reason)
+    auto next_transaction_number(Data& data, const otx::MessageType reason)
         -> otx::context::ManagedNumber;
     auto pending_send(
         Data& data,
@@ -620,7 +622,7 @@ private:
     auto process_response_transaction_cancel(
         Data& data,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response) -> void;
     auto process_response_transaction_cash_deposit(
         Item& replyItem,
@@ -635,37 +637,37 @@ private:
     auto process_response_transaction_cron(
         Data& data,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response,
         const PasswordPrompt& reason) -> void;
     auto process_response_transaction_deposit(
         Data& data,
         const api::session::Client& client,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response,
         const PasswordPrompt& reason) -> void;
     auto process_response_transaction_exchange_basket(
         Data& data,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response) -> void;
     auto process_response_transaction_pay_dividend(
         Data& data,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response) -> void;
     auto process_response_transaction_transfer(
         Data& data,
         const api::session::Client& client,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response) -> void;
     auto process_response_transaction_withdrawal(
         Data& data,
         const api::session::Client& client,
         const Message& reply,
-        const itemType type,
+        const otx::itemType type,
         OTTransaction& response,
         const PasswordPrompt& reason) -> void;
     auto process_unregister_nym_response(

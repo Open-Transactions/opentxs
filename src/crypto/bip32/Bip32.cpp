@@ -18,8 +18,8 @@
 #include "crypto/bip32/Imp.hpp"
 #include "internal/crypto/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "util/HDIndex.hpp"
 

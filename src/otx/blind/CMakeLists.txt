@@ -10,15 +10,7 @@ add_subdirectory(mint)
 add_subdirectory(purse)
 add_subdirectory(token)
 
-libopentxs_add_public_header("otx/blind" "CashType.hpp")
-libopentxs_add_public_header("otx/blind" "PurseType.hpp")
-libopentxs_add_public_header("otx/blind" "TokenState.hpp")
-libopentxs_add_public_header("otx/blind" "Types.hpp")
-
 target_sources(
   opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/otx/blind/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/otx/blind/Types.hpp"
-    "Blind.cpp"
+  PRIVATE "${opentxs_SOURCE_DIR}/src/internal/otx/blind/Factory.hpp"
 )

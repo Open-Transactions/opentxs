@@ -97,7 +97,10 @@ auto PaymentCodeFixture::blinding_key_secret(
                 throw std::runtime_error("Failed");
             }
             var = api.Crypto().Seed().AccountChildKey(
-                ot::reader(bytes), ot::INTERNAL_CHAIN, index_, reason);
+                ot::reader(bytes),
+                ot::blockchain::crypto::Bip44Subchain::internal,
+                index_,
+                reason);
         }
 
         if (false == var.IsValid()) {

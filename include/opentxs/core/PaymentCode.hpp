@@ -11,11 +11,11 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -98,7 +98,7 @@ public:
         -> const internal::PaymentCode&;
     auto Incoming(
         const PaymentCode& sender,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const PasswordPrompt& reason,
         const std::uint8_t version = 0) const noexcept
@@ -108,7 +108,7 @@ public:
         const noexcept -> bool;
     auto Outgoing(
         const PaymentCode& recipient,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const PasswordPrompt& reason,
         const std::uint8_t version = 0) const noexcept

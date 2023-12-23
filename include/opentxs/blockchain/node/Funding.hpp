@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/node/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::node
 {
-enum class Funding : TypeEnum {
+enum class Funding : std::underlying_type_t<Funding> {
     Default = 0,
     SweepAccount = 1,
     SweepSubaccount = 2,

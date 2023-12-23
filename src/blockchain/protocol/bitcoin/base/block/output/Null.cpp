@@ -6,8 +6,8 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"  // IWYU pragma: associated
 
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
-#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/cashtoken/Types.internal.hpp"
 
 namespace opentxs::factory
 {

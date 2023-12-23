@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/rpc/Types.hpp"
+#include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-enum class ContactEventType : TypeEnum {
+enum class ContactEventType : std::underlying_type_t<ContactEventType> {
     error = 0,
     incoming_message = 1,
     outgoing_message = 2,

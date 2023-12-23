@@ -15,7 +15,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -41,12 +40,13 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -1413,7 +1413,7 @@ void OTMarket::ProcessTrade(
             bSuccessLoadingFirstAsset = theFirstAssetInbox->GenerateLedger(
                 theTrade.GetSenderAcctID(),
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -1425,7 +1425,7 @@ void OTMarket::ProcessTrade(
                 theFirstCurrencyInbox->GenerateLedger(
                     theTrade.GetCurrencyAcctID(),
                     NOTARY_ID,
-                    ledgerType::inbox,
+                    otx::ledgerType::inbox,
                     true);  // bGenerateFile=true
         }
 
@@ -1436,7 +1436,7 @@ void OTMarket::ProcessTrade(
             bSuccessLoadingOtherAsset = theOtherAssetInbox->GenerateLedger(
                 pOtherTrade->GetSenderAcctID(),
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -1448,7 +1448,7 @@ void OTMarket::ProcessTrade(
                 theOtherCurrencyInbox->GenerateLedger(
                     pOtherTrade->GetCurrencyAcctID(),
                     NOTARY_ID,
-                    ledgerType::inbox,
+                    otx::ledgerType::inbox,
                     true);  // bGenerateFile=true
         }
 
@@ -1531,32 +1531,32 @@ void OTMarket::ProcessTrade(
 
             auto pTrans1{api_.Factory().Internal().Session().Transaction(
                 *theFirstAssetInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans1));
 
             auto pTrans2{api_.Factory().Internal().Session().Transaction(
                 *theFirstCurrencyInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans2));
 
             auto pTrans3{api_.Factory().Internal().Session().Transaction(
                 *theOtherAssetInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans3));
 
             auto pTrans4{api_.Factory().Internal().Session().Transaction(
                 *theOtherCurrencyInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans4));
@@ -1580,13 +1580,13 @@ void OTMarket::ProcessTrade(
             // set up the transaction items (each transaction may have
             // multiple items... but not in this case.)
             auto pItem1{api_.Factory().Internal().Session().Item(
-                *trans1, itemType::marketReceipt, {})};
+                *trans1, otx::itemType::marketReceipt, {})};
             auto pItem2{api_.Factory().Internal().Session().Item(
-                *trans2, itemType::marketReceipt, {})};
+                *trans2, otx::itemType::marketReceipt, {})};
             auto pItem3{api_.Factory().Internal().Session().Item(
-                *trans3, itemType::marketReceipt, {})};
+                *trans3, otx::itemType::marketReceipt, {})};
             auto pItem4{api_.Factory().Internal().Session().Item(
-                *trans4, itemType::marketReceipt, {})};
+                *trans4, otx::itemType::marketReceipt, {})};
 
             assert_true(false != bool(pItem1));
             assert_true(false != bool(pItem2));

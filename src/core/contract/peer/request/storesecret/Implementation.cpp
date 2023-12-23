@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/core/contract/peer/Types.hpp"
+#include "opentxs/contract/peer/Types.internal.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

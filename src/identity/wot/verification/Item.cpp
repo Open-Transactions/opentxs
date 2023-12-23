@@ -15,7 +15,6 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/Verification.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
-#include "internal/identity/wot/verification/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
+#include "opentxs/identity/wot/verification/Types.internal.hpp"
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
 

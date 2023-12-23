@@ -11,9 +11,9 @@
 #include <string_view>
 
 #include "internal/util/storage/file/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -16,9 +16,9 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
-#include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Account.hpp"         // IWYU pragma: keep
+#include "opentxs/identifier/Notary.hpp"          // IWYU pragma: keep
+#include "opentxs/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Accounts.hpp"
 #include "util/storage/tree/Contacts.hpp"

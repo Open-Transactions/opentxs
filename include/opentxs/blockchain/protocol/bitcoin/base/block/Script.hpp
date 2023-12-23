@@ -11,10 +11,10 @@
 #include <span>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -38,6 +38,11 @@ namespace internal
 {
 class Script;
 }  // namespace internal
+
+namespace script
+{
+struct Element;
+}  // namespace script
 
 class ScriptPrivate;
 }  // namespace block

@@ -7,31 +7,12 @@
 
 #include <cstring>
 #include <iomanip>
-#include <limits>
 #include <sstream>
 
-#include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
 
 namespace opentxs
 {
-auto check_subset(
-    const std::size_t size,
-    const std::size_t target,
-    const std::size_t pos) noexcept -> bool
-{
-    if (pos > size) { return false; }
-
-    if ((std::numeric_limits<std::size_t>::max() - pos) < target) {
-
-        return false;
-    }
-
-    if ((pos + target) > size) { return false; }
-
-    return true;
-}
-
 auto operator==(const Data& lhs, const Data& rhs) noexcept -> bool
 {
     const auto lSize = lhs.size();

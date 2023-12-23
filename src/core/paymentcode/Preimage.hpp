@@ -9,8 +9,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::paymentcode
 {

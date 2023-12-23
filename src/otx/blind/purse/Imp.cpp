@@ -22,13 +22,13 @@
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
-#include "internal/otx/blind/Types.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -38,11 +38,11 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
@@ -50,11 +50,11 @@
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/otx/blind/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 #define OT_PURSE_VERSION 1
@@ -348,10 +348,10 @@ Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
     : Purse(
           api,
           in.version(),
-          translate(in.type()),
+          opentxs::translate(in.type()),
           api.Factory().NotaryIDFromBase58(in.notary()),
           api.Factory().UnitIDFromBase58(in.mint()),
-          translate(in.state()),
+          opentxs::translate(in.state()),
           factory::Amount(in.totalvalue()),
           convert_stime(in.latestvalidfrom()),
           convert_stime(in.earliestvalidto()),
@@ -466,7 +466,7 @@ auto Purse::deserialize_secondary_key(
     const proto::Purse& in) noexcept(false)
     -> std::unique_ptr<const crypto::symmetric::Key>
 {
-    switch (translate(in.state())) {
+    switch (opentxs::translate(in.state())) {
         case blind::PurseType::Request:
         case blind::PurseType::Issue: {
             auto output = std::make_unique<crypto::symmetric::Key>(
@@ -499,7 +499,7 @@ auto Purse::deserialize_secondary_password(
     const api::Session& api,
     const proto::Purse& in) noexcept(false) -> std::unique_ptr<const OTEnvelope>
 {
-    switch (translate(in.state())) {
+    switch (opentxs::translate(in.state())) {
         case blind::PurseType::Request:
         case blind::PurseType::Issue: {
             auto output = std::make_unique<OTEnvelope>(
@@ -751,8 +751,8 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
 {
     try {
         output.set_version(version_);
-        output.set_type(translate(type_));
-        output.set_state(translate(state_));
+        output.set_type(opentxs::translate(type_));
+        output.set_state(opentxs::translate(state_));
         output.set_notary(notary_.asBase58(api_.Crypto()));
         output.set_mint(unit_.asBase58(api_.Crypto()));
         total_value_.Serialize(writer(output.mutable_totalvalue()));

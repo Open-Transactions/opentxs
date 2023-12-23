@@ -28,5 +28,9 @@ libopentxs_add_public_header("interface/ui" "Types.hpp")
 
 target_sources(
   opentxs-common
-  PRIVATE "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UI.hpp" "UI.cpp"
+  PRIVATE
+    "${opentxs_SOURCE_DIR}/src/internal/interface/ui/UI.hpp"
+    "Blockchains.cpp"
+    "Types.cpp"
+    "UI.cpp"
 )

@@ -17,7 +17,6 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Reply.hpp"
 #include "internal/core/contract/peer/Request.hpp"
-#include "internal/core/contract/peer/Types.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/contract/peer/Types.internal.hpp"
 #include "opentxs/core/contract/peer/ObjectType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"

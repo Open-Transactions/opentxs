@@ -15,11 +15,11 @@
 #include <cstdint>
 #include <span>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {

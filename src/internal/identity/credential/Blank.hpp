@@ -9,6 +9,7 @@
 
 #include "internal/crypto/key/Null.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 
@@ -95,7 +96,7 @@ struct Key : virtual public blank::Base,
         return {};
     }
     auto Sign(
-        const GetPreimage,
+        const crypto::GetPreimage,
         const crypto::SignatureRole,
         proto::Signature&,
         const PasswordPrompt&,

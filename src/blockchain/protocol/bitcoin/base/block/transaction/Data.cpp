@@ -10,7 +10,7 @@
 
 #include "internal/blockchain/block/Block.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::protocol::bitcoin::base::block::transaction

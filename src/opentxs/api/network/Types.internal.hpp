@@ -7,9 +7,9 @@
 
 #include <string_view>
 
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 
 namespace opentxs::api::network
 {

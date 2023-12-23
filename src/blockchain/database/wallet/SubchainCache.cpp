@@ -26,10 +26,10 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -57,7 +57,7 @@ SubchainCache::SubchainCache(
 
 auto SubchainCache::AddPattern(
     const ElementID& id,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const ReadView data,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
@@ -189,7 +189,7 @@ auto SubchainCache::GetIndex(
 }
 
 auto SubchainCache::GetLastIndexed(const SubchainID& subchain) const noexcept
-    -> std::optional<Bip32Index>
+    -> std::optional<crypto::Bip32Index>
 {
     try {
         auto handle = last_indexed_.lock();
@@ -264,15 +264,15 @@ auto SubchainCache::load_index(const SubchainID& key, SubchainIDMap& map) const
 
 auto SubchainCache::load_last_indexed(
     const SubchainID& key,
-    LastIndexedMap& map) const noexcept(false) -> const Bip32Index&
+    LastIndexedMap& map) const noexcept(false) -> const crypto::Bip32Index&
 {
     auto it = map.find(key);
 
     if (map.end() != it) { return it->second; }
 
     lmdb_.Load(wallet::last_indexed_, key.Bytes(), [&](const auto bytes) {
-        if (sizeof(Bip32Index) == bytes.size()) {
-            auto value = Bip32Index{};
+        if (sizeof(crypto::Bip32Index) == bytes.size()) {
+            auto value = crypto::Bip32Index{};
             std::memcpy(&value, bytes.data(), bytes.size());
             auto [i, added] = map.try_emplace(key, value);
 
@@ -359,7 +359,7 @@ auto SubchainCache::load_pattern_index(
 
 auto SubchainCache::SetLastIndexed(
     const SubchainID& subchain,
-    const Bip32Index value,
+    const crypto::Bip32Index value,
     storage::lmdb::Transaction& tx) noexcept -> bool
 {
     try {

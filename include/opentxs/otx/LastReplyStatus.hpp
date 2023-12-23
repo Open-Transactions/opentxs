@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx
 {
-enum class LastReplyStatus : std::uint8_t {
+enum class LastReplyStatus : std::underlying_type_t<LastReplyStatus> {
     Invalid = 0,
     None = 1,
     MessageSuccess = 2,

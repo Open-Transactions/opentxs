@@ -8,9 +8,9 @@
 #include <chrono>
 #include <source_location>
 
-#include "internal/network/zeromq/socket/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/zeromq/Types.internal.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/network/zeromq/socket/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

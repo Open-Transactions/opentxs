@@ -10,9 +10,9 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::block
 {

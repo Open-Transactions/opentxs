@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Header.hpp"
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
@@ -44,6 +43,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

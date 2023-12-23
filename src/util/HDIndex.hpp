@@ -11,21 +11,23 @@ namespace opentxs
 {
 template <typename I>
 struct HDIndex {
-    Bip32Index value_{};
+    crypto::Bip32Index value_{};
 
-    operator Bip32Index() const { return value_; }
+    operator crypto::Bip32Index() const { return value_; }
 
     HDIndex(const I in)
-        : value_(static_cast<Bip32Index>(in))
+        : value_(static_cast<crypto::Bip32Index>(in))
     {
     }
 
-    HDIndex(const I lhs, const Bip32Child rhs)
-        : value_(static_cast<Bip32Index>(lhs) | static_cast<Bip32Index>(rhs))
+    HDIndex(const I lhs, const crypto::Bip32Child rhs)
+        : value_(
+              static_cast<crypto::Bip32Index>(lhs) |
+              static_cast<crypto::Bip32Index>(rhs))
     {
     }
 };
 
 template <typename Bip43Purpose>
-HDIndex(const Bip43Purpose, const Bip32Child) -> HDIndex<Bip43Purpose>;
+HDIndex(const Bip43Purpose, const crypto::Bip32Child) -> HDIndex<Bip43Purpose>;
 }  // namespace opentxs

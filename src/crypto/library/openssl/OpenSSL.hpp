@@ -30,10 +30,10 @@ extern "C" {
 
 #include "crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/OpenSSL.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

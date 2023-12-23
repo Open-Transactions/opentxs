@@ -12,15 +12,6 @@ add_subdirectory(script)
 add_subdirectory(transaction)
 
 libopentxs_add_public_header(
-  "blockchain/protocol/bitcoin/base/block" "Opcodes.hpp"
-)
-libopentxs_add_public_header(
-  "blockchain/protocol/bitcoin/base/block" "Pattern.hpp"
-)
-libopentxs_add_public_header(
-  "blockchain/protocol/bitcoin/base/block" "Position.hpp"
-)
-libopentxs_add_public_header(
   "blockchain/protocol/bitcoin/base/block" "Types.hpp"
 )
 

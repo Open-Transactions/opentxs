@@ -9,7 +9,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Item.internal.hpp"
 #include "opentxs/util/Log.hpp"
 

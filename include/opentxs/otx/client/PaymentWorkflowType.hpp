@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/otx/client/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx::client
 {
-enum class PaymentWorkflowType : std::uint8_t {
+enum class PaymentWorkflowType : std::underlying_type_t<PaymentWorkflowType> {
     Error = 0,
     OutgoingCheque = 1,
     IncomingCheque = 2,

@@ -3,18 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::AddressType
-
 #pragma once
 
-#include <ContractEnums.pb.h>
 #include <cstddef>
 
 #include "internal/otx/common/NymFile.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -68,13 +64,3 @@ namespace opentxs::factory
 auto Secret(const std::size_t bytes) noexcept -> opentxs::Secret;
 auto Secret(const ReadView bytes, const bool mode) noexcept -> opentxs::Secret;
 }  // namespace opentxs::factory
-
-namespace opentxs
-{
-auto check_subset(
-    const std::size_t available,
-    const std::size_t requested,
-    const std::size_t position) noexcept -> bool;
-auto translate(const AddressType in) noexcept -> proto::AddressType;
-auto translate(const proto::AddressType in) noexcept -> AddressType;
-}  // namespace opentxs

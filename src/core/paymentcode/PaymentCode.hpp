@@ -10,12 +10,12 @@
 #include <cstdint>
 
 #include "internal/core/PaymentCode.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -93,7 +93,7 @@ public:
     virtual auto ID() const noexcept -> const identifier::Nym&;
     virtual auto Incoming(
         const opentxs::PaymentCode& sender,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
@@ -104,7 +104,7 @@ public:
     auto operator==(const proto::PaymentCode&) const noexcept -> bool override;
     virtual auto Outgoing(
         const opentxs::PaymentCode& recipient,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
@@ -140,7 +140,7 @@ public:
 
     auto AddPrivateKeys(
         const crypto::SeedID&,
-        const Bip32Index,
+        const crypto::Bip32Index,
         const opentxs::PasswordPrompt&) noexcept -> bool override;
 
     Imp() noexcept;

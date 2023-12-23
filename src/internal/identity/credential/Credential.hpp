@@ -9,15 +9,16 @@
 #include <memory>
 #include <optional>
 
-#include "internal/core/contract/Types.hpp"
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Types.hpp"
+#include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/crypto/asymmetric/Role.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/identity/credential/Base.hpp"
 #include "opentxs/identity/credential/Contact.hpp"
 #include "opentxs/identity/credential/Key.hpp"
@@ -114,7 +115,7 @@ struct Key : virtual public Base, virtual public identity::credential::Key {
         const opentxs::Signature& theSignature,
         char cKeyType = '0') const -> std::int32_t = 0;
     virtual auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         const crypto::SignatureRole role,
         proto::Signature& signature,
         const PasswordPrompt& reason,

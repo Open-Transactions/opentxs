@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/otx/blind/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx::blind
 {
-enum class PurseType : std::uint8_t {
+enum class PurseType : std::underlying_type_t<PurseType> {
     Error = 0,
     Request = 1,
     Issue = 2,

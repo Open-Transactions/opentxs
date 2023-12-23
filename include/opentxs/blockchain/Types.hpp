@@ -10,10 +10,11 @@
 #include <cstdint>
 #include <span>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -31,15 +32,13 @@ class Amount;
 
 namespace opentxs::blockchain
 {
-using TypeEnum = std::uint32_t;
-
-enum class Category : TypeEnum;  // IWYU pragma: export
-enum class Type : TypeEnum;      // IWYU pragma: export
-
 using HDIndex = std::uint32_t;
 using ConfirmedBalance = Amount;
 using UnconfirmedBalance = Amount;
 using Balance = std::pair<ConfirmedBalance, UnconfirmedBalance>;
+
+enum class Category : std::uint32_t;  // IWYU pragma: export
+enum class Type : std::uint32_t;      // IWYU pragma: export
 
 OPENTXS_EXPORT auto associated_mainnet(Type) noexcept -> Type;
 OPENTXS_EXPORT auto blockchain_to_unit(const Type type) noexcept -> UnitType;
@@ -58,6 +57,16 @@ OPENTXS_EXPORT auto ticker_symbol(const Type type) noexcept
     -> UnallocatedCString;
 OPENTXS_EXPORT auto ticker_symbol(const Type type, alloc::Strategy) noexcept
     -> CString;
+
+constexpr auto value(Category in) noexcept
+{
+    return static_cast<std::underlying_type_t<Type>>(in);
+}
+
+constexpr auto value(Type in) noexcept
+{
+    return static_cast<std::underlying_type_t<Type>>(in);
+}
 }  // namespace opentxs::blockchain
 
 namespace opentxs

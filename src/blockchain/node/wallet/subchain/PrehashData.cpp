@@ -154,7 +154,7 @@ auto SubchainStateData::PrehashData::match(
     alloc::Default monotonic) const noexcept -> void
 {
     const auto GetKeys = [&](const auto& data) {
-        auto out = Set<Bip32Index>{monotonic};
+        auto out = Set<crypto::Bip32Index>{monotonic};
         out.clear();
         const auto& [hashes, map] = data;
         const auto start = hashes.cbegin();

@@ -7,8 +7,8 @@
 
 #include <functional>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs
 {

@@ -9,6 +9,7 @@
 
 #include "blockchain/protocol/bitcoin/base/block/input/InputPrivate.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

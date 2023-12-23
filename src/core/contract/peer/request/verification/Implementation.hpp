@@ -11,7 +11,7 @@
 #include "core/contract/peer/request/verification/VerificationPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/contract/peer/request/Verification.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/util/Allocator.hpp"

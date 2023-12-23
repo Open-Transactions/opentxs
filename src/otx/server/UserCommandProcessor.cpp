@@ -28,7 +28,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -62,22 +61,23 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -136,8 +136,8 @@ UserCommandProcessor::FinalizeResponse::~FinalizeResponse()
     if (response_.empty()) {
         auto transaction = api_.Factory().Internal().Session().Transaction(
             ledger_,
-            transactionType::error_state,
-            originType::not_applicable,
+            otx::transactionType::error_state,
+            otx::originType::not_applicable,
             0);
         auto response =
             AddResponse(std::shared_ptr<OTTransaction>(transaction.release()));
@@ -211,7 +211,7 @@ auto UserCommandProcessor::add_numbers_to_nymbox(
     }
 
     // Note: I decided against adding newly-requested transaction
-    // numbers to existing transactionType::blanks in the Nymbox.
+    // numbers to existing otx::transactionType::blanks in the Nymbox.
     // Why not? Because once the user downloads the Box Receipt, he will
     // think he has it already, when the Server meanwhile
     // has a new version of that same Box Receipt. But the user will
@@ -223,8 +223,8 @@ auto UserCommandProcessor::add_numbers_to_nymbox(
 
     auto transaction{api_.Factory().Internal().Session().Transaction(
         nymbox,
-        transactionType::blank,
-        originType::not_applicable,
+        otx::transactionType::blank,
+        otx::originType::not_applicable,
         transactionNumber)};
 
     assert_false(nullptr == transaction);
@@ -647,7 +647,7 @@ auto UserCommandProcessor::cmd_delete_asset_account(ReplyMessage& reply) const
         const auto contract =
             server_.API().Wallet().Internal().UnitDefinition(contractID);
 
-        if (contract->Type() == contract::UnitType::Security) {
+        if (contract->Type() == contract::UnitDefinitionType::Security) {
             if (false == contract->EraseAccountRecord(
                              server_.API().DataFolder().string(), accountID)) {
                 LogError()()("Unable to delete account record ")(
@@ -1311,7 +1311,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         LogError()()("Invalid contract type.").Flush();
 
         return false;
@@ -1395,7 +1395,7 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
         return false;
     }
 
-    if (contract::UnitType::Basket != translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket != translate(serialized.type())) {
         LogError()()("Invalid basket contract.").Flush();
 
         return false;
@@ -1483,7 +1483,7 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
     auto input{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     auto responseLedger{api_.Factory().Internal().Session().Ledger(
-        serverNymID, accountID, serverID, ledgerType::message, false)};
+        serverNymID, accountID, serverID, otx::ledgerType::message, false)};
 
     assert_false(nullptr == input);
     assert_false(nullptr == responseLedger);
@@ -1518,16 +1518,16 @@ auto UserCommandProcessor::cmd_notarize_transaction(ReplyMessage& reply) const
         }
 
         const auto inputNumber = transaction->GetTransactionNum();
-        auto outTrans = response.AddResponse(
-            std::shared_ptr<OTTransaction>(api_.Factory()
-                                               .Internal()
-                                               .Session()
-                                               .Transaction(
-                                                   *responseLedger,
-                                                   transactionType::error_state,
-                                                   originType::not_applicable,
-                                                   inputNumber)
-                                               .release()));
+        auto outTrans = response.AddResponse(std::shared_ptr<OTTransaction>(
+            api_.Factory()
+                .Internal()
+                .Session()
+                .Transaction(
+                    *responseLedger,
+                    otx::transactionType::error_state,
+                    otx::originType::not_applicable,
+                    inputNumber)
+                .release()));
 
         bool success{false};
         server_.GetNotary().NotarizeTransaction(
@@ -1585,7 +1585,7 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     auto input{
         api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID)};
     auto responseLedger{api_.Factory().Internal().Session().Ledger(
-        serverNymID, accountID, serverID, ledgerType::message, false)};
+        serverNymID, accountID, serverID, otx::ledgerType::message, false)};
 
     assert_false(nullptr == input);
     assert_false(nullptr == responseLedger);
@@ -1607,7 +1607,8 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
 
     if (false == bool(account)) { return false; }
 
-    auto pProcessInbox = input->GetTransaction(transactionType::processInbox);
+    auto pProcessInbox =
+        input->GetTransaction(otx::transactionType::processInbox);
 
     if (false == bool(pProcessInbox)) {
         LogError()()("processInbox transaction not found in input ledger.")
@@ -1657,16 +1658,16 @@ auto UserCommandProcessor::cmd_process_inbox(ReplyMessage& reply) const -> bool
     FinalizeResponse response(api_, serverNym, reply, *responseLedger);
     reply.SetSuccess(true);
     reply.DropToNymbox(true);
-    auto pResponseTrans = response.AddResponse(
-        std::shared_ptr<OTTransaction>(api_.Factory()
-                                           .Internal()
-                                           .Session()
-                                           .Transaction(
-                                               *responseLedger,
-                                               transactionType::error_state,
-                                               originType::not_applicable,
-                                               inputNumber)
-                                           .release()));
+    auto pResponseTrans = response.AddResponse(std::shared_ptr<OTTransaction>(
+        api_.Factory()
+            .Internal()
+            .Session()
+            .Transaction(
+                *responseLedger,
+                otx::transactionType::error_state,
+                otx::originType::not_applicable,
+                inputNumber)
+            .release()));
 
     if (false == bool(pResponseTrans)) {
         LogError()()("Failed to instantiate response transaction").Flush();
@@ -1741,7 +1742,7 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
     auto input{
         api_.Factory().Internal().Session().Ledger(nymID, nymID, serverID)};
     auto responseLedger{api_.Factory().Internal().Session().Ledger(
-        serverNymID, nymID, serverID, ledgerType::message, false)};
+        serverNymID, nymID, serverID, otx::ledgerType::message, false)};
 
     assert_false(nullptr == input);
     assert_false(nullptr == responseLedger);
@@ -1784,8 +1785,8 @@ auto UserCommandProcessor::cmd_process_nymbox(ReplyMessage& reply) const -> bool
                     .Session()
                     .Transaction(
                         *responseLedger,
-                        transactionType::error_state,
-                        originType::not_applicable,
+                        otx::transactionType::error_state,
+                        otx::originType::not_applicable,
                         transaction->GetTransactionNum())
                     .release()));
         bool success{false};
@@ -1894,7 +1895,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         const auto contract = server_.API().Wallet().Internal().UnitDefinition(
             account.get().GetInstrumentDefinitionID());
 
-        if (contract->Type() == contract::UnitType::Security) {
+        if (contract->Type() == contract::UnitDefinitionType::Security) {
             // The instrument definition keeps a list of all accounts for that
             // type. (For shares, not for currencies.)
             if (false ==
@@ -1934,7 +1935,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         inboxLoaded = inbox->VerifyAccount(serverNym);
     } else {
         inboxLoaded = inbox->CreateLedger(
-            nymID, accountID, serverID, ledgerType::inbox, true);
+            nymID, accountID, serverID, otx::ledgerType::inbox, true);
 
         if (inboxLoaded) {
             inboxLoaded = inbox->SignContract(serverNym, reason_);
@@ -1949,7 +1950,7 @@ auto UserCommandProcessor::cmd_register_account(ReplyMessage& reply) const
         outboxLoaded = outbox->VerifyAccount(serverNym);
     } else {
         outboxLoaded = outbox->CreateLedger(
-            nymID, accountID, serverID, ledgerType::outbox, true);
+            nymID, accountID, serverID, otx::ledgerType::outbox, true);
 
         if (outboxLoaded) {
             outboxLoaded = outbox->SignContract(serverNym, reason_);
@@ -2060,7 +2061,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     const auto serialized =
         proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.payload_});
 
-    if (contract::UnitType::Basket == translate(serialized.type())) {
+    if (contract::UnitDefinitionType::Basket == translate(serialized.type())) {
         LogError()()("Incorrect unit type.").Flush();
 
         return false;
@@ -2281,7 +2282,7 @@ auto UserCommandProcessor::send_message_to_nym(
         NOTARY_ID,
         SENDER_NYM_ID,
         RECIPIENT_NYM_ID,
-        transactionType::message,
+        otx::transactionType::message,
         pMsg);
 }
 
@@ -2468,7 +2469,7 @@ auto UserCommandProcessor::create_nymbox(
     }
 
     if (false ==
-        nymbox->GenerateLedger(nymID, server, ledgerType::nymbox, true)) {
+        nymbox->GenerateLedger(nymID, server, otx::ledgerType::nymbox, true)) {
         LogError()()("Unable to generate nymbox for ")(nymID, api_.Crypto())(
             ".")
             .Flush();
@@ -2530,7 +2531,7 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 
     if (!bGotNextTransNum) {
         LogError()()("Error getting next transaction number for a "
-                     "transactionType::replyNotice.")
+                     "otx::transactionType::replyNotice.")
             .Flush();
 
         return;
@@ -2538,14 +2539,14 @@ void UserCommandProcessor::drop_reply_notice_to_nymbox(
 
     auto pReplyNotice{server.API().Factory().Internal().Session().Transaction(
         *theNymbox,
-        transactionType::replyNotice,
-        originType::not_applicable,
+        otx::transactionType::replyNotice,
+        otx::originType::not_applicable,
         lReplyNoticeTransNum)};
 
     assert_false(nullptr == pReplyNotice);
 
     auto pReplyNoticeItem{server.API().Factory().Internal().Session().Item(
-        *pReplyNotice, itemType::replyNotice, {})};
+        *pReplyNotice, otx::itemType::replyNotice, {})};
 
     assert_false(nullptr == pReplyNoticeItem);
 
@@ -2794,10 +2795,10 @@ auto UserCommandProcessor::ProcessUserCommand(
         .Flush();
 
     switch (type) {
-        case MessageType::pingNotary: {
+        case otx::MessageType::pingNotary: {
             return cmd_ping_notary(reply);
         }
-        case MessageType::registerNym: {
+        case otx::MessageType::registerNym: {
             return cmd_register_nym(reply);
         }
         default: {
@@ -2832,7 +2833,7 @@ auto UserCommandProcessor::ProcessUserCommand(
     // requestNumber Let's compare it to the one that was sent in the message...
     // (This prevents attackers from repeat-sending intercepted messages to the
     // server.)
-    if (MessageType::getRequestNumber != type) {
+    if (otx::MessageType::getRequestNumber != type) {
         if (false == check_request_number(msgIn, requestNumber)) {
 
             return false;
@@ -2855,85 +2856,85 @@ auto UserCommandProcessor::ProcessUserCommand(
     check_acknowledgements(reply);
 
     switch (type) {
-        case MessageType::getRequestNumber: {
+        case otx::MessageType::getRequestNumber: {
             return cmd_get_request_number(reply);
         }
-        case MessageType::getTransactionNumbers: {
+        case otx::MessageType::getTransactionNumbers: {
             return cmd_get_transaction_numbers(reply);
         }
-        case MessageType::checkNym: {
+        case otx::MessageType::checkNym: {
             return cmd_check_nym(reply);
         }
-        case MessageType::sendNymMessage: {
+        case otx::MessageType::sendNymMessage: {
             return cmd_send_nym_message(reply);
         }
-        case MessageType::unregisterNym: {
+        case otx::MessageType::unregisterNym: {
             return cmd_delete_user(reply);
         }
-        case MessageType::unregisterAccount: {
+        case otx::MessageType::unregisterAccount: {
             return cmd_delete_asset_account(reply);
         }
-        case MessageType::registerAccount: {
+        case otx::MessageType::registerAccount: {
             return cmd_register_account(reply);
         }
-        case MessageType::registerInstrumentDefinition: {
+        case otx::MessageType::registerInstrumentDefinition: {
             return cmd_register_instrument_definition(reply);
         }
-        case MessageType::issueBasket: {
+        case otx::MessageType::issueBasket: {
             return cmd_issue_basket(reply);
         }
-        case MessageType::notarizeTransaction: {
+        case otx::MessageType::notarizeTransaction: {
             return cmd_notarize_transaction(reply);
         }
-        case MessageType::getNymbox: {
+        case otx::MessageType::getNymbox: {
             return cmd_get_nymbox(reply);
         }
-        case MessageType::getBoxReceipt: {
+        case otx::MessageType::getBoxReceipt: {
             return cmd_get_box_receipt(reply);
         }
-        case MessageType::getAccountData: {
+        case otx::MessageType::getAccountData: {
             return cmd_get_account_data(reply);
         }
-        case MessageType::processNymbox: {
+        case otx::MessageType::processNymbox: {
             return cmd_process_nymbox(reply);
         }
-        case MessageType::processInbox: {
+        case otx::MessageType::processInbox: {
             return cmd_process_inbox(reply);
         }
-        case MessageType::queryInstrumentDefinitions: {
+        case otx::MessageType::queryInstrumentDefinitions: {
             return cmd_query_instrument_definitions(reply);
         }
-        case MessageType::getInstrumentDefinition: {
+        case otx::MessageType::getInstrumentDefinition: {
             return cmd_get_instrument_definition(reply);
         }
-        case MessageType::getMint: {
+        case otx::MessageType::getMint: {
             return cmd_get_mint(reply);
         }
-        case MessageType::getMarketList: {
+        case otx::MessageType::getMarketList: {
             return cmd_get_market_list(reply);
         }
-        case MessageType::getMarketOffers: {
+        case otx::MessageType::getMarketOffers: {
             return cmd_get_market_offers(reply);
         }
-        case MessageType::getMarketRecentTrades: {
+        case otx::MessageType::getMarketRecentTrades: {
             return cmd_get_market_recent_trades(reply);
         }
-        case MessageType::getNymMarketOffers: {
+        case otx::MessageType::getNymMarketOffers: {
             return cmd_get_nym_market_offers(reply);
         }
-        case MessageType::triggerClause: {
+        case otx::MessageType::triggerClause: {
             return cmd_trigger_clause(reply);
         }
-        case MessageType::usageCredits: {
+        case otx::MessageType::usageCredits: {
             return cmd_usage_credits(reply);
         }
-        case MessageType::registerContract: {
+        case otx::MessageType::registerContract: {
             return cmd_register_contract(reply);
         }
-        case MessageType::requestAdmin: {
+        case otx::MessageType::requestAdmin: {
             return cmd_request_admin(reply);
         }
-        case MessageType::addClaim: {
+        case otx::MessageType::addClaim: {
             return cmd_add_claim(reply);
         }
         default: {

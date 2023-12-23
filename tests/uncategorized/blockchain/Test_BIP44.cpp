@@ -35,15 +35,18 @@ TEST_F(BIP44, generate_expected_keys)
     auto& external = const_cast<ExpectedKeys&>(external_);
     internal.reserve(count_);
     external.reserve(count_);
-    using Path = ot::UnallocatedVector<ot::Bip32Index>;
+    using Path = ot::UnallocatedVector<ot::crypto::Bip32Index>;
     const auto MakePath = [&](auto change, auto index) -> Path {
-        constexpr auto hard =
-            static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED);
-        constexpr auto purpose =
-            static_cast<ot::Bip32Index>(ot::Bip43Purpose::HDWALLET) | hard;
+        constexpr auto hard = static_cast<ot::crypto::Bip32Index>(
+            ot::crypto::Bip32Child::HARDENED);
+        constexpr auto purpose = static_cast<ot::crypto::Bip32Index>(
+                                     ot::crypto::Bip43Purpose::HDWALLET) |
+                                 hard;
         constexpr auto coin_type =
-            static_cast<ot::Bip32Index>(ot::Bip44Type::TESTNET) | hard;
-        constexpr auto account = ot::Bip32Index{0} | hard;
+            static_cast<ot::crypto::Bip32Index>(
+                ot::blockchain::crypto::Bip44Type::TESTNET) |
+            hard;
+        constexpr auto account = ot::crypto::Bip32Index{0} | hard;
 
         return {purpose, coin_type, account, change, index};
     };

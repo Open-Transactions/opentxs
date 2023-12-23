@@ -7,7 +7,6 @@ libopentxs_add_public_header("network/otdht" "Acknowledgement.hpp")
 libopentxs_add_public_header("network/otdht" "Base.hpp")
 libopentxs_add_public_header("network/otdht" "Block.hpp")
 libopentxs_add_public_header("network/otdht" "Data.hpp")
-libopentxs_add_public_header("network/otdht" "MessageType.hpp")
 libopentxs_add_public_header("network/otdht" "PublishContract.hpp")
 libopentxs_add_public_header("network/otdht" "PublishContractReply.hpp")
 libopentxs_add_public_header("network/otdht" "PushTransaction.hpp")
@@ -17,13 +16,11 @@ libopentxs_add_public_header("network/otdht" "QueryContract.hpp")
 libopentxs_add_public_header("network/otdht" "QueryContractReply.hpp")
 libopentxs_add_public_header("network/otdht" "Request.hpp")
 libopentxs_add_public_header("network/otdht" "State.hpp")
-libopentxs_add_public_header("network/otdht" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Factory.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Types.hpp"
     "Acknowledgement.cpp"
     "Base.cpp"
     "Base.hpp"

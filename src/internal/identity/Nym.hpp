@@ -8,9 +8,9 @@
 #include <cstdint>
 
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/identity/Types.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google

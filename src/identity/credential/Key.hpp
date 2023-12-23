@@ -14,16 +14,17 @@
 
 #include "identity/credential/Base.hpp"
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/identity/Types.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/identity/credential/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -85,7 +86,7 @@ public:
         const proto::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool final;
     auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         const crypto::SignatureRole role,
         proto::Signature& signature,
         const PasswordPrompt& reason,

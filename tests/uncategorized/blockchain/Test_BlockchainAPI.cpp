@@ -506,23 +506,24 @@ TEST_F(ApiCryptoBlockchain, set_metadata)
                              .asDeterministic()
                              .asHD();
     const auto subchain = Subchain::External;
-    const auto setContact =
-        ot::UnallocatedVector<ot::Bip32Index>{0, 1, 6, 8, 9, 14, 16, 17, 22};
+    const auto setContact = ot::UnallocatedVector<ot::crypto::Bip32Index>{
+        0, 1, 6, 8, 9, 14, 16, 17, 22};
     const auto clearContact =
-        ot::UnallocatedVector<ot::Bip32Index>{3, 4, 11, 12, 19, 20};
-    const auto unconfirmed =
-        ot::UnallocatedVector<std::pair<ot::Bip32Index, ot::Bip32Index>>{
-            {4, 0},
-            {5, 0},
-            {6, 0},
-            {12, 1},
-            {13, 1},
-            {14, 1},
-            {20, 2},
-            {21, 2},
-            {22, 2},
-        };
-    const auto confirmed = ot::UnallocatedVector<ot::Bip32Index>{7, 15, 23};
+        ot::UnallocatedVector<ot::crypto::Bip32Index>{3, 4, 11, 12, 19, 20};
+    const auto unconfirmed = ot::UnallocatedVector<
+        std::pair<ot::crypto::Bip32Index, ot::crypto::Bip32Index>>{
+        {4, 0},
+        {5, 0},
+        {6, 0},
+        {12, 1},
+        {13, 1},
+        {14, 1},
+        {20, 2},
+        {21, 2},
+        {22, 2},
+    };
+    const auto confirmed =
+        ot::UnallocatedVector<ot::crypto::Bip32Index>{7, 15, 23};
 
     for (const auto& index : setContact) {
         EXPECT_TRUE(api_.Crypto().Blockchain().AssignContact(

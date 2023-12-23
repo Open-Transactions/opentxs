@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
+#include <type_traits>
+
+#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity::wot::claim
 {
-enum class Attribute : std::uint8_t {
+enum class Attribute : std::underlying_type_t<Attribute> {
     Error = 0,
     Active = 1,
     Primary = 2,

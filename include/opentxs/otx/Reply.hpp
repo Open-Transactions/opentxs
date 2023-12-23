@@ -8,11 +8,11 @@
 #include <memory>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -74,7 +74,7 @@ public:
         const RequestNumber number,
         const bool success,
         const PasswordPrompt& reason,
-        opentxs::otx::OTXPushType pushtype,
+        opentxs::otx::PushType pushtype,
         const UnallocatedCString& payload) -> Reply;
     OPENTXS_NO_EXPORT static auto Factory(
         const api::Session& api,

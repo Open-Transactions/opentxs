@@ -17,7 +17,7 @@
 #include "internal/otx/server/MessageProcessor.hpp"
 #include "internal/util/Lockable.hpp"
 #include "opentxs/Export.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"

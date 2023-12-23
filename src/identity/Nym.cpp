@@ -42,27 +42,29 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/IdentityType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
@@ -1135,7 +1137,7 @@ auto Nym::normalize(
 
         const auto& seeds = api.Crypto().Seed().Internal();
         output.SetCredset(0);
-        auto nymIndex = Bip32Index{0};
+        auto nymIndex = crypto::Bip32Index{0};
         auto fingerprint = in.Seed();
         auto style = in.SeedStyle();
         auto lang = in.SeedLanguage();
@@ -1157,7 +1159,7 @@ auto Nym::normalize(
         static constexpr auto maxIndex =
             std::numeric_limits<std::int32_t>::max() - 1;
 
-        if (nymIndex >= static_cast<Bip32Index>(maxIndex)) {
+        if (nymIndex >= static_cast<crypto::Bip32Index>(maxIndex)) {
             throw std::runtime_error(
                 "Requested seed has already generated maximum number of nyms");
         }
@@ -1283,14 +1285,16 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
     if (2 != base.child().size()) { return false; }
 
     static const auto expected =
-        HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED};
+        HDIndex{crypto::Bip43Purpose::NYM, crypto::Bip32Child::HARDENED};
 
     if (expected != base.child(0)) { return false; }
 
     output.set_version(base.version());
     output.mutable_seed()->CopyFrom(base.seed());
-    output.add_child(HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED});
-    output.add_child(HDIndex{Bip44Type::BITCOIN, Bip32Child::HARDENED});
+    output.add_child(
+        HDIndex{crypto::Bip43Purpose::PAYCODE, crypto::Bip32Child::HARDENED});
+    output.add_child(HDIndex{
+        blockchain::crypto::Bip44Type::BITCOIN, crypto::Bip32Child::HARDENED});
     output.add_child(base.child(1));
 
     return true;

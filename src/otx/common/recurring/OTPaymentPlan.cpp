@@ -12,7 +12,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -33,11 +32,12 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -879,7 +879,7 @@ auto OTPaymentPlan::ProcessPayment(
             bSuccessLoadingSenderInbox = theSenderInbox->GenerateLedger(
                 SOURCE_ACCT_ID,
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -890,7 +890,7 @@ auto OTPaymentPlan::ProcessPayment(
             bSuccessLoadingRecipientInbox = theRecipientInbox->GenerateLedger(
                 RECIPIENT_ACCT_ID,
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -915,16 +915,16 @@ auto OTPaymentPlan::ProcessPayment(
 
             auto pTransSend{api_.Factory().Internal().Session().Transaction(
                 *theSenderInbox,
-                transactionType::paymentReceipt,
-                originType::origin_payment_plan,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_payment_plan,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransSend));
 
             auto pTransRecip{api_.Factory().Internal().Session().Transaction(
                 *theRecipientInbox,
-                transactionType::paymentReceipt,
-                originType::origin_payment_plan,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_payment_plan,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransRecip));
@@ -938,9 +938,13 @@ auto OTPaymentPlan::ProcessPayment(
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
             auto pItemSend{api_.Factory().Internal().Session().Item(
-                *pTransSend, itemType::paymentReceipt, identifier::Account{})};
+                *pTransSend,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
             auto pItemRecip{api_.Factory().Internal().Session().Item(
-                *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
+                *pTransRecip,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
 
             assert_true(false != bool(pItemSend));
             assert_true(false != bool(pItemRecip));

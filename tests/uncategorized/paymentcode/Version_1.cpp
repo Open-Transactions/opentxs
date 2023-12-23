@@ -31,7 +31,7 @@ TEST_F(PaymentCode_v1, generate)
 
 TEST_F(PaymentCode_v1, outgoing)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = alice_pc_secret_.Outgoing(
             bob_pc_public_, i, chain_, reason_, version_);
 
@@ -44,7 +44,7 @@ TEST_F(PaymentCode_v1, outgoing)
 
 TEST_F(PaymentCode_v1, incoming)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Incoming(
             alice_pc_public_, i, chain_, reason_, version_);
 

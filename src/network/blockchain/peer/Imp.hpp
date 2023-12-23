@@ -22,8 +22,8 @@
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"  // IWYU pragma: keep
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -31,12 +31,12 @@
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

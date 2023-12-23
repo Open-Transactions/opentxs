@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
+#include <type_traits>
+
+#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity::wot::claim
 {
-enum class SectionType : std::uint8_t {
+enum class SectionType : std::underlying_type_t<SectionType> {
     Error = 0,
     Scope = 1,
     Identifier = 2,

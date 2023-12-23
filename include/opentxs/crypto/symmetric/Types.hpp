@@ -7,16 +7,25 @@
 
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 
 #include "opentxs/Export.hpp"
 
 namespace opentxs::crypto::symmetric
 {
-// IWYU pragma: begin_exports
-enum class Algorithm : std::uint8_t;  // IWYU pragma: keep
-enum class Source : std::uint8_t;     // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class Algorithm : std::uint8_t;  // IWYU pragma: export
+enum class Source : std::uint8_t;     // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Algorithm) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(Source) noexcept -> std::string_view;
+
+constexpr auto value(const Algorithm in) noexcept
+{
+    return static_cast<std::underlying_type_t<Algorithm>>(in);
+}
+
+constexpr auto value(const Source in) noexcept
+{
+    return static_cast<std::underlying_type_t<Source>>(in);
+}
 }  // namespace opentxs::crypto::symmetric

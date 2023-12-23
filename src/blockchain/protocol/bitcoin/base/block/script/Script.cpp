@@ -9,7 +9,6 @@
 
 #include "blockchain/protocol/bitcoin/base/block/script/ScriptPrivate.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

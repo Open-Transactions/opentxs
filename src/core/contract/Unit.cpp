@@ -37,6 +37,8 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -46,19 +48,17 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/display/Scale.hpp"
-#include "opentxs/core/display/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/display/Scale.hpp"
+#include "opentxs/display/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
@@ -84,19 +84,19 @@ auto Factory::UnitDefinition(
     -> std::shared_ptr<contract::Unit>
 {
     switch (translate(serialized.type())) {
-        case contract::UnitType::Currency: {
+        case contract::UnitDefinitionType::Currency: {
 
             return CurrencyContract(api, nym, serialized);
         }
-        case contract::UnitType::Security: {
+        case contract::UnitDefinitionType::Security: {
 
             return SecurityContract(api, nym, serialized);
         }
-        case contract::UnitType::Basket: {
+        case contract::UnitDefinitionType::Basket: {
 
             return BasketContract(api, nym, serialized);
         }
-        case contract::UnitType::Error:
+        case contract::UnitDefinitionType::Error:
         default: {
             return {};
         }
@@ -315,19 +315,19 @@ auto Unit::DisplayStatistics(String& strContents) const -> bool
 {
     const auto type = [&] {
         switch (Type()) {
-            case contract::UnitType::Currency: {
+            case contract::UnitDefinitionType::Currency: {
 
                 return "currency"sv;
             }
-            case contract::UnitType::Security: {
+            case contract::UnitDefinitionType::Security: {
 
                 return "security"sv;
             }
-            case contract::UnitType::Basket: {
+            case contract::UnitDefinitionType::Basket: {
 
                 return "basket currency"sv;
             }
-            case contract::UnitType::Error:
+            case contract::UnitDefinitionType::Error:
             default: {
 
                 return "error"sv;

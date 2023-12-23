@@ -95,15 +95,15 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
@@ -286,7 +286,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
 
             auto payment = std::shared_ptr<const OTPayment>{};
 
-            switch (translate(paymentWorkflow.type())) {
+            switch (opentxs::translate(paymentWorkflow.type())) {
                 case otx::client::PaymentWorkflowType::IncomingCheque:
                 case otx::client::PaymentWorkflowType::IncomingInvoice: {
                     auto chequeState =
@@ -536,7 +536,7 @@ auto RPC::create_compatible_account(const proto::RPCCommand& command) const
             return out;
         }();
 
-        switch (translate(workflow.type())) {
+        switch (opentxs::translate(workflow.type())) {
             case otx::client::PaymentWorkflowType::IncomingCheque: {
                 auto chequeState =
                     opentxs::api::session::Workflow::InstantiateCheque(
@@ -947,7 +947,7 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
             return out;
         }();
 
-        switch (translate(workflow.type())) {
+        switch (opentxs::translate(workflow.type())) {
             case otx::client::PaymentWorkflowType::IncomingCheque:
             case otx::client::PaymentWorkflowType::IncomingInvoice: {
                 auto chequeState =
@@ -1074,7 +1074,7 @@ auto RPC::get_pending_payments(const proto::RPCCommand& command) const
             auto accountEventType = proto::ACCOUNTEVENT_INCOMINGCHEQUE;
 
             if (otx::client::PaymentWorkflowType::IncomingInvoice ==
-                translate(paymentWorkflow.type())) {
+                opentxs::translate(paymentWorkflow.type())) {
                 accountEventType = proto::ACCOUNTEVENT_INCOMINGINVOICE;
             }
 

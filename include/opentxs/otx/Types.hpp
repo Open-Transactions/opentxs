@@ -5,45 +5,40 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-
-namespace opentxs
-{
-namespace otx
+namespace opentxs::otx
 {
 enum class ConsensusType : std::uint8_t;      // IWYU pragma: export
 enum class LastReplyStatus : std::uint8_t;    // IWYU pragma: export
-enum class OTXPushType : std::uint8_t;        // IWYU pragma: export
 enum class OperationType : std::uint16_t;     // IWYU pragma: export
+enum class PushType : std::uint8_t;           // IWYU pragma: export
 enum class ServerReplyType : std::uint8_t;    // IWYU pragma: export
 enum class ServerRequestType : std::uint8_t;  // IWYU pragma: export
-}  // namespace otx
 
-constexpr auto value(const otx::ConsensusType in) noexcept
+constexpr auto value(ConsensusType in) noexcept
 {
-    return static_cast<std::uint8_t>(in);
+    return static_cast<std::underlying_type_t<ConsensusType>>(in);
 }
-constexpr auto value(const otx::LastReplyStatus in) noexcept
+constexpr auto value(LastReplyStatus in) noexcept
 {
-    return static_cast<std::uint8_t>(in);
+    return static_cast<std::underlying_type_t<LastReplyStatus>>(in);
 }
-constexpr auto value(const otx::OTXPushType in) noexcept
+constexpr auto value(OperationType in) noexcept
 {
-    return static_cast<std::uint8_t>(in);
+    return static_cast<std::underlying_type_t<OperationType>>(in);
 }
-constexpr auto value(const otx::OperationType in) noexcept
+constexpr auto value(PushType in) noexcept
 {
-    return static_cast<std::uint16_t>(in);
+    return static_cast<std::underlying_type_t<PushType>>(in);
 }
-constexpr auto value(const otx::ServerReplyType in) noexcept
+constexpr auto value(ServerReplyType in) noexcept
 {
-    return static_cast<std::uint8_t>(in);
+    return static_cast<std::underlying_type_t<ServerReplyType>>(in);
 }
-constexpr auto value(const otx::ServerRequestType in) noexcept
+constexpr auto value(ServerRequestType in) noexcept
 {
-    return static_cast<std::uint8_t>(in);
+    return static_cast<std::underlying_type_t<ServerRequestType>>(in);
 }
-}  // namespace opentxs
+}  // namespace opentxs::otx

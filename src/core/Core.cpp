@@ -5,35 +5,23 @@
 
 #include "internal/core/Core.hpp"  // IWYU pragma: associated
 
-#include <ContractEnums.pb.h>
-#include <frozen/bits/algorithms.h>
-#include <frozen/bits/elsa.h>
-#include <frozen/unordered_map.h>
 #include <cstdint>
-#include <functional>
 #include <mutex>
 #include <span>
 #include <sstream>
-#include <string_view>
 #include <utility>
 
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
-#include "opentxs/identity/wot/claim/Types.hpp"
-#include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain
@@ -192,96 +180,3 @@ auto UnitID(const api::Session& api, const blockchain::Type chain) noexcept
     return output;
 }
 }  // namespace opentxs::blockchain
-
-namespace opentxs
-{
-using AddressTypeMap =
-    frozen::unordered_map<AddressType, proto::AddressType, 6>;
-using AddressTypeReverseMap =
-    frozen::unordered_map<proto::AddressType, AddressType, 6>;
-
-static auto addresstype_map() noexcept -> const AddressTypeMap&
-{
-    using enum AddressType;
-    using enum proto::AddressType;
-    static constexpr auto map = AddressTypeMap{
-        {Error, ADDRESSTYPE_ERROR},
-        {IPV4, ADDRESSTYPE_IPV4},
-        {IPV6, ADDRESSTYPE_IPV6},
-        {Onion2, ADDRESSTYPE_ONION},
-        {EEP, ADDRESSTYPE_EEP},
-        {Inproc, ADDRESSTYPE_INPROC},
-    };
-
-    return map;
-}
-}  // namespace opentxs
-
-namespace opentxs
-{
-using namespace std::literals;
-
-auto print(AccountType in) noexcept -> std::string_view
-{
-    using enum AccountType;
-    static constexpr auto map =
-        frozen::make_unordered_map<AccountType, std::string_view>({
-            {Blockchain, "blockchain"sv},
-            {Custodial, "custodial"sv},
-        });
-
-    try {
-
-        return map.at(in);
-    } catch (...) {
-
-        return "invalid"sv;
-    }
-}
-
-auto print(AddressType in) noexcept -> std::string_view
-{
-    using enum AddressType;
-    static constexpr auto map =
-        frozen::make_unordered_map<AddressType, std::string_view>({
-            {IPV4, "ipv4"sv},
-            {IPV6, "ipv6"sv},
-            {Onion2, "onion"sv},
-            {EEP, "eep"sv},
-            {Inproc, "inproc"sv},
-        });
-
-    try {
-
-        return map.at(in);
-    } catch (...) {
-
-        return "invalid"sv;
-    }
-}
-
-auto print(UnitType in) noexcept -> std::string_view
-{
-    return proto::TranslateItemType(translate(UnitToClaim(in)));
-}
-
-auto translate(AddressType in) noexcept -> proto::AddressType
-{
-    try {
-        return addresstype_map().at(in);
-    } catch (...) {
-        return proto::ADDRESSTYPE_ERROR;
-    }
-}
-
-auto translate(proto::AddressType in) noexcept -> AddressType
-{
-    static const auto map = frozen::invert_unordered_map(addresstype_map());
-
-    try {
-        return map.at(in);
-    } catch (...) {
-        return AddressType::Error;
-    }
-}
-}  // namespace opentxs

@@ -5,10 +5,7 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
-
-#include "opentxs/Export.hpp"
 
 namespace opentxs::ui
 {

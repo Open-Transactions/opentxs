@@ -8,8 +8,8 @@
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/crypto/library/EcdsaProvider.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

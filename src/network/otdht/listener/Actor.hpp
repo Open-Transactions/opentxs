@@ -11,11 +11,11 @@
 
 #include "internal/network/otdht/Listener.hpp"
 #include "internal/network/otdht/Node.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/otdht/node/Shared.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"

@@ -16,7 +16,7 @@
 #include <utility>
 
 #include "internal/blockchain/block/Block.hpp"
-#include "internal/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
@@ -103,7 +103,7 @@ Regtest_payment_code::Regtest_payment_code()
         return output;
     })
     , mine_multiple_to_alex_([&](Height height) -> Transaction {
-        using Index = ot::Bip32Index;
+        using Index = ot::crypto::Bip32Index;
         static constexpr auto count = 100u;
         static const auto baseAmount = ot::Amount{100000000};
         auto meta = ot::UnallocatedVector<OutpointMetadata>{};

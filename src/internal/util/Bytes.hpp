@@ -18,9 +18,9 @@
 #include <utility>
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Bytes.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 

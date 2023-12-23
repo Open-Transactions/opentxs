@@ -11,9 +11,9 @@
 #include <string_view>
 
 #include "internal/util/Mutex.hpp"
-#include "internal/util/storage/Types.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

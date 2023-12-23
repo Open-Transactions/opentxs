@@ -18,7 +18,7 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::database::implementation
@@ -360,7 +360,7 @@ auto Wallet::SubchainAddElements(
 }
 
 auto Wallet::SubchainLastIndexed(const SubchainID& index) const noexcept
-    -> std::optional<Bip32Index>
+    -> std::optional<crypto::Bip32Index>
 {
     return subchains_.SubchainLastIndexed(index);
 }

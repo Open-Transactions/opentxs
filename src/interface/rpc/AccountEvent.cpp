@@ -14,8 +14,8 @@
 #include <memory>
 #include <utility>
 
+#include "interface/rpc/Types.internal.hpp"
 #include "internal/core/Factory.hpp"
-#include "internal/interface/rpc/RPC.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/interface/rpc/AccountEventType.hpp"  // IWYU pragma: keep

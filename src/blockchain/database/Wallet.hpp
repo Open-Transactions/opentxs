@@ -14,17 +14,17 @@
 #include "blockchain/database/wallet/Output.hpp"
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -147,7 +147,7 @@ public:
         -> UnallocatedSet<identifier::Generic>;
     auto PublishBalance() const noexcept -> void;
     auto SubchainLastIndexed(const SubchainID& index) const noexcept
-        -> std::optional<Bip32Index>;
+        -> std::optional<crypto::Bip32Index>;
     auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position;
 

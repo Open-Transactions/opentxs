@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include <type_traits>
 
-namespace opentxs
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
+
+namespace opentxs::crypto
 {
-enum class Bip43Purpose : Bip32Index {
+enum class Bip43Purpose : std::underlying_type_t<Bip43Purpose> {
     HDWALLET = 44,     // BIP-44
     PAYCODE = 47,      // BIP-47
     P2SH_P2WPKH = 49,  // BIP-49
@@ -18,4 +19,4 @@ enum class Bip43Purpose : Bip32Index {
     FS = 0x4f544653,   // OTFS
     NYM = 0x4f544e4d   // OTNM
 };
-}  // namespace opentxs
+}  // namespace opentxs::crypto

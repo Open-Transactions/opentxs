@@ -41,10 +41,10 @@
 #include "opentxs/api/session/Notary.internal.hpp"
 #include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Language.hpp"         // IWYU pragma: keep
-#include "opentxs/crypto/SeedStyle.hpp"        // IWYU pragma: keep
+#include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
+#include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"            // IWYU pragma: keep
 #include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/network/zeromq/Context.hpp"

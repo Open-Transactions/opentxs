@@ -11,12 +11,12 @@
 #include <tuple>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -73,12 +73,12 @@ using mapOfTransactions =
 class Ledger : public OTTransactionType
 {
 public:
-    ledgerType type_;
+    otx::ledgerType type_;
     // So the server can tell if it just loaded a legacy box or a hashed box.
     // (Legacy boxes stored ALL of the receipts IN the box. No more.)
     bool loaded_legacy_data_;
 
-    inline auto GetType() const -> ledgerType { return type_; }
+    inline auto GetType() const -> otx::ledgerType { return type_; }
 
     auto LoadedLegacyData() const -> bool { return loaded_legacy_data_; }
 
@@ -122,7 +122,7 @@ public:
         const UnallocatedSet<std::int32_t>* pOnlyForIndices = nullptr) const
         -> UnallocatedSet<std::int64_t>;
 
-    auto GetTransaction(transactionType theType)
+    auto GetTransaction(otx::transactionType theType)
         -> std::shared_ptr<OTTransaction>;
     auto GetTransaction(const TransactionNumber number) const
         -> std::shared_ptr<OTTransaction>;
@@ -236,21 +236,21 @@ public:
     [[deprecated]] auto GenerateLedger(
         const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) -> bool;
     [[deprecated]] auto GenerateLedger(
         const identifier::Nym& nymAsAccount,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) -> bool;
     auto CreateLedger(
         const identifier::Nym& theNymID,
         const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) -> bool;
 
-    static auto GetTypeString(ledgerType theType) -> char const*;
+    static auto GetTypeString(otx::ledgerType theType) -> const char*;
     auto GetTypeString() const -> char const* { return GetTypeString(type_); }
 
     Ledger() = delete;
@@ -259,11 +259,11 @@ public:
 
 protected:
     auto LoadGeneric(
-        ledgerType theType,
+        otx::ledgerType theType,
         const String& pString = String::Factory()) -> bool;
     // return -1 if error, 0 if nothing, and 1 if the node was processed.
     auto ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t override;
-    auto SaveGeneric(ledgerType theType) -> bool;
+    auto SaveGeneric(otx::ledgerType theType) -> bool;
     void UpdateContents(const PasswordPrompt& reason)
         override;  // Before transmission or
                    // serialization, this is where the
@@ -277,17 +277,17 @@ private:  // Private prevents erroneous use by other classes.
     mapOfTransactions transactions_;  // a ledger contains a map of
                                       // transactions.
 
-    auto make_filename(const ledgerType theType) -> std::
+    auto make_filename(const otx::ledgerType theType) -> std::
         tuple<bool, UnallocatedCString, UnallocatedCString, UnallocatedCString>;
 
     auto generate_ledger(
         const identifier::Nym& theNymID,
         const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile) -> bool;
     auto save_box(
-        const ledgerType type,
+        const otx::ledgerType type,
         identifier::Generic& hash,
         bool (Ledger::*calc)(identifier::Generic&) const) -> bool;
 

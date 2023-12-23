@@ -16,8 +16,8 @@ namespace ottest
 namespace ot = opentxs;
 
 struct OPENTXS_EXPORT PaymentCodeFixture {
-    static constexpr auto account_ = ot::Bip32Index{0};
-    static constexpr auto index_ = ot::Bip32Index{0};
+    static constexpr auto account_ = ot::crypto::Bip32Index{0};
+    static constexpr auto index_ = ot::crypto::Bip32Index{0};
 
     auto blinding_key_public()
         -> const ot::crypto::asymmetric::key::EllipticCurve&;

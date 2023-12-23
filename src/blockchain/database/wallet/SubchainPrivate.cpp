@@ -30,10 +30,10 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -111,7 +111,7 @@ auto SubchainPrivate::add_elements(
     try {
         auto output{false};
         auto newIndices = UnallocatedVector<ElementID>{};
-        auto highest = Bip32Index{};
+        auto highest = crypto::Bip32Index{};
 
         for (const auto& [index, patterns] : elements) {
             const auto id = pattern_id(subchain, index);
@@ -190,7 +190,7 @@ auto SubchainPrivate::get_id(
 }
 
 auto SubchainPrivate::GetLastIndexed(const SubchainID& subchain) const noexcept
-    -> std::optional<Bip32Index>
+    -> std::optional<crypto::Bip32Index>
 {
     upgrade_future_.get();
 
@@ -243,7 +243,7 @@ auto SubchainPrivate::get_patterns(
 
 auto SubchainPrivate::pattern_id(
     const SubchainID& subchain,
-    const Bip32Index index) const noexcept -> ElementID
+    const crypto::Bip32Index index) const noexcept -> ElementID
 {
 
     auto preimage = api_.Factory().Data();

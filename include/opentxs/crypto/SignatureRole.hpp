@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto
 {
-enum class SignatureRole : std::uint16_t {
+enum class SignatureRole : std::underlying_type_t<SignatureRole> {
     PublicCredential = 0,
     PrivateCredential = 1,
     NymIDSource = 2,

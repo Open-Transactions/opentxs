@@ -10,8 +10,8 @@
 #include <memory>
 #include <string_view>
 
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

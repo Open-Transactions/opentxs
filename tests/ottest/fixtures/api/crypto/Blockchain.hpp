@@ -144,7 +144,7 @@ public:
         const ot::UnallocatedVector<ot::UnallocatedCString>& expected,
         const ot::blockchain::crypto::HD& account,
         const Subchain subchain,
-        const ot::Bip32Index i,
+        const ot::crypto::Bip32Index i,
         const ot::UnallocatedCString& label) const noexcept -> bool;
     auto check_initial_state(
         const ot::blockchain::crypto::Deterministic& account,

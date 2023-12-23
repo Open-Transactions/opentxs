@@ -12,12 +12,12 @@
 #include "core/contract/Signable.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -72,7 +72,7 @@ public:
         -> bool override;
     auto Serialize(SerializedType&, bool includeNym = false) const
         -> bool override;
-    auto Type() const -> contract::UnitType override = 0;
+    auto Type() const -> contract::UnitDefinitionType override = 0;
     auto UnitOfAccount() const -> opentxs::UnitType override
     {
         return unit_of_account_;

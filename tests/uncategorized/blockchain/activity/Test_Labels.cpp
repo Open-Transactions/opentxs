@@ -18,8 +18,8 @@ using Subchain = ot::blockchain::crypto::Subchain;
 using TxSet = ot::Set<ot::blockchain::block::Transaction>;
 
 ot::UnallocatedCString txid_{};
-ot::Bip32Index first_index_{};
-ot::Bip32Index second_index_{};
+ot::crypto::Bip32Index first_index_{};
+ot::crypto::Bip32Index second_index_{};
 constexpr auto label_1_{"label one"};
 constexpr auto label_2_{"label two"};
 

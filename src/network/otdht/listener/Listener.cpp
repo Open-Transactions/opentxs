@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <string_view>
 
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/listener/Actor.hpp"
@@ -20,40 +19,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-
-namespace opentxs::network::otdht
-{
-using namespace std::literals;
-
-auto print(ListenerJob job) noexcept -> std::string_view
-{
-    try {
-        using enum ListenerJob;
-        static const auto map = Map<ListenerJob, std::string_view>{
-            {shutdown, "shutdown"sv},
-            {chain_state, "chain_state"sv},
-            {sync_request, "sync_request"sv},
-            {sync_reply, "sync_reply"sv},
-            {sync_push, "sync_push"sv},
-            {sync_query, "sync_query"sv},
-            {response, "response"sv},
-            {publish_contract, "publish_contract"sv},
-            {query_contract, "query_contract"sv},
-            {pushtx, "pushtx"sv},
-            {registration, "registration"sv},
-            {init, "init"sv},
-            {statemachine, "statemachine"sv},
-        };
-
-        return map.at(job);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)("invalid ListenerJob: ")(
-            static_cast<OTZMQWorkType>(job))
-            .Abort();
-    }
-}
-}  // namespace opentxs::network::otdht
 
 namespace opentxs::network::otdht
 {

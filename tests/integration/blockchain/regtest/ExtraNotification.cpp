@@ -16,8 +16,8 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/fixtures/blockchain/Common.hpp"
 #include "ottest/fixtures/blockchain/ScanListener.hpp"

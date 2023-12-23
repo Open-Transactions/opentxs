@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/interface/qt/DestinationValidator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

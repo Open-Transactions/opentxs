@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto
 {
-enum class HashType : std::uint8_t {
+enum class HashType : std::underlying_type_t<HashType> {
     Error = 0,
     None = 1,
     Sha256 = 2,
@@ -30,9 +29,4 @@ enum class HashType : std::uint8_t {
     Keccak256 = 14,
     Ethereum = 15,
 };
-
-constexpr auto value(const HashType in) noexcept
-{
-    return static_cast<std::uint8_t>(in);
-}
 }  // namespace opentxs::crypto

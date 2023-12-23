@@ -11,18 +11,8 @@ endif()
 add_subdirectory(tree)
 
 libopentxs_add_public_header("util/storage" "Driver.hpp")
-libopentxs_add_public_header("util/storage" "Types.hpp")
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/util/storage/Types.hpp"
-    "Common.cpp"
-    "Config.cpp"
-    "Config.hpp"
-)
-
-libopentxs_add_platform_specific("Common")
+target_sources(opentxs-common PRIVATE "Config.cpp" "Config.hpp")
 
 if(LMDB_EXPORT)
   target_sources(opentxs-common PRIVATE "config/DefaultLMDB.cpp")

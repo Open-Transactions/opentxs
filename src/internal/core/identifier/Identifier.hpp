@@ -7,7 +7,7 @@
 
 #include <string_view>
 
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

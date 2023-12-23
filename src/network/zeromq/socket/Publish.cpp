@@ -13,8 +13,8 @@
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Sender.tpp"
 #include "network/zeromq/socket/Socket.hpp"
-#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 
 template class opentxs::Pimpl<opentxs::network::zeromq::socket::Publish>;

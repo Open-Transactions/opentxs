@@ -74,6 +74,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -89,7 +90,6 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
@@ -108,11 +108,6 @@
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/request/Verification.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -125,6 +120,11 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/Verification.hpp"
@@ -1194,7 +1194,7 @@ auto FactoryPrivate::Item(
 auto FactoryPrivate::Item(
     const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
-    itemType theType,
+    otx::itemType theType,
     const identifier::Account& pDestinationAcctID) const
     -> std::unique_ptr<opentxs::Item>
 {
@@ -1262,7 +1262,7 @@ auto FactoryPrivate::Item(
 // Transaction.
 auto FactoryPrivate::Item(
     const OTTransaction& theOwner,
-    itemType theType,
+    otx::itemType theType,
     const identifier::Account& pDestinationAcctID) const
     -> std::unique_ptr<opentxs::Item>
 {
@@ -1366,24 +1366,30 @@ auto FactoryPrivate::Keypair(const proto::AsymmetricKey& serializedPubkey) const
 
 auto FactoryPrivate::Keypair(
     const opentxs::crypto::SeedID& fingerprint,
-    const Bip32Index nym,
-    const Bip32Index credset,
-    const Bip32Index credindex,
+    const opentxs::crypto::Bip32Index nym,
+    const opentxs::crypto::Bip32Index credset,
+    const opentxs::crypto::Bip32Index credindex,
     const opentxs::crypto::EcdsaCurve& curve,
     const opentxs::crypto::asymmetric::Role role,
     const opentxs::PasswordPrompt& reason) const -> OTKeypair
 {
-    auto roleIndex = Bip32Index{0};
+    auto roleIndex = opentxs::crypto::Bip32Index{0};
 
     switch (role) {
         case opentxs::crypto::asymmetric::Role::Auth: {
-            roleIndex = HDIndex{Bip32Child::AUTH_KEY, Bip32Child::HARDENED};
+            roleIndex = HDIndex{
+                opentxs::crypto::Bip32Child::AUTH_KEY,
+                opentxs::crypto::Bip32Child::HARDENED};
         } break;
         case opentxs::crypto::asymmetric::Role::Encrypt: {
-            roleIndex = HDIndex{Bip32Child::ENCRYPT_KEY, Bip32Child::HARDENED};
+            roleIndex = HDIndex{
+                opentxs::crypto::Bip32Child::ENCRYPT_KEY,
+                opentxs::crypto::Bip32Child::HARDENED};
         } break;
         case opentxs::crypto::asymmetric::Role::Sign: {
-            roleIndex = HDIndex{Bip32Child::SIGN_KEY, Bip32Child::HARDENED};
+            roleIndex = HDIndex{
+                opentxs::crypto::Bip32Child::SIGN_KEY,
+                opentxs::crypto::Bip32Child::HARDENED};
         } break;
         case opentxs::crypto::asymmetric::Role::Error:
         default: {
@@ -1393,11 +1399,13 @@ auto FactoryPrivate::Keypair(
         }
     }
 
-    const auto path = UnallocatedVector<Bip32Index>{
-        HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED},
-        HDIndex{nym, Bip32Child::HARDENED},
-        HDIndex{credset, Bip32Child::HARDENED},
-        HDIndex{credindex, Bip32Child::HARDENED},
+    const auto path = UnallocatedVector<opentxs::crypto::Bip32Index>{
+        HDIndex{
+            opentxs::crypto::Bip43Purpose::NYM,
+            opentxs::crypto::Bip32Child::HARDENED},
+        HDIndex{nym, opentxs::crypto::Bip32Child::HARDENED},
+        HDIndex{credset, opentxs::crypto::Bip32Child::HARDENED},
+        HDIndex{credindex, opentxs::crypto::Bip32Child::HARDENED},
         roleIndex};
     auto privateKey =
         api_.Crypto().Seed().GetHDKey(fingerprint, curve, path, role, reason);
@@ -1452,7 +1460,7 @@ auto FactoryPrivate::Ledger(
     const identifier::Nym& theNymID,
     const identifier::Account& theAcctID,
     const identifier::Notary& theNotaryID,
-    ledgerType theType,
+    otx::ledgerType theType,
     bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger>
 {
     std::unique_ptr<opentxs::Ledger> ledger;
@@ -1483,7 +1491,7 @@ auto FactoryPrivate::Ledger(
     const identifier::Nym& theNymID,
     const identifier::Nym& nymAsAccount,
     const identifier::Notary& theNotaryID,
-    ledgerType theType,
+    otx::ledgerType theType,
     bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger>
 {
     using enum identifier::AccountSubtype;
@@ -1548,8 +1556,7 @@ auto FactoryPrivate::Mint(const otx::blind::CashType type) const noexcept
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unsupported cash type: ")(opentxs::print(type))
-                .Flush();
+            LogError()()("unsupported cash type: ")(print(type)).Flush();
 
             return otx::blind::Mint{api_.Self()};
         }
@@ -1573,8 +1580,7 @@ auto FactoryPrivate::Mint(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unsupported cash type: ")(opentxs::print(type))
-                .Flush();
+            LogError()()("unsupported cash type: ")(print(type)).Flush();
 
             return otx::blind::Mint{api_.Self()};
         }
@@ -1601,8 +1607,7 @@ auto FactoryPrivate::Mint(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unsupported cash type: ")(opentxs::print(type))
-                .Flush();
+            LogError()()("unsupported cash type: ")(print(type)).Flush();
 
             return otx::blind::Mint{api_.Self()};
         }
@@ -1773,7 +1778,7 @@ auto FactoryPrivate::PaymentCode(
 
 auto FactoryPrivate::PaymentCode(
     const opentxs::crypto::SeedID& seed,
-    const Bip32Index nym,
+    const opentxs::crypto::Bip32Index nym,
     const std::uint8_t version,
     const opentxs::PasswordPrompt& reason,
     const bool bitmessage,
@@ -2486,7 +2491,7 @@ auto FactoryPrivate::Transaction(
     const identifier::Nym& theNymID,
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
-    originType theOriginType) const -> std::unique_ptr<OTTransaction>
+    otx::originType theOriginType) const -> std::unique_ptr<OTTransaction>
 {
     std::unique_ptr<OTTransaction> transaction;
     transaction.reset(new OTTransaction(
@@ -2500,7 +2505,7 @@ auto FactoryPrivate::Transaction(
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     std::int64_t lTransactionNum,
-    originType theOriginType) const -> std::unique_ptr<OTTransaction>
+    otx::originType theOriginType) const -> std::unique_ptr<OTTransaction>
 {
     std::unique_ptr<OTTransaction> transaction;
     transaction.reset(new OTTransaction(
@@ -2522,12 +2527,12 @@ auto FactoryPrivate::Transaction(
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
     const std::int64_t& lNumberOfOrigin,
-    originType theOriginType,
+    otx::originType theOriginType,
     const std::int64_t& lTransactionNum,
     const std::int64_t& lInRefTo,
     const std::int64_t& lInRefDisplay,
     const Time the_DATE_SIGNED,
-    transactionType theType,
+    otx::transactionType theType,
     const String& strHash,
     const opentxs::Amount& lAdjustment,
     const opentxs::Amount& lDisplayValue,
@@ -2562,8 +2567,8 @@ auto FactoryPrivate::Transaction(
 
 auto FactoryPrivate::Transaction(
     const opentxs::Ledger& theOwner,
-    transactionType theType,
-    originType theOriginType /*=originType::not_applicable*/,
+    otx::transactionType theType,
+    otx::originType theOriginType /*=originType::not_applicable*/,
     std::int64_t lTransactionNum /*=0*/) const -> std::unique_ptr<OTTransaction>
 {
     auto pTransaction = Transaction(
@@ -2582,8 +2587,8 @@ auto FactoryPrivate::Transaction(
     const identifier::Nym& theNymID,
     const identifier::Account& theAccountID,
     const identifier::Notary& theNotaryID,
-    transactionType theType,
-    originType theOriginType /*=originType::not_applicable*/,
+    otx::transactionType theType,
+    otx::originType theOriginType /*=originType::not_applicable*/,
     std::int64_t lTransactionNum /*=0*/) const -> std::unique_ptr<OTTransaction>
 {
     std::unique_ptr<OTTransaction> transaction;

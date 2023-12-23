@@ -15,6 +15,8 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Settings.hpp"
@@ -23,10 +25,9 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Notary.hpp"        // IWYU pragma: keep
+#include "opentxs/network/ConnectionState.hpp"  // IWYU pragma: keep
 #include "opentxs/network/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Container.hpp"

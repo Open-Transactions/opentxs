@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(claim)
+add_subdirectory(verification)
 
 libopentxs_add_public_header("identity/wot" "Claim.hpp")
 

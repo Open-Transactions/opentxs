@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "internal/otx/Types.hpp"
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -88,10 +88,10 @@ class Server : virtual public opentxs::otx::context::Server,
                virtual public otx::context::internal::Base
 {
 public:
-    virtual auto HaveSufficientNumbers(const MessageType reason) const
+    virtual auto HaveSufficientNumbers(const otx::MessageType reason) const
         -> bool = 0;
     virtual auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const Armored& payload,
         const identifier::Account& accountID,
         const RequestNumber provided,
@@ -99,14 +99,14 @@ public:
         const bool withNymboxHash = true)
         -> std::pair<RequestNumber, std::unique_ptr<Message>> = 0;
     virtual auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const identifier::Nym& recipientNymID,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false)
         -> std::pair<RequestNumber, std::unique_ptr<Message>> = 0;
     virtual auto InitializeServerCommand(
-        const MessageType type,
+        const otx::MessageType type,
         const RequestNumber provided,
         const bool withAcknowledgments = true,
         const bool withNymboxHash = false)
@@ -115,7 +115,7 @@ public:
     {
         return *this;
     }
-    virtual auto NextTransactionNumber(const MessageType reason)
+    virtual auto NextTransactionNumber(const otx::MessageType reason)
         -> ManagedNumber = 0;
 
     auto InternalServer() noexcept -> internal::Server& final { return *this; }

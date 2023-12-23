@@ -185,12 +185,15 @@ TEST_F(Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
     parameters.SetNym(nym_);
     source_.reset(ot::Factory::NymIDSource(api_, parameters, reason_));
 
-    const auto path = ot::UnallocatedVector<ot::Bip32Index>{
-        ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
-        ot::HDIndex{nym_, ot::Bip32Child::HARDENED},
-        ot::HDIndex{0, ot::Bip32Child::HARDENED},
-        ot::HDIndex{0, ot::Bip32Child::HARDENED},
-        ot::HDIndex{ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}};
+    const auto path = ot::UnallocatedVector<ot::crypto::Bip32Index>{
+        ot::HDIndex{
+            ot::crypto::Bip43Purpose::NYM, ot::crypto::Bip32Child::HARDENED},
+        ot::HDIndex{nym_, ot::crypto::Bip32Child::HARDENED},
+        ot::HDIndex{0, ot::crypto::Bip32Child::HARDENED},
+        ot::HDIndex{0, ot::crypto::Bip32Child::HARDENED},
+        ot::HDIndex{
+            ot::crypto::Bip32Child::SIGN_KEY,
+            ot::crypto::Bip32Child::HARDENED}};
 
     opentxs::Bip32Index idx{0};
 

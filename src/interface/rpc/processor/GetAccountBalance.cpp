@@ -26,9 +26,9 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/interface/rpc/AccountData.hpp"
 #include "opentxs/interface/rpc/AccountType.hpp"   // IWYU pragma: keep
 #include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep

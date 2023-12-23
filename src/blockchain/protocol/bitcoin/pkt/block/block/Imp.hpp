@@ -10,11 +10,11 @@
 
 #include "blockchain/block/block/BlockPrivate.hpp"
 #include "blockchain/protocol/bitcoin/base/block/block/Imp.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/pkt/block/Types.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

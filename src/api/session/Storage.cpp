@@ -31,7 +31,6 @@
 #include <memory>
 #include <utility>
 
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
@@ -40,6 +39,8 @@
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -48,12 +49,11 @@
 #include "opentxs/api/session/Storage.hpp"  // IWYU pragma: keep
 #include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"

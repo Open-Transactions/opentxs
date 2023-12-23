@@ -20,9 +20,9 @@
 #include <functional>
 #include <iterator>
 
-#include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 
 namespace opentxs::contract::blank
 {
@@ -54,10 +54,10 @@ static constexpr auto protocol_version_map_ = [] {
     });
 }();
 static constexpr auto unit_type_map_ = [] {
-    using enum UnitType;
+    using enum UnitDefinitionType;
     using enum proto::UnitType;
 
-    return frozen::make_unordered_map<UnitType, proto::UnitType>({
+    return frozen::make_unordered_map<UnitDefinitionType, proto::UnitType>({
         {Error, UNITTYPE_ERROR},
         {Currency, UNITTYPE_CURRENCY},
         {Security, UNITTYPE_SECURITY},
@@ -82,7 +82,8 @@ auto translate(const contract::ProtocolVersion in) noexcept
     }
 }
 
-auto translate(const contract::UnitType in) noexcept -> proto::UnitType
+auto translate(const contract::UnitDefinitionType in) noexcept
+    -> proto::UnitType
 {
     const auto& map = contract::unit_type_map_;
 
@@ -110,13 +111,14 @@ auto translate(const proto::ProtocolVersion in) noexcept
     }
 }
 
-auto translate(const proto::UnitType in) noexcept -> contract::UnitType
+auto translate(const proto::UnitType in) noexcept
+    -> contract::UnitDefinitionType
 {
     // NOTE unit_type_map_ sometimes takes too long to invert as a frozen map
     static const auto map = [] {
         const auto& unittypes = contract::unit_type_map_;
-        auto out =
-            boost::unordered_flat_map<proto::UnitType, contract::UnitType>{};
+        auto out = boost::
+            unordered_flat_map<proto::UnitType, contract::UnitDefinitionType>{};
         std::ranges::transform(
             unittypes, std::inserter(out, out.end()), [](const auto& data) {
                 const auto& [key, value] = data;
@@ -132,7 +134,7 @@ auto translate(const proto::UnitType in) noexcept -> contract::UnitType
         return i->second;
     } else {
 
-        return contract::UnitType::Error;
+        return contract::UnitDefinitionType::Error;
     }
 }
 }  // namespace opentxs

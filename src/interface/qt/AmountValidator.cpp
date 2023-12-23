@@ -7,8 +7,8 @@
 
 #include "interface/qt/AmountValidator.hpp"
 #include "interface/ui/accountactivity/AccountActivity.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 
 namespace opentxs::ui
 {

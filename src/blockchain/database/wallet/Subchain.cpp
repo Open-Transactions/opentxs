@@ -61,8 +61,8 @@ auto SubchainData::SubchainAddElements(
     return imp_->AddElements(subchain, elements);
 }
 
-auto SubchainData::SubchainLastIndexed(
-    const SubchainID& subchain) const noexcept -> std::optional<Bip32Index>
+auto SubchainData::SubchainLastIndexed(const SubchainID& subchain)
+    const noexcept -> std::optional<crypto::Bip32Index>
 {
     return imp_->GetLastIndexed(subchain);
 }

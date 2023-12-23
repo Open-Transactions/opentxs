@@ -7,9 +7,9 @@
 
 #include <cstdint>
 
-#include "internal/core/contract/peer/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/peer/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -3,14 +3,16 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/Types.hpp"
+// IWYU pragma: no_include "opentxs/opentxs.hpp"
+
 #pragma once
 
 #include <gtest/gtest.h>
-#include <opentxs/Export.hpp>
+#include <opentxs/opentxs.hpp>
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "opentxs/opentxs.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "internal/blockchain/crypto/Subaccount.hpp"
+#include "opentxs/identifier/Account.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::crypto

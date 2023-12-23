@@ -14,10 +14,10 @@
 #include "api/session/ui/Imp-base.hpp"
 #include "api/session/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/interface/qt/AccountActivity.hpp"
 #include "opentxs/interface/qt/AccountList.hpp"
 #include "opentxs/interface/qt/AccountSummary.hpp"
@@ -43,7 +43,6 @@
 #include "opentxs/interface/qt/UnitList.hpp"
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

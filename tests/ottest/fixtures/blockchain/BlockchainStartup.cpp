@@ -14,7 +14,7 @@
 #include "internal/network/zeromq/ListenCallback.hpp"
 #include "internal/network/zeromq/socket/Subscribe.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/WorkType.internal.hpp"
 
 namespace ottest
 {

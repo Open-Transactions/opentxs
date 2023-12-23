@@ -21,9 +21,9 @@
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/identity/wot/Claim.internal.hpp"
 #include "opentxs/identity/wot/ClaimPrivate.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"

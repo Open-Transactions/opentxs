@@ -11,7 +11,7 @@
 #include "internal/util/alloc/Allocated.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::database::wallet

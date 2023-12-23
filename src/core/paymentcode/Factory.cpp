@@ -16,6 +16,7 @@
 #include "core/paymentcode/Imp.hpp"
 #include "core/paymentcode/Preimage.hpp"
 #include "internal/crypto/asymmetric/Factory.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
@@ -27,7 +28,6 @@
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -139,7 +139,7 @@ auto PaymentCode(
 auto PaymentCode(
     const api::Session& api,
     const crypto::SeedID& seed,
-    const Bip32Index nym,
+    const crypto::Bip32Index nym,
     const std::uint8_t version,
     const bool bitmessage,
     const std::uint8_t bitmessageVersion,

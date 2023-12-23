@@ -10,7 +10,7 @@
 #include <memory>
 
 #include "core/Amount.hpp"
-#include "opentxs/core/display/Definition.hpp"
+#include "opentxs/display/Definition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Writer.hpp"
 

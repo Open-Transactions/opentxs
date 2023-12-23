@@ -10,10 +10,10 @@
 #include <tuple>
 
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/contract/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

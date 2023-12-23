@@ -12,10 +12,10 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

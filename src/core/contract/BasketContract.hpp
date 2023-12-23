@@ -10,10 +10,10 @@
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/BasketContract.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -43,9 +43,9 @@ public:
     {
         return subcontracts_;
     }
-    auto Type() const -> contract::UnitType final
+    auto Type() const -> contract::UnitDefinitionType final
     {
-        return contract::UnitType::Basket;
+        return contract::UnitDefinitionType::Basket;
     }
     auto Weight() const -> std::uint64_t final { return weight_; }
 

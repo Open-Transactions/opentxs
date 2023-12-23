@@ -8,16 +8,7 @@ add_subdirectory(element)
 add_subdirectory(subaccount)
 add_subdirectory(wallet)
 
-libopentxs_add_public_header("blockchain/crypto" "AddressStyle.hpp")
-libopentxs_add_public_header("blockchain/crypto" "HDProtocol.hpp")
-libopentxs_add_public_header("blockchain/crypto" "SubaccountType.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Subchain.hpp")
-libopentxs_add_public_header("blockchain/crypto" "Types.hpp")
-
 target_sources(
   opentxs-common
-  PRIVATE
-    "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Factory.hpp"
-    "Crypto.cpp"
-    "Internal.cpp"
+  PRIVATE "${opentxs_SOURCE_DIR}/src/internal/blockchain/crypto/Factory.hpp"
 )

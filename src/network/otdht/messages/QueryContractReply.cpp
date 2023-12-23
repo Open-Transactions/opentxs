@@ -23,13 +23,13 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
-#include "opentxs/core/contract/ContractType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"     // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/ContractType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"     // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep

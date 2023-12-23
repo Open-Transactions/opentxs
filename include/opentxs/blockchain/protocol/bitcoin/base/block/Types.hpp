@@ -5,16 +5,8 @@
 
 #pragma once
 
-#include <cstdint>
-#include <optional>
-#include <string_view>
-
 #include "opentxs/Export.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
-#include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,6 +21,8 @@ class Outpoint;
 class Position;
 }  // namespace block
 }  // namespace blockchain
+
+class ByteArray;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -41,25 +35,3 @@ using blockchain::block::Position;
 using blockchain::block::TransactionHash;
 using WitnessItem = ByteArray;
 }  // namespace opentxs::blockchain::protocol::bitcoin::base::block
-
-namespace opentxs::blockchain::protocol::bitcoin::base::block::script
-{
-enum class OP : std::uint8_t;        // IWYU pragma: export
-enum class Pattern : std::uint8_t;   // IWYU pragma: export
-enum class Position : std::uint8_t;  // IWYU pragma: export
-
-constexpr auto value(OP i) noexcept { return static_cast<std::uint8_t>(i); }
-OPENTXS_EXPORT auto print(blockchain::Type chain, OP) noexcept
-    -> std::string_view;
-
-struct OPENTXS_EXPORT Element {
-    using Data = ByteArray;
-    using PushArg = ByteArray;
-    using InvalidOpcode = std::uint8_t;
-
-    OP opcode_{};
-    std::optional<InvalidOpcode> invalid_{};
-    std::optional<PushArg> push_bytes_{};
-    std::optional<Data> data_{};
-};
-}  // namespace opentxs::blockchain::protocol::bitcoin::base::block::script

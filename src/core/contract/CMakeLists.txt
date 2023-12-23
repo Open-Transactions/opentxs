@@ -5,11 +5,7 @@
 
 add_subdirectory(peer)
 
-libopentxs_add_public_header("core/contract" "ContractType.hpp")
-libopentxs_add_public_header("core/contract" "ProtocolVersion.hpp")
 libopentxs_add_public_header("core/contract" "Signable.hpp")
-libopentxs_add_public_header("core/contract" "Types.hpp")
-libopentxs_add_public_header("core/contract" "UnitType.hpp")
 
 target_sources(
   opentxs-common
@@ -20,11 +16,9 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/CurrencyContract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/SecurityContract.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/ServerContract.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/core/contract/Types.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/Unit.hpp"
     "BasketContract.cpp"
     "BasketContract.hpp"
-    "Common.cpp"
     "Contract.cpp"
     "CurrencyContract.cpp"
     "CurrencyContract.hpp"

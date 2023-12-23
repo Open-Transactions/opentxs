@@ -23,6 +23,7 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::crypto::implementation
 {

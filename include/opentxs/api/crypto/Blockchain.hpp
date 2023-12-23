@@ -10,15 +10,15 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -111,7 +111,8 @@ public:
     using AccountData = std::pair<Chain, identifier::Nym>;
 
     // Throws std::out_of_range for invalid chains
-    static auto Bip44(Chain chain) noexcept(false) -> Bip44Type;
+    static auto Bip44(Chain chain) noexcept(false)
+        -> opentxs::blockchain::crypto::Bip44Type;
     static auto Bip44Path(
         Chain chain,
         const opentxs::crypto::SeedID& seed,
@@ -140,13 +141,13 @@ public:
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const identifier::Generic& contact) const noexcept -> bool = 0;
     virtual auto AssignLabel(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const UnallocatedCString& label) const noexcept -> bool = 0;
     virtual auto AssignTransactionMemo(
         const TxidHex& id,

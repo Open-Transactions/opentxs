@@ -5,18 +5,17 @@
 
 #pragma once
 
-#include <cstdint>
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto
 {
-enum class SeedStyle : std::uint8_t {
+enum class SeedStyle : std::underlying_type_t<SeedStyle> {
     BIP32 = 0,
     BIP39 = 1,
     PKT = 2,
-    Error = std::numeric_limits<std::uint8_t>::max(),
+    Error = std::numeric_limits<std::underlying_type_t<SeedStyle>>::max(),
 };
 }  // namespace opentxs::crypto

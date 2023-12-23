@@ -16,9 +16,9 @@ extern "C" {
 #include <utility>
 
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/FileSize.hpp"
 #include "util/ScopeGuard.hpp"
 #include "util/storage/lmdb/TransactionPrivate.hpp"

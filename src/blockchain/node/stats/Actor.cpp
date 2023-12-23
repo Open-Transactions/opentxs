@@ -8,16 +8,16 @@
 #include <chrono>
 #include <cstddef>
 #include <span>
-#include <string_view>
 #include <utility>
 
 #include "blockchain/node/stats/Shared.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Types.internal.hpp"
@@ -25,6 +25,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
@@ -32,38 +33,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
-
-namespace opentxs::blockchain::node
-{
-using namespace std::literals;
-
-auto print(StatsJobs state) noexcept -> std::string_view
-{
-    using Job = StatsJobs;
-
-    try {
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::block_header, "block_header"sv},
-            {Job::reorg, "reorg"sv},
-            {Job::cfilter, "cfilter"sv},
-            {Job::peer, "peer"sv},
-            {Job::sync_server, "sync_server"sv},
-            {Job::block, "block"sv},
-            {Job::init, "init"sv},
-            {Job::statemachine, "statemachine"sv},
-        };
-
-        return map.at(state);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)(": invalid StatsJobs: ")(
-            static_cast<OTZMQWorkType>(state))
-            .Abort();
-    }
-}
-}  // namespace opentxs::blockchain::node
 
 namespace opentxs::blockchain::node::stats
 {

@@ -15,19 +15,19 @@
 #include "blockchain/database/wallet/Pattern.hpp"     // IWYU pragma: keep
 #include "blockchain/database/wallet/Position.hpp"    // IWYU pragma: keep
 #include "blockchain/database/wallet/SubchainID.hpp"  // IWYU pragma: keep
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -84,7 +84,7 @@ public:
         const VersionNumber version,
         storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
     auto GetLastIndexed(const SubchainID& subchain) const noexcept
-        -> std::optional<Bip32Index>;
+        -> std::optional<crypto::Bip32Index>;
     auto GetLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
     auto GetPattern(const ElementID& id) const noexcept -> const dbPatterns&;
@@ -93,7 +93,7 @@ public:
 
     auto AddPattern(
         const ElementID& id,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const ReadView data,
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto AddPatternIndex(
@@ -103,7 +103,7 @@ public:
     auto Clear() noexcept -> void;
     auto SetLastIndexed(
         const SubchainID& subchain,
-        const Bip32Index value,
+        const crypto::Bip32Index value,
         storage::lmdb::Transaction& tx) noexcept -> bool;
     auto SetLastScanned(
         const SubchainID& subchain,
@@ -121,8 +121,10 @@ private:
 
     using SubchainIDMap = boost::
         unordered_node_map<SubchainID, db::SubchainID, std::hash<SubchainID>>;
-    using LastIndexedMap = boost::
-        unordered_flat_map<SubchainID, Bip32Index, std::hash<SubchainID>>;
+    using LastIndexedMap = boost::unordered_flat_map<
+        SubchainID,
+        crypto::Bip32Index,
+        std::hash<SubchainID>>;
     using LastScannedMap = boost::
         unordered_node_map<SubchainID, db::Position, std::hash<SubchainID>>;
     using PatternsMap =
@@ -146,7 +148,7 @@ private:
     auto load_index(const SubchainID& key, SubchainIDMap& map) const
         noexcept(false) -> const db::SubchainID&;
     auto load_last_indexed(const SubchainID& key, LastIndexedMap& map) const
-        noexcept(false) -> const Bip32Index&;
+        noexcept(false) -> const crypto::Bip32Index&;
     auto load_last_scanned(const SubchainID& key, LastScannedMap& map) const
         noexcept(false) -> const db::Position&;
     auto load_pattern(const ElementID& key, PatternsMap& map) const noexcept

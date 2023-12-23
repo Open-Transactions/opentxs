@@ -25,9 +25,9 @@
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/Policy.hpp"     // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

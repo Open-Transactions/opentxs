@@ -262,7 +262,7 @@ TEST_F(Regtest_fixture_hd, key_index)
     static constexpr auto count = 100u;
     static const auto baseAmount = ot::Amount{100000000};
     const auto& account = SendHD();
-    using Index = ot::Bip32Index;
+    using Index = ot::crypto::Bip32Index;
 
     for (auto i = Index{0}; i < Index{count}; ++i) {
         using State = ot::blockchain::node::TxoState;

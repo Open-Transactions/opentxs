@@ -17,7 +17,7 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/internal.factory.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep

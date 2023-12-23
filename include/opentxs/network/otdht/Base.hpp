@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Export.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 

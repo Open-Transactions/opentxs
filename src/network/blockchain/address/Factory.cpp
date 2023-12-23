@@ -12,13 +12,13 @@
 
 #include "internal/util/Time.hpp"
 #include "network/blockchain/address/AddressPrivate.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::factory
 {

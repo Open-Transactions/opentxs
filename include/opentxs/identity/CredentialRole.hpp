@@ -5,23 +5,17 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/identity/Types.hpp"
+#include "opentxs/identity/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity
 {
-enum class CredentialRole : std::uint32_t {
+enum class CredentialRole : std::underlying_type_t<CredentialRole> {
     Error = 0,
     MasterKey = 1,
     ChildKey = 2,
     Contact = 3,
     Verify = 4,
 };
-
-constexpr auto value(const CredentialRole in) noexcept
-{
-    return static_cast<std::uint32_t>(in);
-}
 }  // namespace opentxs::identity

@@ -5,53 +5,13 @@
 
 #include "internal/network/blockchain/OTDHT.hpp"  // IWYU pragma: associated
 
-#include <string_view>
-
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "network/blockchain/otdht/Actor.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-
-namespace opentxs::network::blockchain
-{
-using namespace std::literals;
-
-auto print(DHTJob job) noexcept -> std::string_view
-{
-    try {
-        using Job = DHTJob;
-        static const auto map = Map<Job, std::string_view>{
-            {Job::shutdown, "shutdown"sv},
-            {Job::sync_request, "sync_request"sv},
-            {Job::sync_ack, "sync_ack"sv},
-            {Job::sync_reply, "sync_reply"sv},
-            {Job::sync_push, "sync_push"sv},
-            {Job::response, "response"sv},
-            {Job::push_tx, "push_tx"sv},
-            {Job::job_processed, "job_processed"sv},
-            {Job::checksum_failure, "checksum_failure"sv},
-            {Job::report, "report"sv},
-            {Job::peer_list, "peer_list"sv},
-            {Job::registration, "registration"sv},
-            {Job::init, "init"sv},
-            {Job::cfilter, "cfilter"sv},
-            {Job::statemachine, "statemachine"sv},
-        };
-
-        return map.at(job);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)("invalid DHTJob: ")(
-            static_cast<OTZMQWorkType>(job))
-            .Abort();
-    }
-}
-}  // namespace opentxs::network::blockchain
 
 namespace opentxs::network::blockchain
 {

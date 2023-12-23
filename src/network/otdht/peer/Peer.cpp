@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <string_view>
 
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/peer/Actor.hpp"
@@ -20,38 +19,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-
-namespace opentxs::network::otdht
-{
-using namespace std::literals;
-
-auto print(PeerJob job) noexcept -> std::string_view
-{
-    try {
-        using enum PeerJob;
-        static const auto map = Map<PeerJob, std::string_view>{
-            {shutdown, "shutdown"sv},
-            {chain_state, "chain_state"sv},
-            {sync_request, "sync_request"sv},
-            {sync_ack, "sync_ack"sv},
-            {sync_reply, "sync_reply"sv},
-            {sync_push, "sync_push"sv},
-            {response, "response"sv},
-            {push_tx, "push_tx"sv},
-            {registration, "registration"sv},
-            {init, "init"sv},
-            {statemachine, "statemachine"sv},
-        };
-
-        return map.at(job);
-    } catch (...) {
-        LogAbort()(__FUNCTION__)("invalid PeerJob: ")(
-            static_cast<OTZMQWorkType>(job))
-            .Abort();
-    }
-}
-}  // namespace opentxs::network::otdht
 
 namespace opentxs::network::otdht
 {

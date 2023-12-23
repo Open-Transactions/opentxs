@@ -20,6 +20,7 @@ extern "C" {
 
 #include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

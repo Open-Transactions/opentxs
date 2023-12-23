@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/ui/Types.hpp"
+#include "opentxs/interface/ui/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::ui
 {
-enum class Blockchains : std::uint8_t {
+enum class Blockchains : std::underlying_type_t<Blockchains> {
     All = 0,
     Main = 1,
     Test = 2,

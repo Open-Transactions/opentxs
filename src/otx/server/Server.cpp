@@ -22,7 +22,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/Message.hpp"
@@ -30,6 +29,8 @@
 #include "internal/otx/common/cron/OTCron.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -48,18 +49,16 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/contract/ProtocolVersion.hpp"  // IWYU pragma: keep
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Language.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -67,6 +66,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -574,7 +574,7 @@ auto Server::SendInstrumentToNym(
         NOTARY_ID,
         SENDER_NYM_ID,
         RECIPIENT_NYM_ID,
-        transactionType::instrumentNotice,
+        otx::transactionType::instrumentNotice,
         nullptr,
         strPayment,
         szCommand);
@@ -592,7 +592,7 @@ auto Server::SendInstrumentToNym(
         NOTARY_ID,
         SENDER_NYM_ID,
         RECIPIENT_NYM_ID,
-        transactionType::instrumentNotice,
+        otx::transactionType::instrumentNotice,
         pMsg);
 }
 
@@ -600,7 +600,7 @@ auto Server::DropMessageToNymbox(
     const identifier::Notary& notaryID,
     const identifier::Nym& senderNymID,
     const identifier::Nym& recipientNymID,
-    transactionType transactionType,
+    otx::transactionType transactionType,
     const Message& msg) -> bool
 {
     return DropMessageToNymbox(
@@ -672,7 +672,7 @@ auto Server::DropMessageToNymbox(
     const identifier::Notary& NOTARY_ID,
     const identifier::Nym& SENDER_NYM_ID,
     const identifier::Nym& RECIPIENT_NYM_ID,
-    transactionType theType,
+    otx::transactionType theType,
     const Message* pMsg,
     const String& pstrMessage,
     const char* szCommand) -> bool  // If you pass something here, it will
@@ -695,13 +695,13 @@ auto Server::DropMessageToNymbox(
         return false;
     }
     switch (theType) {
-        case transactionType::message:
+        case otx::transactionType::message:
             break;
-        case transactionType::instrumentNotice:
+        case otx::transactionType::instrumentNotice:
             break;
         default:
             LogError()()(
-                "Unexpected transactionType passed here (Expected message "
+                "Unexpected otx::transactionType passed here (Expected message "
                 "or instrumentNotice).")
                 .Flush();
             return false;
@@ -719,10 +719,10 @@ auto Server::DropMessageToNymbox(
             theMsgAngel->command_ = String::Factory(szCommand);
         } else {
             switch (theType) {
-                case transactionType::message:
+                case otx::transactionType::message:
                     theMsgAngel->command_ = String::Factory("sendNymMessage");
                     break;
-                case transactionType::instrumentNotice:
+                case otx::transactionType::instrumentNotice:
                     theMsgAngel->command_ =
                         String::Factory("sendNymInstrument");
                     break;
@@ -803,7 +803,7 @@ auto Server::DropMessageToNymbox(
          theLedger->VerifySignature(*nym_server_))) {
         // Create the instrumentNotice to put in the Nymbox.
         auto pTransaction{api_.Factory().Internal().Session().Transaction(
-            *theLedger, theType, originType::not_applicable, lTransNum)};
+            *theLedger, theType, otx::originType::not_applicable, lTransNum)};
 
         if (false != bool(pTransaction)) {
             // NOTE: todo: SHOULD this be "in reference to" itself? The reason,
@@ -924,7 +924,7 @@ auto Server::nymbox_push(
     auto output = zmq::Message{};
     output.AddFrame(nymID.asBase58(API().Crypto()));
     proto::OTXPush push;
-    push.set_version(OTX_PUSH_VERSION);
+    push.set_version(otx::OTX_PUSH_VERSION);
     push.set_type(proto::OTXPUSH_NYMBOX);
     push.set_item(String::Factory(item)->Get());
     output.Internal().AddFrame(push);

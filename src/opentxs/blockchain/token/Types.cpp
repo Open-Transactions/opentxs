@@ -17,13 +17,13 @@
 #include "core/FixedByteArray.tpp"  // IWYU pragma: keep
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"                   // IWYU pragma: keep
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/token/Descriptor.hpp"
 #include "opentxs/blockchain/token/TokenType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::token
 {

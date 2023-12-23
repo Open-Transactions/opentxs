@@ -12,9 +12,7 @@
 
 namespace opentxs::network::blockchain::bitcoin
 {
-// IWYU pragma: begin_exports
-enum class Service : std::uint8_t;  // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class Service : std::uint8_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Service) noexcept -> std::string_view;
 }  // namespace opentxs::network::blockchain::bitcoin

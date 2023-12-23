@@ -13,7 +13,6 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -32,8 +31,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -52,7 +52,7 @@ Item::Item(const api::Session& api)
     , account_to_id_()
     , amount_(0)
     , list_items_()
-    , type_(itemType::error_state)
+    , type_(otx::itemType::error_state)
     , status_(Item::request)
     , new_outbox_trans_num_(0)
     , closing_transaction_no_(0)
@@ -77,7 +77,7 @@ Item::Item(
     , account_to_id_()
     , amount_(0)
     , list_items_()
-    , type_(itemType::error_state)
+    , type_(otx::itemType::error_state)
     , status_(Item::request)
     , new_outbox_trans_num_(0)
     , closing_transaction_no_(0)
@@ -102,7 +102,7 @@ Item::Item(
     , account_to_id_()
     , amount_(0)
     , list_items_()
-    , type_(itemType::error_state)
+    , type_(otx::itemType::error_state)
     , status_(Item::request)
     , new_outbox_trans_num_(0)
     , closing_transaction_no_(0)
@@ -114,7 +114,7 @@ Item::Item(
     const api::Session& api,
     const identifier::Nym& theNymID,
     const OTTransaction& theOwner,
-    itemType theType,
+    otx::itemType theType,
     const identifier::Account& pDestinationAcctID)
     : OTTransactionType(
           api,
@@ -128,7 +128,7 @@ Item::Item(
     , account_to_id_()
     , amount_(0)
     , list_items_()
-    , type_(itemType::error_state)
+    , type_(otx::itemType::error_state)
     , status_(Item::request)
     , new_outbox_trans_num_(0)
     , closing_transaction_no_(0)
@@ -184,7 +184,7 @@ auto Item::VerifyTransactionStatement(
     const UnallocatedSet<TransactionNumber> newNumbers,
     const bool bIsRealTransaction) const -> bool
 {
-    if (GetType() != itemType::transactionStatement) {
+    if (GetType() != otx::itemType::transactionStatement) {
         LogConsole()()("Wrong item type. Expected Item::transactionStatement.")
             .Flush();
         return false;
@@ -227,7 +227,7 @@ auto Item::VerifyTransactionStatement(
             // number would be excluded, so we have to remove it now, to
             // simulate success for the verification. Then we add it again
             // afterwards, before returning.
-            case transactionType::cancelCronItem: {
+            case otx::transactionType::cancelCronItem: {
                 excluded.insert(itemNumber);
             } break;
             // IN the case of the offer/plan, we do NOT want to remove from
@@ -236,9 +236,9 @@ auto Item::VerifyTransactionStatement(
             // the user is  responsible for its main transaction number until he
             // signs off on  final closing, after many receipts have potentially
             // been received.
-            case transactionType::marketOffer:
-            case transactionType::paymentPlan:
-            case transactionType::smartContract: {
+            case otx::transactionType::marketOffer:
+            case otx::transactionType::paymentPlan:
+            case otx::transactionType::smartContract: {
                 break;
             }
             default: {
@@ -297,7 +297,7 @@ auto Item::VerifyBalanceStatement(
 {
     UnallocatedSet<TransactionNumber> removed(excluded);
 
-    if (GetType() != itemType::balanceStatement) {
+    if (GetType() != otx::itemType::balanceStatement) {
         LogConsole()()("Wrong item type.").Flush();
 
         return false;
@@ -341,19 +341,19 @@ auto Item::VerifyBalanceStatement(
         const Ledger* pLedger = nullptr;
 
         switch (pSubItem->GetType()) {
-            case itemType::voucherReceipt:
-            case itemType::chequeReceipt:
-            case itemType::marketReceipt:
-            case itemType::paymentReceipt:
-            case itemType::transferReceipt:
-            case itemType::basketReceipt:
-            case itemType::finalReceipt: {
+            case otx::itemType::voucherReceipt:
+            case otx::itemType::chequeReceipt:
+            case otx::itemType::marketReceipt:
+            case otx::itemType::paymentReceipt:
+            case otx::itemType::transferReceipt:
+            case otx::itemType::basketReceipt:
+            case otx::itemType::finalReceipt: {
                 nInboxItemCount++;
                 pLedger = &THE_INBOX;
                 pszLedgerType = szInbox;
                 [[fallthrough]];
             }
-            case itemType::transfer: {
+            case otx::itemType::transfer: {
                 break;
             }
             default: {
@@ -368,7 +368,7 @@ auto Item::VerifyBalanceStatement(
         }
 
         switch (pSubItem->GetType()) {
-            case itemType::transfer: {
+            case otx::itemType::transfer: {
                 if (pSubItem->GetAmount() < 0) {  // it's an outbox item
                     // transfers out always reduce your balance.
                     lReceiptAmountMultiplier = -1;
@@ -392,13 +392,13 @@ auto Item::VerifyBalanceStatement(
             // am looping through the inbox report, and there happens to be a
             // finalReceipt on it. (Which doesn't mean necessarily that it's
             // being processed out...)
-            case itemType::finalReceipt:
-            case itemType::basketReceipt:
-            case itemType::transferReceipt:
-            case itemType::voucherReceipt:
-            case itemType::chequeReceipt:
-            case itemType::marketReceipt:
-            case itemType::paymentReceipt: {
+            case otx::itemType::finalReceipt:
+            case otx::itemType::basketReceipt:
+            case otx::itemType::transferReceipt:
+            case otx::itemType::voucherReceipt:
+            case otx::itemType::chequeReceipt:
+            case otx::itemType::marketReceipt:
+            case otx::itemType::paymentReceipt: {
                 lReceiptAmountMultiplier = 1;
             } break;
             default: {
@@ -503,8 +503,8 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::transfer) &&
-            (pTransaction->GetType() != transactionType::pending)) {
+        if ((pSubItem->GetType() == otx::itemType::transfer) &&
+            (pTransaction->GetType() != otx::transactionType::pending)) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type. (transfer block).")
                 .Flush();
@@ -512,8 +512,8 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::chequeReceipt) &&
-            (pTransaction->GetType() != transactionType::chequeReceipt)) {
+        if ((pSubItem->GetType() == otx::itemType::chequeReceipt) &&
+            (pTransaction->GetType() != otx::transactionType::chequeReceipt)) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type. (chequeReceipt block).")
                 .Flush();
@@ -521,8 +521,9 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::voucherReceipt) &&
-            ((pTransaction->GetType() != transactionType::voucherReceipt) ||
+        if ((pSubItem->GetType() == otx::itemType::voucherReceipt) &&
+            ((pTransaction->GetType() !=
+              otx::transactionType::voucherReceipt) ||
              (pSubItem->GetOriginType() != pTransaction->GetOriginType()))) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type or origin type. (voucherReceipt block).")
@@ -531,8 +532,8 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::marketReceipt) &&
-            (pTransaction->GetType() != transactionType::marketReceipt)) {
+        if ((pSubItem->GetType() == otx::itemType::marketReceipt) &&
+            (pTransaction->GetType() != otx::transactionType::marketReceipt)) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type. (marketReceipt block).")
                 .Flush();
@@ -540,8 +541,9 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::paymentReceipt) &&
-            ((pTransaction->GetType() != transactionType::paymentReceipt) ||
+        if ((pSubItem->GetType() == otx::itemType::paymentReceipt) &&
+            ((pTransaction->GetType() !=
+              otx::transactionType::paymentReceipt) ||
              (pSubItem->GetOriginType() != pTransaction->GetOriginType()))) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type or origin type. (paymentReceipt block).")
@@ -550,8 +552,9 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::transferReceipt) &&
-            (pTransaction->GetType() != transactionType::transferReceipt)) {
+        if ((pSubItem->GetType() == otx::itemType::transferReceipt) &&
+            (pTransaction->GetType() !=
+             otx::transactionType::transferReceipt)) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type. (transferReceipt block).")
                 .Flush();
@@ -559,8 +562,8 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::basketReceipt) &&
-            ((pTransaction->GetType() != transactionType::basketReceipt) ||
+        if ((pSubItem->GetType() == otx::itemType::basketReceipt) &&
+            ((pTransaction->GetType() != otx::transactionType::basketReceipt) ||
              (pSubItem->GetClosingNum() != pTransaction->GetClosingNum()))) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
                 ") wrong type or closing num (")(pSubItem->GetClosingNum())(
@@ -570,8 +573,8 @@ auto Item::VerifyBalanceStatement(
             return false;
         }
 
-        if ((pSubItem->GetType() == itemType::finalReceipt) &&
-            ((pTransaction->GetType() != transactionType::finalReceipt) ||
+        if ((pSubItem->GetType() == otx::itemType::finalReceipt) &&
+            ((pTransaction->GetType() != otx::transactionType::finalReceipt) ||
              (pSubItem->GetClosingNum() != pTransaction->GetClosingNum()) ||
              (pSubItem->GetOriginType() != pTransaction->GetOriginType()))) {
             LogConsole()()("Transaction (")(pSubItem->GetTransactionNum())(
@@ -662,22 +665,22 @@ auto Item::VerifyBalanceStatement(
     // this code repeated a few times in reverse, down inside this function. For
     // example,
     switch (TARGET_TRANSACTION.GetType()) {
-        case transactionType::processInbox:
-        case transactionType::withdrawal:
-        case transactionType::deposit:
-        case transactionType::payDividend:
-        case transactionType::cancelCronItem:
-        case transactionType::exchangeBasket: {
+        case otx::transactionType::processInbox:
+        case otx::transactionType::withdrawal:
+        case otx::transactionType::deposit:
+        case otx::transactionType::payDividend:
+        case otx::transactionType::cancelCronItem:
+        case otx::transactionType::exchangeBasket: {
             removed.insert(targetNumber);
             LogDetail()()("Transaction number: ")(
                 targetNumber)(" from TARGET_TRANSACTION "
                               "is being closed.")
                 .Flush();
         } break;
-        case transactionType::transfer:
-        case transactionType::marketOffer:
-        case transactionType::paymentPlan:
-        case transactionType::smartContract: {
+        case otx::transactionType::transfer:
+        case otx::transactionType::marketOffer:
+        case otx::transactionType::paymentPlan:
+        case otx::transactionType::smartContract: {
             // These, assuming success, do NOT remove an issued number. So no
             // need to anticipate setting up the list that way, to get a match.
             LogDetail()()("Transaction number: ")(
@@ -792,7 +795,7 @@ auto Item::GetFinalReceiptItemByReferenceNum(std::int64_t lReferenceNumber)
         const auto pItem = it;
         assert_true(false != bool(pItem));
 
-        if (itemType::finalReceipt != pItem->GetType()) { continue; }
+        if (otx::itemType::finalReceipt != pItem->GetType()) { continue; }
         if (pItem->GetReferenceToNum() == lReferenceNumber) { return pItem; }
     }
 
@@ -813,38 +816,46 @@ auto Item::GetNumberOfOrigin() -> std::int64_t
 
     if (0 == number_of_origin_) {
         switch (GetType()) {
-            case itemType::acceptPending:  // this item is a client-side
-                                           // acceptance of a pending transfer
-            case itemType::rejectPending:  // this item is a client-side
-                                           // rejection of a pending transfer
-            case itemType::acceptCronReceipt:   // this item is a client-side
-                                                // acceptance of
-                                                // a
-                                                // cron receipt in his inbox.
-            case itemType::acceptItemReceipt:   // this item is a client-side
-                                                // acceptance of an item receipt
-                                                // in his inbox.
-            case itemType::disputeCronReceipt:  // this item is a client dispute
-                                                // of a cron receipt in his
-                                                // inbox.
-            case itemType::disputeItemReceipt:  // this item is a client dispute
-                                                // of an item receipt in his
-                                                // inbox.
+            case otx::itemType::acceptPending:  // this item is a client-side
+                                                // acceptance of a pending
+                                                // transfer
+            case otx::itemType::rejectPending:  // this item is a client-side
+                                                // rejection of a pending
+                                                // transfer
+            case otx::itemType::acceptCronReceipt:  // this item is a
+                                                    // client-side acceptance of
+                                                    // a
+                                                    // cron receipt in his
+                                                    // inbox.
+            case otx::itemType::acceptItemReceipt:  // this item is a
+                                                    // client-side acceptance of
+                                                    // an item receipt in his
+                                                    // inbox.
+            case otx::itemType::disputeCronReceipt:  // this item is a client
+                                                     // dispute of a cron
+                                                     // receipt in his inbox.
+            case otx::itemType::disputeItemReceipt:  // this item is a client
+                                                     // dispute of an item
+                                                     // receipt in his inbox.
 
-            case itemType::acceptFinalReceipt:  // this item is a client-side
-                                                // acceptance of a
+            case otx::itemType::acceptFinalReceipt:  // this item is a
+                                                     // client-side acceptance
+                                                     // of a
             // final receipt in his inbox. (All related
             // receipts must also be closed!)
-            case itemType::acceptBasketReceipt:  // this item is a client-side
-                                                 // acceptance of a basket
-                                                 // receipt in his inbox.
-            case itemType::disputeFinalReceipt:  // this item is a client-side
-                                                 // rejection of a
+            case otx::itemType::acceptBasketReceipt:  // this item is a
+                                                      // client-side acceptance
+                                                      // of a basket receipt in
+                                                      // his inbox.
+            case otx::itemType::disputeFinalReceipt:  // this item is a
+                                                      // client-side rejection
+                                                      // of a
             // final receipt in his inbox. (All related
             // receipts must also be closed!)
-            case itemType::disputeBasketReceipt:  // this item is a client-side
-                                                  // rejection of a basket
-                                                  // receipt in his inbox.
+            case otx::itemType::disputeBasketReceipt:  // this item is a
+                                                       // client-side rejection
+                                                       // of a basket receipt in
+                                                       // his inbox.
 
                 LogError()()("In this case, you can't calculate the "
                              "origin number, you must set it "
@@ -869,67 +880,71 @@ auto Item::GetNumberOfOrigin() -> std::int64_t
 void Item::CalculateNumberOfOrigin()
 {
     switch (GetType()) {
-        case itemType::acceptTransaction:  // this item is a client-side
-                                           // acceptance of a transaction number
-                                           // (a blank) in my Nymbox
-        case itemType::atAcceptTransaction:  // server reply
-        case itemType::acceptMessage:  // this item is a client-side acceptance
-                                       // of a message in my Nymbox
-        case itemType::atAcceptMessage:  // server reply
-        case itemType::acceptNotice:    // this item is a client-side acceptance
-                                        // of a server notification in my Nymbox
-        case itemType::atAcceptNotice:  // server reply
-        case itemType::replyNotice:  // server notice of a reply that nym should
-                                     // have already
+        case otx::itemType::acceptTransaction:  // this item is a client-side
+                                                // acceptance of a transaction
+                                                // number (a blank) in my Nymbox
+        case otx::itemType::atAcceptTransaction:  // server reply
+        case otx::itemType::acceptMessage:        // this item is a client-side
+                                            // acceptance of a message in my
+                                            // Nymbox
+        case otx::itemType::atAcceptMessage:  // server reply
+        case otx::itemType::acceptNotice:     // this item is a client-side
+                                              // acceptance of a server
+                                              // notification in my Nymbox
+        case otx::itemType::atAcceptNotice:   // server reply
+        case otx::itemType::replyNotice:  // server notice of a reply that nym
+                                          // should have already
         // received as a response to a request. (Copy dropped in
         // nymbox.)
-        case itemType::successNotice:  // server notice dropped into nymbox as
-                                       // result of a transaction# being
-                                       // successfully signed out.
-        case itemType::notice:  // server notice dropped into nymbox as result
-                                // of a smart contract processing.
-        case itemType::transferReceipt:  // Currently don't create an Item for
-                                         // transfer receipt in inbox. Used only
-                                         // for inbox report.
-        case itemType::chequeReceipt:    // Currently don't create an Item for
-                                       // cheque receipt in inbox. Used only for
-                                       // inbox report.
-        case itemType::voucherReceipt:  // Currently don't create an Item for
-                                        // voucher receipt in inbox. Used only
-                                        // for inbox report.
+        case otx::itemType::successNotice:  // server notice dropped into nymbox
+                                            // as result of a transaction# being
+                                            // successfully signed out.
+        case otx::itemType::notice:  // server notice dropped into nymbox as
+                                     // result of a smart contract processing.
+        case otx::itemType::transferReceipt:  // Currently don't create an Item
+                                              // for transfer receipt in inbox.
+                                              // Used only for inbox report.
+        case otx::itemType::chequeReceipt:    // Currently don't create an Item
+                                            // for cheque receipt in inbox. Used
+                                            // only for inbox report.
+        case otx::itemType::voucherReceipt:  // Currently don't create an Item
+                                             // for voucher receipt in inbox.
+                                             // Used only for inbox report.
 
             SetNumberOfOrigin(0);  // Not applicable.
             break;
 
-        case itemType::acceptPending:  // this item is a client-side acceptance
-                                       // of a pending transfer
-        case itemType::rejectPending:  // this item is a client-side rejection
-                                       // of a pending transfer
-        case itemType::acceptCronReceipt:   // this item is a client-side
-                                            // acceptance of a cron receipt in
-                                            // his inbox.
-        case itemType::acceptItemReceipt:   // this item is a client-side
-                                            // acceptance of an item receipt in
-                                            // his inbox.
-        case itemType::disputeCronReceipt:  // this item is a client dispute of
-                                            // a cron receipt in his inbox.
-        case itemType::disputeItemReceipt:  // this item is a client dispute of
-                                            // an item receipt in his inbox.
+        case otx::itemType::acceptPending:  // this item is a client-side
+                                            // acceptance of a pending transfer
+        case otx::itemType::rejectPending:  // this item is a client-side
+                                            // rejection of a pending transfer
+        case otx::itemType::acceptCronReceipt:  // this item is a client-side
+                                                // acceptance of a cron receipt
+                                                // in his inbox.
+        case otx::itemType::acceptItemReceipt:  // this item is a client-side
+                                                // acceptance of an item receipt
+                                                // in his inbox.
+        case otx::itemType::disputeCronReceipt:  // this item is a client
+                                                 // dispute of a cron receipt in
+                                                 // his inbox.
+        case otx::itemType::disputeItemReceipt:  // this item is a client
+                                                 // dispute of an item receipt
+                                                 // in his inbox.
 
-        case itemType::acceptFinalReceipt:  // this item is a client-side
-                                            // acceptance of a final
+        case otx::itemType::acceptFinalReceipt:  // this item is a client-side
+                                                 // acceptance of a final
         // receipt in his inbox. (All related receipts must
         // also be closed!)
-        case itemType::acceptBasketReceipt:  // this item is a client-side
-                                             // acceptance of a basket receipt
-                                             // in his inbox.
-        case itemType::disputeFinalReceipt:  // this item is a client-side
-                                             // rejection of a final
+        case otx::itemType::acceptBasketReceipt:  // this item is a client-side
+                                                  // acceptance of a basket
+                                                  // receipt in his inbox.
+        case otx::itemType::disputeFinalReceipt:  // this item is a client-side
+                                                  // rejection of a final
         // receipt in his inbox. (All related receipts
         // must also be closed!)
-        case itemType::disputeBasketReceipt:  // this item is a client-side
-                                              // rejection of a basket receipt
-                                              // in his inbox.
+        case otx::itemType::disputeBasketReceipt:  // this item is a client-side
+                                                   // rejection of a basket
+                                                   // receipt in his inbox.
 
             LogError()()("In this case, you can't calculate the "
                          "origin number, you must set it explicitly.")
@@ -940,17 +955,18 @@ void Item::CalculateNumberOfOrigin()
             LogAbort()()("In this case, you can't calculate the origin number, "
                          "you must set it explicitly.")
                 .Abort();
-        case itemType::marketReceipt:  // server receipt dropped into inbox as
-                                       // result of market trading. Also used in
-                                       // inbox report.
-        case itemType::paymentReceipt:  // server receipt dropped into an inbox
-                                        // as result of payment occuring. Also
-                                        // used in inbox report.
-        case itemType::finalReceipt:    // server receipt dropped into inbox /
-                                      // nymbox as result of cron item expiring
-                                      // or being canceled.
-        case itemType::basketReceipt:  // server receipt dropped into inbox as
-                                       // result of a basket exchange.
+        case otx::itemType::marketReceipt:  // server receipt dropped into inbox
+                                            // as result of market trading. Also
+                                            // used in inbox report.
+        case otx::itemType::paymentReceipt:  // server receipt dropped into an
+                                             // inbox as result of payment
+                                             // occuring. Also used in inbox
+                                             // report.
+        case otx::itemType::finalReceipt:   // server receipt dropped into inbox
+                                            // / nymbox as result of cron item
+                                            // expiring or being canceled.
+        case otx::itemType::basketReceipt:  // server receipt dropped into inbox
+                                            // as result of a basket exchange.
 
             SetNumberOfOrigin(GetReferenceToNum());  // pending is in
                                                      // reference to the
@@ -958,8 +974,8 @@ void Item::CalculateNumberOfOrigin()
                                                      // transfer.
             break;
 
-        case itemType::depositCheque:  // this item is a request to deposit a
-                                       // cheque.
+        case otx::itemType::depositCheque:  // this item is a request to deposit
+                                            // a cheque.
         {
             const auto theCheque{api_.Factory().Internal().Session().Cheque()};
             auto strAttachment = String::Factory();
@@ -974,22 +990,22 @@ void Item::CalculateNumberOfOrigin()
             }
         } break;
 
-        case itemType::atDepositCheque:  // this item is a server response to
-                                         // that request.
-        case itemType::atAcceptPending:  // server reply to acceptPending.
-        case itemType::atRejectPending:  // server reply to rejectPending.
-        case itemType::atAcceptCronReceipt:    // this item is a server reply to
-                                               // that acceptance.
-        case itemType::atAcceptItemReceipt:    // this item is a server reply to
-                                               // that acceptance.
-        case itemType::atDisputeCronReceipt:   // Server reply to dispute
-                                               // message.
-        case itemType::atDisputeItemReceipt:   // Server reply to dispute
-                                               // message.
-        case itemType::atAcceptFinalReceipt:   // server reply
-        case itemType::atAcceptBasketReceipt:  // server reply
-        case itemType::atDisputeFinalReceipt:  // server reply
-        case itemType::atDisputeBasketReceipt:  // server reply
+        case otx::itemType::atDepositCheque:  // this item is a server response
+                                              // to that request.
+        case otx::itemType::atAcceptPending:  // server reply to acceptPending.
+        case otx::itemType::atRejectPending:  // server reply to rejectPending.
+        case otx::itemType::atAcceptCronReceipt:  // this item is a server reply
+                                                  // to that acceptance.
+        case otx::itemType::atAcceptItemReceipt:  // this item is a server reply
+                                                  // to that acceptance.
+        case otx::itemType::atDisputeCronReceipt:    // Server reply to dispute
+                                                     // message.
+        case otx::itemType::atDisputeItemReceipt:    // Server reply to dispute
+                                                     // message.
+        case otx::itemType::atAcceptFinalReceipt:    // server reply
+        case otx::itemType::atAcceptBasketReceipt:   // server reply
+        case otx::itemType::atDisputeFinalReceipt:   // server reply
+        case otx::itemType::atDisputeBasketReceipt:  // server reply
         {
             auto strReference = String::Factory();
             GetReferenceString(strReference);
@@ -1006,28 +1022,35 @@ void Item::CalculateNumberOfOrigin()
 
             assert_true(false != bool(pOriginalItem));
 
-            if (((type_ == itemType::atDepositCheque) &&
-                 (itemType::depositCheque != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atAcceptPending) &&
-                 (itemType::acceptPending != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atRejectPending) &&
-                 (itemType::rejectPending != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atAcceptCronReceipt) &&
-                 (itemType::acceptCronReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atAcceptItemReceipt) &&
-                 (itemType::acceptItemReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atDisputeCronReceipt) &&
-                 (itemType::disputeCronReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atDisputeItemReceipt) &&
-                 (itemType::disputeItemReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atAcceptFinalReceipt) &&
-                 (itemType::acceptFinalReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atAcceptBasketReceipt) &&
-                 (itemType::acceptBasketReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atDisputeFinalReceipt) &&
-                 (itemType::disputeFinalReceipt != pOriginalItem->GetType())) ||
-                ((type_ == itemType::atDisputeBasketReceipt) &&
-                 (itemType::disputeBasketReceipt !=
+            if (((type_ == otx::itemType::atDepositCheque) &&
+                 (otx::itemType::depositCheque != pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atAcceptPending) &&
+                 (otx::itemType::acceptPending != pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atRejectPending) &&
+                 (otx::itemType::rejectPending != pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atAcceptCronReceipt) &&
+                 (otx::itemType::acceptCronReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atAcceptItemReceipt) &&
+                 (otx::itemType::acceptItemReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atDisputeCronReceipt) &&
+                 (otx::itemType::disputeCronReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atDisputeItemReceipt) &&
+                 (otx::itemType::disputeItemReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atAcceptFinalReceipt) &&
+                 (otx::itemType::acceptFinalReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atAcceptBasketReceipt) &&
+                 (otx::itemType::acceptBasketReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atDisputeFinalReceipt) &&
+                 (otx::itemType::disputeFinalReceipt !=
+                  pOriginalItem->GetType())) ||
+                ((type_ == otx::itemType::atDisputeBasketReceipt) &&
+                 (otx::itemType::disputeBasketReceipt !=
                   pOriginalItem->GetType()))) {
                 auto strType = String::Factory();
                 pOriginalItem->GetTypeString(strType);
@@ -1044,76 +1067,80 @@ void Item::CalculateNumberOfOrigin()
         } break;
 
         // FEEs
-        case itemType::serverfee:  // this item is a fee from the transaction
-                                   // server (per contract)
-        case itemType::atServerfee:
-        case itemType::issuerfee:  // this item is a fee from the issuer (per
-                                   // contract)
-        case itemType::atIssuerfee:
+        case otx::itemType::serverfee:  // this item is a fee from the
+                                        // transaction server (per contract)
+        case otx::itemType::atServerfee:
+        case otx::itemType::issuerfee:  // this item is a fee from the issuer
+                                        // (per contract)
+        case otx::itemType::atIssuerfee:
 
         // INFO (BALANCE, HASH, etc) these are still all messages with replies.
-        case itemType::balanceStatement:  // this item is a statement of
-                                          // balance. (For asset account.)
-        case itemType::atBalanceStatement:
-        case itemType::transactionStatement:  // this item is a transaction
-                                              // statement. (For Nym
-                                              // -- which numbers are assigned
-                                              // to him.)
-        case itemType::atTransactionStatement:
+        case otx::itemType::balanceStatement:  // this item is a statement of
+                                               // balance. (For asset account.)
+        case otx::itemType::atBalanceStatement:
+        case otx::itemType::transactionStatement:  // this item is a transaction
+                                                   // statement. (For Nym
+                                                   // -- which numbers are
+                                                   // assigned to him.)
+        case otx::itemType::atTransactionStatement:
 
         // TRANSFER
-        case itemType::transfer:  // This item is an outgoing transfer, probably
-                                  // part of an outoing transaction.
-        case itemType::atTransfer:  // Server reply.
+        case otx::itemType::transfer:    // This item is an outgoing transfer,
+                                         // probably part of an outoing
+                                         // transaction.
+        case otx::itemType::atTransfer:  // Server reply.
 
         // CASH WITHDRAWAL / DEPOSIT
-        case itemType::withdrawal:  // this item is a cash withdrawal (of
-                                    // chaumian blinded tokens)
-        case itemType::atWithdrawal:
-        case itemType::deposit:  // this item is a cash deposit (of a purse
-                                 // containing blinded tokens.)
-        case itemType::atDeposit:
+        case otx::itemType::withdrawal:  // this item is a cash withdrawal (of
+                                         // chaumian blinded tokens)
+        case otx::itemType::atWithdrawal:
+        case otx::itemType::deposit:  // this item is a cash deposit (of a purse
+                                      // containing blinded tokens.)
+        case otx::itemType::atDeposit:
 
         // CHEQUES AND VOUCHERS
-        case itemType::withdrawVoucher:  // this item is a request to purchase a
-                                         // voucher (a cashier's cheque)
-        case itemType::atWithdrawVoucher:
+        case otx::itemType::withdrawVoucher:  // this item is a request to
+                                              // purchase a voucher (a cashier's
+                                              // cheque)
+        case otx::itemType::atWithdrawVoucher:
 
         // PAYING DIVIDEND ON SHARES OF STOCK
-        case itemType::payDividend:    // this item is a request to pay a
-                                       // dividend.
-        case itemType::atPayDividend:  // the server reply to that request.
+        case otx::itemType::payDividend:    // this item is a request to pay a
+                                            // dividend.
+        case otx::itemType::atPayDividend:  // the server reply to that request.
 
         // TRADING ON MARKETS
-        case itemType::marketOffer:    // this item is an offer to be put on a
-                                       // market.
-        case itemType::atMarketOffer:  // server reply or updated notification
-                                       // regarding a market offer.
+        case otx::itemType::marketOffer:  // this item is an offer to be put on
+                                          // a market.
+        case otx::itemType::atMarketOffer:  // server reply or updated
+                                            // notification regarding a market
+                                            // offer.
 
         // PAYMENT PLANS
-        case itemType::paymentPlan:    // this item is a new payment plan
-        case itemType::atPaymentPlan:  // server reply or updated notification
-                                       // regarding a payment plan.
+        case otx::itemType::paymentPlan:    // this item is a new payment plan
+        case otx::itemType::atPaymentPlan:  // server reply or updated
+                                            // notification regarding a payment
+                                            // plan.
 
         // SMART CONTRACTS
-        case itemType::smartContract:    // this item is a new smart contract
-        case itemType::atSmartContract:  // server reply or updated notification
-                                         // regarding
-                                         // a
-                                         // smart contract.
+        case otx::itemType::smartContract:  // this item is a new smart contract
+        case otx::itemType::atSmartContract:  // server reply or updated
+                                              // notification regarding
+                                              // a
+                                              // smart contract.
 
         // CANCELLING: Market Offers and Payment Plans.
-        case itemType::cancelCronItem:    // this item is intended to cancel a
-                                          // market offer or payment plan.
-        case itemType::atCancelCronItem:  // reply from the server regarding
-                                          // said cancellation.
+        case otx::itemType::cancelCronItem:  // this item is intended to cancel
+                                             // a market offer or payment plan.
+        case otx::itemType::atCancelCronItem:  // reply from the server
+                                               // regarding said cancellation.
 
         // EXCHANGE IN/OUT OF A BASKET CURRENCY
-        case itemType::exchangeBasket:  // this item is an exchange in/out of a
-                                        // basket currency.
-        case itemType::atExchangeBasket:  // reply from the server regarding
-                                          // said exchange.
-        case itemType::error_state:
+        case otx::itemType::exchangeBasket:  // this item is an exchange in/out
+                                             // of a basket currency.
+        case otx::itemType::atExchangeBasket:  // reply from the server
+                                               // regarding said exchange.
+        case otx::itemType::error_state:
         default: {
             SetNumberOfOrigin(GetTransactionNum());
         }
@@ -1156,7 +1183,7 @@ void Item::InitItem()
 {
     amount_ = 0;  // Accounts default to ZERO.  They can only change that
                   // amount by receiving from another account.
-    type_ = itemType::error_state;
+    type_ = otx::itemType::error_state;
     status_ = request;          // (Unless an issuer account, which can
                                 // create currency
     new_outbox_trans_num_ = 0;  // When the user puts a "1" in his outbox for a
@@ -1194,165 +1221,165 @@ void Item::Release_Item()
 
 void Item::ReleaseItems() { list_items_.clear(); }
 
-auto Item::GetItemTypeFromString(const String& strType) -> itemType
+auto Item::GetItemTypeFromString(const String& strType) -> otx::itemType
 {
-    itemType theType = itemType::error_state;
+    otx::itemType theType = otx::itemType::error_state;
 
     if (strType.Compare("transfer")) {
-        theType = itemType::transfer;
+        theType = otx::itemType::transfer;
     } else if (strType.Compare("atTransfer")) {
-        theType = itemType::atTransfer;
+        theType = otx::itemType::atTransfer;
 
     } else if (strType.Compare("acceptTransaction")) {
-        theType = itemType::acceptTransaction;
+        theType = otx::itemType::acceptTransaction;
     } else if (strType.Compare("atAcceptTransaction")) {
-        theType = itemType::atAcceptTransaction;
+        theType = otx::itemType::atAcceptTransaction;
 
     } else if (strType.Compare("acceptMessage")) {
-        theType = itemType::acceptMessage;
+        theType = otx::itemType::acceptMessage;
     } else if (strType.Compare("atAcceptMessage")) {
-        theType = itemType::atAcceptMessage;
+        theType = otx::itemType::atAcceptMessage;
 
     } else if (strType.Compare("acceptNotice")) {
-        theType = itemType::acceptNotice;
+        theType = otx::itemType::acceptNotice;
     } else if (strType.Compare("atAcceptNotice")) {
-        theType = itemType::atAcceptNotice;
+        theType = otx::itemType::atAcceptNotice;
 
     } else if (strType.Compare("acceptPending")) {
-        theType = itemType::acceptPending;
+        theType = otx::itemType::acceptPending;
     } else if (strType.Compare("atAcceptPending")) {
-        theType = itemType::atAcceptPending;
+        theType = otx::itemType::atAcceptPending;
     } else if (strType.Compare("rejectPending")) {
-        theType = itemType::rejectPending;
+        theType = otx::itemType::rejectPending;
     } else if (strType.Compare("atRejectPending")) {
-        theType = itemType::atRejectPending;
+        theType = otx::itemType::atRejectPending;
 
     } else if (strType.Compare("acceptCronReceipt")) {
-        theType = itemType::acceptCronReceipt;
+        theType = otx::itemType::acceptCronReceipt;
     } else if (strType.Compare("atAcceptCronReceipt")) {
-        theType = itemType::atAcceptCronReceipt;
+        theType = otx::itemType::atAcceptCronReceipt;
     } else if (strType.Compare("disputeCronReceipt")) {
-        theType = itemType::disputeCronReceipt;
+        theType = otx::itemType::disputeCronReceipt;
     } else if (strType.Compare("atDisputeCronReceipt")) {
-        theType = itemType::atDisputeCronReceipt;
+        theType = otx::itemType::atDisputeCronReceipt;
     } else if (strType.Compare("acceptItemReceipt")) {
-        theType = itemType::acceptItemReceipt;
+        theType = otx::itemType::acceptItemReceipt;
     } else if (strType.Compare("atAcceptItemReceipt")) {
-        theType = itemType::atAcceptItemReceipt;
+        theType = otx::itemType::atAcceptItemReceipt;
     } else if (strType.Compare("disputeItemReceipt")) {
-        theType = itemType::disputeItemReceipt;
+        theType = otx::itemType::disputeItemReceipt;
     } else if (strType.Compare("atDisputeItemReceipt")) {
-        theType = itemType::atDisputeItemReceipt;
+        theType = otx::itemType::atDisputeItemReceipt;
 
     } else if (strType.Compare("acceptFinalReceipt")) {
-        theType = itemType::acceptFinalReceipt;
+        theType = otx::itemType::acceptFinalReceipt;
     } else if (strType.Compare("atAcceptFinalReceipt")) {
-        theType = itemType::atAcceptFinalReceipt;
+        theType = otx::itemType::atAcceptFinalReceipt;
     } else if (strType.Compare("disputeFinalReceipt")) {
-        theType = itemType::disputeFinalReceipt;
+        theType = otx::itemType::disputeFinalReceipt;
     } else if (strType.Compare("atDisputeFinalReceipt")) {
-        theType = itemType::atDisputeFinalReceipt;
+        theType = otx::itemType::atDisputeFinalReceipt;
 
     } else if (strType.Compare("acceptBasketReceipt")) {
-        theType = itemType::acceptBasketReceipt;
+        theType = otx::itemType::acceptBasketReceipt;
     } else if (strType.Compare("atAcceptBasketReceipt")) {
-        theType = itemType::atAcceptBasketReceipt;
+        theType = otx::itemType::atAcceptBasketReceipt;
     } else if (strType.Compare("disputeBasketReceipt")) {
-        theType = itemType::disputeBasketReceipt;
+        theType = otx::itemType::disputeBasketReceipt;
     } else if (strType.Compare("atDisputeBasketReceipt")) {
-        theType = itemType::atDisputeBasketReceipt;
+        theType = otx::itemType::atDisputeBasketReceipt;
 
     } else if (strType.Compare("serverfee")) {
-        theType = itemType::serverfee;
+        theType = otx::itemType::serverfee;
     } else if (strType.Compare("atServerfee")) {
-        theType = itemType::atServerfee;
+        theType = otx::itemType::atServerfee;
     } else if (strType.Compare("issuerfee")) {
-        theType = itemType::issuerfee;
+        theType = otx::itemType::issuerfee;
     } else if (strType.Compare("atIssuerfee")) {
-        theType = itemType::atIssuerfee;
+        theType = otx::itemType::atIssuerfee;
 
     } else if (strType.Compare("balanceStatement")) {
-        theType = itemType::balanceStatement;
+        theType = otx::itemType::balanceStatement;
     } else if (strType.Compare("atBalanceStatement")) {
-        theType = itemType::atBalanceStatement;
+        theType = otx::itemType::atBalanceStatement;
     } else if (strType.Compare("transactionStatement")) {
-        theType = itemType::transactionStatement;
+        theType = otx::itemType::transactionStatement;
     } else if (strType.Compare("atTransactionStatement")) {
-        theType = itemType::atTransactionStatement;
+        theType = otx::itemType::atTransactionStatement;
 
     } else if (strType.Compare("withdrawal")) {
-        theType = itemType::withdrawal;
+        theType = otx::itemType::withdrawal;
     } else if (strType.Compare("atWithdrawal")) {
-        theType = itemType::atWithdrawal;
+        theType = otx::itemType::atWithdrawal;
     } else if (strType.Compare("deposit")) {
-        theType = itemType::deposit;
+        theType = otx::itemType::deposit;
     } else if (strType.Compare("atDeposit")) {
-        theType = itemType::atDeposit;
+        theType = otx::itemType::atDeposit;
 
     } else if (strType.Compare("withdrawVoucher")) {
-        theType = itemType::withdrawVoucher;
+        theType = otx::itemType::withdrawVoucher;
     } else if (strType.Compare("atWithdrawVoucher")) {
-        theType = itemType::atWithdrawVoucher;
+        theType = otx::itemType::atWithdrawVoucher;
     } else if (strType.Compare("depositCheque")) {
-        theType = itemType::depositCheque;
+        theType = otx::itemType::depositCheque;
     } else if (strType.Compare("atDepositCheque")) {
-        theType = itemType::atDepositCheque;
+        theType = otx::itemType::atDepositCheque;
 
     } else if (strType.Compare("payDividend")) {
-        theType = itemType::payDividend;
+        theType = otx::itemType::payDividend;
     } else if (strType.Compare("atPayDividend")) {
-        theType = itemType::atPayDividend;
+        theType = otx::itemType::atPayDividend;
 
     } else if (strType.Compare("marketOffer")) {
-        theType = itemType::marketOffer;
+        theType = otx::itemType::marketOffer;
     } else if (strType.Compare("atMarketOffer")) {
-        theType = itemType::atMarketOffer;
+        theType = otx::itemType::atMarketOffer;
 
     } else if (strType.Compare("paymentPlan")) {
-        theType = itemType::paymentPlan;
+        theType = otx::itemType::paymentPlan;
     } else if (strType.Compare("atPaymentPlan")) {
-        theType = itemType::atPaymentPlan;
+        theType = otx::itemType::atPaymentPlan;
 
     } else if (strType.Compare("smartContract")) {
-        theType = itemType::smartContract;
+        theType = otx::itemType::smartContract;
     } else if (strType.Compare("atSmartContract")) {
-        theType = itemType::atSmartContract;
+        theType = otx::itemType::atSmartContract;
 
     } else if (strType.Compare("cancelCronItem")) {
-        theType = itemType::cancelCronItem;
+        theType = otx::itemType::cancelCronItem;
     } else if (strType.Compare("atCancelCronItem")) {
-        theType = itemType::atCancelCronItem;
+        theType = otx::itemType::atCancelCronItem;
 
     } else if (strType.Compare("exchangeBasket")) {
-        theType = itemType::exchangeBasket;
+        theType = otx::itemType::exchangeBasket;
     } else if (strType.Compare("atExchangeBasket")) {
-        theType = itemType::atExchangeBasket;
+        theType = otx::itemType::atExchangeBasket;
 
     } else if (strType.Compare("chequeReceipt")) {
-        theType = itemType::chequeReceipt;
+        theType = otx::itemType::chequeReceipt;
     } else if (strType.Compare("voucherReceipt")) {
-        theType = itemType::voucherReceipt;
+        theType = otx::itemType::voucherReceipt;
     } else if (strType.Compare("marketReceipt")) {
-        theType = itemType::marketReceipt;
+        theType = otx::itemType::marketReceipt;
     } else if (strType.Compare("paymentReceipt")) {
-        theType = itemType::paymentReceipt;
+        theType = otx::itemType::paymentReceipt;
     } else if (strType.Compare("transferReceipt")) {
-        theType = itemType::transferReceipt;
+        theType = otx::itemType::transferReceipt;
 
     } else if (strType.Compare("finalReceipt")) {
-        theType = itemType::finalReceipt;
+        theType = otx::itemType::finalReceipt;
     } else if (strType.Compare("basketReceipt")) {
-        theType = itemType::basketReceipt;
+        theType = otx::itemType::basketReceipt;
 
     } else if (strType.Compare("replyNotice")) {
-        theType = itemType::replyNotice;
+        theType = otx::itemType::replyNotice;
     } else if (strType.Compare("successNotice")) {
-        theType = itemType::successNotice;
+        theType = otx::itemType::successNotice;
     } else if (strType.Compare("notice")) {
-        theType = itemType::notice;
+        theType = otx::itemType::notice;
 
     } else {
-        theType = itemType::error_state;
+        theType = otx::itemType::error_state;
     }
 
     return theType;
@@ -1402,7 +1429,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         // Therefore, the Item::acceptTransaction must contain the same list,
         // otherwise you haven't actually SIGNED for the list, have you!
         //
-        if (itemType::acceptTransaction == type_) {
+        if (otx::itemType::acceptTransaction == type_) {
             const auto strTotalList =
                 String::Factory(xml->getAttributeValue("totalListOfNumbers"));
             numlist_.Release();
@@ -1440,7 +1467,7 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
         strTemp = String::Factory(xml->getAttributeValue("numberOfOrigin"));
         if (strTemp->Exists()) { SetNumberOfOrigin(strTemp->ToLong()); }
 
-        strTemp = String::Factory(xml->getAttributeValue("originType"));
+        strTemp = String::Factory(xml->getAttributeValue("otx::originType"));
         if (strTemp->Exists()) {
             SetOriginType(GetOriginTypeFromString(strTemp));
         }
@@ -1491,8 +1518,8 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
 
         return 1;
     } else if (!strcmp("transactionReport", xml->getNodeName())) {
-        if ((itemType::balanceStatement == type_) ||
-            (itemType::atBalanceStatement == type_)) {
+        if ((otx::itemType::balanceStatement == type_) ||
+            (otx::itemType::atBalanceStatement == type_)) {
             // Notice it initializes with the wrong transaction number, in this
             // case.
             // That's okay, because I'm setting it below with
@@ -1563,7 +1590,8 @@ auto Item::ProcessXMLNode(irr::io::IrrXMLReader*& xml) -> std::int32_t
                 pItem->SetNumberOfOrigin(strTemp->ToLong());
             }
 
-            strTemp = String::Factory(xml->getAttributeValue("originType"));
+            strTemp =
+                String::Factory(xml->getAttributeValue("otx::originType"));
             if (strTemp->Exists()) {
                 pItem->SetOriginType(GetOriginTypeFromString(strTemp));
             }
@@ -1616,223 +1644,224 @@ void Item::SetClosingNum(std::int64_t lClosingNum)
     closing_transaction_no_ = lClosingNum;
 }
 
-void Item::GetStringFromType(itemType theType, String& strType)
+void Item::GetStringFromType(otx::itemType theType, String& strType)
 {
     switch (theType) {
-        case itemType::transfer: {
+        case otx::itemType::transfer: {
             strType.Set("transfer");
         } break;
-        case itemType::acceptTransaction: {
+        case otx::itemType::acceptTransaction: {
             strType.Set("acceptTransaction");
         } break;
-        case itemType::acceptMessage: {
+        case otx::itemType::acceptMessage: {
             strType.Set("acceptMessage");
         } break;
-        case itemType::acceptNotice: {
+        case otx::itemType::acceptNotice: {
             strType.Set("acceptNotice");
         } break;
-        case itemType::acceptPending: {
+        case otx::itemType::acceptPending: {
             strType.Set("acceptPending");
         } break;
-        case itemType::rejectPending: {
+        case otx::itemType::rejectPending: {
             strType.Set("rejectPending");
         } break;
-        case itemType::acceptCronReceipt: {
+        case otx::itemType::acceptCronReceipt: {
             strType.Set("acceptCronReceipt");
         } break;
-        case itemType::disputeCronReceipt: {
+        case otx::itemType::disputeCronReceipt: {
             strType.Set("disputeCronReceipt");
         } break;
-        case itemType::acceptItemReceipt: {
+        case otx::itemType::acceptItemReceipt: {
             strType.Set("acceptItemReceipt");
         } break;
-        case itemType::disputeItemReceipt: {
+        case otx::itemType::disputeItemReceipt: {
             strType.Set("disputeItemReceipt");
         } break;
-        case itemType::acceptFinalReceipt: {
+        case otx::itemType::acceptFinalReceipt: {
             strType.Set("acceptFinalReceipt");
         } break;
-        case itemType::acceptBasketReceipt: {
+        case otx::itemType::acceptBasketReceipt: {
             strType.Set("acceptBasketReceipt");
         } break;
-        case itemType::disputeFinalReceipt: {
+        case otx::itemType::disputeFinalReceipt: {
             strType.Set("disputeFinalReceipt");
         } break;
-        case itemType::disputeBasketReceipt: {
+        case otx::itemType::disputeBasketReceipt: {
             strType.Set("disputeBasketReceipt");
         } break;
-        case itemType::serverfee: {
+        case otx::itemType::serverfee: {
             strType.Set("serverfee");
         } break;
-        case itemType::issuerfee: {
+        case otx::itemType::issuerfee: {
             strType.Set("issuerfee");
         } break;
-        case itemType::withdrawal: {
+        case otx::itemType::withdrawal: {
             strType.Set("withdrawal");
         } break;
-        case itemType::deposit: {
+        case otx::itemType::deposit: {
             strType.Set("deposit");
         } break;
-        case itemType::withdrawVoucher: {
+        case otx::itemType::withdrawVoucher: {
             strType.Set("withdrawVoucher");
         } break;
-        case itemType::depositCheque: {
+        case otx::itemType::depositCheque: {
             strType.Set("depositCheque");
         } break;
-        case itemType::payDividend: {
+        case otx::itemType::payDividend: {
             strType.Set("payDividend");
         } break;
-        case itemType::marketOffer: {
+        case otx::itemType::marketOffer: {
             strType.Set("marketOffer");
         } break;
-        case itemType::paymentPlan: {
+        case otx::itemType::paymentPlan: {
             strType.Set("paymentPlan");
         } break;
-        case itemType::smartContract: {
+        case otx::itemType::smartContract: {
             strType.Set("smartContract");
         } break;
-        case itemType::balanceStatement: {
+        case otx::itemType::balanceStatement: {
             strType.Set("balanceStatement");
         } break;
-        case itemType::transactionStatement: {
+        case otx::itemType::transactionStatement: {
             strType.Set("transactionStatement");
         } break;
-        case itemType::cancelCronItem: {
+        case otx::itemType::cancelCronItem: {
             strType.Set("cancelCronItem");
         } break;
-        case itemType::exchangeBasket: {
+        case otx::itemType::exchangeBasket: {
             strType.Set("exchangeBasket");
         } break;
-        case itemType::atCancelCronItem: {
+        case otx::itemType::atCancelCronItem: {
             strType.Set("atCancelCronItem");
         } break;
-        case itemType::atExchangeBasket: {
+        case otx::itemType::atExchangeBasket: {
             strType.Set("atExchangeBasket");
         } break;
         // used for inbox statements in balance agreement.
-        case itemType::chequeReceipt: {
+        case otx::itemType::chequeReceipt: {
             strType.Set("chequeReceipt");
         } break;
         // used for inbox statements in balance agreement.
-        case itemType::voucherReceipt: {
+        case otx::itemType::voucherReceipt: {
             strType.Set("voucherReceipt");
         } break;
         // used as market receipt, and also for inbox statement containing
         // market receipt will use this as well.
-        case itemType::marketReceipt: {
+        case otx::itemType::marketReceipt: {
             strType.Set("marketReceipt");
         } break;
         // used as payment receipt, also used in inbox statement as payment
         // receipt.
-        case itemType::paymentReceipt: {
+        case otx::itemType::paymentReceipt: {
             strType.Set("paymentReceipt");
         } break;
         // used in inbox statement as transfer receipt.
-        case itemType::transferReceipt: {
+        case otx::itemType::transferReceipt: {
             strType.Set("transferReceipt");
         } break;
         // used for final receipt. Also used in inbox statement as final
         // receipt. (For expiring or cancelled Cron Item.)
-        case itemType::finalReceipt: {
+        case otx::itemType::finalReceipt: {
             strType.Set("finalReceipt");
         } break;
         // used in inbox statement as basket receipt. (For exchange.)
-        case itemType::basketReceipt: {
+        case otx::itemType::basketReceipt: {
             strType.Set("basketReceipt");
         } break;
-        case itemType::notice: {  // used in Nymbox statement as notification
-                                  // from erver.
+        case otx::itemType::notice: {  // used in Nymbox statement as
+                                       // notification
+                                       // from erver.
             strType.Set("notice");
         } break;
         // some server replies (to your request) have a copy dropped into your
         // nymbox, to make sure you received it.
-        case itemType::replyNotice: {
+        case otx::itemType::replyNotice: {
             strType.Set("replyNotice");
         } break;
         // used in Nymbox statement as notification from server of successful
         // sign-out of a trans#.
-        case itemType::successNotice: {
+        case otx::itemType::successNotice: {
             strType.Set("successNotice");
         } break;
-        case itemType::atTransfer: {
+        case otx::itemType::atTransfer: {
             strType.Set("atTransfer");
         } break;
-        case itemType::atAcceptTransaction: {
+        case otx::itemType::atAcceptTransaction: {
             strType.Set("atAcceptTransaction");
         } break;
-        case itemType::atAcceptMessage: {
+        case otx::itemType::atAcceptMessage: {
             strType.Set("atAcceptMessage");
         } break;
-        case itemType::atAcceptNotice: {
+        case otx::itemType::atAcceptNotice: {
             strType.Set("atAcceptNotice");
         } break;
-        case itemType::atAcceptPending: {
+        case otx::itemType::atAcceptPending: {
             strType.Set("atAcceptPending");
         } break;
-        case itemType::atRejectPending: {
+        case otx::itemType::atRejectPending: {
             strType.Set("atRejectPending");
         } break;
-        case itemType::atAcceptCronReceipt: {
+        case otx::itemType::atAcceptCronReceipt: {
             strType.Set("atAcceptCronReceipt");
         } break;
-        case itemType::atDisputeCronReceipt: {
+        case otx::itemType::atDisputeCronReceipt: {
             strType.Set("atDisputeCronReceipt");
         } break;
-        case itemType::atAcceptItemReceipt: {
+        case otx::itemType::atAcceptItemReceipt: {
             strType.Set("atAcceptItemReceipt");
         } break;
-        case itemType::atDisputeItemReceipt: {
+        case otx::itemType::atDisputeItemReceipt: {
             strType.Set("atDisputeItemReceipt");
         } break;
-        case itemType::atAcceptFinalReceipt: {
+        case otx::itemType::atAcceptFinalReceipt: {
             strType.Set("atAcceptFinalReceipt");
         } break;
-        case itemType::atAcceptBasketReceipt: {
+        case otx::itemType::atAcceptBasketReceipt: {
             strType.Set("atAcceptBasketReceipt");
         } break;
-        case itemType::atDisputeFinalReceipt: {
+        case otx::itemType::atDisputeFinalReceipt: {
             strType.Set("atDisputeFinalReceipt");
         } break;
-        case itemType::atDisputeBasketReceipt: {
+        case otx::itemType::atDisputeBasketReceipt: {
             strType.Set("atDisputeBasketReceipt");
         } break;
-        case itemType::atServerfee: {
+        case otx::itemType::atServerfee: {
             strType.Set("atServerfee");
         } break;
-        case itemType::atIssuerfee: {
+        case otx::itemType::atIssuerfee: {
             strType.Set("atIssuerfee");
         } break;
-        case itemType::atWithdrawal: {
+        case otx::itemType::atWithdrawal: {
             strType.Set("atWithdrawal");
         } break;
-        case itemType::atDeposit: {
+        case otx::itemType::atDeposit: {
             strType.Set("atDeposit");
         } break;
-        case itemType::atWithdrawVoucher: {
+        case otx::itemType::atWithdrawVoucher: {
             strType.Set("atWithdrawVoucher");
         } break;
-        case itemType::atDepositCheque: {
+        case otx::itemType::atDepositCheque: {
             strType.Set("atDepositCheque");
         } break;
-        case itemType::atPayDividend: {
+        case otx::itemType::atPayDividend: {
             strType.Set("atPayDividend");
         } break;
-        case itemType::atMarketOffer: {
+        case otx::itemType::atMarketOffer: {
             strType.Set("atMarketOffer");
         } break;
-        case itemType::atPaymentPlan: {
+        case otx::itemType::atPaymentPlan: {
             strType.Set("atPaymentPlan");
         } break;
-        case itemType::atSmartContract: {
+        case otx::itemType::atSmartContract: {
             strType.Set("atSmartContract");
         } break;
-        case itemType::atBalanceStatement: {
+        case otx::itemType::atBalanceStatement: {
             strType.Set("atBalanceStatement");
         } break;
-        case itemType::atTransactionStatement: {
+        case otx::itemType::atTransactionStatement: {
             strType.Set("atTransactionStatement");
         } break;
-        case itemType::error_state:
+        case otx::itemType::error_state:
         default: {
             strType.Set("error-unknown");
         }
@@ -1881,9 +1910,9 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
         "numberOfOrigin",  // GetRaw so it doesn't calculate.
         std::to_string(GetRawNumberOfOrigin()));
 
-    if (GetOriginType() != originType::not_applicable) {
+    if (GetOriginType() != otx::originType::not_applicable) {
         auto strOriginType = String::Factory(GetOriginTypeString());
-        tag.add_attribute("originType", strOriginType->Get());
+        tag.add_attribute("otx::originType", strOriginType->Get());
     }
 
     tag.add_attribute("transactionNum", std::to_string(GetTransactionNum()));
@@ -1918,9 +1947,10 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
         // will serialize the list of transaction numbers
         // being accepted. (They now support multiple
         // numbers.)
-        if ((itemType::acceptTransaction == type_) && (numlist_.Count() > 0)) {
+        if ((otx::itemType::acceptTransaction == type_) &&
+            (numlist_.Count() > 0)) {
             // numlist_.Count is always 0, except for
-            // itemType::acceptTransaction.
+            // otx::itemType::acceptTransaction.
             auto strListOfBlanks = String::Factory();
 
             if (true == numlist_.Output(strListOfBlanks)) {
@@ -1939,8 +1969,8 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
         tag.add_tag("attachment", attachment_->Get());
     }
 
-    if ((itemType::balanceStatement == type_) ||
-        (itemType::atBalanceStatement == type_)) {
+    if ((otx::itemType::balanceStatement == type_) ||
+        (otx::itemType::atBalanceStatement == type_)) {
 
         // loop through the sub-items (only used for balance agreement.)
         //
@@ -1973,10 +2003,11 @@ void Item::UpdateContents(const PasswordPrompt& reason)  // Before transmission
                 "numberOfOrigin",
                 std::to_string(pItem->GetRawNumberOfOrigin()));
 
-            if (pItem->GetOriginType() != originType::not_applicable) {
+            if (pItem->GetOriginType() != otx::originType::not_applicable) {
                 auto strOriginType =
                     String::Factory(pItem->GetOriginTypeString());
-                tagReport->add_attribute("originType", strOriginType->Get());
+                tagReport->add_attribute(
+                    "otx::originType", strOriginType->Get());
             }
 
             tagReport->add_attribute(

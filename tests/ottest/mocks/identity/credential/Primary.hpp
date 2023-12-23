@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
 
-#include "internal/identity/Types.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 
 namespace opentxs::identity::credential
 {

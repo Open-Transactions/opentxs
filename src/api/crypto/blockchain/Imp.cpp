@@ -28,6 +28,8 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -44,6 +46,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
@@ -59,17 +62,14 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -351,7 +351,7 @@ auto Blockchain::Imp::AssignContact(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
     const Subchain subchain,
-    const Bip32Index index,
+    const opentxs::crypto::Bip32Index index,
     const identifier::Generic& contactID) const noexcept -> bool
 {
     if (false == validate_nym(nymID)) { return false; }
@@ -386,7 +386,7 @@ auto Blockchain::Imp::AssignLabel(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
     const Subchain subchain,
-    const Bip32Index index,
+    const opentxs::crypto::Bip32Index index,
     const std::string_view label) const noexcept -> bool
 {
     if (false == validate_nym(nymID)) { return false; }
@@ -423,7 +423,8 @@ auto Blockchain::Imp::AssignTransactionMemo(
     return false;
 }
 
-auto Blockchain::Imp::bip44_type(const UnitType in) const noexcept -> Bip44Type
+auto Blockchain::Imp::bip44_type(const UnitType in) const noexcept
+    -> opentxs::blockchain::crypto::Bip44Type
 {
     try {
         const auto chain = unit_to_blockchain(in);
@@ -908,7 +909,7 @@ auto Blockchain::Imp::Init() noexcept -> void { accounts_.lock()->Populate(); }
 auto Blockchain::Imp::init_path(
     const opentxs::crypto::SeedID& seed,
     const UnitType chain,
-    const Bip32Index account,
+    const opentxs::crypto::Bip32Index account,
     const opentxs::blockchain::crypto::HDProtocol standard,
     proto::HDPath& path) const noexcept -> void
 {
@@ -918,23 +919,31 @@ auto Blockchain::Imp::init_path(
 
     switch (standard) {
         case Standard::BIP_32: {
-            path.add_child(HDIndex{account, Bip32Child::HARDENED});
+            path.add_child(
+                HDIndex{account, opentxs::crypto::Bip32Child::HARDENED});
         } break;
         case Standard::BIP_44: {
-            path.add_child(
-                HDIndex{Bip43Purpose::HDWALLET, Bip32Child::HARDENED});
-            path.add_child(HDIndex{bip44_type(chain), Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                opentxs::crypto::Bip43Purpose::HDWALLET,
+                opentxs::crypto::Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                bip44_type(chain), opentxs::crypto::Bip32Child::HARDENED});
             path.add_child(account);
         } break;
         case Standard::BIP_49: {
-            path.add_child(
-                HDIndex{Bip43Purpose::P2SH_P2WPKH, Bip32Child::HARDENED});
-            path.add_child(HDIndex{bip44_type(chain), Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                opentxs::crypto::Bip43Purpose::P2SH_P2WPKH,
+                opentxs::crypto::Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                bip44_type(chain), opentxs::crypto::Bip32Child::HARDENED});
             path.add_child(account);
         } break;
         case Standard::BIP_84: {
-            path.add_child(HDIndex{Bip43Purpose::P2WPKH, Bip32Child::HARDENED});
-            path.add_child(HDIndex{bip44_type(chain), Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                opentxs::crypto::Bip43Purpose::P2WPKH,
+                opentxs::crypto::Bip32Child::HARDENED});
+            path.add_child(HDIndex{
+                bip44_type(chain), opentxs::crypto::Bip32Child::HARDENED});
             path.add_child(account);
         } break;
         case Standard::Error:
@@ -1168,7 +1177,7 @@ auto Blockchain::Imp::NewEthereumSubaccount(
     init_path(
         api_.Factory().Internal().SeedID(nymPath.seed()),
         blockchain_to_unit(derivationChain),
-        HDIndex{nymPath.child(1), Bip32Child::HARDENED},
+        HDIndex{nymPath.child(1), opentxs::crypto::Bip32Child::HARDENED},
         standard,
         accountPath);
 
@@ -1253,7 +1262,7 @@ auto Blockchain::Imp::NewHDSubaccount(
     init_path(
         api_.Factory().Internal().SeedID(nymPath.seed()),
         blockchain_to_unit(derivationChain),
-        HDIndex{nymPath.child(1), Bip32Child::HARDENED},
+        HDIndex{nymPath.child(1), opentxs::crypto::Bip32Child::HARDENED},
         standard,
         accountPath);
 

@@ -13,6 +13,7 @@
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::node::manager

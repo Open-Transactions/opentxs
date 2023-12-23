@@ -14,7 +14,7 @@
 #include "interface/ui/contactlist/ContactList.hpp"  // IWYU pragma: keep
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 
 namespace opentxs::ui::implementation
 {

@@ -11,6 +11,7 @@
 
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
@@ -18,11 +19,16 @@
 namespace opentxs::blockchain::node::wallet
 {
 struct Elements final : public Allocated {
-    Vector<std::pair<Bip32Index, std::array<std::byte, 20>>> elements_20_;
-    Vector<std::pair<Bip32Index, std::array<std::byte, 32>>> elements_32_;
-    Vector<std::pair<Bip32Index, std::array<std::byte, 33>>> elements_33_;
-    Vector<std::pair<Bip32Index, std::array<std::byte, 64>>> elements_64_;
-    Vector<std::pair<Bip32Index, std::array<std::byte, 65>>> elements_65_;
+    Vector<std::pair<crypto::Bip32Index, std::array<std::byte, 20>>>
+        elements_20_;
+    Vector<std::pair<crypto::Bip32Index, std::array<std::byte, 32>>>
+        elements_32_;
+    Vector<std::pair<crypto::Bip32Index, std::array<std::byte, 33>>>
+        elements_33_;
+    Vector<std::pair<crypto::Bip32Index, std::array<std::byte, 64>>>
+        elements_64_;
+    Vector<std::pair<crypto::Bip32Index, std::array<std::byte, 65>>>
+        elements_65_;
     database::TXOs txos_;
 
     auto get_allocator() const noexcept -> allocator_type final;

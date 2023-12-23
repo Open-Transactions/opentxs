@@ -5,10 +5,6 @@
 
 add_subdirectory(obsolete)
 
-libopentxs_add_public_header("otx/client" "PaymentWorkflowState.hpp")
-libopentxs_add_public_header("otx/client" "PaymentWorkflowType.hpp")
-libopentxs_add_public_header("otx/client" "Types.hpp")
-
 target_sources(
   opentxs-common
   PRIVATE
