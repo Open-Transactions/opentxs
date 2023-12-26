@@ -20,6 +20,7 @@
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet

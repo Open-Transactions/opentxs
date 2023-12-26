@@ -27,11 +27,11 @@ TEST_F(Lucre, requestPurse)
 
     ASSERT_TRUE(purse.IsUnlocked());
     EXPECT_EQ(
-        ot::Clock::to_time_t(purse.EarliestValidTo()),
-        ot::Clock::to_time_t(valid_to_));
+        ot::seconds_since_epoch(purse.EarliestValidTo()).value(),
+        ot::seconds_since_epoch(valid_to_).value());
     EXPECT_EQ(
-        ot::Clock::to_time_t(purse.LatestValidFrom()),
-        ot::Clock::to_time_t(valid_from_));
+        ot::seconds_since_epoch(purse.LatestValidFrom()).value(),
+        ot::seconds_since_epoch(valid_from_).value());
     EXPECT_EQ(server_id_, purse.Notary());
     EXPECT_EQ(purse.State(), ot::otx::blind::PurseType::Request);
     EXPECT_EQ(purse.Type(), ot::otx::blind::CashType::Lucre);
@@ -47,11 +47,11 @@ TEST_F(Lucre, requestPurse)
     EXPECT_EQ(token1.Type(), ot::otx::blind::CashType::Lucre);
     EXPECT_EQ(unit_id_, token1.Unit());
     EXPECT_EQ(
-        ot::Clock::to_time_t(token1.ValidFrom()),
-        ot::Clock::to_time_t(valid_from_));
+        ot::seconds_since_epoch(token1.ValidFrom()).value(),
+        ot::seconds_since_epoch(valid_from_).value());
     EXPECT_EQ(
-        ot::Clock::to_time_t(token1.ValidTo()),
-        ot::Clock::to_time_t(valid_to_));
+        ot::seconds_since_epoch(token1.ValidTo()).value(),
+        ot::seconds_since_epoch(valid_to_).value());
     EXPECT_EQ(token1.Value(), 10000);
 
     auto& token2 = purse.at(1);
@@ -62,11 +62,11 @@ TEST_F(Lucre, requestPurse)
     EXPECT_EQ(token2.Type(), ot::otx::blind::CashType::Lucre);
     EXPECT_EQ(unit_id_, token2.Unit());
     EXPECT_EQ(
-        ot::Clock::to_time_t(token2.ValidFrom()),
-        ot::Clock::to_time_t(valid_from_));
+        ot::seconds_since_epoch(token2.ValidFrom()).value(),
+        ot::seconds_since_epoch(valid_from_).value());
     EXPECT_EQ(
-        ot::Clock::to_time_t(token2.ValidTo()),
-        ot::Clock::to_time_t(valid_to_));
+        ot::seconds_since_epoch(token2.ValidTo()).value(),
+        ot::seconds_since_epoch(valid_to_).value());
     EXPECT_EQ(token2.Value(), 10000);
 }
 
@@ -81,11 +81,11 @@ TEST_F(Lucre, serialize_deserialize)
     ASSERT_TRUE(restored);
 
     EXPECT_EQ(
-        ot::Clock::to_time_t(request_purse_->EarliestValidTo()),
-        ot::Clock::to_time_t(restored.EarliestValidTo()));
+        ot::seconds_since_epoch(request_purse_->EarliestValidTo()).value(),
+        ot::seconds_since_epoch(restored.EarliestValidTo()).value());
     EXPECT_EQ(
-        ot::Clock::to_time_t(request_purse_->LatestValidFrom()),
-        ot::Clock::to_time_t(restored.LatestValidFrom()));
+        ot::seconds_since_epoch(request_purse_->LatestValidFrom()).value(),
+        ot::seconds_since_epoch(restored.LatestValidFrom()).value());
     EXPECT_EQ(request_purse_->Notary(), restored.Notary());
     EXPECT_EQ(request_purse_->State(), restored.State());
     EXPECT_EQ(request_purse_->Type(), restored.Type());
@@ -104,11 +104,11 @@ TEST_F(Lucre, serialize_deserialize)
         EXPECT_EQ(token_a.Type(), token_b.Type());
         EXPECT_EQ(token_a.Unit(), token_b.Unit());
         EXPECT_EQ(
-            ot::Clock::to_time_t(token_a.ValidFrom()),
-            ot::Clock::to_time_t(token_b.ValidFrom()));
+            ot::seconds_since_epoch(token_a.ValidFrom()).value(),
+            ot::seconds_since_epoch(token_b.ValidFrom()).value());
         EXPECT_EQ(
-            ot::Clock::to_time_t(token_a.ValidTo()),
-            ot::Clock::to_time_t(token_b.ValidTo()));
+            ot::seconds_since_epoch(token_a.ValidTo()).value(),
+            ot::seconds_since_epoch(token_b.ValidTo()).value());
         EXPECT_EQ(token_a.Value(), token_b.Value());
     }
 }

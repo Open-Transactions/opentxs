@@ -53,6 +53,7 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
@@ -92,7 +93,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs

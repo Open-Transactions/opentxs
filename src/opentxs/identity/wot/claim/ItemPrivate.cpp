@@ -107,8 +107,8 @@ auto ItemPrivate::Serialize(proto::ContactItem& out, bool withID) const noexcept
 
     out.set_type(translate(Type()));
     out.set_value(UnallocatedCString{Value()});
-    out.set_start(Clock::to_time_t(Start()));
-    out.set_end(Clock::to_time_t(End()));
+    out.set_start(seconds_since_epoch(Start()).value());
+    out.set_end(seconds_since_epoch(End()).value());
     for_each_attribute([&out](auto a) { out.add_attribute(translate(a)); });
 
     return true;

@@ -12,10 +12,10 @@
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

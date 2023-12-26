@@ -58,8 +58,8 @@ ClaimPrivate::ClaimPrivate(
             auto& item = *out.mutable_item();
             item.set_version(version);
             item.set_type(translate(type_));
-            item.set_start(Clock::to_time_t(start_));
-            item.set_end(Clock::to_time_t(stop_));
+            item.set_start(seconds_since_epoch(start_).value());
+            item.set_end(seconds_since_epoch(stop_).value());
             item.set_value(
                 static_cast<const char*>(value_.data()), value_.size());
             item.set_subtype(

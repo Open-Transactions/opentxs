@@ -21,6 +21,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
@@ -30,7 +31,6 @@
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

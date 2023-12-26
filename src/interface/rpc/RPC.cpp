@@ -72,7 +72,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Session.hpp"

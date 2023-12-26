@@ -15,6 +15,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <span>
 #include <utility>
 
@@ -411,7 +412,8 @@ auto BalanceItem::qt_data(const int column, const int role, QVariant& out)
         } break;
         case Parent::TimeRole: {
             auto qdatetime = QDateTime{};
-            qdatetime.setSecsSinceEpoch(Clock::to_time_t(Timestamp()));
+            qdatetime.setSecsSinceEpoch(
+                seconds_since_epoch(Timestamp()).value());
 
             out = qdatetime;
         } break;

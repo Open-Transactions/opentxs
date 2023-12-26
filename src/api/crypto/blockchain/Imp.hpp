@@ -19,6 +19,7 @@
 #include "api/crypto/blockchain/AccountCache.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

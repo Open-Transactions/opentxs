@@ -8,6 +8,7 @@
 #include <cstdint>
 
 #include "internal/otx/blind/Purse.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identifier/Notary.hpp"
@@ -15,7 +16,6 @@
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/blind/token/Token.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

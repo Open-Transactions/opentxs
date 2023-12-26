@@ -16,7 +16,7 @@
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/P0330.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -29,7 +29,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::network::blockchain
@@ -195,7 +194,7 @@ auto AddressPrivate::calculate_id(
         bytes,
         port,
         chain,
-        convert_stime(0),
+        seconds_since_epoch_unsigned(0).value(),
         {});
 
     return api.Internal().IdentifierFromPreimage(serialized);
@@ -378,7 +377,7 @@ auto AddressPrivate::serialize(
     if (valid(bytes)) { output.set_address(bytes.data(), bytes.size()); }
 
     output.set_port(port);
-    output.set_time(Clock::to_time_t(lastConnected));
+    output.set_time(seconds_since_epoch_unsigned(lastConnected).value());
 
     for (const auto& service : services) {
         output.add_service(static_cast<std::uint8_t>(service));

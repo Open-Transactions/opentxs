@@ -68,7 +68,7 @@ void DealerRouter::dealerSocketThread(const ot::UnallocatedCString& msg)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 5;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }
@@ -109,13 +109,13 @@ void DealerRouter::routerSocketThread(const ot::UnallocatedCString& endpoint)
     routerSocket->Start(endpoint);
 
     auto end = std::time(nullptr) + 15;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     ASSERT_TRUE(replyProcessed);
 
     routerSocket->Send(std::move(replyMessage));
 
     // Give the router socket time to send the message.
-    ot::Sleep(500ms);
+    ot::sleep(500ms);
 }
 }  // namespace ottest

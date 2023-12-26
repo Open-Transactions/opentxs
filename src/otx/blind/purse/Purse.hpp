@@ -12,13 +12,13 @@
 #include <memory>
 
 #include "internal/otx/blind/Purse.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

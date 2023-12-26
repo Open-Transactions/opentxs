@@ -23,6 +23,7 @@
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/blockchain/Peer.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -25,6 +25,7 @@
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -41,7 +42,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs

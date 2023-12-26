@@ -127,7 +127,7 @@ void Server::ActivateCron()
 /// Currently the test server calls this 10 times per second.
 /// It also processes all the input/output at the same rate.
 /// It sleeps in between. (See testserver.cpp for the call
-/// and OTSleep() for the sleep code.)
+/// and OTsleep() for the sleep code.)
 ///
 void Server::ProcessCron()
 {

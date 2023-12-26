@@ -11,6 +11,7 @@
 #include "opentxs/ConnectionMode.hpp"                     // IWYU pragma: export
 #include "opentxs/Context.hpp"                            // IWYU pragma: export
 #include "opentxs/Export.hpp"                             // IWYU pragma: export
+#include "opentxs/Time.hpp"                               // IWYU pragma: export
 #include "opentxs/Types.hpp"                              // IWYU pragma: export
 #include "opentxs/UnitType.hpp"                           // IWYU pragma: export
 #include "opentxs/WorkType.hpp"                           // IWYU pragma: export
@@ -320,6 +321,5 @@
 #include "opentxs/util/PasswordCallback.hpp"             // IWYU pragma: export
 #include "opentxs/util/PasswordCaller.hpp"               // IWYU pragma: export
 #include "opentxs/util/PasswordPrompt.hpp"               // IWYU pragma: export
-#include "opentxs/util/Time.hpp"                         // IWYU pragma: export
 #include "opentxs/util/WriteBuffer.hpp"                  // IWYU pragma: export
 #include "opentxs/util/Writer.hpp"                       // IWYU pragma: export

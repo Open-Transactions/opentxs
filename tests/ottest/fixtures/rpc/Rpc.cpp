@@ -156,12 +156,12 @@ void Rpc::wait_for_state_machine(
     ThreadStatus status{ThreadStatus::RUNNING};
 
     while (0 == std::get<0>(task)) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
         task = api.OTX().DownloadNym(nymID, serverID, nymID);
     }
 
     while (ThreadStatus::RUNNING == status) {
-        ot::Sleep(10ms);
+        ot::sleep(10ms);
         status = api.OTX().Status(std::get<0>(task));
     }
 
@@ -178,12 +178,12 @@ void Rpc::receive_payment(
     ThreadStatus status{ThreadStatus::RUNNING};
 
     while (0 == std::get<0>(task)) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
         task = api.OTX().ProcessInbox(nymID, serverID, accountID);
     }
 
     while (ThreadStatus::RUNNING == status) {
-        ot::Sleep(10ms);
+        ot::sleep(10ms);
         status = api.OTX().Status(std::get<0>(task));
     }
 

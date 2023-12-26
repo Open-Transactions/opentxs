@@ -20,6 +20,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/util/Common.hpp"
 #include "internal/util/Log.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -35,7 +36,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/log/LogBuffer.hpp"
 #include "util/log/Logger.hpp"
@@ -351,7 +351,7 @@ auto Log::Imp::Trace(const std::source_location& loc, std::string_view message)
 
 auto Log::Imp::wait_for_terminate() const noexcept -> void
 {
-    Sleep(10s);
+    sleep(10s);
     std::abort();
 }
 }  // namespace opentxs

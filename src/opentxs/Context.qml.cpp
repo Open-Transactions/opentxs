@@ -15,10 +15,10 @@ auto RegisterQMLTypes() noexcept -> void
 {
     qmlRegisterUncreatableMetaObject(
         opentxs::unittype::staticMetaObject,
-        "org.opentransactions",
+        "org.opentransactions.unittype",
         VersionMajor(),
         VersionMinor(),
-        "opentxs_unittype",
+        "UnitType",
         "Access to opentxs::UnitType enum class");
 }
 }  // namespace opentxs

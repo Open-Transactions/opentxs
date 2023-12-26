@@ -192,7 +192,7 @@ auto SyncRequestor::wait(const bool hard) noexcept -> bool
 
     while ((imp_->updated_ < expected_) &&
            ((ot::Clock::now() - start) < limit)) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
     }
 
     if (false == hard) { imp_->updated_.store(expected_.load()); }

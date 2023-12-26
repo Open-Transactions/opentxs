@@ -23,6 +23,7 @@
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Deterministic.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
@@ -37,7 +38,6 @@
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Latest.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -17,12 +17,11 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/StorageRoot.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/Time.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "opentxs/util/storage/Driver.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -144,7 +143,8 @@ auto Root::init(const Hash& hash) noexcept(false) -> void
                 sequence_.store(proto.sequence());
                 tree_root_ = read(proto.items());
                 gc_params_.running_ = proto.gc();
-                gc_params_.last_ = convert_stime(proto.lastgc());
+                gc_params_.last_ =
+                    seconds_since_epoch_unsigned(proto.lastgc()).value();
                 gc_params_.root_ = read(proto.gcroot());
                 gc_params_.from_ = next(current_bucket_.load());
             }
@@ -198,7 +198,7 @@ auto Root::serialize(const Lock&) const -> proto::StorageRoot
     write(tree_root_, *output.mutable_items());
     output.set_altlocation(static_cast<bool>(current_bucket_.load()));
     output.set_sequence(sequence_);
-    output.set_lastgc(Clock::to_time_t(gc_params_.last_));
+    output.set_lastgc(seconds_since_epoch(gc_params_.last_).value());
     output.set_gc(gc_params_.running_);
     write(gc_params_.root_, *output.mutable_gcroot());
 

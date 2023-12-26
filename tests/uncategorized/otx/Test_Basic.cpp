@@ -1708,7 +1708,7 @@ TEST_F(Basic, send_internal_transfer)
         // The state change from ACKNOWLEDGED to CONVEYED occurs
         // asynchronously due to server push notifications so the order in
         // which these states are observed by the sender is undefined.
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
         workflows = client_2_.Storage().Internal().PaymentWorkflowsByState(
             bob_nym_id_,
             ot::otx::client::PaymentWorkflowType::InternalTransfer,
@@ -2558,7 +2558,7 @@ TEST_F(Basic, waitForCash_Alice)
 
     while (false == mint) {
         std::cout << "* Waiting for mint..." << std::endl;
-        ot::Sleep(10s);
+        ot::sleep(10s);
         mint = CheckMint();
         const auto wait = ot::Clock::now() - start;
         const auto limit = std::chrono::minutes(MINT_TIME_LIMIT_MINUTES);

@@ -13,6 +13,7 @@
 #include <tuple>
 
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/storage/Types.hpp"
@@ -61,7 +62,7 @@ public:
 
     auto Add(
         const identifier::Generic& id,
-        const std::uint64_t time,
+        Time time,
         const otx::client::StorageBox& box,
         std::string_view alias,
         const UnallocatedCString& contents,

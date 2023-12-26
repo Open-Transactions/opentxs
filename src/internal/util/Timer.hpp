@@ -9,7 +9,7 @@
 #include <functional>
 #include <memory>
 
-#include "opentxs/util/Time.hpp"
+#include "opentxs/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

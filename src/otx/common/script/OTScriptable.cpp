@@ -13,6 +13,7 @@
 #include <cstring>
 #include <filesystem>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <utility>
 
@@ -32,6 +33,7 @@
 #include "internal/otx/smartcontract/OTVariable.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -42,7 +44,6 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 // CALLBACKS
 //
@@ -246,7 +247,7 @@ auto OTScriptable::GetTime()
     -> UnallocatedCString  // Returns a string, containing seconds as
                            // std::int32_t. (Time in seconds.)
 {
-    const std::int64_t lTime = Clock::to_time_t(Clock::now());
+    const auto lTime = seconds_since_epoch(Clock::now()).value();
 
     return std::to_string(lTime);
 }

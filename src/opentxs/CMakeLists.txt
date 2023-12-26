@@ -20,6 +20,34 @@ configure_file(
   @ONLY
 )
 
+try_compile(
+  OPENTXS_HAVE_UTC_CLOCK SOURCE_FROM_FILE
+  "libopentxs-test-for-utc-clock.cpp"
+  "${opentxs_SOURCE_DIR}/tools/cmake/libopentxs-test-for-utc-clock.cpp"
+  LOG_DESCRIPTION
+  "test for std::chrono::utc_clock"
+  CXX_STANDARD
+  20
+  CXX_STANDARD_REQUIRED
+  ON
+  CXX_EXTENSIONS
+  OFF
+)
+
+if(OPENTXS_HAVE_UTC_CLOCK)
+  message(STATUS "standard library supports std::chrono::utc_clock")
+  set(OPENTXS_TIME_TYPE "utc_clock")
+else()
+  message(STATUS "standard library does not support std::chrono::utc_clock")
+  set(OPENTXS_TIME_TYPE "system_clock")
+endif()
+
+configure_file(
+  "${opentxs_SOURCE_DIR}/include/opentxs/Time.hpp.in"
+  "${opentxs_BINARY_DIR}/include/opentxs/Time.hpp"
+  @ONLY
+)
+
 file(
   READ
   "Export.hpp.in"
@@ -46,6 +74,7 @@ libopentxs_add_public_header("" "BlockchainProfile.hpp")
 libopentxs_add_public_header("" "ConnectionMode.hpp")
 libopentxs_add_public_header("" "Context.hpp")
 libopentxs_add_public_header("" "Export.hpp")
+libopentxs_add_public_header("" "Time.hpp")
 libopentxs_add_public_header("" "Types.hpp")
 libopentxs_add_public_header("" "WorkType.hpp")
 libopentxs_add_public_header("" "opentxs.hpp")
@@ -69,6 +98,7 @@ target_sources(
     "BlockchainProfile.cpp"
     "ConnectionMode.cpp"
     "Context.cpp"
+    "Time.cpp"
     "Types.cpp"
     "Types.internal.cpp"
     "Types.internal.hpp"

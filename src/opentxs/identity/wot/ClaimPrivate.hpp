@@ -17,6 +17,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/identifier/Generic.hpp"
@@ -27,7 +28,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

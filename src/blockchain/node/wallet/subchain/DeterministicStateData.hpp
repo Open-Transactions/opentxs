@@ -17,12 +17,12 @@
 #include "blockchain/node/wallet/subchain/SubchainStateData.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

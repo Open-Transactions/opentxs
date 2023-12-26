@@ -85,7 +85,7 @@ void RequestReply::replySocketThread(const ot::UnallocatedCString& endpoint)
     replySocket->Start(endpoint);
 
     auto end = std::time(nullptr) + 15;
-    while (!replyReturned && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyReturned && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyReturned);
 }

@@ -15,6 +15,7 @@
 #include <cstring>
 #include <functional>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
@@ -23,7 +24,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -39,7 +40,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Container.hpp"
 
@@ -239,7 +239,8 @@ Bip155::Bip155(
     const opentxs::blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     const network::blockchain::Address& address) noexcept
-    : time_(shorten(Clock::to_time_t(address.LastConnected())))
+    : time_(shorten(uint64_to_size(
+          seconds_since_epoch_unsigned(address.LastConnected()).value())))
     , services_(GetServiceBytes(
           TranslateServices(chain, version, address.Services())))
     , network_id_([&]() -> std::uint8_t {
@@ -395,7 +396,7 @@ auto Bip155::ToAddress(
                 network,
                 addr,
                 chain,
-                convert_time(time_.value()),
+                seconds_since_epoch(time_.value()).value(),
                 TranslateServices(
                     chain, version, GetServices(services_.Value())),
                 keyView);
@@ -412,7 +413,7 @@ auto Bip155::ToAddress(
         addr_.Bytes(),
         port_.value(),
         chain,
-        convert_time(time_.value()),
+        seconds_since_epoch(time_.value()).value(),
         TranslateServices(chain, version, GetServices(services_.Value())));
 }
 

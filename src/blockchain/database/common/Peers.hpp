@@ -17,6 +17,7 @@
 
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
@@ -24,7 +25,6 @@
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -78,7 +78,7 @@ void PairSocket::pairSocketThread(
 
     promise->set_value();
     auto end = std::time(nullptr) + 15;
-    while (!callbackFinished && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!callbackFinished && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     ASSERT_TRUE(callbackFinished);
 }

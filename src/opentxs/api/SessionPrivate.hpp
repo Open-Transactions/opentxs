@@ -15,6 +15,7 @@
 #include <optional>
 
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -29,7 +30,6 @@
 #include "opentxs/core/Secret.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Shutdown.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Time.hpp"
+#include "opentxs/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

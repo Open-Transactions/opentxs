@@ -9,9 +9,9 @@
 
 #include "ListRow.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

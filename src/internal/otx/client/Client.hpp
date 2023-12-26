@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "internal/otx/consensus/Server.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/OTX.hpp"
 #include "opentxs/contract/ContractType.hpp"  // IWYU pragma: keep
@@ -30,7 +31,6 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/Blank.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

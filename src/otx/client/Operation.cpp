@@ -57,6 +57,7 @@
 #include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -100,7 +101,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 
@@ -1640,7 +1640,7 @@ auto Operation::download_box_receipt(
 
     while (false == bool(result)) {
         LogTrace()()("Context is busy").Flush();
-        Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
         result = context.Queue(api_, command, reason_, {});
     }
 
@@ -1804,7 +1804,7 @@ void Operation::execute()
 
     if (false == bool(result)) {
         LogTrace()()("Context is busy").Flush();
-        Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
 
         return;
     }
@@ -1884,7 +1884,7 @@ auto Operation::get_account_data(
 
     if (false == bool(result)) {
         LogTrace()()("Context is busy").Flush();
-        Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
 
         return false;
     }
@@ -2010,7 +2010,7 @@ auto Operation::IssueUnitDefinition(
 void Operation::join()
 {
     while (State::Idle != state_.load()) {
-        Sleep(std::chrono::milliseconds(OPERATION_JOIN_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_JOIN_MILLISECONDS));
     }
 }
 
@@ -2256,7 +2256,7 @@ auto Operation::process_inbox(
 
     while (false == bool(result)) {
         LogTrace()()("Context is busy").Flush();
-        Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
         result = context.Queue(api_, message, reason_, {});
     }
 
@@ -2694,7 +2694,7 @@ void Operation::transaction_numbers()
 
     if (false == bool(result)) {
         LogTrace()()("Context is busy").Flush();
-        Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+        sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
 
         return;
     }
@@ -2709,7 +2709,7 @@ void Operation::transaction_numbers()
         while (false == bool(nymbox)) {
             if (shutdown().load()) { return; }
             LogTrace()()("Context is busy").Flush();
-            Sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
+            sleep(std::chrono::milliseconds(OPERATION_POLL_MILLISECONDS));
             nymbox = context.RefreshNymbox(api_, reason_);
         }
 

@@ -41,6 +41,7 @@
 #include "internal/core/Amount.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -91,7 +92,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 

@@ -11,11 +11,11 @@
 
 #include "blockchain/node/wallet/proposals/Pending.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

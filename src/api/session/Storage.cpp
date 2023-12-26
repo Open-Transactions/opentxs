@@ -777,15 +777,16 @@ auto Storage::Load(
 
     if (rc && temp) {
         output = *temp;
-        time = Clock::from_time_t([&]() -> std::time_t {
-            try {
+        time = seconds_since_epoch([&] {
+                   try {
 
-                return std::stoi(alias);
-            } catch (...) {
+                       return std::stoi(alias);
+                   } catch (...) {
 
-                return {};
-            }
-        }());
+                       return 0;
+                   }
+               }())
+                   .value();
     }
 
     return rc;
@@ -979,7 +980,7 @@ auto Storage::MoveThreadItem(
                            .get();
     const auto thread = fromThread.Items();
     auto found{false};
-    auto time = std::uint64_t{};
+    auto time = Time{};
     auto box = otx::client::StorageBox{};
     const auto alias = UnallocatedCString{};
     const auto contents = UnallocatedCString{};
@@ -989,7 +990,7 @@ auto Storage::MoveThreadItem(
     for (const auto& item : thread.item()) {
         if (item.id() == itemID.asBase58(crypto_)) {
             found = true;
-            time = item.time();
+            time = seconds_since_epoch_unsigned(item.time()).value();
             box = static_cast<otx::client::StorageBox>(item.box());
             index = item.index();
             account = factory_.IdentifierFromBase58(item.account());
@@ -2032,7 +2033,7 @@ auto Storage::Store(
     const identifier::Nym& nymid,
     const identifier::Generic& threadid,
     const identifier::Generic& itemid,
-    const std::uint64_t time,
+    Time time,
     std::string_view alias,
     const UnallocatedCString& data,
     const otx::client::StorageBox box,
@@ -2078,7 +2079,7 @@ auto Storage::Store(
         .get()
         .Add(
             id,
-            Clock::to_time_t(time),
+            time,
             otx::client::StorageBox::BLOCKCHAIN,
             alias,
             UnallocatedCString{txid.Bytes()},

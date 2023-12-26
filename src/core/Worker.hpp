@@ -133,7 +133,7 @@ private:
         const auto wait = std::chrono::duration_cast<std::chrono::milliseconds>(
             rate_limit_ - (Clock::now() - last_executed_));
 
-        if (0 < wait.count()) { Sleep(wait); }
+        if (0 < wait.count()) { sleep(wait); }
     }
 
     inline auto downcast() noexcept -> Child&

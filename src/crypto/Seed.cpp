@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 
@@ -28,7 +29,7 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Seed.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -453,7 +454,7 @@ Seed::Imp::Imp(
     , encrypted_phrase_(
           proto.has_passphrase() ? proto.passphrase() : proto::Ciphertext{})
     , encrypted_entropy_(proto.has_raw() ? proto.raw() : proto::Ciphertext{})
-    , created_time_(convert_time(proto.created_time()))
+    , created_time_(seconds_since_epoch(proto.created_time()).value())
     , api_(api)
     , data_(proto.version(), proto.index())
 {
@@ -589,7 +590,7 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
     id_.Internal().Serialize(*proto.mutable_id());
     proto.set_type(internal::translate(type_));
     proto.set_lang(internal::translate(lang_));
-    proto.set_created_time(Clock::to_time_t(created_time_));
+    proto.set_created_time(seconds_since_epoch_unsigned(created_time_).value());
 
     if (0u < words_.size()) { *proto.mutable_words() = encrypted_words_; }
 

@@ -557,7 +557,8 @@ auto check_row(
 
         if (const auto& required = expected.timestamp_; required.has_value()) {
             const auto qt =
-                ot::Clock::from_time_t(time.toDateTime().toSecsSinceEpoch());
+                ot::seconds_since_epoch(time.toDateTime().toSecsSinceEpoch())
+                    .value();
 
             output &= (qt == required.value());
 
@@ -896,7 +897,8 @@ auto check_row(
 
         if (const auto& required = expected.timestamp_; required.has_value()) {
             const auto qt =
-                ot::Clock::from_time_t(time.toDateTime().toSecsSinceEpoch());
+                ot::seconds_since_epoch(time.toDateTime().toSecsSinceEpoch())
+                    .value();
 
             output &= (qt == required.value());
 

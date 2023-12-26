@@ -45,6 +45,7 @@
 #include "network/blockchain/Seednodes.hpp"
 #include "opentxs/BlockchainProfile.hpp"
 #include "opentxs/ConnectionMode.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.hpp"
 #include "opentxs/WorkType.internal.hpp"
@@ -89,7 +90,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {

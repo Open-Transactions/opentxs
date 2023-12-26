@@ -11,6 +11,7 @@
 #include "core/contract/Signable.hpp"
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Types.hpp"
@@ -19,7 +20,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

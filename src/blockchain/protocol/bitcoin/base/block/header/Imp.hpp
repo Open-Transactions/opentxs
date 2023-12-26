@@ -15,6 +15,7 @@
 #include "blockchain/block/header/Imp.hpp"
 #include "blockchain/protocol/bitcoin/base/block/header/HeaderPrivate.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -24,7 +25,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

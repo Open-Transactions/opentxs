@@ -31,6 +31,7 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/Timer.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Context.hpp"
@@ -52,7 +53,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -9,6 +9,7 @@
 #include <compare>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "internal/core/String.hpp"
@@ -28,7 +29,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
@@ -230,8 +231,8 @@ auto OTAPI_Exec::EasyProposePlan(
     OT_VERIFY_ID_STR(RECIPIENT_ACCT_ID);
     OT_VERIFY_STD_STR(PLAN_CONSIDERATION);
 
-    Time VALID_FROM = convert_stime(0);
-    Time VALID_TO = convert_stime(0);
+    auto VALID_FROM = seconds_since_epoch_unsigned(0).value();
+    auto VALID_TO = seconds_since_epoch_unsigned(0).value();
     std::int64_t INITIAL_PAYMENT_AMOUNT = 0;
     std::chrono::seconds INITIAL_PAYMENT_DELAY{0};
     std::int64_t PAYMENT_PLAN_AMOUNT = 0;
@@ -246,13 +247,17 @@ auto OTAPI_Exec::EasyProposePlan(
         // VALID_FROM
         if (theList.Count() > 0) {
             std::int64_t lVal = 0;
-            if (theList.Peek(lVal)) { VALID_FROM = convert_stime(lVal); }
+            if (theList.Peek(lVal)) {
+                VALID_FROM = seconds_since_epoch_unsigned(lVal).value();
+            }
             theList.Pop();
         }
         // VALID_TO
         if (theList.Count() > 0) {
             std::int64_t lVal = 0;
-            if (theList.Peek(lVal)) { VALID_TO = convert_stime(lVal); }
+            if (theList.Peek(lVal)) {
+                VALID_TO = seconds_since_epoch_unsigned(lVal).value();
+            }
             theList.Pop();
         }
     }
@@ -411,11 +416,11 @@ auto OTAPI_Exec::Create_SmartContract(
 {
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
-    if (convert_stime(0) > VALID_FROM) {
+    if (seconds_since_epoch_unsigned(0) > VALID_FROM) {
         LogError()()("Negative: VALID_FROM passed in!").Flush();
         return {};
     }
-    if (convert_stime(0) > VALID_TO) {
+    if (seconds_since_epoch_unsigned(0) > VALID_TO) {
         LogError()()("Negative: VALID_TO passed in!").Flush();
         return {};
     }
@@ -474,11 +479,11 @@ auto OTAPI_Exec::SmartContract_SetDates(
     OT_VERIFY_STD_STR(THE_CONTRACT);
     OT_VERIFY_ID_STR(SIGNER_NYM_ID);
 
-    if (convert_stime(0) > VALID_FROM) {
+    if (seconds_since_epoch_unsigned(0) > VALID_FROM) {
         LogError()()("Negative: VALID_FROM passed in!").Flush();
         return {};
     }
-    if (convert_stime(0) > VALID_TO) {
+    if (seconds_since_epoch_unsigned(0) > VALID_TO) {
         LogError()()("Negative: VALID_TO passed in!").Flush();
         return {};
     }

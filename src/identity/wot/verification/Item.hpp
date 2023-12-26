@@ -9,12 +9,12 @@
 #include <span>
 
 #include "internal/identity/wot/verification/Item.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

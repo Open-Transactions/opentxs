@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "internal/otx/common/Contract.hpp"
-#include "opentxs/util/Time.hpp"
+#include "opentxs/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -12,12 +12,12 @@
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

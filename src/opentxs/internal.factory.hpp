@@ -13,6 +13,7 @@
 #include <span>
 #include <string_view>
 
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -22,7 +23,6 @@
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

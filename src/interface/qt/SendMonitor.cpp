@@ -17,11 +17,11 @@
 
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::ui::implementation
@@ -101,7 +101,7 @@ private:
 
         if (elapsed > minimum) { return; }
 
-        Sleep(std::chrono::duration_cast<Duration>(minimum - elapsed));
+        sleep(std::chrono::duration_cast<Duration>(minimum - elapsed));
     }
 
     auto run() noexcept -> void

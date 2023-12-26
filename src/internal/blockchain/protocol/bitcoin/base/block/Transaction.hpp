@@ -14,6 +14,7 @@
 #include "internal/blockchain/block/Transaction.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -22,7 +23,6 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

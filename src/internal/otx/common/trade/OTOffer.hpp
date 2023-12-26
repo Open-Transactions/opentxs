@@ -9,10 +9,10 @@
 #include <cstdint>
 
 #include "internal/otx/common/Instrument.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

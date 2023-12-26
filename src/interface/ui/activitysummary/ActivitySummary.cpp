@@ -9,13 +9,14 @@
 #include <StorageThreadItem.pb.h>
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <span>
 #include <sstream>
 #include <thread>
 #include <utility>
 
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -26,7 +27,6 @@
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
 {
@@ -109,14 +109,14 @@ auto ActivitySummary::newest_item(
     for (const auto& item : thread.item()) {
         if (nullptr == output) {
             output = &item;
-            *time = convert_stime(item.time());
+            *time = seconds_since_epoch_unsigned(item.time()).value();
 
             continue;
         }
 
         if (item.time() > output->time()) {
             output = &item;
-            *time = convert_stime(item.time());
+            *time = seconds_since_epoch_unsigned(item.time()).value();
 
             continue;
         }

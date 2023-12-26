@@ -12,6 +12,7 @@
 #include <variant>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Types.hpp"
@@ -19,7 +20,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

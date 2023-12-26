@@ -18,6 +18,7 @@
 #include "identity/credential/Base.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {

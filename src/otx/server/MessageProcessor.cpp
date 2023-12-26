@@ -35,6 +35,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
@@ -65,7 +66,6 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/UserCommandProcessor.hpp"
 
@@ -641,7 +641,7 @@ auto MessageProcessor::Imp::run() noexcept -> void
             server_.ProcessCron();
         }
 
-        Sleep(50ms);
+        sleep(50ms);
     }
 }
 

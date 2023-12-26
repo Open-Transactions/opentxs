@@ -12,11 +12,12 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "interface/rpc/Types.internal.hpp"
 #include "internal/core/Factory.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/interface/rpc/AccountEventType.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"
@@ -151,7 +152,7 @@ AccountEvent::AccountEvent(const proto::AccountEvent& in) noexcept(false)
                in.pendingamountformatted(),
                factory::Amount(in.amount()),
                factory::Amount(in.pendingamount()),
-               convert_stime(in.timestamp()),
+               seconds_since_epoch_unsigned(in.timestamp()).value(),
                in.memo(),
                in.uuid(),
                in.state())
@@ -220,7 +221,7 @@ auto AccountEvent::Serialize(proto::AccountEvent& dest) const noexcept -> bool
     dest.set_workflow(imp.workflow_);
     imp.amount_.Serialize(writer(dest.mutable_amount()));
     imp.pending_.Serialize(writer(dest.mutable_pendingamount()));
-    dest.set_timestamp(Clock::to_time_t(imp.time_));
+    dest.set_timestamp(seconds_since_epoch(imp.time_).value());
     dest.set_memo(imp.memo_);
     dest.set_uuid(imp.uuid_);
     dest.set_state(static_cast<proto::PaymentWorkflowState>(imp.state_));

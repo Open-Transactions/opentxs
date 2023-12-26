@@ -26,6 +26,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -45,7 +46,6 @@
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/common/OTStorage.hpp"
 
 namespace opentxs

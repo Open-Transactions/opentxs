@@ -8,8 +8,8 @@
 
 #pragma once
 
+#include "opentxs/Time.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

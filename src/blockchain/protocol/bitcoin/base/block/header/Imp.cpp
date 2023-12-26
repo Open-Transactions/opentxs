@@ -16,6 +16,7 @@
 #include <ctime>
 #include <iomanip>
 #include <limits>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -26,7 +27,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Blockchain.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
@@ -176,7 +177,8 @@ Header::Header(
           serialized.bitcoin().version(),
           serialized.bitcoin().block_version(),
           block::Hash{serialized.bitcoin().merkle_hash()},
-          convert_stime(serialized.bitcoin().timestamp()),
+          seconds_since_epoch_unsigned(serialized.bitcoin().timestamp())
+              .value(),
           serialized.bitcoin().nbits(),
           serialized.bitcoin().nonce(),
           true,
@@ -392,7 +394,10 @@ auto Header::Print() const noexcept -> UnallocatedCString
 
 auto Header::Print(allocator_type alloc) const noexcept -> CString
 {
-    const auto time = Clock::to_time_t(timestamp_);
+    // TODO use std::format when available on all platforms
+    const auto time = convert_to_size<std::int64_t, std::time_t>(
+        seconds_since_epoch(timestamp_).value());
+    // TODO use allocator when available on all platforms
     auto out = std::stringstream{};
     out << "  version: " << std::to_string(block_version_) << '\n';
     out << "  parent: " << parent_hash_.asHex() << '\n';
@@ -401,9 +406,6 @@ auto Header::Print(allocator_type alloc) const noexcept -> CString
     out << '\n';
     out << "  nBits: " << std::to_string(nbits_) << '\n';
     out << "  nonce: " << std::to_string(nonce_) << '\n';
-    // NOTE someday once LLVM and Apple pull their heads out of their asses and
-    // finish c++20 support we can pass an allocator to std::stringstream. Until
-    // then there is this.
 
     return {out.str().c_str(), alloc};
 }
@@ -420,7 +422,8 @@ auto Header::Serialize(SerializedType& out) const noexcept -> bool
         bitcoin.set_block_version(block_version_);
         bitcoin.set_previous_header(UnallocatedCString{parent_hash_.Bytes()});
         bitcoin.set_merkle_hash(UnallocatedCString{merkle_root_.Bytes()});
-        bitcoin.set_timestamp(shorten(Clock::to_time_t(timestamp_)));
+        bitcoin.set_timestamp(shorten(
+            uint64_to_size(seconds_since_epoch_unsigned(timestamp_).value())));
         bitcoin.set_nbits(nbits_);
         bitcoin.set_nonce(nonce_);
 
@@ -441,7 +444,8 @@ auto Header::Serialize(Writer&& destination, const bool bitcoinformat)
             block_version_,
             UnallocatedCString{parent_hash_.Bytes()},
             UnallocatedCString{merkle_root_.Bytes()},
-            static_cast<std::uint32_t>(Clock::to_time_t(timestamp_)),
+            shorten(uint64_to_size(
+                seconds_since_epoch_unsigned(timestamp_).value())),
             nbits_,
             nonce_};
 

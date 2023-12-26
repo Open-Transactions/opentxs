@@ -18,6 +18,7 @@ extern "C" {
 #include <cctype>
 #include <functional>
 #include <limits>
+#include <optional>
 #include <regex>
 #include <stdexcept>
 
@@ -32,7 +33,7 @@ extern "C" {
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -171,8 +172,8 @@ Lucre::Lucre(
           opentxs::translate(in.state()),
           in.series(),
           factory::Amount(in.denomination()),
-          convert_stime(in.validfrom()),
-          convert_stime(in.validto()),
+          seconds_since_epoch_unsigned(in.validfrom()).value(),
+          seconds_since_epoch_unsigned(in.validto()).value(),
           String::Factory(),
           nullptr,
           nullptr,

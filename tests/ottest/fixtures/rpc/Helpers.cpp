@@ -65,7 +65,7 @@ struct RPCPushCounter::Imp {
         const auto start = ot::Clock::now();
 
         while ((!condition()) && ((ot::Clock::now() - start) < limit)) {
-            ot::Sleep(wait);
+            ot::sleep(wait);
         }
 
         return condition();

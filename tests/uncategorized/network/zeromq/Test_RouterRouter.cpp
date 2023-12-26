@@ -32,7 +32,7 @@ TEST_F(RouterRouterF, test)
     EXPECT_EQ(::zmq_bind(server_.get(), endpoint_.c_str()), 0);
     EXPECT_EQ(::zmq_connect(client_.get(), endpoint_.c_str()), 0);
 
-    ot::Sleep(1s);
+    ot::sleep(1s);
 
     const auto sent = opentxs::network::zeromq::send_from_message(
         std::cerr,

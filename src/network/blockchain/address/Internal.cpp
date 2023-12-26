@@ -7,6 +7,7 @@
 
 #include <cstdint>
 
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
@@ -14,7 +15,6 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::blockchain::internal
 {

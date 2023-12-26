@@ -21,6 +21,7 @@
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Time.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::database::wallet
 {

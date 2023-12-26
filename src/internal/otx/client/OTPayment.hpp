@@ -14,12 +14,12 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/recurring/OTPaymentPlan.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

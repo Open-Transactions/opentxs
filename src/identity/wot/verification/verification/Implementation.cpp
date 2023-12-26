@@ -12,6 +12,7 @@
 #include <functional>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
@@ -21,7 +22,7 @@
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Verification.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -80,8 +81,8 @@ Verification::Verification(
           }())
     , claim_(api.Factory().Internal().Identifier(proto.claim()), alloc)
     , value_(translate(proto.kind()))
-    , start_(convert_stime(proto.start()))
-    , stop_(convert_stime(proto.end()))
+    , start_(seconds_since_epoch_unsigned(proto.start()).value())
+    , stop_(seconds_since_epoch_unsigned(proto.end()).value())
     , superscedes_([&] {
         auto out = decltype(superscedes_){};
         const auto& ids = proto.superscedes();

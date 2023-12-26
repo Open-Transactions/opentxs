@@ -8,7 +8,7 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -20,7 +20,6 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::addr
 {
@@ -77,7 +76,8 @@ Message::Message(
                           bytearray.Bytes(),
                           raw.data_.port_.value(),
                           chain,
-                          convert_stime(raw.time_.value()),
+                          seconds_since_epoch_unsigned(raw.time_.value())
+                              .value(),
                           TranslateServices(
                               chain,
                               version,
@@ -121,7 +121,8 @@ Message::BitcoinFormat_31402::BitcoinFormat_31402(
     const opentxs::blockchain::Type chain,
     const network::blockchain::bitcoin::message::ProtocolVersion version,
     const network::blockchain::Address& address)
-    : time_(shorten(Clock::to_time_t(address.LastConnected())))
+    : time_(shorten(uint64_to_size(
+          seconds_since_epoch_unsigned(address.LastConnected()).value())))
     , data_(chain, version, address)
 {
 }

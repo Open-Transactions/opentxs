@@ -17,7 +17,7 @@
 #include <stdexcept>
 
 #include "internal/util/PMR.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -116,8 +116,8 @@ auto Claim(
             translate(item.type()),
             item.value(),
             item.subtype(),
-            convert_stime(item.start()),
-            convert_stime(item.end()),
+            seconds_since_epoch_unsigned(item.start()).value(),
+            seconds_since_epoch_unsigned(item.end()).value(),
             Vector<identity::wot::claim::Attribute>{alloc.work_},
             proto);
     } catch (const std::exception& e) {
@@ -147,8 +147,8 @@ auto Claim(
             translate(proto.type()),
             proto.value(),
             proto.subtype(),
-            convert_stime(proto.start()),
-            convert_stime(proto.end()),
+            seconds_since_epoch_unsigned(proto.start()).value(),
+            seconds_since_epoch_unsigned(proto.end()).value(),
             [&] {
                 const auto& in = proto.attribute();
                 auto a = Vector<identity::wot::claim::Attribute>{alloc.result_};

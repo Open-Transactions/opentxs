@@ -10,13 +10,14 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/Verification.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -142,8 +143,8 @@ Item::Item(const internal::Nym& parent, const SerializedType& in) noexcept(
     : version_(in.version())
     , claim_(parent.API().Factory().Internal().Identifier(in.claim()))
     , value_(translate(in.kind()))
-    , start_(convert_stime(in.start()))
-    , end_(convert_stime(in.end()))
+    , start_(seconds_since_epoch_unsigned(in.start()).value())
+    , end_(seconds_since_epoch_unsigned(in.end()).value())
     , id_(parent.API().Factory().Internal().Identifier(in.id()))
     , sig_(in.sig())
     , superscedes_([&] {

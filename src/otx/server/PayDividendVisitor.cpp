@@ -15,6 +15,7 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -28,7 +29,6 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/Transactor.hpp"
 

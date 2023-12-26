@@ -748,7 +748,7 @@ auto Transaction::Serialize(const api::Session& api) const noexcept
     // TODO optional string blockhash = 10;
     // TODO optional uint32 blockindex = 11;
     // TODO optional uint64 fee = 12;
-    output.set_time(Clock::to_time_t(time_));
+    output.set_time(seconds_since_epoch(time_).value());
     // TODO repeated string conflicts = 14;
     output.set_memo(UnallocatedCString{data.memo()});
     output.set_segwit_flag(std::to_integer<std::uint32_t>(segwit_flag_));
