@@ -32,6 +32,8 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
@@ -51,12 +53,11 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -613,8 +614,8 @@ auto BlockOracle::Shared::load_blocks(
 
 auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 {
-    const auto& [jobs, downloading] = queue;
     to_blockchain_api_.lock()->SendDeferred([&]() {
+        const auto& [jobs, downloading] = queue;
         auto work = network::zeromq::tagged_message(
             WorkType::BlockchainBlockDownloadQueue, true);
         work.AddFrame(chain_);
@@ -622,6 +623,7 @@ auto BlockOracle::Shared::publish_queue(QueueData queue) const noexcept -> void
 
         return work;
     }());
+    const auto& [jobs, downloading] = queue;
 
     if (0_uz < jobs) { work_available(); }
 }

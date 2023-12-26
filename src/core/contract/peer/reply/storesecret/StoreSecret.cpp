@@ -57,11 +57,13 @@ auto StoreSecret::IsValid() const noexcept -> bool
 
 auto StoreSecret::operator=(const StoreSecret& rhs) noexcept -> StoreSecret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto StoreSecret::operator=(StoreSecret&& rhs) noexcept -> StoreSecret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

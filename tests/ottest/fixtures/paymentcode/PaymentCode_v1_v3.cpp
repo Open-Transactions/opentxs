@@ -12,7 +12,6 @@
 
 namespace ottest
 {
-namespace ot = opentxs;
 using namespace opentxs::literals;
 
 PaymentCode_v1_v3::PaymentCode_v1_v3()

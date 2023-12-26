@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::blockchain
 {
-enum class Transport : std::uint8_t {
+enum class Transport : std::underlying_type_t<Transport> {
     invalid = 0,
     ipv4 = 1,
     ipv6 = 2,

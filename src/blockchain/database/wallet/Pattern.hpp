@@ -8,8 +8,8 @@
 #include <cstddef>
 #include <string_view>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -47,9 +47,9 @@ struct Pattern {
     const Space data_;
 
     auto Data() const noexcept -> ReadView;
-    auto Index() const noexcept -> Bip32Index;
+    auto Index() const noexcept -> crypto::Bip32Index;
 
-    Pattern(const Bip32Index index, const ReadView data) noexcept;
+    Pattern(const crypto::Bip32Index index, const ReadView data) noexcept;
     Pattern(const ReadView bytes) noexcept(false);
     Pattern() = delete;
     Pattern(const Pattern&) = delete;
@@ -60,6 +60,6 @@ struct Pattern {
     ~Pattern() = default;
 
 private:
-    static constexpr auto fixed_ = sizeof(Bip32Index);
+    static constexpr auto fixed_ = sizeof(crypto::Bip32Index);
 };
 }  // namespace opentxs::blockchain::database::wallet::db

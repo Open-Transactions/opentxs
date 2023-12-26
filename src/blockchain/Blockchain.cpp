@@ -5,7 +5,6 @@
 
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
-#include <boost/multiprecision/cpp_int.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
 #include <algorithm>
@@ -30,7 +29,7 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/display/Definition.hpp"
+#include "opentxs/display/Definition.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -44,8 +43,6 @@ constexpr auto BITMASK(std::uint64_t n) noexcept -> std::uint64_t
 
     return (one << n) - one;
 }
-
-namespace bmp = boost::multiprecision;
 
 namespace opentxs::blockchain
 {
@@ -242,7 +239,7 @@ void BitWriter::write(std::size_t nbits, std::uint64_t value)
             // accum_. n_ -8 would be 11. So accum_ is right-shifted 11 bits
             // in order to get the most significant 8 bits first. Those 8
             // bits are bitmasked and copied into result.
-            std::uint8_t result = (accum_ >> (n_ - 8u)) & BITMASK(8u);
+            const std::uint8_t result = (accum_ >> (n_ - 8u)) & BITMASK(8u);
 
             // result is then concatenated to output_.
             output_.emplace_back(std::byte{result});

@@ -46,12 +46,10 @@ class Output;
 
 namespace opentxs::blockchain::node
 {
-using TypeEnum = std::uint32_t;
-
-enum class Funding : TypeEnum;        // IWYU pragma: export
-enum class SendResult : TypeEnum;     // IWYU pragma: export
-enum class TxoState : std::uint16_t;  // IWYU pragma: export
-enum class TxoTag : std::uint16_t;    // IWYU pragma: export
+enum class Funding : std::uint32_t;     // IWYU pragma: export
+enum class SendResult : std::uint32_t;  // IWYU pragma: export
+enum class TxoState : std::uint16_t;    // IWYU pragma: export
+enum class TxoTag : std::uint16_t;      // IWYU pragma: export
 
 using BlockResult = std::shared_future<block::Block>;
 using BlockResults = Vector<BlockResult>;

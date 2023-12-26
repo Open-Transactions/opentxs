@@ -283,7 +283,7 @@ auto Armored::LoadFrom_ifstream(std::ifstream& fin) -> bool
     std::stringstream buffer;
     buffer << fin.rdbuf();
 
-    UnallocatedCString contents(buffer.str());
+    const UnallocatedCString contents(buffer.str());
 
     auto theString = String::Factory();
     theString->Set(contents.c_str());
@@ -460,7 +460,8 @@ auto Armored::SetData(const opentxs::Data& theData, bool) -> bool
 auto Armored::SaveTo_ofstream(std::ofstream& fout) -> bool
 {
     auto strOutput = String::Factory();
-    UnallocatedCString str_type("DATA");  // -----BEGIN OT ARMORED DATA-----
+    const UnallocatedCString str_type("DATA");  // -----BEGIN OT ARMORED
+                                                // DATA-----
 
     if (WriteArmoredString(strOutput, str_type) && strOutput->Exists()) {
         // WRITE IT TO THE FILE

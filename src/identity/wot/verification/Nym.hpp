@@ -12,7 +12,7 @@
 #include "internal/identity/wot/verification/Item.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"

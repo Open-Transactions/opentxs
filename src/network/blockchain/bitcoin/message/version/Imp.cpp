@@ -19,13 +19,13 @@
 #include "internal/util/Size.hpp"
 #include "internal/util/Time.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::version
 {

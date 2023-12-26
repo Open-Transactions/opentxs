@@ -19,13 +19,13 @@
 #include "blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/Header.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/headeroracle/Types.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -35,6 +35,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/otdht/Block.hpp"
@@ -44,7 +45,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::internal
 {
@@ -983,9 +983,9 @@ auto HeaderOracle::Shared::initialize_candidate(
     block::Header& child,
     const block::Hash& stopHash) noexcept(false) -> Candidate&
 {
-    const auto blacklisted = connect_to_parent(data, update, parent, child);
     auto position{parent.Position()};
-    auto& output = candidates.emplace_back(Candidate{blacklisted, {}});
+    auto& output = candidates.emplace_back();
+    output.blacklisted_ = connect_to_parent(data, update, parent, child);
     auto& chain = output.chain_;
     const block::Header* grandparent = &parent;
     using StopFunction = std::function<bool(const block::Position&)>;

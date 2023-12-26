@@ -14,7 +14,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 
 namespace opentxs::factory
 {

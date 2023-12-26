@@ -19,7 +19,7 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
@@ -131,7 +131,7 @@ exit:
 auto DepositPayment::get_account_id(const identifier::UnitDefinition& unit)
     -> identifier::Account
 {
-    Lock lock(payment_tasks_.GetAccountLock(unit));
+    const auto lock = Lock{payment_tasks_.GetAccountLock(unit)};
     const auto accounts =
         parent_.api().Storage().Internal().AccountsByContract(unit);
 

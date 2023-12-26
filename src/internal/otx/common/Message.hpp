@@ -12,9 +12,9 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/NumList.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -102,15 +102,16 @@ protected:
 private:
     friend api::session::FactoryPrivate;
 
-    using TypeMap = UnallocatedMap<MessageType, UnallocatedCString>;
-    using ReverseTypeMap = UnallocatedMap<UnallocatedCString, MessageType>;
+    using TypeMap = UnallocatedMap<otx::MessageType, UnallocatedCString>;
+    using ReverseTypeMap = UnallocatedMap<UnallocatedCString, otx::MessageType>;
 
     static const TypeMap message_names_;
     static const ReverseTypeMap message_types_;
-    static const UnallocatedMap<MessageType, MessageType> reply_message_;
+    static const UnallocatedMap<otx::MessageType, otx::MessageType>
+        reply_message_;
 
     static auto make_reverse_map() -> ReverseTypeMap;
-    static auto reply_command(const MessageType& type) -> MessageType;
+    static auto reply_command(const otx::MessageType& type) -> otx::MessageType;
 
     Message(const api::Session& api);
 
@@ -125,9 +126,9 @@ private:
         -> std::int32_t;
 
 public:
-    static auto Command(const MessageType type) -> UnallocatedCString;
-    static auto Type(const UnallocatedCString& type) -> MessageType;
-    static auto ReplyCommand(const MessageType type) -> UnallocatedCString;
+    static auto Command(const otx::MessageType type) -> UnallocatedCString;
+    static auto Type(const UnallocatedCString& type) -> otx::MessageType;
+    static auto ReplyCommand(const otx::MessageType type) -> UnallocatedCString;
 
     ~Message() final;
 

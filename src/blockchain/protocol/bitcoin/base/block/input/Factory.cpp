@@ -31,12 +31,13 @@
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Element.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

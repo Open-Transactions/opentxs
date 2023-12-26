@@ -19,11 +19,11 @@
 #include "internal/serialization/protobuf/verify/StorageSeeds.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -60,7 +60,7 @@ auto Seeds::Alias(const opentxs::crypto::SeedID& id) const -> UnallocatedCString
 
 auto Seeds::Default() const -> opentxs::crypto::SeedID
 {
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return default_seed_;
 }

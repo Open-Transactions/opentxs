@@ -22,7 +22,6 @@
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Mint.hpp"
 #include "internal/otx/blind/Purse.hpp"
@@ -64,20 +63,21 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
@@ -230,14 +230,14 @@ void Notary::cancel_cheque(
 
     TransactionNumber receiptNumber{0};
     server_.GetTransactor().issueNextTransactionNumber(receiptNumber);
-    std::shared_ptr<OTTransaction> inboxTransaction{
+    const std::shared_ptr<OTTransaction> inboxTransaction{
         api_.Factory()
             .Internal()
             .Session()
             .Transaction(
                 inbox,
-                transactionType::chequeReceipt,
-                originType::not_applicable,
+                otx::transactionType::chequeReceipt,
+                otx::originType::not_applicable,
                 receiptNumber)
             .release()};
 
@@ -599,9 +599,9 @@ void Notary::deposit_cheque(
                         .Session()
                         .Transaction(
                             senderInbox,
-                            isVoucher ? transactionType::voucherReceipt
-                                      : transactionType::chequeReceipt,
-                            originType::not_applicable,
+                            isVoucher ? otx::transactionType::voucherReceipt
+                                      : otx::transactionType::chequeReceipt,
+                            otx::originType::not_applicable,
                             receiptNumber)
                         .release());
 
@@ -637,7 +637,7 @@ auto Notary::extract_cheque(
 
     assert_false(nullptr == cheque);
 
-    bool loadedCheque = cheque->LoadContractFromString(serialized);
+    const bool loadedCheque = cheque->LoadContractFromString(serialized);
 
     if (false == loadedCheque) {
         LogError()()("Failed to load cheque.").Flush();
@@ -666,7 +666,7 @@ void Notary::NotarizeTransfer(
 {
     // The outgoing transaction is an "atTransfer", that is, "a reply to the
     // transfer request"
-    tranOut.SetType(transactionType::atTransfer);
+    tranOut.SetType(otx::transactionType::atTransfer);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pBalanceItem = nullptr;
@@ -687,12 +687,14 @@ void Notary::NotarizeTransfer(
         server_.API().Factory().Internal().Identifier(theFromAccount.get());
     auto strNymID = String::Factory(NYM_ID, api_.Crypto()),
          strAccountID = String::Factory(ACCOUNT_ID, api_.Crypto());
-    pResponseBalanceItem.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
-            .release());
+    pResponseBalanceItem.reset(api_.Factory()
+                                   .Internal()
+                                   .Session()
+                                   .Item(
+                                       tranOut,
+                                       otx::itemType::atBalanceStatement,
+                                       identifier::Account{})
+                                   .release());
 
     assert_true(false != bool(pResponseBalanceItem));
 
@@ -704,7 +706,7 @@ void Notary::NotarizeTransfer(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atTransfer, identifier::Account{})
+            .Item(tranOut, otx::itemType::atTransfer, identifier::Account{})
             .release());
 
     assert_true(false != bool(pResponseItem));
@@ -724,7 +726,7 @@ void Notary::NotarizeTransfer(
             .Flush();
     } else if (
         nullptr ==
-        (pBalanceItem = tranIn.GetItem(itemType::balanceStatement))) {
+        (pBalanceItem = tranIn.GetItem(otx::itemType::balanceStatement))) {
         auto strTemp = String::Factory(tranIn);
         LogError()()("Expected Item::balanceStatement in trans #")(
             tranIn.GetTransactionNum())(": ")(
@@ -735,7 +737,7 @@ void Notary::NotarizeTransfer(
     // For now, there should only be one of these transfer items inside the
     // transaction.
     // So we treat it that way... I either get it successfully or not.
-    else if (nullptr == (pItem = tranIn.GetItem(itemType::transfer))) {
+    else if (nullptr == (pItem = tranIn.GetItem(otx::itemType::transfer))) {
         auto strTemp = String::Factory(tranIn);
         LogError()()("Expected Item::transfer in trans #")(
             tranIn.GetTransactionNum())(": ")(
@@ -966,8 +968,8 @@ void Notary::NotarizeTransfer(
                 auto pTEMPOutboxTransaction{
                     api_.Factory().Internal().Session().Transaction(
                         outbox,
-                        transactionType::pending,
-                        originType::not_applicable,
+                        otx::transactionType::pending,
+                        otx::originType::not_applicable,
                         lNewTransactionNumber)};
 
                 assert_true(false != bool(pTEMPOutboxTransaction));
@@ -975,8 +977,8 @@ void Notary::NotarizeTransfer(
                 auto pOutboxTransaction{
                     api_.Factory().Internal().Session().Transaction(
                         *theFromOutbox,
-                        transactionType::pending,
-                        originType::not_applicable,
+                        otx::transactionType::pending,
+                        otx::originType::not_applicable,
                         lNewTransactionNumber)};
 
                 assert_true(false != bool(pOutboxTransaction));
@@ -986,8 +988,8 @@ void Notary::NotarizeTransfer(
                                            .Session()
                                            .Transaction(
                                                *recipientInbox,
-                                               transactionType::pending,
-                                               originType::not_applicable,
+                                               otx::transactionType::pending,
+                                               otx::originType::not_applicable,
                                                lNewTransactionNumber)
                                            .release());
 
@@ -1039,7 +1041,7 @@ void Notary::NotarizeTransfer(
                 // No need to save a box receipt in this case, like we normally
                 // would
                 // when adding a transaction to a box.
-                std::shared_ptr<OTTransaction> TEMPOutboxTransaction{
+                const std::shared_ptr<OTTransaction> TEMPOutboxTransaction{
                     pTEMPOutboxTransaction.release()};
                 outbox.AddTransaction(TEMPOutboxTransaction);
 
@@ -1112,7 +1114,7 @@ void Notary::NotarizeTransfer(
                                                     // inside this block fails.
                         // Here the transactions we just created are actually
                         // added to the ledgers.
-                        std::shared_ptr<OTTransaction> outboxTransaction{
+                        const std::shared_ptr<OTTransaction> outboxTransaction{
                             pOutboxTransaction.release()};
                         theFromOutbox->AddTransaction(outboxTransaction);
                         recipientInbox->AddTransaction(inboxTransaction);
@@ -1234,7 +1236,7 @@ void Notary::NotarizeWithdrawal(
 {
     // The outgoing transaction is an "atWithdrawal", that is, "a reply to the
     // withdrawal request"
-    tranOut.SetType(transactionType::atWithdrawal);
+    tranOut.SetType(otx::transactionType::atWithdrawal);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pItemCash = nullptr;
@@ -1266,17 +1268,19 @@ void Notary::NotarizeWithdrawal(
     // Here we find out if we're withdrawing cash, or a voucher
     // (A voucher is a cashier's cheque aka banker's cheque).
     //
-    itemType theReplyItemType = itemType::error_state;
+    otx::itemType theReplyItemType = otx::itemType::error_state;
 
-    pItemVoucher = tranIn.GetItem(itemType::withdrawVoucher);
+    pItemVoucher = tranIn.GetItem(otx::itemType::withdrawVoucher);
 
     if (false == bool(pItemVoucher)) {
-        pItemCash = tranIn.GetItem(itemType::withdrawal);
+        pItemCash = tranIn.GetItem(otx::itemType::withdrawal);
         pItem = pItemCash;
-        if (false != bool(pItem)) { theReplyItemType = itemType::atWithdrawal; }
+        if (false != bool(pItem)) {
+            theReplyItemType = otx::itemType::atWithdrawal;
+        }
     } else {
         pItem = pItemVoucher;
-        theReplyItemType = itemType::atWithdrawVoucher;
+        theReplyItemType = otx::itemType::atWithdrawVoucher;
     }
     pResponseItem.reset(
         api_.Factory()
@@ -1288,12 +1292,14 @@ void Notary::NotarizeWithdrawal(
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
 
-    pResponseBalanceItem.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
-            .release());
+    pResponseBalanceItem.reset(api_.Factory()
+                                   .Internal()
+                                   .Session()
+                                   .Item(
+                                       tranOut,
+                                       otx::itemType::atBalanceStatement,
+                                       identifier::Account{})
+                                   .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It "owns"
@@ -1347,14 +1353,14 @@ void Notary::NotarizeWithdrawal(
     //
     else if (
         nullptr ==
-        (pBalanceItem = tranIn.GetItem(itemType::balanceStatement))) {
+        (pBalanceItem = tranIn.GetItem(otx::itemType::balanceStatement))) {
         auto strTemp = String::Factory(tranIn);
         LogError()()("Expected Item::balanceStatement, but not found in trans "
                      "#")(tranIn.GetTransactionNum())(": ")(
             strTemp->Exists() ? strTemp->Get()
                               : " (ERROR LOADING TRANSACTION INTO STRING)")
             .Flush();
-    } else if (pItem->GetType() == itemType::withdrawVoucher) {
+    } else if (pItem->GetType() == otx::itemType::withdrawVoucher) {
         // The response item will contain a copy of the request item. So I save
         // it into a string
         // here so they can all grab a copy of it into their "in reference to"
@@ -1428,7 +1434,7 @@ void Notary::NotarizeWithdrawal(
             auto theVoucherRequest{api_.Factory().Internal().Session().Cheque(
                 NOTARY_ID, INSTRUMENT_DEFINITION_ID)};
 
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 theVoucherRequest->LoadContractFromString(strVoucherRequest);
 
             if (!bLoadContractFromString) {
@@ -1519,7 +1525,7 @@ void Notary::NotarizeWithdrawal(
                                                              // transaction # on
                                                              // the
                 // cheque (to prevent double-spending of cheques.)
-                bool bIssueVoucher = theVoucher->IssueCheque(
+                const bool bIssueVoucher = theVoucher->IssueCheque(
                     lAmount,  // The amount of the cheque.
                     theVoucherRequest->GetTransactionNum(),  // Requiring a
                     // transaction number
@@ -1609,7 +1615,7 @@ void Notary::NotarizeWithdrawal(
     // transaction.
     // So we treat it that way... I either get it successfully or not.
     //
-    else if (pItem->GetType() == itemType::withdrawal) {
+    else if (pItem->GetType() == otx::itemType::withdrawal) {
         // The response item will contain a copy of the request item. So I save
         // it into a string
         // here so they can all grab a copy of it into their "in reference to"
@@ -1737,7 +1743,7 @@ void Notary::NotarizePayDividend(
 {
     // The outgoing transaction is an "atPayDividend", that is, "a reply to the
     // 'pay dividend' request"
-    tranOut.SetType(transactionType::atPayDividend);
+    tranOut.SetType(otx::transactionType::atPayDividend);
     // This pointer and the following one, are 2 pointers, as a vestige
     std::shared_ptr<Item> pItem = nullptr;
     // from the withdrawal code, which has two forms: voucher and cash.
@@ -1766,12 +1772,12 @@ void Notary::NotarizePayDividend(
     const auto strInstrumentDefinitionID =
         String::Factory(PAYOUT_INSTRUMENT_DEFINITION_ID, api_.Crypto());
     // Make sure the appropriate item is attached.
-    itemType theReplyItemType = itemType::error_state;
-    pItemPayDividend = tranIn.GetItem(itemType::payDividend);
+    otx::itemType theReplyItemType = otx::itemType::error_state;
+    pItemPayDividend = tranIn.GetItem(otx::itemType::payDividend);
 
     if (nullptr != pItemPayDividend) {
         pItem = pItemPayDividend;
-        theReplyItemType = itemType::atPayDividend;
+        theReplyItemType = otx::itemType::atPayDividend;
     }
     //
 
@@ -1786,12 +1792,14 @@ void Notary::NotarizePayDividend(
     pResponseItem->SetStatus(Item::rejection);
     // the Transaction's destructor will cleanup the item. It "owns" it now.
     tranOut.AddItem(pResponseItem);
-    pResponseBalanceItem.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
-            .release());
+    pResponseBalanceItem.reset(api_.Factory()
+                                   .Internal()
+                                   .Session()
+                                   .Item(
+                                       tranOut,
+                                       otx::itemType::atBalanceStatement,
+                                       identifier::Account{})
+                                   .release());
     pResponseBalanceItem->SetStatus(Item::rejection);
     // the Transaction's destructor will cleanup the item. It "owns" it now.
     tranOut.AddItem(pResponseBalanceItem);
@@ -1833,7 +1841,7 @@ void Notary::NotarizePayDividend(
     // Check for a balance agreement...
     else if (
         nullptr ==
-        (pBalanceItem = tranIn.GetItem(itemType::balanceStatement))) {
+        (pBalanceItem = tranIn.GetItem(otx::itemType::balanceStatement))) {
         auto strTemp = String::Factory(tranIn);
         LogError()()(
             "Expected Item::balanceStatement, but not found in trans #")(
@@ -1844,7 +1852,7 @@ void Notary::NotarizePayDividend(
             .Flush();
     }
     // Superfluous by this point. Artifact of withdrawal code.
-    else if (pItem->GetType() == itemType::payDividend) {
+    else if (pItem->GetType() == otx::itemType::payDividend) {
         // The response item will contain a copy of the request item. So I save
         // it into a string here so they can all grab a copy of it into their
         // "in reference to" fields.
@@ -1913,7 +1921,8 @@ void Notary::NotarizePayDividend(
                         SHARES_ISSUER_ACCT_ID, reason_);
                 const auto& purportedID = context.RemoteNym().ID();
 
-                if (pSharesContract->Type() != contract::UnitType::Security) {
+                if (pSharesContract->Type() !=
+                    contract::UnitDefinitionType::Security) {
                     const auto strSharesType = String::Factory(
                         SHARES_INSTRUMENT_DEFINITION_ID, api_.Crypto());
                     LogError()()(
@@ -2561,25 +2570,25 @@ void Notary::NotarizeDeposit(
     bool& success)
 {
     const auto& nymID = context.Signer()->ID();
-    output.SetType(transactionType::atDeposit);
+    output.SetType(otx::transactionType::atDeposit);
     std::shared_ptr<const Item> depositItem{nullptr};
-    std::shared_ptr<const Item> balanceItem{
-        input.GetItem(itemType::balanceStatement)};
+    const std::shared_ptr<const Item> balanceItem{
+        input.GetItem(otx::itemType::balanceStatement)};
     std::shared_ptr<Item> responseItem{nullptr};
     std::shared_ptr<Item> responseBalanceItem{nullptr};
-    itemType type{itemType::error_state};
+    otx::itemType type{otx::itemType::error_state};
     bool permission = NYM_IS_ALLOWED(
         nymID.asBase58(api_.Crypto()), ServerSettings::_transact_deposit);
 
-    if (input.GetItem(itemType::depositCheque)) {
-        type = itemType::atDepositCheque;
-        depositItem = input.GetItem(itemType::depositCheque);
+    if (input.GetItem(otx::itemType::depositCheque)) {
+        type = otx::itemType::atDepositCheque;
+        depositItem = input.GetItem(otx::itemType::depositCheque);
         permission &= NYM_IS_ALLOWED(
             nymID.asBase58(api_.Crypto()),
             ServerSettings::_transact_deposit_cheque);
-    } else if (input.GetItem(itemType::deposit)) {
-        type = itemType::atDeposit;
-        depositItem = input.GetItem(itemType::deposit);
+    } else if (input.GetItem(otx::itemType::deposit)) {
+        type = otx::itemType::atDeposit;
+        depositItem = input.GetItem(otx::itemType::deposit);
         permission &= NYM_IS_ALLOWED(
             nymID.asBase58(api_.Crypto()),
             ServerSettings::_transact_deposit_cash);
@@ -2592,19 +2601,21 @@ void Notary::NotarizeDeposit(
                            .release());
     responseItem->SetStatus(Item::rejection);
     output.AddItem(responseItem);
-    responseBalanceItem.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Item(output, itemType::atBalanceStatement, identifier::Account{})
-            .release());
+    responseBalanceItem.reset(api_.Factory()
+                                  .Internal()
+                                  .Session()
+                                  .Item(
+                                      output,
+                                      otx::itemType::atBalanceStatement,
+                                      identifier::Account{})
+                                  .release());
     responseBalanceItem->SetStatus(Item::rejection);
     output.AddItem(responseBalanceItem);
 
     assert_false(nullptr == responseItem);
     assert_false(nullptr == responseBalanceItem);
 
-    Finalize signer(
+    const Finalize signer(
         server_.GetServerNym(), *responseItem, *responseBalanceItem, reason_);
 
     if (false == permission) {
@@ -2639,7 +2650,7 @@ void Notary::NotarizeDeposit(
     assert_false(nullptr == balanceItem);
 
     switch (type) {
-        case itemType::atDepositCheque: {
+        case otx::itemType::atDepositCheque: {
             process_cheque_deposit(
                 input,
                 *depositItem,
@@ -2653,7 +2664,7 @@ void Notary::NotarizeDeposit(
                 *responseItem,
                 *responseBalanceItem);
         } break;
-        case itemType::atDeposit: {
+        case otx::itemType::atDeposit: {
             process_cash_deposit(
                 input,
                 *depositItem,
@@ -2667,71 +2678,71 @@ void Notary::NotarizeDeposit(
                 *responseItem,
                 *responseBalanceItem);
         } break;
-        case itemType::transfer:
-        case itemType::atTransfer:
-        case itemType::acceptTransaction:
-        case itemType::atAcceptTransaction:
-        case itemType::acceptMessage:
-        case itemType::atAcceptMessage:
-        case itemType::acceptNotice:
-        case itemType::atAcceptNotice:
-        case itemType::acceptPending:
-        case itemType::atAcceptPending:
-        case itemType::rejectPending:
-        case itemType::atRejectPending:
-        case itemType::acceptCronReceipt:
-        case itemType::atAcceptCronReceipt:
-        case itemType::acceptItemReceipt:
-        case itemType::atAcceptItemReceipt:
-        case itemType::disputeCronReceipt:
-        case itemType::atDisputeCronReceipt:
-        case itemType::disputeItemReceipt:
-        case itemType::atDisputeItemReceipt:
-        case itemType::acceptFinalReceipt:
-        case itemType::atAcceptFinalReceipt:
-        case itemType::acceptBasketReceipt:
-        case itemType::atAcceptBasketReceipt:
-        case itemType::disputeFinalReceipt:
-        case itemType::atDisputeFinalReceipt:
-        case itemType::disputeBasketReceipt:
-        case itemType::atDisputeBasketReceipt:
-        case itemType::serverfee:
-        case itemType::atServerfee:
-        case itemType::issuerfee:
-        case itemType::atIssuerfee:
-        case itemType::balanceStatement:
-        case itemType::atBalanceStatement:
-        case itemType::transactionStatement:
-        case itemType::atTransactionStatement:
-        case itemType::withdrawal:
-        case itemType::atWithdrawal:
-        case itemType::deposit:
-        case itemType::withdrawVoucher:
-        case itemType::atWithdrawVoucher:
-        case itemType::depositCheque:
-        case itemType::payDividend:
-        case itemType::atPayDividend:
-        case itemType::marketOffer:
-        case itemType::atMarketOffer:
-        case itemType::paymentPlan:
-        case itemType::atPaymentPlan:
-        case itemType::smartContract:
-        case itemType::atSmartContract:
-        case itemType::cancelCronItem:
-        case itemType::atCancelCronItem:
-        case itemType::exchangeBasket:
-        case itemType::atExchangeBasket:
-        case itemType::chequeReceipt:
-        case itemType::voucherReceipt:
-        case itemType::marketReceipt:
-        case itemType::paymentReceipt:
-        case itemType::transferReceipt:
-        case itemType::finalReceipt:
-        case itemType::basketReceipt:
-        case itemType::replyNotice:
-        case itemType::successNotice:
-        case itemType::notice:
-        case itemType::error_state:
+        case otx::itemType::transfer:
+        case otx::itemType::atTransfer:
+        case otx::itemType::acceptTransaction:
+        case otx::itemType::atAcceptTransaction:
+        case otx::itemType::acceptMessage:
+        case otx::itemType::atAcceptMessage:
+        case otx::itemType::acceptNotice:
+        case otx::itemType::atAcceptNotice:
+        case otx::itemType::acceptPending:
+        case otx::itemType::atAcceptPending:
+        case otx::itemType::rejectPending:
+        case otx::itemType::atRejectPending:
+        case otx::itemType::acceptCronReceipt:
+        case otx::itemType::atAcceptCronReceipt:
+        case otx::itemType::acceptItemReceipt:
+        case otx::itemType::atAcceptItemReceipt:
+        case otx::itemType::disputeCronReceipt:
+        case otx::itemType::atDisputeCronReceipt:
+        case otx::itemType::disputeItemReceipt:
+        case otx::itemType::atDisputeItemReceipt:
+        case otx::itemType::acceptFinalReceipt:
+        case otx::itemType::atAcceptFinalReceipt:
+        case otx::itemType::acceptBasketReceipt:
+        case otx::itemType::atAcceptBasketReceipt:
+        case otx::itemType::disputeFinalReceipt:
+        case otx::itemType::atDisputeFinalReceipt:
+        case otx::itemType::disputeBasketReceipt:
+        case otx::itemType::atDisputeBasketReceipt:
+        case otx::itemType::serverfee:
+        case otx::itemType::atServerfee:
+        case otx::itemType::issuerfee:
+        case otx::itemType::atIssuerfee:
+        case otx::itemType::balanceStatement:
+        case otx::itemType::atBalanceStatement:
+        case otx::itemType::transactionStatement:
+        case otx::itemType::atTransactionStatement:
+        case otx::itemType::withdrawal:
+        case otx::itemType::atWithdrawal:
+        case otx::itemType::deposit:
+        case otx::itemType::withdrawVoucher:
+        case otx::itemType::atWithdrawVoucher:
+        case otx::itemType::depositCheque:
+        case otx::itemType::payDividend:
+        case otx::itemType::atPayDividend:
+        case otx::itemType::marketOffer:
+        case otx::itemType::atMarketOffer:
+        case otx::itemType::paymentPlan:
+        case otx::itemType::atPaymentPlan:
+        case otx::itemType::smartContract:
+        case otx::itemType::atSmartContract:
+        case otx::itemType::cancelCronItem:
+        case otx::itemType::atCancelCronItem:
+        case otx::itemType::exchangeBasket:
+        case otx::itemType::atExchangeBasket:
+        case otx::itemType::chequeReceipt:
+        case otx::itemType::voucherReceipt:
+        case otx::itemType::marketReceipt:
+        case otx::itemType::paymentReceipt:
+        case otx::itemType::transferReceipt:
+        case otx::itemType::finalReceipt:
+        case otx::itemType::basketReceipt:
+        case otx::itemType::replyNotice:
+        case otx::itemType::successNotice:
+        case otx::itemType::notice:
+        case otx::itemType::error_state:
         default: {
             LogError()()("Invalid deposit item type.").Flush();
 
@@ -2767,7 +2778,7 @@ void Notary::NotarizePaymentPlan(
 {
     // The outgoing transaction is an "atPaymentPlan", that is, "a reply to the
     // paymentPlan request"
-    tranOut.SetType(transactionType::atPaymentPlan);
+    tranOut.SetType(otx::transactionType::atPaymentPlan);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pBalanceItem = nullptr;
@@ -2789,13 +2800,13 @@ void Notary::NotarizePaymentPlan(
         server_.API().Factory().Internal().Identifier(
             theDepositorAccount.get());
     const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
-    pItem = tranIn.GetItem(itemType::paymentPlan);
-    pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
+    pItem = tranIn.GetItem(otx::itemType::paymentPlan);
+    pBalanceItem = tranIn.GetItem(otx::itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atPaymentPlan, identifier::Account{})
+            .Item(tranOut, otx::itemType::atPaymentPlan, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -2805,7 +2816,7 @@ void Notary::NotarizePaymentPlan(
                                    .Session()
                                    .Item(
                                        tranOut,
-                                       itemType::atTransactionStatement,
+                                       otx::itemType::atTransactionStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -3262,7 +3273,7 @@ void Notary::NotarizePaymentPlan(
                                 // original receipt can always
                                 // be loaded when necessary.)
                                 //
-                                std::shared_ptr<OTPaymentPlan> plan{
+                                const std::shared_ptr<OTPaymentPlan> plan{
                                     pPlan.release()};
                                 if (!bCancelling &&
                                     server_.Cron().AddCronItem(
@@ -3448,9 +3459,9 @@ void Notary::NotarizePaymentPlan(
         }
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theDepositorAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theDepositorAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theDepositorAccount.get().GetIdentifier(accountHash);
@@ -3478,7 +3489,7 @@ void Notary::NotarizeSmartContract(
 {
     // The outgoing transaction is an "atSmartContract", that is, "a reply to
     // the smartContract request"
-    tranOut.SetType(transactionType::atSmartContract);
+    tranOut.SetType(otx::transactionType::atSmartContract);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pBalanceItem = nullptr;
@@ -3500,13 +3511,14 @@ void Notary::NotarizeSmartContract(
     const auto ACTIVATOR_ACCT_ID = server_.API().Factory().Internal().AccountID(
         theActivatingAccount.get());
     const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
-    pItem = tranIn.GetItem(itemType::smartContract);
-    pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
+    pItem = tranIn.GetItem(otx::itemType::smartContract);
+    pBalanceItem = tranIn.GetItem(otx::itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atSmartContract, identifier::Account{})
+            .Item(
+                tranOut, otx::itemType::atSmartContract, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -3516,7 +3528,7 @@ void Notary::NotarizeSmartContract(
                                    .Session()
                                    .Item(
                                        tranOut,
-                                       itemType::atTransactionStatement,
+                                       otx::itemType::atTransactionStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -4149,7 +4161,7 @@ void Notary::NotarizeSmartContract(
                     server_.GetTransactor().issueNextTransactionNumber(
                         lNewTransactionNumber);
 
-                    std::shared_ptr<OTSmartContract> contract{
+                    const std::shared_ptr<OTSmartContract> contract{
                         pContract.release()};
                     if (false == contract->SendNoticeToAllParties(
                                      true,
@@ -4216,9 +4228,9 @@ void Notary::NotarizeSmartContract(
         }
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theActivatingAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theActivatingAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theActivatingAccount.get().GetIdentifier(accountHash);
@@ -4264,7 +4276,7 @@ void Notary::NotarizeCancelCronItem(
 {
     // The outgoing transaction is an "atCancelCronItem", that is, "a reply
     // to the cancelCronItem request"
-    tranOut.SetType(transactionType::atCancelCronItem);
+    tranOut.SetType(otx::transactionType::atCancelCronItem);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pBalanceItem = nullptr;
@@ -4281,12 +4293,13 @@ void Notary::NotarizeCancelCronItem(
     // ID here.
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
-    pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
+    pBalanceItem = tranIn.GetItem(otx::itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atCancelCronItem, identifier::Account{})
+            .Item(
+                tranOut, otx::itemType::atCancelCronItem, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -4297,7 +4310,7 @@ void Notary::NotarizeCancelCronItem(
                                    .Session()
                                    .Item(
                                        tranOut,
-                                       itemType::atTransactionStatement,
+                                       otx::itemType::atTransactionStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -4323,7 +4336,8 @@ void Notary::NotarizeCancelCronItem(
     // For now, there should only be one of these cancelCronItem items
     // inside the transaction. So we treat it that way... I either get it
     // successfully or not.
-    else if (nullptr != (pItem = tranIn.GetItem(itemType::cancelCronItem))) {
+    else if (
+        nullptr != (pItem = tranIn.GetItem(otx::itemType::cancelCronItem))) {
         // The response item will contain a copy of the request item. So I
         // save it into a string here so it can be saved into the "in
         // reference to" field.
@@ -4438,9 +4452,9 @@ void Notary::NotarizeCancelCronItem(
             .Flush();
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theAssetAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theAssetAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theAssetAccount.get().GetIdentifier(accountHash);
@@ -4471,11 +4485,12 @@ void Notary::NotarizeExchangeBasket(
 {
     // The outgoing transaction is an "atExchangeBasket", that is, "a reply
     // to the exchange basket request"
-    tranOut.SetType(transactionType::atExchangeBasket);
+    tranOut.SetType(otx::transactionType::atExchangeBasket);
 
-    std::shared_ptr<Item> pItem = tranIn.GetItem(itemType::exchangeBasket);
-    std::shared_ptr<Item> pBalanceItem =
-        tranIn.GetItem(itemType::balanceStatement);
+    const std::shared_ptr<Item> pItem =
+        tranIn.GetItem(otx::itemType::exchangeBasket);
+    const std::shared_ptr<Item> pBalanceItem =
+        tranIn.GetItem(otx::itemType::balanceStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
 
@@ -4495,18 +4510,21 @@ void Notary::NotarizeExchangeBasket(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atExchangeBasket, identifier::Account{})
+            .Item(
+                tranOut, otx::itemType::atExchangeBasket, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
                                      // cleanup the item. It "owns" it now.
 
-    pResponseBalanceItem.reset(
-        api_.Factory()
-            .Internal()
-            .Session()
-            .Item(tranOut, itemType::atBalanceStatement, identifier::Account{})
-            .release());
+    pResponseBalanceItem.reset(api_.Factory()
+                                   .Internal()
+                                   .Session()
+                                   .Item(
+                                       tranOut,
+                                       otx::itemType::atBalanceStatement,
+                                       identifier::Account{})
+                                   .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseBalanceItem);  // the Transaction's destructor
                                             // will cleanup the item. It
@@ -4587,7 +4605,7 @@ void Notary::NotarizeExchangeBasket(
 
             auto BASKET_ACCOUNT_ID = identifier::Account{};
             ExclusiveAccount basketAccount{};
-            bool bLookup =
+            const bool bLookup =
                 server_.GetTransactor().lookupBasketAccountIDByContractID(
                     BASKET_CONTRACT_ID, BASKET_ACCOUNT_ID);
 
@@ -4640,7 +4658,8 @@ void Notary::NotarizeExchangeBasket(
                                 BASKET_CONTRACT_ID);
                         // Now let's load up the actual basket, from the actual
                         // asset contract.
-                        std::int64_t currencies = basket->Currencies().size();
+                        const std::int64_t currencies =
+                            basket->Currencies().size();
                         const Amount& weight = basket->Weight();
 
                         if (currencies == theRequestBasket->Count() &&
@@ -4962,9 +4981,9 @@ void Notary::NotarizeExchangeBasket(
                                                         .Session()
                                                         .Transaction(
                                                             *pSubInbox,
-                                                            transactionType::
+                                                            otx::transactionType::
                                                                 basketReceipt,
-                                                            originType::
+                                                            otx::originType::
                                                                 not_applicable,
                                                             lNewTransactionNumber)};
 
@@ -4978,7 +4997,7 @@ void Notary::NotarizeExchangeBasket(
                                                         .Session()
                                                         .Item(
                                                             *pInboxTransaction,
-                                                            itemType::
+                                                            otx::itemType::
                                                                 basketReceipt,
                                                             identifier::
                                                                 Account{});
@@ -5003,8 +5022,9 @@ void Notary::NotarizeExchangeBasket(
                                                     reason_);
                                                 pItemInbox->SaveContract();
 
-                                                std::shared_ptr<Item> itemInbox{
-                                                    pItemInbox.release()};
+                                                const std::shared_ptr<Item>
+                                                    itemInbox{
+                                                        pItemInbox.release()};
                                                 pInboxTransaction->AddItem(
                                                     itemInbox);  // Add the
                                                                  // inbox item
@@ -5053,7 +5073,8 @@ void Notary::NotarizeExchangeBasket(
                                                 // Here the transaction we just
                                                 // created is actually added to
                                                 // the exchanger's inbox.
-                                                std::shared_ptr<OTTransaction>
+                                                const std::shared_ptr<
+                                                    OTTransaction>
                                                     inboxTransaction{
                                                         pInboxTransaction
                                                             .release()};
@@ -5183,9 +5204,10 @@ void Notary::NotarizeExchangeBasket(
                                                 .Session()
                                                 .Transaction(
                                                     inbox,
-                                                    transactionType::
+                                                    otx::transactionType::
                                                         basketReceipt,
-                                                    originType::not_applicable,
+                                                    otx::originType::
+                                                        not_applicable,
                                                     lNewTransactionNumber)};
 
                                         assert_true(
@@ -5197,7 +5219,8 @@ void Notary::NotarizeExchangeBasket(
                                                 .Session()
                                                 .Item(
                                                     *pInboxTransaction,
-                                                    itemType::basketReceipt,
+                                                    otx::itemType::
+                                                        basketReceipt,
                                                     identifier::Account{});
 
                                         // these may be unnecessary, I'll have
@@ -5217,7 +5240,7 @@ void Notary::NotarizeExchangeBasket(
                                             server_.GetServerNym(), reason_);
                                         pItemInbox->SaveContract();
 
-                                        std::shared_ptr<Item> itemInbox{
+                                        const std::shared_ptr<Item> itemInbox{
                                             pItemInbox.release()};
                                         pInboxTransaction->AddItem(
                                             itemInbox);  // Add the inbox item
@@ -5264,7 +5287,7 @@ void Notary::NotarizeExchangeBasket(
                                         // Here the transaction we just created
                                         // is actually added to the source
                                         // acct's inbox.
-                                        std::shared_ptr<OTTransaction>
+                                        const std::shared_ptr<OTTransaction>
                                             inboxTransaction{
                                                 pInboxTransaction.release()};
                                         inbox.AddTransaction(inboxTransaction);
@@ -5414,7 +5437,7 @@ void Notary::NotarizeMarketOffer(
 {
     // The outgoing transaction is an "atMarketOffer", that is, "a reply to
     // the marketOffer request"
-    tranOut.SetType(transactionType::atMarketOffer);
+    tranOut.SetType(otx::transactionType::atMarketOffer);
 
     std::shared_ptr<Item> pItem = nullptr;
     std::shared_ptr<Item> pBalanceItem = nullptr;
@@ -5433,13 +5456,13 @@ void Notary::NotarizeMarketOffer(
     const auto& NOTARY_ID = context.Notary();
     const auto strNymID = String::Factory(NYM_ID, api_.Crypto());
 
-    pItem = tranIn.GetItem(itemType::marketOffer);
-    pBalanceItem = tranIn.GetItem(itemType::transactionStatement);
+    pItem = tranIn.GetItem(otx::itemType::marketOffer);
+    pBalanceItem = tranIn.GetItem(otx::itemType::transactionStatement);
     pResponseItem.reset(
         api_.Factory()
             .Internal()
             .Session()
-            .Item(tranOut, itemType::atMarketOffer, identifier::Account{})
+            .Item(tranOut, otx::itemType::atMarketOffer, identifier::Account{})
             .release());
     pResponseItem->SetStatus(Item::rejection);  // the default.
     tranOut.AddItem(pResponseItem);  // the Transaction's destructor will
@@ -5450,7 +5473,7 @@ void Notary::NotarizeMarketOffer(
                                    .Session()
                                    .Item(
                                        tranOut,
-                                       itemType::atTransactionStatement,
+                                       otx::itemType::atTransactionStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -5546,7 +5569,7 @@ void Notary::NotarizeMarketOffer(
 
             // First load the Trade up (from the string that was passed in
             // on the transaction item.)
-            bool bLoadContractFromString =
+            const bool bLoadContractFromString =
                 pTrade->LoadContractFromString(strTrade);
 
             // If failed to load the trade...
@@ -5753,7 +5776,7 @@ void Notary::NotarizeMarketOffer(
                 // changes over time as cron processes. (The original
                 // receipt can always be loaded when necessary.)
                 //
-                std::shared_ptr<OTTrade> trade{pTrade.release()};
+                const std::shared_ptr<OTTrade> trade{pTrade.release()};
                 if (server_.Cron().AddCronItem(
                         trade,
                         true,
@@ -5805,9 +5828,9 @@ void Notary::NotarizeMarketOffer(
         }  // transaction statement verified.
     }
 
-    std::unique_ptr<Ledger> pInbox(
+    const std::unique_ptr<Ledger> pInbox(
         theAssetAccount.get().LoadInbox(server_.GetServerNym()));
-    std::unique_ptr<Ledger> pOutbox(
+    const std::unique_ptr<Ledger> pOutbox(
         theAssetAccount.get().LoadOutbox(server_.GetServerNym()));
 
     theAssetAccount.get().GetIdentifier(accountHash);
@@ -5861,7 +5884,7 @@ void Notary::NotarizeTransaction(
     };
 
     const auto& serverNym = server_.GetServerNym();
-    Cleanup cleanup(tranOut, serverNym, reason_);
+    const Cleanup cleanup(tranOut, serverNym, reason_);
     const auto lTransactionNumber = tranIn.GetTransactionNum();
     const auto& NYM_ID = context.RemoteNym().ID();
     const auto strIDNym = String::Factory(NYM_ID, api_.Crypto());
@@ -6006,7 +6029,7 @@ void Notary::NotarizeTransaction(
                          "from user nym in Notary::NotarizeTransaction.")
                 .Flush();
         } else {
-            itemType theReplyItemType = itemType::error_state;
+            otx::itemType theReplyItemType = otx::itemType::error_state;
 
             switch (tranIn.GetType()) {
                 // TRANSFER (account to account)
@@ -6014,7 +6037,7 @@ void Notary::NotarizeTransaction(
                 // transfer from her account ABC to the inbox of account
                 // DEF. A copy will also remain in her outbox until canceled
                 // or accepted.
-                case transactionType::transfer:
+                case otx::transactionType::transfer:
                     LogConsole()("    Notarizing transfer").Flush();
                     NotarizeTransfer(
                         context,
@@ -6024,7 +6047,7 @@ void Notary::NotarizeTransaction(
                         inbox,
                         outbox,
                         bOutSuccess);
-                    theReplyItemType = itemType::atTransfer;
+                    theReplyItemType = otx::itemType::atTransfer;
                     break;
 
                 // PROCESS INBOX (currently, all incoming transfers must be
@@ -6032,7 +6055,7 @@ void Notary::NotarizeTransaction(
                 // Bob sends a signed request to the server asking it to
                 // reject some of his inbox items and/or accept some into
                 // his account DEF.
-                case transactionType::processInbox:
+                case otx::transactionType::processInbox:
                     LogConsole()("    Notarizing process inbox").Flush();
                     NotarizeProcessInbox(
                         context,
@@ -6057,17 +6080,17 @@ void Notary::NotarizeTransaction(
                 // recipient's
                 // Nym ID, or made out to a blank recipient, just like a
                 // blank cheque.)
-                case transactionType::withdrawal: {
+                case otx::transactionType::withdrawal: {
                     auto pItemVoucher =
-                        tranIn.GetItem(itemType::withdrawVoucher);
-                    auto pItemCash = tranIn.GetItem(itemType::withdrawal);
+                        tranIn.GetItem(otx::itemType::withdrawVoucher);
+                    auto pItemCash = tranIn.GetItem(otx::itemType::withdrawal);
 
                     if (false != bool(pItemCash)) {
-                        theReplyItemType = itemType::atWithdrawal;
+                        theReplyItemType = otx::itemType::atWithdrawal;
                         LogConsole()("    Notarizing withdrawal (cash)")
                             .Flush();
                     } else if (false != bool(pItemVoucher)) {
-                        theReplyItemType = itemType::atWithdrawVoucher;
+                        theReplyItemType = otx::itemType::atWithdrawVoucher;
                         LogConsole()("    Notarizing withdrawal (voucher)")
                             .Flush();
                     }
@@ -6086,7 +6109,7 @@ void Notary::NotarizeTransaction(
                 // deposit into his account ABC. He includes with his
                 // request a signed cheque made out to Bob's user ID (or
                 // blank), --OR-- a purse full of tokens.
-                case transactionType::deposit:
+                case otx::transactionType::deposit:
                     LogConsole()("    Notarizing deposit").Flush();
                     NotarizeDeposit(
                         context,
@@ -6096,7 +6119,7 @@ void Notary::NotarizeTransaction(
                         inbox,
                         outbox,
                         bOutSuccess);
-                    theReplyItemType = itemType::atDeposit;
+                    theReplyItemType = otx::itemType::atDeposit;
                     break;
 
                 // PAY DIVIDEND
@@ -6104,7 +6127,7 @@ void Notary::NotarizeTransaction(
                 // all shareholders of a given instrument definition at the
                 // rate of $X per share, where X and $ are both
                 // configurable.
-                case transactionType::payDividend:
+                case otx::transactionType::payDividend:
                     LogConsole()("    Notarizing pay dividend").Flush();
                     NotarizePayDividend(
                         context,
@@ -6114,7 +6137,7 @@ void Notary::NotarizeTransaction(
                         inbox,
                         outbox,
                         bOutSuccess);
-                    theReplyItemType = itemType::atPayDividend;
+                    theReplyItemType = otx::itemType::atPayDividend;
                     break;
 
                 // MARKET OFFER
@@ -6122,22 +6145,22 @@ void Notary::NotarizeTransaction(
                 // an offer on the market. He includes with his request a
                 // signed trade listing the relevant information, instrument
                 // definitions and account IDs.
-                case transactionType::marketOffer:
+                case otx::transactionType::marketOffer:
                     LogConsole()("    Notarizing market offer").Flush();
                     NotarizeMarketOffer(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
-                    theReplyItemType = itemType::atMarketOffer;
+                    theReplyItemType = otx::itemType::atMarketOffer;
                     break;
 
                 // PAYMENT PLAN
                 // Bob sends a signed request to the server asking it to
                 // make regular payments to Alice. (BOTH Alice AND Bob must
                 // have signed the same contract.)
-                case transactionType::paymentPlan:
+                case otx::transactionType::paymentPlan:
                     LogConsole()("    Notarizing payment plan").Flush();
                     NotarizePaymentPlan(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
-                    theReplyItemType = itemType::atPaymentPlan;
+                    theReplyItemType = otx::itemType::atPaymentPlan;
                     break;
 
                 // SMART CONTRACT
@@ -6147,7 +6170,7 @@ void Notary::NotarizeTransaction(
                 // Bob is the authorizing agent for one of the parties, all
                 // of whom have signed it, and have provided transaction #s
                 // for it.
-                case transactionType::smartContract: {
+                case otx::transactionType::smartContract: {
                     LogConsole()("    Notarizing smart contract").Flush();
 
                     // For all transaction numbers used on cron items, we
@@ -6157,7 +6180,7 @@ void Notary::NotarizeTransaction(
                     context.OpenCronItem(lTransactionNumber);
                     NotarizeSmartContract(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
-                    theReplyItemType = itemType::atSmartContract;
+                    theReplyItemType = otx::itemType::atSmartContract;
                 } break;
 
                 // CANCEL CRON ITEM
@@ -6165,11 +6188,11 @@ void Notary::NotarizeTransaction(
                 // signed request to the server asking it to cancel a
                 // REGULARLY PROCESSING CONTRACT that he had previously
                 // created.
-                case transactionType::cancelCronItem: {
+                case otx::transactionType::cancelCronItem: {
                     LogConsole()("    Notarizing cancelCronItem").Flush();
                     NotarizeCancelCronItem(
                         context, theFromAccount, tranIn, tranOut, bOutSuccess);
-                    theReplyItemType = itemType::atCancelCronItem;
+                    theReplyItemType = otx::itemType::atCancelCronItem;
                 } break;
 
                 // EXCHANGE BASKET
@@ -6179,7 +6202,7 @@ void Notary::NotarizeTransaction(
                 // in or out of a basket currency. (From-or-to his main
                 // basket account and his various sub-accounts for each
                 // member currency in the basket.)
-                case transactionType::exchangeBasket:
+                case otx::transactionType::exchangeBasket:
                     LogConsole()("    Notarizing exchange basket").Flush();
                     NotarizeExchangeBasket(
                         context,
@@ -6189,7 +6212,7 @@ void Notary::NotarizeTransaction(
                         inbox,
                         outbox,
                         bOutSuccess);
-                    theReplyItemType = itemType::atExchangeBasket;
+                    theReplyItemType = otx::itemType::atExchangeBasket;
                     break;
 
                 default:
@@ -6206,12 +6229,12 @@ void Notary::NotarizeTransaction(
             bool bIsCronItem = false;
 
             switch (tranIn.GetType()) {
-                case transactionType::marketOffer:
-                case transactionType::paymentPlan:
-                case transactionType::smartContract:
+                case otx::transactionType::marketOffer:
+                case otx::transactionType::paymentPlan:
+                case otx::transactionType::smartContract:
                     bIsCronItem = true;
                     [[fallthrough]];
-                case transactionType::transfer: {
+                case otx::transactionType::transfer: {
                     // If success, then Issued number stays on Nym's issued
                     // list until the transfer, paymentPlan, marketOffer, or
                     // smart contract is entirely closed and removed. In the
@@ -6259,12 +6282,12 @@ void Notary::NotarizeTransaction(
                 // transaction number is removed from the Nym's issued list
                 // SUCCESS OR FAIL. (It's closed either way.)
                 //
-                case transactionType::processInbox:
-                case transactionType::payDividend:
-                case transactionType::withdrawal:
-                case transactionType::deposit:
-                case transactionType::cancelCronItem:
-                case transactionType::exchangeBasket: {
+                case otx::transactionType::processInbox:
+                case otx::transactionType::payDividend:
+                case otx::transactionType::withdrawal:
+                case otx::transactionType::deposit:
+                case otx::transactionType::cancelCronItem:
+                case otx::transactionType::exchangeBasket: {
                     if (!context.ConsumeIssued(lTransactionNumber)) {
                         const auto strNymID =
                             String::Factory(NYM_ID, api_.Crypto());
@@ -6308,10 +6331,10 @@ auto Notary::NotarizeProcessNymbox(
 {
     // The outgoing transaction is an "atProcessNymbox", that is, "a reply
     // to the process nymbox request"
-    tranOut.SetType(transactionType::atProcessNymbox);
+    tranOut.SetType(otx::transactionType::atProcessNymbox);
     std::shared_ptr<Item> pItem = nullptr;
-    std::shared_ptr<Item> pBalanceItem =
-        tranIn.GetItem(itemType::transactionStatement);
+    const std::shared_ptr<Item> pBalanceItem =
+        tranIn.GetItem(otx::itemType::transactionStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
 
@@ -6338,7 +6361,7 @@ auto Notary::NotarizeProcessNymbox(
                                    .Session()
                                    .Item(
                                        tranOut,
-                                       itemType::atTransactionStatement,
+                                       otx::itemType::atTransactionStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -6400,15 +6423,16 @@ auto Notary::NotarizeProcessNymbox(
             assert_false(
                 nullptr == pItem, "Pointer should not have been nullptr.");
 
-            if (pItem->GetType() == itemType::acceptTransaction) {
+            if (pItem->GetType() == otx::itemType::acceptTransaction) {
                 auto pTransaction =
                     theNymbox->GetTransaction(pItem->GetReferenceToNum());
 
                 if ((nullptr != pTransaction) &&
                     (pTransaction->GetType() ==
-                     transactionType::blank))  // The user is referencing a
-                                               // blank in the nymbox, which
-                                               // indeed is actually there.
+                     otx::transactionType::blank))  // The user is referencing a
+                                                    // blank in the nymbox,
+                                                    // which indeed is actually
+                                                    // there.
                 {
                     bSuccessFindingAllTransactions = true;
                     NumList listNumbersNymbox, listNumbersUserItem;
@@ -6501,22 +6525,22 @@ auto Notary::NotarizeProcessNymbox(
 
                 // We already handled this one (if we're even in this block
                 // in the first place.)
-                if (itemType::transactionStatement == pItem->GetType()) {
+                if (otx::itemType::transactionStatement == pItem->GetType()) {
                     continue;
                 }
 
                 // If the client sent an accept item then let's process it.
                 if ((Item::request == pItem->GetStatus()) &&
-                    ((itemType::acceptFinalReceipt ==
+                    ((otx::itemType::acceptFinalReceipt ==
                       pItem->GetType()) ||  // Clearing out a finalReceipt
                                             // notice.
-                     (itemType::acceptTransaction ==
+                     (otx::itemType::acceptTransaction ==
                       pItem->GetType()) ||  // Accepting new transaction
                                             // number.
-                     (itemType::acceptMessage ==
+                     (otx::itemType::acceptMessage ==
                       pItem->GetType()) ||  // Accepted
                                             // message.
-                     (itemType::acceptNotice ==
+                     (otx::itemType::acceptNotice ==
                       pItem->GetType())  // Accepted server notification.
                      )) {
                     auto strInReferenceTo = String::Factory();
@@ -6526,20 +6550,22 @@ auto Notary::NotarizeProcessNymbox(
                     // So I'm just setting aside a copy now for those
                     // purposes later.
                     pItem->SaveContractRaw(strInReferenceTo);
-                    itemType theReplyItemType;
+                    otx::itemType theReplyItemType;
 
                     switch (pItem->GetType()) {
-                        case itemType::acceptFinalReceipt: {
-                            theReplyItemType = itemType::atAcceptFinalReceipt;
+                        case otx::itemType::acceptFinalReceipt: {
+                            theReplyItemType =
+                                otx::itemType::atAcceptFinalReceipt;
                         } break;
-                        case itemType::acceptTransaction: {
-                            theReplyItemType = itemType::atAcceptTransaction;
+                        case otx::itemType::acceptTransaction: {
+                            theReplyItemType =
+                                otx::itemType::atAcceptTransaction;
                         } break;
-                        case itemType::acceptMessage: {
-                            theReplyItemType = itemType::atAcceptMessage;
+                        case otx::itemType::acceptMessage: {
+                            theReplyItemType = otx::itemType::atAcceptMessage;
                         } break;
-                        case itemType::acceptNotice: {
-                            theReplyItemType = itemType::atAcceptNotice;
+                        case otx::itemType::acceptNotice: {
+                            theReplyItemType = otx::itemType::atAcceptNotice;
                         } break;
                         default: {
                             LogError()()("Should never happen.").Flush();
@@ -6579,21 +6605,21 @@ auto Notary::NotarizeProcessNymbox(
                     if ((nullptr !=
                          (pServerTransaction = theNymbox->GetTransaction(
                               pItem->GetReferenceToNum()))) &&
-                        ((transactionType::finalReceipt ==
+                        ((otx::transactionType::finalReceipt ==
                           pServerTransaction->GetType()) ||  // finalReceipt
                                                              // (notice that
                                                              // an opening
                                                              // num was
                                                              // closed.)
-                         (transactionType::blank ==
+                         (otx::transactionType::blank ==
                           pServerTransaction->GetType()) ||  // new
                                                              // transaction
                          // number waiting to
                          // be picked up.
-                         (transactionType::message ==
+                         (otx::transactionType::message ==
                           pServerTransaction->GetType()) ||  // message in
                                                              // the nymbox
-                         (transactionType::replyNotice ==
+                         (otx::transactionType::replyNotice ==
                           pServerTransaction->GetType()) ||  // replyNotice
                                                              // containing a
                                                              // server
@@ -6601,17 +6627,17 @@ auto Notary::NotarizeProcessNymbox(
                          // (Some replies are so important,
                          // this is used to make sure users
                          // get them.)
-                         (transactionType::successNotice ==
+                         (otx::transactionType::successNotice ==
                           pServerTransaction->GetType()) ||  // successNotice
                                                              // that you signed
                                                              // out a
                                                              // transaction#.
-                         (transactionType::notice ==
+                         (otx::transactionType::notice ==
                           pServerTransaction->GetType()) ||  // server
                                                              // notification,
                                                              // in the
                                                              // nymbox
-                         (transactionType::instrumentNotice ==
+                         (otx::transactionType::instrumentNotice ==
                           pServerTransaction->GetType())  // A financial
                          // instrument sent from
                          // another user.
@@ -6643,8 +6669,9 @@ auto Notary::NotarizeProcessNymbox(
 
                         // The below block only executes for ACCEPTING a
                         // MESSAGE
-                        if ((itemType::acceptMessage == pItem->GetType()) &&
-                            (transactionType::message ==
+                        if ((otx::itemType::acceptMessage ==
+                             pItem->GetType()) &&
+                            (otx::transactionType::message ==
                              pServerTransaction->GetType())) {
                             // pItem contains the current user's attempt to
                             // accept the
@@ -6671,14 +6698,14 @@ auto Notary::NotarizeProcessNymbox(
                         // The below block only executes for ACCEPTING a
                         // NOTICE
                         else if (
-                            (itemType::acceptNotice == pItem->GetType()) &&
-                            ((transactionType::notice ==
+                            (otx::itemType::acceptNotice == pItem->GetType()) &&
+                            ((otx::transactionType::notice ==
                               pServerTransaction->GetType()) ||
-                             (transactionType::replyNotice ==
+                             (otx::transactionType::replyNotice ==
                               pServerTransaction->GetType()) ||
-                             (transactionType::successNotice ==
+                             (otx::transactionType::successNotice ==
                               pServerTransaction->GetType()) ||
-                             (transactionType::instrumentNotice ==
+                             (otx::transactionType::instrumentNotice ==
                               pServerTransaction->GetType()))) {
                             // pItem contains the current user's attempt to
                             // accept the
@@ -6713,8 +6740,9 @@ auto Notary::NotarizeProcessNymbox(
                         // got the notice! Probably should do this for cash
                         // withdrawals as well...)
                         else if (
-                            (itemType::acceptTransaction == pItem->GetType()) &&
-                            (transactionType::blank ==
+                            (otx::itemType::acceptTransaction ==
+                             pItem->GetType()) &&
+                            (otx::transactionType::blank ==
                              pServerTransaction->GetType())) {
                             // Add the success notice to the Nymbox, so if
                             // the Nym fails to see the server reply, he can
@@ -6722,17 +6750,18 @@ auto Notary::NotarizeProcessNymbox(
                             // notice, instead of going out of sync.
                             //
                             auto lSuccessNoticeTransNum = TransactionNumber{};
-                            bool bGotNextTransNum =
+                            const bool bGotNextTransNum =
                                 server_.GetTransactor()
                                     .issueNextTransactionNumber(
                                         lSuccessNoticeTransNum);
 
                             if (!bGotNextTransNum) {
-                                LogError()()("Error getting next transaction "
-                                             "number in "
-                                             "Notary::NotarizeProcessNymbox "
-                                             "for transactionType::blank (for "
-                                             "the successNotice).")
+                                LogError()()(
+                                    "Error getting next transaction "
+                                    "number in "
+                                    "Notary::NotarizeProcessNymbox "
+                                    "for otx::transactionType::blank (for "
+                                    "the successNotice).")
                                     .Flush();
                             } else {
                                 // Drop SUCCESS NOTICE in the Nymbox
@@ -6743,8 +6772,8 @@ auto Notary::NotarizeProcessNymbox(
                                         .Session()
                                         .Transaction(
                                             *theNymbox,
-                                            transactionType::successNotice,
-                                            originType::not_applicable,
+                                            otx::transactionType::successNotice,
+                                            otx::originType::not_applicable,
                                             lSuccessNoticeTransNum)};
 
                                 if (nullptr != pSuccessNotice) {
@@ -6788,7 +6817,7 @@ auto Notary::NotarizeProcessNymbox(
                                         server_.GetServerNym(), reason_);
                                     pSuccessNotice->SaveContract();
 
-                                    std::shared_ptr<OTTransaction>
+                                    const std::shared_ptr<OTTransaction>
                                         successNotice{pSuccessNotice.release()};
                                     theNymbox->AddTransaction(
                                         successNotice);  // Add the
@@ -6834,9 +6863,9 @@ auto Notary::NotarizeProcessNymbox(
                         // occurred. The client has seen the notice and is
                         // now clearing it from the box.
                         else if (
-                            (itemType::acceptFinalReceipt ==
+                            (otx::itemType::acceptFinalReceipt ==
                              pItem->GetType()) &&
-                            (transactionType::finalReceipt ==
+                            (otx::transactionType::finalReceipt ==
                              pServerTransaction->GetType())) {
                             // pItem contains the current user's attempt to
                             // clear the
@@ -6959,11 +6988,11 @@ void Notary::NotarizeProcessInbox(
 {
     // The outgoing transaction is an "atProcessInbox", that is, "a reply to
     // the process inbox request"
-    processInboxResponse.SetType(transactionType::atProcessInbox);
+    processInboxResponse.SetType(otx::transactionType::atProcessInbox);
 
-    std::shared_ptr<Item> pItem = nullptr;
-    std::shared_ptr<Item> pBalanceItem =
-        processInbox.GetItem(itemType::balanceStatement);
+    const std::shared_ptr<Item> pItem = nullptr;
+    const std::shared_ptr<Item> pBalanceItem =
+        processInbox.GetItem(otx::itemType::balanceStatement);
     std::shared_ptr<Item> pResponseItem = nullptr;
     std::shared_ptr<Item> pResponseBalanceItem = nullptr;
 
@@ -6987,7 +7016,7 @@ void Notary::NotarizeProcessInbox(
                                    .Session()
                                    .Item(
                                        processInboxResponse,
-                                       itemType::atBalanceStatement,
+                                       otx::itemType::atBalanceStatement,
                                        identifier::Account{})
                                    .release());
     pResponseBalanceItem->SetStatus(Item::rejection);  // the default.
@@ -7061,31 +7090,31 @@ void Notary::NotarizeProcessInbox(
         std::shared_ptr<OTTransaction> pServerTransaction;
 
         switch (item.GetType()) {
-            case itemType::balanceStatement: {
+            case otx::itemType::balanceStatement: {
                 continue;
             }
-            case itemType::acceptCronReceipt:
-            case itemType::acceptFinalReceipt:
-            case itemType::acceptBasketReceipt:
-            case itemType::disputeCronReceipt:
-            case itemType::disputeFinalReceipt:
-            case itemType::disputeBasketReceipt: {
+            case otx::itemType::acceptCronReceipt:
+            case otx::itemType::acceptFinalReceipt:
+            case otx::itemType::acceptBasketReceipt:
+            case otx::itemType::disputeCronReceipt:
+            case otx::itemType::disputeFinalReceipt:
+            case otx::itemType::disputeBasketReceipt: {
                 pServerTransaction =
                     inbox.GetTransaction(item.GetReferenceToNum());
             } break;
             // Accept an incoming (pending) transfer.
-            case itemType::acceptPending:
+            case otx::itemType::acceptPending:
             // Accept a chequeReceipt, voucherReceipt, or transferReceipt.
-            case itemType::acceptItemReceipt:
-            case itemType::rejectPending:
-            case itemType::disputeItemReceipt: {
+            case otx::itemType::acceptItemReceipt:
+            case otx::itemType::rejectPending:
+            case otx::itemType::disputeItemReceipt: {
                 pServerTransaction =
                     inbox.GetTransaction(item.GetReferenceToNum());
             } break;
             default: {
                 auto strItemType = String::Factory();
                 item.GetTypeString(strItemType);
-                itemType nItemType = item.GetType();
+                const otx::itemType nItemType = item.GetType();
                 bSuccessFindingAllTransactions = false;
                 LogError()()(" Wrong item type: ")(
                     strItemType->Exists() ? strItemType->Get() : "")("(")(
@@ -7125,10 +7154,10 @@ void Notary::NotarizeProcessInbox(
         const auto closingNum = serverTransaction.GetClosingNum();
 
         switch (item.GetType()) {
-            case itemType::acceptCronReceipt: {
+            case otx::itemType::acceptCronReceipt: {
                 bSuccessFindingAllTransactions = true;
             } break;
-            case itemType::acceptFinalReceipt: {
+            case otx::itemType::acceptFinalReceipt: {
                 bSuccessFindingAllTransactions = true;
 
                 // Need to ERROR OUT here, if the number of cron receipts
@@ -7261,7 +7290,7 @@ void Notary::NotarizeProcessInbox(
             }
             // ---- COUNT is correct and closing num is on list of open cron
             // items. (FINAL RECEIPT FALLS THROUGH HERE!!! no break)
-            case itemType::acceptBasketReceipt: {
+            case otx::itemType::acceptBasketReceipt: {
                 // IF it's actually there on theNym, then schedule it for
                 // removal. (Otherwise we'd end up improperly re-adding it.)
                 const bool verified = context.VerifyIssuedNumber(closingNum);
@@ -7285,14 +7314,14 @@ void Notary::NotarizeProcessInbox(
                 }
 
             } break;
-            case itemType::acceptPending: {
+            case otx::itemType::acceptPending: {
                 // IF I'm accepting a pending transfer, then add the amount
                 // to my counter of total amount being accepted.
                 lTotalBeingAccepted +=
                     serverTransaction.GetReceiptAmount(reason_);
                 bSuccessFindingAllTransactions = true;
             } break;
-            case itemType::acceptItemReceipt: {
+            case otx::itemType::acceptItemReceipt: {
                 bSuccessFindingAllTransactions = true;
                 // If I'm accepting an item receipt (which will remove my
                 // responsibility for that item) then add it to the temp Nym
@@ -7344,7 +7373,8 @@ void Notary::NotarizeProcessInbox(
                     // client is accepting a cheque receipt, which has a
                     // depositCheque (from the recipient) as the original
                     // item within.
-                    if (itemType::depositCheque == pOriginalItem->GetType()) {
+                    if (otx::itemType::depositCheque ==
+                        pOriginalItem->GetType()) {
                         // Get the cheque from the Item and load it up into
                         // a Cheque object.
                         auto strCheque = String::Factory();
@@ -7398,7 +7428,8 @@ void Notary::NotarizeProcessInbox(
                     // item within, (which is in reference to the client's
                     // outoing original transfer.)
                     else if (
-                        itemType::acceptPending == pOriginalItem->GetType()) {
+                        otx::itemType::acceptPending ==
+                        pOriginalItem->GetType()) {
                         const auto number = pOriginalItem->GetNumberOfOrigin();
                         // IF it's actually there on theNym, then schedule
                         // it for removal. (Otherwise we'd end up improperly
@@ -7480,7 +7511,7 @@ void Notary::NotarizeProcessInbox(
     // Remove certain receipts (determined in the big loop above) from the
     // inbox copy, to see if it will verify in the balance agreement.
     while (!theListOfInboxReceiptsBeingRemoved.empty()) {
-        std::int64_t lTemp = theListOfInboxReceiptsBeingRemoved.front();
+        const std::int64_t lTemp = theListOfInboxReceiptsBeingRemoved.front();
         theListOfInboxReceiptsBeingRemoved.pop_front();
 
         // Notice I don't call DeleteBoxReceipt(lTemp) here like I
@@ -7528,7 +7559,7 @@ void Notary::NotarizeProcessInbox(
 
         // We already handled this one (if we're even in this block
         // in the first place.)
-        if (itemType::balanceStatement == pProcessInboxItem->GetType()) {
+        if (otx::itemType::balanceStatement == pProcessInboxItem->GetType()) {
             continue;
         }
 
@@ -7536,26 +7567,26 @@ void Notary::NotarizeProcessInbox(
         // then let's process it.
         const bool validType =
             (Item::request == pProcessInboxItem->GetStatus()) &&
-            ((itemType::acceptCronReceipt ==
+            ((otx::itemType::acceptCronReceipt ==
               pProcessInboxItem->GetType()) ||  // Accepting notice of market
                                                 // trade or payment processing.
                                                 // (Original in Cron Receipt.)
-             //                       (OTitemType::disputeCronReceipt
-             (itemType::acceptItemReceipt ==
+             //                       (OTotx::itemType::disputeCronReceipt
+             (otx::itemType::acceptItemReceipt ==
               pProcessInboxItem->GetType()) ||  // Accepted
                                                 // item
                                                 // receipt
                                                 // (cheque,
                                                 // transfer)
-             (itemType::acceptPending ==
+             (otx::itemType::acceptPending ==
               pProcessInboxItem->GetType()) ||  // Accepting
                                                 // notice of
                                                 // pending
                                                 // transfer
-             (itemType::acceptFinalReceipt ==
+             (otx::itemType::acceptFinalReceipt ==
               pProcessInboxItem->GetType()) ||  // Accepting
                                                 // finalReceipt
-             (itemType::acceptBasketReceipt ==
+             (otx::itemType::acceptBasketReceipt ==
               pProcessInboxItem->GetType())  // Accepting
                                              // basketReceipt
             );
@@ -7563,7 +7594,7 @@ void Notary::NotarizeProcessInbox(
         if (false == validType) {
             auto strItemType = String::Factory();
             pProcessInboxItem->GetTypeString(strItemType);
-            LogError()()("Error, unexpected Item::itemType: ")(
+            LogError()()("Error, unexpected Item::otx::itemType: ")(
                 strItemType.get())
                 .Flush();
 
@@ -7577,44 +7608,44 @@ void Notary::NotarizeProcessInbox(
         strInReferenceTo->Release();
         pProcessInboxItem->SaveContractRaw(strInReferenceTo);
 
-        itemType theReplyItemType;
+        otx::itemType theReplyItemType;
         switch (pProcessInboxItem->GetType()) {
-            case itemType::acceptPending:
-                theReplyItemType = itemType::atAcceptPending;
+            case otx::itemType::acceptPending:
+                theReplyItemType = otx::itemType::atAcceptPending;
                 break;
-            case itemType::rejectPending:
-                theReplyItemType = itemType::atRejectPending;
+            case otx::itemType::rejectPending:
+                theReplyItemType = otx::itemType::atRejectPending;
                 break;
-            case itemType::acceptCronReceipt:
-                theReplyItemType = itemType::atAcceptCronReceipt;
+            case otx::itemType::acceptCronReceipt:
+                theReplyItemType = otx::itemType::atAcceptCronReceipt;
                 break;
-            case itemType::disputeCronReceipt:
-                theReplyItemType = itemType::atDisputeCronReceipt;
+            case otx::itemType::disputeCronReceipt:
+                theReplyItemType = otx::itemType::atDisputeCronReceipt;
                 break;
-            case itemType::acceptItemReceipt:
-                theReplyItemType = itemType::atAcceptItemReceipt;
+            case otx::itemType::acceptItemReceipt:
+                theReplyItemType = otx::itemType::atAcceptItemReceipt;
                 break;
-            case itemType::disputeItemReceipt:
-                theReplyItemType = itemType::atDisputeItemReceipt;
+            case otx::itemType::disputeItemReceipt:
+                theReplyItemType = otx::itemType::atDisputeItemReceipt;
                 break;
-            case itemType::acceptFinalReceipt:
-                theReplyItemType = itemType::atAcceptFinalReceipt;
+            case otx::itemType::acceptFinalReceipt:
+                theReplyItemType = otx::itemType::atAcceptFinalReceipt;
                 break;
-            case itemType::disputeFinalReceipt:
-                theReplyItemType = itemType::atDisputeFinalReceipt;
+            case otx::itemType::disputeFinalReceipt:
+                theReplyItemType = otx::itemType::atDisputeFinalReceipt;
                 break;
-            case itemType::acceptBasketReceipt:
-                theReplyItemType = itemType::atAcceptBasketReceipt;
+            case otx::itemType::acceptBasketReceipt:
+                theReplyItemType = otx::itemType::atAcceptBasketReceipt;
                 break;
-            case itemType::disputeBasketReceipt:
-                theReplyItemType = itemType::atDisputeBasketReceipt;
+            case otx::itemType::disputeBasketReceipt:
+                theReplyItemType = otx::itemType::atDisputeBasketReceipt;
                 break;
             default:
                 LogError()()("Should never happen.").Flush();
                 theReplyItemType =
-                    itemType::error_state;  // should never happen
-                                            // based on above 'if'
-                                            // statement.
+                    otx::itemType::error_state;  // should never happen
+                                                 // based on above 'if'
+                                                 // statement.
                 break;  // saving this anyway just cause it's
                         // cleaner.
         }
@@ -7668,8 +7699,8 @@ void Notary::NotarizeProcessInbox(
         }
         //
         // Warning! In the case of a
-        // transactionType::paymentReceipt or
-        // transactionType::marketReceipt,
+        // otx::transactionType::paymentReceipt or
+        // otx::transactionType::marketReceipt,
         // the "in reference to" string will NOT contain an
         // Item at all, but an OTPaymentPlan or
         // an OTTrade!! Also, a paymentReceipt might be for a
@@ -7677,7 +7708,7 @@ void Notary::NotarizeProcessInbox(
         // a smartcontract inside, instead of a payment plan! I
         // handle these cases first, here:
         else if (  // MARKET RECEIPT, or PAYMENT RECEIPT.....
-            ((itemType::acceptCronReceipt ==
+            ((otx::itemType::acceptCronReceipt ==
               pProcessInboxItem->GetType())  // This is checked
                                              // above, but just
              // keeping this safe.
@@ -7685,9 +7716,9 @@ void Notary::NotarizeProcessInbox(
             // or is used elsewhere.
             && (nullptr != (pServerTransaction = theInbox->GetTransaction(
                                 pProcessInboxItem->GetReferenceToNum()))) &&
-            ((transactionType::paymentReceipt ==
+            ((otx::transactionType::paymentReceipt ==
               pServerTransaction->GetType()) ||
-             (transactionType::marketReceipt ==
+             (otx::transactionType::marketReceipt ==
               pServerTransaction->GetType()))) {
             // pItem contains the current user's attempt to
             // accept the Receipt
@@ -7709,7 +7740,7 @@ void Notary::NotarizeProcessInbox(
             // (rejection)
             pResponseItem->SetStatus(Item::acknowledgement);
         } else if (  // FINAL RECEIPT
-            ((itemType::acceptFinalReceipt ==
+            ((otx::itemType::acceptFinalReceipt ==
               pProcessInboxItem->GetType())  // This is checked
                                              // above, but just
              // keeping this safe.
@@ -7717,7 +7748,7 @@ void Notary::NotarizeProcessInbox(
             // or is used elsewhere.
             && (nullptr != (pServerTransaction = theInbox->GetTransaction(
                                 pProcessInboxItem->GetReferenceToNum()))) &&
-            ((transactionType::finalReceipt ==
+            ((otx::transactionType::finalReceipt ==
               pServerTransaction->GetType()))) {
             // pItem contains the current user's attempt to
             // accept the Receipt
@@ -7739,7 +7770,7 @@ void Notary::NotarizeProcessInbox(
             // (rejection)
             pResponseItem->SetStatus(Item::acknowledgement);
         } else if (  // BASKET RECEIPT
-            ((itemType::acceptBasketReceipt ==
+            ((otx::itemType::acceptBasketReceipt ==
               pProcessInboxItem->GetType())  // This is checked
                                              // above, but just
              // keeping this safe.
@@ -7747,7 +7778,7 @@ void Notary::NotarizeProcessInbox(
             // or is used elsewhere.
             && (nullptr != (pServerTransaction = theInbox->GetTransaction(
                                 pProcessInboxItem->GetReferenceToNum()))) &&
-            ((transactionType::basketReceipt ==
+            ((otx::transactionType::basketReceipt ==
               pServerTransaction->GetType()))) {
             // pItem contains the current user's attempt to
             // accept the Receipt
@@ -7786,12 +7817,12 @@ void Notary::NotarizeProcessInbox(
         // for pending transactions and cheque receipts, is NOT
         // the case above, with receipts from cron.
         else if (
-            ((itemType::acceptItemReceipt ==
+            ((otx::itemType::acceptItemReceipt ==
               pProcessInboxItem->GetType())  // acceptItemReceipt
                                              // includes
                                              // checkReceipt and
                                              // transferReceipts.
-             || (itemType::acceptPending ==
+             || (otx::itemType::acceptPending ==
                  pProcessInboxItem->GetType())  // acceptPending
                                                 // includes
                                                 // checkReceipts.
@@ -7800,16 +7831,16 @@ void Notary::NotarizeProcessInbox(
              ) &&
             (nullptr != (pServerTransaction = theInbox->GetTransaction(
                              pProcessInboxItem->GetReferenceToNum()))) &&
-            ((transactionType::pending ==
+            ((otx::transactionType::pending ==
               pServerTransaction->GetType()) ||  // pending
                                                  // transfer.
-             (transactionType::transferReceipt ==
+             (otx::transactionType::transferReceipt ==
               pServerTransaction->GetType()) ||  // transfer
                                                  // receipt.
-             (transactionType::voucherReceipt ==
+             (otx::transactionType::voucherReceipt ==
               pServerTransaction->GetType()) ||  // voucher
                                                  // receipt.
-             (transactionType::chequeReceipt ==
+             (otx::transactionType::chequeReceipt ==
               pServerTransaction->GetType())  // cheque
                                               // receipt is
                                               // down here
@@ -7902,16 +7933,17 @@ void Notary::NotarizeProcessInbox(
                 // inbox. So that's the simplest case, and it's
                 // handled by THIS block of code:
                 //
-                if ((itemType::acceptItemReceipt ==
+                if ((otx::itemType::acceptItemReceipt ==
                      pProcessInboxItem->GetType()) &&
-                    (((transactionType::transferReceipt ==
+                    (((otx::transactionType::transferReceipt ==
                        pServerTransaction->GetType()) &&
-                      (itemType::acceptPending == pOriginalItem->GetType())) ||
-                     (((transactionType::chequeReceipt ==
+                      (otx::itemType::acceptPending ==
+                       pOriginalItem->GetType())) ||
+                     (((otx::transactionType::chequeReceipt ==
                         pServerTransaction->GetType()) ||
-                       (transactionType::voucherReceipt ==
+                       (otx::transactionType::voucherReceipt ==
                         pServerTransaction->GetType())) &&
-                      (itemType::depositCheque ==
+                      (otx::itemType::depositCheque ==
                        pOriginalItem->GetType())))) {  // (The
                                                        // funds
                                                        // are
@@ -7953,9 +7985,9 @@ void Notary::NotarizeProcessInbox(
                 // The below block only executes for ACCEPTING a
                 // TRANSFER
                 else if (
-                    (transactionType::pending ==
+                    (otx::transactionType::pending ==
                      pServerTransaction->GetType()) &&
-                    (itemType::transfer == pOriginalItem->GetType())) {
+                    (otx::itemType::transfer == pOriginalItem->GetType())) {
                     // pItem contains the current user's attempt
                     // to accept the transfer located in
                     // theOriginalItem.
@@ -8051,8 +8083,8 @@ void Notary::NotarizeProcessInbox(
                         auto pInboxTransaction{
                             api_.Factory().Internal().Session().Transaction(
                                 *theFromInbox,
-                                transactionType::transferReceipt,
-                                originType::not_applicable,
+                                otx::transactionType::transferReceipt,
+                                otx::originType::not_applicable,
                                 lNewTransactionNumber)};
 
                         assert_true(false != bool(pInboxTransaction));
@@ -8114,8 +8146,8 @@ void Notary::NotarizeProcessInbox(
                             // the trans #can be removed from
                             // his issued list.)
                             //
-                            std::shared_ptr<OTTransaction> inboxTransaction{
-                                pInboxTransaction.release()};
+                            const std::shared_ptr<OTTransaction>
+                                inboxTransaction{pInboxTransaction.release()};
                             theFromInbox->AddTransaction(inboxTransaction);
 
                             // The original item carries the
@@ -8516,7 +8548,7 @@ void Notary::process_cash_withdrawal(
     const auto& unit = account.get().GetInstrumentDefinitionID();
     const auto& accountID = requestItem.GetPurportedAccountID();
     bool bSuccess{false};
-    std::shared_ptr<otx::blind::Mint> pMint{nullptr};
+    const std::shared_ptr<otx::blind::Mint> pMint{nullptr};
     ExclusiveAccount pMintCashReserveAcct{};
 
     auto rawPurse = ByteArray{};
@@ -8741,7 +8773,7 @@ void Notary::send_push_notification(
     auto message = zmq::Message{};
     message.AddFrame(account.GetNymID().asBase58(api_.Crypto()));
     proto::OTXPush push;
-    push.set_version(OTX_PUSH_VERSION);
+    push.set_version(otx::OTX_PUSH_VERSION);
     push.set_type(proto::OTXPUSH_INBOX);
     push.set_accountid(
         server_.API().Factory().Internal().Identifier(account).asBase58(

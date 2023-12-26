@@ -16,7 +16,7 @@ auto Ed25519Key(
     const opentxs::Secret&,
     const Data&,
     const proto::HDPath&,
-    const Bip32Fingerprint,
+    const crypto::Bip32Fingerprint,
     const crypto::asymmetric::Role,
     const VersionNumber,
     const opentxs::PasswordPrompt&,

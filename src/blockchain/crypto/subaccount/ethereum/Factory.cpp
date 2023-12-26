@@ -16,7 +16,7 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory

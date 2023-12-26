@@ -4,20 +4,20 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // IWYU pragma: no_forward_declare opentxs::identifier::Account
-// IWYU pragma: no_include "opentxs/core/identifier/Account.hpp"
-// IWYU pragma: no_include "opentxs/core/identifier/Generic.hpp"
+// IWYU pragma: no_include "opentxs/identifier/Account.hpp"
+// IWYU pragma: no_include "opentxs/identifier/Generic.hpp"
 
 #pragma once
 
 #include <memory>
 #include <string_view>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

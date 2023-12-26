@@ -50,8 +50,9 @@ DeterministicIndex::DeterministicIndex(
 {
 }
 
-auto DeterministicIndex::need_index(const std::optional<Bip32Index>& current)
-    const noexcept -> std::optional<Bip32Index>
+auto DeterministicIndex::need_index(
+    const std::optional<crypto::Bip32Index>& current) const noexcept
+    -> std::optional<crypto::Bip32Index>
 {
     const auto generated = subaccount_.LastGenerated(parent_.subchain_);
 
@@ -78,15 +79,15 @@ auto DeterministicIndex::need_index(const std::optional<Bip32Index>& current)
 }
 
 auto DeterministicIndex::process(
-    const std::optional<Bip32Index>& current,
-    Bip32Index target,
+    const std::optional<crypto::Bip32Index>& current,
+    crypto::Bip32Index target,
     allocator_type monotonic) noexcept -> void
 {
     auto elements = database::ElementMap{monotonic};
     auto postcondition = ScopeGuard{[&] { done(std::move(elements)); }};
     const auto& subchain = parent_.subchain_;
     const auto first =
-        current.has_value() ? current.value() + 1u : Bip32Index{0u};
+        current.has_value() ? current.value() + 1u : crypto::Bip32Index{0u};
     const auto last = subaccount_.LastGenerated(subchain).value_or(0u);
 
     if (last > first) {

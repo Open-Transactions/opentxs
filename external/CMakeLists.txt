@@ -39,8 +39,11 @@ if(CASH_LUCRE_EXPORT)
   endif()
 
   set_target_properties(
-    opentxs-lucre PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
-                                                       ""
+    opentxs-lucre
+    PROPERTIES
+      C_INCLUDE_WHAT_YOU_USE ""
+      CXX_INCLUDE_WHAT_YOU_USE ""
+      CXX_CLANG_TIDY ""
   )
   libopentxs_link_internal(opentxs-lucre)
   libopentxs_link_external(OpenSSL::Crypto)
@@ -124,8 +127,11 @@ if(NOT MSVC)
 endif()
 
 set_target_properties(
-  opentxs-bech32 PROPERTIES C_INCLUDE_WHAT_YOU_USE "" CXX_INCLUDE_WHAT_YOU_USE
-                                                      ""
+  opentxs-bech32
+  PROPERTIES
+    C_INCLUDE_WHAT_YOU_USE ""
+    CXX_INCLUDE_WHAT_YOU_USE ""
+    CXX_CLANG_TIDY ""
 )
 libopentxs_add_sources($<TARGET_OBJECTS:opentxs-bech32>)
 

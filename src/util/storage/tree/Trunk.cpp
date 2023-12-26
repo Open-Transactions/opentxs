@@ -16,9 +16,9 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "opentxs/core/identifier/Account.hpp"         // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"          // IWYU pragma: keep
-#include "opentxs/core/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Account.hpp"         // IWYU pragma: keep
+#include "opentxs/identifier/Notary.hpp"          // IWYU pragma: keep
+#include "opentxs/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Accounts.hpp"
 #include "util/storage/tree/Contacts.hpp"
@@ -157,7 +157,7 @@ auto Trunk::get_child(
     const Hash& hash,
     Args&&... params) const -> T*
 {
-    Lock lock(mutex);
+    auto lock = Lock{mutex};
 
     if (false == bool(pointer)) {
         pointer.reset(new T(crypto_, factory_, plugin_, hash, params...));
@@ -179,7 +179,8 @@ auto Trunk::get_editor(
     Hash& hash,
     Args&&... params) const -> Editor<T>
 {
-    std::function<void(T*, Lock&)> callback = [&](T* in, Lock& lock) -> void {
+    const std::function<void(T*, Lock&)> callback = [&](T* in,
+                                                        Lock& lock) -> void {
         save_child<T>(in, lock, mutex, hash);
     };
 
@@ -228,7 +229,7 @@ auto Trunk::Load(
     std::shared_ptr<proto::Ciphertext>& output,
     ErrorReporting checking) const -> bool
 {
-    Lock lock(master_key_lock_);
+    const auto lock = Lock{master_key_lock_};
 
     const bool have = bool(master_key_);
 
@@ -329,7 +330,7 @@ void Trunk::save_child(
 
     if (nullptr == input) { LogAbort()()("Null target.").Abort(); }
 
-    Lock rootLock(hashLock);
+    auto rootLock = Lock{hashLock};
     hash = input->Root();
     rootLock.unlock();
 
@@ -349,39 +350,39 @@ auto Trunk::serialize() const -> proto::StorageItems
     proto.set_version(version_);
 
     {
-        Lock accountLock(account_lock_);
+        const auto accountLock = Lock{account_lock_};
         write(account_root_, *proto.mutable_accounts());
     }
     {
-        Lock contactLock(contact_lock_);
+        const auto contactLock = Lock{contact_lock_};
         write(contact_root_, *proto.mutable_contacts());
     }
     {
-        Lock credLock(credential_lock_);
+        const auto credLock = Lock{credential_lock_};
         write(credential_root_, *proto.mutable_creds());
     }
     {
-        Lock notaryLock(notary_lock_);
+        const auto notaryLock = Lock{notary_lock_};
         write(notary_root_, *proto.mutable_notary());
     }
     {
-        Lock nymLock(nym_lock_);
+        const auto nymLock = Lock{nym_lock_};
         write(nym_root_, *proto.mutable_nyms());
     }
     {
-        Lock seedLock(seed_lock_);
+        const auto seedLock = Lock{seed_lock_};
         write(seed_root_, *proto.mutable_seeds());
     }
     {
-        Lock serverLock(server_lock_);
+        const auto serverLock = Lock{server_lock_};
         write(server_root_, *proto.mutable_servers());
     }
     {
-        Lock unitLock(unit_lock_);
+        const auto unitLock = Lock{unit_lock_};
         write(unit_root_, *proto.mutable_units());
     }
     {
-        Lock masterLock(master_key_lock_);
+        const auto masterLock = Lock{master_key_lock_};
 
         if (master_key_) { *proto.mutable_master_secret() = *master_key_; }
     }
@@ -398,8 +399,8 @@ auto Trunk::servers() const -> tree::Servers*
 
 auto Trunk::Store(const proto::Ciphertext& serialized) -> bool
 {
-    Lock masterLock(master_key_lock_, std::defer_lock);
-    Lock writeLock(write_lock_, std::defer_lock);
+    auto masterLock = Lock{master_key_lock_, std::defer_lock};
+    auto writeLock = Lock{write_lock_, std::defer_lock};
     std::lock(masterLock, writeLock);
     master_key_ = std::make_shared<proto::Ciphertext>(serialized);
     masterLock.unlock();

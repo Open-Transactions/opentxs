@@ -10,9 +10,9 @@
 
 #include "internal/util/Bytes.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::ping
 {

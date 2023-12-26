@@ -276,7 +276,7 @@ auto EllipticCurve::SignDER(
         return false;
     }
 
-    bool success = ecdsa_.SignDER(
+    const bool success = ecdsa_.SignDER(
         preimage, private_key(lock, reason), hash, std::move(output));
 
     if (false == success) { LogError()()("Failed to sign preimage").Flush(); }

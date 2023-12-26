@@ -16,8 +16,8 @@ namespace ottest
 {
 TEST_F(Filename, GetFilenameBin)
 {
-    ot::UnallocatedCString exp{"filename.bin"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.bin"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameBin("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -31,8 +31,8 @@ TEST_F(Filename, getFilenameBin_invalid_input)
 
 TEST_F(Filename, GetFilenameA)
 {
-    ot::UnallocatedCString exp{"filename.a"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.a"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameA("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -46,8 +46,8 @@ TEST_F(Filename, getFilenameA_invalid_input)
 
 TEST_F(Filename, GetFilenameR)
 {
-    ot::UnallocatedCString exp{"filename.r"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.r"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameR("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -62,14 +62,14 @@ TEST_F(Filename, getFilenameR_invalid_input)
 TEST_F(Filename, GetFilenameRct)
 {
     {
-        ot::UnallocatedCString exp{"123.rct"};
-        ot::UnallocatedCString s{
+        const ot::UnallocatedCString exp{"123.rct"};
+        const ot::UnallocatedCString s{
             opentxs::api::internal::Paths::GetFilenameRct(123)};
         ASSERT_STREQ(s.c_str(), exp.c_str());
     }
     {
-        ot::UnallocatedCString exp{"0.rct"};
-        ot::UnallocatedCString s{
+        const ot::UnallocatedCString exp{"0.rct"};
+        const ot::UnallocatedCString s{
             opentxs::api::internal::Paths::GetFilenameRct(000)};
         ASSERT_STREQ(s.c_str(), exp.c_str());
     }
@@ -83,17 +83,17 @@ TEST_F(Filename, getFilenameRct_invalid_input)
 TEST_F(Filename, GetFilenameCrn)
 {
     {
-        ot::UnallocatedCString exp{"123.crn"};
+        const ot::UnallocatedCString exp{"123.crn"};
         static_assert(
             std::is_same_v<int64_t, opentxs::TransactionNumber>,
             "type is not matching");  // detect if type change
-        ot::UnallocatedCString s{
+        const ot::UnallocatedCString s{
             opentxs::api::internal::Paths::GetFilenameCrn(123)};
         ASSERT_STREQ(s.c_str(), exp.c_str());
     }
     {
-        ot::UnallocatedCString exp{"0.crn"};
-        ot::UnallocatedCString s{
+        const ot::UnallocatedCString exp{"0.crn"};
+        const ot::UnallocatedCString s{
             opentxs::api::internal::Paths::GetFilenameCrn(000)};
         ASSERT_STREQ(s.c_str(), exp.c_str());
     }
@@ -106,8 +106,8 @@ TEST_F(Filename, getFilenameCrn_invalid_input)
 
 TEST_F(Filename, GetFilenameSuccess)
 {
-    ot::UnallocatedCString exp{"filename.success"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.success"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameSuccess("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -123,8 +123,8 @@ TEST_F(Filename, getFilenameSuccess_invalid_input)
 
 TEST_F(Filename, GetFilenameFail)
 {
-    ot::UnallocatedCString exp{"filename.fail"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.fail"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameFail("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -139,8 +139,8 @@ TEST_F(Filename, getFilenameFail_invalid_input)
 
 TEST_F(Filename, GetFilenameError)
 {
-    ot::UnallocatedCString exp{"filename.error"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.error"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameError("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }
@@ -155,8 +155,8 @@ TEST_F(Filename, getFilenameError_invalid_input)
 
 TEST_F(Filename, GetFilenameLst)
 {
-    ot::UnallocatedCString exp{"filename.lst"};
-    ot::UnallocatedCString s{
+    const ot::UnallocatedCString exp{"filename.lst"};
+    const ot::UnallocatedCString s{
         opentxs::api::internal::Paths::GetFilenameLst("filename")};
     ASSERT_STREQ(s.c_str(), exp.c_str());
 }

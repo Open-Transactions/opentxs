@@ -17,8 +17,8 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Nym.hpp"
 
 namespace opentxs::factory
 {

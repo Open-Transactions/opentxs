@@ -19,10 +19,10 @@
 #include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Mailbox.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -98,7 +98,7 @@ auto Thread::Add(
     const identifier::Generic& workflow,
     const std::uint32_t chain) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     auto saved{true};
     auto unread{true};
@@ -164,7 +164,7 @@ auto Thread::Add(
 
 auto Thread::Alias() const -> UnallocatedCString
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return alias_;
 }
@@ -200,7 +200,7 @@ auto Thread::init(const Hash& hash) noexcept(false) -> void
 
 auto Thread::Check(const identifier::Generic& id) const -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return items_.end() != items_.find(id);
 }
@@ -209,14 +209,14 @@ auto Thread::ID() const -> identifier::Generic { return id_; }
 
 auto Thread::Items() const -> proto::StorageThread
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return serialize(lock);
 }
 
 auto Thread::Read(const identifier::Generic& id, const bool unread) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     auto it = items_.find(id);
 
@@ -235,7 +235,7 @@ auto Thread::Read(const identifier::Generic& id, const bool unread) -> bool
 
 auto Thread::Remove(const identifier::Generic& id) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     auto it = items_.find(id);
 
@@ -264,11 +264,11 @@ auto Thread::Remove(const identifier::Generic& id) -> bool
 
 auto Thread::Rename(const identifier::Generic& newID) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto oldID = id_;
     id_ = newID;
 
-    if (0 != participants_.count(oldID)) {
+    if (participants_.contains(oldID)) {
         participants_.erase(oldID);
         participants_.emplace(newID);
     }
@@ -315,7 +315,7 @@ auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
 
 auto Thread::SetAlias(std::string_view alias) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     alias_ = alias;
 
@@ -343,7 +343,7 @@ auto Thread::sort(const Lock& lock) const -> Thread::SortedItems
 
 auto Thread::UnreadCount() const -> std::size_t
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     std::size_t output{0};
 
     for (const auto& it : items_) {

@@ -11,8 +11,8 @@
 #include <cstddef>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -24,8 +24,6 @@ namespace block
 class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
-
-struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 

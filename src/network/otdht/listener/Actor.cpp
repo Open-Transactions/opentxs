@@ -16,13 +16,13 @@
 
 #include "internal/api/network/Asio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Factory.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -31,6 +31,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/otdht/Acknowledgement.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Data.hpp"
@@ -39,6 +40,7 @@
 #include "opentxs/network/otdht/Request.hpp"
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
@@ -46,8 +48,6 @@
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::network::otdht

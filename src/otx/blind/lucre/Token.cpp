@@ -31,7 +31,6 @@ extern "C" {
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
-#include "internal/otx/blind/Types.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Session.hpp"
@@ -43,6 +42,7 @@ extern "C" {
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/blind/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -168,7 +168,7 @@ Lucre::Lucre(
           api,
           purse,
           in.lucre().version(),
-          translate(in.state()),
+          opentxs::translate(in.state()),
           in.series(),
           factory::Amount(in.denomination()),
           convert_stime(in.validfrom()),
@@ -296,7 +296,7 @@ auto Lucre::GenerateTokenRequest(
     const PasswordPrompt& reason) -> bool
 {
     auto setDumper = LucreDumper{};
-    crypto::openssl::BIO bioBank = ::BIO_new(::BIO_s_mem());
+    crypto::openssl::BIO const bioBank = ::BIO_new(::BIO_s_mem());
     auto armoredMint = Armored::Factory(api_.Crypto());
     mint.GetPublic(armoredMint, denomination_);
     auto serializedMint = String::Factory(armoredMint);
@@ -450,7 +450,7 @@ auto Lucre::ID(const PasswordPrompt& reason) const -> UnallocatedCString
     }
 
     UnallocatedCString output;
-    std::regex reg("id=([A-Z0-9]*)");
+    const std::regex reg("id=([A-Z0-9]*)");
     std::cmatch match{};
 
     if (std::regex_search(spendable->Get(), match, reg)) { output = match[1]; }

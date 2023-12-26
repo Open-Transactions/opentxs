@@ -32,19 +32,17 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::factory
 {
@@ -295,8 +293,8 @@ auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
             throw std::runtime_error{"invalid path (missing nym index)"};
         }
 
-        const auto index =
-            path.child(1) ^ static_cast<std::uint32_t>(Bip32Child::HARDENED);
+        const auto index = path.child(1) ^ static_cast<std::uint32_t>(
+                                               crypto::Bip32Child::HARDENED);
 
         static_assert(sizeof(index) <= sizeof(std::size_t));
 

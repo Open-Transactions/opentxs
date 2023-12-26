@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/Types.hpp"
+
 #include "ottest/fixtures/blockchain/CfilterListener.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
@@ -18,7 +20,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Logging.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "util/Actor.hpp"
 
 namespace ottest

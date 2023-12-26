@@ -15,7 +15,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -41,12 +40,13 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -1197,12 +1197,12 @@ void OTMarket::ProcessTrade(
     // We MIGHT use ONE, OR BOTH, of these, or none.
 
     // Find out if either Nym is actually also the server.
-    bool bFirstNymIsServerNym = (FIRST_NYM_ID == NOTARY_NYM_ID);
-    bool bOtherNymIsServerNym = (OTHER_NYM_ID == NOTARY_NYM_ID);
+    const bool bFirstNymIsServerNym = (FIRST_NYM_ID == NOTARY_NYM_ID);
+    const bool bOtherNymIsServerNym = (OTHER_NYM_ID == NOTARY_NYM_ID);
 
     // We also see, after all that is done, whether both pointers go to the same
     // entity. We'll want to know that later.
-    bool bTradersAreSameNym = (FIRST_NYM_ID == OTHER_NYM_ID);
+    const bool bTradersAreSameNym = (FIRST_NYM_ID == OTHER_NYM_ID);
 
     // Initially both nym pointers are set to their own blank objects
     Nym_p pFirstNym = nullptr;
@@ -1413,7 +1413,7 @@ void OTMarket::ProcessTrade(
             bSuccessLoadingFirstAsset = theFirstAssetInbox->GenerateLedger(
                 theTrade.GetSenderAcctID(),
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -1425,7 +1425,7 @@ void OTMarket::ProcessTrade(
                 theFirstCurrencyInbox->GenerateLedger(
                     theTrade.GetCurrencyAcctID(),
                     NOTARY_ID,
-                    ledgerType::inbox,
+                    otx::ledgerType::inbox,
                     true);  // bGenerateFile=true
         }
 
@@ -1436,7 +1436,7 @@ void OTMarket::ProcessTrade(
             bSuccessLoadingOtherAsset = theOtherAssetInbox->GenerateLedger(
                 pOtherTrade->GetSenderAcctID(),
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -1448,7 +1448,7 @@ void OTMarket::ProcessTrade(
                 theOtherCurrencyInbox->GenerateLedger(
                     pOtherTrade->GetCurrencyAcctID(),
                     NOTARY_ID,
-                    ledgerType::inbox,
+                    otx::ledgerType::inbox,
                     true);  // bGenerateFile=true
         }
 
@@ -1469,7 +1469,7 @@ void OTMarket::ProcessTrade(
             return;
         } else {
             // Generate new transaction numbers for these new transactions
-            std::int64_t lNewTransactionNumber =
+            const std::int64_t lNewTransactionNumber =
                 pCron->GetNextTransactionNumber();
 
             //            assert_true(lNewTransactionNumber > 0); // this can be
@@ -1531,40 +1531,40 @@ void OTMarket::ProcessTrade(
 
             auto pTrans1{api_.Factory().Internal().Session().Transaction(
                 *theFirstAssetInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans1));
 
             auto pTrans2{api_.Factory().Internal().Session().Transaction(
                 *theFirstCurrencyInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans2));
 
             auto pTrans3{api_.Factory().Internal().Session().Transaction(
                 *theOtherAssetInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans3));
 
             auto pTrans4{api_.Factory().Internal().Session().Transaction(
                 *theOtherCurrencyInbox,
-                transactionType::marketReceipt,
-                originType::origin_market_offer,
+                otx::transactionType::marketReceipt,
+                otx::originType::origin_market_offer,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTrans4));
 
-            std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
-            std::shared_ptr<OTTransaction> trans2{pTrans2.release()};
-            std::shared_ptr<OTTransaction> trans3{pTrans3.release()};
-            std::shared_ptr<OTTransaction> trans4{pTrans4.release()};
+            const std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
+            const std::shared_ptr<OTTransaction> trans2{pTrans2.release()};
+            const std::shared_ptr<OTTransaction> trans3{pTrans3.release()};
+            const std::shared_ptr<OTTransaction> trans4{pTrans4.release()};
 
             // All four inboxes will get receipts with the same (new)
             // transaction ID.
@@ -1580,23 +1580,23 @@ void OTMarket::ProcessTrade(
             // set up the transaction items (each transaction may have
             // multiple items... but not in this case.)
             auto pItem1{api_.Factory().Internal().Session().Item(
-                *trans1, itemType::marketReceipt, {})};
+                *trans1, otx::itemType::marketReceipt, {})};
             auto pItem2{api_.Factory().Internal().Session().Item(
-                *trans2, itemType::marketReceipt, {})};
+                *trans2, otx::itemType::marketReceipt, {})};
             auto pItem3{api_.Factory().Internal().Session().Item(
-                *trans3, itemType::marketReceipt, {})};
+                *trans3, otx::itemType::marketReceipt, {})};
             auto pItem4{api_.Factory().Internal().Session().Item(
-                *trans4, itemType::marketReceipt, {})};
+                *trans4, otx::itemType::marketReceipt, {})};
 
             assert_true(false != bool(pItem1));
             assert_true(false != bool(pItem2));
             assert_true(false != bool(pItem3));
             assert_true(false != bool(pItem4));
 
-            std::shared_ptr<Item> item1{pItem1.release()};
-            std::shared_ptr<Item> item2{pItem2.release()};
-            std::shared_ptr<Item> item3{pItem3.release()};
-            std::shared_ptr<Item> item4{pItem4.release()};
+            const std::shared_ptr<Item> item1{pItem1.release()};
+            const std::shared_ptr<Item> item2{pItem2.release()};
+            const std::shared_ptr<Item> item3{pItem3.release()};
+            const std::shared_ptr<Item> item4{pItem4.release()};
 
             item1->SetStatus(Item::rejection);  // the default.
             item2->SetStatus(Item::rejection);  // the default.
@@ -1719,8 +1719,9 @@ void OTMarket::ProcessTrade(
                      ? theOtherOffer.GetAmountAvailable()
                      : theOffer.GetAmountAvailable());
 
-            Amount lTemp = lMostAvailable % GetScale();  // The Scale may not
-                                                         // evenly divide into
+            const Amount lTemp =
+                lMostAvailable % GetScale();  // The Scale may not
+                                              // evenly divide into
             // the amount available
 
             lMostAvailable -= lTemp;  // We'll subtract remainder amount, so
@@ -1820,12 +1821,13 @@ void OTMarket::ProcessTrade(
                 // accounts to cover the round, (for SURE.) So let's DO
                 // it.
 
-                bool bMove1 =
+                const bool bMove1 =
                     pAssetAccountToDebit.get().Debit(lMinIncrementPerRound);
-                bool bMove2 = pCurrencyAccountToDebit.get().Debit(lPrice);
-                bool bMove3 =
+                const bool bMove2 = pCurrencyAccountToDebit.get().Debit(lPrice);
+                const bool bMove3 =
                     pAssetAccountToCredit.get().Credit(lMinIncrementPerRound);
-                bool bMove4 = pCurrencyAccountToCredit.get().Credit(lPrice);
+                const bool bMove4 =
+                    pCurrencyAccountToCredit.get().Credit(lPrice);
 
                 // If ANY of these failed, then roll them all back and
                 // break.
@@ -2698,7 +2700,7 @@ auto OTMarket::ValidateOfferForMarket(OTOffer& theOffer) -> bool
         api_.Wallet().Internal().CurrencyTypeBasedOnUnitType(
             theOffer.GetInstrumentDefinitionID()));
 
-    UnallocatedVector<char> buf;
+    const UnallocatedVector<char> buf;
     if (GetNotaryID() != theOffer.GetNotaryID()) {
         bValidOffer = false;
         LogConsole()()("Offer is invalid for this market: "

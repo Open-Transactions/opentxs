@@ -35,6 +35,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -49,14 +50,15 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
@@ -64,8 +66,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/UserCommandProcessor.hpp"
 
@@ -206,13 +206,13 @@ auto MessageProcessor::Imp::cleanup() noexcept -> void
 
 auto MessageProcessor::Imp::DropIncoming(const int count) const noexcept -> void
 {
-    Lock lock(counter_lock_);
+    const auto lock = Lock{counter_lock_};
     drop_incoming_ = count;
 }
 
 auto MessageProcessor::Imp::DropOutgoing(const int count) const noexcept -> void
 {
-    Lock lock(counter_lock_);
+    const auto lock = Lock{counter_lock_};
     drop_outgoing_ = count;
 }
 

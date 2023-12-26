@@ -24,6 +24,7 @@
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -37,7 +38,6 @@
 #include "opentxs/interface/rpc/request/Base.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

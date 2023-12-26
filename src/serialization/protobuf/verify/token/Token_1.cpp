@@ -40,7 +40,7 @@ auto CheckProto_1(
 
     const bool haveExpectedState = false == state.empty();
 
-    if (haveExpectedState && (0 == state.count(input.state()))) {
+    if (haveExpectedState && (false == state.contains(input.state()))) {
         FAIL_2("Incorrect state", std::to_string(input.state()));
     }
 

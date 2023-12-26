@@ -5,8 +5,8 @@
 
 // IWYU pragma: no_forward_declare opentxs::identifier::Notary
 // IWYU pragma: no_forward_declare opentxs::identifier::UnitDefinition
-// IWYU pragma: no_include "opentxs/core/identifier/Notary.hpp"
-// IWYU pragma: no_include "opentxs/core/identifier/UnitDefinition.hpp"
+// IWYU pragma: no_include "opentxs/identifier/Notary.hpp"
+// IWYU pragma: no_include "opentxs/identifier/UnitDefinition.hpp"
 
 #pragma once
 

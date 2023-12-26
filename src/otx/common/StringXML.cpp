@@ -95,7 +95,7 @@ auto StringXML::read(void* buffer, std::uint32_t sizeToRead) -> std::int32_t
     if (buffer && sizeToRead && Exists()) {
         char* pBuf = static_cast<char*>(buffer);
 
-        std::int32_t nBytesToCopy =
+        const std::int32_t nBytesToCopy =
             (sizeToRead > GetLength() ? GetLength() : sizeToRead);
         std::int32_t i;
         for (i = 0; i < nBytesToCopy; i++) { pBuf[i] = sgetc(); }

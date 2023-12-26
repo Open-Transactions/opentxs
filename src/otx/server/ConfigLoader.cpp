@@ -177,7 +177,8 @@ auto ConfigLoader::load(
             auto strValue = String::Factory();
             const char* szValue = nullptr;
 
-            UnallocatedCString stdstrValue = ServerSettings::GetOverrideNymID();
+            const UnallocatedCString stdstrValue =
+                ServerSettings::GetOverrideNymID();
             szValue = stdstrValue.c_str();
 
             bool bIsNewKey = false;

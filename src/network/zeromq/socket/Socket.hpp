@@ -19,10 +19,10 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -42,7 +42,7 @@ class Message;
 #define SHUTDOWN_SOCKET                                                        \
     {                                                                          \
         running_->Off();                                                       \
-        Lock lock(lock_);                                                      \
+        auto lock = Lock{lock_};                                               \
         shutdown(lock);                                                        \
     }
 
@@ -101,7 +101,7 @@ protected:
         {
             auto output = Vector<CString>{};
 
-            Lock lock{lock_};
+            const auto lock = Lock{lock_};
             output.reserve(queue_.size());
 
             while (false == queue_.empty()) {

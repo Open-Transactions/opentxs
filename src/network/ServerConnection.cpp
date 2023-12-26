@@ -41,6 +41,8 @@
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -48,9 +50,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/ZeroMQ.internal.hpp"
-#include "opentxs/core/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -64,7 +65,6 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 
@@ -214,7 +214,7 @@ auto ServerConnection::Imp::async_socket(const Lock& lock) const
 
 auto ServerConnection::Imp::ChangeAddressType(const AddressType type) -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     address_type_ = type;
     reset_socket(lock);
 
@@ -223,7 +223,7 @@ auto ServerConnection::Imp::ChangeAddressType(const AddressType type) -> bool
 
 auto ServerConnection::Imp::ClearProxy() -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     use_proxy_->Off();
     reset_socket(lock);
 
@@ -232,7 +232,7 @@ auto ServerConnection::Imp::ClearProxy() -> bool
 
 auto ServerConnection::Imp::EnableProxy() -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     use_proxy_->On();
     reset_socket(lock);
 
@@ -241,7 +241,7 @@ auto ServerConnection::Imp::EnableProxy() -> bool
 
 auto ServerConnection::Imp::disable_push(const identifier::Nym& nymID) -> void
 {
-    Lock registrationLock(registration_lock_);
+    const auto registrationLock = Lock{registration_lock_};
     registered_for_push_[nymID] = true;
 }
 
@@ -402,7 +402,7 @@ auto ServerConnection::Imp::register_for_push(
         return;
     }
 
-    Lock registrationLock(registration_lock_);
+    const auto registrationLock = Lock{registration_lock_};
     const auto& nymID = context.Signer()->ID();
     auto& isRegistered = registered_for_push_[nymID];
 
@@ -426,7 +426,7 @@ auto ServerConnection::Imp::register_for_push(
     }
     message.Internal().AddFrame(serialized);
     message.AddFrame();
-    Lock socketLock(lock_);
+    const auto socketLock = Lock{lock_};
     isRegistered = get_async(socketLock).Send(std::move(message));
 }
 
@@ -510,7 +510,7 @@ auto ServerConnection::Imp::Send(
         return output;
     }
 
-    Lock socketLock(lock_);
+    const auto socketLock = Lock{lock_};
     Cleanup cleanup(socketLock, *this, status, reply);
     auto sendresult = get_sync(socketLock).Send([&] {
         auto out = zeromq::Message{};

@@ -11,12 +11,12 @@
 #include <cstdint>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
@@ -114,9 +114,9 @@ protected:
     UnallocatedDeque<TransactionNumber> recipient_closing_numbers_;
 
 public:
-    auto GetOriginType() const -> originType override
+    auto GetOriginType() const -> otx::originType override
     {
-        return originType::origin_payment_plan;
+        return otx::originType::origin_payment_plan;
     }
 
     void setCustomerNymId(const identifier::Nym& NYM_ID);
@@ -432,7 +432,7 @@ public:
         const TransactionNumber& lNewTransactionNumber,
         const TransactionNumber& lInReferenceTo,
         const String& strReference,
-        originType theOriginType,
+        otx::originType theOriginType,
         OTString pstrNote,
         OTString pstrAttachment,
         const identifier::Nym& actualNymID,

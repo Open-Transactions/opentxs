@@ -25,26 +25,26 @@ public:
     using api::crypto::Seed::AccountChildKey;
     virtual auto AccountChildKey(
         const proto::HDPath& path,
-        const BIP44Chain internal,
-        const Bip32Index index,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto AccountKey(
         const proto::HDPath& path,
-        const BIP44Chain internal,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetOrCreateDefaultSeed(
         opentxs::crypto::SeedID& seedID,
         opentxs::crypto::SeedStyle& type,
         opentxs::crypto::Language& lang,
-        Bip32Index& index,
+        opentxs::crypto::Bip32Index& index,
         const opentxs::crypto::SeedStrength strength,
         const PasswordPrompt& reason) const -> Secret = 0;
     auto Internal() const noexcept -> const Seed& final { return *this; }
     virtual auto UpdateIndex(
         const opentxs::crypto::SeedID& seedID,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const -> bool = 0;
 
     auto Internal() noexcept -> Seed& final { return *this; }

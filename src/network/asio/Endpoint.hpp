@@ -6,8 +6,8 @@
 #pragma once
 
 #include "BoostAsio.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace asio = boost::asio;
 namespace ip = asio::ip;

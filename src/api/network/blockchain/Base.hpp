@@ -12,6 +12,7 @@
 
 #include "api/network/blockchain/Blockchain.hpp"
 #include "internal/api/network/Blockchain.hpp"
+#include "opentxs/BlockchainProfile.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -19,7 +20,6 @@
 #include "opentxs/blockchain/node/Stats.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

@@ -11,12 +11,12 @@
 #include <string_view>
 
 #include "internal/util/Mutex.hpp"
-#include "internal/util/storage/Types.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

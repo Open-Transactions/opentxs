@@ -10,9 +10,9 @@
 #include <memory>
 
 #include "internal/api/crypto/Hash.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Hasher.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

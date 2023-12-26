@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/core/contract/peer/Types.hpp"
+#include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::contract::peer
 {
-enum class RequestType : std::uint32_t {
+enum class RequestType : std::underlying_type_t<RequestType> {
     Error = 0,
     Bailment = 1,
     OutBailment = 2,

@@ -5,14 +5,14 @@
 
 // IWYU pragma: no_include "opentxs/core/Amount.hpp"
 // IWYU pragma: no_include "opentxs/core/Data.hpp"
-// IWYU pragma: no_include "opentxs/core/identifier/Generic.hpp"
+// IWYU pragma: no_include "opentxs/identifier/Generic.hpp"
 // IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 

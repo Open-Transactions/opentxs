@@ -13,8 +13,8 @@
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/blind/mint/Mint.hpp"
 

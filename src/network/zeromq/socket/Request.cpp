@@ -20,8 +20,8 @@
 #include "network/zeromq/curve/Client.hpp"
 #include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
@@ -59,7 +59,7 @@ auto Request::Send(zeromq::Message&& request) const noexcept
 {
     assert_false(nullptr == socket_);
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto output = SendResult{otx::client::SendResult::Error, {}};
     auto& [status, reply] = output;
 

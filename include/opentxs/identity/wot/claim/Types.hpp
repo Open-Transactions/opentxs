@@ -7,8 +7,8 @@
 
 #include <cstdint>
 
-#include "opentxs/Export.hpp"      // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"  // IWYU pragma: keep
+#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"   // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -18,18 +18,18 @@ enum class Attribute : std::uint8_t;    // IWYU pragma: export
 enum class ClaimType : std::uint32_t;   // IWYU pragma: export
 enum class SectionType : std::uint8_t;  // IWYU pragma: export
 
-OPENTXS_EXPORT auto ClaimToNym(const ClaimType in) noexcept -> identity::Type;
-OPENTXS_EXPORT auto ClaimToUnit(const ClaimType in) noexcept -> UnitType;
+OPENTXS_EXPORT auto ClaimToNym(ClaimType) noexcept -> identity::Type;
+OPENTXS_EXPORT auto ClaimToUnit(ClaimType) noexcept -> UnitType;
 OPENTXS_EXPORT auto DefaultVersion() noexcept -> VersionNumber;
 }  // namespace opentxs::identity::wot::claim
 
 namespace opentxs::identity
 {
-OPENTXS_EXPORT auto NymToClaim(const Type in) noexcept -> wot::claim::ClaimType;
+OPENTXS_EXPORT auto NymToClaim(Type) noexcept -> wot::claim::ClaimType;
 }  // namespace opentxs::identity
 
 namespace opentxs
 {
-OPENTXS_EXPORT auto UnitToClaim(const UnitType in) noexcept
+OPENTXS_EXPORT auto UnitToClaim(UnitType) noexcept
     -> identity::wot::claim::ClaimType;
 }  // namespace opentxs

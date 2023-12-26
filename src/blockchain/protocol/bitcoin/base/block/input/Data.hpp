@@ -11,12 +11,13 @@
 #include <functional>
 #include <optional>
 
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 

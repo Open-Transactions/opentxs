@@ -19,6 +19,8 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/otx/common/Account.hpp"
+#include "opentxs/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -30,20 +32,16 @@
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::factory
 {

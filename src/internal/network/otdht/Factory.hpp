@@ -8,11 +8,10 @@
 #include <memory>
 #include <string_view>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/contract/Types.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/network/otdht/Types.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

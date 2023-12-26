@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/Server.hpp"
@@ -17,10 +16,11 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -46,7 +46,7 @@ OTClient::OTClient(const api::Session& api)
 /// returns >0 for nearly everything else, containing the request number
 /// itself.
 auto OTClient::ProcessUserCommand(
-    const MessageType requestedCommand,
+    const otx::MessageType requestedCommand,
     otx::context::Server& context,
     Message& theMessage,
     const identifier::Generic& pHisNymID,
@@ -106,7 +106,7 @@ auto OTClient::ProcessUserCommand(
         // attackers who cannot break the crypto, but try to capture
         // encrypted messages and send them to the server twice. Better that
         // new requests requre new request numbers :-)
-        case MessageType::unregisterNym: {
+        case otx::MessageType::unregisterNym: {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();
             theMessage.request_num_->Set(
@@ -127,7 +127,7 @@ auto OTClient::ProcessUserCommand(
 
             lReturnValue = lRequestNumber;
         } break;
-        case MessageType::processNymbox:  // PROCESS NYMBOX
+        case otx::MessageType::processNymbox:  // PROCESS NYMBOX
         {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();
@@ -161,7 +161,7 @@ auto OTClient::ProcessUserCommand(
         // This is called by the user of the command line utility.
         //
         break;
-        case MessageType::getTransactionNumbers:  // GET TRANSACTION NUM
+        case otx::MessageType::getTransactionNumbers:  // GET TRANSACTION NUM
         {
             // (0) Set up the REQUEST NUMBER and then INCREMENT IT
             lRequestNumber = context.Request();

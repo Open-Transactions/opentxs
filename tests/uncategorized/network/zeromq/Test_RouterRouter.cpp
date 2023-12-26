@@ -13,8 +13,6 @@
 #include "ottest/fixtures/zeromq/Helpers.hpp"
 #include "ottest/fixtures/zeromq/RouterRouter.hpp"
 
-namespace zmq = ot::network::zeromq;
-
 namespace ottest
 {
 using namespace std::literals::chrono_literals;

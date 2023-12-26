@@ -12,7 +12,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/client/OTPayment.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
@@ -20,11 +19,12 @@
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "otx/server/MainFile.hpp"
 #include "otx/server/Notary.hpp"
@@ -86,7 +86,7 @@ public:
         const identifier::Notary& notaryID,
         const identifier::Nym& senderNymID,
         const identifier::Nym& recipientNymID,
-        transactionType transactionType,
+        otx::transactionType transactionType,
         const Message& msg) -> bool;
     auto GetMainFile() -> MainFile& { return main_file_; }
     auto GetNotary() -> Notary& { return notary_; }
@@ -156,7 +156,7 @@ private:
         const identifier::Notary& notaryID,
         const identifier::Nym& senderNymID,
         const identifier::Nym& recipientNymID,
-        transactionType transactionType,
+        otx::transactionType transactionType,
         const Message* msg = nullptr,
         const String& messageString = String::Factory(),
         const char* command = nullptr) -> bool;

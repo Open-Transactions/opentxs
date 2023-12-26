@@ -8,8 +8,6 @@
 
 #include "ottest/fixtures/crypto/BitcoinProviders.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(Bitcoin_Providers, Common)

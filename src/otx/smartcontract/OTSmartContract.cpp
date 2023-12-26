@@ -13,7 +13,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/AccountList.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Instrument.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -47,11 +46,12 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -1161,7 +1161,7 @@ auto OTSmartContract::GetUnitTypeIDofAcct(UnallocatedCString from_acct_name)
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -1369,7 +1369,7 @@ auto OTSmartContract::GetStashBalance(
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -1418,7 +1418,7 @@ auto OTSmartContract::SendANoticeToAllParties(const PasswordPrompt& reason)
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -1467,7 +1467,7 @@ auto OTSmartContract::SendNoticeToParty(
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -1589,7 +1589,7 @@ auto OTSmartContract::StashAcctFunds(
     assert_false(nullptr == pCron);
     auto reason = api_.Factory().PasswordPrompt(__func__);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -1812,7 +1812,7 @@ auto OTSmartContract::StashAcctFunds(
     // Above: the ToAgent and ToAcct are commented out,
     // since the funds are going into a stash.
 
-    bool bMoved =
+    const bool bMoved =
         StashFunds(lAmount, theFromAcctID, theFromAgentID, *pStash, reason);
     if (!bMoved) {
         LogConsole()()("Failed in final call. "
@@ -1851,7 +1851,7 @@ auto OTSmartContract::UnstashAcctFunds(
     assert_false(nullptr == pCron);
     auto reason = api_.Factory().PasswordPrompt(__func__);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -2053,7 +2053,7 @@ auto OTSmartContract::UnstashAcctFunds(
 
     const std::int64_t lNegativeAmount = (lAmount * (-1));
 
-    bool bMoved =
+    const bool bMoved =
         StashFunds(lNegativeAmount, theToAcctID, theToAgentID, *pStash, reason);
     if (!bMoved) {
         LogConsole()()("Failed in final call. "
@@ -2083,7 +2083,7 @@ auto OTSmartContract::StashFunds(
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym(pCron->GetServerNym());
+    const Nym_p pServerNym(pCron->GetServerNym());
     assert_false(nullptr == pServerNym);
 
     if (0 == lAmount) {
@@ -2379,7 +2379,7 @@ auto OTSmartContract::StashFunds(
             LogError()()("ERROR loading or generating inbox ledger.").Flush();
         } else {
             // Generate new transaction numbers for these new transactions
-            std::int64_t lNewTransactionNumber =
+            const std::int64_t lNewTransactionNumber =
                 pCron->GetNextTransactionNumber();
 
             //          assert_true(lNewTransactionNumber > 0); // this can be
@@ -2395,8 +2395,8 @@ auto OTSmartContract::StashFunds(
 
             auto pTransParty{api_.Factory().Internal().Session().Transaction(
                 *thePartyInbox,
-                transactionType::paymentReceipt,
-                originType::origin_smart_contract,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_smart_contract,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransParty));
@@ -2411,7 +2411,9 @@ auto OTSmartContract::StashFunds(
             // items... but not in this case.)
             //
             auto pItemParty{api_.Factory().Internal().Session().Item(
-                *pTransParty, itemType::paymentReceipt, identifier::Account{})};
+                *pTransParty,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
             assert_true(
                 false != bool(pItemParty));  //  may be unnecessary, I'll
                                              //  have to
@@ -2498,7 +2500,7 @@ auto OTSmartContract::StashFunds(
                         // so it's really superfluous.)
                         //
                         if (!bMoveParty) {
-                            bool bErr = stashAccount.get().Credit(
+                            const bool bErr = stashAccount.get().Credit(
                                 lAbsoluteAmount);  // put the money back
 
                             LogError()()(
@@ -2512,7 +2514,7 @@ auto OTSmartContract::StashFunds(
                                 .Flush();
                         } else {  // SUCCESS!
                             //
-                            bool bStashSuccess = pStashItem->DebitStash(
+                            const bool bStashSuccess = pStashItem->DebitStash(
                                 lAbsoluteAmount);  // we already verified above
                                                    // that this stash item has
                                                    // enough funds to
@@ -2557,7 +2559,7 @@ auto OTSmartContract::StashFunds(
                         // so it's really superfluous.)
                         //
                         if (!bMoveStash) {
-                            bool bErr = account.get().Credit(
+                            const bool bErr = account.get().Credit(
                                 lAbsoluteAmount);  // put the money back
 
                             LogError()()(
@@ -2572,7 +2574,7 @@ auto OTSmartContract::StashFunds(
                                 .Flush();
                         } else {  // SUCCESS!
                             //
-                            bool bStashSuccess = pStashItem->CreditStash(
+                            const bool bStashSuccess = pStashItem->CreditStash(
                                 lAbsoluteAmount);  // we already verified above
                                                    // that this stash item has
                                                    // enough funds to
@@ -2766,7 +2768,7 @@ auto OTSmartContract::StashFunds(
             pItemParty->SignContract(*pServerNym, reason);
             pItemParty->SaveContract();
 
-            std::shared_ptr<Item> itemParty{pItemParty.release()};
+            const std::shared_ptr<Item> itemParty{pItemParty.release()};
             pTransParty->AddItem(itemParty);
             pTransParty->SignContract(*pServerNym, reason);
             pTransParty->SaveContract();
@@ -2774,7 +2776,8 @@ auto OTSmartContract::StashFunds(
             // Here, the transaction we just created is actually added to the
             // inbox ledger.
             // This happens either way, success or fail.
-            std::shared_ptr<OTTransaction> transParty{pTransParty.release()};
+            const std::shared_ptr<OTTransaction> transParty{
+                pTransParty.release()};
             thePartyInbox->AddTransaction(transParty);
 
             // Release any signatures that were there before (They won't
@@ -2844,7 +2847,7 @@ auto OTSmartContract::MoveAcctFundsStr(
     assert_false(nullptr == pCron);
     auto reason = api_.Factory().PasswordPrompt(__func__);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     // Below this point, these are all good:
@@ -3094,7 +3097,7 @@ auto OTSmartContract::MoveAcctFundsStr(
                                                // of a party who RECEIVED
                                                // money.
 
-    bool bMoved = MoveFunds(
+    const bool bMoved = MoveFunds(
         lAmount,
         theFromAcctID,
         theFromAgentID,
@@ -3137,7 +3140,7 @@ void OTSmartContract::onFinalReceipt(
     // The finalReceipt Item's ATTACHMENT contains the UPDATED Cron Item.
     // (With the SERVER's signature on it!)
     auto strUpdatedCronItem = String::Factory(*this);
-    OTString pstrAttachment = strUpdatedCronItem;
+    const OTString pstrAttachment = strUpdatedCronItem;
     const auto strOrigCronItem = String::Factory(theOrigCronItem);
 
     // IF server is originator and/or remover then swap it in for it/them so I
@@ -3591,7 +3594,7 @@ void OTSmartContract::ExecuteClauses(
         OTCron* pCron = GetCron();
         assert_false(nullptr == pCron);
 
-        Nym_p pServerNym = pCron->GetServerNym();
+        const Nym_p pServerNym = pCron->GetServerNym();
         assert_false(nullptr == pServerNym);
 
         const std::int64_t lNewTransactionNumber =
@@ -3610,7 +3613,7 @@ void OTSmartContract::ExecuteClauses(
             SaveContract();
 
             const auto strReference = String::Factory(*this);
-            bool bDroppedNotice = SendNoticeToAllParties(
+            const bool bDroppedNotice = SendNoticeToAllParties(
                 true,  // bSuccessMsg=true
                 *pServerNym,
                 GetNotaryID(),
@@ -3651,7 +3654,7 @@ auto OTSmartContract::CanCancelContract(UnallocatedCString str_party_name)
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     OTParty* pParty = GetParty(str_party_name);
@@ -4093,9 +4096,10 @@ auto OTSmartContract::VerifySmartContract(
                                         // verified by this time, in
                                         // Server::NotarizeSmartContract()
 
-    mapOfAccounts map_Accts_Already_Loaded;  // The list of Accounts that were
-                                             // already instantiated before this
-                                             // function was called.
+    const mapOfAccounts map_Accts_Already_Loaded;  // The list of Accounts that
+                                                   // were already instantiated
+                                                   // before this function was
+                                                   // called.
     mapOfAccounts map_Accts_Loaded_In_This_Function;  // The total list of Accts
                                                       // that were instantiated
                                                       // inside this function
@@ -5040,7 +5044,7 @@ void OTSmartContract::UpdateContents(const PasswordPrompt& reason)
     // OTCronItem
     if (!calculating_id_) {
         for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
-            std::int64_t lClosingNumber = GetClosingTransactionNoAt(i);
+            const std::int64_t lClosingNumber = GetClosingTransactionNoAt(i);
             assert_true(lClosingNumber > 0);
 
             TagPtr tagClosingNo(new Tag("closingTransactionNumber"));
@@ -5316,7 +5320,7 @@ auto OTSmartContract::MoveFunds(
     OTCron* pCron = GetCron();
     assert_false(nullptr == pCron);
 
-    Nym_p pServerNym = pCron->GetServerNym();
+    const Nym_p pServerNym = pCron->GetServerNym();
     assert_false(nullptr == pServerNym);
 
     if (lAmount <= 0) {
@@ -5399,12 +5403,12 @@ auto OTSmartContract::MoveFunds(
     // We MIGHT use ONE, OR BOTH, of these, or none. (But probably both.)
 
     // Find out if either Nym is actually also the server.
-    bool bSenderNymIsServerNym = (SENDER_NYM_ID == NOTARY_NYM_ID);
-    bool bRecipientNymIsServerNym = (RECIPIENT_NYM_ID == NOTARY_NYM_ID);
+    const bool bSenderNymIsServerNym = (SENDER_NYM_ID == NOTARY_NYM_ID);
+    const bool bRecipientNymIsServerNym = (RECIPIENT_NYM_ID == NOTARY_NYM_ID);
 
     // We also see, after all that is done, whether both pointers go to the same
     // entity. (We'll want to know that later.)
-    bool bUsersAreSameNym = (SENDER_NYM_ID == RECIPIENT_NYM_ID);
+    const bool bUsersAreSameNym = (SENDER_NYM_ID == RECIPIENT_NYM_ID);
 
     Nym_p pSenderNym = nullptr;
     Nym_p pRecipientNym = nullptr;
@@ -5716,16 +5720,16 @@ auto OTSmartContract::MoveFunds(
 
             auto pTransSend{api_.Factory().Internal().Session().Transaction(
                 *theSenderInbox,
-                transactionType::paymentReceipt,
-                originType::origin_smart_contract,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_smart_contract,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransSend));
 
             auto pTransRecip{api_.Factory().Internal().Session().Transaction(
                 *theRecipientInbox,
-                transactionType::paymentReceipt,
-                originType::origin_smart_contract,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_smart_contract,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransRecip));
@@ -5739,9 +5743,13 @@ auto OTSmartContract::MoveFunds(
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
             auto pItemSend{api_.Factory().Internal().Session().Item(
-                *pTransSend, itemType::paymentReceipt, identifier::Account{})};
+                *pTransSend,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
             auto pItemRecip{api_.Factory().Internal().Session().Item(
-                *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
+                *pTransRecip,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
 
             // these may be unnecessary, I'll have to check
             // CreateItemFromTransaction. I'll leave em.
@@ -5801,7 +5809,7 @@ auto OTSmartContract::MoveFunds(
             // Make sure he can actually afford it...
             if (sourceAccount.get().GetBalance() >= lAmount) {
                 // Debit the source account.
-                bool bMoveSender = sourceAccount.get().Debit(lAmount);
+                const bool bMoveSender = sourceAccount.get().Debit(lAmount);
                 bool bMoveRecipient = false;
 
                 // IF success, credit the recipient.
@@ -5987,9 +5995,9 @@ auto OTSmartContract::MoveFunds(
             pItemSend->SaveContract();
             pItemRecip->SaveContract();
 
-            std::shared_ptr<Item> itemSend{pItemSend.release()};
+            const std::shared_ptr<Item> itemSend{pItemSend.release()};
             pTransSend->AddItem(itemSend);
-            std::shared_ptr<Item> itemRecip{pItemRecip.release()};
+            const std::shared_ptr<Item> itemRecip{pItemRecip.release()};
             pTransRecip->AddItem(itemRecip);
 
             pTransSend->SignContract(*pServerNym, reason);
@@ -6002,9 +6010,11 @@ auto OTSmartContract::MoveFunds(
             // ledgers.
             // This happens either way, success or fail.
 
-            std::shared_ptr<OTTransaction> transSend{pTransSend.release()};
+            const std::shared_ptr<OTTransaction> transSend{
+                pTransSend.release()};
             theSenderInbox->AddTransaction(transSend);
-            std::shared_ptr<OTTransaction> transRecip{pTransRecip.release()};
+            const std::shared_ptr<OTTransaction> transRecip{
+                pTransRecip.release()};
             theRecipientInbox->AddTransaction(transRecip);
 
             // Release any signatures that were there before (They won't

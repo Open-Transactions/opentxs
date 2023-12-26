@@ -10,8 +10,9 @@
 #include "opentxs/blockchain/block/Outpoint.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs::blockchain::block::internal

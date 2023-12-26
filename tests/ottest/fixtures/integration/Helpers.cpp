@@ -78,7 +78,7 @@ Callbacks::Callbacks(
 auto Callbacks::callback(ot::network::zeromq::Message&& incoming) noexcept
     -> void
 {
-    ot::Lock lock(callback_lock_);
+    const auto lock = ot::Lock{callback_lock_};
     const auto widgetID =
         api_.Factory().IdentifierFromBase58(incoming.Payload()[0].Bytes());
 
@@ -109,7 +109,7 @@ auto Callbacks::callback(ot::network::zeromq::Message&& incoming) noexcept
 
 auto Callbacks::Count() const noexcept -> std::size_t
 {
-    ot::Lock lock(map_lock_);
+    const auto lock = ot::Lock{map_lock_};
 
     return widget_map_.size();
 }
@@ -144,7 +144,7 @@ auto Callbacks::SetCallback(
     int limit,
     WidgetCallback callback) noexcept -> std::future<bool>
 {
-    ot::Lock lock(map_lock_);
+    const auto lock = ot::Lock{map_lock_};
     auto& [counter, cb, promise] =
         std::get<2>(widget_map_.at(ui_names_.at(type)));
     counter += limit;

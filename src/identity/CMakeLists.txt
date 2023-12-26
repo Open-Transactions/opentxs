@@ -7,14 +7,8 @@ add_subdirectory(credential)
 add_subdirectory(wot)
 
 libopentxs_add_public_header("identity" "Authority.hpp")
-libopentxs_add_public_header("identity" "CredentialRole.hpp")
-libopentxs_add_public_header("identity" "CredentialType.hpp")
-libopentxs_add_public_header("identity" "IdentityType.hpp")
 libopentxs_add_public_header("identity" "Nym.hpp")
 libopentxs_add_public_header("identity" "Source.hpp")
-libopentxs_add_public_header("identity" "SourceProofType.hpp")
-libopentxs_add_public_header("identity" "SourceType.hpp")
-libopentxs_add_public_header("identity" "Types.hpp")
 
 target_sources(
   opentxs-common
@@ -22,10 +16,8 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/identity/Authority.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/Nym.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/identity/Source.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/identity/Types.hpp"
     "Authority.cpp"
     "Authority.hpp"
-    "Identity.cpp"
     "Nym.cpp"
     "Nym.hpp"
     "Source.cpp"

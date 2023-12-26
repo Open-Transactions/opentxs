@@ -3,8 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"
-// IWYU pragma: no_include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/protocol/bitcoin/base/block/script/OP.hpp"
+// IWYU pragma: no_include "opentxs/blockchain/protocol/bitcoin/base/block/script/Pattern.hpp"
 
 #pragma once
 
@@ -14,16 +14,18 @@
 #include <span>
 
 #include "blockchain/protocol/bitcoin/base/block/script/ScriptPrivate.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Element.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Types.hpp"
+#include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -34,7 +36,6 @@ class Crypto;
 class Session;
 }  // namespace api
 
-class ByteArray;
 class PaymentCode;
 class Writer;
 }  // namespace opentxs

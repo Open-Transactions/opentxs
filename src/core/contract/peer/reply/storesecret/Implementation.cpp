@@ -9,7 +9,7 @@
 #include <PeerReply.pb.h>
 #include <utility>
 
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 
 namespace opentxs::contract::peer::reply::storesecret
 {

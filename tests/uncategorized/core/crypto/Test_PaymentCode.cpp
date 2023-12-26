@@ -12,8 +12,6 @@
 
 #include "ottest/fixtures/core/PaymentCode.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace std::literals;
@@ -193,11 +191,11 @@ TEST_F(PaymentCode, factory_seed_nym)
 {
     if (have_hd_) {
         auto seed = api_.Crypto().Seed().DefaultSeed().first;
-        [[maybe_unused]] std::uint32_t nym_idx = 0;
-        [[maybe_unused]] std::uint8_t version = 1;
-        [[maybe_unused]] bool bitmessage = false;
-        [[maybe_unused]] std::uint8_t bitmessage_version = 0;
-        [[maybe_unused]] std::uint8_t bitmessage_stream = 0;
+        [[maybe_unused]] const std::uint32_t nym_idx = 0;
+        [[maybe_unused]] const std::uint8_t version = 1;
+        [[maybe_unused]] const bool bitmessage = false;
+        [[maybe_unused]] const std::uint8_t bitmessage_version = 0;
+        [[maybe_unused]] const std::uint8_t bitmessage_stream = 0;
 
         const auto nym =
             api_.Wallet().Nym(api_.Factory().NymIDFromBase58(nym_id_0_));

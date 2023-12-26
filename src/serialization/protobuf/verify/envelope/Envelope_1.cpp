@@ -45,7 +45,7 @@ auto CheckProto_1(const Envelope& input, const bool silent) -> bool
         const auto type = key.type();
 
         try {
-            if (0 == allowed_types_.at(input.version()).count(type)) {
+            if (false == allowed_types_.at(input.version()).contains(type)) {
                 FAIL_1("Invalid dh key type");
             }
         } catch (...) {

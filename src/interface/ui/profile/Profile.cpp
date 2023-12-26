@@ -617,7 +617,7 @@ auto Profile::Delete(
     const int type,
     const UnallocatedCString& claimID) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const auto& section = lookup(lock, static_cast<ProfileRowID>(sectionType));
 
     if (false == section.Valid()) { return false; }
@@ -627,7 +627,7 @@ auto Profile::Delete(
 
 auto Profile::DisplayName() const noexcept -> UnallocatedCString
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
 
     return name_;
 }
@@ -646,7 +646,7 @@ auto Profile::nym_name(
 
 auto Profile::PaymentCode() const noexcept -> UnallocatedCString
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
 
     return payment_code_;
 }
@@ -728,7 +728,7 @@ auto Profile::SetActive(
     const UnallocatedCString& claimID,
     const bool active) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const auto& section = lookup(lock, static_cast<ProfileRowID>(sectionType));
 
     if (false == section.Valid()) { return false; }
@@ -748,7 +748,7 @@ auto Profile::SetPrimary(
     const UnallocatedCString& claimID,
     const bool primary) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const auto& section = lookup(lock, static_cast<ProfileRowID>(sectionType));
 
     if (false == section.Valid()) { return false; }
@@ -762,7 +762,7 @@ auto Profile::SetValue(
     const UnallocatedCString& claimID,
     const UnallocatedCString& value) const noexcept -> bool
 {
-    rLock lock{recursive_lock_};
+    const auto lock = rLock{recursive_lock_};
     const auto& section = lookup(lock, static_cast<ProfileRowID>(sectionType));
 
     if (false == section.Valid()) { return false; }

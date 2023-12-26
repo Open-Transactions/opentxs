@@ -58,9 +58,10 @@ auto AddBookendsAroundContent(
         return out;
     }();
     strTemp->Concatenate(strContents);
-    static UnallocatedCString _meta{"Meta:    CCCC\n"};  // length 14
-                                                         // [9,10,11,12] index
-                                                         // to put chars on
+    static const UnallocatedCString _meta{"Meta:    CCCC\n"};  // length 14
+                                                               // [9,10,11,12]
+                                                               // index to put
+                                                               // chars on
     auto meta = String::Factory(_meta);
 
     for (const auto& sig : listSignatures) {
@@ -80,7 +81,7 @@ auto AddBookendsAroundContent(
     }
 
     UnallocatedCString str_Trim(strTemp->Get());
-    UnallocatedCString str_Trim2 = String::trim(str_Trim);
+    const UnallocatedCString str_Trim2 = String::trim(str_Trim);
     strOutput.Set(str_Trim2.c_str());
 
     return true;
@@ -118,7 +119,7 @@ auto DearmorAndTrim(
     // either way.)
 
     std::array<char, 75> buf{};
-    bool bGotLine = strOutput.sgets(buf.data(), 70);
+    const bool bGotLine = strOutput.sgets(buf.data(), 70);
 
     if (!bGotLine) { return false; }
 
@@ -260,7 +261,7 @@ auto LoadEncodedTextFieldByName(
         String::Map& mapExtraVars = (*pmapExtraVars);
 
         for (auto& it : mapExtraVars) {
-            UnallocatedCString first = it.first;
+            const UnallocatedCString first = it.first;
             auto strTemp =
                 String::Factory(xml->getAttributeValue(first.c_str()));
 

@@ -47,11 +47,13 @@ auto Reject::Blank() noexcept -> Reject&
 
 auto Reject::operator=(const Reject& rhs) noexcept -> Reject&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Reject::operator=(Reject&& rhs) noexcept -> Reject&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

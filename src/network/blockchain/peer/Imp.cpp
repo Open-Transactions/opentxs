@@ -9,8 +9,6 @@
 #include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
 
 #include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
 #include <sodium.h>
 #include <algorithm>
 #include <compare>
@@ -25,13 +23,11 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/blockoracle/BlockBatch.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/network/blockchain/Address.hpp"
 #include "internal/network/blockchain/ConnectionManager.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
@@ -43,6 +39,7 @@
 #include "network/blockchain/peer/RunJob.hpp"
 #include "network/blockchain/peer/UpdateBlockJob.hpp"
 #include "network/blockchain/peer/UpdateGetHeadersJob.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
@@ -60,12 +57,14 @@
 #include "opentxs/blockchain/node/BlockOracle.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
@@ -78,53 +77,7 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
-
-namespace opentxs::network::blockchain
-{
-using namespace std::literals;
-
-auto print(PeerJob in) noexcept -> std::string_view
-{
-    using enum PeerJob;
-    static constexpr auto map =
-        frozen::make_unordered_map<PeerJob, std::string_view>({
-            {shutdown, "shutdown"sv},
-            {blockheader, "blockheader"sv},
-            {reorg, "reorg"sv},
-            {mempool, "mempool"sv},
-            {registration, "registration"sv},
-            {connect, "connect"sv},
-            {disconnect, "disconnect"sv},
-            {sendresult, "sendresult"sv},
-            {p2p, "p2p"sv},
-            {gossip_address, "gossip_address"sv},
-            {jobtimeout, "jobtimeout"sv},
-            {needpeers, "needpeers"sv},
-            {statetimeout, "statetimeout"sv},
-            {activitytimeout, "activitytimeout"sv},
-            {needping, "needping"sv},
-            {body, "body"sv},
-            {header, "header"sv},
-            {broadcasttx, "broadcasttx"sv},
-            {jobavailablegetheaders, "jobavailablegetheaders"sv},
-            {jobavailableblock, "jobavailableblock"sv},
-            {block, "block"sv},
-            {init, "init"sv},
-            {statemachine, "statemachine"sv},
-        });
-
-    if (const auto* i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-        LogAbort()(__FUNCTION__)(": invalid PeerJob: ")(
-            static_cast<OTZMQWorkType>(in))
-            .Abort();
-    }
-}
-}  // namespace opentxs::network::blockchain
 
 namespace opentxs::network::blockchain::internal
 {

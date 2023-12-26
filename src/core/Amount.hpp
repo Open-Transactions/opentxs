@@ -17,12 +17,12 @@
 #include <utility>
 
 #include "internal/core/Amount.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace be = boost::endian;

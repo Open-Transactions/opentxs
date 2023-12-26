@@ -18,8 +18,8 @@ extern "C" {
 #include <span>
 #include <utility>
 
-#include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"

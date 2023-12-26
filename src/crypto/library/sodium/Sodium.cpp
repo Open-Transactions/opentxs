@@ -27,8 +27,8 @@ extern "C" {
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/crypto/symmetric/Algorithm.hpp"
-#include "opentxs/crypto/symmetric/Source.hpp"
+#include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -366,7 +366,7 @@ auto Sodium::Encrypt(
     auto& tag = *ciphertext.mutable_tag();
     auto& output = *ciphertext.mutable_data();
 
-    bool result = false;
+    const bool result = false;
 
     if (mode == opentxs::crypto::symmetric::Algorithm::Error) {
         LogError()()("Incorrect mode.").Flush();

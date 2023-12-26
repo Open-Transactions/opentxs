@@ -11,6 +11,7 @@
 #include "crypto/asymmetric/key/ellipticcurve/EllipticCurvePrivate.hpp"
 #include "crypto/asymmetric/key/hd/HDPrivate.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
@@ -19,7 +20,6 @@
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 

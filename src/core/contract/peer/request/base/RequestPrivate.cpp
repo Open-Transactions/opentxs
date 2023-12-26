@@ -23,8 +23,8 @@
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/request/Verification.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 
 namespace opentxs::contract::peer
 {

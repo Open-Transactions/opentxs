@@ -17,6 +17,7 @@
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Hash.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/EcdsaCurve.hpp"            // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"              // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"

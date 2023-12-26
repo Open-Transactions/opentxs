@@ -9,7 +9,7 @@
 #include "internal/otx/client/Client.hpp"
 #include "opentxs/Export.hpp"
 #include "opentxs/api/session/OTX.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

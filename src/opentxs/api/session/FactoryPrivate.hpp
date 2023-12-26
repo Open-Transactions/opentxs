@@ -25,11 +25,11 @@
 #include "internal/core/contract/Unit.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -48,7 +48,6 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -66,16 +65,16 @@
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/request/Verification.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/Types.hpp"
@@ -85,6 +84,7 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
@@ -93,7 +93,6 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost
@@ -819,7 +818,7 @@ public:
     auto Item(
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
-        itemType theType,
+        otx::itemType theType,
         const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> final;
     auto Item(
@@ -829,7 +828,7 @@ public:
         -> std::unique_ptr<opentxs::Item> final;
     auto Item(
         const OTTransaction& theOwner,
-        itemType theType,
+        otx::itemType theType,
         const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> final;
     auto Keypair(
@@ -844,9 +843,9 @@ public:
         -> OTKeypair final;
     auto Keypair(
         const opentxs::crypto::SeedID& fingerprint,
-        const Bip32Index nym,
-        const Bip32Index credset,
-        const Bip32Index credindex,
+        const opentxs::crypto::Bip32Index nym,
+        const opentxs::crypto::Bip32Index credset,
+        const opentxs::crypto::Bip32Index credindex,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair final;
@@ -863,7 +862,7 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) const
         -> std::unique_ptr<opentxs::Ledger> final;
     auto Ledger(
@@ -875,7 +874,7 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Nym& nymAsAccount,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile) const -> std::unique_ptr<opentxs::Ledger> final;
     auto Market() const -> std::unique_ptr<OTMarket> final;
     auto Market(const char* szFilename) const
@@ -1061,7 +1060,7 @@ public:
         -> opentxs::PaymentCode final;
     auto PaymentCode(
         const opentxs::crypto::SeedID& seed,
-        const Bip32Index nym,
+        const opentxs::crypto::Bip32Index nym,
         const std::uint8_t version,
         const opentxs::PasswordPrompt& reason,
         const bool bitmessage,
@@ -1329,26 +1328,26 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        originType theOriginType = originType::not_applicable) const
+        otx::originType theOriginType = otx::originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
-        originType theOriginType = originType::not_applicable) const
+        otx::originType theOriginType = otx::originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
-        originType theOriginType,
+        otx::originType theOriginType,
         const std::int64_t& lTransactionNum,
         const std::int64_t& lInRefTo,
         const std::int64_t& lInRefDisplay,
         const Time the_DATE_SIGNED,
-        transactionType theType,
+        otx::transactionType theType,
         const String& strHash,
         const opentxs::Amount& lAdjustment,
         const opentxs::Amount& lDisplayValue,
@@ -1361,14 +1360,14 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        transactionType theType,
-        originType theOriginType = originType::not_applicable,
+        otx::transactionType theType,
+        otx::originType theOriginType = otx::originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> final;
     auto Transaction(
         const opentxs::Ledger& theOwner,
-        transactionType theType,
-        originType theOriginType = originType::not_applicable,
+        otx::transactionType theType,
+        otx::originType theOriginType = otx::originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> final;
     auto UnitID(const proto::Identifier& in, alloc::Default alloc)

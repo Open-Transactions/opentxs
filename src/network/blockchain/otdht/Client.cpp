@@ -7,6 +7,7 @@
 
 #include <span>
 #include <stdexcept>
+#include <type_traits>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "opentxs/api/Session.hpp"
@@ -26,6 +27,8 @@
 
 namespace opentxs::network::blockchain::otdht
 {
+using namespace std::literals;
+
 Client::Client(
     std::shared_ptr<const api::internal::Session> api,
     std::shared_ptr<const opentxs::blockchain::node::Manager> node,
@@ -193,29 +196,29 @@ auto Client::process_sync_peer(Message&& msg) noexcept -> void
         const auto peer = get_peer(msg);
         const auto sync = api_.Factory().BlockchainSyncMessage(msg);
         const auto type = sync->Type();
-        using Type = opentxs::network::otdht::MessageType;
         auto finish{false};
 
         switch (type) {
-            case Type::sync_ack: {
+            using enum opentxs::network::otdht::MessageType;
+            case sync_ack: {
                 process_ack(msg, sync->asAcknowledgement());
             } break;
-            case Type::sync_reply: {
+            case sync_reply: {
                 finish = true;
                 [[fallthrough]];
             }
-            case Type::new_block_header: {
+            case new_block_header: {
                 process_data(std::move(msg), sync->asData());
             } break;
-            case Type::error:
-            case Type::sync_request:
-            case Type::query:
-            case Type::publish_contract:
-            case Type::publish_ack:
-            case Type::contract_query:
-            case Type::contract:
-            case Type::pushtx:
-            case Type::pushtx_reply: {
+            case error:
+            case sync_request:
+            case query:
+            case publish_contract:
+            case publish_ack:
+            case contract_query:
+            case contract:
+            case pushtx:
+            case pushtx_reply: {
                 const auto error =
                     CString{}
                         .append("unsupported message type on external socket: ")
@@ -224,13 +227,11 @@ auto Client::process_sync_peer(Message&& msg) noexcept -> void
                 throw std::runtime_error{error.c_str()};
             }
             default: {
-                const auto error =
-                    CString{}
-                        .append("unknown message type: ")
-                        .append(std::to_string(
-                            static_cast<network::otdht::TypeEnum>(type)));
 
-                throw std::runtime_error{error.c_str()};
+                throw std::runtime_error{
+                    "unknown message type: "s.append(std::to_string(
+                        static_cast<std::underlying_type_t<
+                            opentxs::network::otdht::MessageType>>(type)))};
             }
         }
 

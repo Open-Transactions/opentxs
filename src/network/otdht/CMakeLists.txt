@@ -7,9 +7,3 @@ add_subdirectory(listener)
 add_subdirectory(messages)
 add_subdirectory(node)
 add_subdirectory(peer)
-
-target_sources(
-  opentxs-common
-  PRIVATE "${opentxs_SOURCE_DIR}/src/internal/network/otdht/Types.hpp"
-          "Common.cpp"
-)

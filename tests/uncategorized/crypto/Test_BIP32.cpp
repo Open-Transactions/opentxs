@@ -9,8 +9,6 @@
 #include "ottest/data/crypto/Bip32.hpp"
 #include "ottest/fixtures/crypto/BIP32.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(BIP32, init) {}

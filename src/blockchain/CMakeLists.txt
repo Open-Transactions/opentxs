@@ -17,9 +17,6 @@ if(OT_BLOCKCHAIN_EXPORT)
 endif()
 
 libopentxs_add_public_header("blockchain" "Blockchain.hpp")
-libopentxs_add_public_header("blockchain" "BlockchainType.hpp")
-libopentxs_add_public_header("blockchain" "Category.hpp")
-libopentxs_add_public_header("blockchain" "Types.hpp")
 
 target_sources(opentxs-common PRIVATE "Common.cpp")
 target_include_directories(

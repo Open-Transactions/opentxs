@@ -11,7 +11,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

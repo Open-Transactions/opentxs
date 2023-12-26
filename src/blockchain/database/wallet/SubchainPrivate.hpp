@@ -12,9 +12,9 @@
 #include <shared_mutex>
 
 #include "blockchain/database/wallet/SubchainCache.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -70,7 +70,7 @@ public:
         const crypto::Subchain subchain,
         storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
     auto GetLastIndexed(const SubchainID& subchain) const noexcept
-        -> std::optional<Bip32Index>;
+        -> std::optional<crypto::Bip32Index>;
     auto GetLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
     auto GetPatterns(const SubchainID& id, alloc::Default alloc) const noexcept
@@ -122,7 +122,7 @@ private:
         const crypto::Subchain subchain,
         const SubchainCache& cache,
         storage::lmdb::Transaction& tx) const noexcept -> SubchainID;
-    auto pattern_id(const SubchainID& subchain, const Bip32Index index)
+    auto pattern_id(const SubchainID& subchain, const crypto::Bip32Index index)
         const noexcept -> ElementID;
     auto subchain_index(
         const SubaccountID& subaccount,

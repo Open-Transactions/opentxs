@@ -42,27 +42,29 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Type.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Role.hpp"       // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/IdentityType.hpp"    // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
@@ -287,7 +289,7 @@ auto Nym::AddChildKeyCredential(
     const crypto::Parameters& nymParameters,
     const opentxs::PasswordPrompt& reason) -> identifier::Generic
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     auto output = identifier::Generic{};
     auto it = active_.find(masterID);
     const bool noMaster = (it == active_.end());
@@ -309,7 +311,7 @@ auto Nym::AddClaim(
     const wot::Claim& claim,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -339,7 +341,7 @@ auto Nym::AddContract(
 
     if (id.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -367,7 +369,7 @@ auto Nym::AddEmail(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -398,7 +400,7 @@ auto Nym::AddPaymentCode(
 
     if (paymentCode.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -426,7 +428,7 @@ auto Nym::AddPhoneNumber(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -451,7 +453,7 @@ auto Nym::AddPreferredOTServer(
     const opentxs::PasswordPrompt& reason,
     const bool primary) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -482,7 +484,7 @@ auto Nym::AddSocialMediaProfile(
 {
     if (value.empty()) { return false; }
 
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -547,7 +549,7 @@ auto Nym::at(const std::size_t& index) const noexcept(false)
 
 auto Nym::BestEmail() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -558,7 +560,7 @@ auto Nym::BestEmail() const -> UnallocatedCString
 
 auto Nym::BestPhoneNumber() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -570,7 +572,7 @@ auto Nym::BestPhoneNumber() const -> UnallocatedCString
 auto Nym::BestSocialMediaProfile(const wot::claim::ClaimType type) const
     -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -581,7 +583,7 @@ auto Nym::BestSocialMediaProfile(const wot::claim::ClaimType type) const
 
 auto Nym::Claims() const -> const wot::claim::Data&
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -615,7 +617,7 @@ auto Nym::ContactCredentialVersion() const -> VersionNumber
 auto Nym::Contracts(const UnitType currency, const bool onlyActive) const
     -> UnallocatedSet<identifier::Generic>
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -652,7 +654,7 @@ auto Nym::DeleteClaim(
     const identifier::Generic& id,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -673,7 +675,7 @@ auto Nym::DeleteClaim(
 
 auto Nym::EmailAddresses(bool active) const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -996,7 +998,7 @@ auto Nym::has_capability(const eLock& lock, const NymCapability& capability)
 
 auto Nym::HasCapability(const NymCapability& capability) const -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return has_capability(lock, capability);
 }
@@ -1030,7 +1032,8 @@ void Nym::init_claims(const eLock& lock) const
             assert_true(
                 proto::Validate(serialized, VERBOSE, proto::ClaimType::Normal));
 
-            wot::claim::Data claimCred(api_, nymID, dataVersion, serialized);
+            const wot::claim::Data claimCred(
+                api_, nymID, dataVersion, serialized);
             // NOLINTNEXTLINE(modernize-make-unique)
             contact_data_.reset(
                 new wot::claim::Data(*contact_data_ + claimCred));
@@ -1106,7 +1109,7 @@ auto Nym::load_revoked(
 
 auto Nym::Name() const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1134,7 +1137,7 @@ auto Nym::normalize(
 
         const auto& seeds = api.Crypto().Seed().Internal();
         output.SetCredset(0);
-        auto nymIndex = Bip32Index{0};
+        auto nymIndex = crypto::Bip32Index{0};
         auto fingerprint = in.Seed();
         auto style = in.SeedStyle();
         auto lang = in.SeedLanguage();
@@ -1156,7 +1159,7 @@ auto Nym::normalize(
         static constexpr auto maxIndex =
             std::numeric_limits<std::int32_t>::max() - 1;
 
-        if (nymIndex >= static_cast<Bip32Index>(maxIndex)) {
+        if (nymIndex >= static_cast<crypto::Bip32Index>(maxIndex)) {
             throw std::runtime_error(
                 "Requested seed has already generated maximum number of nyms");
         }
@@ -1282,14 +1285,16 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
     if (2 != base.child().size()) { return false; }
 
     static const auto expected =
-        HDIndex{Bip43Purpose::NYM, Bip32Child::HARDENED};
+        HDIndex{crypto::Bip43Purpose::NYM, crypto::Bip32Child::HARDENED};
 
     if (expected != base.child(0)) { return false; }
 
     output.set_version(base.version());
     output.mutable_seed()->CopyFrom(base.seed());
-    output.add_child(HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED});
-    output.add_child(HDIndex{Bip44Type::BITCOIN, Bip32Child::HARDENED});
+    output.add_child(
+        HDIndex{crypto::Bip43Purpose::PAYCODE, crypto::Bip32Child::HARDENED});
+    output.add_child(HDIndex{
+        blockchain::crypto::Bip44Type::BITCOIN, crypto::Bip32Child::HARDENED});
     output.add_child(base.child(1));
 
     return true;
@@ -1297,7 +1302,7 @@ auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
 
 auto Nym::PhoneNumbers(bool active) const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1458,7 +1463,7 @@ auto Nym::set_contact_data(
 
 void Nym::SetAlias(std::string_view alias)
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     alias_ = alias;
     revision_++;
@@ -1468,7 +1473,7 @@ auto Nym::SetCommonName(
     const UnallocatedCString& name,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1499,7 +1504,7 @@ auto Nym::SetContactData(
     const proto::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     contact_data_ = std::make_unique<wot::claim::Data>(
         api_, id_.asBase58(api_.Crypto()), ContactDataVersion(), data);
 
@@ -1512,7 +1517,7 @@ auto Nym::SetScope(
     const opentxs::PasswordPrompt& reason,
     const bool primary) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1555,7 +1560,7 @@ auto Nym::Sign(
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
-            bool success = it.second->Internal().Sign(
+            const bool success = it.second->Internal().Sign(
                 preimage,
                 role,
                 opentxs::crypto::asymmetric::Role::Sign,
@@ -1585,7 +1590,7 @@ auto Nym::Sign(
 auto Nym::SocialMediaProfiles(const wot::claim::ClaimType type, bool active)
     const -> UnallocatedCString
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1597,7 +1602,7 @@ auto Nym::SocialMediaProfiles(const wot::claim::ClaimType type, bool active)
 auto Nym::SocialMediaProfileTypes() const
     -> const UnallocatedSet<wot::claim::ClaimType>
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (false == bool(contact_data_)) { init_claims(lock); }
 
@@ -1713,7 +1718,7 @@ auto Nym::verify_pseudonym(const eLock& lock) const -> bool
 
 auto Nym::VerifyPseudonym() const -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return verify_pseudonym(lock);
 }

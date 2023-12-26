@@ -52,11 +52,13 @@ auto Pong::Nonce() const noexcept -> message::Nonce
 
 auto Pong::operator=(const Pong& rhs) noexcept -> Pong&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Pong::operator=(Pong&& rhs) noexcept -> Pong&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

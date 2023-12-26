@@ -6,8 +6,8 @@
 #include "core/contract/peer/request/bailment/BailmentPrivate.hpp"  // IWYU pragma: associated
 
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 
 namespace opentxs::contract::peer::request
 {

@@ -10,13 +10,13 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "internal/otx/common/script/OTScriptable.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -77,9 +77,9 @@ public:
     using mapOfAccounts = UnallocatedMap<UnallocatedCString, SharedAccount>;
     using mapOfStashes = UnallocatedMap<UnallocatedCString, OTStash*>;
 
-    auto GetOriginType() const -> originType override
+    auto GetOriginType() const -> otx::originType override
     {
-        return originType::origin_smart_contract;
+        return otx::originType::origin_smart_contract;
     }
 
     void SetDisplayLabel(

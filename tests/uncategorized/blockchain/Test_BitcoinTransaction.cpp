@@ -13,8 +13,6 @@
 #include "ottest/data/blockchain/Bip143.hpp"
 #include "ottest/fixtures/blockchain/BitcoinTransaction.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(BitcoinTransaction, serialization)

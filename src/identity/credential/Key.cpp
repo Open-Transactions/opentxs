@@ -30,14 +30,17 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/EcdsaCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"         // IWYU pragma: keep
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"        // IWYU pragma: keep
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/NymCapability.hpp"   // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -139,11 +142,11 @@ auto Key::addKeyCredentialtoSerializedCredential(
     keyCredential->set_version(subversion_);
 
     // These must be serialized in this order
-    bool auth = addKeytoSerializedKeyCredential(
+    const bool auth = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_AUTH);
-    bool encrypt = addKeytoSerializedKeyCredential(
+    const bool encrypt = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_ENCRYPT);
-    bool sign = addKeytoSerializedKeyCredential(
+    const bool sign = addKeytoSerializedKeyCredential(
         *keyCredential, addPrivate, proto::KEYROLE_SIGN);
 
     if (auth && encrypt && sign) {
@@ -490,7 +493,7 @@ auto Key::serialize(
 }
 
 auto Key::Sign(
-    const GetPreimage input,
+    const crypto::GetPreimage input,
     const crypto::SignatureRole role,
     proto::Signature& signature,
     const PasswordPrompt& reason,
@@ -659,7 +662,7 @@ auto Key::VerifySignedBySelf() const -> bool
         return false;
     }
 
-    bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
+    const bool goodPublic = VerifySig(*publicSig, PUBLIC_VERSION);
 
     if (!goodPublic) {
         LogError()()("Could not verify public self signature.").Flush();
@@ -676,7 +679,7 @@ auto Key::VerifySignedBySelf() const -> bool
             return false;
         }
 
-        bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
+        const bool goodPrivate = VerifySig(*privateSig, PRIVATE_VERSION);
 
         if (!goodPrivate) {
             LogError()()("Could not verify private self signature.").Flush();

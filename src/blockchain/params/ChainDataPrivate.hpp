@@ -16,6 +16,7 @@
 
 #include "blockchain/params/Data.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -24,10 +25,9 @@
 #include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -75,7 +75,7 @@ public:
     const bool spend_unconfirmed_;
     const unsigned segwit_scale_factor_;
     const UnitType currency_type_;
-    const Bip44Type bip44_;
+    const crypto::Bip44Type bip44_;
     const std::uint32_t difficulty_;
     const block::Hash genesis_hash_;
     const ByteArray serialized_genesis_block_;
@@ -101,7 +101,7 @@ public:
     const Data::ServiceMapReverse services_reverse_;
     const Data::Bip158 bip158_;
     const Data::Bip158Reverse bip158_reverse_;
-    const std::pair<Bip44Type, network::blockchain::Subchain> zmq_;
+    const std::pair<crypto::Bip44Type, network::blockchain::Subchain> zmq_;
     const std::size_t max_notifications_;
     mutable GuardedCheckpoints cfheaders_;
 

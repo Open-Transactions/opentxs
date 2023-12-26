@@ -6,9 +6,10 @@
 #pragma once
 
 #include "blockchain/node/wallet/subchain/statemachine/Elements.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
@@ -57,7 +58,8 @@ private:
         allocator_type alloc = {}) noexcept -> database::ElementMap;
 
     auto index(const database::ElementMap::value_type& data) noexcept -> void;
-    auto index(const Bip32Index index, const block::Element& element) noexcept
-        -> void;
+    auto index(
+        const crypto::Bip32Index index,
+        const block::Element& element) noexcept -> void;
 };
 }  // namespace opentxs::blockchain::node::wallet

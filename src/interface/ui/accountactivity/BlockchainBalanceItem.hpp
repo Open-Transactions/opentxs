@@ -13,7 +13,7 @@
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -87,7 +87,7 @@ private:
 
     auto effective_amount() const noexcept -> opentxs::Amount final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
         return amount_;
     }
 

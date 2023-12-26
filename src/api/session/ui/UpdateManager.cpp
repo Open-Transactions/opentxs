@@ -16,6 +16,7 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -23,15 +24,13 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace zmq = opentxs::network::zeromq;
 

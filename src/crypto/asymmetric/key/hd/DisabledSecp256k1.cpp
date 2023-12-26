@@ -16,7 +16,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data&,
     const proto::HDPath&,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role,
     const VersionNumber version,
     const opentxs::PasswordPrompt&,
@@ -32,7 +32,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data&,
     const proto::HDPath&,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role,
     const VersionNumber,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1

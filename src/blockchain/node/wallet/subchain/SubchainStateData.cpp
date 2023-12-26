@@ -53,6 +53,8 @@
 #include "internal/util/Thread.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -76,9 +78,9 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -91,8 +93,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
@@ -522,7 +522,7 @@ auto SubchainStateData::highest_clean(
 auto SubchainStateData::IndexElement(
     const cfilter::Type type,
     const blockchain::crypto::Element& input,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     database::ElementMap& output) const noexcept -> void
 {
     log_()(name_)(" element ")(index)(" extracting filter matching patterns")
@@ -1128,11 +1128,11 @@ auto SubchainStateData::select_targets(
     auto& [hash, selected] = targets.emplace_back(std::make_pair(
         block.hash_,
         std::make_tuple(
-            std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
-            std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
-            std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
-            std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
-            std::make_pair(Vector<Bip32Index>{alloc}, Targets{alloc}),
+            std::make_pair(Vector<crypto::Bip32Index>{alloc}, Targets{alloc}),
+            std::make_pair(Vector<crypto::Bip32Index>{alloc}, Targets{alloc}),
+            std::make_pair(Vector<crypto::Bip32Index>{alloc}, Targets{alloc}),
+            std::make_pair(Vector<crypto::Bip32Index>{alloc}, Targets{alloc}),
+            std::make_pair(Vector<crypto::Bip32Index>{alloc}, Targets{alloc}),
             std::make_pair(Vector<block::Outpoint>{alloc}, Targets{alloc}))));
     auto& [s20, s32, s33, s64, s65, stxo] = selected;
     Prepare(s20, in.elements_20_.size());
@@ -1451,7 +1451,7 @@ auto SubchainStateData::translate(const TXOs& utxos, allocator_type alloc)
 
             outpoints.emplace_back(
                 block::ElementIndex{
-                    static_cast<Bip32Index>(index),
+                    static_cast<crypto::Bip32Index>(index),
                     {static_cast<crypto::Subchain>(subchain),
                      std::move(account)}},
                 space(outpoint.Bytes(), outpoints.get_allocator().resource()));

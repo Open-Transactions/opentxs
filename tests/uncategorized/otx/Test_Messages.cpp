@@ -9,8 +9,6 @@
 
 #include "ottest/fixtures/otx/Messages.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 
@@ -78,7 +76,7 @@ TEST_F(Messages, pushReply)
         true,
         true,
         reason_s_,
-        ot::otx::OTXPushType::Nymbox,
+        ot::otx::PushType::Nymbox,
         payload);
 
     ASSERT_TRUE(reply.Nym());

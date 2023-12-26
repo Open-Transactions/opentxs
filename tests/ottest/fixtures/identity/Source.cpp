@@ -17,8 +17,6 @@
 #include "ottest/data/crypto/PaymentCodeV3.hpp"
 #include "ottest/env/OTTestEnvironment.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 Source::Source()
@@ -39,7 +37,7 @@ void Source::Authority()
 {
     const auto& seeds = api_.Crypto().Seed().Internal();
     parameters_.SetCredset(0);
-    auto nymIndex = ot::Bip32Index{0};
+    auto nymIndex = ot::crypto::Bip32Index{0};
     auto fingerprint = parameters_.Seed();
     auto style = parameters_.SeedStyle();
     auto lang = parameters_.SeedLanguage();

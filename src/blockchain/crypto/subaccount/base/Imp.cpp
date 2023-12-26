@@ -15,7 +15,6 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
@@ -177,14 +176,7 @@ auto SubaccountPrivate::describe(
     return CString{} + out.str().c_str();
 }
 
-auto SubaccountPrivate::init(bool existing) noexcept(false) -> void
-{
-    using opentxs::blockchain::is_supported;
-
-    if (existing && (false == is_supported(base_chain(target_)))) {
-        existing = false;
-    }
-}
+auto SubaccountPrivate::init(bool) noexcept(false) -> void {}
 
 auto SubaccountPrivate::serialize_common(
     const rLock&,

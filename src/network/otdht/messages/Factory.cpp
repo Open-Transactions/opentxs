@@ -21,6 +21,8 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainHello.hpp"
 #include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
@@ -43,7 +45,6 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
 {
@@ -199,12 +200,12 @@ auto BlockchainSyncMessage(
 
             for (const auto& state : hello.state()) {
                 try {
-                    out.emplace_back(network::otdht::State{
+                    out.emplace_back(
                         static_cast<opentxs::blockchain::Type>(state.chain()),
                         opentxs::blockchain::block::Position{
                             static_cast<opentxs::blockchain::block::Height>(
                                 state.height()),
-                            opentxs::blockchain::block::Hash{state.hash()}}});
+                            opentxs::blockchain::block::Hash{state.hash()}});
                 } catch (const std::exception& e) {
                     // NOTE The remote peer might know about a newer blockchain
                     // type than what the local peer understands

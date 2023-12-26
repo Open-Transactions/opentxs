@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/network/zeromq/socket/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::zeromq::socket
 {
-enum class Direction : std::uint8_t {
+enum class Direction : std::underlying_type_t<Direction> {
     Bind = 0,
     Connect = 1,
 };

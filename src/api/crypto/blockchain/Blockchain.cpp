@@ -22,14 +22,12 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::factory
 {
@@ -59,7 +57,8 @@ Blockchain::Blockchain(const session::Factory& factory) noexcept
 
 namespace opentxs::api::crypto
 {
-auto Blockchain::Bip44(Chain chain) noexcept(false) -> Bip44Type
+auto Blockchain::Bip44(Chain chain) noexcept(false)
+    -> opentxs::blockchain::crypto::Bip44Type
 {
     return opentxs::blockchain::params::get(chain).Bip44Code();
 }
@@ -69,14 +68,18 @@ auto Blockchain::Bip44Path(
     const opentxs::crypto::SeedID& seed,
     Writer&& destination) noexcept(false) -> bool
 {
-    constexpr auto hard = static_cast<Bip32Index>(Bip32Child::HARDENED);
+    constexpr auto hard = static_cast<opentxs::crypto::Bip32Index>(
+        opentxs::crypto::Bip32Child::HARDENED);
     const auto coin = Bip44(chain);
     auto output = proto::HDPath{};
     output.set_version(1);
     seed.Internal().Serialize(*output.mutable_seed());
-    output.add_child(static_cast<Bip32Index>(Bip43Purpose::HDWALLET) | hard);
-    output.add_child(static_cast<Bip32Index>(coin) | hard);
-    output.add_child(Bip32Index{0} | hard);
+    output.add_child(
+        static_cast<opentxs::crypto::Bip32Index>(
+            opentxs::crypto::Bip43Purpose::HDWALLET) |
+        hard);
+    output.add_child(static_cast<opentxs::crypto::Bip32Index>(coin) | hard);
+    output.add_child(opentxs::crypto::Bip32Index{0} | hard);
 
     return write(output, std::move(destination));
 }
@@ -142,7 +145,7 @@ auto Blockchain::AssignContact(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
     const Subchain subchain,
-    const Bip32Index index,
+    const opentxs::crypto::Bip32Index index,
     const identifier::Generic& contactID) const noexcept -> bool
 {
     return imp_->AssignContact(nymID, accountID, subchain, index, contactID);
@@ -152,7 +155,7 @@ auto Blockchain::AssignLabel(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
     const Subchain subchain,
-    const Bip32Index index,
+    const opentxs::crypto::Bip32Index index,
     const UnallocatedCString& label) const noexcept -> bool
 {
     return imp_->AssignLabel(nymID, accountID, subchain, index, label);

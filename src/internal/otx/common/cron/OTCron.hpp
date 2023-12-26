@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "internal/otx/common/Contract.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"

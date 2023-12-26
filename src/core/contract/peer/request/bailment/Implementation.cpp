@@ -13,8 +13,8 @@
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 
 namespace opentxs::contract::peer::request::bailment
 {

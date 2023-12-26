@@ -79,7 +79,7 @@ private:
         std::string_view,
         Data,
         std::hash<std::string_view>,
-        std::equal_to<std::string_view>,
+        std::equal_to<>,
         alloc::PMR<std::pair<const std::string_view, Data>>>;
     using Guarded = libguarded::plain_guarded<DomainHandlers>;
 

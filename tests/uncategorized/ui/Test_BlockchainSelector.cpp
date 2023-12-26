@@ -12,8 +12,6 @@
 #include "ottest/fixtures/ui/BlockchainSelection.hpp"
 #include "ottest/fixtures/ui/BlockchainSelector.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(BlockchainSelector, initialize_opentxs) {}

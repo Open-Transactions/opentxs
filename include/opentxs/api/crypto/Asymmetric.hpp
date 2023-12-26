@@ -6,12 +6,12 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 /// NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

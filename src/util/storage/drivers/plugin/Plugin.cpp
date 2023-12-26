@@ -12,10 +12,10 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 
 #include "internal/util/P0330.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "internal/util/storage/tree/Types.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -24,6 +24,7 @@
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"  // IWYU pragma: keep
@@ -466,7 +467,7 @@ auto Plugin::migrate_primary(
         LogAbort()()("Failed to migrate from primary driver").Abort();
     }
 
-    old.reset(newDriver.release());
+    old = std::move(newDriver);
 }
 
 auto Plugin::Primary() const noexcept -> const storage::Driver&

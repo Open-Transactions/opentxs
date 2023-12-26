@@ -12,7 +12,6 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -37,10 +36,11 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -129,7 +129,7 @@ auto OTAgreement::SendNoticeToAllParties(
             lNewTransactionNumber,
             GetTransactionNum(),  // in reference to
             strReference,
-            originType::origin_payment_plan,
+            otx::originType::origin_payment_plan,
             pstrNote,
             pstrAttachment,
             GetSenderNymID(),
@@ -149,7 +149,7 @@ auto OTAgreement::SendNoticeToAllParties(
             lNewTransactionNumber,
             GetRecipientOpeningNum(),  // in reference to
             strReference,
-            originType::origin_payment_plan,
+            otx::originType::origin_payment_plan,
             pstrNote,
             pstrAttachment,
             GetRecipientNymID(),
@@ -172,7 +172,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
     const TransactionNumber& lNewTransactionNumber,
     const TransactionNumber& lInReferenceTo,
     const String& strReference,
-    originType theOriginType,
+    otx::originType theOriginType,
     OTString pstrNote,
     OTString pstrAttachment,
     const identifier::Nym& actualNymID,
@@ -192,7 +192,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
         bSuccessLoading = theLedger->GenerateLedger(
             NYM_ID,
             NOTARY_ID,
-            ledgerType::nymbox,
+            otx::ledgerType::nymbox,
             true);  // bGenerateFile=true
     }
 
@@ -206,7 +206,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
 
     auto pTransaction{api.Factory().Internal().Session().Transaction(
         *theLedger,
-        transactionType::notice,
+        otx::transactionType::notice,
         theOriginType,
         lNewTransactionNumber)};
 
@@ -218,7 +218,7 @@ auto OTAgreement::DropServerNoticeToNymbox(
         // Set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api.Factory().Internal().Session().Item(
-            *pTransaction, itemType::notice, identifier::Account{})};
+            *pTransaction, otx::itemType::notice, identifier::Account{})};
         assert_true(false != bool(pItem1));  // This may be unnecessary, I'll
                                              // have to check
                                              // CreateItemFromTransaction. I'll
@@ -253,8 +253,8 @@ auto OTAgreement::DropServerNoticeToNymbox(
             pItem1->SetNote(pstrNote);  // in markets, this is updated trade.
         }
 
-        // Nothing is special stored here so far for transactionType::notice,
-        // but the option is always there.
+        // Nothing is special stored here so far for
+        // otx::transactionType::notice, but the option is always there.
         //
         if (pstrAttachment->Exists()) { pItem1->SetAttachment(pstrAttachment); }
 
@@ -264,14 +264,15 @@ auto OTAgreement::DropServerNoticeToNymbox(
         pItem1->SaveContract();
 
         // the Transaction "owns" the item now and will handle cleaning it up.
-        std::shared_ptr<Item> item{pItem1.release()};
+        const std::shared_ptr<Item> item{pItem1.release()};
         pTransaction->AddItem(item);
 
         pTransaction->SignContract(theServerNym, reason);
         pTransaction->SaveContract();
 
         // Here the transaction we just created is actually added to the ledger.
-        std::shared_ptr<OTTransaction> transaction{pTransaction.release()};
+        const std::shared_ptr<OTTransaction> transaction{
+            pTransaction.release()};
         theLedger->AddTransaction(transaction);
 
         // Release any signatures that were there before (They won't
@@ -391,7 +392,7 @@ void OTAgreement::onFinalReceipt(
     // The finalReceipt Item's ATTACHMENT contains the UPDATED Cron Item.
     // (With the SERVER's signature on it!)
     auto strUpdatedCronItem = String::Factory(*this);
-    OTString pstrAttachment = strUpdatedCronItem;
+    const OTString pstrAttachment = strUpdatedCronItem;
     const auto strOrigCronItem = String::Factory(theOrigCronItem);
     const identifier::Nym NYM_ID = GetRecipientNymID();
 
@@ -912,9 +913,9 @@ auto OTAgreement::SetProposal(
     // 'em...
     auto strNotaryID = String::Factory(GetNotaryID(), api_.Crypto());
     const auto openingNumber = context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
 
     if (0 == openingNumber.Value()) {
         LogError()()("Error: Unable to get a transaction number.").Flush();
@@ -1067,9 +1068,9 @@ auto OTAgreement::Confirm(
     //
     auto strNotaryIDstrTemp = String::Factory(GetNotaryID(), api_.Crypto());
     const auto openingNumber = context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
     const auto closingNumber = context.InternalServer().NextTransactionNumber(
-        MessageType::notarizeTransaction);
+        otx::MessageType::notarizeTransaction);
 
     if (0 == openingNumber.Value()) {
         LogError()()("Error: Strangely unable to get a transaction number.")

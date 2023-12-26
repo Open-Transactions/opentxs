@@ -12,13 +12,6 @@ if(OT_BLOCKCHAIN_EXPORT)
   add_subdirectory(peer)
 endif()
 
-libopentxs_add_public_header("network/blockchain" "Protocol.hpp")
-libopentxs_add_public_header("network/blockchain" "Subchain.hpp")
-libopentxs_add_public_header("network/blockchain" "Transport.hpp")
-libopentxs_add_public_header("network/blockchain" "Types.hpp")
-
-target_sources(opentxs-common PRIVATE "Common.cpp")
-
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(
     opentxs-common

@@ -13,14 +13,14 @@
 #include <utility>
 
 #include "internal/util/Mutex.hpp"
-#include "internal/util/storage/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

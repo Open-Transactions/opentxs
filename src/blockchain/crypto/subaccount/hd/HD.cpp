@@ -18,10 +18,7 @@ HD::HD(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-HD::HD(const HD& rhs) noexcept
-    : Deterministic(rhs)
-{
-}
+HD::HD(const HD& rhs) noexcept = default;
 
 HD::HD(HD&& rhs) noexcept
     : Deterministic(std::move(rhs))

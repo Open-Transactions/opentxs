@@ -10,10 +10,10 @@
 #include <memory>
 
 #include "internal/otx/client/ServerAction.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

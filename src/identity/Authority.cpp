@@ -44,8 +44,6 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/ParameterType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
@@ -53,6 +51,9 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Base.hpp"
@@ -368,7 +369,7 @@ auto Authority::create_child_credential(
     const credential::internal::Primary& master,
     internal::Authority& parent,
     const VersionNumber parentVersion,
-    Bip32Index& index,
+    crypto::Bip32Index& index,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> KeyCredentialMap
 {
     auto output = KeyCredentialMap{};
@@ -469,7 +470,7 @@ auto Authority::create_key_credential(
     const credential::internal::Primary& master,
     internal::Authority& parent,
     const VersionNumber parentVersion,
-    Bip32Index& index,
+    crypto::Bip32Index& index,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> KeyCredentialItem
 {
     auto output = std::pair<
@@ -506,7 +507,7 @@ auto Authority::create_master(
     const identity::Source& source,
     const VersionNumber version,
     const crypto::Parameters& parameters,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const opentxs::PasswordPrompt& reason) noexcept(false)
     -> std::unique_ptr<credential::internal::Primary>
 {
@@ -574,7 +575,7 @@ void Authority::extract_child(
 {
     if (role != serialized.role()) { return; }
 
-    bool valid = proto::Validate<proto::Credential>(
+    const bool valid = proto::Validate<proto::Credential>(
         serialized, VERBOSE, mode, role, true);
 
     if (false == valid) {
@@ -850,7 +851,7 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
 auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
     -> bool
 {
-    bool validProto = proto::Validate<proto::Credential>(
+    const bool validProto = proto::Validate<proto::Credential>(
         serializedCred, VERBOSE, mode_, proto::CREDROLE_ERROR, true);
 
     if (!validProto) {
@@ -1063,7 +1064,7 @@ auto Authority::Serialize(
 }
 
 auto Authority::Sign(
-    const GetPreimage input,
+    const crypto::GetPreimage input,
     crypto::SignatureRole role,
     proto::Signature& output,
     const PasswordPrompt& reason) const -> bool
@@ -1078,7 +1079,7 @@ auto Authority::Sign(
 }
 
 auto Authority::Sign(
-    const GetPreimage input,
+    const crypto::GetPreimage input,
     crypto::SignatureRole role,
     crypto::HashType hash,
     proto::Signature& output,
@@ -1089,7 +1090,7 @@ auto Authority::Sign(
 }
 
 auto Authority::Sign(
-    const GetPreimage input,
+    const crypto::GetPreimage input,
     crypto::SignatureRole role,
     opentxs::crypto::asymmetric::Role key,
     proto::Signature& output,
@@ -1099,7 +1100,7 @@ auto Authority::Sign(
 }
 
 auto Authority::Sign(
-    const GetPreimage input,
+    const crypto::GetPreimage input,
     crypto::SignatureRole role,
     opentxs::crypto::asymmetric::Role key,
     crypto::HashType hash,

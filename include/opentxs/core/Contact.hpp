@@ -11,10 +11,10 @@
 #include <tuple>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Allocator.hpp"

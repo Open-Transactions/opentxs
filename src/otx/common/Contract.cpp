@@ -36,10 +36,11 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -203,7 +204,7 @@ void Contract::CalculateContractID(identifier::Generic& newID) const
 {
     // may be redundant...
     UnallocatedCString str_Trim(raw_file_->Get());
-    UnallocatedCString str_Trim2 = String::trim(str_Trim);
+    const UnallocatedCString str_Trim2 = String::trim(str_Trim);
     auto strTemp = String::Factory(str_Trim2.c_str());
     newID = api_.Factory().IdentifierFromPreimage(strTemp->Bytes());
 
@@ -288,7 +289,7 @@ auto Contract::SignContract(
     const PasswordPrompt& reason) -> bool
 {
     auto sig = Signature::Factory(api_);
-    bool bSigned = SignContract(nym, sig, reason);
+    const bool bSigned = SignContract(nym, sig, reason);
 
     if (bSigned) {
         list_signatures_.emplace_back(std::move(sig));
@@ -308,7 +309,7 @@ auto Contract::SignContractAuthent(
     const PasswordPrompt& reason) -> bool
 {
     auto sig = Signature::Factory(api_);
-    bool bSigned = SignContractAuthent(nym, sig, reason);
+    const bool bSigned = SignContractAuthent(nym, sig, reason);
 
     if (bSigned) {
         list_signatures_.emplace_back(std::move(sig));
@@ -365,7 +366,7 @@ auto Contract::SignWithKey(
 {
     auto sig = Signature::Factory(api_);
     sig_hash_type_ = key.PreferredHash();
-    bool bSigned = SignContract(key, sig, sig_hash_type_, reason);
+    const bool bSigned = SignContract(key, sig, sig_hash_type_, reason);
 
     if (bSigned) {
         list_signatures_.emplace_back(std::move(sig));
@@ -477,7 +478,7 @@ auto Contract::VerifySigAuthent(const identity::Nym& nym) const -> bool
     auto strNymID = String::Factory();
     nym.GetIdentifier(strNymID);
     char cNymID = '0';
-    std::uint32_t uIndex = 3;
+    const std::uint32_t uIndex = 3;
     const bool bNymID = strNymID->At(uIndex, cNymID);
 
     for (const auto& sig : list_signatures_) {
@@ -500,7 +501,7 @@ auto Contract::VerifySignature(const identity::Nym& nym) const -> bool
 {
     auto strNymID = String::Factory(nym.ID(), api_.Crypto());
     char cNymID = '0';
-    std::uint32_t uIndex = 3;
+    const std::uint32_t uIndex = 3;
     const bool bNymID = strNymID->At(uIndex, cNymID);
 
     for (const auto& sig : list_signatures_) {
@@ -687,7 +688,7 @@ auto Contract::SaveContents(String& strContents) const -> bool
 auto Contract::SaveContract() -> bool
 {
     auto strTemp = String::Factory();
-    bool bSuccess = RewriteContract(strTemp);
+    const bool bSuccess = RewriteContract(strTemp);
 
     if (bSuccess) {
         raw_file_->Set(strTemp);
@@ -925,8 +926,8 @@ auto Contract::LoadContractFromString(const String& theStr) -> bool
 
     // This populates xml_unsigned_ with the contents of raw_file_ (minus
     // bookends, signatures, etc. JUST the XML.)
-    bool bSuccess = ParseRawFile();  // It also parses into the various
-                                     // member variables.
+    const bool bSuccess = ParseRawFile();  // It also parses into the various
+                                           // member variables.
 
     // Removed:
     // This was the bug where the version changed from 75 to 75c, and suddenly
@@ -967,7 +968,7 @@ auto Contract::ParseRawFile() -> bool
     // This is redundant (I thought) but the problem hasn't cleared up yet.. so
     // trying to really nail it now.
     UnallocatedCString str_Trim(raw_file_->Get());
-    UnallocatedCString str_Trim2 = String::trim(str_Trim);
+    const UnallocatedCString str_Trim2 = String::trim(str_Trim);
     raw_file_->Set(str_Trim2.c_str());
 
     bool bIsEOF = false;
@@ -1140,7 +1141,7 @@ auto Contract::ParseRawFile() -> bool
                                      " contract header...")
                             .Flush();
 
-                        UnallocatedCString strTemp = line.substr(6);
+                        const UnallocatedCString strTemp = line.substr(6);
                         auto strHashType = String::Factory(strTemp.c_str());
                         strHashType->ConvertToUpperCase();
 
@@ -1219,7 +1220,7 @@ auto Contract::LoadContractXML() -> bool
 
     auto* xml = irr::io::createIrrXMLReader(xml_unsigned_.get());
     assert_false(nullptr == xml, "Memory allocation issue with xml reader");
-    std::unique_ptr<irr::io::IrrXMLReader> xmlAngel(xml);
+    const std::unique_ptr<irr::io::IrrXMLReader> xmlAngel(xml);
 
     // parse the file until end reached
     while (xml->read()) {
@@ -1349,7 +1350,7 @@ auto Contract::CreateContract(
     // This function assumes that xml_unsigned_ is ready to be processed.
     // This function only processes that portion of the contract.
     //
-    bool bLoaded = LoadContractXML();
+    const bool bLoaded = LoadContractXML();
 
     if (bLoaded) {
 
@@ -1419,8 +1420,8 @@ void Contract::CreateInnerContents(Tag& parent)
     //
     if (!conditions_.empty()) {
         for (auto& it : conditions_) {
-            UnallocatedCString str_condition_name = it.first;
-            UnallocatedCString str_condition_value = it.second;
+            const UnallocatedCString str_condition_name = it.first;
+            const UnallocatedCString str_condition_value = it.second;
 
             TagPtr pTag(new Tag("condition", str_condition_value));
             pTag->add_attribute("name", str_condition_name);
@@ -1432,8 +1433,8 @@ void Contract::CreateInnerContents(Tag& parent)
     if (!nyms_.empty()) {
         // CREDENTIALS, based on NymID and Source, and credential IDs.
         for (auto& it : nyms_) {
-            UnallocatedCString str_name = it.first;
-            Nym_p pNym = it.second;
+            const UnallocatedCString str_name = it.first;
+            const Nym_p pNym = it.second;
             assert_false(nullptr == pNym, "nullptr pseudonym pointer");
 
             if ("signer" == str_name) {

@@ -13,8 +13,6 @@
 #include "ottest/fixtures/blockchain/ScanListener.hpp"
 #include "ottest/fixtures/rpc/SendPayment_blockchain.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(RPC_BC, preconditions)

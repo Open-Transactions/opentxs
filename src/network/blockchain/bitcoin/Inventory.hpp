@@ -9,11 +9,11 @@
 #include <cstdint>
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

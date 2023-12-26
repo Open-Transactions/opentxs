@@ -12,7 +12,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -33,11 +32,12 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -289,7 +289,7 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
 
     // OTCronItem
     for (std::int32_t i = 0; i < GetCountClosingNumbers(); i++) {
-        std::int64_t lClosingNumber = GetClosingTransactionNoAt(i);
+        const std::int64_t lClosingNumber = GetClosingTransactionNoAt(i);
         assert_true(lClosingNumber > 0);
 
         TagPtr tagClosingNo(new Tag("closingTransactionNumber"));
@@ -302,7 +302,8 @@ void OTPaymentPlan::UpdateContents(const PasswordPrompt& reason)
     // this list. (For sender, the "opening" number is the GetTransactionNum()
     // on this object, and the "closing" number is in the above list.)
     for (std::int32_t i = 0; i < GetRecipientCountClosingNumbers(); i++) {
-        std::int64_t lClosingNumber = GetRecipientClosingTransactionNoAt(i);
+        const std::int64_t lClosingNumber =
+            GetRecipientClosingTransactionNoAt(i);
         assert_true(lClosingNumber > 0);
 
         TagPtr tagClosingNo(new Tag("closingRecipientNumber"));
@@ -673,7 +674,7 @@ auto OTPaymentPlan::ProcessPayment(
     // OTCronItem::LoadCronReceipt loads the original version with the user's
     // signature.
     // (Updated versions, as processing occurs, are signed by the server.)
-    std::unique_ptr<OTCronItem> pOrigCronItem{
+    const std::unique_ptr<OTCronItem> pOrigCronItem{
         OTCronItem::LoadCronReceipt(api_, GetTransactionNum())};
 
     assert_true(false != bool(pOrigCronItem));  // How am I processing it now if
@@ -701,12 +702,12 @@ auto OTPaymentPlan::ProcessPayment(
     // We MIGHT use ONE, OR BOTH, of these, or none. (But probably both.)
 
     // Find out if either Nym is actually also the server.
-    bool bSenderNymIsServerNym = (SENDER_NYM_ID == NOTARY_NYM_ID);
-    bool bRecipientNymIsServerNym = (RECIPIENT_NYM_ID == NOTARY_NYM_ID);
+    const bool bSenderNymIsServerNym = (SENDER_NYM_ID == NOTARY_NYM_ID);
+    const bool bRecipientNymIsServerNym = (RECIPIENT_NYM_ID == NOTARY_NYM_ID);
 
     // We also see, after all that is done, whether both pointers go to the same
     // entity. (We'll want to know that later.)
-    bool bUsersAreSameNym = (SENDER_NYM_ID == RECIPIENT_NYM_ID);
+    const bool bUsersAreSameNym = (SENDER_NYM_ID == RECIPIENT_NYM_ID);
 
     Nym_p pSenderNym = nullptr;
     Nym_p pRecipientNym = nullptr;
@@ -878,7 +879,7 @@ auto OTPaymentPlan::ProcessPayment(
             bSuccessLoadingSenderInbox = theSenderInbox->GenerateLedger(
                 SOURCE_ACCT_ID,
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -889,7 +890,7 @@ auto OTPaymentPlan::ProcessPayment(
             bSuccessLoadingRecipientInbox = theRecipientInbox->GenerateLedger(
                 RECIPIENT_ACCT_ID,
                 NOTARY_ID,
-                ledgerType::inbox,
+                otx::ledgerType::inbox,
                 true);  // bGenerateFile=true
         }
 
@@ -898,7 +899,7 @@ auto OTPaymentPlan::ProcessPayment(
             LogError()()("ERROR loading or generating inbox ledger.").Flush();
         } else {
             // Generate new transaction numbers for these new transactions
-            std::int64_t lNewTransactionNumber =
+            const std::int64_t lNewTransactionNumber =
                 GetCron()->GetNextTransactionNumber();
 
             //            assert_true(lNewTransactionNumber > 0); // this can be
@@ -914,16 +915,16 @@ auto OTPaymentPlan::ProcessPayment(
 
             auto pTransSend{api_.Factory().Internal().Session().Transaction(
                 *theSenderInbox,
-                transactionType::paymentReceipt,
-                originType::origin_payment_plan,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_payment_plan,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransSend));
 
             auto pTransRecip{api_.Factory().Internal().Session().Transaction(
                 *theRecipientInbox,
-                transactionType::paymentReceipt,
-                originType::origin_payment_plan,
+                otx::transactionType::paymentReceipt,
+                otx::originType::origin_payment_plan,
                 lNewTransactionNumber)};
 
             assert_true(false != bool(pTransRecip));
@@ -937,9 +938,13 @@ auto OTPaymentPlan::ProcessPayment(
             // set up the transaction items (each transaction may have multiple
             // items... but not in this case.)
             auto pItemSend{api_.Factory().Internal().Session().Item(
-                *pTransSend, itemType::paymentReceipt, identifier::Account{})};
+                *pTransSend,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
             auto pItemRecip{api_.Factory().Internal().Session().Item(
-                *pTransRecip, itemType::paymentReceipt, identifier::Account{})};
+                *pTransRecip,
+                otx::itemType::paymentReceipt,
+                identifier::Account{})};
 
             assert_true(false != bool(pItemSend));
             assert_true(false != bool(pItemRecip));
@@ -988,7 +993,7 @@ auto OTPaymentPlan::ProcessPayment(
             // Make sure he can actually afford it...
             if (sourceAccount.get().GetBalance() >= amount) {
                 // Debit the source account.
-                bool bMoveSender =
+                const bool bMoveSender =
                     sourceAccount.get().Debit(amount);  // <====== DEBIT FUNDS
                 bool bMoveRecipient = false;
 
@@ -1189,8 +1194,8 @@ auto OTPaymentPlan::ProcessPayment(
             pItemSend->SaveContract();
             pItemRecip->SaveContract();
 
-            std::shared_ptr<Item> itemSend{pItemSend.release()};
-            std::shared_ptr<Item> itemRecip{pItemRecip.release()};
+            const std::shared_ptr<Item> itemSend{pItemSend.release()};
+            const std::shared_ptr<Item> itemRecip{pItemRecip.release()};
             pTransSend->AddItem(itemSend);
             pTransRecip->AddItem(itemRecip);
 
@@ -1204,8 +1209,10 @@ auto OTPaymentPlan::ProcessPayment(
             // ledgers.
             // This happens either way, success or fail.
 
-            std::shared_ptr<OTTransaction> transSend{pTransSend.release()};
-            std::shared_ptr<OTTransaction> transRecip{pTransRecip.release()};
+            const std::shared_ptr<OTTransaction> transSend{
+                pTransSend.release()};
+            const std::shared_ptr<OTTransaction> transRecip{
+                pTransRecip.release()};
             theSenderInbox->AddTransaction(transSend);
             theRecipientInbox->AddTransaction(transRecip);
 

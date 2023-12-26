@@ -45,7 +45,7 @@ Regtest_fixture_hd::Regtest_fixture_hd()
     , expected_account_type_(ot::AccountType::Blockchain)
     , expected_unit_type_(ot::UnitType::Regtest)
     , hd_generator_([&](Height height) -> Transaction {
-        using Index = ot::Bip32Index;
+        using Index = ot::crypto::Bip32Index;
         static constexpr auto count = 100u;
         static const auto baseAmount = ot::Amount{100000000};
         auto meta = ot::UnallocatedVector<OutpointMetadata>{};

@@ -15,7 +15,8 @@
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Opcodes.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Element.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/OP.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 

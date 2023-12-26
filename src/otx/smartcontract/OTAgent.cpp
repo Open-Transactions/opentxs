@@ -9,7 +9,6 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/recurring/OTAgreement.hpp"
@@ -31,10 +30,11 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -185,7 +185,7 @@ auto OTAgent::VerifySignature(const Contract& theContract) const -> bool
 auto OTAgent::LoadNym() -> Nym_p
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     if (bNymID) {
         nym_ = api_.Wallet().Nym(theAgentNymID);
@@ -409,7 +409,7 @@ auto OTAgent::GetSignerID(identifier::Generic& theOutput) const -> bool
 auto OTAgent::IsValidSignerID(const identifier::Generic& theNymID) -> bool
 {
     auto theAgentNymID = identifier::Generic{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNymID...
     //
@@ -425,7 +425,7 @@ auto OTAgent::IsValidSignerID(const identifier::Generic& theNymID) -> bool
 auto OTAgent::IsValidSigner(const identity::Nym& theNym) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // If there's a NymID on this agent, and it matches theNym's ID...
     //
@@ -472,7 +472,7 @@ auto OTAgent::GetEntityID(identifier::Generic& theOutput) const -> bool
     if (DoesRepresentAnEntity() && (nullptr != for_party_) &&
         for_party_->IsEntity()) {
         bool bSuccessEntityID = false;
-        UnallocatedCString str_entity_id =
+        const UnallocatedCString str_entity_id =
             for_party_->GetEntityID(&bSuccessEntityID);
 
         if (bSuccessEntityID && (str_entity_id.size() > 0)) {
@@ -572,7 +572,7 @@ auto OTAgent::DropFinalReceiptToInbox(
     // accommodate them.
 
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.) But in the case of
     // Inboxes for asset accounts, shouldn't the agent be a Nym?
@@ -621,7 +621,7 @@ auto OTAgent::DropFinalReceiptToNymbox(
     OTString pstrAttachment) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)
 
@@ -658,7 +658,7 @@ auto OTAgent::DropServerNoticeToNymbox(
     identity::Nym* pActualNym) -> bool
 {
     auto theAgentNymID = identifier::Nym{};
-    bool bNymID = GetNymID(theAgentNymID);
+    const bool bNymID = GetNymID(theAgentNymID);
 
     // Not all agents have Nyms. (Might be a voting group.)
 
@@ -673,7 +673,7 @@ auto OTAgent::DropServerNoticeToNymbox(
             lNewTransactionNumber,
             lInReferenceTo,
             strReference,
-            originType::origin_smart_contract,
+            otx::originType::origin_smart_contract,
             pstrNote,
             pstrAttachment,
             theAgentNymID,
@@ -926,7 +926,7 @@ auto OTAgent::ReserveClosingTransNum(
 
         // Need a closing number...
         const auto number = context.InternalServer().NextTransactionNumber(
-            MessageType::notarizeTransaction);
+            otx::MessageType::notarizeTransaction);
 
         if (0 == number.Value()) {
             LogError()()(
@@ -987,7 +987,7 @@ auto OTAgent::ReserveOpeningTransNum(otx::context::Server& context) -> bool
 
         // Need opening number...
         const auto number = context.InternalServer().NextTransactionNumber(
-            MessageType::notarizeTransaction);
+            otx::MessageType::notarizeTransaction);
 
         if (0 == number.Value()) {
             LogError()()(

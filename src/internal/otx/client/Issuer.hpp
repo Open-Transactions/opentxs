@@ -7,7 +7,7 @@
 
 #include <tuple>
 
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/contract/peer/reply/Bailment.hpp"
 #include "opentxs/core/contract/peer/reply/Connection.hpp"

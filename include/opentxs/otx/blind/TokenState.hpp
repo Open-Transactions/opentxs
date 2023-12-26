@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/otx/blind/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx::blind
 {
-enum class TokenState : std::uint8_t {
+enum class TokenState : std::underlying_type_t<TokenState> {
     Error = 0,
     Blinded = 1,
     Signed = 2,

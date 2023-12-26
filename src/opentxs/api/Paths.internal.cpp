@@ -99,7 +99,7 @@ auto Paths::Concatenate(
     const UnallocatedCString& unit_id,
     const char* append) -> UnallocatedCString
 {
-    UnallocatedCString app(append);
+    const UnallocatedCString app(append);
     UnallocatedCString tmp;
     tmp.reserve(
         notary_id.length() + path_separator.length() + unit_id.length() +
@@ -115,7 +115,7 @@ auto Paths::Concatenate(
 auto Paths::Concatenate(const UnallocatedCString& unit_id, const char* append)
     -> UnallocatedCString
 {
-    UnallocatedCString app(append);
+    const UnallocatedCString app(append);
     UnallocatedCString tmp;
     tmp.reserve(unit_id.length() + app.length());
     tmp.append(unit_id);
@@ -150,14 +150,14 @@ auto Paths::FileExists(const std::filesystem::path& path, std::size_t& size)
 
 auto Paths::GetFilenameA(const char* filename) noexcept -> UnallocatedCString
 {
-    static UnallocatedCString ext{".a"};
+    static const UnallocatedCString ext{".a"};
 
     return internal_concatenate(filename, ext);
 }
 
 auto Paths::GetFilenameBin(const char* filename) noexcept -> UnallocatedCString
 {
-    static UnallocatedCString ext{".bin"};
+    static const UnallocatedCString ext{".bin"};
 
     return internal_concatenate(filename, ext);
 }
@@ -165,7 +165,7 @@ auto Paths::GetFilenameBin(const char* filename) noexcept -> UnallocatedCString
 auto Paths::GetFilenameCrn(TransactionNumber number) noexcept
     -> UnallocatedCString
 {
-    static UnallocatedCString ext{".crn"};
+    static const UnallocatedCString ext{".crn"};
 
     return internal_concatenate(std::to_string(number).c_str(), ext);
 }
@@ -173,14 +173,14 @@ auto Paths::GetFilenameCrn(TransactionNumber number) noexcept
 auto Paths::GetFilenameError(const char* filename) noexcept
     -> UnallocatedCString
 {
-    static UnallocatedCString ext{".error"};
+    static const UnallocatedCString ext{".error"};
 
     return internal_concatenate(filename, ext);
 }
 
 auto Paths::GetFilenameFail(const char* filename) noexcept -> UnallocatedCString
 {
-    static UnallocatedCString ext{".fail"};
+    static const UnallocatedCString ext{".fail"};
 
     return internal_concatenate(filename, ext);
 }
@@ -188,14 +188,14 @@ auto Paths::GetFilenameFail(const char* filename) noexcept -> UnallocatedCString
 auto Paths::GetFilenameLst(const UnallocatedCString& filename) noexcept
     -> UnallocatedCString
 {
-    static UnallocatedCString ext{".lst"};
+    static const UnallocatedCString ext{".lst"};
 
     return internal_concatenate(filename.c_str(), ext);
 }
 
 auto Paths::GetFilenameR(const char* foldername) noexcept -> UnallocatedCString
 {
-    static UnallocatedCString ext{".r"};
+    static const UnallocatedCString ext{".r"};
 
     return internal_concatenate(foldername, ext);
 }
@@ -203,7 +203,7 @@ auto Paths::GetFilenameR(const char* foldername) noexcept -> UnallocatedCString
 auto Paths::GetFilenameRct(TransactionNumber number) noexcept
     -> UnallocatedCString
 {
-    static UnallocatedCString ext{".rct"};
+    static const UnallocatedCString ext{".rct"};
 
     return internal_concatenate(std::to_string(number).c_str(), ext);
 }
@@ -211,7 +211,7 @@ auto Paths::GetFilenameRct(TransactionNumber number) noexcept
 auto Paths::GetFilenameSuccess(const char* filename) noexcept
     -> UnallocatedCString
 {
-    static UnallocatedCString ext{".success"};
+    static const UnallocatedCString ext{".success"};
 
     return internal_concatenate(filename, ext);
 }

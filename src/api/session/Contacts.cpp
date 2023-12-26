@@ -26,7 +26,8 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
-#include "internal/util/storage/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/Asio.hpp"
@@ -43,10 +44,8 @@
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
@@ -61,10 +60,10 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 namespace opentxs::factory
 {
@@ -209,7 +208,7 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
 
     const auto& contactID = contact->ID();
 
-    assert_true(0 == contact_map_.count(contactID));
+    assert_true(false == contact_map_.contains(contactID));
 
     auto it = add_contact(lock, contact.release());
     auto& output = it->second.second;
@@ -1018,7 +1017,7 @@ auto Contacts::mutable_contact(const rLock& lock, const identifier::Generic& id)
 
     if (contact_map_.end() == it) { return {}; }
 
-    std::function<void(opentxs::Contact*)> callback =
+    const std::function<void(opentxs::Contact*)> callback =
         [&](opentxs::Contact* in) -> void { this->save(in); };
     output = std::make_unique<Editor<opentxs::Contact>>(
         it->second.second.get(), callback);
@@ -1065,7 +1064,7 @@ auto Contacts::new_contact(
 
     if (false == bool(newContact)) { return {}; }
 
-    identifier::Generic contactID = newContact->ID();
+    const identifier::Generic contactID = newContact->ID();
     newContact.reset();
     auto output = mutable_contact(lock, contactID);
 
@@ -1924,7 +1923,7 @@ auto Contacts::update_existing_contact(
 
     assert_false(nullptr == contact);
 
-    Lock contactLock(contactMutex);
+    const auto contactLock = Lock{contactMutex};
     const auto& existingLabel = contact->Label();
 
     if ((existingLabel != label) && (false == label.empty())) {

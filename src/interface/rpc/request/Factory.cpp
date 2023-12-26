@@ -8,7 +8,7 @@
 #include <RPCCommand.pb.h>
 #include <stdexcept>
 
-#include "internal/interface/rpc/RPC.hpp"
+#include "interface/rpc/Types.internal.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"

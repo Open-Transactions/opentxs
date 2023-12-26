@@ -7,20 +7,19 @@
 
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 
 #include "opentxs/Export.hpp"
 
 namespace opentxs::rpc
 {
-using TypeEnum = std::uint32_t;
-
-enum class AccountEventType : TypeEnum;  // IWYU pragma: export
-enum class AccountType : TypeEnum;       // IWYU pragma: export
-enum class CommandType : TypeEnum;       // IWYU pragma: export
-enum class ContactEventType : TypeEnum;  // IWYU pragma: export
-enum class PaymentType : TypeEnum;       // IWYU pragma: export
-enum class PushType : TypeEnum;          // IWYU pragma: export
-enum class ResponseCode : TypeEnum;      // IWYU pragma: export
+enum class AccountEventType : std::uint32_t;  // IWYU pragma: export
+enum class AccountType : std::uint32_t;       // IWYU pragma: export
+enum class CommandType : std::uint32_t;       // IWYU pragma: export
+enum class ContactEventType : std::uint32_t;  // IWYU pragma: export
+enum class PaymentType : std::uint32_t;       // IWYU pragma: export
+enum class PushType : std::uint32_t;          // IWYU pragma: export
+enum class ResponseCode : std::uint32_t;      // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(AccountEventType value) noexcept -> std::string_view;
 OPENTXS_EXPORT auto print(AccountType value) noexcept -> std::string_view;
@@ -32,30 +31,30 @@ OPENTXS_EXPORT auto print(ResponseCode value) noexcept -> std::string_view;
 
 constexpr auto value(AccountEventType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<AccountEventType>>(type);
 }
 constexpr auto value(AccountType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<AccountType>>(type);
 }
 constexpr auto value(CommandType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<CommandType>>(type);
 }
 constexpr auto value(ContactEventType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<ContactEventType>>(type);
 }
 constexpr auto value(PaymentType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<PaymentType>>(type);
 }
 constexpr auto value(PushType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<PushType>>(type);
 }
 constexpr auto value(ResponseCode type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<ResponseCode>>(type);
 }
 }  // namespace opentxs::rpc

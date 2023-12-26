@@ -10,7 +10,7 @@
 
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
@@ -49,7 +49,7 @@ auto Pending::Add(Data&& job) noexcept -> void
     auto& data = *handle;
     const auto& [id, promise] = job;
 
-    assert_true(0 == data.ids_.count(id));
+    assert_true(false == data.ids_.contains(id));
 
     data.ids_.emplace(id);
     data.data_.emplace_back(std::move(job));
@@ -61,7 +61,7 @@ auto Pending::Delete(const identifier::Generic& id) noexcept -> void
     auto& data = *handle;
     auto copy = identifier::Generic{id};
 
-    if (0 < data.ids_.count(copy)) {
+    if (data.ids_.contains(copy)) {
         data.ids_.erase(copy);
 
         for (auto i{data.data_.begin()}; i != data.data_.end();) {

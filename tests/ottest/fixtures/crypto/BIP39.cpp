@@ -109,7 +109,7 @@ auto BIP39::generate_words(const ot::crypto::SeedStrength count) const
 
     EXPECT_EQ(generated_seeds_.count(fingerprint), 0);
 
-    if (0 < generated_seeds_.count(fingerprint)) { return 0; }
+    if (generated_seeds_.contains(fingerprint)) { return 0; }
 
     generated_seeds_.insert(fingerprint);
 

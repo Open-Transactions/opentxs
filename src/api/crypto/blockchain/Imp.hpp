@@ -18,23 +18,22 @@
 
 #include "api/crypto/blockchain/AccountCache.hpp"
 #include "api/crypto/blockchain/Blockchain.hpp"
-#include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -143,13 +142,13 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const identifier::Generic& contactID) const noexcept -> bool;
     auto AssignLabel(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const std::string_view label) const noexcept -> bool;
     virtual auto AssignTransactionMemo(
         const TxidHex& id,
@@ -318,7 +317,8 @@ protected:
     const api::crypto::Blockchain& parent_;
     const CString balance_oracle_endpoint_;
 
-    auto bip44_type(const UnitType type) const noexcept -> Bip44Type;
+    auto bip44_type(const UnitType type) const noexcept
+        -> opentxs::blockchain::crypto::Bip44Type;
     auto decode_bech23(std::string_view encoded) const noexcept
         -> std::optional<DecodedAddress>;
     auto decode_ethereum(std::string_view encoded) const noexcept
@@ -332,7 +332,7 @@ protected:
     auto init_path(
         const opentxs::crypto::SeedID& seed,
         const UnitType chain,
-        const Bip32Index account,
+        const opentxs::crypto::Bip32Index account,
         const opentxs::blockchain::crypto::HDProtocol standard,
         proto::HDPath& path) const noexcept -> void;
     auto p2pkh(const opentxs::blockchain::Type chain, const Data& pubkeyHash)

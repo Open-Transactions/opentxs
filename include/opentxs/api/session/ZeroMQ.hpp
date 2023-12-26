@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

@@ -10,10 +10,10 @@
 #include "crypto/asymmetric/base/KeyPrivate.hpp"
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

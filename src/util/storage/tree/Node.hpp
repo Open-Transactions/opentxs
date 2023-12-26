@@ -20,18 +20,18 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "internal/util/storage/tree/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
-#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -185,7 +185,7 @@ protected:
     {
         if (id.empty()) { return false; }
 
-        Lock lock(write_lock_);
+        const auto lock = Lock{write_lock_};
         const auto& it = item_map_.find(id);
         const bool exists = (item_map_.end() != it);
 
@@ -232,7 +232,7 @@ protected:
         std::string_view alias,
         UnallocatedCString& plaintext) noexcept -> bool
     {
-        Lock lock(write_lock_);
+        const auto lock = Lock{write_lock_};
 
         return store_proto(lock, data, id, alias, plaintext);
     }

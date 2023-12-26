@@ -14,6 +14,7 @@
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
@@ -25,7 +26,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::implementation
 {

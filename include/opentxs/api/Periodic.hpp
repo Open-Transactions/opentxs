@@ -10,7 +10,7 @@
 #include <functional>
 
 #include "opentxs/Export.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 namespace opentxs
 {

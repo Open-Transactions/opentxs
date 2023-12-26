@@ -13,8 +13,8 @@
 #include <variant>
 
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 extern "C" {
 using MDB_env = struct MDB_env;

@@ -21,7 +21,7 @@
 #include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/display/Definition.hpp"
+#include "opentxs/display/Definition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

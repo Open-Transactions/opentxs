@@ -17,6 +17,7 @@
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/identifier/Account.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::params
 {
@@ -30,7 +31,10 @@ auto ChainData::AssociatedMainnet() const noexcept -> blockchain::Type
     return imp_->associated_mainnet_;
 }
 
-auto ChainData::Bip44Code() const noexcept -> Bip44Type { return imp_->bip44_; }
+auto ChainData::Bip44Code() const noexcept -> crypto::Bip44Type
+{
+    return imp_->bip44_;
+}
 
 auto ChainData::BlockDownloadBatch() const noexcept -> std::size_t
 {
@@ -370,7 +374,7 @@ auto ChainData::TranslateService(
 }
 
 auto ChainData::ZMQ() const noexcept
-    -> std::pair<Bip44Type, network::blockchain::Subchain>
+    -> std::pair<crypto::Bip44Type, network::blockchain::Subchain>
 {
     return imp_->zmq_;
 }
@@ -416,8 +420,8 @@ auto get(blockchain::Type chain) noexcept(false) -> const ChainData&
         return i->second;
     } else {
 
-        throw std::out_of_range{"undefined chain "s.append(
-            std::to_string(static_cast<blockchain::TypeEnum>(chain)))};
+        throw std::out_of_range{
+            "undefined chain "s.append(std::to_string(value(chain)))};
     }
 }
 

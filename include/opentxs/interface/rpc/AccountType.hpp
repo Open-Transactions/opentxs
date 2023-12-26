@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/rpc/Types.hpp"
+#include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-enum class AccountType : TypeEnum {
+enum class AccountType : std::underlying_type_t<AccountType> {
     error = 0,
     normal = 1,
     issuer = 2,

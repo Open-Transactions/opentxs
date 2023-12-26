@@ -23,7 +23,7 @@
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -91,7 +91,7 @@ ActivitySummaryItem::ActivitySummaryItem(
 
 auto ActivitySummaryItem::DisplayName() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     if (display_name_.empty()) { return api_.Contacts().ContactName(row_id_); }
 
@@ -146,7 +146,7 @@ auto ActivitySummaryItem::find_text(
 void ActivitySummaryItem::get_text() noexcept
 {
     auto reason = api_.Factory().PasswordPrompt(__func__);
-    eLock lock(shared_lock_, std::defer_lock);
+    auto lock = eLock{shared_lock_, std::defer_lock};
     auto locator = ItemLocator{"", {}, "", identifier::Generic{}};
 
     while (running_) {
@@ -195,7 +195,7 @@ auto ActivitySummaryItem::reindex(
     const ActivitySummarySortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    auto lock = eLock{shared_lock_};
     key_ = key;
     lock.unlock();
     startup(custom);
@@ -215,7 +215,7 @@ void ActivitySummaryItem::startup(CustomData& custom) noexcept
 
 auto ActivitySummaryItem::Text() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return text_;
 }
@@ -227,14 +227,14 @@ auto ActivitySummaryItem::ThreadID() const noexcept -> UnallocatedCString
 
 auto ActivitySummaryItem::Timestamp() const noexcept -> Time
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return time_;
 }
 
 auto ActivitySummaryItem::Type() const noexcept -> otx::client::StorageBox
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return type_;
 }

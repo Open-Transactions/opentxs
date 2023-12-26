@@ -17,10 +17,7 @@ Deterministic::Deterministic(std::shared_ptr<internal::Subaccount> imp) noexcept
 {
 }
 
-Deterministic::Deterministic(const Deterministic& rhs) noexcept
-    : Subaccount(rhs)
-{
-}
+Deterministic::Deterministic(const Deterministic& rhs) noexcept = default;
 
 Deterministic::Deterministic(Deterministic&& rhs) noexcept
     : Subaccount(std::move(rhs))

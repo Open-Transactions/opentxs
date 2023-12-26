@@ -21,8 +21,10 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -31,21 +33,17 @@
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ByteLiterals.hpp"
 #include "util/JobCounter.hpp"
 #include "util/ScopeGuard.hpp"
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::api::session::activity
 {

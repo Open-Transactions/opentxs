@@ -14,12 +14,12 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/otx/client/Issuer.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 
 class QVariant;

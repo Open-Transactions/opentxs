@@ -62,11 +62,13 @@ auto BailmentNotice::IsValid() const noexcept -> bool
 auto BailmentNotice::operator=(const BailmentNotice& rhs) noexcept
     -> BailmentNotice&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto BailmentNotice::operator=(BailmentNotice&& rhs) noexcept -> BailmentNotice&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

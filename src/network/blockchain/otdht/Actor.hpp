@@ -18,14 +18,14 @@
 #include <utility>
 
 #include "internal/network/blockchain/OTDHT.hpp"
-#include "internal/network/blockchain/Types.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"

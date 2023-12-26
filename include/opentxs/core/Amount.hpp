@@ -36,25 +36,25 @@ struct hash<opentxs::Amount> {
 
 namespace opentxs
 {
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator==(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator!=(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator<(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator<=(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator>(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator>=(T lhs, const Amount& rhs) noexcept -> bool;
 
-template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 OPENTXS_EXPORT auto operator*(T lhs, const Amount& rhs) noexcept(false)
     -> Amount;
 
@@ -80,42 +80,42 @@ public:
     OPENTXS_NO_EXPORT auto Internal() const noexcept -> const internal::Amount&;
 
     auto operator==(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator==(const T) const noexcept -> bool;
 
     auto operator!=(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator!=(const T) const noexcept -> bool;
 
     auto operator<(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator<(const T) const noexcept -> bool;
 
     auto operator<=(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator<=(const T) const noexcept -> bool;
 
     auto operator>(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator>(const T) const noexcept -> bool;
 
     auto operator>=(const Amount& rhs) const noexcept -> bool;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator>=(const T) const noexcept -> bool;
 
     auto operator+(const Amount& rhs) const noexcept(false) -> Amount;
     auto operator-(const Amount& rhs) const noexcept(false) -> Amount;
 
     auto operator*(const Amount& rhs) const noexcept(false) -> Amount;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator*(const T) const noexcept(false) -> Amount;
 
     auto operator/(const Amount& rhs) const noexcept(false) -> Amount;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator/(const T) const noexcept(false) -> Amount;
 
     auto operator%(const Amount& rhs) const noexcept(false) -> Amount;
-    template <typename T, std::enable_if_t<std::is_integral<T>::value, int> = 0>
+    template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
     auto operator%(const T) const noexcept(false) -> Amount;
 
     auto operator*=(const Amount& amount) noexcept(false) -> Amount&;

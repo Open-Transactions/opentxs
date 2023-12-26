@@ -6,13 +6,13 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/rpc/Types.hpp"
+#include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-enum class ResponseCode : TypeEnum {
+enum class ResponseCode : std::underlying_type_t<ResponseCode> {
     invalid = 0,
     success = 1,
     bad_session = 2,
@@ -44,7 +44,7 @@ enum class ResponseCode : TypeEnum {
     send_payment_failed = 28,
     transaction_failed = 29,
     txid = 30,
-    unimplemented = std::numeric_limits<int>::max() - 1u,
+    unimplemented = std::numeric_limits<int>::max() - 1,
     error = std::numeric_limits<int>::max(),
 };
 }  // namespace opentxs::rpc

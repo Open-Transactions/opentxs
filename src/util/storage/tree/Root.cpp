@@ -18,8 +18,8 @@
 #include "internal/serialization/protobuf/verify/StorageRoot.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Time.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -157,7 +157,7 @@ auto Root::init(const Hash& hash) noexcept(false) -> void
 
 auto Root::mutable_Trunk() -> Editor<tree::Trunk>
 {
-    std::function<void(tree::Trunk*, Lock&)> callback =
+    const std::function<void(tree::Trunk*, Lock&)> callback =
         [&](tree::Trunk* in, Lock& lock) -> void { this->save(in, lock); };
 
     return {write_lock_, trunk(), callback};
@@ -180,7 +180,7 @@ auto Root::save(tree::Trunk* tree, const Lock& lock) -> void
     assert_true(verify_write_lock(lock));
     assert_false(nullptr == tree);
 
-    Lock treeLock(tree_lock_);
+    auto treeLock = Lock{tree_lock_};
     tree_root_ = tree->root_;
     treeLock.unlock();
 
@@ -231,7 +231,7 @@ auto Root::StartGC() noexcept -> std::optional<GCParams>
 
 auto Root::trunk() const -> tree::Trunk*
 {
-    Lock lock(tree_lock_);
+    auto lock = Lock{tree_lock_};
 
     if (!tree_) {
         tree_.reset(new tree::Trunk(crypto_, factory_, plugin_, tree_root_));

@@ -26,9 +26,9 @@
 #include "opentxs/blockchain/node/Spend.hpp"
 #include "opentxs/blockchain/node/Wallet.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/PaymentType.hpp"   // IWYU pragma: keep
 #include "opentxs/interface/rpc/ResponseCode.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"

@@ -12,6 +12,7 @@
 #include "crypto/asymmetric/key/hd/Imp.hpp"
 #include "internal/crypto/asymmetric/key/Ed25519.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
@@ -19,7 +20,6 @@
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

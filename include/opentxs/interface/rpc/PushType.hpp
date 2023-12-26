@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <limits>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/interface/rpc/Types.hpp"
+#include "opentxs/interface/rpc/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-enum class PushType : TypeEnum {
+enum class PushType : std::underlying_type_t<PushType> {
     error = 0,
     account = 1,
     contact = 2,

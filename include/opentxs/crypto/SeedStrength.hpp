@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto
 {
-enum class SeedStrength : std::size_t {
+enum class SeedStrength : std::underlying_type_t<SeedStrength> {
     Twelve = 128,
     Fifteen = 160,
     Eighteen = 192,

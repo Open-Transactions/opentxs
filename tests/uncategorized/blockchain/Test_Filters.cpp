@@ -21,8 +21,6 @@
 #include "internal/util/P0330.hpp"
 #include "ottest/fixtures/blockchain/Filters.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace opentxs::literals;

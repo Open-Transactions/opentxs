@@ -18,7 +18,7 @@ auto BIP32::make_path(const Child::Path& path) const noexcept -> Path
 {
     auto output = Path{};
     static constexpr auto hard =
-        static_cast<ot::Bip32Index>(ot::Bip32Child::HARDENED);
+        static_cast<ot::crypto::Bip32Index>(ot::crypto::Bip32Child::HARDENED);
 
     for (const auto& item : path) {
         if (item.hardened_) {

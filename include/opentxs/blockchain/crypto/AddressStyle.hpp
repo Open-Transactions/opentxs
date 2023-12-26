@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/blockchain/crypto/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/blockchain/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain::crypto
 {
-enum class AddressStyle : std::uint16_t {
+enum class AddressStyle : std::underlying_type_t<AddressStyle> {
     unknown_address_style = 0,
     p2pkh = 1,
     p2sh = 2,

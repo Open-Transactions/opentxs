@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/network/zeromq/socket/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/network/zeromq/socket/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::zeromq::socket
 {
-enum class Policy : std::uint8_t {
+enum class Policy : std::underlying_type_t<Policy> {
     Internal = 0,
     External = 1,
 };

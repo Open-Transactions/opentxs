@@ -28,8 +28,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/util/Container.hpp"
@@ -70,14 +70,14 @@ NymFile::NymFile(const api::Session& api, Nym_p targetNym, Nym_p signerNym)
 /// a payments message is a form of transaction, transported via Nymbox
 void NymFile::AddOutpayments(std::shared_ptr<Message> theMessage)
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     outpayments_.push_front(theMessage);
 }
 
 void NymFile::ClearAll()
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     inbox_hash_.clear();
     outbox_hash_.clear();
@@ -122,7 +122,7 @@ auto NymFile::deserialize_nymfile(
     auto strNymXML = StringXML::Factory(strNym);  // todo optimize
     irr::io::IrrXMLReader* xml = irr::io::createIrrXMLReader(strNymXML.get());
     assert_false(nullptr == xml);
-    std::unique_ptr<irr::io::IrrXMLReader> theCleanup(xml);
+    const std::unique_ptr<irr::io::IrrXMLReader> theCleanup(xml);
 
     // parse the file until end reached
     while (xml && xml->read()) {
@@ -281,7 +281,7 @@ auto NymFile::deserialize_nymfile(
 
                                     if (pMessage->LoadContractFromString(
                                             strMessage)) {
-                                        std::shared_ptr<Message> message{
+                                        const std::shared_ptr<Message> message{
                                             pMessage.release()};
                                         outpayments_.push_back(message);
                                     }
@@ -430,11 +430,7 @@ auto NymFile::GetOutpaymentsByTransNum(
         //
         if (pMsg->payload_->Exists() && pMsg->payload_->GetString(strPayment) &&
             strPayment->Exists()) {
-            pPayment.reset(api_.Factory()
-                               .Internal()
-                               .Session()
-                               .Payment(strPayment)
-                               .release());
+            pPayment = api_.Factory().Internal().Session().Payment(strPayment);
 
             // Let's see if it's the cheque we're looking for...
             //
@@ -670,7 +666,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
     //
     if (!(accounts_.empty())) {
         for (const auto& it : accounts_) {
-            UnallocatedCString strID(it);
+            const UnallocatedCString strID(it);
             TagPtr pTag(new Tag("ownsAssetAcct"));
             pTag->add_attribute("ID", strID);
             tag.add_tag(pTag);
@@ -679,7 +675,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
 
     // client-side
     for (const auto& it : inbox_hash_) {
-        UnallocatedCString strAcctID = it.first;
+        const UnallocatedCString strAcctID = it.first;
         const identifier::Generic& theID = it.second;
 
         if ((strAcctID.size() > 0) && !theID.empty()) {
@@ -693,7 +689,7 @@ auto NymFile::serialize_nymfile(const T& lock, opentxs::String& strNym) const
 
     // client-side
     for (const auto& it : outbox_hash_) {
-        UnallocatedCString strAcctID = it.first;
+        const UnallocatedCString strAcctID = it.first;
         const identifier::Generic& theID = it.second;
 
         if ((strAcctID.size() > 0) && !theID.empty()) {
@@ -724,7 +720,7 @@ auto NymFile::SerializeNymFile(const char* szFoldername, const char* szFilename)
     auto strNym = String::Factory();
     serialize_nymfile(lock, strNym);
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strNym->Get(),
         api_.DataFolder().string(),
@@ -742,7 +738,7 @@ auto NymFile::SerializeNymFile(const char* szFoldername, const char* szFilename)
 
 auto NymFile::SaveSignedNymFile(const opentxs::PasswordPrompt& reason) -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return save_signed_nymfile(lock, reason);
 }
@@ -812,7 +808,7 @@ auto NymFile::SetInboxHash(
     const UnallocatedCString& acct_id,
     const identifier::Generic& theInput) -> bool  // client-side
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return SetHash(inbox_hash_, acct_id, theInput);
 }
@@ -821,7 +817,7 @@ auto NymFile::SetOutboxHash(
     const UnallocatedCString& acct_id,
     const identifier::Generic& theInput) -> bool  // client-side
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     return SetHash(outbox_hash_, acct_id, theInput);
 }

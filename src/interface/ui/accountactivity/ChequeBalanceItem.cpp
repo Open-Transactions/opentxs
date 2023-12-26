@@ -19,9 +19,9 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -46,7 +46,7 @@ ChequeBalanceItem::ChequeBalanceItem(
 
 auto ChequeBalanceItem::effective_amount() const noexcept -> opentxs::Amount
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
     auto amount = opentxs::Amount{0};
     auto sign = opentxs::Amount{0};
 
@@ -81,7 +81,7 @@ auto ChequeBalanceItem::effective_amount() const noexcept -> opentxs::Amount
 
 auto ChequeBalanceItem::Memo() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     if (cheque_) { return cheque_->GetMemo().Get(); }
 
@@ -104,7 +104,7 @@ auto ChequeBalanceItem::startup(
     const proto::PaymentWorkflow workflow,
     const proto::PaymentEvent event) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    auto lock = eLock{shared_lock_};
 
     if (false == bool(cheque_)) {
         cheque_ =

@@ -9,18 +9,15 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::cfilter
 {
 using Targets = Vector<ReadView>;
 using Matches = Vector<Targets::const_iterator>;
-using TypeEnum = std::uint32_t;
 
-// IWYU pragma: begin_exports
-enum class Type : TypeEnum;  // IWYU pragma: keep
-// IWYU pragma: end_exports
+enum class Type : std::uint32_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(Type) noexcept -> std::string_view;
 }  // namespace opentxs::blockchain::cfilter

@@ -10,7 +10,8 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -99,11 +100,13 @@ auto Output::Note(const api::crypto::Blockchain& crypto, allocator_type alloc)
 
 auto Output::operator=(const Output& rhs) noexcept -> Output&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Output::operator=(Output&& rhs) noexcept -> Output&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

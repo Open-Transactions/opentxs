@@ -39,7 +39,7 @@ extern "C" {
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"

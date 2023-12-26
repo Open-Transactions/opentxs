@@ -17,7 +17,7 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/reply/Faucet.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"

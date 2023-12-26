@@ -32,7 +32,7 @@ auto CheckProto_1(
 
     for (const auto& it : input.section()) {
         try {
-            bool validSection = Check(
+            const bool validSection = Check(
                 it,
                 ContactDataAllowedContactSection().at(input.version()).first,
                 ContactDataAllowedContactSection().at(input.version()).second,
@@ -47,9 +47,9 @@ auto CheckProto_1(
                 input.version());
         }
 
-        ContactSectionName name = it.name();
+        const ContactSectionName name = it.name();
 
-        if (sectionCount.count(name) > 0) {
+        if (sectionCount.contains(name)) {
             FAIL_1("duplicate section");
         } else {
             sectionCount.insert({name, 1});

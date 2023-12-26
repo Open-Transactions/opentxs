@@ -10,14 +10,14 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

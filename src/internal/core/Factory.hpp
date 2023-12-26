@@ -52,7 +52,7 @@ auto PaymentCode(
 auto PaymentCode(
     const api::Session& api,
     const crypto::SeedID& seed,
-    const Bip32Index nym,
+    const crypto::Bip32Index nym,
     const std::uint8_t version,
     const bool bitmessage,
     const std::uint8_t bitmessageVersion,

@@ -13,8 +13,8 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "otx/client/obsolete/OTAPI_Func.hpp"
 
 namespace opentxs::factory

@@ -20,8 +20,8 @@
 #include "opentxs/api/session/Contacts.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -114,7 +114,7 @@ BalanceItem::BalanceItem(
 
 auto BalanceItem::DisplayAmount() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
     const auto& amount = effective_amount();
     const auto& definition =
         display::GetDefinition(parent_.Contract().UnitOfAccount());
@@ -209,7 +209,7 @@ auto BalanceItem::reindex(
     const implementation::AccountActivitySortKey& key,
     implementation::CustomData&) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
 
     if (key == time_) {
 
@@ -223,14 +223,14 @@ auto BalanceItem::reindex(
 
 auto BalanceItem::Text() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return text_;
 }
 
 auto BalanceItem::Timestamp() const noexcept -> Time
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return time_;
 }

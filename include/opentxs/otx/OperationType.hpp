@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx
 {
-enum class OperationType : std::uint16_t {
+enum class OperationType : std::underlying_type_t<OperationType> {
     Invalid = 0,
     AddClaim = 1,
     CheckNym = 2,

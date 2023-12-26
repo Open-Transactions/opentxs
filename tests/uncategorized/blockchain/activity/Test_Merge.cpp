@@ -16,10 +16,10 @@ using Subchain = ot::blockchain::crypto::Subchain;
 
 ot::UnallocatedCString txid_1_{};
 ot::UnallocatedCString txid_2_{};
-ot::Bip32Index first_index_{};
-ot::Bip32Index second_index_{};
-ot::Bip32Index third_index_{};
-ot::Bip32Index fourth_index_{};
+ot::crypto::Bip32Index first_index_{};
+ot::crypto::Bip32Index second_index_{};
+ot::crypto::Bip32Index third_index_{};
+ot::crypto::Bip32Index fourth_index_{};
 
 TEST_F(Test_BlockchainActivity, init)
 {

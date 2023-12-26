@@ -13,11 +13,11 @@
 #include <string_view>
 
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

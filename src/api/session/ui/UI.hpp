@@ -27,16 +27,15 @@
 #include "internal/interface/ui/SeedList.hpp"
 #include "internal/interface/ui/SeedTree.hpp"
 #include "internal/interface/ui/UnitList.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/interface/ui/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

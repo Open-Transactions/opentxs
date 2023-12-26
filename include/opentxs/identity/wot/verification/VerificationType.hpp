@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/identity/wot/verification/Types.hpp"
+#include "opentxs/identity/wot/verification/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity::wot::verification
 {
-enum class Type : std::uint8_t {
+enum class Type : std::underlying_type_t<Type> {
     invalid = 0,
     affirm = 1,
     neutral = 2,

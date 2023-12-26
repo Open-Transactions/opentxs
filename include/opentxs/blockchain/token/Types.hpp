@@ -8,8 +8,8 @@
 #include <cstdint>
 #include <string_view>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

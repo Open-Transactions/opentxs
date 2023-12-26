@@ -14,8 +14,6 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/otx/OTX.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NymFile.hpp"  // IWYU pragma: keep
 #include "internal/util/P0330.hpp"
@@ -29,13 +27,14 @@
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/consensus/Client.hpp"
 #include "otx/consensus/ClientPrivate.hpp"
@@ -288,7 +287,7 @@ auto Base<CRTP, DataType>::InitializeNymbox(const PasswordPrompt& reason)
     }
 
     const auto generated = nymbox->GenerateLedger(
-        ownerNymID, server_id_, ledgerType::nymbox, true);
+        ownerNymID, server_id_, otx::ledgerType::nymbox, true);
 
     if (false == generated) {
         LogError()()("(")(type())(") ")("Unable to generate nymbox "

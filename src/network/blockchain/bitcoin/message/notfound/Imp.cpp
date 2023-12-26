@@ -15,10 +15,10 @@
 #include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/Inventory.hpp"  // IWYU pragma: keep
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 

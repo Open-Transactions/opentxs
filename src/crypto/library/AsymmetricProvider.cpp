@@ -20,6 +20,7 @@ extern "C" {
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/crypto/EcdsaCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
@@ -196,7 +197,7 @@ auto AsymmetricProvider::SignContract(
         return out;
     }();
     auto signature = api.Factory().Data();
-    bool success =
+    const bool success =
         Sign(reader(plaintext), theKey, hashType, signature.WriteInto());
     output.SetData(signature, true);  // true means, "yes, with newlines in the
                                       // b64-encoded output, please."

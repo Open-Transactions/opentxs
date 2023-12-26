@@ -18,25 +18,25 @@
 #include <string_view>
 
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/block/Types.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -122,13 +122,13 @@ public:
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const identifier::Generic& contactID) const noexcept -> bool final;
     auto AssignLabel(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
         const Subchain subchain,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const UnallocatedCString& label) const noexcept -> bool final;
     auto AssignTransactionMemo(
         const UnallocatedCString& id,

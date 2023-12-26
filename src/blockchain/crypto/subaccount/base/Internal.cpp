@@ -14,8 +14,8 @@
 #include "opentxs/blockchain/crypto/Imported.hpp"
 #include "opentxs/blockchain/crypto/Notification.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::blockchain::crypto::internal

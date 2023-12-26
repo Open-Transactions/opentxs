@@ -8,7 +8,7 @@
 #include "internal/interface/ui/List.hpp"
 #include "internal/interface/ui/ListRow.hpp"
 #include "internal/util/SharedPimpl.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

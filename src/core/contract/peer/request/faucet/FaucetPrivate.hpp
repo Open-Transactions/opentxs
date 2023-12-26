@@ -12,7 +12,7 @@
 #include "core/contract/peer/request/base/RequestPrivate.hpp"
 #include "internal/core/contract/peer/request/Faucet.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocator.hpp"
 

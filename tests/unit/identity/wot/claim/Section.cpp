@@ -13,8 +13,6 @@
 #include "ottest/fixtures/contact/ContactItem.hpp"
 #include "ottest/fixtures/contact/ContactSection.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(ContactSection, first_constructor)
@@ -83,7 +81,7 @@ TEST_F(ContactSection, copy_constructor)
 {
     const auto& section1(contact_section_.AddItem(active_contact_item_));
 
-    ot::identity::wot::claim::Section copiedContactSection(section1);
+    const ot::identity::wot::claim::Section copiedContactSection(section1);
     ASSERT_EQ(section1.Type(), copiedContactSection.Type());
     ASSERT_EQ(section1.Version(), copiedContactSection.Version());
     ASSERT_EQ(copiedContactSection.Size(), 1);

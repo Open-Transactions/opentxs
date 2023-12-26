@@ -17,9 +17,10 @@
 
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/Claim.internal.hpp"
 #include "opentxs/identity/wot/Types.hpp"
@@ -27,7 +28,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -136,7 +136,7 @@ private:
     struct Data final : public opentxs::pmr::Allocated {
         using Attributes = boost::container::flat_set<
             claim::Attribute,
-            std::less<claim::Attribute>,
+            std::less<>,
             alloc::PMR<claim::Attribute>>;
 
         Attributes attributes_;

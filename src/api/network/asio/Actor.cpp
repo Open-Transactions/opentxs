@@ -17,6 +17,8 @@
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Context.hpp"
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
@@ -30,8 +32,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::api::network::asio
 {

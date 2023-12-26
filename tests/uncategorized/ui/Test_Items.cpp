@@ -14,8 +14,6 @@
 #include "interface/ui/base/Items.hpp"
 #include "ottest/fixtures/ui/Items.hpp"
 
-namespace ot = opentxs;
-
 namespace opentxs::ui::implementation
 {
 template <>

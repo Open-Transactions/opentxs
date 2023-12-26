@@ -13,14 +13,14 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/asio/Socket.hpp"
 #include "opentxs/network/blockchain/Address.hpp"

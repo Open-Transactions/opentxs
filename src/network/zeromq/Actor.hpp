@@ -17,10 +17,10 @@
 
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -94,7 +94,7 @@ private:
         SocketID,
         actor::SocketIndex,
         std::hash<SocketID>,
-        std::equal_to<SocketID>,
+        std::equal_to<>,
         alloc::PMR<std::pair<const SocketID, actor::SocketIndex>>>;
 
     static constexpr auto fixed_ = 4_uz;

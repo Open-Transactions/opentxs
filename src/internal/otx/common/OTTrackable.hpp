@@ -6,8 +6,8 @@
 #pragma once
 
 #include "internal/otx/common/Instrument.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 namespace opentxs

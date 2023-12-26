@@ -16,8 +16,8 @@ namespace ottest
 using Subchain = ot::blockchain::crypto::Subchain;
 
 ot::UnallocatedCString txid_{};
-ot::Bip32Index first_index_{};
-ot::Bip32Index second_index_{};
+ot::crypto::Bip32Index first_index_{};
+ot::crypto::Bip32Index second_index_{};
 
 TEST_F(Test_BlockchainActivity, init)
 {

@@ -5,10 +5,10 @@
 
 #pragma once
 
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Bip32.hpp"
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

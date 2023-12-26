@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "util/Actor.hpp"
 

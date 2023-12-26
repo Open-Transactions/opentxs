@@ -96,11 +96,14 @@ auto Signatures::get_hd_key(
     return api.Crypto().Seed().GetHDKey(
         seedID,
         curve,
-        {ot::HDIndex{ot::Bip43Purpose::NYM, ot::Bip32Child::HARDENED},
-         ot::HDIndex{0, ot::Bip32Child::HARDENED},
-         ot::HDIndex{0, ot::Bip32Child::HARDENED},
-         ot::HDIndex{index, ot::Bip32Child::HARDENED},
-         ot::HDIndex{ot::Bip32Child::SIGN_KEY, ot::Bip32Child::HARDENED}},
+        {ot::HDIndex{
+             ot::crypto::Bip43Purpose::NYM, ot::crypto::Bip32Child::HARDENED},
+         ot::HDIndex{0, ot::crypto::Bip32Child::HARDENED},
+         ot::HDIndex{0, ot::crypto::Bip32Child::HARDENED},
+         ot::HDIndex{index, ot::crypto::Bip32Child::HARDENED},
+         ot::HDIndex{
+             ot::crypto::Bip32Child::SIGN_KEY,
+             ot::crypto::Bip32Child::HARDENED}},
         reason);
 }
 

@@ -78,11 +78,13 @@ auto Connection::Login() const noexcept -> std::string_view
 
 auto Connection::operator=(const Connection& rhs) noexcept -> Connection&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Connection::operator=(Connection&& rhs) noexcept -> Connection&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

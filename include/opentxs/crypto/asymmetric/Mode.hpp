@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
+
+#include "opentxs/crypto/asymmetric/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto::asymmetric
 {
-enum class Mode : std::uint8_t {
+enum class Mode : std::underlying_type_t<Mode> {
     Error = 0,
     Null = 1,
     Public = 2,

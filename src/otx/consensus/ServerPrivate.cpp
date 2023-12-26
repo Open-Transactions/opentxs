@@ -12,17 +12,17 @@
 #include <atomic>
 
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/otx/OTX.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Flag.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/Direction.hpp"
+#include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "otx/consensus/Server.hpp"
 
 namespace opentxs::otx::context

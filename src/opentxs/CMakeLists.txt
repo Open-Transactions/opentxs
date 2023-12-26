@@ -5,9 +5,14 @@
 
 add_subdirectory(api)
 add_subdirectory(blockchain)
+add_subdirectory(contract)
+add_subdirectory(crypto)
+add_subdirectory(display)
+add_subdirectory(identifier)
 add_subdirectory(identity)
 add_subdirectory(network)
-add_subdirectory(util)
+add_subdirectory(otx)
+add_subdirectory(storage)
 
 configure_file(
   "Context.version.cpp.in"
@@ -34,8 +39,15 @@ generate_export_header(
   OPENTXS_CUSTOM_CONTENT_FROM_VARIABLE
 )
 
+libopentxs_add_enum_header("" "UnitType")
+libopentxs_add_public_header("" "AccountType.hpp")
+libopentxs_add_public_header("" "AddressType.hpp")
+libopentxs_add_public_header("" "BlockchainProfile.hpp")
+libopentxs_add_public_header("" "ConnectionMode.hpp")
 libopentxs_add_public_header("" "Context.hpp")
 libopentxs_add_public_header("" "Export.hpp")
+libopentxs_add_public_header("" "Types.hpp")
+libopentxs_add_public_header("" "WorkType.hpp")
 libopentxs_add_public_header("" "opentxs.hpp")
 
 if(OT_QT_EXPORT)
@@ -54,9 +66,19 @@ target_sources(
   opentxs-common
   PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}/Context.version.cpp"
+    "BlockchainProfile.cpp"
+    "ConnectionMode.cpp"
     "Context.cpp"
+    "Types.cpp"
+    "Types.internal.cpp"
+    "Types.internal.hpp"
+    "WorkType.cpp"
+    "WorkType.internal.cpp"
+    "WorkType.internal.hpp"
     "internal.factory.hpp"
+    "strerror_r.hpp"
 )
+libopentxs_add_platform_specific("strerror_r")
 target_include_directories(
   opentxs-common PRIVATE "${opentxs_BINARY_DIR}/include"
 )

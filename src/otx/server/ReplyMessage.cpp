@@ -9,7 +9,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/NumList.hpp"
 #include "internal/otx/consensus/Client.hpp"
@@ -19,10 +18,11 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/server/Server.hpp"
@@ -37,7 +37,7 @@ ReplyMessage::ReplyMessage(
     const identity::Nym& signer,
     const Message& input,
     Server& server,
-    const MessageType& type,
+    const otx::MessageType& type,
     Message& output,
     const PasswordPrompt& reason)
     : parent_(parent)
@@ -77,38 +77,38 @@ void ReplyMessage::attach_request()
     const auto type = Message::Type(command);
 
     switch (type) {
-        case MessageType::getMarketOffers:
-        case MessageType::getMarketRecentTrades:
-        case MessageType::getNymMarketOffers:
-        case MessageType::registerContract:
-        case MessageType::registerNym:
-        case MessageType::unregisterNym:
-        case MessageType::checkNym:
-        case MessageType::registerInstrumentDefinition:
-        case MessageType::queryInstrumentDefinitions:
-        case MessageType::issueBasket:
-        case MessageType::registerAccount:
-        case MessageType::getBoxReceipt:
-        case MessageType::getAccountData:
-        case MessageType::unregisterAccount:
-        case MessageType::notarizeTransaction:
-        case MessageType::getNymbox:
-        case MessageType::getInstrumentDefinition:
-        case MessageType::getMint:
-        case MessageType::processInbox:
-        case MessageType::processNymbox:
-        case MessageType::triggerClause:
-        case MessageType::getMarketList:
-        case MessageType::requestAdmin:
-        case MessageType::addClaim: {
+        case otx::MessageType::getMarketOffers:
+        case otx::MessageType::getMarketRecentTrades:
+        case otx::MessageType::getNymMarketOffers:
+        case otx::MessageType::registerContract:
+        case otx::MessageType::registerNym:
+        case otx::MessageType::unregisterNym:
+        case otx::MessageType::checkNym:
+        case otx::MessageType::registerInstrumentDefinition:
+        case otx::MessageType::queryInstrumentDefinitions:
+        case otx::MessageType::issueBasket:
+        case otx::MessageType::registerAccount:
+        case otx::MessageType::getBoxReceipt:
+        case otx::MessageType::getAccountData:
+        case otx::MessageType::unregisterAccount:
+        case otx::MessageType::notarizeTransaction:
+        case otx::MessageType::getNymbox:
+        case otx::MessageType::getInstrumentDefinition:
+        case otx::MessageType::getMint:
+        case otx::MessageType::processInbox:
+        case otx::MessageType::processNymbox:
+        case otx::MessageType::triggerClause:
+        case otx::MessageType::getMarketList:
+        case otx::MessageType::requestAdmin:
+        case otx::MessageType::addClaim: {
             LogVerbose()()("Attaching original ")(command)(" message.").Flush();
             message_.in_reference_to_->SetString(String::Factory(original_));
         } break;
-        case MessageType::pingNotary:
-        case MessageType::usageCredits:
-        case MessageType::sendNymMessage:
-        case MessageType::getRequestNumber:
-        case MessageType::getTransactionNumbers:
+        case otx::MessageType::pingNotary:
+        case otx::MessageType::usageCredits:
+        case otx::MessageType::sendNymMessage:
+        case otx::MessageType::getRequestNumber:
+        case otx::MessageType::getTransactionNumbers:
         default: {
         }
     }
@@ -120,38 +120,38 @@ void ReplyMessage::clear_request()
     const auto type = Message::Type(command);
 
     switch (type) {
-        case MessageType::checkNym:
-        case MessageType::getNymbox:
-        case MessageType::getAccountData:
-        case MessageType::getInstrumentDefinition:
-        case MessageType::getMint: {
+        case otx::MessageType::checkNym:
+        case otx::MessageType::getNymbox:
+        case otx::MessageType::getAccountData:
+        case otx::MessageType::getInstrumentDefinition:
+        case otx::MessageType::getMint: {
             LogVerbose()()("Clearing original ")(command)(" message.").Flush();
             message_.in_reference_to_->Release();
         } break;
-        case MessageType::getMarketOffers:
-        case MessageType::getMarketRecentTrades:
-        case MessageType::getNymMarketOffers:
-        case MessageType::registerContract:
-        case MessageType::registerNym:
-        case MessageType::unregisterNym:
-        case MessageType::registerInstrumentDefinition:
-        case MessageType::queryInstrumentDefinitions:
-        case MessageType::issueBasket:
-        case MessageType::registerAccount:
-        case MessageType::getBoxReceipt:
-        case MessageType::unregisterAccount:
-        case MessageType::notarizeTransaction:
-        case MessageType::processInbox:
-        case MessageType::processNymbox:
-        case MessageType::triggerClause:
-        case MessageType::getMarketList:
-        case MessageType::requestAdmin:
-        case MessageType::addClaim:
-        case MessageType::pingNotary:
-        case MessageType::usageCredits:
-        case MessageType::sendNymMessage:
-        case MessageType::getRequestNumber:
-        case MessageType::getTransactionNumbers:
+        case otx::MessageType::getMarketOffers:
+        case otx::MessageType::getMarketRecentTrades:
+        case otx::MessageType::getNymMarketOffers:
+        case otx::MessageType::registerContract:
+        case otx::MessageType::registerNym:
+        case otx::MessageType::unregisterNym:
+        case otx::MessageType::registerInstrumentDefinition:
+        case otx::MessageType::queryInstrumentDefinitions:
+        case otx::MessageType::issueBasket:
+        case otx::MessageType::registerAccount:
+        case otx::MessageType::getBoxReceipt:
+        case otx::MessageType::unregisterAccount:
+        case otx::MessageType::notarizeTransaction:
+        case otx::MessageType::processInbox:
+        case otx::MessageType::processNymbox:
+        case otx::MessageType::triggerClause:
+        case otx::MessageType::getMarketList:
+        case otx::MessageType::requestAdmin:
+        case otx::MessageType::addClaim:
+        case otx::MessageType::pingNotary:
+        case otx::MessageType::usageCredits:
+        case otx::MessageType::sendNymMessage:
+        case otx::MessageType::getRequestNumber:
+        case otx::MessageType::getTransactionNumbers:
         default: {
         }
     }

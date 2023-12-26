@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -18,14 +19,13 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/notary/Shared.hpp"
 #include "opentxs/api/session/notary/Types.internal.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"     // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::api::session::notary

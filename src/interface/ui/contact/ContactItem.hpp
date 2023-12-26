@@ -13,7 +13,7 @@
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
@@ -43,25 +43,25 @@ public:
 
     auto ClaimID() const noexcept -> UnallocatedCString final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return row_id_.asBase58(api_.Crypto());
     }
     auto IsActive() const noexcept -> bool final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return item_->HasAttribute(identity::wot::claim::Attribute::Active);
     }
     auto IsPrimary() const noexcept -> bool final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return item_->HasAttribute(identity::wot::claim::Attribute::Primary);
     }
     auto Value() const noexcept -> UnallocatedCString final
     {
-        sLock lock(shared_lock_);
+        const auto lock = sLock{shared_lock_};
 
         return UnallocatedCString{item_->Value()};
     }

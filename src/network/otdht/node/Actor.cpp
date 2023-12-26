@@ -22,10 +22,8 @@
 
 #include "BoostAsio.hpp"
 #include "internal/api/session/Endpoints.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/otdht/Listener.hpp"
 #include "internal/network/otdht/Peer.hpp"
 #include "internal/network/zeromq/Context.hpp"
@@ -35,6 +33,8 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -52,12 +52,14 @@
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
@@ -71,9 +73,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -210,6 +209,7 @@ auto Node::Actor::do_shutdown() noexcept -> void
     api_p_.reset();
 }
 
+// NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
 auto Node::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 {
     if (api_.Internal().ShuttingDown()) { return true; }
@@ -220,6 +220,7 @@ auto Node::Actor::do_startup(allocator_type monotonic) noexcept -> bool
 
     return false;
 }
+// NOLINTEND(clang-analyzer-cplusplus.StringChecker)
 
 auto Node::Actor::forward(
     const zeromq::Envelope& recipient,
@@ -439,12 +440,14 @@ auto Node::Actor::parse(const opentxs::internal::Options::Listener& val)
                         "local address is not a valid ipv6 address"};
                 }
 
+                // NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
                 auto out = ParsedListener{
                     CString{"tcp://[", alloc}
                         .append(local->to_string())
                         .append("]:")
                         .append(std::to_string(blockchain::otdht_listen_port_)),
                     std::make_pair(val.external_type_, val.external_address_)};
+                // NOLINTEND(clang-analyzer-cplusplus.StringChecker)
                 const auto bytes = external->to_v6().to_bytes();
                 std::get<1>(out).second.Assign(bytes.data(), bytes.size());
 
@@ -702,6 +705,7 @@ auto Node::Actor::process_blockchain_external(
                 queued.MoveFrames(payload);
             }
             const auto& endpoint = external_endpoints_[index];
+            // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
             router_.SendDeferred([&]() {
                 using enum opentxs::blockchain::node::PeerManagerJobs;
                 auto out = zeromq::tagged_reply_to_message(
@@ -712,6 +716,7 @@ auto Node::Actor::process_blockchain_external(
 
                 return out;
             }());
+            // NOLINTEND(clang-analyzer-core.CallAndMessage)
         } else {
             // NOTE there is no peer manager for this chain so drop the message
         }

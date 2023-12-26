@@ -8,7 +8,6 @@ if(OT_BLOCKCHAIN_EXPORT)
     opentxs-common
     PRIVATE
       "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/Peer.hpp"
-      "${opentxs_SOURCE_DIR}/src/internal/network/blockchain/Types.hpp"
       "HasJob.cpp"
       "HasJob.hpp"
       "Imp.cpp"

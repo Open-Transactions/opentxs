@@ -9,9 +9,10 @@
 
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 
+// NOLINTBEGIN(misc-definitions-in-headers)
 namespace opentxs::otx::client::implementation
 {
 template <>
@@ -295,3 +296,4 @@ template StateMachine::BackgroundTask StateMachine::StartTask(
 template StateMachine::BackgroundTask StateMachine::StartTask(
     const WithdrawCashTask& params) const;
 }  // namespace opentxs::otx::client::implementation
+// NOLINTEND(misc-definitions-in-headers)

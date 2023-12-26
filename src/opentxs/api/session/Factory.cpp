@@ -5,6 +5,7 @@
 
 #include "opentxs/api/session/Factory.hpp"  // IWYU pragma: associated
 
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -13,7 +14,6 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
@@ -31,11 +31,11 @@
 #include "opentxs/core/contract/peer/request/Outbailment.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
 #include "opentxs/core/contract/peer/request/Verification.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/Verification.hpp"
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: keep
@@ -520,7 +520,7 @@ auto Factory::PasswordPrompt(const opentxs::PasswordPrompt& rhs) const
 
 auto Factory::PaymentCode(
     const opentxs::crypto::SeedID& seed,
-    const Bip32Index nym,
+    const opentxs::crypto::Bip32Index nym,
     const std::uint8_t version,
     const opentxs::PasswordPrompt& reason,
     const bool bitmessage,

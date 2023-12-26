@@ -37,7 +37,7 @@ void DealerReply::dealerSocketThread(const ot::UnallocatedCString& msg)
         [this, &replyProcessed](zmq::Message&& input) -> void {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 

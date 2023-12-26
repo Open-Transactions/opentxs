@@ -14,7 +14,7 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Verification.hpp"
 
 namespace opentxs::contract::peer::reply::verification

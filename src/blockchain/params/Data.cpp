@@ -6,14 +6,15 @@
 #include "blockchain/params/Data.hpp"  // IWYU pragma: associated
 
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"                   // IWYU pragma: keep
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/blockchain/cfilter/FilterType.hpp"   // IWYU pragma: keep
-#include "opentxs/blockchain/crypto/AddressStyle.hpp"  // IWYU pragma: keep
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"                       // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"                    // IWYU pragma: keep
+#include "opentxs/blockchain/cfilter/FilterType.hpp"       // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/AddressStyle.hpp"      // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"         // IWYU pragma: keep
+#include "opentxs/identifier/Account.hpp"                  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Protocol.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/Subchain.hpp"         // IWYU pragma: keep
 #include "opentxs/network/blockchain/bitcoin/Service.hpp"  // IWYU pragma: keep
@@ -25,7 +26,7 @@ using namespace std::literals;
 
 auto Chains() noexcept -> const ChainMap&
 {
-    using enum Bip44Type;
+    using enum crypto::Bip44Type;
     using enum blockchain::Category;
     using enum cfilter::Type;
     using enum crypto::AddressStyle;

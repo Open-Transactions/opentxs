@@ -7,6 +7,8 @@
 
 #include "internal/util/Exclusive.hpp"  // IWYU pragma: associated
 
+#include <utility>
+
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -57,7 +59,7 @@ auto Exclusive<C>::operator=(Exclusive&& rhs) noexcept -> Exclusive<C>&
 {
     p_ = rhs.p_;
     rhs.p_ = nullptr;
-    lock_.reset(rhs.lock_.release());
+    lock_ = std::move(rhs.lock_);
     save_ = rhs.save_;
     rhs.save_ = Save{nullptr};
     success_.store(rhs.success_.load());

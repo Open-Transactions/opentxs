@@ -15,14 +15,14 @@
 #include <stdexcept>
 #include <utility>
 
+#include "opentxs/BlockchainProfile.hpp"  // IWYU pragma: keep
+#include "opentxs/ConnectionMode.hpp"     // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
-#include "opentxs/util/ConnectionMode.hpp"     // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace po = boost::program_options;
 

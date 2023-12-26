@@ -18,7 +18,7 @@
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
@@ -267,7 +267,7 @@ auto Section::AddItem(const std::shared_ptr<Item>& item) const -> Section
     if (specialCaseScope) { return imp_->add_scope(item); }
 
     const auto& groupID = item->Type();
-    const bool groupExists = imp_->groups_.count(groupID);
+    const bool groupExists = imp_->groups_.contains(groupID);
     auto map = imp_->groups_;
 
     if (groupExists) {

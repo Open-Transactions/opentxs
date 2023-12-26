@@ -5,8 +5,6 @@
 
 #include "blockchain/node/manager/Actor.hpp"  // IWYU pragma: associated
 
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
 #include <chrono>
 #include <iomanip>
 #include <span>
@@ -22,16 +20,16 @@
 #include "internal/blockchain/node/Endpoints.hpp"
 #include "internal/blockchain/node/Manager.hpp"
 #include "internal/blockchain/node/Mempool.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
-#include "internal/network/blockchain/Types.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -48,6 +46,8 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Types.internal.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/otdht/Base.hpp"
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/Data.hpp"
@@ -61,39 +61,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
-
-namespace opentxs::blockchain::node
-{
-using namespace std::literals;
-
-auto print(ManagerJobs in) noexcept -> std::string_view
-{
-    using enum ManagerJobs;
-    static constexpr auto map =
-        frozen::make_unordered_map<ManagerJobs, std::string_view>({
-            {shutdown, "shutdown"sv},
-            {sync_reply, "sync_reply"sv},
-            {sync_new_block, "sync_new_block"sv},
-            {heartbeat, "heartbeat"sv},
-            {start_wallet, "start_wallet"sv},
-            {init, "init"sv},
-            {filter_update, "filter_update"sv},
-            {statemachine, "statemachine"sv},
-        });
-
-    if (const auto* i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-        LogAbort()(__FUNCTION__)(": invalid node::ManagerJobs: ")(
-            static_cast<OTZMQWorkType>(in))
-            .Abort();
-    }
-}
-}  // namespace opentxs::blockchain::node
 
 namespace opentxs::blockchain::node::manager
 {

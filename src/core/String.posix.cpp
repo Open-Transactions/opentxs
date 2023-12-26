@@ -26,14 +26,14 @@ auto String::tokenize_basic(
     if (!Exists()) { return true; }
 
     const char* txt = Get();
-    UnallocatedCString buf = txt;
+    const UnallocatedCString buf = txt;
     for (std::int32_t i = 0; txt[i] != 0;) {
         while (txt[i] == ' ') { i++; }
         std::int32_t k = i;
         std::int32_t k2{};
         if (txt[i] == '\'' || txt[i] == '"') {
             // quoted string
-            char quote = txt[i++];
+            const char quote = txt[i++];
             k = i;
             while (txt[i] != quote && txt[i] != 0) { i++; }
             if (txt[i] != quote) {
@@ -53,7 +53,7 @@ auto String::tokenize_basic(
         std::int32_t v2{};
         if (txt[i] == '\'' || txt[i] == '"') {
             // quoted string
-            char quote = txt[i++];
+            const char quote = txt[i++];
             v = i;
             while (txt[i] != quote && txt[i] != 0) { i++; }
             if (txt[i] != quote) {

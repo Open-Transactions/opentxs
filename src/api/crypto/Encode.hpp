@@ -13,8 +13,8 @@
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/core/String.hpp"
 #include "internal/util/Bytes.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

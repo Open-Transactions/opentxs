@@ -7,11 +7,11 @@
 
 #include "interface/ui/base/List.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

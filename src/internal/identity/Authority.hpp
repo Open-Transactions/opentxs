@@ -9,10 +9,12 @@
 
 #include "internal/core/String.hpp"
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/identity/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/util/Numbers.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -112,24 +114,24 @@ public:
         Serialized& serialized,
         const CredentialIndexModeFlag mode) const -> bool = 0;
     virtual auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         crypto::HashType hash,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         proto::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
-        const GetPreimage input,
+        const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         crypto::HashType hash,

@@ -16,8 +16,6 @@
 #include "internal/util/Pimpl.hpp"
 #include "ottest/fixtures/crypto/Envelope.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace opentxs::literals;

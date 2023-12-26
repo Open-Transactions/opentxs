@@ -32,9 +32,9 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep
@@ -661,7 +661,7 @@ auto Data::BestEmail() const -> UnallocatedCString
         Group(claim::SectionType::Communication, claim::ClaimType::Email);
 
     if (group) {
-        std::shared_ptr<Item> best = group->Best();
+        const std::shared_ptr<Item> best = group->Best();
 
         if (best) { bestEmail = best->Value(); }
     }
@@ -677,7 +677,7 @@ auto Data::BestPhoneNumber() const -> UnallocatedCString
         Group(claim::SectionType::Communication, claim::ClaimType::Phone);
 
     if (group) {
-        std::shared_ptr<Item> best = group->Best();
+        const std::shared_ptr<Item> best = group->Best();
 
         if (best) { bestEmail = best->Value(); }
     }
@@ -692,7 +692,7 @@ auto Data::BestSocialMediaProfile(const claim::ClaimType type) const
 
     auto group = Group(claim::SectionType::Profile, type);
     if (group) {
-        std::shared_ptr<Item> best = group->Best();
+        const std::shared_ptr<Item> best = group->Best();
 
         if (best) { bestProfile = best->Value(); }
     }

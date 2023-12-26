@@ -11,7 +11,6 @@
 #include "internal/core/Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/otx/blind/Types.hpp"
 #include "internal/util/Time.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -21,6 +20,7 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/otx/blind/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -79,8 +79,8 @@ Token::Token(
     : Token(
           api,
           purse,
-          translate(in.state()),
-          translate(in.type()),
+          opentxs::translate(in.state()),
+          opentxs::translate(in.type()),
           api.Factory().NotaryIDFromBase58(in.notary()),
           api.Factory().UnitIDFromBase58(in.mint()),
           in.series(),
@@ -151,8 +151,8 @@ auto Token::reencrypt(
 auto Token::Serialize(proto::Token& output) const noexcept -> bool
 {
     output.set_version(version_);
-    output.set_type(translate(type_));
-    output.set_state(translate(state_));
+    output.set_type(opentxs::translate(type_));
+    output.set_state(opentxs::translate(state_));
     output.set_notary(notary_.asBase58(api_.Crypto()));
     output.set_mint(unit_.asBase58(api_.Crypto()));
     output.set_series(series_);

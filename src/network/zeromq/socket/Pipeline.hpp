@@ -146,7 +146,7 @@ private:
     const boost::unordered_flat_set<
         std::size_t,
         std::hash<std::size_t>,
-        std::equal_to<std::size_t>,
+        std::equal_to<>,
         alloc::PMR<std::size_t>>
         external_;
 

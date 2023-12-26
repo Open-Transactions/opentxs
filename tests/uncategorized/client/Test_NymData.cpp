@@ -19,8 +19,6 @@
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "ottest/fixtures/client/NymData.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 static const ot::UnallocatedCString paymentCode{
@@ -129,7 +127,7 @@ TEST_F(NymData, BestEmail)
     added = nym_data_.AddEmail("email2", false, true, reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString email = nym_data_.BestEmail();
+    const ot::UnallocatedCString email = nym_data_.BestEmail();
     // First email added is made primary.
     EXPECT_STREQ("email1", email.c_str());
 }
@@ -142,7 +140,7 @@ TEST_F(NymData, BestPhoneNumber)
     added = nym_data_.AddPhoneNumber("phone2", false, true, reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString phone = nym_data_.BestPhoneNumber();
+    const ot::UnallocatedCString phone = nym_data_.BestPhoneNumber();
     // First phone number added is made primary.
     EXPECT_STREQ("phone1", phone.c_str());
 }
@@ -165,7 +163,7 @@ TEST_F(NymData, BestSocialMediaProfile)
         reason_);
     EXPECT_TRUE(added);
 
-    ot::UnallocatedCString profile = nym_data_.BestSocialMediaProfile(
+    const ot::UnallocatedCString profile = nym_data_.BestSocialMediaProfile(
         ot::identity::wot::claim::ClaimType::Yahoo);
     // First profile added is made primary.
     EXPECT_STREQ("profile1", profile.c_str());
@@ -177,7 +175,7 @@ TEST_F(NymData, Claims)
     const auto expected =
         ExpectedStringOutput(nym_data_.Nym().ContactDataVersion());
 
-    ot::UnallocatedCString output = contactData;
+    const ot::UnallocatedCString output = contactData;
     EXPECT_TRUE(!output.empty());
     EXPECT_STREQ(expected.c_str(), output.c_str());
 }

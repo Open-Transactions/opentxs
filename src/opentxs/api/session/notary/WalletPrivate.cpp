@@ -23,9 +23,9 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/ConsensusType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
@@ -148,7 +148,7 @@ auto WalletPrivate::mutable_ClientContext(
     auto handle = context_map_.lock();
     auto& map = *handle;
     auto base = context(serverNymID, remoteNymID, map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };
@@ -193,7 +193,7 @@ auto WalletPrivate::mutable_Context(
     auto handle = context_map_.lock();
     auto& map = *handle;
     auto base = context(server_.NymID(), clientNymID, map);
-    std::function<void(otx::context::Base*)> callback =
+    const std::function<void(otx::context::Base*)> callback =
         [&](otx::context::Base* in) -> void {
         this->save(reason, dynamic_cast<otx::context::internal::Base*>(in));
     };

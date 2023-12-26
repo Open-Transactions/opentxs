@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto
 {
-enum class ParameterType : std::uint8_t {
+enum class ParameterType : std::underlying_type_t<ParameterType> {
     invalid = 0,
     rsa = 1,
     secp256k1 = 2,

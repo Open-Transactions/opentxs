@@ -13,17 +13,16 @@
 #include <span>
 #include <string_view>
 
-#include "internal/core/contract/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

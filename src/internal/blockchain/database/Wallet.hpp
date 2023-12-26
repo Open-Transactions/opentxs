@@ -12,11 +12,11 @@
 #include <tuple>
 
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -137,7 +137,7 @@ public:
         -> UnallocatedSet<identifier::Generic> = 0;
     virtual auto PublishBalance() const noexcept -> void = 0;
     virtual auto SubchainLastIndexed(const SubchainID& index) const noexcept
-        -> std::optional<Bip32Index> = 0;
+        -> std::optional<crypto::Bip32Index> = 0;
     virtual auto SubchainLastScanned(const SubchainID& index) const noexcept
         -> block::Position = 0;
 

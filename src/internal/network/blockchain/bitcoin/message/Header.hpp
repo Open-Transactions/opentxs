@@ -10,8 +10,8 @@
 
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

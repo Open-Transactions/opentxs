@@ -31,7 +31,6 @@
 #include "blockchain/database/wallet/Proposal.hpp"
 #include "blockchain/database/wallet/Subchain.hpp"  // IWYU pragma: keep
 #include "internal/api/crypto/Blockchain.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
@@ -41,6 +40,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -54,6 +54,7 @@
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
@@ -64,17 +65,17 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::database::wallet
 {
@@ -1305,6 +1306,7 @@ auto Output::publish_balance(const OutputCache& cache) const noexcept -> void
     }());
 
     for (const auto& [nym, balance] : byNym) {
+        // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
         handle->SendDeferred([&]() {
             auto out = MakeWork(OT_ZMQ_BALANCE_ORACLE_SUBMIT);
             out.AddFrame(chain_);
@@ -1314,6 +1316,7 @@ auto Output::publish_balance(const OutputCache& cache) const noexcept -> void
 
             return out;
         }());
+        // NOLINTEND(clang-analyzer-core.CallAndMessage)
     }
 }
 

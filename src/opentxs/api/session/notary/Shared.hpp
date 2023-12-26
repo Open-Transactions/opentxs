@@ -14,7 +14,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/api/session/notary/Types.internal.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocated.hpp"

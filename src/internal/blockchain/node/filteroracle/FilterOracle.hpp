@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "internal/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

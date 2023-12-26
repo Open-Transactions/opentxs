@@ -12,7 +12,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -32,9 +31,10 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStorage.hpp"
@@ -333,7 +333,7 @@ auto OTCronItem::EraseActiveCronReceipt(
                     .Flush();
                 return false;
             } else {
-                bool bSaved = OTDB::StorePlainString(
+                const bool bSaved = OTDB::StorePlainString(
                     api,
                     strFinal->Get(),
                     dataFolder,
@@ -461,7 +461,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
                 return false;
             }
 
-            bool bSaved = OTDB::StorePlainString(
+            const bool bSaved = OTDB::StorePlainString(
                 api_,
                 strFinal->Get(),
                 api_.DataFolder().string(),
@@ -489,7 +489,7 @@ auto OTCronItem::SaveActiveCronReceipt(const identifier::Nym& theNymID)
         return false;
     }
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strFinal->Get(),
         api_.DataFolder().string(),
@@ -545,7 +545,7 @@ auto OTCronItem::SaveCronReceipt() -> bool
         return false;
     }
 
-    bool bSaved = OTDB::StorePlainString(
+    const bool bSaved = OTDB::StorePlainString(
         api_,
         strFinal->Get(),
         api_.DataFolder().string(),
@@ -818,7 +818,8 @@ void OTCronItem::HookRemovalFromCron(
         // signatures on it.)
         //
         {
-            bool bValidSignture = pOrigCronItem->VerifySignature(*pServerNym);
+            const bool bValidSignture =
+                pOrigCronItem->VerifySignature(*pServerNym);
             if (!bValidSignture) {
                 LogError()()("Failure verifying signature of "
                              "server on Cron Item!")
@@ -926,7 +927,7 @@ void OTCronItem::onFinalReceipt(
     // (With the SERVER's signature on it!)
     //
     auto strUpdatedCronItem = String::Factory(*this);
-    OTString pstrAttachment = strUpdatedCronItem;
+    const OTString pstrAttachment = strUpdatedCronItem;
 
     const auto strOrigCronItem = String::Factory(theOrigCronItem);
 
@@ -1032,7 +1033,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
     const std::int64_t& lNewTransactionNumber,
     const std::int64_t& lClosingNumber,
     const String& strOrigCronItem,
-    const originType theOriginType,
+    const otx::originType theOriginType,
     const PasswordPrompt& reason,
     OTString pstrNote,
     OTString pstrAttachment) -> bool
@@ -1071,7 +1072,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
 
         auto pTrans1{api_.Factory().Internal().Session().Transaction(
             *theInbox,
-            transactionType::finalReceipt,
+            otx::transactionType::finalReceipt,
             theOriginType,
             lNewTransactionNumber)};
 
@@ -1084,7 +1085,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api_.Factory().Internal().Session().Item(
-            *pTrans1, itemType::finalReceipt, identifier::Account{})};
+            *pTrans1, otx::itemType::finalReceipt, identifier::Account{})};
 
         assert_true(false != bool(pItem1));
 
@@ -1141,7 +1142,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
         pItem1->SignContract(pServerNym, reason);
         pItem1->SaveContract();
 
-        std::shared_ptr<Item> item1{pItem1.release()};
+        const std::shared_ptr<Item> item1{pItem1.release()};
         pTrans1->AddItem(item1);
 
         pTrans1->SignContract(pServerNym, reason);
@@ -1149,7 +1150,7 @@ auto OTCronItem::DropFinalReceiptToInbox(
 
         // Here the transaction we just created is actually added to the
         // ledger.
-        std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
+        const std::shared_ptr<OTTransaction> trans1{pTrans1.release()};
         theInbox->AddTransaction(trans1);
 
         // Release any signatures that were there before (They won't
@@ -1210,14 +1211,14 @@ auto OTCronItem::DropFinalReceiptToNymbox(
     const identifier::Nym& NYM_ID,
     const TransactionNumber& lNewTransactionNumber,
     const String& strOrigCronItem,
-    const originType theOriginType,
+    const otx::originType theOriginType,
     const PasswordPrompt& reason,
     OTString pstrNote,
     OTString pstrAttachment) -> bool
 {
     assert_false(nullptr == server_nym_);
 
-    Nym_p pServerNym(server_nym_);
+    const Nym_p pServerNym(server_nym_);
 
     auto theLedger{api_.Factory().Internal().Session().Ledger(
         NYM_ID, NYM_ID, GetNotaryID())};
@@ -1247,7 +1248,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
 
     auto pTransaction{api_.Factory().Internal().Session().Transaction(
         *theLedger,
-        transactionType::finalReceipt,
+        otx::transactionType::finalReceipt,
         theOriginType,
         lNewTransactionNumber)};
 
@@ -1261,7 +1262,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
         // set up the transaction items (each transaction may have multiple
         // items... but not in this case.)
         auto pItem1{api_.Factory().Internal().Session().Item(
-            *pTransaction, itemType::finalReceipt, identifier::Account{})};
+            *pTransaction, otx::itemType::finalReceipt, identifier::Account{})};
 
         assert_true(false != bool(pItem1));
 
@@ -1326,7 +1327,7 @@ auto OTCronItem::DropFinalReceiptToNymbox(
         pItem1->SignContract(*pServerNym, reason);
         pItem1->SaveContract();
 
-        std::shared_ptr<Item> item1{pItem1.release()};
+        const std::shared_ptr<Item> item1{pItem1.release()};
         pTransaction->AddItem(item1);
 
         pTransaction->SignContract(*pServerNym, reason);
@@ -1334,7 +1335,8 @@ auto OTCronItem::DropFinalReceiptToNymbox(
 
         // Here the transaction we just created is actually added to the
         // ledger.
-        std::shared_ptr<OTTransaction> transaction{pTransaction.release()};
+        const std::shared_ptr<OTTransaction> transaction{
+            pTransaction.release()};
         theLedger->AddTransaction(transaction);
 
         // Release any signatures that were there before (They won't

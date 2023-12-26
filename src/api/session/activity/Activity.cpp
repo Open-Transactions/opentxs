@@ -35,6 +35,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
@@ -55,10 +56,10 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
@@ -67,7 +68,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::factory
@@ -292,7 +292,7 @@ auto Activity::Cheque(
     }
 
     auto instantiated = session::Workflow::InstantiateCheque(api_, workflow);
-    cheque.reset(std::get<1>(instantiated).release());
+    cheque = std::move(std::get<1>(instantiated));
 
     assert_false(nullptr == cheque);
 
@@ -350,7 +350,7 @@ auto Activity::Transfer(
     }
 
     auto instantiated = session::Workflow::InstantiateTransfer(api_, workflow);
-    transfer.reset(std::get<1>(instantiated).release());
+    transfer = std::move(std::get<1>(instantiated));
 
     assert_false(nullptr == transfer);
 
@@ -408,7 +408,7 @@ auto Activity::get_publisher(
     -> const opentxs::network::zeromq::socket::Publish&
 {
     endpoint = api_.Endpoints().ThreadUpdate(nymID.asBase58(api_.Crypto()));
-    Lock lock(publisher_lock_);
+    const auto lock = Lock{publisher_lock_};
     auto it = thread_publishers_.find(nymID);
 
     if (thread_publishers_.end() != it) { return it->second; }

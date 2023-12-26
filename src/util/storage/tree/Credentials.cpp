@@ -20,13 +20,13 @@
 #include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/core/FixedByteArray.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -125,7 +125,7 @@ auto Credentials::Load(
     std::shared_ptr<proto::Credential>& cred,
     ErrorReporting checking) const -> bool
 {
-    std::lock_guard<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const bool exists = (item_map_.end() != item_map_.find(id));
 
     if (false == exists) {
@@ -191,7 +191,7 @@ auto Credentials::SetAlias(
 auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
     -> bool
 {
-    std::unique_lock<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto id = factory_.Internal().Identifier(cred.id());
     const bool existingKey = (item_map_.end() != item_map_.find(id));
     const bool incomingPrivate = (proto::KEYMODE_PRIVATE == cred.mode());

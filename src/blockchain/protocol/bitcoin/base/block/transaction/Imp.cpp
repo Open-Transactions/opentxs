@@ -50,9 +50,10 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Algorithm.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Algorithm.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

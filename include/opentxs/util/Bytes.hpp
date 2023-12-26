@@ -10,9 +10,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

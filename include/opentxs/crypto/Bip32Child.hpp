@@ -5,15 +5,16 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/crypto/Types.hpp"
+#include <type_traits>
 
-namespace opentxs
+#include "opentxs/crypto/Types.hpp"  // IWYU pragma: keep
+
+namespace opentxs::crypto
 {
-enum class Bip32Child : Bip32Index {
+enum class Bip32Child : std::underlying_type_t<Bip32Child> {
     AUTH_KEY = 0x41555448,
     ENCRYPT_KEY = 0x454e4352,
     SIGN_KEY = 0x5349474e,
     HARDENED = 0x80000000,
 };
-}  // namespace opentxs
+}  // namespace opentxs::crypto

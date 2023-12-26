@@ -12,10 +12,10 @@
 #include "crypto/library/EcdsaProvider.hpp"
 #include "internal/api/crypto/Util.hpp"
 #include "internal/crypto/library/Sodium.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

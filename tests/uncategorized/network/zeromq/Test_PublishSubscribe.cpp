@@ -65,7 +65,7 @@ TEST_F(PublishSubscribe, Publish_Subscribe)
 
     ASSERT_TRUE(set);
 
-    bool sent = publishSocket->Send([&] {
+    const bool sent = publishSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
         out.AddFrame(test_message_);
 
@@ -115,7 +115,7 @@ TEST_F(PublishSubscribe, Publish_1_Subscribe_2)
 
     ASSERT_EQ(subscribe_thread_count_, subscribe_thread_started_count_);
 
-    bool sent = publishSocket->Send([&] {
+    const bool sent = publishSocket->Send([&] {
         auto out = opentxs::network::zeromq::Message{};
         out.AddFrame(test_message_);
 
@@ -152,7 +152,7 @@ TEST_F(PublishSubscribe, Publish_2_Subscribe_1)
         [this](ot::network::zeromq::Message&& input) -> void {
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message_ || inputString == test_message2_;
             EXPECT_TRUE(match);
             ++callback_finished_count_;

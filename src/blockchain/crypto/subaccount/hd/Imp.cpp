@@ -18,7 +18,6 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -26,18 +25,20 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Storage.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
+#include "opentxs/blockchain/crypto/Bip44Subchain.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/SubaccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -192,8 +193,8 @@ auto HDPrivate::PrivateKey(
         return opentxs::crypto::asymmetric::key::EllipticCurve::Blank();
     }
 
-    const auto change =
-        (internal_type_ == type) ? INTERNAL_CHAIN : EXTERNAL_CHAIN;
+    using enum Bip44Subchain;
+    const auto change = (internal_type_ == type) ? internal : external;
     auto& key = (internal_type_ == type) ? cached_internal_ : cached_external_;
     auto lock = rLock{lock_};
 

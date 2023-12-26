@@ -38,7 +38,7 @@ auto CheckProto_1(
     bool expectMasterSignature = false;
     bool expectSourceSignature = false;
     std::int32_t expectedSigCount = 1;  // public self-signature
-    bool checkRole = (CREDROLE_ERROR != role);
+    const bool checkRole = (CREDROLE_ERROR != role);
 
     CHECK_SUBOBJECT(id, CredentialAllowedIdentifier());
     CHECK_EXISTS(type);
@@ -55,19 +55,19 @@ auto CheckProto_1(
 
     CHECK_EXISTS(role);
 
-    CredentialRole actualRole = input.role();
+    const CredentialRole actualRole = input.role();
 
     if (checkRole && (role != actualRole)) {
         FAIL_2("incorrect role", input.role());
     }
 
-    bool masterCredential = (CREDROLE_MASTERKEY == actualRole);
-    bool childKeyCredential = (CREDROLE_CHILDKEY == actualRole);
-    bool keyCredential = (masterCredential || childKeyCredential);
-    bool contactCredential = (CREDROLE_CONTACT == actualRole);
-    bool verifyCredential = (CREDROLE_VERIFY == actualRole);
-    bool metadataContainer = (contactCredential || verifyCredential);
-    bool knownRole = (keyCredential || metadataContainer);
+    const bool masterCredential = (CREDROLE_MASTERKEY == actualRole);
+    const bool childKeyCredential = (CREDROLE_CHILDKEY == actualRole);
+    const bool keyCredential = (masterCredential || childKeyCredential);
+    const bool contactCredential = (CREDROLE_CONTACT == actualRole);
+    const bool verifyCredential = (CREDROLE_VERIFY == actualRole);
+    const bool metadataContainer = (contactCredential || verifyCredential);
+    const bool knownRole = (keyCredential || metadataContainer);
 
     if (childKeyCredential) {
         expectedSigCount++;  // master signature

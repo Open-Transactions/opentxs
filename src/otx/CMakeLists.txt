@@ -10,24 +10,14 @@ add_subdirectory(consensus)
 add_subdirectory(server)
 add_subdirectory(smartcontract)
 
-libopentxs_add_public_header("otx" "ConsensusType.hpp")
-libopentxs_add_public_header("otx" "LastReplyStatus.hpp")
-libopentxs_add_public_header("otx" "OTXPushType.hpp")
-libopentxs_add_public_header("otx" "OperationType.hpp")
 libopentxs_add_public_header("otx" "Reply.hpp")
 libopentxs_add_public_header("otx" "Request.hpp")
-libopentxs_add_public_header("otx" "ServerReplyType.hpp")
-libopentxs_add_public_header("otx" "ServerRequestType.hpp")
-libopentxs_add_public_header("otx" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
     "${opentxs_SOURCE_DIR}/src/internal/otx/AccountList.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/otx/OTX.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/otx/Types.hpp"
     "AccountList.cpp"
-    "OTX.cpp"
     "Reply.cpp"
     "Reply.hpp"
     "Request.cpp"

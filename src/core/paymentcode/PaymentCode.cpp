@@ -11,10 +11,10 @@
 
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/key/HD.hpp"             // IWYU pragma: keep
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -25,7 +25,7 @@ PaymentCode::Imp::Imp() noexcept = default;
 
 auto PaymentCode::Imp::AddPrivateKeys(
     const crypto::SeedID&,
-    const Bip32Index,
+    const crypto::Bip32Index,
     const opentxs::PasswordPrompt&) noexcept -> bool
 {
     return {};
@@ -87,7 +87,7 @@ auto PaymentCode::Imp::ID() const noexcept -> const identifier::Nym&
 }
 auto PaymentCode::Imp::Incoming(
     const opentxs::PaymentCode&,
-    const Bip32Index,
+    const crypto::Bip32Index,
     const blockchain::Type,
     const opentxs::PasswordPrompt&,
     const std::uint8_t) const noexcept -> crypto::asymmetric::key::EllipticCurve
@@ -115,7 +115,7 @@ auto PaymentCode::Imp::operator==(const proto::PaymentCode&) const noexcept
 
 auto PaymentCode::Imp::Outgoing(
     const opentxs::PaymentCode&,
-    const Bip32Index,
+    const crypto::Bip32Index,
     const blockchain::Type,
     const opentxs::PasswordPrompt&,
     const std::uint8_t) const noexcept -> crypto::asymmetric::key::EllipticCurve
@@ -301,7 +301,7 @@ auto PaymentCode::Internal() noexcept -> internal::PaymentCode&
 
 auto PaymentCode::Incoming(
     const PaymentCode& sender,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept
@@ -323,7 +323,7 @@ auto PaymentCode::Locator(Writer&& destination, const std::uint8_t version)
 
 auto PaymentCode::Outgoing(
     const PaymentCode& recipient,
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const blockchain::Type chain,
     const opentxs::PasswordPrompt& reason,
     const std::uint8_t version) const noexcept

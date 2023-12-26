@@ -47,11 +47,13 @@ auto RSA::Blank() noexcept -> RSA&
 
 auto RSA::operator=(const RSA& rhs) noexcept -> RSA&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Key>(*this, rhs);
 }
 
 auto RSA::operator=(RSA&& rhs) noexcept -> RSA&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Key>(*this, std::move(rhs));
 }
 

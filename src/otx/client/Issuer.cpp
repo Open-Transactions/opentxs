@@ -16,7 +16,6 @@
 #include <string_view>
 
 #include "internal/core/String.hpp"
-#include "internal/core/contract/peer/Types.hpp"
 #include "internal/otx/client/Factory.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
@@ -27,6 +26,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
+#include "opentxs/contract/peer/Types.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
@@ -36,8 +36,8 @@
 #include "opentxs/core/contract/peer/reply/Connection.hpp"
 #include "opentxs/core/contract/peer/request/Bailment.hpp"
 #include "opentxs/core/contract/peer/request/Connection.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
@@ -114,7 +114,7 @@ Issuer::Issuer(
     , account_map_()
     , peer_requests_()
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     for (const auto& it : serialized.accounts()) {
         const auto& type = it.type();
@@ -140,7 +140,7 @@ Issuer::Issuer(
 
 auto Issuer::toString() const -> UnallocatedCString
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     std::stringstream output{};
     output << "Connected issuer: " << issuer_id_.asBase58(crypto_) << "\n";
 
@@ -237,7 +237,7 @@ auto Issuer::AccountList(
     const identifier::UnitDefinition& unitID) const
     -> UnallocatedSet<identifier::Account>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     UnallocatedSet<identifier::Account> output;
     auto accountSet = account_map_.find(type);
     const bool allUnits = unitID.empty();
@@ -256,7 +256,7 @@ void Issuer::AddAccount(
     const identifier::UnitDefinition& unitID,
     const identifier::Account& accountID)
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     account_map_[type].emplace(unitID, accountID);
 }
 
@@ -289,7 +289,7 @@ auto Issuer::AddReply(
     const identifier::Generic& requestID,
     const identifier::Generic& replyID) -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto [found, it] = find_request(lock, type, requestID);
     auto& [reply, used] = it->second;
 
@@ -309,7 +309,7 @@ auto Issuer::AddRequest(
     const contract::peer::RequestType type,
     const identifier::Generic& requestID) -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     // ReplyID is blank because we don't know it yet.
     auto replyID = identifier::Generic{};
 
@@ -322,7 +322,7 @@ auto Issuer::BailmentInitiated(const identifier::UnitDefinition& unitID) const
     LogVerbose()()("Searching for initiated bailment requests for unit ")(
         unitID, crypto_)
         .Flush();
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     std::size_t count{0};
     const auto requests = get_requests(
         lock, contract::peer::RequestType::Bailment, RequestStatus::Requested);
@@ -365,7 +365,7 @@ auto Issuer::BailmentInstructions(
     const identifier::UnitDefinition& unitID,
     const bool onlyUnused) const -> UnallocatedVector<Issuer::BailmentDetails>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     UnallocatedVector<BailmentDetails> output{};
     const auto replies = get_requests(
         lock,
@@ -418,7 +418,7 @@ auto Issuer::ConnectionInfo(
     LogVerbose()()("Searching for type ")(static_cast<std::uint32_t>(type))(
         " connection info requests (which have replies).")
         .Flush();
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     UnallocatedVector<ConnectionDetails> output{};
     const auto replies = get_requests(
         lock,
@@ -477,7 +477,7 @@ auto Issuer::ConnectionInfoInitiated(
     LogVerbose()()("Searching for all type ")(static_cast<std::uint32_t>(type))(
         " connection info requests.")
         .Flush();
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     std::size_t count{0};
     const auto requests = get_requests(
         lock, contract::peer::RequestType::ConnectionInfo, RequestStatus::All);
@@ -531,7 +531,7 @@ auto Issuer::GetRequests(
     -> UnallocatedSet<
         std::tuple<identifier::Generic, identifier::Generic, bool>>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return get_requests(lock, type, state);
 }
@@ -597,7 +597,7 @@ auto Issuer::PairingCode() const -> const UnallocatedCString&
 
 auto Issuer::PrimaryServer() const -> identifier::Notary
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     auto nym = wallet_.Nym(issuer_id_);
 
@@ -611,7 +611,7 @@ auto Issuer::RemoveAccount(
     const identifier::UnitDefinition& unitID,
     const identifier::Account& accountID) -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto accountSet = account_map_.find(type);
 
     if (account_map_.end() == accountSet) { return false; }
@@ -627,7 +627,7 @@ auto Issuer::RemoveAccount(
 
 auto Issuer::RequestTypes() const -> UnallocatedSet<contract::peer::RequestType>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     UnallocatedSet<contract::peer::RequestType> output{};
 
     for (const auto& [type, map] : peer_requests_) {
@@ -640,7 +640,7 @@ auto Issuer::RequestTypes() const -> UnallocatedSet<contract::peer::RequestType>
 
 auto Issuer::Serialize(proto::Issuer& output) const -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     output.set_version(version_);
     output.set_id(issuer_id_.asBase58(crypto_));
     output.set_paired(paired_.get());
@@ -680,7 +680,7 @@ void Issuer::SetPaired(const bool paired) { paired_->Set(paired); }
 
 void Issuer::SetPairingCode(const UnallocatedCString& code)
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     pairing_code_ = code;
     paired_->On();
 }
@@ -690,7 +690,7 @@ auto Issuer::SetUsed(
     const identifier::Generic& requestID,
     const bool isUsed) -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto [found, it] = find_request(lock, type, requestID);
     auto& [reply, used] = it->second;
     const auto& notUsed [[maybe_unused]] = reply;
@@ -704,7 +704,7 @@ auto Issuer::SetUsed(
 
 auto Issuer::StoreSecretComplete() const -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto storeSecret = get_requests(
         lock, contract::peer::RequestType::StoreSecret, RequestStatus::Replied);
 
@@ -713,7 +713,7 @@ auto Issuer::StoreSecretComplete() const -> bool
 
 auto Issuer::StoreSecretInitiated() const -> bool
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto storeSecret = get_requests(
         lock, contract::peer::RequestType::StoreSecret, RequestStatus::All);
 

@@ -9,11 +9,11 @@
 
 #include <string_view>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/State.hpp"
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

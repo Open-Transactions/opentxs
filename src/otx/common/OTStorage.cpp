@@ -763,7 +763,7 @@ auto Storable::Create(StoredObjectType eType, PackType thePackType) -> Storable*
 
     // The Pack type, plus the Stored Object type, is the Key to the map of
     // function pointers.
-    InstantiateFuncKey theKey(thePackType, eType);
+    const InstantiateFuncKey theKey(thePackType, eType);
 
     // If the key works, we get the function pointer to the static Create()
     // method for
@@ -937,7 +937,7 @@ auto OTPacker::Unpack(PackedBuffer& inBuf, UnallocatedCString& outObj) -> bool
     auto scope Get##name(std::size_t nIndex) -> name*                          \
     {                                                                          \
         if (nIndex < list_##name##s.size()) {                                  \
-            PointerTo##name theP = list_##name##s.at(nIndex);                  \
+            const auto& theP = list_##name##s.at(nIndex);                      \
             return theP.get();                                                 \
         }                                                                      \
         return nullptr;                                                        \
@@ -954,8 +954,7 @@ auto OTPacker::Unpack(PackedBuffer& inBuf, UnallocatedCString& outObj) -> bool
                                                                                \
     auto scope Add##name(name& disownObject) -> bool                           \
     {                                                                          \
-        PointerTo##name theP(disownObject.clone());                            \
-        list_##name##s.push_back(theP);                                        \
+        list_##name##s.emplace_back(PointerTo##name{disownObject.clone()});    \
         return true;                                                           \
     }
 
@@ -1420,7 +1419,7 @@ void BufferPB::SetData(const std::uint8_t* pData, std::size_t theSize)
     for (auto it = list_##element_type##s.begin();                             \
          it != list_##element_type##s.end();                                   \
          ++it) {                                                               \
-        PointerTo##element_type thePtr = (*it);                                \
+        const auto& thePtr = *it;                                              \
         element_type##PB* pObject =                                            \
             dynamic_cast<element_type##PB*>(thePtr.get());                     \
         assert_false(nullptr == pObject);                                      \
@@ -1450,7 +1449,7 @@ void BufferPB::SetData(const std::uint8_t* pData, std::size_t theSize)
         assert_false(nullptr == pInternal);                                    \
         pInternal->CopyFrom(theInternal);                                      \
         pNewWrapper->hookAfterUnpack();                                        \
-        PointerTo##element_type thePtr(                                        \
+        const PointerTo##element_type thePtr(                                  \
             dynamic_cast<element_type*>(pNewWrapper));                         \
         list_##element_type##s.push_back(thePtr);                              \
     }
@@ -1947,7 +1946,7 @@ auto Storage::QueryString(
 
     // Below this point, responsible for pBuffer.
 
-    bool bSuccess = onQueryPackedBuffer(
+    const bool bSuccess = onQueryPackedBuffer(
         api, *pBuffer, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
@@ -1959,7 +1958,7 @@ auto Storage::QueryString(
     // We got the packed buffer back from the query!
     // Now let's unpack it and return the Storable object.
 
-    bool bUnpacked = pPacker->Unpack(*pBuffer, theString);
+    const bool bUnpacked = pPacker->Unpack(*pBuffer, theString);
 
     if (!bUnpacked) {
         delete pBuffer;
@@ -2034,7 +2033,7 @@ auto Storage::StoreObject(
         return false;
     }
 
-    bool bSuccess = onStorePackedBuffer(
+    const bool bSuccess = onStorePackedBuffer(
         api, *pBuffer, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
@@ -2080,7 +2079,7 @@ auto Storage::QueryObject(
 
     // Below this point, responsible for pBuffer AND pStorable.
 
-    bool bSuccess = onQueryPackedBuffer(
+    const bool bSuccess = onQueryPackedBuffer(
         api, *pBuffer, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
@@ -2093,7 +2092,7 @@ auto Storage::QueryObject(
     // We got the packed buffer back from the query!
     // Now let's unpack it and return the Storable object.
 
-    bool bUnpacked = pPacker->Unpack(*pBuffer, *pStorable);
+    const bool bUnpacked = pPacker->Unpack(*pBuffer, *pStorable);
 
     if (!bUnpacked) {
         delete pBuffer;
@@ -2221,7 +2220,7 @@ auto Storage::EraseValueByKey(
     const UnallocatedCString& twoStr,
     const UnallocatedCString& threeStr) -> bool
 {
-    bool bSuccess =
+    const bool bSuccess =
         onEraseValueByKey(api, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (!bSuccess) {
@@ -2434,7 +2433,7 @@ auto StorageFS::onStorePackedBuffer(
     }
 
     ofs.clear();
-    bool bSuccess = theBuffer.WriteToOStream(ofs);
+    const bool bSuccess = theBuffer.WriteToOStream(ofs);
     ofs.close();
 
     // TODO: Remove the .lock file.
@@ -2453,7 +2452,7 @@ auto StorageFS::onQueryPackedBuffer(
 {
     UnallocatedCString strOutput;
 
-    std::int64_t lRet = ConstructAndConfirmPath(
+    const std::int64_t lRet = ConstructAndConfirmPath(
         api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (0 > lRet) {
@@ -2475,7 +2474,7 @@ auto StorageFS::onQueryPackedBuffer(
         return false;
     }
 
-    bool bSuccess = theBuffer.ReadFromIStream(fin, lRet);
+    const bool bSuccess = theBuffer.ReadFromIStream(fin, lRet);
 
     fin.close();
 
@@ -2523,7 +2522,7 @@ auto StorageFS::onStorePlainString(
 
     ofs.clear();
     ofs << theBuffer;
-    bool bSuccess = ofs.good();
+    const bool bSuccess = ofs.good();
     ofs.close();
 
     // TODO: Remove the .lock file.
@@ -2542,7 +2541,7 @@ auto StorageFS::onQueryPlainString(
 {
     UnallocatedCString strOutput;
 
-    std::int64_t lRet = ConstructAndConfirmPath(
+    const std::int64_t lRet = ConstructAndConfirmPath(
         api, strOutput, dataFolder, strFolder, oneStr, twoStr, threeStr);
 
     if (0 > lRet) {

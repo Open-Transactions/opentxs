@@ -22,9 +22,9 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -121,7 +121,7 @@ auto PayDividendVisitor::Trigger(
     TransactionNumber lNewTransactionNumber = 0;
     auto context = server_.API().Wallet().Internal().mutable_ClientContext(
         theServerNym.ID(), reason);
-    bool bGotNextTransNum =
+    const bool bGotNextTransNum =
         server_.GetTransactor().issueNextTransactionNumberToNym(
             context.get(), lNewTransactionNumber);  // We save the transaction
     // number on the server Nym (normally we'd discard it) because

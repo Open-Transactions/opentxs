@@ -18,6 +18,7 @@
 #include "internal/blockchain/node/Spend.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -32,7 +33,6 @@
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

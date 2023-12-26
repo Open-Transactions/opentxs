@@ -66,11 +66,13 @@ auto StoreSecret::Kind() const noexcept -> SecretType
 
 auto StoreSecret::operator=(const StoreSecret& rhs) noexcept -> StoreSecret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto StoreSecret::operator=(StoreSecret&& rhs) noexcept -> StoreSecret&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 

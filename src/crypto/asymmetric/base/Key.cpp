@@ -120,11 +120,13 @@ auto Key::MaxVersion() noexcept -> VersionNumber { return 2; }
 
 auto Key::operator=(const Key& rhs) noexcept -> Key&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Key::operator=(Key&& rhs) noexcept -> Key&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

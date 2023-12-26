@@ -10,8 +10,8 @@
 #include <string_view>
 
 #include "internal/interface/ui/AccountTreeItem.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 
 namespace opentxs::factory
 {

@@ -24,6 +24,8 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Endpoints.hpp"  // IWYU pragma: keep
@@ -32,14 +34,12 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
@@ -468,7 +468,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
 
     const auto balance = factory::Amount(body[2]);
     const auto oldBalance = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         const auto oldbalance = balance_;
         balance_ = balance;
@@ -483,7 +483,7 @@ auto CustodialAccountActivity::process_balance(const Message& message) noexcept
         return account.get().Alias();
     }();
     const auto aliasChanged = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         if (alias != alias_) {
             alias_ = alias;
@@ -515,7 +515,7 @@ auto CustodialAccountActivity::process_notary(const Message& message) noexcept
     const auto oldName = NotaryName();
     const auto newName = [&] {
         {
-            eLock lock{shared_lock_};
+            auto lock = eLock{shared_lock_};
             notary_ = api_.Wallet().Internal().Server(
                 api_.Storage().Internal().AccountServer(account_id_));
         }
@@ -573,7 +573,7 @@ auto CustodialAccountActivity::process_unit(const Message& message) noexcept
     wait_for_startup();
     // TODO currently it doesn't matter if the unit definition alias changes
     // since we don't use it
-    eLock lock{shared_lock_};
+    auto lock = eLock{shared_lock_};
     contract_ = api_.Wallet().Internal().UnitDefinition(
         api_.Storage().Internal().AccountContract(account_id_));
 }
@@ -588,7 +588,7 @@ auto CustodialAccountActivity::startup() noexcept -> void
         return account.get().Alias();
     }();
     const auto aliasChanged = [&] {
-        eLock lock(shared_lock_);
+        auto lock = eLock{shared_lock_};
 
         if (alias != alias_) {
             alias_ = alias;

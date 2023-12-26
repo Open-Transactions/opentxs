@@ -11,6 +11,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "opentxs/core/Amount.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
 

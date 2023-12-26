@@ -16,56 +16,22 @@ find_package(
     system
     thread
   OPTIONAL_COMPONENTS
-    align
-    any
-    array
-    assert
-    atomic
-    bind
-    chrono
+    algorithm
+    asio
+    beast
     circular_buffer
-    concept_check
-    config
-    container_hash
-    context
-    core
-    coroutine
-    describe
-    detail
-    exception
-    function
-    fusion
-    integer
-    io
-    iterator
-    lexical_cast
-    logic
-    math
-    mp11
-    mpl
-    numeric-conversion
-    optional
-    parameter
-    predef
-    preprocessor
-    random
-    range
-    regex
-    serialization
+    container
+    date_time
+    dynamic_bitset
+    endian
+    interprocess
+    intrusive
+    move
+    multiprecision
     smart_ptr
     stacktrace_basic
-    static_assert
-    static_string
-    throw_exception
-    tokenizer
-    tuple
     type_index
-    type_traits
-    typeof
-    ublas
     unordered
-    variant2
-    winapi
 )
 find_package(OpenSSL REQUIRED)
 
@@ -134,7 +100,15 @@ if(OT_STORAGE_LMDB)
 endif()
 
 if(OT_CRYPTO_USING_LIBSECP256K1 AND NOT OT_BUNDLED_SECP256K1)
-  find_package(unofficial-secp256k1 REQUIRED)
+  if(OT_USE_VCPKG_TARGETS)
+    find_package(
+      unofficial-secp256k1
+      CONFIG
+      REQUIRED
+    )
+  else()
+    find_package(unofficial-secp256k1 REQUIRED)
+  endif()
 endif()
 
 if(OT_WITH_QT)

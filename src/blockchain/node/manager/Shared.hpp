@@ -15,10 +15,10 @@
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/blockoracle/BlockOracle.hpp"
 #include "internal/blockchain/node/headeroracle/HeaderOracle.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 #include "util/Shutdown.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx
 {
-enum class ConsensusType : std::uint8_t {
+enum class ConsensusType : std::underlying_type_t<ConsensusType> {
     Error = 0,
     Server = 1,
     Client = 2,

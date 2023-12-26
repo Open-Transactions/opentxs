@@ -20,6 +20,7 @@
 #include "internal/crypto/Parameters.hpp"
 #include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -38,19 +39,18 @@
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/contract/peer/Reply.hpp"
 #include "opentxs/core/contract/peer/Request.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/Seed.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Bytes.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Sodium.hpp"
 
@@ -231,8 +231,8 @@ auto hash<opentxs::blockchain::token::Descriptor>::operator()(
     const opentxs::blockchain::token::Descriptor& data) const noexcept
     -> std::size_t
 {
-    using Host = std::underlying_type<decltype(data.host_)>::type;
-    using Token = std::underlying_type<decltype(data.type_)>::type;
+    using Host = std::underlying_type_t<decltype(data.host_)>;
+    using Token = std::underlying_type_t<decltype(data.type_)>;
     using Buffer = boost::endian::little_uint32_buf_t;
 
     static_assert(sizeof(Host) == sizeof(Buffer));

@@ -65,7 +65,7 @@ auto ProfileItem::add_claim(const identity::wot::Claim& claim) const noexcept
 
 auto ProfileItem::as_claim() const noexcept -> identity::wot::Claim
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return item_->asClaim();
 }
@@ -83,7 +83,7 @@ auto ProfileItem::reindex(
     const ProfileSubsectionSortKey&,
     CustomData& custom) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     item_ = std::make_unique<identity::wot::claim::Item>(
         extract_custom<identity::wot::claim::Item>(custom));
 

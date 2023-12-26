@@ -18,11 +18,11 @@
 #include <variant>
 
 #include "internal/blockchain/node/Job.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

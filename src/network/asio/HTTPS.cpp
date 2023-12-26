@@ -17,6 +17,7 @@
 #include <memory>
 #include <ratio>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 #include "api/network/asio/Context.hpp"
@@ -161,7 +162,7 @@ auto HTTPS::load_root_certificates() noexcept(false) -> void
     auto ec = boost::system::error_code{};
 
     for (const auto& cert : ssl_certs()) {
-        ssl_.add_certificate_authority(
+        std::ignore = ssl_.add_certificate_authority(
             boost::asio::buffer(cert.data(), cert.size()), ec);
     }
 

@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Time.hpp"
 
@@ -39,19 +39,19 @@ class String;
 namespace opentxs
 {
 auto GetTransactionTypeString(int transactionTypeIndex) -> const
-    char*;  // enum transactionType
-auto GetOriginTypeToString(int originTypeIndex) -> const char*;  // enum
-                                                                 // originType
+    char*;  // enum otx::transactionType
+auto GetOriginTypeToString(int originTypeIndex) -> const
+    char*;  // enum otx::originType
 
 auto LoadAbbreviatedRecord(
     irr::io::IrrXMLReader*& xml,
     std::int64_t& lNumberOfOrigin,
-    originType& theOriginType,
+    otx::originType& theOriginType,
     std::int64_t& lTransactionNum,
     std::int64_t& lInRefTo,
     std::int64_t& lInRefDisplay,
     Time& the_DATE_SIGNED,
-    transactionType& theType,
+    otx::transactionType& theType,
     String& strHash,
     Amount& lAdjustment,
     Amount& lDisplayValue,

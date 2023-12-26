@@ -68,11 +68,13 @@ auto Bailment::Notary() const noexcept -> const identifier::Notary&
 
 auto Bailment::operator=(const Bailment& rhs) noexcept -> Bailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Bailment::operator=(Bailment&& rhs) noexcept -> Bailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 

@@ -128,7 +128,7 @@ auto ElementCache::index(const database::ElementMap::value_type& data) noexcept
 }
 
 auto ElementCache::index(
-    const Bip32Index index,
+    const crypto::Bip32Index index,
     const block::Element& element) noexcept -> void
 {
     switch (element.size()) {

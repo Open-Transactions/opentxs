@@ -14,7 +14,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Container.hpp"
 

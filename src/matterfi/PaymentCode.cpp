@@ -10,7 +10,6 @@
 
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/crypto/Account.hpp"
-#include "internal/blockchain/crypto/Types.hpp"
 #include "internal/blockchain/crypto/Wallet.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/blockchain/crypto/Account.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
+#include "opentxs/blockchain/crypto/Types.internal.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

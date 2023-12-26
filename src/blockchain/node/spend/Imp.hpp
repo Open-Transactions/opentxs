@@ -18,6 +18,7 @@
 #include "blockchain/node/spend/SpendPrivate.hpp"
 #include "internal/blockchain/node/SpendPolicy.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -25,17 +26,16 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -233,7 +233,7 @@ private:
         const PaymentCode& recipient,
         const Amount& amount,
         const identifier::Account& subaccount,
-        Bip32Index index,
+        crypto::Bip32Index index,
         ReadView pubkey) noexcept(false) -> void;
     auto check_funding_sweep() noexcept -> std::optional<SendResult>;
     auto deserialize_notification(

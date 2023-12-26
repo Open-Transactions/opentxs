@@ -25,11 +25,12 @@
 #include "opentxs/api/session/Notary.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -73,7 +74,7 @@ auto MainFile::SaveMainFileToString(String& strMainFile) -> bool
                 strBasketAcctID->Bytes());
         auto BASKET_CONTRACT_ID = identifier::UnitDefinition{};
 
-        bool bContractID =
+        const bool bContractID =
             server_.GetTransactor().lookupBasketContractIDByAccountID(
                 BASKET_ACCOUNT_ID, BASKET_CONTRACT_ID);
 
@@ -249,7 +250,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
         return false;
     }
 
-    bool bNeedToSaveAgain = false;
+    const bool bNeedToSaveAgain = false;
 
     bool bFailure = false;
 
@@ -269,7 +270,7 @@ auto MainFile::LoadMainFile(bool bReadOnly) -> bool
 
         irr::io::IrrXMLReader* xml =
             irr::io::createIrrXMLReader(xmlFileContents.get());
-        std::unique_ptr<irr::io::IrrXMLReader> theXMLGuardian(xml);
+        const std::unique_ptr<irr::io::IrrXMLReader> theXMLGuardian(xml);
 
         while (xml && xml->read()) {
             // strings for storing the data that we want to read out of the file

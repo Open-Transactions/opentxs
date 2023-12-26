@@ -17,16 +17,16 @@
 
 #include "core/paymentcode/PaymentCode.hpp"
 #include "core/paymentcode/Preimage.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/Secp256k1.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -103,7 +103,7 @@ public:
     auto ID() const noexcept -> const identifier::Nym& final { return id_; }
     auto Incoming(
         const opentxs::PaymentCode& sender,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
@@ -113,7 +113,7 @@ public:
         const noexcept -> bool final;
     auto Outgoing(
         const opentxs::PaymentCode& recipient,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const blockchain::Type chain,
         const opentxs::PasswordPrompt& reason,
         const std::uint8_t version) const noexcept
@@ -148,7 +148,7 @@ public:
 
     auto AddPrivateKeys(
         const crypto::SeedID& seed,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         const opentxs::PasswordPrompt& reason) noexcept -> bool final;
 
     PaymentCode(
@@ -210,8 +210,8 @@ private:
         const opentxs::PasswordPrompt& reason) const noexcept(false) -> Mask;
     auto derive_keys(
         const opentxs::PaymentCode& other,
-        const Bip32Index local,
-        const Bip32Index remote,
+        const crypto::Bip32Index local,
+        const crypto::Bip32Index remote,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> std::pair<
             crypto::asymmetric::key::EllipticCurve,

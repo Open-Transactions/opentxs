@@ -8,12 +8,12 @@
 #include <cstdint>
 #include <memory>
 
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/util/Editor.hpp"
 #include "opentxs/Export.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
+#include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -101,7 +101,7 @@ public:
         const identity::Nym& signer,
         const Message& input,
         Server& server,
-        const MessageType& type,
+        const otx::MessageType& type,
         Message& output,
         const PasswordPrompt& reason);
     ReplyMessage() = delete;

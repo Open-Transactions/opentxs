@@ -12,10 +12,10 @@
 #include <string>
 #include <utility>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::otdht
 {

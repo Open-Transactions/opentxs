@@ -10,11 +10,11 @@
 
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/tree/Node.hpp"
 #include "util/storage/tree/Nym.hpp"
 

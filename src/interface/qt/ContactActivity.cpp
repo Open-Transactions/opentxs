@@ -16,11 +16,11 @@
 #include "interface/qt/DraftValidator.hpp"
 #include "interface/ui/contactactivity/ContactActivityItem.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Time.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep

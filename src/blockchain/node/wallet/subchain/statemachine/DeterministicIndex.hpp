@@ -11,6 +11,7 @@
 #include "blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 
@@ -62,12 +63,12 @@ public:
 private:
     const crypto::Deterministic& subaccount_;
 
-    auto need_index(const std::optional<Bip32Index>& current) const noexcept
-        -> std::optional<Bip32Index> final;
+    auto need_index(const std::optional<crypto::Bip32Index>& current)
+        const noexcept -> std::optional<crypto::Bip32Index> final;
 
     auto process(
-        const std::optional<Bip32Index>& current,
-        Bip32Index target,
+        const std::optional<crypto::Bip32Index>& current,
+        crypto::Bip32Index target,
         allocator_type monotonic) noexcept -> void final;
 };
 }  // namespace opentxs::blockchain::node::wallet

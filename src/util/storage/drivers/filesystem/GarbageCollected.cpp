@@ -16,9 +16,9 @@
 #include "opentxs/Context.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/api/crypto/Encode.hpp"
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"
-#include "opentxs/util/storage/Types.hpp"
 #include "util/storage/Config.hpp"
 
 namespace opentxs::factory

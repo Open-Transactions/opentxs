@@ -14,12 +14,12 @@
 
 #include "internal/core/String.hpp"
 #include "internal/identity/Source.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/asymmetric/Key.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -15,12 +15,12 @@
 #include "internal/blockchain/node/wallet/ReorgMaster.hpp"
 #include "internal/blockchain/node/wallet/Types.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/Actor.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -16,7 +16,6 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/util/PasswordPrompt.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/api/Network.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
 #include "opentxs/util/PasswordCaller.hpp"
@@ -57,7 +57,7 @@ extern "C" auto internal_password_cb(
     const bool askTwice = (1 == rwflag);
     const auto& reason = *static_cast<opentxs::PasswordPrompt*>(userdata);
     const auto& api = opentxs::api::SessionPrivate::get_api(reason);
-    opentxs::Lock lock(api.Internal().Lock());
+    const auto lock = opentxs::Lock{api.Internal().Lock()};
     auto secret = api.Factory().Secret(0);
 
     if (false == api.Internal().GetSecret(lock, secret, reason, askTwice)) {
@@ -135,7 +135,7 @@ SessionPrivate::SessionPrivate(
     assert_false(nullptr == external_password_callback_);
 
     if (master_secret_) {
-        opentxs::Lock lock(master_key_lock_);
+        const auto lock = opentxs::Lock{master_key_lock_};
         bump_password_timer(lock);
     }
 }
@@ -335,7 +335,7 @@ auto SessionPrivate::MasterKey(const opentxs::Lock& lock) const
 void SessionPrivate::SetMasterKeyTimeout(
     const std::chrono::seconds& timeout) const noexcept
 {
-    opentxs::Lock lock(master_key_lock_);
+    const auto lock = opentxs::Lock{master_key_lock_};
     password_duration_ = timeout;
 }
 
@@ -387,7 +387,7 @@ auto SessionPrivate::Storage() const noexcept -> const api::session::Storage&
 //         ~Cleanup() { running_.store(false); }
 //     };
 //
-//     opentxs::Lock lock(master_key_lock_, std::defer_lock);
+//     auto lock = opentxs::Lock{master_key_lock_, std::defer_lock};
 //     Cleanup cleanup(timeout_thread_running_);
 //
 //     while (running_) {

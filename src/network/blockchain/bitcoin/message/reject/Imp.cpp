@@ -13,8 +13,8 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::reject
 {

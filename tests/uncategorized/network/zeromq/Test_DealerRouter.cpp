@@ -122,7 +122,7 @@ TEST_F(DealerRouter, Dealer_2_Router_1)
 
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
@@ -199,7 +199,7 @@ TEST_F(DealerRouter, Dealer_1_Router_2)
             EXPECT_EQ(2, input.get().size());
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
@@ -271,8 +271,8 @@ TEST_F(DealerRouter, Dealer_Router_Multipart)
             EXPECT_TRUE(originalFound);
 
             for (const auto& frame : payload) {
-                bool match = frame.Bytes() == test_message2_ ||
-                             frame.Bytes() == test_message3_;
+                bool const match = frame.Bytes() == test_message2_ ||
+                                   frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
             }
 
@@ -306,8 +306,8 @@ TEST_F(DealerRouter, Dealer_Router_Multipart)
                 EXPECT_EQ(test_message_, frame.Bytes());
             }
             for (const auto& frame : payload) {
-                bool match = frame.Bytes() == test_message2_ ||
-                             frame.Bytes() == test_message3_;
+                bool const match = frame.Bytes() == test_message2_ ||
+                                   frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match);
             }
 

@@ -38,7 +38,7 @@ auto operator==(const Descriptor& lhs, const Descriptor& rhs) noexcept -> bool
 auto operator<=>(const Descriptor& lhs, const Descriptor& rhs) noexcept
     -> std::strong_ordering
 {
-    constexpr auto& equal = std::strong_ordering::equal;
+    constexpr const auto& equal = std::strong_ordering::equal;
 
     if (const auto host = lhs.host_ <=> rhs.host_; equal != host) {
 

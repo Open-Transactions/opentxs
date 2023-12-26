@@ -18,16 +18,17 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Seed.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -83,19 +84,19 @@ class Seed final : public internal::Seed
 public:
     auto AccountChildKey(
         const proto::HDPath& path,
-        const BIP44Chain internal,
-        const Bip32Index index,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto AccountChildKey(
         const ReadView& path,
-        const BIP44Chain internal,
-        const Bip32Index index,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto AccountKey(
         const proto::HDPath& path,
-        const BIP44Chain internal,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto AllowedLanguages(const opentxs::crypto::SeedStyle type) const noexcept
@@ -114,27 +115,27 @@ public:
     auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const opentxs::crypto::asymmetric::Role role,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const VersionNumber version,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const opentxs::crypto::asymmetric::Role role,
         const VersionNumber version,
         const PasswordPrompt& reason) const
@@ -143,19 +144,19 @@ public:
         opentxs::crypto::SeedID& seedID,
         opentxs::crypto::SeedStyle& type,
         opentxs::crypto::Language& lang,
-        Bip32Index& index,
+        opentxs::crypto::Bip32Index& index,
         const opentxs::crypto::SeedStrength strength,
         const PasswordPrompt& reason) const -> Secret final;
     auto GetPaymentCode(
         const opentxs::crypto::SeedID& seedID,
-        const Bip32Index nym,
+        const opentxs::crypto::Bip32Index nym,
         const std::uint8_t version,
         const PasswordPrompt& reason,
         alloc::Default alloc) const
         -> opentxs::crypto::asymmetric::key::Secp256k1 final;
     auto GetSeed(
         const opentxs::crypto::SeedID& seedID,
-        Bip32Index& index,
+        opentxs::crypto::Bip32Index& index,
         const PasswordPrompt& reason) const -> Secret final;
     auto GetSeed(
         const opentxs::crypto::SeedID& id,
@@ -200,7 +201,7 @@ public:
         const std::string_view comment) const noexcept -> bool final;
     auto UpdateIndex(
         const opentxs::crypto::SeedID& seedID,
-        const Bip32Index index,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const -> bool final;
     auto ValidateWord(
         const opentxs::crypto::SeedStyle type,

@@ -22,11 +22,11 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/network/BlockchainHandle.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

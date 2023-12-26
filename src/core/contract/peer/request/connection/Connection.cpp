@@ -64,11 +64,13 @@ auto Connection::Kind() const noexcept -> ConnectionInfoType
 
 auto Connection::operator=(const Connection& rhs) noexcept -> Connection&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Request>(*this, rhs);
 }
 
 auto Connection::operator=(Connection&& rhs) noexcept -> Connection&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Request>(*this, std::move(rhs));
 }
 

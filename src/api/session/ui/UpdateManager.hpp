@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

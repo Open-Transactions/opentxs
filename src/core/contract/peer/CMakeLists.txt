@@ -6,12 +6,6 @@
 add_subdirectory(reply)
 add_subdirectory(request)
 
-libopentxs_add_public_header("core/contract/peer" "ConnectionInfoType.hpp")
-libopentxs_add_public_header("core/contract/peer" "ObjectType.hpp")
-libopentxs_add_public_header("core/contract/peer" "RequestType.hpp")
-libopentxs_add_public_header("core/contract/peer" "SecretType.hpp")
-libopentxs_add_public_header("core/contract/peer" "Types.hpp")
-
 target_sources(
   opentxs-common
   PRIVATE
@@ -19,8 +13,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/Object.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/PairEvent.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/PairEventType.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/core/contract/peer/Types.hpp"
-    "Common.cpp"
     "Factory.cpp"
     "Object.cpp"
     "Object.hpp"

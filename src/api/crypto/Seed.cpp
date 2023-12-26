@@ -28,6 +28,8 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -39,14 +41,15 @@
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Storage.hpp"
-#include "opentxs/blockchain/block/Hash.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/block/Hash.hpp"        // IWYU pragma: keep
+#include "opentxs/blockchain/crypto/Bip44Type.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Bip39.hpp"
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
-#include "opentxs/crypto/Bip44Type.hpp"     // IWYU pragma: keep
+#include "opentxs/crypto/EcdsaCurve.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"      // IWYU pragma: keep
 #include "opentxs/crypto/Language.hpp"      // IWYU pragma: keep
 #include "opentxs/crypto/Seed.hpp"
@@ -64,9 +67,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/HDIndex.hpp"  // IWYU pragma: keep
 
@@ -135,11 +135,11 @@ Seed::Seed(
 
 auto Seed::AccountChildKey(
     const proto::HDPath& rootPath,
-    const BIP44Chain internal,
-    const Bip32Index index,
+    const opentxs::blockchain::crypto::Bip44Subchain subchain,
+    const opentxs::crypto::Bip32Index index,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
-    auto parent = AccountKey(rootPath, internal, reason);
+    auto parent = AccountKey(rootPath, subchain, reason);
 
     if (false == parent.IsValid()) { return {}; }
 
@@ -148,27 +148,25 @@ auto Seed::AccountChildKey(
 
 auto Seed::AccountChildKey(
     const ReadView& view,
-    const BIP44Chain internal,
-    const Bip32Index index,
+    const opentxs::blockchain::crypto::Bip44Subchain subchain,
+    const opentxs::crypto::Bip32Index index,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return AccountChildKey(
-        proto::Factory<proto::HDPath>(view), internal, index, reason);
+        proto::Factory<proto::HDPath>(view), subchain, index, reason);
 }
 
 auto Seed::AccountKey(
     const proto::HDPath& rootPath,
-    const BIP44Chain internal,
+    const opentxs::blockchain::crypto::Bip44Subchain subchain,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     const auto id = api_.Factory().Internal().SeedID(rootPath.seed());
-    const auto change =
-        (INTERNAL_CHAIN == internal) ? Bip32Index{1u} : Bip32Index{0u};
-    auto path = UnallocatedVector<Bip32Index>{};
+    auto path = UnallocatedVector<opentxs::crypto::Bip32Index>{};
 
     for (const auto& child : rootPath.child()) { path.emplace_back(child); }
 
-    path.emplace_back(change);
+    path.emplace_back(value(subchain));
 
     return GetHDKey(id, opentxs::crypto::EcdsaCurve::secp256k1, path, reason);
 }
@@ -276,7 +274,7 @@ auto Seed::DefaultSeed() const
 auto Seed::GetHDKey(
     const opentxs::crypto::SeedID& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
-    const UnallocatedVector<Bip32Index>& path,
+    const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return GetHDKey(
@@ -291,7 +289,7 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const opentxs::crypto::SeedID& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
-    const UnallocatedVector<Bip32Index>& path,
+    const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
     const opentxs::crypto::asymmetric::Role role,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
@@ -307,7 +305,7 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const opentxs::crypto::SeedID& fingerprint,
     const opentxs::crypto::EcdsaCurve& curve,
-    const UnallocatedVector<Bip32Index>& path,
+    const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
     const VersionNumber version,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
@@ -323,12 +321,12 @@ auto Seed::GetHDKey(
 auto Seed::GetHDKey(
     const opentxs::crypto::SeedID& id,
     const opentxs::crypto::EcdsaCurve& curve,
-    const UnallocatedVector<Bip32Index>& path,
+    const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
     const opentxs::crypto::asymmetric::Role role,
     const VersionNumber version,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
-    Bip32Index notUsed{0};
+    opentxs::crypto::Bip32Index notUsed{0};
     auto seed = GetSeed(id, notUsed, reason);
 
     if (seed.empty()) { return {}; }
@@ -340,7 +338,7 @@ auto Seed::GetOrCreateDefaultSeed(
     opentxs::crypto::SeedID& seedID,
     opentxs::crypto::SeedStyle& type,
     opentxs::crypto::Language& lang,
-    Bip32Index& index,
+    opentxs::crypto::Bip32Index& index,
     const opentxs::crypto::SeedStrength strength,
     const PasswordPrompt& reason) const -> Secret
 {
@@ -368,12 +366,12 @@ auto Seed::GetOrCreateDefaultSeed(
 
 auto Seed::GetPaymentCode(
     const opentxs::crypto::SeedID& fingerprint,
-    const Bip32Index nym,
+    const opentxs::crypto::Bip32Index nym,
     const std::uint8_t version,
     const PasswordPrompt& reason,
     alloc::Default alloc) const -> opentxs::crypto::asymmetric::key::Secp256k1
 {
-    Bip32Index notUsed{0};
+    opentxs::crypto::Bip32Index notUsed{0};
     auto seed = GetSeed(fingerprint, notUsed, reason);
 
     if (seed.empty()) {
@@ -385,9 +383,13 @@ auto Seed::GetPaymentCode(
     auto key = asymmetric_.NewSecp256k1Key(
         fingerprint,
         seed,
-        {HDIndex{Bip43Purpose::PAYCODE, Bip32Child::HARDENED},
-         HDIndex{Bip44Type::BITCOIN, Bip32Child::HARDENED},
-         HDIndex{nym, Bip32Child::HARDENED}},
+        {HDIndex{
+             opentxs::crypto::Bip43Purpose::PAYCODE,
+             opentxs::crypto::Bip32Child::HARDENED},
+         HDIndex{
+             opentxs::blockchain::crypto::Bip44Type::BITCOIN,
+             opentxs::crypto::Bip32Child::HARDENED},
+         HDIndex{nym, opentxs::crypto::Bip32Child::HARDENED}},
         reason);
 
     if (false == key.IsValid()) {
@@ -446,8 +448,12 @@ auto Seed::GetStorageKey(
     auto key = GetHDKey(
         fingerprint,
         opentxs::crypto::EcdsaCurve::secp256k1,
-        {HDIndex{Bip43Purpose::FS, Bip32Child::HARDENED},
-         HDIndex{Bip32Child::ENCRYPT_KEY, Bip32Child::HARDENED}},
+        {HDIndex{
+             opentxs::crypto::Bip43Purpose::FS,
+             opentxs::crypto::Bip32Child::HARDENED},
+         HDIndex{
+             opentxs::crypto::Bip32Child::ENCRYPT_KEY,
+             opentxs::crypto::Bip32Child::HARDENED}},
         reason);
 
     if (false == key.IsValid()) {
@@ -461,7 +467,7 @@ auto Seed::GetStorageKey(
 
 auto Seed::GetSeed(
     const opentxs::crypto::SeedID& seedID,
-    Bip32Index& index,
+    opentxs::crypto::Bip32Index& index,
     const PasswordPrompt& reason) const -> Secret
 {
     auto lock = Lock{seed_lock_};
@@ -822,7 +828,7 @@ auto Seed::SetSeedComment(
 
 auto Seed::UpdateIndex(
     const opentxs::crypto::SeedID& seedID,
-    const Bip32Index index,
+    const opentxs::crypto::Bip32Index index,
     const PasswordPrompt& reason) const -> bool
 {
     auto lock = Lock{seed_lock_};

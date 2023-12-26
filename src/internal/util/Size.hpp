@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 namespace opentxs
 {

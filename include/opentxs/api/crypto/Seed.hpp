@@ -10,13 +10,14 @@
 #include <tuple>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -71,8 +72,8 @@ class OPENTXS_EXPORT Seed
 public:
     virtual auto AccountChildKey(
         const ReadView& path,
-        const BIP44Chain internal,
-        const Bip32Index index,
+        const opentxs::blockchain::crypto::Bip44Subchain subchain,
+        const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto AllowedLanguages(
@@ -91,34 +92,34 @@ public:
     virtual auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const opentxs::crypto::asymmetric::Role,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const VersionNumber version,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetHDKey(
         const opentxs::crypto::SeedID& seedID,
         const opentxs::crypto::EcdsaCurve& curve,
-        const UnallocatedVector<Bip32Index>& path,
+        const UnallocatedVector<opentxs::crypto::Bip32Index>& path,
         const opentxs::crypto::asymmetric::Role,
         const VersionNumber version,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto GetPaymentCode(
         const opentxs::crypto::SeedID& seedID,
-        const Bip32Index nym,
+        const opentxs::crypto::Bip32Index nym,
         const std::uint8_t version,
         const PasswordPrompt& reason,
         alloc::Default alloc = {}) const
@@ -129,7 +130,7 @@ public:
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto GetSeed(
         const opentxs::crypto::SeedID& seedID,
-        Bip32Index& index,
+        opentxs::crypto::Bip32Index& index,
         const PasswordPrompt& reason) const -> Secret = 0;
     virtual auto GetSeed(
         const opentxs::crypto::SeedID& id,

@@ -8,9 +8,9 @@
 #include <memory>
 #include <optional>
 
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
@@ -85,7 +85,7 @@ public:
         const SubchainID& subchain,
         const ElementMap& elements) const noexcept -> bool;
     auto SubchainLastIndexed(const SubchainID& subchain) const noexcept
-        -> std::optional<Bip32Index>;
+        -> std::optional<crypto::Bip32Index>;
     auto SubchainLastScanned(const SubchainID& subchain) const noexcept
         -> block::Position;
     auto SubchainSetLastScanned(

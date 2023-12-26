@@ -89,7 +89,7 @@ auto UpdateTransaction::ConnectBlock(database::ChainSegment&& segment) -> void
         }
     }
 
-    if (0 < disconnected_.count(segment)) {
+    if (disconnected_.contains(segment)) {
         disconnected_.erase(segment);
     } else {
         connect_.emplace(std::move(segment));
@@ -156,7 +156,7 @@ auto UpdateTransaction::EffectiveHasDisconnectedChildren(
 auto UpdateTransaction::EffectiveHeaderExists(
     const block::Hash& hash) const noexcept -> bool
 {
-    if (0 < headers_.count(hash)) { return true; }
+    if (headers_.contains(hash)) { return true; }
 
     return db_.HeaderExists(hash);
 }

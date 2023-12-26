@@ -11,11 +11,11 @@
 
 #include "internal/core/Core.hpp"
 #include "internal/interface/ui/UI.hpp"
+#include "opentxs/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

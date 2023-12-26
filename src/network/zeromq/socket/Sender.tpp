@@ -22,7 +22,7 @@ template <typename Interface, typename ImplementationParent>
 auto Sender<Interface, ImplementationParent>::Send(
     zeromq::Message&& message) const noexcept -> bool
 {
-    Lock lock(this->lock_);
+    const auto lock = Lock{this->lock_};
 
     if (false == this->running_.get()) { return false; }
 

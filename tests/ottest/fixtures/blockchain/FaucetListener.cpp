@@ -3,6 +3,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+// IWYU pragma: no_include "opentxs/Types.hpp"
+
 #include "ottest/fixtures/blockchain/FaucetListener.hpp"  // IWYU pragma: associated
 
 #include <opentxs/opentxs.hpp>
@@ -12,7 +14,7 @@
 #include <utility>
 
 #include "internal/util/Future.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
+#include "opentxs/WorkType.internal.hpp"
 
 namespace ottest
 {

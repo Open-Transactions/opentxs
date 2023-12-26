@@ -26,7 +26,6 @@
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
@@ -39,10 +38,11 @@
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Input.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Position.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Position.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/cashtoken/Types.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"

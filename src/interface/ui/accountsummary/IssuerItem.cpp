@@ -28,9 +28,9 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -103,7 +103,7 @@ auto IssuerItem::construct_row(
 
 auto IssuerItem::Name() const noexcept -> UnallocatedCString
 {
-    sLock lock(shared_lock_);
+    const auto lock = sLock{shared_lock_};
 
     return name_;
 }
@@ -162,7 +162,7 @@ void IssuerItem::refresh_accounts() noexcept
 auto IssuerItem::reindex(const AccountSummarySortKey& key, CustomData&) noexcept
     -> bool
 {
-    eLock lock(shared_lock_);
+    auto lock = eLock{shared_lock_};
     key_ = key;
     connection_.store(std::get<0>(key_));
     lock.unlock();

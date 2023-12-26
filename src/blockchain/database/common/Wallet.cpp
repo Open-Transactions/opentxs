@@ -77,7 +77,7 @@ auto Wallet::AssociateTransaction(
         incoming.emplace(pattern);
         LogTrace()("    * ")(pattern).Flush();
     });
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     auto& existing = transaction_to_patterns_[txid];
     auto newElements = UnallocatedVector<ElementHash>{};
     auto removedElements = UnallocatedVector<ElementHash>{};
@@ -174,7 +174,7 @@ auto Wallet::LoadTransaction(
 auto Wallet::LookupContact(const Data& pubkeyHash) const noexcept
     -> UnallocatedSet<identifier::Generic>
 {
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
 
     return element_to_contact_[pubkeyHash];
 }
@@ -321,7 +321,7 @@ auto Wallet::UpdateContact(const opentxs::Contact& contact) const noexcept
         });
     }
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto& contactID = contact.ID();
     auto& existing = contact_to_element_[contactID];
     auto output = update_contact(lock, existing, incoming, contactID);
@@ -354,7 +354,7 @@ auto Wallet::UpdateMergedContact(
         });
     }
 
-    Lock lock(lock_);
+    auto lock = Lock{lock_};
     const auto& contactID = parent.ID();
     const auto& deletedID = child.ID();
     auto& existing = contact_to_element_[contactID];

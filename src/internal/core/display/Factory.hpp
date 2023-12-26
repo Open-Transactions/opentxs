@@ -8,7 +8,7 @@
 #include <string_view>
 
 #include "internal/core/display/Types.hpp"
-#include "opentxs/core/display/Types.hpp"
+#include "opentxs/display/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

@@ -12,7 +12,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/NumList.hpp"
@@ -29,9 +28,10 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"
@@ -115,113 +115,133 @@ namespace opentxs
 OTMessageStrategyManager Message::messageStrategyManager;
 
 const Message::TypeMap Message::message_names_{
-    {MessageType::badID, ERROR_STRING},
-    {MessageType::pingNotary, PING_NOTARY},
-    {MessageType::pingNotaryResponse, PING_NOTARY_RESPONSE},
-    {MessageType::registerNym, REGISTER_NYM},
-    {MessageType::registerNymResponse, REGISTER_NYM_RESPONSE},
-    {MessageType::unregisterNym, UNREGISTER_NYM},
-    {MessageType::unregisterNymResponse, UNREGISTER_NYM_RESPONSE},
-    {MessageType::getRequestNumber, GET_REQUEST_NUMBER},
-    {MessageType::getRequestNumberResponse, GET_REQUEST_NUMBER_RESPONSE},
-    {MessageType::getTransactionNumbers, GET_TRANSACTION_NUMBER},
-    {MessageType::getTransactionNumbersResponse,
+    {otx::MessageType::badID, ERROR_STRING},
+    {otx::MessageType::pingNotary, PING_NOTARY},
+    {otx::MessageType::pingNotaryResponse, PING_NOTARY_RESPONSE},
+    {otx::MessageType::registerNym, REGISTER_NYM},
+    {otx::MessageType::registerNymResponse, REGISTER_NYM_RESPONSE},
+    {otx::MessageType::unregisterNym, UNREGISTER_NYM},
+    {otx::MessageType::unregisterNymResponse, UNREGISTER_NYM_RESPONSE},
+    {otx::MessageType::getRequestNumber, GET_REQUEST_NUMBER},
+    {otx::MessageType::getRequestNumberResponse, GET_REQUEST_NUMBER_RESPONSE},
+    {otx::MessageType::getTransactionNumbers, GET_TRANSACTION_NUMBER},
+    {otx::MessageType::getTransactionNumbersResponse,
      GET_TRANSACTION_NUMBER_RESPONSE},
-    {MessageType::processNymbox, PROCESS_NYMBOX},
-    {MessageType::processNymboxResponse, PROCESS_NYMBOX_RESPONSE},
-    {MessageType::checkNym, CHECK_NYM},
-    {MessageType::checkNymResponse, CHECK_NYM_RESPONSE},
-    {MessageType::sendNymMessage, SEND_NYM_MESSAGE},
-    {MessageType::sendNymMessageResponse, SEND_NYM_MESSAGE_RESPONSE},
-    {MessageType::sendNymInstrument, SEND_NYM_INSTRUMENT},
-    {MessageType::unregisterAccount, UNREGISTER_ACCOUNT},
-    {MessageType::unregisterAccountResponse, UNREGISTER_ACCOUNT_RESPONSE},
-    {MessageType::registerAccount, REGISTER_ACCOUNT},
-    {MessageType::registerAccountResponse, REGISTER_ACCOUNT_RESPONSE},
-    {MessageType::registerInstrumentDefinition, REGISTER_INSTRUMENT_DEFINITION},
-    {MessageType::registerInstrumentDefinitionResponse,
+    {otx::MessageType::processNymbox, PROCESS_NYMBOX},
+    {otx::MessageType::processNymboxResponse, PROCESS_NYMBOX_RESPONSE},
+    {otx::MessageType::checkNym, CHECK_NYM},
+    {otx::MessageType::checkNymResponse, CHECK_NYM_RESPONSE},
+    {otx::MessageType::sendNymMessage, SEND_NYM_MESSAGE},
+    {otx::MessageType::sendNymMessageResponse, SEND_NYM_MESSAGE_RESPONSE},
+    {otx::MessageType::sendNymInstrument, SEND_NYM_INSTRUMENT},
+    {otx::MessageType::unregisterAccount, UNREGISTER_ACCOUNT},
+    {otx::MessageType::unregisterAccountResponse, UNREGISTER_ACCOUNT_RESPONSE},
+    {otx::MessageType::registerAccount, REGISTER_ACCOUNT},
+    {otx::MessageType::registerAccountResponse, REGISTER_ACCOUNT_RESPONSE},
+    {otx::MessageType::registerInstrumentDefinition,
+     REGISTER_INSTRUMENT_DEFINITION},
+    {otx::MessageType::registerInstrumentDefinitionResponse,
      REGISTER_INSTRUMENT_DEFINITION_RESPONSE},
-    {MessageType::issueBasket, ISSUE_BASKET},
-    {MessageType::issueBasketResponse, ISSUE_BASKET_RESPONSE},
-    {MessageType::notarizeTransaction, NOTARIZE_TRANSACTION},
-    {MessageType::notarizeTransactionResponse, NOTARIZE_TRANSACTION_RESPONSE},
-    {MessageType::getNymbox, GET_NYMBOX},
-    {MessageType::getNymboxResponse, GET_NYMBOX_RESPONSE},
-    {MessageType::getBoxReceipt, GET_BOX_RECEIPT},
-    {MessageType::getBoxReceiptResponse, GET_BOX_RECEIPT_RESPONSE},
-    {MessageType::getAccountData, GET_ACCOUNT_DATA},
-    {MessageType::getAccountDataResponse, GET_ACCOUNT_DATA_RESPONSE},
-    {MessageType::processNymbox, PROCESS_NYMBOX},
-    {MessageType::processNymboxResponse, PROCESS_NYMBOX_RESPONSE},
-    {MessageType::processInbox, PROCESS_INBOX},
-    {MessageType::processInboxResponse, PROCESS_INBOX_RESPONSE},
-    {MessageType::queryInstrumentDefinitions, QUERY_INSTRUMENT_DEFINITION},
-    {MessageType::queryInstrumentDefinitionsResponse,
+    {otx::MessageType::issueBasket, ISSUE_BASKET},
+    {otx::MessageType::issueBasketResponse, ISSUE_BASKET_RESPONSE},
+    {otx::MessageType::notarizeTransaction, NOTARIZE_TRANSACTION},
+    {otx::MessageType::notarizeTransactionResponse,
+     NOTARIZE_TRANSACTION_RESPONSE},
+    {otx::MessageType::getNymbox, GET_NYMBOX},
+    {otx::MessageType::getNymboxResponse, GET_NYMBOX_RESPONSE},
+    {otx::MessageType::getBoxReceipt, GET_BOX_RECEIPT},
+    {otx::MessageType::getBoxReceiptResponse, GET_BOX_RECEIPT_RESPONSE},
+    {otx::MessageType::getAccountData, GET_ACCOUNT_DATA},
+    {otx::MessageType::getAccountDataResponse, GET_ACCOUNT_DATA_RESPONSE},
+    {otx::MessageType::processNymbox, PROCESS_NYMBOX},
+    {otx::MessageType::processNymboxResponse, PROCESS_NYMBOX_RESPONSE},
+    {otx::MessageType::processInbox, PROCESS_INBOX},
+    {otx::MessageType::processInboxResponse, PROCESS_INBOX_RESPONSE},
+    {otx::MessageType::queryInstrumentDefinitions, QUERY_INSTRUMENT_DEFINITION},
+    {otx::MessageType::queryInstrumentDefinitionsResponse,
      QUERY_INSTRUMENT_DEFINITION_RESPONSE},
-    {MessageType::getInstrumentDefinition, GET_INSTRUMENT_DEFINITION},
-    {MessageType::getInstrumentDefinitionResponse,
+    {otx::MessageType::getInstrumentDefinition, GET_INSTRUMENT_DEFINITION},
+    {otx::MessageType::getInstrumentDefinitionResponse,
      GET_INSTRUMENT_DEFINITION_RESPONSE},
-    {MessageType::getMint, GET_MINT},
-    {MessageType::getMintResponse, GET_MINT_RESPONSE},
-    {MessageType::getMarketList, GET_MARKET_LIST},
-    {MessageType::getMarketListResponse, GET_MARKET_LIST_RESPONSE},
-    {MessageType::getMarketOffers, GET_MARKET_OFFERS},
-    {MessageType::getMarketOffersResponse, GET_MARKET_OFFERS_RESPONSE},
-    {MessageType::getMarketRecentTrades, GET_MARKET_RECENT_TRADES},
-    {MessageType::getMarketRecentTradesResponse,
+    {otx::MessageType::getMint, GET_MINT},
+    {otx::MessageType::getMintResponse, GET_MINT_RESPONSE},
+    {otx::MessageType::getMarketList, GET_MARKET_LIST},
+    {otx::MessageType::getMarketListResponse, GET_MARKET_LIST_RESPONSE},
+    {otx::MessageType::getMarketOffers, GET_MARKET_OFFERS},
+    {otx::MessageType::getMarketOffersResponse, GET_MARKET_OFFERS_RESPONSE},
+    {otx::MessageType::getMarketRecentTrades, GET_MARKET_RECENT_TRADES},
+    {otx::MessageType::getMarketRecentTradesResponse,
      GET_MARKET_RECENT_TRADES_RESPONSE},
-    {MessageType::getNymMarketOffers, GET_NYM_MARKET_OFFERS},
-    {MessageType::getNymMarketOffersResponse, GET_NYM_MARKET_OFFERS_RESPONSE},
-    {MessageType::triggerClause, TRIGGER_CLAUSE},
-    {MessageType::triggerClauseResponse, TRIGGER_CLAUSE_RESPONSE},
-    {MessageType::usageCredits, USAGE_CREDITS},
-    {MessageType::usageCreditsResponse, USAGE_CREDITS_RESPONSE},
-    {MessageType::registerContract, REGISTER_CONTRACT},
-    {MessageType::registerContractResponse, REGISTER_CONTRACT_RESPONSE},
-    {MessageType::requestAdmin, REQUEST_ADMIN},
-    {MessageType::requestAdminResponse, REQUEST_ADMIN_RESPONSE},
-    {MessageType::addClaim, ADD_CLAIM},
-    {MessageType::addClaimResponse, ADD_CLAIM_RESPONSE},
-    {MessageType::outmail, OUTMAIL},
+    {otx::MessageType::getNymMarketOffers, GET_NYM_MARKET_OFFERS},
+    {otx::MessageType::getNymMarketOffersResponse,
+     GET_NYM_MARKET_OFFERS_RESPONSE},
+    {otx::MessageType::triggerClause, TRIGGER_CLAUSE},
+    {otx::MessageType::triggerClauseResponse, TRIGGER_CLAUSE_RESPONSE},
+    {otx::MessageType::usageCredits, USAGE_CREDITS},
+    {otx::MessageType::usageCreditsResponse, USAGE_CREDITS_RESPONSE},
+    {otx::MessageType::registerContract, REGISTER_CONTRACT},
+    {otx::MessageType::registerContractResponse, REGISTER_CONTRACT_RESPONSE},
+    {otx::MessageType::requestAdmin, REQUEST_ADMIN},
+    {otx::MessageType::requestAdminResponse, REQUEST_ADMIN_RESPONSE},
+    {otx::MessageType::addClaim, ADD_CLAIM},
+    {otx::MessageType::addClaimResponse, ADD_CLAIM_RESPONSE},
+    {otx::MessageType::outmail, OUTMAIL},
 };
 
-const UnallocatedMap<MessageType, MessageType> Message::reply_message_{
-    {MessageType::pingNotary, MessageType::pingNotaryResponse},
-    {MessageType::registerNym, MessageType::registerNymResponse},
-    {MessageType::unregisterNym, MessageType::unregisterNymResponse},
-    {MessageType::getRequestNumber, MessageType::getRequestNumberResponse},
-    {MessageType::getTransactionNumbers,
-     MessageType::getTransactionNumbersResponse},
-    {MessageType::checkNym, MessageType::checkNymResponse},
-    {MessageType::sendNymMessage, MessageType::sendNymMessageResponse},
-    {MessageType::unregisterAccount, MessageType::unregisterAccountResponse},
-    {MessageType::registerAccount, MessageType::registerAccountResponse},
-    {MessageType::registerInstrumentDefinition,
-     MessageType::registerInstrumentDefinitionResponse},
-    {MessageType::issueBasket, MessageType::issueBasketResponse},
-    {MessageType::notarizeTransaction,
-     MessageType::notarizeTransactionResponse},
-    {MessageType::getNymbox, MessageType::getNymboxResponse},
-    {MessageType::getBoxReceipt, MessageType::getBoxReceiptResponse},
-    {MessageType::getAccountData, MessageType::getAccountDataResponse},
-    {MessageType::processNymbox, MessageType::processNymboxResponse},
-    {MessageType::processInbox, MessageType::processInboxResponse},
-    {MessageType::queryInstrumentDefinitions,
-     MessageType::queryInstrumentDefinitionsResponse},
-    {MessageType::getInstrumentDefinition,
-     MessageType::getInstrumentDefinitionResponse},
-    {MessageType::getMint, MessageType::getMintResponse},
-    {MessageType::getMarketList, MessageType::getMarketListResponse},
-    {MessageType::getMarketOffers, MessageType::getMarketOffersResponse},
-    {MessageType::getMarketRecentTrades,
-     MessageType::getMarketRecentTradesResponse},
-    {MessageType::getNymMarketOffers, MessageType::getNymMarketOffersResponse},
-    {MessageType::triggerClause, MessageType::triggerClauseResponse},
-    {MessageType::usageCredits, MessageType::usageCreditsResponse},
-    {MessageType::registerContract, MessageType::registerContractResponse},
-    {MessageType::requestAdmin, MessageType::requestAdminResponse},
-    {MessageType::addClaim, MessageType::addClaimResponse},
-};
+const UnallocatedMap<otx::MessageType, otx::MessageType>
+    Message::reply_message_{
+        {otx::MessageType::pingNotary, otx::MessageType::pingNotaryResponse},
+        {otx::MessageType::registerNym, otx::MessageType::registerNymResponse},
+        {otx::MessageType::unregisterNym,
+         otx::MessageType::unregisterNymResponse},
+        {otx::MessageType::getRequestNumber,
+         otx::MessageType::getRequestNumberResponse},
+        {otx::MessageType::getTransactionNumbers,
+         otx::MessageType::getTransactionNumbersResponse},
+        {otx::MessageType::checkNym, otx::MessageType::checkNymResponse},
+        {otx::MessageType::sendNymMessage,
+         otx::MessageType::sendNymMessageResponse},
+        {otx::MessageType::unregisterAccount,
+         otx::MessageType::unregisterAccountResponse},
+        {otx::MessageType::registerAccount,
+         otx::MessageType::registerAccountResponse},
+        {otx::MessageType::registerInstrumentDefinition,
+         otx::MessageType::registerInstrumentDefinitionResponse},
+        {otx::MessageType::issueBasket, otx::MessageType::issueBasketResponse},
+        {otx::MessageType::notarizeTransaction,
+         otx::MessageType::notarizeTransactionResponse},
+        {otx::MessageType::getNymbox, otx::MessageType::getNymboxResponse},
+        {otx::MessageType::getBoxReceipt,
+         otx::MessageType::getBoxReceiptResponse},
+        {otx::MessageType::getAccountData,
+         otx::MessageType::getAccountDataResponse},
+        {otx::MessageType::processNymbox,
+         otx::MessageType::processNymboxResponse},
+        {otx::MessageType::processInbox,
+         otx::MessageType::processInboxResponse},
+        {otx::MessageType::queryInstrumentDefinitions,
+         otx::MessageType::queryInstrumentDefinitionsResponse},
+        {otx::MessageType::getInstrumentDefinition,
+         otx::MessageType::getInstrumentDefinitionResponse},
+        {otx::MessageType::getMint, otx::MessageType::getMintResponse},
+        {otx::MessageType::getMarketList,
+         otx::MessageType::getMarketListResponse},
+        {otx::MessageType::getMarketOffers,
+         otx::MessageType::getMarketOffersResponse},
+        {otx::MessageType::getMarketRecentTrades,
+         otx::MessageType::getMarketRecentTradesResponse},
+        {otx::MessageType::getNymMarketOffers,
+         otx::MessageType::getNymMarketOffersResponse},
+        {otx::MessageType::triggerClause,
+         otx::MessageType::triggerClauseResponse},
+        {otx::MessageType::usageCredits,
+         otx::MessageType::usageCreditsResponse},
+        {otx::MessageType::registerContract,
+         otx::MessageType::registerContractResponse},
+        {otx::MessageType::requestAdmin,
+         otx::MessageType::requestAdminResponse},
+        {otx::MessageType::addClaim, otx::MessageType::addClaimResponse},
+    };
 
 const Message::ReverseTypeMap Message::message_types_ = make_reverse_map();
 
@@ -268,18 +288,18 @@ auto Message::make_reverse_map() -> Message::ReverseTypeMap
     return output;
 }
 
-auto Message::reply_command(const MessageType& type) -> MessageType
+auto Message::reply_command(const otx::MessageType& type) -> otx::MessageType
 {
     try {
 
         return reply_message_.at(type);
     } catch (...) {
 
-        return MessageType::badID;
+        return otx::MessageType::badID;
     }
 }
 
-auto Message::Command(const MessageType type) -> UnallocatedCString
+auto Message::Command(const otx::MessageType type) -> UnallocatedCString
 {
     try {
 
@@ -290,18 +310,18 @@ auto Message::Command(const MessageType type) -> UnallocatedCString
     }
 }
 
-auto Message::Type(const UnallocatedCString& type) -> MessageType
+auto Message::Type(const UnallocatedCString& type) -> otx::MessageType
 {
     try {
 
         return message_types_.at(type);
     } catch (...) {
 
-        return MessageType::badID;
+        return otx::MessageType::badID;
     }
 }
 
-auto Message::ReplyCommand(const MessageType type) -> UnallocatedCString
+auto Message::ReplyCommand(const otx::MessageType type) -> UnallocatedCString
 {
     return Command(reply_command(type));
 }

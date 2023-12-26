@@ -11,8 +11,8 @@
 
 #include "internal/otx/blind/Mint.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/util/Time.hpp"
 

@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
+
+#include "opentxs/network/zeromq/socket/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::zeromq::socket
 {
-enum class Type : std::uint8_t {
+enum class Type : std::underlying_type_t<Type> {
     Error = 0,
     Request = 1,
     Reply = 2,

@@ -6,16 +6,8 @@
 add_subdirectory(message)
 
 libopentxs_add_public_header("network/blockchain/bitcoin" "CompactSize.hpp")
-libopentxs_add_public_header("network/blockchain/bitcoin" "Service.hpp")
-libopentxs_add_public_header("network/blockchain/bitcoin" "Types.hpp")
 
-target_sources(
-  opentxs-common
-  PRIVATE
-    "Common.cpp"
-    "CompactSize.cpp"
-    "CompactSize.hpp"
-)
+target_sources(opentxs-common PRIVATE "CompactSize.cpp" "CompactSize.hpp")
 
 if(OT_BLOCKCHAIN_EXPORT)
   target_sources(

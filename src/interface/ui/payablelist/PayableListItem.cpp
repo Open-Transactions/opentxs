@@ -48,7 +48,7 @@ PayableListItem::PayableListItem(
 
 auto PayableListItem::PaymentCode() const noexcept -> UnallocatedCString
 {
-    Lock lock{lock_};
+    const auto lock = Lock{lock_};
 
     return payment_code_;
 }
@@ -57,7 +57,7 @@ auto PayableListItem::reindex(
     const ContactListSortKey& key,
     CustomData& custom) noexcept -> bool
 {
-    Lock lock{lock_};
+    const auto lock = Lock{lock_};
 
     return reindex(lock, key, custom);
 }

@@ -151,7 +151,7 @@ TEST(Data, copy_from_pimpl)
 {
     auto one = ot::ByteArray{"abcd", 4};
     auto other = ot::ByteArray{one};
-    ot::UnallocatedCString value(
+    const ot::UnallocatedCString value(
         static_cast<const char*>(other.data()), other.size());
     ASSERT_EQ(value, "abcd");
 }
@@ -160,7 +160,7 @@ TEST(Data, copy_from_interface)
 {
     auto one = ot::ByteArray{"abcd", 4};
     auto other = ot::ByteArray{one};
-    ot::UnallocatedCString value(
+    const ot::UnallocatedCString value(
         static_cast<const char*>(other.data()), other.size());
     ASSERT_EQ(value, "abcd");
 }

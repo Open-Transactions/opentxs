@@ -19,7 +19,6 @@
 #include <utility>
 
 #include "internal/network/otdht/Node.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
@@ -29,6 +28,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"

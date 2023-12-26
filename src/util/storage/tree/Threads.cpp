@@ -24,13 +24,13 @@
 #include "internal/serialization/protobuf/verify/StorageBlockchainTransactions.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -70,7 +70,7 @@ auto Threads::AddIndex(
     const blockchain::block::TransactionHash& txid,
     const identifier::Generic& thread) noexcept -> bool
 {
-    Lock lock(blockchain_.lock_);
+    const auto lock = Lock{blockchain_.lock_};
 
     assert_false(txid.empty());
 
@@ -100,7 +100,7 @@ auto Threads::BlockchainThreadMap(
     -> UnallocatedVector<identifier::Generic>
 {
     auto output = UnallocatedVector<identifier::Generic>{};
-    Lock lock(blockchain_.lock_);
+    const auto lock = Lock{blockchain_.lock_};
 
     try {
         const auto& data = blockchain_.map_.at(txid);
@@ -115,7 +115,7 @@ auto Threads::BlockchainTransactionList() const noexcept
     -> UnallocatedVector<ByteArray>
 {
     auto output = UnallocatedVector<ByteArray>{};
-    Lock lock(blockchain_.lock_);
+    const auto lock = Lock{blockchain_.lock_};
     std::ranges::transform(
         blockchain_.map_,
         std::back_inserter(output),
@@ -149,7 +149,7 @@ auto Threads::create(
     auto& node = threads_[id];
 
     if (false == bool(node)) {
-        Lock threadLock(newThread->write_lock_);
+        const auto threadLock = Lock{newThread->write_lock_};
         newThread->save(threadLock);
         node.swap(newThread);
         save(lock);
@@ -165,7 +165,7 @@ auto Threads::Create(
     const UnallocatedSet<identifier::Generic>& participants)
     -> identifier::Generic
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return create(lock, id, participants);
 }
@@ -206,14 +206,14 @@ auto Threads::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
 
 auto Threads::Exists(const identifier::Generic& id) const -> bool
 {
-    std::unique_lock<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return item_map_.contains(id);
 }
 
 auto Threads::FindAndDeleteItem(const identifier::Generic& itemID) -> bool
 {
-    std::unique_lock<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     bool found = false;
 
@@ -283,7 +283,7 @@ auto Threads::List(const bool unreadOnly) const -> ObjectList
     if (false == unreadOnly) { return ot_super::List(); }
 
     ObjectList output{};
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     for (const auto& it : item_map_) {
         const auto& threadID = it.first;
@@ -303,8 +303,9 @@ auto Threads::List(const bool unreadOnly) const -> ObjectList
 auto Threads::mutable_Thread(const identifier::Generic& id)
     -> Editor<tree::Thread>
 {
-    std::function<void(tree::Thread*, std::unique_lock<std::mutex>&)> callback =
-        [&](tree::Thread* in, std::unique_lock<std::mutex>& lock) -> void {
+    const std::function<void(tree::Thread*, std::unique_lock<std::mutex>&)>
+        callback =
+            [&](tree::Thread* in, std::unique_lock<std::mutex>& lock) -> void {
         this->save(in, lock, id);
     };
 
@@ -313,7 +314,7 @@ auto Threads::mutable_Thread(const identifier::Generic& id)
 
 auto Threads::thread(const identifier::Generic& id) const -> tree::Thread*
 {
-    std::unique_lock<std::mutex> lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     return thread(id, lock);
 }
@@ -355,7 +356,7 @@ auto Threads::Rename(
     const identifier::Generic& existingID,
     const identifier::Generic& newID) -> bool
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
 
     auto it = item_map_.find(existingID);
 
@@ -387,7 +388,7 @@ auto Threads::Rename(
         return false;
     }
 
-    newThread.reset(oldThread.release());
+    newThread = std::move(oldThread);
     threads_.erase(threadItem);
     threads_.emplace(newID, std::unique_ptr<tree::Thread>(newThread.release()));
     item_map_.erase(it);
@@ -400,7 +401,7 @@ auto Threads::RemoveIndex(
     const blockchain::block::TransactionHash& txid,
     const identifier::Generic& thread) noexcept -> void
 {
-    Lock lock(blockchain_.lock_);
+    const auto lock = Lock{blockchain_.lock_};
     auto it = blockchain_.map_.find(txid);
 
     if (blockchain_.map_.end() != it) {
@@ -455,7 +456,7 @@ auto Threads::serialize() const -> proto::StorageNymList
         }
     }
 
-    Lock lock(blockchain_.lock_);
+    const auto lock = Lock{blockchain_.lock_};
 
     for (const auto& [txid, data] : blockchain_.map_) {
         if (data.empty()) { continue; }

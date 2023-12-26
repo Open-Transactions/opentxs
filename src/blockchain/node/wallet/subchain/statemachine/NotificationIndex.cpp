@@ -56,8 +56,9 @@ NotificationIndex::NotificationIndex(
 {
 }
 
-auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
-    const noexcept -> std::optional<Bip32Index>
+auto NotificationIndex::need_index(
+    const std::optional<crypto::Bip32Index>& current) const noexcept
+    -> std::optional<crypto::Bip32Index>
 {
     const auto version = code_.Version();
 
@@ -67,7 +68,7 @@ auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
             version)
             .Flush();
 
-        return static_cast<Bip32Index>(version);
+        return static_cast<crypto::Bip32Index>(version);
     } else {
         log_()("Payment code ")(pc_display_)(" already indexed").Flush();
 
@@ -76,8 +77,8 @@ auto NotificationIndex::need_index(const std::optional<Bip32Index>& current)
 }
 
 auto NotificationIndex::process(
-    const std::optional<Bip32Index>& current,
-    Bip32Index target,
+    const std::optional<crypto::Bip32Index>& current,
+    crypto::Bip32Index target,
     allocator_type monotonic) noexcept -> void
 {
     auto elements = database::ElementMap{monotonic};

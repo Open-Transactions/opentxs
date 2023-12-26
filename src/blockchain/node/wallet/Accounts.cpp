@@ -24,6 +24,8 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -41,7 +43,7 @@
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
@@ -53,8 +55,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet
@@ -153,7 +153,7 @@ Accounts::Imp::Imp(
           std::move(node),
           std::move(batch),
           network::zeromq::MakeArbitraryInproc(alloc),
-          std::move(alloc))
+          alloc)
 {
 }
 

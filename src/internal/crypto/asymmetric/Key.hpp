@@ -7,9 +7,10 @@
 
 #include <cstdint>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/crypto/Types.internal.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

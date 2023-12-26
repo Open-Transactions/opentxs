@@ -57,11 +57,13 @@ auto Cfcheckpt::get() noexcept -> std::span<value_type>
 
 auto Cfcheckpt::operator=(const Cfcheckpt& rhs) noexcept -> Cfcheckpt&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Cfcheckpt::operator=(Cfcheckpt&& rhs) noexcept -> Cfcheckpt&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

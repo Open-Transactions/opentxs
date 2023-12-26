@@ -58,11 +58,13 @@ auto Inv::get() noexcept -> std::span<value_type>
 
 auto Inv::operator=(const Inv& rhs) noexcept -> Inv&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Inv::operator=(Inv&& rhs) noexcept -> Inv&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

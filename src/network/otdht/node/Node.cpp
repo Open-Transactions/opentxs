@@ -5,13 +5,9 @@
 
 #include "internal/network/otdht/Node.hpp"  // IWYU pragma: associated
 
-#include <frozen/bits/algorithms.h>
-#include <frozen/unordered_map.h>
 #include <functional>  // IWYU pragma: keep
-#include <string_view>
 #include <utility>
 
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "network/otdht/node/Actor.hpp"
@@ -22,41 +18,6 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
-
-namespace opentxs::network::otdht
-{
-using namespace std::literals;
-
-auto print(NodeJob in) noexcept -> std::string_view
-{
-    using enum NodeJob;
-    static constexpr auto map =
-        frozen::make_unordered_map<NodeJob, std::string_view>({
-            {shutdown, "shutdown"sv},
-            {chain_state, "chain_state"sv},
-            {new_cfilter, "new_cfilter"sv},
-            {new_peer, "new_peer"sv},
-            {blockchain, "blockchain"sv},
-            {add_listener, "add_listener"sv},
-            {connect_peer_manager, "connect_peer_manager"sv},
-            {disconnect_peer_manager, "disconnect_peer_manager"sv},
-            {connect_peer, "connect_peer"sv},
-            {disconnect_peer, "disconnect_peer"sv},
-            {registration, "registration"sv},
-            {init, "init"sv},
-            {statemachine, "statemachine"sv},
-        });
-
-    if (const auto* i = map.find(in); map.end() != i) {
-
-        return i->second;
-    } else {
-        LogAbort()(__FUNCTION__)(": invalid network::otdht::NodeJob: ")(
-            static_cast<OTZMQWorkType>(in))
-            .Abort();
-    }
-}
-}  // namespace opentxs::network::otdht
 
 namespace opentxs::network::otdht
 {

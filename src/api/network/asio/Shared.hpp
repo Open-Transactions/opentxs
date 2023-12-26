@@ -21,10 +21,10 @@
 #include "api/network/asio/Data.hpp"
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/asio/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/network/asio/Endpoint.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

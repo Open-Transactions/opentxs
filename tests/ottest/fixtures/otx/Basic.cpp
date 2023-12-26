@@ -103,7 +103,7 @@ auto Basic::find_id(
     const ot::UnallocatedCString& id,
     const ot::ObjectList& list) -> bool
 {
-    matchID matchid(id);
+    const matchID matchid(id);
 
     return std::find_if(list.begin(), list.end(), matchid) != list.end();
 }
@@ -226,7 +226,8 @@ void Basic::create_unit_definition_1()
             UNIT_DEFINITION_UNIT_OF_ACCOUNT,
             1,
             reason_c1_);
-    EXPECT_EQ(ot::contract::UnitType::Currency, asset_contract_1_->Type());
+    EXPECT_EQ(
+        ot::contract::UnitDefinitionType::Currency, asset_contract_1_->Type());
 
     if (asset_contract_1_->ID().empty()) {
         throw std::runtime_error("Failed to create unit definition 1");
@@ -246,7 +247,8 @@ void Basic::create_unit_definition_2()
             UNIT_DEFINITION_UNIT_OF_ACCOUNT_2,
             1,
             reason_c2_);
-    EXPECT_EQ(ot::contract::UnitType::Currency, asset_contract_2_->Type());
+    EXPECT_EQ(
+        ot::contract::UnitDefinitionType::Currency, asset_contract_2_->Type());
 
     if (asset_contract_2_->ID().empty()) {
         throw std::runtime_error("Failed to create unit definition 2");

@@ -9,6 +9,7 @@
 #include <memory>
 #include <shared_mutex>
 #include <stdexcept>
+#include <utility>
 
 #include "internal/util/Mutex.hpp"
 
@@ -79,7 +80,7 @@ public:
     {
         p_ = rhs.p_;
         rhs.p_ = nullptr;
-        lock_.reset(rhs.lock_.release());
+        lock_ = std::move(rhs.lock_);
 
         return *this;
     }

@@ -76,6 +76,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
 
             if (false == save) { continue; }
 
+            // NOLINTBEGIN(clang-analyzer-core.CallAndMessage)
             const auto proto = [&]() {
                 auto out = block::internal::Header::SerializedType{};
 
@@ -92,6 +93,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
 
                 return out;
             }();
+            // NOLINTEND(clang-analyzer-core.CallAndMessage)
             const auto bytes = [&]() {
                 auto out = ByteArray{};
 

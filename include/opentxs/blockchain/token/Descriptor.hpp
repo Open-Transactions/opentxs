@@ -11,7 +11,7 @@
 #include <compare>
 #include <cstddef>
 
-#include "opentxs/Export.hpp"  // IWYU pragma: keep
+#include "opentxs/Export.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/token/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"

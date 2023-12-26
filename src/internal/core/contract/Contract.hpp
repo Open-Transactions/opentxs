@@ -18,18 +18,18 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
+#include "opentxs/contract/Types.hpp"
+#include "opentxs/contract/UnitDefinitionType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/Signable.hpp"
-#include "opentxs/core/contract/Types.hpp"
-#include "opentxs/core/contract/UnitType.hpp"          // IWYU pragma: keep
 #include "opentxs/core/contract/peer/RequestType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -108,7 +108,7 @@ struct Unit final : virtual public opentxs::contract::Unit,
     }
     auto Serialize(proto::UnitDefinition& output, bool includeNym = false) const
         -> bool final;
-    auto Type() const -> contract::UnitType final { return {}; }
+    auto Type() const -> contract::UnitDefinitionType final { return {}; }
     auto UnitOfAccount() const -> opentxs::UnitType final { return {}; }
     auto VisitAccountRecords(
         const UnallocatedCString&,
@@ -181,8 +181,10 @@ namespace opentxs
 {
 auto translate(const contract::ProtocolVersion in) noexcept
     -> proto::ProtocolVersion;
-auto translate(const contract::UnitType in) noexcept -> proto::UnitType;
+auto translate(const contract::UnitDefinitionType in) noexcept
+    -> proto::UnitType;
 auto translate(const proto::ProtocolVersion in) noexcept
     -> contract::ProtocolVersion;
-auto translate(const proto::UnitType in) noexcept -> contract::UnitType;
+auto translate(const proto::UnitType in) noexcept
+    -> contract::UnitDefinitionType;
 }  // namespace opentxs

@@ -19,14 +19,13 @@
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/blockchain/Types.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

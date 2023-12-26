@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/blockchain/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::blockchain
 {
-enum class Category : TypeEnum {
+enum class Category : std::underlying_type_t<Category> {
     unknown_category = 0,
     output_based = 1,
     balance_based = 2,

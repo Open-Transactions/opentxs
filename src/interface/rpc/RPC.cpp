@@ -95,15 +95,15 @@
 #include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/PaymentCode.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Language.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/SeedStyle.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"
@@ -201,7 +201,8 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
     [[maybe_unused]] const auto& server = *pServer
 
 #define INIT_OTX(a, ...)                                                       \
-    api::session::OTX::Result result{otx::LastReplyStatus::NotSent, nullptr};  \
+    auto result =                                                              \
+        api::session::OTX::Result{otx::LastReplyStatus::NotSent, nullptr};     \
     [[maybe_unused]] const auto& [status, pReply] = result;                    \
     [[maybe_unused]] auto [taskID, future] = client.OTX().a(__VA_ARGS__);      \
     [[maybe_unused]] const auto ready = (0 != taskID)
@@ -285,7 +286,7 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
 
             auto payment = std::shared_ptr<const OTPayment>{};
 
-            switch (translate(paymentWorkflow.type())) {
+            switch (opentxs::translate(paymentWorkflow.type())) {
                 case otx::client::PaymentWorkflowType::IncomingCheque:
                 case otx::client::PaymentWorkflowType::IncomingInvoice: {
                     auto chequeState =
@@ -329,7 +330,9 @@ auto RPC::accept_pending_payments(const proto::RPCCommand& command) const
                 continue;
             }
 
+            // NOLINTBEGIN(misc-const-correctness)
             INIT_OTX(DepositPayment, nymID, destinationaccountID, payment);
+            // NOLINTEND(misc-const-correctness)
 
             if (false == ready) {
                 add_output_task(output, "");
@@ -484,7 +487,9 @@ auto RPC::create_account(const proto::RPCCommand& command) const
 
     if (0 < command.identifier_size()) { label = command.identifier(0); }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterAccount, ownerID, notaryID, unitID, label);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -531,7 +536,7 @@ auto RPC::create_compatible_account(const proto::RPCCommand& command) const
             return out;
         }();
 
-        switch (translate(workflow.type())) {
+        switch (opentxs::translate(workflow.type())) {
             case otx::client::PaymentWorkflowType::IncomingCheque: {
                 auto chequeState =
                     opentxs::api::session::Workflow::InstantiateCheque(
@@ -560,7 +565,9 @@ auto RPC::create_compatible_account(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterAccount, ownerID, notaryID, unitID, "");
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -620,8 +627,10 @@ auto RPC::create_issuer_account(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(
         IssueUnitDefinition, ownerID, notaryID, unitID, UnitType::Error, label);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -938,7 +947,7 @@ auto RPC::get_compatible_accounts(const proto::RPCCommand& command) const
             return out;
         }();
 
-        switch (translate(workflow.type())) {
+        switch (opentxs::translate(workflow.type())) {
             case otx::client::PaymentWorkflowType::IncomingCheque:
             case otx::client::PaymentWorkflowType::IncomingInvoice: {
                 auto chequeState =
@@ -1065,7 +1074,7 @@ auto RPC::get_pending_payments(const proto::RPCCommand& command) const
             auto accountEventType = proto::ACCOUNTEVENT_INCOMINGCHEQUE;
 
             if (otx::client::PaymentWorkflowType::IncomingInvoice ==
-                translate(paymentWorkflow.type())) {
+                opentxs::translate(paymentWorkflow.type())) {
                 accountEventType = proto::ACCOUNTEVENT_INCOMINGINVOICE;
             }
 
@@ -1600,6 +1609,7 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
             const auto notary =
                 client.Storage().Internal().AccountServer(sourceaccount);
 
+            // NOLINTBEGIN(misc-const-correctness)
             INIT_OTX(
                 SendTransfer,
                 sender,
@@ -1608,6 +1618,7 @@ auto RPC::move_funds(const proto::RPCCommand& command) const
                 targetaccount,
                 factory::Amount(movefunds.amount()),
                 movefunds.memo());
+            // NOLINTEND(misc-const-correctness)
 
             if (false == ready) {
                 add_output_status(output, proto::RPCRESPONSE_ERROR);
@@ -1892,7 +1903,9 @@ auto RPC::register_nym(const proto::RPCCommand& command) const
         return output;
     }
 
+    // NOLINTBEGIN(misc-const-correctness)
     INIT_OTX(RegisterNymPublic, ownerID, notaryID, true);
+    // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
         add_output_status(output, proto::RPCRESPONSE_REGISTER_NYM_FAILED);

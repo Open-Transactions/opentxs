@@ -72,7 +72,7 @@ struct BlockchainDestinationValidator final : public Super {
 
         const auto type = *chains.begin();
         const auto chain = print(type);
-        const auto validChain = (0u < chains.count(chain_));
+        const auto validChain = (chains.contains(chain_));
 
         switch (style) {
             using enum blockchain::crypto::AddressStyle;

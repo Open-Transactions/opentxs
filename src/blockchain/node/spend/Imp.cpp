@@ -55,10 +55,12 @@
 #include "opentxs/blockchain/crypto/Wallet.hpp"
 #include "opentxs/blockchain/node/Funding.hpp"     // IWYU pragma: keep
 #include "opentxs/blockchain/node/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -229,7 +231,7 @@ auto SpendPrivate::add_payment_code(
     const PaymentCode& recipient,
     const Amount& amount,
     const identifier::Account& subaccount,
-    Bip32Index index,
+    crypto::Bip32Index index,
     ReadView pubkey) noexcept(false) -> void
 {
     validate_payment_code(recipient);
@@ -410,7 +412,7 @@ auto SpendPrivate::deserialize_output(
             subaccount.Remote(),
             amount,
             subaccountID,
-            static_cast<Bip32Index>(in.index()),
+            static_cast<crypto::Bip32Index>(in.index()),
             in.pubkey());
     } else {
         throw std::runtime_error{"unsupported output type"};
@@ -445,7 +447,7 @@ auto SpendPrivate::deserialize_sweep(
         sweep_key_.emplace(
             api_.Factory().AccountIDFromBase58(key.subaccount()),
             static_cast<crypto::Subchain>(key.subchain()),
-            static_cast<Bip32Index>(key.index()));
+            static_cast<crypto::Bip32Index>(key.index()));
     } else {
         policy_ = SweepAccount;
     }

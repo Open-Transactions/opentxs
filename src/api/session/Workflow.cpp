@@ -27,7 +27,6 @@
 #include "internal/network/zeromq/message/Message.hpp"
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Push.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Message.hpp"
@@ -39,6 +38,7 @@
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
@@ -54,24 +54,24 @@
 #include "opentxs/api/session/internal.factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs
@@ -237,7 +237,7 @@ auto Workflow::InstantiateCheque(
         case PaymentWorkflowType::IncomingCheque:
         case PaymentWorkflowType::OutgoingInvoice:
         case PaymentWorkflowType::IncomingInvoice: {
-            cheque.reset(api.Factory().Internal().Session().Cheque().release());
+            cheque = api.Factory().Internal().Session().Cheque();
 
             assert_false(nullptr == cheque);
 
@@ -337,8 +337,7 @@ auto Workflow::InstantiateTransfer(
 
             if (serialized.empty()) { return output; }
 
-            transfer.reset(
-                api.Factory().Internal().Session().Item(serialized).release());
+            transfer = api.Factory().Internal().Session().Item(serialized);
 
             if (false == bool(transfer)) {
                 LogError()()("Failed to instantiate transfer").Flush();
@@ -487,7 +486,7 @@ auto Workflow::AbortTransfer(
     const UnallocatedSet<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, type, nymID, transfer);
 
     if (false == bool(workflow)) {
@@ -547,7 +546,7 @@ auto Workflow::AcceptTransfer(
 
     const UnallocatedSet<PaymentWorkflowType> type{
         PaymentWorkflowType::IncomingTransfer};
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, type, nymID, *transfer);
 
     if (false == bool(workflow)) {
@@ -585,7 +584,7 @@ auto Workflow::AcknowledgeTransfer(
     const UnallocatedSet<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, type, nymID, transfer);
 
     if (false == bool(workflow)) {
@@ -627,7 +626,7 @@ auto Workflow::AllocateCash(
     const identifier::Nym& id,
     const otx::blind::Purse& purse) const -> identifier::Generic
 {
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     auto workflowID = api_.Factory().IdentifierFromRandom();
     proto::PaymentWorkflow workflow{};
     workflow.set_version(
@@ -1134,7 +1133,7 @@ auto Workflow::CancelCheque(
     if (false == isCheque(cheque)) { return false; }
 
     const auto& nymID = cheque.GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::OutgoingCheque}, nymID, cheque);
 
@@ -1193,7 +1192,7 @@ auto Workflow::ClearCheque(
     if (false == isCheque(*cheque)) { return false; }
 
     const auto& nymID = cheque->GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::OutgoingCheque}, nymID, *cheque);
 
@@ -1291,7 +1290,7 @@ auto Workflow::ClearTransfer(
     const UnallocatedSet<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, type, nymID, *transfer);
 
     if (false == bool(workflow)) {
@@ -1384,7 +1383,7 @@ auto Workflow::CompleteTransfer(
     const UnallocatedSet<PaymentWorkflowType> type{
         isInternal ? PaymentWorkflowType::InternalTransfer
                    : PaymentWorkflowType::OutgoingTransfer};
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, type, nymID, *transfer);
 
     if (false == bool(workflow)) {
@@ -1427,7 +1426,7 @@ auto Workflow::convey_incoming_transfer(
     const identifier::Nym& recipientNymID,
     const Item& transfer) const -> identifier::Generic
 {
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     const auto existing = get_workflow(
         global, {PaymentWorkflowType::IncomingTransfer}, nymID, transfer);
 
@@ -1490,7 +1489,7 @@ auto Workflow::convey_internal_transfer(
     const identifier::Nym& senderNymID,
     const Item& transfer) const -> identifier::Generic
 {
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::InternalTransfer}, nymID, transfer);
 
@@ -1747,7 +1746,7 @@ auto Workflow::CreateTransfer(const Item& transfer, const Message& request)
     const auto& accountID = transfer.GetRealAccountID();
     const bool isInternal =
         isInternalTransfer(accountID, transfer.GetDestinationAcctID());
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     const auto existing = get_workflow(
         global,
         {isInternal ? PaymentWorkflowType::InternalTransfer
@@ -1811,7 +1810,7 @@ auto Workflow::DepositCheque(
 {
     if (false == isCheque(cheque)) { return false; }
 
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::IncomingCheque}, receiver, cheque);
 
@@ -1859,7 +1858,7 @@ auto Workflow::ExpireCheque(
 {
     if (false == isCheque(cheque)) { return false; }
 
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global,
         {PaymentWorkflowType::OutgoingCheque,
@@ -1887,7 +1886,7 @@ auto Workflow::ExportCheque(const opentxs::Cheque& cheque) const -> bool
     if (false == isCheque(cheque)) { return false; }
 
     const auto& nymID = cheque.GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(global, {}, nymID, cheque);
 
     if (false == bool(workflow)) {
@@ -1926,7 +1925,7 @@ auto Workflow::extract_conveyed_time(const proto::PaymentWorkflow& workflow)
 auto Workflow::extract_transfer_from_pending(const OTTransaction& receipt) const
     -> std::unique_ptr<Item>
 {
-    if (transactionType::pending != receipt.GetType()) {
+    if (otx::transactionType::pending != receipt.GetType()) {
         LogError()()("Incorrect receipt type: ")(receipt.GetTypeString())
             .Flush();
 
@@ -1951,7 +1950,7 @@ auto Workflow::extract_transfer_from_pending(const OTTransaction& receipt) const
         return nullptr;
     }
 
-    if (itemType::transfer != transfer->GetType()) {
+    if (otx::itemType::transfer != transfer->GetType()) {
         LogError()()("Invalid transfer item type.").Flush();
 
         return nullptr;
@@ -1964,8 +1963,8 @@ auto Workflow::extract_transfer_from_receipt(
     const OTTransaction& receipt,
     identifier::Nym& depositorNymID) const -> std::unique_ptr<Item>
 {
-    if (transactionType::transferReceipt != receipt.GetType()) {
-        if (transactionType::pending == receipt.GetType()) {
+    if (otx::transactionType::transferReceipt != receipt.GetType()) {
+        if (otx::transactionType::pending == receipt.GetType()) {
             return extract_transfer_from_pending(receipt);
         } else {
             LogError()()("Incorrect receipt type: ")(receipt.GetTypeString())
@@ -1993,7 +1992,7 @@ auto Workflow::extract_transfer_from_receipt(
         return nullptr;
     }
 
-    if (itemType::acceptPending != acceptPending->GetType()) {
+    if (otx::itemType::acceptPending != acceptPending->GetType()) {
         LogError()()("Invalid accept pending item type.").Flush();
 
         return nullptr;
@@ -2028,7 +2027,7 @@ auto Workflow::extract_transfer_from_receipt(
         return nullptr;
     }
 
-    if (transactionType::pending != pending->GetType()) {
+    if (otx::transactionType::pending != pending->GetType()) {
         LogError()()("Invalid pending transaction type.").Flush();
 
         return nullptr;
@@ -2052,7 +2051,7 @@ auto Workflow::extract_transfer_from_receipt(
         return nullptr;
     }
 
-    if (itemType::transfer != transfer->GetType()) {
+    if (otx::itemType::transfer != transfer->GetType()) {
         LogError()()("Invalid transfer item type.").Flush();
 
         return nullptr;
@@ -2069,7 +2068,7 @@ auto Workflow::FinishCheque(
     if (false == isCheque(cheque)) { return false; }
 
     const auto& nymID = cheque.GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::OutgoingCheque}, nymID, cheque);
 
@@ -2141,7 +2140,7 @@ auto Workflow::get_workflow_by_id(
 {
     auto output = get_workflow_by_id(nymID, workflowID);
 
-    if (0 == types.count(translate(output->type()))) {
+    if (false == types.contains(translate(output->type()))) {
         LogError()()("Incorrect type (")(output->type())(") on workflow ")(
             workflowID, api_.Crypto())(" for nym ")(nymID, api_.Crypto())
             .Flush();
@@ -2191,7 +2190,7 @@ auto Workflow::ImportCheque(
         return {};
     }
 
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     const auto existing = get_workflow(
         global, {PaymentWorkflowType::IncomingCheque}, nymID, cheque);
 
@@ -2338,7 +2337,7 @@ auto Workflow::isInternalTransfer(
 
 auto Workflow::isTransfer(const Item& item) -> bool
 {
-    return itemType::transfer == item.GetType();
+    return otx::itemType::transfer == item.GetType();
 }
 
 auto Workflow::List(
@@ -2451,7 +2450,7 @@ auto Workflow::ReceiveCash(
     const otx::blind::Purse& purse,
     const Message& message) const -> identifier::Generic
 {
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     const auto serialized = String::Factory(message);
     const auto* party = message.nym_id_->Get();
     auto workflowID = api_.Factory().IdentifierFromRandom();
@@ -2509,7 +2508,7 @@ auto Workflow::ReceiveCheque(
         return {};
     }
 
-    Lock global(lock_);
+    const auto global = Lock{lock_};
     const auto existing = get_workflow(
         global, {PaymentWorkflowType::IncomingCheque}, nymID, cheque);
 
@@ -2623,7 +2622,7 @@ auto Workflow::SendCash(
     const Message& request,
     const Message* reply) const -> bool
 {
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto pWorkflow = get_workflow_by_id(sender, workflowID);
 
     if (false == bool(pWorkflow)) {
@@ -2676,7 +2675,7 @@ auto Workflow::SendCheque(
     if (false == isCheque(cheque)) { return false; }
 
     const auto& nymID = cheque.GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto workflow = get_workflow(
         global, {PaymentWorkflowType::OutgoingCheque}, nymID, cheque);
 
@@ -2863,7 +2862,7 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const
     }
 
     const auto& nymID = cheque.GetSenderNymID();
-    Lock global(lock_);
+    auto global = Lock{lock_};
     const auto existing = get_workflow(
         global, {PaymentWorkflowType::OutgoingCheque}, nymID, cheque);
 

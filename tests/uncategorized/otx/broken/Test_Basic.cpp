@@ -1091,7 +1091,7 @@ TEST_F(Integration, issue_dollars)
                                   issuer_.Reason());
 
     EXPECT_EQ(UNIT_DEFINITION_CONTRACT_VERSION, contract->Version());
-    EXPECT_EQ(ot::contract::UnitType::Currency, contract->Type());
+    EXPECT_EQ(ot::contract::UnitDefinitionType::Currency, contract->Type());
     EXPECT_EQ(UNIT_DEFINITION_UNIT_OF_ACCOUNT, contract->UnitOfAccount());
     EXPECT_TRUE(unit_id_.empty());
 

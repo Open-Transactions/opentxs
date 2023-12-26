@@ -12,7 +12,7 @@
 
 namespace opentxs::blockchain::token
 {
-enum class Type : std::underlying_type<Type>::type {
+enum class Type : std::underlying_type_t<Type> {
     null = 0,
     slp = 1,
     cashtoken = 2,

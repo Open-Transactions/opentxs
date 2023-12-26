@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_include "opentxs/core/display/Scale.hpp"
+// IWYU pragma: no_include "opentxs/display/Scale.hpp"
 
 #pragma once
 
@@ -14,7 +14,7 @@
 #include <variant>
 
 #include "internal/util/P0330.hpp"
-#include "opentxs/core/display/Types.hpp"
+#include "opentxs/display/Types.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

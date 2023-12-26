@@ -23,8 +23,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -56,8 +56,8 @@ void AccountList::Serialize(Tag& parent) const
     pTag->add_attribute("count", std::to_string(sizeMapAcctIDs));
 
     for (const auto& it : map_acct_ids_) {
-        UnallocatedCString instrumentDefinitionID = it.first;
-        UnallocatedCString accountId = it.second;
+        const UnallocatedCString instrumentDefinitionID = it.first;
+        const UnallocatedCString accountId = it.second;
         assert_true(
             (instrumentDefinitionID.size() > 0) && (accountId.size() > 0));
 

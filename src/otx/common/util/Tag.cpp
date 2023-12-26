@@ -16,7 +16,7 @@ void Tag::add_attribute(
     const UnallocatedCString& str_att_name,
     const char* sz_att_value)
 {
-    UnallocatedCString str_temp(sz_att_value);
+    const UnallocatedCString str_temp(sz_att_value);
 
     add_attribute(str_att_name, str_temp);
 }
@@ -25,7 +25,7 @@ void Tag::add_attribute(
     const UnallocatedCString& str_att_name,
     const UnallocatedCString& str_att_value)
 {
-    std::pair<UnallocatedCString, UnallocatedCString> temp =
+    const std::pair<UnallocatedCString, UnallocatedCString> temp =
         std::make_pair(str_att_name, str_att_value);
 
     attributes_.insert(temp);

@@ -20,7 +20,6 @@
 #include "internal/blockchain/database/Factory.hpp"
 #include "internal/blockchain/node/Config.hpp"
 #include "internal/blockchain/node/Factory.hpp"
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/blockchain/node/Wallet.hpp"
 #include "internal/blockchain/node/filteroracle/FilterOracle.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
@@ -30,6 +29,9 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/BlockchainProfile.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/Blockchain.hpp"
@@ -44,15 +46,13 @@
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/node/FilterOracle.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/PushTransaction.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::node::manager

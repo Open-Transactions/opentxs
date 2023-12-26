@@ -11,7 +11,7 @@
 #include "core/contract/Signable.hpp"
 #include "identity/wot/verification/verification/VerificationPrivate.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/Verification.hpp"

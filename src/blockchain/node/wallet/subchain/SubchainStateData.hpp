@@ -22,7 +22,6 @@
 #include "blockchain/node/wallet/subchain/statemachine/ElementCache.hpp"
 #include "blockchain/node/wallet/subchain/statemachine/Elements.hpp"
 #include "blockchain/node/wallet/subchain/statemachine/MatchCache.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/node/wallet/Reorg.hpp"
 #include "internal/blockchain/node/wallet/ReorgSlave.hpp"
@@ -37,12 +36,13 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -184,7 +184,7 @@ public:
     auto IndexElement(
         const cfilter::Type type,
         const blockchain::crypto::Element& input,
-        const Bip32Index index,
+        const crypto::Bip32Index index,
         database::ElementMap& output) const noexcept -> void;
     auto ProcessBlock(
         const block::Position& position,
@@ -250,7 +250,7 @@ private:
     using Targets = cfilter::Targets;
     using Tested = database::MatchingIndices;
     using HandledReorgs = Set<StateSequence>;
-    using SelectedKeyElement = std::pair<Vector<Bip32Index>, Targets>;
+    using SelectedKeyElement = std::pair<Vector<crypto::Bip32Index>, Targets>;
     using SelectedTxoElement = std::pair<Vector<block::Outpoint>, Targets>;
     using SelectedElements = std::tuple<
         SelectedKeyElement,  // 20 byte

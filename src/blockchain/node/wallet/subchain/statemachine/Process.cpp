@@ -28,6 +28,7 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
@@ -51,7 +52,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::wallet

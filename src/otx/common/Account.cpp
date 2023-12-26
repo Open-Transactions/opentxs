@@ -13,7 +13,6 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/Factory.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Helpers.hpp"
 #include "internal/otx/common/Ledger.hpp"
@@ -34,12 +33,13 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -233,17 +233,14 @@ auto Account::ConsensusHash(
 auto Account::create_box(
     std::unique_ptr<Ledger>& box,
     const identity::Nym& signer,
-    const ledgerType type,
+    const otx::ledgerType type,
     const PasswordPrompt& reason) -> bool
 {
     const auto& nymID = GetNymID();
     const auto& accountID = GetRealAccountID();
     const auto& serverID = GetRealNotaryID();
-    box.reset(api_.Factory()
-                  .Internal()
-                  .Session()
-                  .Ledger(nymID, accountID, serverID)
-                  .release());
+    box =
+        api_.Factory().Internal().Session().Ledger(nymID, accountID, serverID);
 
     if (false == bool(box)) {
         LogError()()("Failed to construct ledger.").Flush();
@@ -447,7 +444,7 @@ auto Account::InitBoxes(
         return false;
     }
 
-    if (false == create_box(inbox, signer, ledgerType::inbox, reason)) {
+    if (false == create_box(inbox, signer, otx::ledgerType::inbox, reason)) {
         LogError()()("Failed to create inbox.").Flush();
 
         return false;
@@ -467,7 +464,7 @@ auto Account::InitBoxes(
         return false;
     }
 
-    if (false == create_box(outbox, signer, ledgerType::outbox, reason)) {
+    if (false == create_box(outbox, signer, otx::ledgerType::outbox, reason)) {
         LogError()()("Failed to create outbox.").Flush();
 
         return false;

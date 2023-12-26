@@ -11,10 +11,10 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/Mutex.hpp"
-#include "opentxs/core/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/display/Definition.hpp"
+#include "opentxs/display/Definition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

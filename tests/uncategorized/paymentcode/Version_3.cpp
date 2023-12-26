@@ -81,7 +81,7 @@ TEST_F(PaymentCode_v3, locators)
 
 TEST_F(PaymentCode_v3, outgoing_btc)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Outgoing(
             alice_pc_public_,
             i,
@@ -103,7 +103,7 @@ TEST_F(PaymentCode_v3, outgoing_btc)
 
 TEST_F(PaymentCode_v3, incoming_btc)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = alice_pc_secret_.Incoming(
             bob_pc_public_,
             i,
@@ -125,7 +125,7 @@ TEST_F(PaymentCode_v3, incoming_btc)
 
 TEST_F(PaymentCode_v3, outgoing_testnet)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = alice_pc_secret_.Outgoing(
             bob_pc_public_,
             i,
@@ -147,7 +147,7 @@ TEST_F(PaymentCode_v3, outgoing_testnet)
 
 TEST_F(PaymentCode_v3, incoming_testnet)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Incoming(
             alice_pc_public_,
             i,
@@ -169,7 +169,7 @@ TEST_F(PaymentCode_v3, incoming_testnet)
 
 TEST_F(PaymentCode_v3, avoid_cross_chain_address_reuse)
 {
-    for (auto i = ot::Bip32Index{0}; i < 10u; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0}; i < 10u; ++i) {
         const auto key = bob_pc_secret_.Outgoing(
             alice_pc_public_,
             i,

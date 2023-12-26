@@ -5,11 +5,13 @@
 
 // IWYU pragma: no_include "opentxs/network/otdht/Block.hpp"
 // IWYU pragma: no_include "opentxs/network/otdht/State.hpp"
+// IWYU pragma: no_include "opentxs/opentxs.hpp"
 
 #pragma once
 
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/util/Container.hpp"
@@ -30,19 +32,15 @@ class State;
 
 namespace opentxs::network::otdht
 {
-using TypeEnum = std::uint32_t;
-
-// IWYU pragma: begin_exports
-enum class MessageType : TypeEnum;  // IWYU pragma: keep
-// IWYU pragma: end_exports
-
 using StateData = Vector<otdht::State>;
 using SyncData = Vector<otdht::Block>;
+
+enum class MessageType : std::uint32_t;  // IWYU pragma: export
 
 OPENTXS_EXPORT auto print(MessageType in) noexcept -> std::string_view;
 
 constexpr auto value(MessageType type) noexcept
 {
-    return static_cast<TypeEnum>(type);
+    return static_cast<std::underlying_type_t<MessageType>>(type);
 }
 }  // namespace opentxs::network::otdht

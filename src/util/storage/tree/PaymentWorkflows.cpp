@@ -21,13 +21,13 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/StoragePaymentWorkflows.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"              // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 
@@ -81,7 +81,7 @@ void PaymentWorkflows::add_state_index(
 
 auto PaymentWorkflows::Delete(const identifier::Generic& id) -> bool
 {
-    Lock lock(write_lock_);
+    auto lock = Lock{write_lock_};
     delete_by_value(id);
     lock.unlock();
 
@@ -108,7 +108,7 @@ auto PaymentWorkflows::GetState(const identifier::Generic& workflowID) const
         otx::client::PaymentWorkflowType::Error,
         otx::client::PaymentWorkflowState::Error};
     auto& [outType, outState] = output;
-    Lock lock(write_lock_);
+    auto lock = Lock{write_lock_};
     const auto& it = workflow_state_map_.find(workflowID);
     const bool found = workflow_state_map_.end() != it;
     lock.unlock();
@@ -157,7 +157,7 @@ auto PaymentWorkflows::init(const Hash& hash) noexcept(false) -> void
                     archived_.emplace(factory_.IdentifierFromBase58(it));
                 }
 
-                Lock lock(write_lock_);
+                const auto lock = Lock{write_lock_};
 
                 for (const auto& it : proto.types()) {
                     const auto workflowID =
@@ -178,7 +178,7 @@ auto PaymentWorkflows::init(const Hash& hash) noexcept(false) -> void
 auto PaymentWorkflows::ListByAccount(const identifier::Account& accountID) const
     -> PaymentWorkflows::Workflows
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto it = account_workflow_map_.find(accountID);
 
     if (account_workflow_map_.end() == it) { return {}; }
@@ -189,7 +189,7 @@ auto PaymentWorkflows::ListByAccount(const identifier::Account& accountID) const
 auto PaymentWorkflows::ListByUnit(const identifier::UnitDefinition& accountID)
     const -> PaymentWorkflows::Workflows
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto it = unit_workflow_map_.find(accountID);
 
     if (unit_workflow_map_.end() == it) { return {}; }
@@ -202,7 +202,7 @@ auto PaymentWorkflows::ListByState(
     otx::client::PaymentWorkflowState state) const
     -> PaymentWorkflows::Workflows
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto it = state_workflow_map_.find(State{type, state});
 
     if (state_workflow_map_.end() == it) { return {}; }
@@ -223,7 +223,7 @@ auto PaymentWorkflows::Load(
 auto PaymentWorkflows::LookupBySource(const identifier::Generic& sourceID) const
     -> identifier::Generic
 {
-    Lock lock(write_lock_);
+    const auto lock = Lock{write_lock_};
     const auto it = item_workflow_map_.find(sourceID);
 
     if (item_workflow_map_.end() == it) { return {}; }
@@ -347,8 +347,8 @@ auto PaymentWorkflows::Store(
     const proto::PaymentWorkflow& data,
     UnallocatedCString& plaintext) -> bool
 {
-    Lock lock(write_lock_);
-    UnallocatedCString alias;
+    const auto lock = Lock{write_lock_};
+    const UnallocatedCString alias;
     const auto id = factory_.IdentifierFromBase58(data.id());
     delete_by_value(id);
 

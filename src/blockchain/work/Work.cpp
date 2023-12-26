@@ -12,10 +12,10 @@
 #include "blockchain/work/WorkPrivate.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -147,11 +147,13 @@ auto Work::IsNull() const noexcept -> bool { return imp_->IsNull(); }
 
 auto Work::operator=(const Work& rhs) noexcept -> Work&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Work::operator=(Work&& rhs) noexcept -> Work&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

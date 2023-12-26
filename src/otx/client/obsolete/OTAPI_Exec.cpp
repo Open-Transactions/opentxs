@@ -29,6 +29,8 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Time.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -36,15 +38,13 @@
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
 #include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -151,7 +151,7 @@ auto OTAPI_Exec::ProposePaymentPlan(
         angelSenderAcctId = api_.Factory().AccountIDFromBase58(SENDER_ACCT_ID);
     }
 
-    std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
+    const std::unique_ptr<OTPaymentPlan> pPlan(ot_api_.ProposePaymentPlan(
         api_.Factory().NotaryIDFromBase58(NOTARY_ID),
         VALID_FROM,  // Default (0) == NOW
         VALID_TO,    // Default (0) == no expiry / cancel
@@ -376,7 +376,7 @@ auto OTAPI_Exec::ConfirmPaymentPlan(
         LogConsole()()("Failure loading payment plan from string.").Flush();
         return {};
     }
-    bool bConfirmed = ot_api_.ConfirmPaymentPlan(
+    const bool bConfirmed = ot_api_.ConfirmPaymentPlan(
         theNotaryID,
         theSenderNymID,
         theSenderAcctID,
@@ -2525,7 +2525,7 @@ auto OTAPI_Exec::Basket_GetMemberType(
 
     auto theOutputMemberType = identifier::UnitDefinition{};
 
-    bool bGotType = ot_api_.GetBasketMemberType(
+    const bool bGotType = ot_api_.GetBasketMemberType(
         theInstrumentDefinitionID, nIndex, theOutputMemberType);
     if (!bGotType) { return {}; }
 
@@ -2713,7 +2713,7 @@ auto OTAPI_Exec::GenerateBasketExchange(
     std::int32_t nTransferMultiple = 1;  // Just a default value.
 
     if (TRANSFER_MULTIPLE > 0) { nTransferMultiple = TRANSFER_MULTIPLE; }
-    std::unique_ptr<Basket> pBasket(ot_api_.GenerateBasketExchange(
+    const std::unique_ptr<Basket> pBasket(ot_api_.GenerateBasketExchange(
         theNotaryID,
         theNymID,
         theBasketInstrumentDefinitionID,

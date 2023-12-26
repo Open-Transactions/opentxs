@@ -5,16 +5,17 @@
 
 #include "blockchain/node/stats/Data.hpp"  // IWYU pragma: associated
 
-#include "internal/blockchain/node/Types.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
+#include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
-#include "opentxs/network/zeromq/socket/SocketType.hpp"
+#include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::stats
 {

@@ -16,8 +16,8 @@
 #include <functional>
 #include <utility>
 
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/UnitType.hpp"          // IWYU pragma: keep
+#include "opentxs/Types.hpp"
+#include "opentxs/UnitType.hpp"               // IWYU pragma: keep
 #include "opentxs/identity/IdentityType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/ClaimType.hpp"  // IWYU pragma: keep

@@ -39,7 +39,7 @@ auto PaymentTasks::cleanup() -> bool
 {
     UnallocatedVector<TaskMap::iterator> finished;
 
-    Lock lock(decision_lock_);
+    auto lock = Lock{decision_lock_};
 
     for (auto i = tasks_.begin(); i != tasks_.end(); ++i) {
         auto& task = i->second;
@@ -79,7 +79,7 @@ auto PaymentTasks::error_task() -> PaymentTasks::BackgroundTask
 auto PaymentTasks::GetAccountLock(const identifier::UnitDefinition& unit)
     -> std::mutex&
 {
-    Lock lock(unit_lock_);
+    const auto lock = Lock{unit_lock_};
 
     return account_lock_[unit];
 }
@@ -132,9 +132,9 @@ auto PaymentTasks::PaymentTasks::Queue(const DepositPaymentTask& task)
     }
 
     const auto id = get_payment_id(*pPayment);
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
 
-    if (0 < tasks_.count(id)) {
+    if (tasks_.contains(id)) {
         LogVerbose()("Payment ")(id, parent_.api().Crypto())(" already queued")
             .Flush();
 

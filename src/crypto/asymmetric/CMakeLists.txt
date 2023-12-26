@@ -3,16 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+libopentxs_add_public_header("crypto/asymmetric" "Key.hpp")
+
 add_subdirectory(base)
 add_subdirectory(key)
-
-libopentxs_add_public_header("crypto/asymmetric" "Algorithm.hpp")
-libopentxs_add_public_header("crypto/asymmetric" "Mode.hpp")
-libopentxs_add_public_header("crypto/asymmetric" "Role.hpp")
-libopentxs_add_public_header("crypto/asymmetric" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE "${opentxs_SOURCE_DIR}/src/internal/crypto/asymmetric/Factory.hpp"
-          "Common.cpp"
 )

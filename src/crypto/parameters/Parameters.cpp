@@ -13,10 +13,10 @@
 #include "crypto/parameters/Imp.hpp"
 #include "internal/crypto/Parameters.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/ParameterType.hpp"         // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/identity/CredentialType.hpp"   // IWYU pragma: keep
 #include "opentxs/identity/SourceProofType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/SourceType.hpp"       // IWYU pragma: keep

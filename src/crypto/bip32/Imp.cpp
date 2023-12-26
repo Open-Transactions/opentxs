@@ -26,12 +26,13 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/Bip32Child.hpp"            // IWYU pragma: keep
+#include "opentxs/crypto/EcdsaCurve.hpp"            // IWYU pragma: keep
 #include "opentxs/crypto/HashType.hpp"              // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -297,7 +298,8 @@ auto Bip32::Imp::DeserializePrivate(
         return {};
     }
 
-    bool output = extract(input, network, depth, parent, index, chainCode);
+    const bool output =
+        extract(input, network, depth, parent, index, chainCode);
 
     if (std::byte(0) != input.get()[45]) {
         LogError()()("Invalid padding bit").Flush();

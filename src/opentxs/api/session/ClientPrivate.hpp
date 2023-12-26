@@ -11,6 +11,7 @@
 
 #include "internal/otx/client/Pair.hpp"
 #include "internal/otx/client/ServerAction.hpp"
+#include "opentxs/Types.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/SessionPrivate.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/api/session/ZeroMQ.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

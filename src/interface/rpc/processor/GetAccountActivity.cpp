@@ -23,8 +23,8 @@
 #include "opentxs/api/session/UI.hpp"
 #include "opentxs/api/session/Workflow.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/interface/rpc/AccountEventType.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/ResponseCode.hpp"      // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"

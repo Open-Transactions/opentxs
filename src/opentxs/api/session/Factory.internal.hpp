@@ -23,31 +23,30 @@
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/crypto/Envelope.hpp"
 #include "internal/crypto/key/Keypair.hpp"
-#include "internal/otx/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/Types.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Time.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -504,7 +503,7 @@ public:
         -> contract::peer::request::Faucet = 0;
     virtual auto Item(
         const OTTransaction& theOwner,
-        itemType theType,
+        otx::itemType theType,
         const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> = 0;
     virtual auto Item(const String& serialized) const
@@ -523,7 +522,7 @@ public:
     virtual auto Item(
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
-        itemType theType,
+        otx::itemType theType,
         const identifier::Account& pDestinationAcctID) const
         -> std::unique_ptr<opentxs::Item> = 0;
     virtual auto Item(
@@ -537,9 +536,9 @@ public:
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
     virtual auto Keypair(
         const opentxs::crypto::SeedID& fingerprint,
-        const Bip32Index nym,
-        const Bip32Index credset,
-        const Bip32Index credindex,
+        const opentxs::crypto::Bip32Index nym,
+        const opentxs::crypto::Bip32Index credset,
+        const opentxs::crypto::Bip32Index credindex,
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
@@ -561,7 +560,7 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Account& theAcctID,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) const -> std::unique_ptr<opentxs::Ledger> = 0;
     virtual auto Ledger(
         const identifier::Nym& theNymID,
@@ -572,7 +571,7 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Nym& nymAsAccount,
         const identifier::Notary& theNotaryID,
-        ledgerType theType,
+        otx::ledgerType theType,
         bool bCreateFile = false) const -> std::unique_ptr<opentxs::Ledger> = 0;
     virtual auto Market() const -> std::unique_ptr<OTMarket> = 0;
     virtual auto Market(const char* szFilename) const
@@ -646,7 +645,7 @@ public:
         -> std::unique_ptr<OTPayment> = 0;
     virtual auto PaymentCode(
         const opentxs::crypto::SeedID& seed,
-        const Bip32Index nym,
+        const opentxs::crypto::Bip32Index nym,
         const std::uint8_t version,
         const opentxs::PasswordPrompt& reason,
         const bool bitmessage = false,
@@ -856,12 +855,12 @@ public:
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         const std::int64_t& lNumberOfOrigin,
-        originType theOriginType,
+        otx::originType theoriginType,
         const std::int64_t& lTransactionNum,
         const std::int64_t& lInRefTo,
         const std::int64_t& lInRefDisplay,
         const Time the_DATE_SIGNED,
-        transactionType theType,
+        otx::transactionType theType,
         const String& strHash,
         const opentxs::Amount& lAdjustment,
         const opentxs::Amount& lDisplayValue,
@@ -874,29 +873,29 @@ public:
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        originType theOriginType = originType::not_applicable) const
+        otx::originType theoriginType = otx::originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
         std::int64_t lTransactionNum,
-        originType theOriginType = originType::not_applicable) const
+        otx::originType theoriginType = otx::originType::not_applicable) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const identifier::Nym& theNymID,
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID,
-        transactionType theType,
-        originType theOriginType = originType::not_applicable,
+        otx::transactionType theType,
+        otx::originType theoriginType = otx::originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(const opentxs::Ledger& theOwner) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto Transaction(
         const opentxs::Ledger& theOwner,
-        transactionType theType,
-        originType theOriginType = originType::not_applicable,
+        otx::transactionType theType,
+        otx::originType theoriginType = otx::originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> = 0;
     virtual auto UnitDefinition() const noexcept -> OTUnitDefinition = 0;

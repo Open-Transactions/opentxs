@@ -16,7 +16,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/core/contract/peer/request/StoreSecret.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

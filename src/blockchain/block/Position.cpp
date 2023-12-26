@@ -20,7 +20,7 @@ auto operator==(const Position& lhs, const Position& rhs) noexcept -> bool
 auto operator<=>(const Position& lhs, const Position& rhs) noexcept
     -> std::strong_ordering
 {
-    constexpr auto& equal = std::strong_ordering::equal;
+    constexpr const auto& equal = std::strong_ordering::equal;
 
     if (const auto out = lhs.height_ <=> rhs.height_; equal != out) {
 

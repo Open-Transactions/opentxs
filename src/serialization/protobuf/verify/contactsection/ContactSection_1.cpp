@@ -35,7 +35,7 @@ auto CheckProto_1(
 
     for (const auto& it : input.item()) {
         try {
-            bool validItem = Check(
+            const bool validItem = Check(
                 it,
                 ContactSectionAllowedItem().at(input.version()).first,
                 ContactSectionAllowedItem().at(input.version()).second,
@@ -106,7 +106,7 @@ auto CheckProto_6(
 
     for (const auto& it : input.item()) {
         try {
-            bool validItem = Check(
+            const bool validItem = Check(
                 it,
                 ContactSectionAllowedItem().at(input.version()).first,
                 ContactSectionAllowedItem().at(input.version()).second,

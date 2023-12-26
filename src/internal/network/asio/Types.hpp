@@ -8,8 +8,8 @@
 #include <optional>
 #include <string_view>
 
+#include "opentxs/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

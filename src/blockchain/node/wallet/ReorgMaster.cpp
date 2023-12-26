@@ -18,10 +18,10 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/blockchain/node/HeaderOracle.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

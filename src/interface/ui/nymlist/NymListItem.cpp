@@ -10,7 +10,7 @@
 #include "internal/interface/ui/UI.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
+#include "opentxs/identifier/Nym.hpp"
 
 namespace opentxs::factory
 {

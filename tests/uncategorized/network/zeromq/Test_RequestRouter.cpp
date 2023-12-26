@@ -99,7 +99,7 @@ TEST_F(RequestRouter, Request_2_Router_1)
 
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
@@ -177,9 +177,9 @@ TEST_F(RequestRouter, Request_Router_Multipart)
             EXPECT_EQ(4, input.Payload().size());
 
             for (const auto& frame : input.Payload()) {
-                bool match = frame.Bytes() == test_message_ ||
-                             frame.Bytes() == test_message2_ ||
-                             frame.Bytes() == test_message3_;
+                bool const match = frame.Bytes() == test_message_ ||
+                                   frame.Bytes() == test_message2_ ||
+                                   frame.Bytes() == test_message3_;
                 EXPECT_TRUE(match || frame.size() == 0);
             }
 

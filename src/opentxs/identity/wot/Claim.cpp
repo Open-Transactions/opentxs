@@ -9,7 +9,7 @@
 
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Claim.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -110,11 +110,13 @@ auto Claim::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Claim::operator=(const Claim& rhs) noexcept -> Claim&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Claim::operator=(Claim&& rhs) noexcept -> Claim&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

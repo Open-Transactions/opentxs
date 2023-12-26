@@ -91,7 +91,7 @@ auto ApiCryptoBlockchain::check_deterministic_account(
     output &= check_initial_state(account, subchain1);
     output &= check_initial_state(account, subchain2);
 
-    for (ot::Bip32Index i{0}; i < external.size(); ++i) {
+    for (ot::crypto::Bip32Index i{0}; i < external.size(); ++i) {
         const auto label{label1 + std::to_string(i)};
         output &= check_hd_index(
             accountID, contactID, external, account, subchain1, i, label);
@@ -103,7 +103,7 @@ auto ApiCryptoBlockchain::check_deterministic_account(
 
     output &= (floor.value_or(1) == 0);
 
-    for (ot::Bip32Index i{0}; i < internal.size(); ++i) {
+    for (ot::crypto::Bip32Index i{0}; i < internal.size(); ++i) {
         const auto label{label2 + std::to_string(i)};
         output &= check_hd_index(
             accountID, contactID, internal, account, subchain2, i, label);
@@ -146,7 +146,7 @@ auto ApiCryptoBlockchain::check_hd_index(
     const ot::UnallocatedVector<ot::UnallocatedCString>& expected,
     const ot::blockchain::crypto::HD& account,
     const Subchain subchain,
-    const ot::Bip32Index i,
+    const ot::crypto::Bip32Index i,
     const ot::UnallocatedCString& label) const noexcept -> bool
 {
     auto output = true;
@@ -234,7 +234,7 @@ auto ApiCryptoBlockchain::check_initial_state(
     output &= bool(floor);
     output &= (floor.value_or(1) == 0);
 
-    for (auto i = ot::Bip32Index{0u}; i < gen; ++i) {
+    for (auto i = ot::crypto::Bip32Index{0u}; i < gen; ++i) {
         const auto& element = account.BalanceElement(subchain, i);
 
         EXPECT_EQ(element.LastActivity(), zero_time_);

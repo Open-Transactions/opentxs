@@ -15,30 +15,30 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/otx/OTX.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::otx
@@ -46,9 +46,8 @@ namespace opentxs::otx
 const VersionNumber Reply::DefaultVersion{1};
 const VersionNumber Reply::MaxVersion{1};
 
-static auto construct_push(
-    OTXPushType pushtype,
-    const UnallocatedCString& payload) -> std::shared_ptr<proto::OTXPush>
+static auto construct_push(PushType pushtype, const UnallocatedCString& payload)
+    -> std::shared_ptr<proto::OTXPush>
 {
     auto pPush = std::make_shared<proto::OTXPush>();
     auto& push = *pPush;
@@ -100,7 +99,7 @@ auto Reply::Factory(
     const RequestNumber number,
     const bool success,
     const PasswordPrompt& reason,
-    opentxs::otx::OTXPushType pushtype,
+    opentxs::otx::PushType pushtype,
     const UnallocatedCString& payload) -> Reply
 {
     return Factory(

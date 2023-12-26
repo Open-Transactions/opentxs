@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include "opentxs/Export.hpp"
-#include "opentxs/network/otdht/Types.hpp"
+#include <type_traits>
+
+#include "opentxs/network/otdht/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::otdht
 {
-enum class MessageType : TypeEnum {
+enum class MessageType : std::underlying_type_t<MessageType> {
     error = 0,
     sync_request = 1,
     sync_ack = 2,

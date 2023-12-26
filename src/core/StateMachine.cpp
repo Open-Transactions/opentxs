@@ -37,7 +37,7 @@ void StateMachine::execute() const noexcept
         if (shutdown_.load()) { break; }
     }
 
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
     running_.store(false);
     waiting_.set_value();
 
@@ -57,7 +57,7 @@ auto StateMachine::make_wait_promise(const Lock& lock, const bool set)
 
 auto StateMachine::Stop() const noexcept -> StateMachine::StopFuture
 {
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
 
     if (false == clean_.load()) {
         shutdown_.store(true);
@@ -86,14 +86,14 @@ auto StateMachine::trigger(const Lock& lock) const noexcept -> bool
 
 auto StateMachine::Trigger() const noexcept -> bool
 {
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
 
     return trigger(lock);
 }
 
 auto StateMachine::Wait() const noexcept -> StateMachine::WaitFuture
 {
-    Lock lock(decision_lock_);
+    const auto lock = Lock{decision_lock_};
 
     if (false == running_.load()) { return make_wait_promise(lock, true); }
 

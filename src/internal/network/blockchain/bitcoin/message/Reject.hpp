@@ -7,7 +7,7 @@
 
 #include "internal/network/blockchain/bitcoin/message/Message.hpp"
 #include "internal/util/PMR.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

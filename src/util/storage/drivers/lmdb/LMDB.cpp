@@ -16,10 +16,10 @@
 #include <variant>
 
 #include "internal/util/P0330.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/storage/Driver.hpp"

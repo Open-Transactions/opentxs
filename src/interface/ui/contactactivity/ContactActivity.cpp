@@ -39,10 +39,10 @@
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Contact.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
@@ -59,8 +59,6 @@ template class std::tuple<
     opentxs::otx::client::StorageBox,
     opentxs::identifier::Generic>;
 // NOLINTEND(cert-dcl58-cpp)
-
-namespace zmq = opentxs::network::zeromq;
 
 namespace opentxs::factory
 {
@@ -460,7 +458,7 @@ auto ContactActivity::process_contact(const Message& in) noexcept -> void
             std::swap(me_, name);
             changed = true;
         }
-    } else if (0 < contacts_.count(contactID)) {
+    } else if (contacts_.contains(contactID)) {
         changed = update_display_name();
     } else {
 
@@ -573,7 +571,7 @@ auto ContactActivity::process_messagability(const Message& message) noexcept
 
     const auto contact = api_.Factory().IdentifierFromHash(body[2].Bytes());
 
-    if (0 == contacts_.count(contact)) { return; }
+    if (false == contacts_.contains(contact)) { return; }
 
     if (update_messagability(body[3].as<otx::client::Messagability>())) {
         UpdateNotify();

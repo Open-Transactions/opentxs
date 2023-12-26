@@ -40,7 +40,7 @@ void DealerRouter::dealerSocketThread(const ot::UnallocatedCString& msg)
 
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 
@@ -85,7 +85,7 @@ void DealerRouter::routerSocketThread(const ot::UnallocatedCString& endpoint)
 
             const auto inputString =
                 ot::UnallocatedCString{input.Payload().begin()->Bytes()};
-            bool match =
+            bool const match =
                 inputString == test_message2_ || inputString == test_message3_;
             EXPECT_TRUE(match);
 

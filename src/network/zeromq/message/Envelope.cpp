@@ -84,11 +84,13 @@ auto Envelope::IsValid() const noexcept -> bool { return imp_->IsValid(); }
 
 auto Envelope::operator=(const Envelope& rhs) noexcept -> Envelope&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_base(this, imp_, rhs.imp_);
 }
 
 auto Envelope::operator=(Envelope&& rhs) noexcept -> Envelope&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_base(*this, rhs, imp_, rhs.imp_);
 }
 

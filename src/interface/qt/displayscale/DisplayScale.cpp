@@ -8,8 +8,8 @@
 #include <QString>
 
 #include "internal/util/Size.hpp"
-#include "opentxs/core/display/Definition.hpp"
-#include "opentxs/core/display/Types.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/display/Types.hpp"
 
 namespace opentxs::ui
 {

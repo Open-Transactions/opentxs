@@ -22,13 +22,13 @@
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
 #include "util/storage/tree/Nym.hpp"
@@ -136,7 +136,7 @@ auto Nyms::LocalNyms() const noexcept -> Set<identifier::Nym>
 
 auto Nyms::mutable_Nym(const identifier::Nym& id) -> Editor<tree::Nym>
 {
-    std::function<void(tree::Nym*, Lock&)> callback =
+    const std::function<void(tree::Nym*, Lock&)> callback =
         [&](tree::Nym* in, Lock& lock) -> void { this->save(in, lock, id); };
 
     return {write_lock_, nym(id), callback};

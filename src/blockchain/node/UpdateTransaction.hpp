@@ -59,7 +59,7 @@ public:
     auto EffectiveHeaderExists(const block::Hash& hash) const noexcept -> bool;
     auto EffectiveIsSibling(const block::Hash& hash) const noexcept -> bool
     {
-        return 0 < siblings().count(hash);
+        return siblings().contains(hash);
     }
     auto EffectiveSiblingHashes() const noexcept -> const database::Hashes&
     {

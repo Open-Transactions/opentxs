@@ -5,17 +5,14 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
+
+#include "opentxs/crypto/symmetric/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::crypto::symmetric
 {
-enum class Algorithm : std::uint8_t {
+enum class Algorithm : std::underlying_type_t<Algorithm> {
     Error = 0,
     ChaCha20Poly1305 = 1,
 };
-
-constexpr auto value(const Algorithm in) noexcept
-{
-    return static_cast<std::uint8_t>(in);
-}
 }  // namespace opentxs::crypto::symmetric

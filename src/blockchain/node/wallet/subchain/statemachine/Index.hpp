@@ -12,6 +12,7 @@
 
 #include "blockchain/node/wallet/subchain/statemachine/Job.hpp"
 #include "internal/blockchain/database/Types.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 
@@ -69,10 +70,10 @@ protected:
 private:
     network::zeromq::socket::Raw& to_rescan_;
     network::zeromq::socket::Raw& to_scan_;
-    std::optional<Bip32Index> last_indexed_;
+    std::optional<crypto::Bip32Index> last_indexed_;
 
-    virtual auto need_index(const std::optional<Bip32Index>& current)
-        const noexcept -> std::optional<Bip32Index> = 0;
+    virtual auto need_index(const std::optional<crypto::Bip32Index>& current)
+        const noexcept -> std::optional<crypto::Bip32Index> = 0;
 
     auto check_mempool(allocator_type monotonic) noexcept -> void;
     auto do_process_update(Message&& msg, allocator_type monotonic) noexcept
@@ -80,8 +81,8 @@ private:
     auto do_startup_internal(allocator_type monotonic) noexcept -> void final;
     auto forward_to_next(Message&& msg) noexcept -> void final;
     virtual auto process(
-        const std::optional<Bip32Index>& current,
-        Bip32Index target,
+        const std::optional<crypto::Bip32Index>& current,
+        crypto::Bip32Index target,
         allocator_type monotonic) noexcept -> void = 0;
     auto process_do_rescan(Message&& in) noexcept -> void final;
     auto process_filter(

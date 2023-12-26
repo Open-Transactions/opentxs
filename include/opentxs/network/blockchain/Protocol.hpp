@@ -5,19 +5,18 @@
 
 #pragma once
 
-#include <cstdint>
 #include <limits>
 #include <type_traits>
 
-#include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::blockchain
 {
-enum class Protocol : std::uint8_t {
+enum class Protocol : std::underlying_type_t<Protocol> {
     opentxs = 0,
     bitcoin = 1,
     ethereum = 2,
     unknown_protocol =
-        std::numeric_limits<std::underlying_type<Protocol>::type>::max(),
+        std::numeric_limits<std::underlying_type_t<Protocol>>::max(),
 };
 }  // namespace opentxs::network::blockchain

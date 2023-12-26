@@ -50,7 +50,7 @@ User::User(
 auto User::Account(std::string_view type) const noexcept
     -> const ot::identifier::Account&
 {
-    ot::Lock lock(lock_);
+    const auto lock = ot::Lock{lock_};
 
     if (auto i = accounts_.find(type); accounts_.end() != i) {
 
@@ -65,7 +65,7 @@ auto User::Contact(std::string_view contact) const noexcept
 {
     static const auto blank = ot::identifier::Generic{};
 
-    ot::Lock lock(lock_);
+    const auto lock = ot::Lock{lock_};
 
     if (auto i = contacts_.find(contact); contacts_.end() != i) {
 
@@ -198,7 +198,7 @@ auto User::SetAccount(std::string_view type, const ot::identifier::Account& id)
 {
     opentxs::assert_false(nullptr == api_);
 
-    ot::Lock lock(lock_);
+    const auto lock = ot::Lock{lock_};
     const auto [it, added] = accounts_.emplace(type, id);
 
     return added;
@@ -218,7 +218,7 @@ auto User::SetContact(
 {
     opentxs::assert_false(nullptr == api_);
 
-    ot::Lock lock(lock_);
+    const auto lock = ot::Lock{lock_};
     const auto [it, added] = contacts_.emplace(contact, id);
 
     return added;

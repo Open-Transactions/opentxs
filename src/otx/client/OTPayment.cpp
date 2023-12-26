@@ -12,7 +12,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Contract.hpp"
 #include "internal/otx/common/Item.hpp"
@@ -32,9 +31,10 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -165,7 +165,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
         // the temp values, then clean it up again before returning
         // success/fail.
         //
-        std::unique_ptr<OTTransaction> pNotice(InstantiateNotice());
+        const std::unique_ptr<OTTransaction> pNotice(InstantiateNotice());
 
         if (!pNotice) {
             LogError()()(
@@ -186,7 +186,7 @@ auto OTPayment::SetTempValues(const PasswordPrompt& reason)
             return false;
         }
         // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         Cheque* pCheque = nullptr;
         OTPaymentPlan* pPaymentPlan = nullptr;
@@ -327,8 +327,8 @@ auto OTPayment::SetTempValuesFromNotice(
         // -------------------------------------------
         auto strCronItem = String::Factory();
 
-        auto pItem =
-            (const_cast<OTTransaction&>(theInput)).GetItem(itemType::notice);
+        auto pItem = (const_cast<OTTransaction&>(theInput))
+                         .GetItem(otx::itemType::notice);
 
         if (false != bool(pItem)) {       // The item's NOTE, as opposed to the
                                           // transaction's reference string,
@@ -378,7 +378,7 @@ auto OTPayment::SetTempValuesFromNotice(
                 .Flush();
             return false;
         }
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
         // -------------------------------------------
         auto* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
         auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -635,7 +635,7 @@ auto OTPayment::GetAllTransactionNumbers(
                 .Flush();
             return false;
         }  // Below THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         auto* pPlan = dynamic_cast<OTPaymentPlan*>(pTrackable);
         auto* pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -666,7 +666,7 @@ auto OTPayment::GetAllTransactionNumbers(
         }
         auto strCronItem = String::Factory();
         // -------------------------------------------
-        auto pItem = pNotice->GetItem(itemType::notice);
+        auto pItem = pNotice->GetItem(otx::itemType::notice);
 
         if (false != bool(pItem)) {       // The item's NOTE, as opposed to the
                                           // transaction's reference string,
@@ -764,7 +764,7 @@ auto OTPayment::HasTransactionNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTPaymentPlan* pPlan = nullptr;
         OTSmartContract* pSmartContract = nullptr;
@@ -796,7 +796,7 @@ auto OTPayment::HasTransactionNum(
         }
         auto strCronItem = String::Factory();
         // -------------------------------------------
-        auto pItem = pNotice->GetItem(itemType::notice);
+        auto pItem = pNotice->GetItem(otx::itemType::notice);
 
         if (false != bool(pItem)) {       // The item's NOTE, as opposed to the
                                           // transaction's reference string,
@@ -878,7 +878,7 @@ auto OTPayment::GetClosingNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTSmartContract* pSmartContract = nullptr;
         pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -916,7 +916,7 @@ auto OTPayment::GetClosingNum(
         }
         auto strCronItem = String::Factory();
         // -------------------------------------------
-        auto pItem = pNotice->GetItem(itemType::notice);
+        auto pItem = pNotice->GetItem(otx::itemType::notice);
 
         if (false != bool(pItem)) {       // The item's NOTE, as opposed to the
                                           // transaction's reference string,
@@ -997,7 +997,7 @@ auto OTPayment::GetOpeningNum(
                 .Flush();
             return false;
         }  // BELOW THIS POINT, MUST DELETE pTrackable!
-        std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
+        const std::unique_ptr<OTTrackable> theTrackableAngel(pTrackable);
 
         OTSmartContract* pSmartContract = nullptr;
         pSmartContract = dynamic_cast<OTSmartContract*>(pTrackable);
@@ -1035,7 +1035,7 @@ auto OTPayment::GetOpeningNum(
         }
         auto strCronItem = String::Factory();
         // -------------------------------------------
-        auto pItem = pNotice->GetItem(itemType::notice);
+        auto pItem = pNotice->GetItem(otx::itemType::notice);
 
         if (false != bool(pItem)) {       // The item's NOTE, as opposed to the
                                           // transaction's reference string,

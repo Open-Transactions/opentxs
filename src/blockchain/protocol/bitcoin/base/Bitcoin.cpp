@@ -28,8 +28,6 @@
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 
-namespace bb = opentxs::blockchain::protocol::bitcoin::base;
-
 namespace opentxs::blockchain::protocol::bitcoin::base::sighash
 {
 constexpr auto All = std::byte{0x01};

@@ -24,10 +24,10 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Parameters.hpp"
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Verification.hpp"
@@ -194,7 +194,7 @@ auto Verification::verify_internally() const -> bool
 
     for (const auto& nym : data_.internal().identity()) {
         for (const auto& claim : nym.verification()) {
-            bool valid = parent_.Verify(claim);
+            const bool valid = parent_.Verify(claim);
 
             if (!valid) {
                 LogError()()("Invalid claim verification.").Flush();

@@ -27,7 +27,16 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/interface/rpc/RPC.hpp"
     "AccountData.cpp"
     "AccountEvent.cpp"
-    "Common.cpp"
+    "AccountEventType.cpp"
+    "AccountType.cpp"
+    "CommandType.cpp"
+    "ContactEventType.cpp"
+    "PaymentType.cpp"
+    "PushType.cpp"
+    "ResponseCode.cpp"
+    "Types.cpp"
+    "Types.internal.cpp"
+    "Types.internal.hpp"
 )
 
 if(OT_ENABLE_RPC)

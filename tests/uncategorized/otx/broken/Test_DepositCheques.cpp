@@ -23,8 +23,6 @@
 #define CHEQUE_AMOUNT_1 2000
 #define CHEQUE_MEMO_1 "memo"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 TEST_F(DepositCheques, payment_codes)
@@ -185,7 +183,7 @@ TEST_F(DepositCheques, issue_dollars)
                 1,
                 reasonI);
 
-    EXPECT_EQ(ot::contract::UnitType::Currency, contract->Type());
+    EXPECT_EQ(ot::contract::UnitDefinitionType::Currency, contract->Type());
     EXPECT_TRUE(unit_id_.empty());
 
     unit_id_.Assign(contract->ID());

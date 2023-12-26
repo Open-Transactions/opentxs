@@ -9,7 +9,7 @@
 #include <span>
 
 #include "internal/identity/wot/verification/Item.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Container.hpp"

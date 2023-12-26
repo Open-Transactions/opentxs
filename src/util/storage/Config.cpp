@@ -6,7 +6,6 @@
 #include "util/storage/Config.hpp"  // IWYU pragma: associated
 
 #include <algorithm>
-#include <chrono>
 
 #include "internal/core/String.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -15,8 +14,6 @@
 #include "opentxs/api/Settings.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-
-namespace C = std::chrono;
 
 #define STORAGE_CONFIG_KEY "storage"
 

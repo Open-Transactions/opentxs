@@ -28,7 +28,7 @@ auto CheckProto_1(const BasketParams& input, const bool silent) -> bool
 
     for (const auto& item : input.item()) {
         try {
-            bool validItem = Check(
+            const bool validItem = Check(
                 item,
                 BasketParamsAllowedBasketItem().at(input.version()).first,
                 BasketParamsAllowedBasketItem().at(input.version()).second,

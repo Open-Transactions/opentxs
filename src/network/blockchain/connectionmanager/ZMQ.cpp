@@ -14,9 +14,8 @@
 #include "internal/api/session/Endpoints.hpp"
 #include "internal/network/asio/Types.hpp"
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/network/blockchain/Types.hpp"
-#include "internal/network/otdht/Types.hpp"
 #include "internal/network/zeromq/socket/Sender.hpp"  // IWYU pragma: keep
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -24,11 +23,12 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
+#include "opentxs/network/blockchain/Types.internal.hpp"
+#include "opentxs/network/otdht/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 
 namespace opentxs::network::blockchain
 {
@@ -113,7 +113,7 @@ struct ZMQConnectionManager : virtual public ConnectionManager {
         , zmq_([&]() -> decltype(zmq_) {
             // NOLINTBEGIN(clang-analyzer-cplusplus.StringChecker)
             if (zmq.empty()) {
-                auto out = std::remove_const<decltype(zmq_)>::type{};
+                auto out = std::remove_const_t<decltype(zmq_)>{};
 
                 try {
                     using enum Transport;

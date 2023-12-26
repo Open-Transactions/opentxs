@@ -13,8 +13,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "interface/rpc/Types.internal.hpp"
 #include "interface/rpc/response/Base.hpp"
-#include "internal/interface/rpc/RPC.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/interface/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/rpc/Types.hpp"

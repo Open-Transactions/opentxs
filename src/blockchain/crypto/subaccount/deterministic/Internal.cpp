@@ -11,9 +11,9 @@
 #include "internal/blockchain/crypto/PaymentCode.hpp"
 #include "opentxs/blockchain/crypto/HD.hpp"
 #include "opentxs/blockchain/crypto/PaymentCode.hpp"
-#include "opentxs/core/identifier/HDSeed.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
+#include "opentxs/identifier/HDSeed.hpp"
 
 namespace opentxs::blockchain::crypto::internal
 {

@@ -21,6 +21,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"
+#include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
@@ -81,7 +82,7 @@ public:
 private:
     using Hash = std::uint64_t;
     using Hashes = Vector<Hash>;
-    using ElementHashMap = Map<Hash, Vector<const Bip32Index*>>;
+    using ElementHashMap = Map<Hash, Vector<const crypto::Bip32Index*>>;
     using TxoHashMap = Map<Hash, Vector<const block::Outpoint*>>;
     using ElementData = std::pair<Hashes, ElementHashMap>;
     using TxoData = std::pair<Hashes, TxoHashMap>;

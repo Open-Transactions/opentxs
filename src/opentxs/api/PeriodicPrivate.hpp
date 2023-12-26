@@ -11,9 +11,9 @@
 #include <tuple>
 
 #include "internal/util/Timer.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Periodic.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -5,11 +5,14 @@
 
 #pragma once
 
-#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: associated
+#include <type_traits>
+
+#include "opentxs/identity/wot/claim/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::identity::wot::claim
 {
-enum class ClaimType : std::uint32_t {
+// NOLINTBEGIN(misc-confusable-identifiers)
+enum class ClaimType : std::underlying_type_t<ClaimType> {
     Error = 0,
     Individual = 1,
     Organization = 2,
@@ -2199,4 +2202,5 @@ enum class ClaimType : std::uint32_t {
     erc20_ethsepolia_xaut4 = 2185,     // Tether Gold on Sepolia
     erc20_ethsepolia_dawgs3 = 2186,    // SpaceDawgs
 };
+// NOLINTEND(misc-confusable-identifiers)
 }  // namespace opentxs::identity::wot::claim

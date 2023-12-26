@@ -11,8 +11,8 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 struct zmq_msg_t;
 
@@ -62,7 +62,7 @@ public:
 
     template <
         typename Output,
-        std::enable_if_t<std::is_trivially_copyable<Output>::value, int> = 0>
+        std::enable_if_t<std::is_trivially_copyable_v<Output>, int> = 0>
     auto as() const noexcept(false) -> Output
     {
         if (sizeof(Output) != size()) {

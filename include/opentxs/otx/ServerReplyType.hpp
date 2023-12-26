@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <cstdint>
+#include <type_traits>
 
-#include "opentxs/Export.hpp"
-#include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/Types.hpp"  // IWYU pragma: keep
 
 namespace opentxs::otx
 {
-enum class ServerReplyType : std::uint8_t {
+enum class ServerReplyType : std::underlying_type_t<ServerReplyType> {
     Error = 0,
     Activate = 1,
     Push = 255,

@@ -18,26 +18,26 @@
 #include <utility>
 
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"  // IWYU pragma: keep
 #include "internal/util/Mutex.hpp"
 #include "internal/util/PMR.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/cashtoken/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/cashtoken/Types.internal.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/Types.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

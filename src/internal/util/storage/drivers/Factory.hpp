@@ -8,8 +8,8 @@
 #include <filesystem>
 #include <memory>
 
+#include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"  // IWYU pragma: keep
-#include "opentxs/util/storage/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

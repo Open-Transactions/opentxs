@@ -5,12 +5,10 @@
 
 #pragma once
 
-#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <mutex>
-#include <tuple>
+#include <utility>
 
 #include "opentxs/Export.hpp"
 
@@ -28,8 +26,9 @@ class Message;
 
 namespace opentxs::otx::client
 {
-enum class PaymentWorkflowType : std::uint8_t;   // IWYU pragma: export
 enum class PaymentWorkflowState : std::uint8_t;  // IWYU pragma: export
+enum class PaymentWorkflowType : std::uint8_t;   // IWYU pragma: export
+
 enum class SendResult : std::int8_t {
     TRANSACTION_NUMBERS = -3,
     INVALID_REPLY = -2,

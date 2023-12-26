@@ -13,7 +13,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 
 namespace opentxs::factory
 {
@@ -126,7 +126,7 @@ auto ContactListItem::translate_section(const Lock&) const noexcept
 {
     if (key_.second.empty()) { return {" "}; }
 
-    std::locale locale;
+    const std::locale locale;
     UnallocatedCString output{" "};
     output[0] = std::toupper(key_.second[0], locale);
 

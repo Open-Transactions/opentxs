@@ -18,12 +18,12 @@
 #include "internal/serialization/protobuf/verify/PeerReply.hpp"
 #include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
-#include "internal/util/storage/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -85,13 +85,14 @@ auto PeerReplies::Load(
     UnallocatedCString notUsed;
     using enum ErrorReporting;
 
-    bool loaded = load_proto<proto::PeerReply>(id, output, notUsed, silent);
+    const bool loaded =
+        load_proto<proto::PeerReply>(id, output, notUsed, silent);
 
     if (loaded) { return true; }
 
     // The provided ID might actually be a request ID instead of a reply ID.
 
-    std::unique_lock<std::mutex> lock(write_lock_);
+    auto lock = Lock{write_lock_};
     auto realID = identifier::Generic{};
 
     for (const auto& it : item_map_) {

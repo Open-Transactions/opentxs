@@ -12,11 +12,11 @@
 #include <type_traits>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/util/Allocated.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -25,7 +25,6 @@ class Armored;
 class ByteArray;
 class ByteArrayPrivate;
 class Writer;
-struct HexType;
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -119,7 +118,7 @@ public:
     ByteArray(const Data& rhs, allocator_type alloc = {}) noexcept;
     template <
         typename T,
-        std::enable_if_t<std::is_trivially_copyable<T>::value, int> = 0>
+        std::enable_if_t<std::is_trivially_copyable_v<T>, int> = 0>
     ByteArray(
         const T* data,
         std::size_t size,

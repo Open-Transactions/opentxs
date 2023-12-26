@@ -34,8 +34,6 @@
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/otx/Basic.hpp"
 
-namespace ot = opentxs;
-
 namespace ottest
 {
 using namespace std::literals;
@@ -1104,7 +1102,7 @@ TEST_F(Basic, depositCheque)
     ASSERT_EQ(ot::otx::client::PaymentWorkflowState::Conveyed, state);
     ASSERT_TRUE(pCheque);
 
-    std::shared_ptr<ot::Cheque> cheque{std::move(pCheque)};
+    const std::shared_ptr<ot::Cheque> cheque{std::move(pCheque)};
     const ot::RequestNumber sequence = bob_counter_;
     const ot::RequestNumber messages{12};
     bob_counter_ += messages;

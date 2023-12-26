@@ -47,7 +47,7 @@ auto ContactItem::reindex(
     const ContactSubsectionSortKey&,
     CustomData& custom) noexcept -> bool
 {
-    eLock lock(shared_lock_);
+    const auto lock = eLock{shared_lock_};
     item_ = std::make_unique<identity::wot::claim::Item>(
         extract_custom<identity::wot::claim::Item>(custom));
 

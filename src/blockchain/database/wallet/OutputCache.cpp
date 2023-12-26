@@ -35,6 +35,7 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"  // IWYU pragma: keep
@@ -44,17 +45,17 @@
 #include "opentxs/blockchain/node/TxoState.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Pattern.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Script.hpp"
-#include "opentxs/blockchain/protocol/bitcoin/base/block/Types.hpp"
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Pattern.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/protocol/bitcoin/base/block/script/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/display/Definition.hpp"
+#include "opentxs/display/Definition.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Time.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Types.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::database::wallet
@@ -682,7 +683,7 @@ auto OutputCache::Exists(const SubchainID& subchain, const block::Outpoint& id)
     if (auto it = subchains_.find(subchain); subchains_.end() != it) {
         const auto& set = it->second;
 
-        return 0 < set.count(id);
+        return set.contains(id);
     } else {
 
         return false;
@@ -848,7 +849,7 @@ auto OutputCache::GetOutput(
 {
     const auto& relevant = GetSubchain(subchain);
 
-    if (0u == relevant.count(id)) {
+    if (false == relevant.contains(id)) {
         throw std::out_of_range{"outpoint not found in this subchain"};
     }
 
@@ -980,7 +981,7 @@ auto OutputCache::load_output(const block::Outpoint& id) const noexcept(false)
     auto it = outputs_.find(id);
 
     if (outputs_.end() != it) {
-        auto& out = it->second;
+        const auto& out = it->second;
 
         assert_true(0 < out.Keys({}).size());  // TODO monotonic allocator
 

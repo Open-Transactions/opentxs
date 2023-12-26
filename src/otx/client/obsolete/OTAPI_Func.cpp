@@ -8,6 +8,7 @@
 #include <UnitDefinition.pb.h>
 #include <cstdint>
 #include <exception>
+#include <utility>
 
 #include "internal/core/Amount.hpp"
 #include "internal/core/String.hpp"
@@ -25,13 +26,13 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/Nym.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/Types.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -229,14 +230,15 @@ OTAPI_Func::OTAPI_Func(
     std::unique_ptr<OTPaymentPlan>& paymentPlan)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
 {
-    UnallocatedCString strError = "Warning: Empty UnallocatedCString passed to "
-                                  "OTAPI_Func.OTAPI_Func() as: ";
+    const UnallocatedCString strError =
+        "Warning: Empty UnallocatedCString passed to "
+        "OTAPI_Func.OTAPI_Func() as: ";
 
     switch (theType) {
         case DEPOSIT_PAYMENT_PLAN: {
             trans_nums_needed_ = 1;
             account_id_ = recipientID;
-            payment_plan_.reset(paymentPlan.release());
+            payment_plan_ = std::move(paymentPlan);
         } break;
         default: {
             LogConsole()()(
@@ -300,8 +302,9 @@ OTAPI_Func::OTAPI_Func(
     const UnallocatedCString& parameter)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
 {
-    UnallocatedCString strError = "Warning: Empty UnallocatedCString passed to "
-                                  "OTAPI_Func.OTAPI_Func() as: ";
+    const UnallocatedCString strError =
+        "Warning: Empty UnallocatedCString passed to "
+        "OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(clause)) { LogError()()("clause.").Flush(); }
 
@@ -333,8 +336,9 @@ OTAPI_Func::OTAPI_Func(
     std::unique_ptr<OTSmartContract>& contract)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
 {
-    UnallocatedCString strError = "Warning: Empty UnallocatedCString passed to "
-                                  "OTAPI_Func.OTAPI_Func() as: ";
+    const UnallocatedCString strError =
+        "Warning: Empty UnallocatedCString passed to "
+        "OTAPI_Func.OTAPI_Func() as: ";
 
     if (!VerifyStringVal(agentName)) { LogError()()("agentName.").Flush(); }
 
@@ -346,9 +350,9 @@ OTAPI_Func::OTAPI_Func(
                                   // activating the contract.;
         agent_name_ = agentName;  // the agent's name for that party, as listed
                                   // on the contract.;
-        contract_.reset(contract.release());  // the smart contract itself.;
+        contract_ = std::move(contract);  // the smart contract itself.;
 
-        std::int32_t nNumsNeeded =
+        const std::int32_t nNumsNeeded =
             api_.Internal().asClient().Exec().SmartContract_CountNumsNeeded(
                 String::Factory(*contract_)->Get(), agent_name_);
 
@@ -483,7 +487,7 @@ auto OTAPI_Func::Run(const std::size_t) -> UnallocatedCString
 void OTAPI_Func::run()
 {
     /*
-        Lock lock(lock_);
+        auto lock = Lock{lock_};
         const auto triggerParameter = String::Factory(parameter_);
         auto& [requestNum, transactionNum, result] = last_attempt_;
         auto& [status, reply] = result;

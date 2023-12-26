@@ -10,10 +10,10 @@
 #include <memory>
 
 #include "internal/core/Armored.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/OTTransactionType.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -179,8 +179,8 @@ public:
         const bool bIsRealTransaction = true) const -> bool;
     inline auto GetStatus() const -> Item::itemStatus { return status_; }
     inline void SetStatus(const Item::itemStatus& theVal) { status_ = theVal; }
-    inline auto GetType() const -> itemType { return type_; }
-    inline void SetType(itemType theType) { type_ = theType; }
+    inline auto GetType() const -> otx::itemType { return type_; }
+    inline void SetType(otx::itemType theType) { type_ = theType; }
     inline auto GetAmount() const -> Amount { return amount_; }
     inline void SetAmount(Amount lAmount) { amount_ = lAmount; }
     void GetNote(String& theStr) const;
@@ -197,7 +197,7 @@ public:
     {
         account_to_id_ = theID;
     }
-    static void GetStringFromType(itemType theType, String& strType);
+    static void GetStringFromType(otx::itemType theType, String& strType);
     inline void GetTypeString(String& strType) const
     {
         GetStringFromType(GetType(), strType);
@@ -220,7 +220,7 @@ protected:
     listOfItems list_items_;
     // the item type. Could be a transfer, a fee, a balance or client
     // accept/rejecting an item
-    itemType type_{itemType::error_state};
+    otx::itemType type_{otx::itemType::error_state};
     // request, acknowledgment, or rejection.
     itemStatus status_{error_status};
     // Used for balance agreement. The user puts transaction "1" in his outbox
@@ -247,7 +247,7 @@ private:  // Private prevents erroneous use by other classes.
 
     using ot_super = OTTransactionType;
 
-    auto GetItemTypeFromString(const String& strType) -> itemType;
+    auto GetItemTypeFromString(const String& strType) -> otx::itemType;
 
     // There is the OTTransaction transfer, which is a transaction type, and
     // there is also the Item transfer, which is an item type. They are
@@ -269,7 +269,7 @@ private:  // Private prevents erroneous use by other classes.
         const api::Session& api,
         const identifier::Nym& theNymID,
         const OTTransaction& theOwner,
-        itemType theType,
+        otx::itemType theType,
         const identifier::Account& pDestinationAcctID);
 };
 }  // namespace opentxs

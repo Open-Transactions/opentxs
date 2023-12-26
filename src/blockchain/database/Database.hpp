@@ -19,13 +19,13 @@
 #include "blockchain/database/Sync.hpp"
 #include "blockchain/database/Wallet.hpp"
 #include "blockchain/database/common/Database.hpp"
-#include "internal/blockchain/block/Types.hpp"
 #include "internal/blockchain/database/Database.hpp"
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/util/alloc/AllocatesChildren.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -33,6 +33,7 @@
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/blockchain/block/Types.hpp"
+#include "opentxs/blockchain/block/Types.internal.hpp"
 #include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/blockchain/cfilter/Hash.hpp"
 #include "opentxs/blockchain/cfilter/Header.hpp"
@@ -41,8 +42,8 @@
 #include "opentxs/blockchain/node/Types.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Output.hpp"  // IWYU pragma: keep
 #include "opentxs/core/Amount.hpp"  // IWYU pragma: keep
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
@@ -50,7 +51,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -568,7 +568,7 @@ public:
         return wallet_.SubchainAddElements(log, index, elements, alloc);
     }
     auto SubchainLastIndexed(const SubchainID& index) const noexcept
-        -> std::optional<Bip32Index> final
+        -> std::optional<crypto::Bip32Index> final
     {
         return wallet_.SubchainLastIndexed(index);
     }

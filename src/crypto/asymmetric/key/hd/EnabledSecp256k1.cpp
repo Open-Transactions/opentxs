@@ -39,7 +39,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data& publicKey,
     const proto::HDPath& path,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
@@ -82,7 +82,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data& publicKey,
     const proto::HDPath& path,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1
@@ -132,7 +132,7 @@ auto Secp256k1Key(
             api.Factory().SecretFromBytes(chaincode),
             api.Factory().DataFromBytes(key),
             path,
-            Bip32Fingerprint{},
+            crypto::Bip32Fingerprint{},
             crypto::asymmetric::Role::Sign,
             crypto::asymmetric::key::EllipticCurve::DefaultVersion());
     } catch (const std::exception& e) {

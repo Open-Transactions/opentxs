@@ -7,11 +7,11 @@
 
 #include <cstddef>
 
+#include "opentxs/BlockchainProfile.hpp"  // IWYU pragma: keep
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
-#include "opentxs/util/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 namespace opentxs::blockchain::node::internal
 {

@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "opentxs/core/identifier/Generic.hpp"
-#include "opentxs/core/identifier/Types.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
+#include "opentxs/identifier/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

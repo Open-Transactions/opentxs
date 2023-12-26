@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "opentxs/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -69,7 +69,7 @@ auto Ed25519Key(
     const opentxs::Secret& chainCode,
     const Data& publicKey,
     const proto::HDPath& path,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
@@ -115,7 +115,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data& publicKey,
     const proto::HDPath& path,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     const opentxs::PasswordPrompt& reason,
@@ -127,7 +127,7 @@ auto Secp256k1Key(
     const opentxs::Secret& chainCode,
     const Data& publicKey,
     const proto::HDPath& path,
-    const Bip32Fingerprint parent,
+    const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;

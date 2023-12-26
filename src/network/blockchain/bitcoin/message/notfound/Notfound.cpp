@@ -58,11 +58,13 @@ auto Notfound::get() noexcept -> std::span<value_type>
 
 auto Notfound::operator=(const Notfound& rhs) noexcept -> Notfound&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Message>(*this, rhs);
 }
 
 auto Notfound::operator=(Notfound&& rhs) noexcept -> Notfound&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Message>(*this, std::move(rhs));
 }
 

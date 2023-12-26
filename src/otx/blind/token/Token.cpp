@@ -12,13 +12,13 @@
 #include <utility>
 
 #include "internal/otx/blind/Factory.hpp"
-#include "internal/otx/blind/Types.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/blind/CashType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/otx/blind/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/blind/purse/Purse.hpp"
@@ -39,8 +39,7 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unknown or unsupported token type: ")(
-                opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(print(type))
                 .Flush();
 
             return {};
@@ -62,8 +61,7 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unknown or unsupported token type: ")(
-                opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(print(type))
                 .Flush();
 
             return {};
@@ -88,8 +86,7 @@ auto Token(
         }
         case otx::blind::CashType::Error:
         default: {
-            LogError()()("unknown or unsupported token type: ")(
-                opentxs::print(type))
+            LogError()()("unknown or unsupported token type: ")(print(type))
                 .Flush();
 
             return {};

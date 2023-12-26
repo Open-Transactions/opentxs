@@ -9,13 +9,13 @@
 #include <cstdint>
 
 #include "internal/core/String.hpp"
-#include "internal/otx/Types.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/cron/OTCronItem.hpp"
 #include "opentxs/core/Amount.hpp"
-#include "opentxs/core/identifier/Account.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Account.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/otx/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -91,9 +91,9 @@ namespace opentxs
 class OTTrade : public OTCronItem
 {
 public:
-    auto GetOriginType() const -> originType override
+    auto GetOriginType() const -> otx::originType override
     {
-        return originType::origin_market_offer;
+        return otx::originType::origin_market_offer;
     }
 
     auto VerifyOffer(OTOffer& offer) const -> bool;

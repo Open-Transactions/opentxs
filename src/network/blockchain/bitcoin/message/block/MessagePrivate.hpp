@@ -8,7 +8,7 @@
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 
 #include "internal/network/blockchain/bitcoin/message/Block.hpp"
-#include "opentxs/util/Types.hpp"
+#include "opentxs/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::block
 {

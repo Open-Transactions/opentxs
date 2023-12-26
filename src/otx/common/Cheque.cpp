@@ -21,8 +21,8 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/core/identifier/Notary.hpp"
-#include "opentxs/core/identifier/UnitDefinition.hpp"
+#include "opentxs/identifier/Notary.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -70,8 +70,8 @@ void Cheque::UpdateContents([[maybe_unused]] const PasswordPrompt& reason)
          REMITTER_NYM_ID = String::Factory(GetRemitterNymID(), api_.Crypto()),
          REMITTER_ACCT_ID = String::Factory(GetRemitterAcctID(), api_.Crypto());
 
-    UnallocatedCString from = formatTimestamp(GetValidFrom());
-    UnallocatedCString to = formatTimestamp(GetValidTo());
+    const UnallocatedCString from = formatTimestamp(GetValidFrom());
+    const UnallocatedCString to = formatTimestamp(GetValidTo());
 
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();

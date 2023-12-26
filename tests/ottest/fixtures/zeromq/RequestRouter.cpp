@@ -85,7 +85,7 @@ void RequestRouter::requestSocketThreadMultipart()
     ASSERT_EQ(test_message_, messageHeader);
 
     for (const auto& frame : message.Payload()) {
-        bool match =
+        const bool match =
             frame.Bytes() == test_message2_ || frame.Bytes() == test_message3_;
         ASSERT_TRUE(match);
     }

@@ -10,9 +10,6 @@
 
 #include "ottest/env/OTTestEnvironment.hpp"
 
-namespace ot = opentxs;
-namespace zmq = ot::network::zeromq;
-
 namespace ottest
 {
 using namespace std::literals::chrono_literals;

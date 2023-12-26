@@ -36,6 +36,8 @@
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/alloc/MonotonicSync.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Paths.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -62,8 +64,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Types.hpp"
-#include "opentxs/util/WorkType.internal.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::blockchain::node::filteroracle

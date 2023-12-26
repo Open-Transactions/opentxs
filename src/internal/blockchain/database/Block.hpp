@@ -9,10 +9,10 @@
 
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/util/storage/file/Types.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

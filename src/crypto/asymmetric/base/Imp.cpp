@@ -36,7 +36,6 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/Secret.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
 #include "opentxs/crypto/HashType.hpp"
 #include "opentxs/crypto/SecretStyle.hpp"    // IWYU pragma: keep
 #include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
@@ -46,7 +45,9 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Authority.hpp"
+#include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/util/Allocator.hpp"
@@ -770,7 +771,7 @@ auto Key::Sign(
         return false;
     }
 
-    bool success = provider_.Sign(
+    const bool success = provider_.Sign(
         preimage, private_key(lock, reason), hash, std::move(output));
 
     if (false == success) { LogError()()("Failed to sign preimage").Flush(); }

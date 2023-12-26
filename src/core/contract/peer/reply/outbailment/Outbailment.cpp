@@ -63,11 +63,13 @@ auto Outbailment::IsValid() const noexcept -> bool
 
 auto Outbailment::operator=(const Outbailment& rhs) noexcept -> Outbailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::copy_assign_child<Reply>(*this, rhs);
 }
 
 auto Outbailment::operator=(Outbailment&& rhs) noexcept -> Outbailment&
 {
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     return pmr::move_assign_child<Reply>(*this, std::move(rhs));
 }
 

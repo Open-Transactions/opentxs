@@ -36,7 +36,7 @@
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
-#include "opentxs/core/identifier/Generic.hpp"
+#include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Log.hpp"
@@ -347,7 +347,7 @@ auto Peers::get_candidates(
 
             for (const auto& service : withServices) {
                 try {
-                    if (0 == data.services_.at(service).count(id)) {
+                    if (false == data.services_.at(service).contains(id)) {
                         haveAllServices = false;
                         break;
                     }
