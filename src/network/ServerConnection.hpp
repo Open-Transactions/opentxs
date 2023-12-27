@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <ctime>
 #include <mutex>
 #include <thread>
 
@@ -112,7 +113,7 @@ private:
     OTZMQDealerSocket registration_socket_;
     OTZMQRequestSocket socket_;
     OTZMQPushSocket notification_socket_;
-    std::atomic<sTime> last_activity_;
+    std::atomic<std::time_t> last_activity_{0};
     OTFlag sockets_ready_;
     OTFlag status_;
     OTFlag use_proxy_;
