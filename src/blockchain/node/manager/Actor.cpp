@@ -28,6 +28,7 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
@@ -60,7 +61,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::blockchain::node::manager
 {

@@ -35,6 +35,7 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -78,7 +79,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 #define MINIMUM_UNUSED_BAILMENTS 3
@@ -86,7 +86,7 @@
 #define PAIR_SHUTDOWN()                                                        \
     if (!running_) { return; }                                                 \
                                                                                \
-    Sleep(50ms)
+    sleep(50ms)
 
 namespace opentxs::factory
 {
@@ -255,7 +255,7 @@ repeat:
     LogTrace()()("Repeating").Flush();
     // Rate limit state machine to reduce unproductive execution while waiting
     // on network activity
-    Sleep(50ms);
+    sleep(50ms);
 
     return true;
 }

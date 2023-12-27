@@ -18,6 +18,7 @@
 #include <compare>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
 #include "internal/api/session/Storage.hpp"
@@ -37,7 +38,7 @@
 #include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
 #include "internal/serialization/protobuf/verify/RPCPush.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Network.hpp"
@@ -647,7 +648,7 @@ auto Workflow::AllocateCash(
     workflow.set_notary(purse.Notary().asBase58(api_.Crypto()));
     auto& event = *workflow.add_event();
     event.set_version(versions_.at(PaymentWorkflowType::OutgoingCash).event_);
-    event.set_time(Clock::to_time_t(Clock::now()));
+    event.set_time(seconds_since_epoch(Clock::now()).value());
     event.set_type(proto::PAYMENTEVENTTYPE_CREATE);
     event.set_method(proto::TRANSPORTMETHOD_NONE);
     event.set_success(true);
@@ -750,7 +751,7 @@ auto Workflow::add_cheque_event(
     event.set_version(version);
     event.set_type(newEventType);
     event.add_item(message->Get());
-    event.set_time(Clock::to_time_t(time));
+    event.set_time(seconds_since_epoch(time).value());
     event.set_method(proto::TRANSPORTMETHOD_OT);
     event.set_transport(receipt.GetRealNotaryID().asBase58(api_.Crypto()));
     event.set_nym(recipientNymID.asBase58(api_.Crypto()));
@@ -853,7 +854,7 @@ auto Workflow::add_transfer_event(
     }
 
     event.set_success(success);
-    event.set_time(Clock::to_time_t(Clock::now()));
+    event.set_time(seconds_since_epoch(Clock::now()).value());
 
     if (0 == workflow.party_size() && (false == eventNym.empty())) {
         workflow.add_party(eventNym.asBase58(api_.Crypto()));
@@ -1604,7 +1605,7 @@ auto Workflow::create_cheque(
         event.set_method(proto::TRANSPORTMETHOD_OT);
         event.set_transport(message->notary_id_->Get());
     } else {
-        event.set_time(Clock::to_time_t(Clock::now()));
+        event.set_time(seconds_since_epoch(Clock::now()).value());
 
         if (PaymentWorkflowState::Unsent == workflowState) {
             event.set_type(proto::PAYMENTEVENTTYPE_CREATE);
@@ -1696,7 +1697,7 @@ auto Workflow::create_transfer(
 
     auto& event = *workflow.add_event();
     event.set_version(eventVersion);
-    event.set_time(Clock::to_time_t(Clock::now()));
+    event.set_time(seconds_since_epoch(Clock::now()).value());
 
     if (PaymentWorkflowState::Initiated == workflowState) {
         event.set_type(proto::PAYMENTEVENTTYPE_CREATE);
@@ -1845,7 +1846,7 @@ auto Workflow::DepositCheque(
             api_.Factory().IdentifierFromBase58(workflow->id()),
             cheque.GetAmount(),
             0,
-            convert_stime(reply->time_),
+            seconds_since_epoch_unsigned(reply->time_).value(),
             cheque.GetMemo().Get());
     }
 
@@ -1903,7 +1904,7 @@ auto Workflow::ExportCheque(const opentxs::Cheque& cheque) const -> bool
     auto& event = *(workflow->add_event());
     event.set_version(versions_.at(PaymentWorkflowType::OutgoingCheque).event_);
     event.set_type(proto::PAYMENTEVENTTYPE_CONVEY);
-    event.set_time(Clock::to_time_t(Clock::now()));
+    event.set_time(seconds_since_epoch(Clock::now()).value());
     event.set_method(proto::TRANSPORTMETHOD_OOB);
     event.set_success(true);
 
@@ -1915,7 +1916,9 @@ auto Workflow::extract_conveyed_time(const proto::PaymentWorkflow& workflow)
 {
     for (const auto& event : workflow.event()) {
         if (proto::PAYMENTEVENTTYPE_CONVEY == event.type()) {
-            if (event.success()) { return convert_stime(event.time()); }
+            if (event.success()) {
+                return seconds_since_epoch_unsigned(event.time()).value();
+            }
         }
     }
 
@@ -2816,7 +2819,7 @@ void Workflow::update_rpc(
     event.set_workflow(workflowID.asBase58(api_.Crypto()));
     amount.Serialize(writer(event.mutable_amount()));
     pending.Serialize(writer(event.mutable_pendingamount()));
-    event.set_timestamp(Clock::to_time_t(time));
+    event.set_timestamp(seconds_since_epoch(time).value());
     event.set_memo(memo);
 
     assert_true(proto::Validate(push, VERBOSE));
@@ -2900,7 +2903,8 @@ auto Workflow::WriteCheque(const opentxs::Cheque& cheque) const
         cheque.GetSenderAcctID());
     global.unlock();
     const bool haveWorkflow = (false == workflowID.empty());
-    const auto time{convert_stime(workflow.event(0).time())};
+    const auto time{
+        seconds_since_epoch_unsigned(workflow.event(0).time()).value()};
 
     if (haveWorkflow && cheque.HasRecipient()) {
         update_activity(

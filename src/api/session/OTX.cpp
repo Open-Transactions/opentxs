@@ -14,7 +14,6 @@
 #include <atomic>
 #include <chrono>
 #include <compare>
-#include <ctime>
 #include <memory>
 #include <ratio>
 #include <span>
@@ -164,7 +163,7 @@
 #define YIELD_OTX(a)                                                           \
     if (!running_) { return false; }                                           \
                                                                                \
-    Sleep(std::chrono::milliseconds(a))
+    sleep(std::chrono::milliseconds(a))
 
 #define SHUTDOWN_OTX() YIELD_OTX(50)
 
@@ -1005,7 +1004,7 @@ auto OTX::CheckTransactionNumbers(
         auto status = Status(taskID);
 
         while (otx::client::ThreadStatus::RUNNING == status) {
-            Sleep(100ms);
+            sleep(100ms);
             status = Status(taskID);
         }
 
@@ -2169,9 +2168,11 @@ auto OTX::refresh_contacts() const -> bool
 
         assert_false(nullptr == contact);
 
-        const auto now = std::time(nullptr);
-        const std::chrono::seconds interval(now - contact->LastUpdated());
-        const std::chrono::hours limit(24 * CONTACT_REFRESH_DAYS);
+        using namespace std::chrono;
+        const auto now = Clock::now();
+        const auto interval =
+            duration_cast<seconds>(now - contact->LastUpdated());
+        const auto limit = hours(24 * CONTACT_REFRESH_DAYS);
         const auto nymList = contact->Nyms();
 
         if (nymList.empty()) {

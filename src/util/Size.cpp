@@ -12,6 +12,8 @@
 
 namespace opentxs
 {
+template auto convert_to_size<std::int64_t, std::size_t>(std::int64_t) noexcept(
+    false) -> std::size_t;
 template auto convert_to_size<std::uint64_t, std::size_t>(
     std::uint64_t) noexcept(false) -> std::size_t;
 template auto convert_to_size<std::size_t, std::uint32_t>(std::size_t) noexcept(

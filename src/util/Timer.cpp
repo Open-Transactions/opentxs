@@ -5,7 +5,6 @@
 
 #include "util/Timer.hpp"  // IWYU pragma: associated
 
-#include <boost/date_time/posix_time/conversion.hpp>
 #include <boost/date_time/posix_time/posix_time_config.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -44,16 +43,10 @@ auto Timer(std::shared_ptr<api::network::asio::Context> asio) noexcept
         auto IsActive() const noexcept -> bool final { return *is_active_; }
         auto SetAbsolute(const Time& time) noexcept -> std::size_t final
         {
-            try {
-                const auto boostTime =
-                    boost::posix_time::from_time_t(Clock::to_time_t(time));
+            using namespace std::chrono;
 
-                return timer_.expires_at(boostTime);
-            } catch (const std::exception& e) {
-                LogError()()(e.what()).Flush();
-
-                return {};
-            }
+            return SetRelative(
+                duration_cast<microseconds>(time - Clock::now()));
         }
         auto SetRelative(const std::chrono::microseconds& time) noexcept
             -> std::size_t final

@@ -5,7 +5,9 @@
 
 #include "internal/otx/common/util/Common.hpp"  // IWYU pragma: associated
 
-#include "internal/util/Time.hpp"
+#include <optional>
+
+#include "opentxs/Time.hpp"
 #include "opentxs/util/Container.hpp"
 
 namespace opentxs
@@ -14,7 +16,7 @@ auto formatBool(bool in) -> UnallocatedCString { return in ? "true" : "false"; }
 
 auto formatTimestamp(const opentxs::Time in) -> UnallocatedCString
 {
-    return std::to_string(opentxs::Clock::to_time_t(in));
+    return std::to_string(seconds_since_epoch(in).value());
 }
 
 auto getTimestamp() -> UnallocatedCString
@@ -25,7 +27,7 @@ auto getTimestamp() -> UnallocatedCString
 auto parseTimestamp(UnallocatedCString in) -> opentxs::Time
 {
     try {
-        return opentxs::convert_stime(std::stoull(in));
+        return opentxs::seconds_since_epoch_unsigned(std::stoull(in)).value();
     } catch (...) {
 
         return {};

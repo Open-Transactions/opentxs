@@ -6,12 +6,13 @@
 #include "otx/blind/token/Imp.hpp"  // IWYU pragma: associated
 
 #include <Token.pb.h>
+#include <optional>
 #include <string>
 
 #include "internal/core/Factory.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -85,8 +86,8 @@ Token::Token(
           api.Factory().UnitIDFromBase58(in.mint()),
           in.series(),
           factory::Amount(in.denomination()),
-          convert_stime(in.validfrom()),
-          convert_stime(in.validto()),
+          seconds_since_epoch_unsigned(in.validfrom()).value(),
+          seconds_since_epoch_unsigned(in.validto()).value(),
           in.version())
 {
 }
@@ -157,8 +158,8 @@ auto Token::Serialize(proto::Token& output) const noexcept -> bool
     output.set_mint(unit_.asBase58(api_.Crypto()));
     output.set_series(series_);
     denomination_.Serialize(writer(output.mutable_denomination()));
-    output.set_validfrom(Clock::to_time_t(valid_from_));
-    output.set_validto(Clock::to_time_t(valid_to_));
+    output.set_validfrom(seconds_since_epoch(valid_from_).value());
+    output.set_validto(seconds_since_epoch(valid_to_).value());
 
     return true;
 }

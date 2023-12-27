@@ -18,6 +18,7 @@
 #include "internal/blockchain/crypto/Deterministic.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/crypto/Element.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
@@ -29,7 +30,6 @@
 #include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

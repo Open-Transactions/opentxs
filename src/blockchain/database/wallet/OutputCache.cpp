@@ -35,6 +35,7 @@
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
+#include "opentxs/Time.hpp"  // IWYU pragma: keep
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -55,7 +56,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::database::wallet

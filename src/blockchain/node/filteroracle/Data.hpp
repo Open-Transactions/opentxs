@@ -8,10 +8,10 @@
 #include <future>
 
 #include "internal/network/zeromq/socket/Raw.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

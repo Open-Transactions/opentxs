@@ -8,17 +8,17 @@
 #include <BlockchainPeerAddress.pb.h>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 
-#include "internal/util/Time.hpp"
 #include "network/blockchain/address/AddressPrivate.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
 {
@@ -127,7 +127,7 @@ auto BlockchainAddress(
                    serialized.address(),
                    static_cast<std::uint16_t>(serialized.port()),
                    static_cast<blockchain::Type>(serialized.chain()),
-                   convert_stime(serialized.time()),
+                   seconds_since_epoch_unsigned(serialized.time()).value(),
                    ReturnType::instantiate_services(serialized),
                    false,
                    ReadView{})

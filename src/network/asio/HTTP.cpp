@@ -13,7 +13,7 @@
 
 #include "api/network/asio/Context.hpp"
 #include "network/asio/WebRequest.tpp"
-#include "opentxs/util/Time.hpp"  // IWYU pragma: keep
+#include "opentxs/Time.hpp"  // IWYU pragma: keep
 
 namespace opentxs::network::asio
 {

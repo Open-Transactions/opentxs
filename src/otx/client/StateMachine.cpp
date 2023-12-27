@@ -34,6 +34,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/UnitType.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -60,7 +61,6 @@
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/client/StateMachine.hpp"
 #include "util/Blank.hpp"
@@ -87,7 +87,7 @@
             return false;                                                      \
         }                                                                      \
                                                                                \
-        Sleep(std::chrono::milliseconds(STATE_MACHINE_READY_MILLISECONDS));    \
+        sleep(std::chrono::milliseconds(STATE_MACHINE_READY_MILLISECONDS));    \
                                                                                \
         if (shutdown().load()) {                                               \
             op_.Shutdown();                                                    \
@@ -118,7 +118,7 @@
                                                                                \
             return task_done(false);                                           \
         }                                                                      \
-        Sleep(std::chrono::milliseconds(STATE_MACHINE_READY_MILLISECONDS));    \
+        sleep(std::chrono::milliseconds(STATE_MACHINE_READY_MILLISECONDS));    \
                                                                                \
         if (shutdown().load()) {                                               \
             op_.Shutdown();                                                    \
@@ -142,7 +142,7 @@
 #define SM_YIELD(a)                                                            \
     if (shutdown().load()) return false;                                       \
                                                                                \
-    Sleep(std::chrono::milliseconds(a));                                       \
+    sleep(std::chrono::milliseconds(a));                                       \
                                                                                \
     if (shutdown().load()) return false
 

@@ -7,14 +7,14 @@
 
 #include <CashEnums.pb.h>
 #include <Purse.pb.h>
-#include <cstdint>
+#include <optional>
 
 #include "internal/serialization/protobuf/verify/Envelope.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/SymmetricKey.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/Token.hpp"  // IWYU pragma: keep
 #include "internal/serialization/protobuf/verify/VerifyCash.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "serialization/protobuf/verify/Check.hpp"
 
 namespace opentxs::proto
@@ -41,8 +41,8 @@ auto CheckProto_1(
     }
 
     auto allowedStates = UnallocatedSet<TokenState>{};
-    auto validFrom = std::int64_t{Clock::to_time_t(Time::min())};
-    auto validTo = std::int64_t{Clock::to_time_t(Time::max())};
+    auto validFrom = seconds_since_epoch(Time::min()).value();
+    auto validTo = seconds_since_epoch(Time::max()).value();
 
     switch (input.state()) {
         case PURSETYPE_REQUEST: {

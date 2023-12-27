@@ -17,6 +17,7 @@
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/contract/peer/ConnectionInfoType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/contract/peer/SecretType.hpp"  // IWYU pragma: keep
@@ -26,7 +27,6 @@
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

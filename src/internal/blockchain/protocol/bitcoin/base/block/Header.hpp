@@ -8,8 +8,8 @@
 #include <cstdint>
 
 #include "internal/blockchain/block/Header.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -12,10 +12,10 @@
 #include <string_view>
 
 #include "internal/util/Log.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/log/Logger.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

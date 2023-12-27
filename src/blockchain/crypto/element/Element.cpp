@@ -22,7 +22,7 @@
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Asymmetric.hpp"
@@ -134,7 +134,7 @@ Element::Element(
           address.label(),
           std::move(contact),
           instantiate(api, address.key()),
-          convert_stime(address.modified()),
+          seconds_since_epoch_unsigned(address.modified()).value(),
           [&] {
               auto out = Transactions{};
 
@@ -368,7 +368,8 @@ auto Element::Serialize(bool withPrivate) const noexcept
         output.set_label(data.label_);
         output.set_contact(data.contact_.asBase58(api_.Crypto()));
         *output.mutable_key() = key;
-        output.set_modified(Clock::to_time_t(data.timestamp_));
+        output.set_modified(
+            seconds_since_epoch_unsigned(data.timestamp_).value());
 
         for (const auto& txid : data.unconfirmed_) {
             output.add_unconfirmed(UnallocatedCString{txid.Bytes()});

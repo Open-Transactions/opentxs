@@ -10,7 +10,7 @@
 #include <chrono>
 #include <cstddef>
 
-#include "opentxs/util/Time.hpp"
+#include "opentxs/Time.hpp"
 
 namespace opentxs
 {

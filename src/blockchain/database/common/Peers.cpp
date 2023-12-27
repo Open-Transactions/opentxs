@@ -25,11 +25,11 @@
 #include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/P0330.hpp"
-#include "internal/util/Time.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/Session.internal.hpp"
@@ -488,7 +488,7 @@ auto Peers::init(
                     std::memcpy(&input, key.data(), key.size());
                     data.connected_.emplace(
                         api_.Factory().IdentifierFromBase58(value),
-                        convert_stime(input));
+                        seconds_since_epoch_unsigned(input).value());
 
                     return true;
                 }),
@@ -624,7 +624,8 @@ auto Peers::insert(
             result = lmdb_.Store(
                 Table::PeerConnectedIndex,
                 static_cast<std::size_t>(
-                    Clock::to_time_t(address.LastConnected())),
+                    seconds_since_epoch_unsigned(address.LastConnected())
+                        .value()),
                 encodedID,
                 parentTxn);
 
@@ -636,8 +637,10 @@ auto Peers::insert(
 
             lmdb_.Delete(
                 Table::PeerConnectedIndex,
-                static_cast<std::size_t>(Clock::to_time_t(
-                    address.Internal().PreviousLastConnected())),
+                static_cast<std::size_t>(
+                    seconds_since_epoch_unsigned(
+                        address.Internal().PreviousLastConnected())
+                        .value()),
                 encodedID,
                 parentTxn);
         }

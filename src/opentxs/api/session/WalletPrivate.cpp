@@ -66,6 +66,7 @@
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/WorkType.internal.hpp"
@@ -124,7 +125,6 @@
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Exclusive.tpp"
 

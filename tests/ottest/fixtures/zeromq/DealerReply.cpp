@@ -63,7 +63,7 @@ void DealerReply::dealerSocketThread(const ot::UnallocatedCString& msg)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 5;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }

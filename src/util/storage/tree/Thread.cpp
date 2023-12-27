@@ -9,6 +9,7 @@
 #include <StorageThreadItem.pb.h>
 #include <atomic>
 #include <memory>
+#include <optional>
 #include <source_location>
 #include <stdexcept>
 #include <utility>
@@ -90,7 +91,7 @@ Thread::Thread(
 
 auto Thread::Add(
     const identifier::Generic& id,
-    const std::uint64_t time,
+    Time time,
     const otx::client::StorageBox& box,
     std::string_view alias,
     const UnallocatedCString& contents,
@@ -141,7 +142,7 @@ auto Thread::Add(
         item.set_index(index);
     }
 
-    item.set_time(time);
+    item.set_time(seconds_since_epoch_unsigned(time).value());
     item.set_box(static_cast<std::uint32_t>(box));
     item.set_account(workflow.asBase58(crypto_));
     item.set_unread(unread);

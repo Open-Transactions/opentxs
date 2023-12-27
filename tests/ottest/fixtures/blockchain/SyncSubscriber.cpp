@@ -82,7 +82,7 @@ struct SyncSubscriber::Imp {
         const auto& expected = parent_.expected_;
 
         while ((updated_ < expected) && ((ot::Clock::now() - start) < limit)) {
-            ot::Sleep(100ms);
+            ot::sleep(100ms);
         }
 
         if (false == hard) { updated_.store(expected.load()); }

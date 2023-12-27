@@ -21,7 +21,6 @@ libopentxs_add_public_header("util" "Options.hpp")
 libopentxs_add_public_header("util" "PasswordCallback.hpp")
 libopentxs_add_public_header("util" "PasswordCaller.hpp")
 libopentxs_add_public_header("util" "PasswordPrompt.hpp")
-libopentxs_add_public_header("util" "Time.hpp")
 libopentxs_add_public_header("util" "WriteBuffer.hpp")
 libopentxs_add_public_header("util" "Writer.hpp")
 
@@ -46,7 +45,6 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/util/Size.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/TSV.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Thread.hpp"
-    "${opentxs_SOURCE_DIR}/src/internal/util/Time.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/Timer.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/util/UniqueQueue.hpp"
     "Actor.hpp"
@@ -87,7 +85,6 @@ target_sources(
     "Sodium.cpp"
     "Sodium.hpp"
     "Thread.cpp"
-    "Time.cpp"
     "Timer.cpp"
     "Timer.hpp"
     "WriteBuffer.cpp"

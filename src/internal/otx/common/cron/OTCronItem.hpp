@@ -12,13 +12,13 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/common/OTTrackable.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

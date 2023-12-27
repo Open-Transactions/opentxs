@@ -18,6 +18,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Timer.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Types.internal.hpp"
 #include "opentxs/identifier/Generic.hpp"
@@ -29,7 +30,6 @@
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Envelope.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "util/Actor.hpp"
 

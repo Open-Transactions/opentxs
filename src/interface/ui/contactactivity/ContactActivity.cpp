@@ -24,6 +24,7 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -51,7 +52,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(cert-dcl58-cpp)
 template class std::tuple<

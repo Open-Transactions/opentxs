@@ -666,7 +666,7 @@ TEST_F(Regtest_fixture_hd, failed_spend)
     EXPECT_TRUE(txid.IsNull());
 
     // TODO ensure CancelProposal is finished processing with appropriate signal
-    ot::Sleep(5s);
+    ot::sleep(5s);
 }
 
 TEST_F(Regtest_fixture_hd, account_activity_failed_spend)

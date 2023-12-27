@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <span>
 #include <sstream>
 #include <stdexcept>
@@ -32,6 +33,7 @@
 #include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -67,7 +69,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 #define ID_BYTES 32
 
@@ -870,7 +871,7 @@ auto Contact::Label() const -> const UnallocatedCString&
     return imp_->label_;
 }
 
-auto Contact::LastUpdated() const -> std::time_t
+auto Contact::LastUpdated() const -> Time
 {
     assert_false(nullptr == imp_->contact_data_);
 
@@ -887,19 +888,7 @@ auto Contact::LastUpdated() const -> std::time_t
     try {
         const auto stlWorkaround = UnallocatedCString{claim->Value()};
 
-        if (sizeof(int) == sizeof(std::time_t)) {
-
-            return std::stoi(stlWorkaround);
-        } else if (sizeof(long) == sizeof(std::time_t)) {
-
-            return std::stol(stlWorkaround);
-        } else if (sizeof(long long) == sizeof(std::time_t)) {
-
-            return std::stoll(stlWorkaround);
-        } else {
-            LogAbort()().Abort();
-        }
-
+        return seconds_since_epoch(std::stoll(stlWorkaround)).value();
     } catch (const std::out_of_range&) {
 
         return {};
@@ -1187,7 +1176,7 @@ void Contact::Update(const proto::Nym& serialized)
     using enum identity::wot::claim::Attribute;
     static const auto attrib =
         Vector<identity::wot::claim::Attribute>{Primary, Active, Local};
-    const auto now = Clock::to_time_t(Clock::now());
+    const auto now = seconds_since_epoch(Clock::now()).value();
     auto claim =
         std::make_shared<identity::wot::claim::Item>(factory::ContactItem(
             imp_->api_.Factory().Claim(

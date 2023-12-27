@@ -11,11 +11,11 @@
 #include <string_view>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/crypto/Subaccount.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -77,7 +77,7 @@ TEST_F(PublishSubscribe, Publish_Subscribe)
     auto end = std::time(nullptr) + 30;
 
     while ((1 > callback_finished_count_) && (std::time(nullptr) < end)) {
-        ot::Sleep(1ms);
+        ot::sleep(1ms);
     }
 
     EXPECT_EQ(1, callback_finished_count_);

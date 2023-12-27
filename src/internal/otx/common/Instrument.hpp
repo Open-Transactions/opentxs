@@ -9,9 +9,9 @@
 #include <cstdint>
 
 #include "internal/otx/common/script/OTScriptable.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {

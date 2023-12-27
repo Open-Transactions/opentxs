@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <ctime>
 #include <memory>
 #include <string_view>
 #include <tuple>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
@@ -101,7 +101,7 @@ public:
     auto EmailAddresses(bool active = true) const -> UnallocatedCString;
     auto ID() const -> const identifier::Generic&;
     auto Label() const -> const UnallocatedCString&;
-    auto LastUpdated() const -> std::time_t;
+    auto LastUpdated() const -> Time;
     auto Nyms(const bool includeInactive = false) const
         -> UnallocatedVector<identifier::Nym>;
     auto PaymentCode(const UnitType currency = UnitType::Btc) const

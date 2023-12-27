@@ -18,10 +18,10 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Types.internal.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation
 {
@@ -62,7 +62,7 @@ auto Receiver<InterfaceType, MessageType>::apply_socket(
     const auto id = add_task(std::move(cb));
 
     while (task_running(id)) {
-        Sleep(std::chrono::milliseconds(receiver_poll_milliseconds_));
+        sleep(std::chrono::milliseconds(receiver_poll_milliseconds_));
     }
 
     return task_result(id);
@@ -144,7 +144,7 @@ void Receiver<InterfaceType, MessageType>::thread() noexcept
     while (running_.get()) {
         if (have_callback()) { break; }
 
-        Sleep(std::chrono::milliseconds(callback_wait_milliseconds_));
+        sleep(std::chrono::milliseconds(callback_wait_milliseconds_));
     }
 
     auto poll = std::array<::zmq_pollitem_t, 1>{};

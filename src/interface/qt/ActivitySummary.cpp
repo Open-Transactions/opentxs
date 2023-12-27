@@ -8,10 +8,11 @@
 #include <QDateTime>
 #include <QVariant>
 #include <memory>
+#include <optional>
 
 #include "interface/ui/activitysummary/ActivitySummaryItem.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "opentxs/util/Time.hpp"
+#include "opentxs/Time.hpp"
 
 namespace opentxs::factory
 {
@@ -73,7 +74,8 @@ auto ActivitySummaryItem::qt_data(
         } break;
         case 4: {
             QDateTime qdatetime;
-            qdatetime.setSecsSinceEpoch(Clock::to_time_t(Timestamp()));
+            qdatetime.setSecsSinceEpoch(
+                seconds_since_epoch(Timestamp()).value());
             out = qdatetime;
         } break;
         case 5: {

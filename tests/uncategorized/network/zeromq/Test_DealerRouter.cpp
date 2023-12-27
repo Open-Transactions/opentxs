@@ -90,7 +90,7 @@ TEST_F(DealerRouter, Dealer_Router)
 
     auto end = std::time(nullptr) + 15;
     while (0 == replyMessage.get().size() && std::time(nullptr) < end) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
     }
 
     ASSERT_NE(0, replyMessage.get().size());
@@ -100,7 +100,7 @@ TEST_F(DealerRouter, Dealer_Router)
     ASSERT_TRUE(sent);
 
     end = std::time(nullptr) + 15;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }
@@ -337,7 +337,7 @@ TEST_F(DealerRouter, Dealer_Router_Multipart)
 
     auto end = std::time(nullptr) + 15;
     while (0 == replyMessage.get().size() && std::time(nullptr) < end) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
     }
 
     ASSERT_NE(0, replyMessage.get().size());
@@ -347,7 +347,7 @@ TEST_F(DealerRouter, Dealer_Router_Multipart)
     ASSERT_TRUE(sent);
 
     end = std::time(nullptr) + 15;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }

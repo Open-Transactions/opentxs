@@ -23,6 +23,7 @@
 #include <functional>
 #include <future>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 
 #include "core/StateMachine.hpp"
@@ -71,6 +72,7 @@
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/api/Factory.internal.hpp"
@@ -121,7 +123,6 @@
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/consensus/Base.hpp"
@@ -2791,7 +2792,8 @@ auto Server::process_accept_cron_receipt_reply(
         }
 
         const auto tProcessDate = inboxTransaction.GetDateSigned();
-        pData->date_ = std::to_string(Clock::to_time_t(tProcessDate));
+        pData->date_ =
+            std::to_string(seconds_since_epoch(tProcessDate).value());
 
         // The original offer price. (Might be 0, if it's a market order.)
         pData->offer_price_ = [&] {

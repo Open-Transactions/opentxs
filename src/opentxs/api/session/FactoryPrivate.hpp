@@ -29,6 +29,7 @@
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -92,7 +93,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

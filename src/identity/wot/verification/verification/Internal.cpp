@@ -10,6 +10,7 @@
 #include <VerificationItem.pb.h>
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <stdexcept>
 
 #include "internal/core/identifier/Identifier.hpp"
@@ -42,8 +43,8 @@ auto Verification::CalculateID(
         out.set_version(version);
         claim.Internal().Serialize(*out.mutable_claim());
         out.set_kind(translate(value));
-        out.set_start(Clock::to_time_t(start));
-        out.set_start(Clock::to_time_t(end));
+        out.set_start(seconds_since_epoch(start).value());
+        out.set_start(seconds_since_epoch(end).value());
         const auto serialize = [&](const auto& id) {
             id.Internal().Serialize(*out.add_superscedes());
         };
@@ -90,8 +91,8 @@ auto Verification::Serialize(
     out.set_version(version);
     claim.Internal().Serialize(*out.mutable_claim());
     out.set_kind(translate(value));
-    out.set_start(Clock::to_time_t(start));
-    out.set_end(Clock::to_time_t(end));
+    out.set_start(seconds_since_epoch(start).value());
+    out.set_end(seconds_since_epoch(end).value());
     const auto serialize = [&](const auto& id) {
         id.Internal().Serialize(*out.add_superscedes());
     };

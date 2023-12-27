@@ -15,12 +15,12 @@
 #include "internal/network/zeromq/socket/Publish.hpp"
 #include "internal/network/zeromq/socket/Pull.hpp"
 #include "internal/util/Log.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::api::internal
 {
@@ -66,7 +66,7 @@ auto LogPrivate::callback(opentxs::network::zeromq::Message&& in) noexcept
     }
 
     if (LogAction::terminate == action) {
-        if (publish_) { Sleep(1s); }
+        if (publish_) { sleep(1s); }
 
         std::abort();
     }

@@ -31,6 +31,7 @@
 #include "internal/util/Mutex.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/Types.internal.hpp"
 #include "opentxs/core/Amount.hpp"
@@ -45,7 +46,6 @@
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/client/StateMachine.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

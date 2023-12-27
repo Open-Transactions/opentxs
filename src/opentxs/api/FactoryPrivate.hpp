@@ -12,6 +12,7 @@
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace boost

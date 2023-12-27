@@ -162,7 +162,7 @@ void ActivitySummaryItem::get_text() noexcept
             UpdateNotify();
         }
 
-        Sleep(std::chrono::milliseconds(GET_TEXT_MILLISECONDS));
+        sleep(std::chrono::milliseconds(GET_TEXT_MILLISECONDS));
     }
 }
 

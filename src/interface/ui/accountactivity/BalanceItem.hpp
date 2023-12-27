@@ -11,12 +11,12 @@
 #include "interface/ui/base/Row.hpp"
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 class QVariant;
 

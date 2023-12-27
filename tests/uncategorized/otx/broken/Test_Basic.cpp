@@ -10,6 +10,7 @@
 #include <atomic>
 #include <future>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <utility>
 
@@ -704,7 +705,7 @@ TEST_F(Integration, activity_summary_alex_1)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), firstMessage);
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -725,7 +726,7 @@ TEST_F(Integration, contact_activity_bob_alex_1)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), firstMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -767,7 +768,7 @@ TEST_F(Integration, activity_summary_bob_1)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), firstMessage);
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -889,7 +890,7 @@ TEST_F(Integration, contact_activity_alex_bob_0)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), message_.at(msg_count_));
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
 }
 
@@ -935,7 +936,7 @@ TEST_F(Integration, activity_summary_alex_2)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), secondMessage);
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -957,7 +958,7 @@ TEST_F(Integration, contact_activity_bob_alex_2)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), firstMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_FALSE(row->Last());
 
@@ -969,7 +970,7 @@ TEST_F(Integration, contact_activity_bob_alex_2)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), secondMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -988,7 +989,7 @@ TEST_F(Integration, activity_summary_bob_2)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), secondMessage);
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -1010,7 +1011,7 @@ TEST_F(Integration, contact_activity_alex_bob_1)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), firstMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_FALSE(row->Last());
 
@@ -1031,7 +1032,7 @@ TEST_F(Integration, contact_activity_alex_bob_1)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), secondMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -1202,7 +1203,7 @@ TEST_F(Integration, activity_summary_alex_3)
     EXPECT_STREQ("", row->ImageURI().c_str());
     EXPECT_STREQ("Received cheque", row->Text().c_str());
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(ot::otx::client::StorageBox::INCOMINGCHEQUE, row->Type());
     EXPECT_FALSE(row->Last());
 
@@ -1212,7 +1213,7 @@ TEST_F(Integration, activity_summary_alex_3)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), secondMessage);
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_TRUE(row->Last());
 }
@@ -1428,7 +1429,7 @@ TEST_F(Integration, contact_activity_issuer_alex_0)
     EXPECT_STREQ(CHEQUE_MEMO, row->Memo().c_str());
     EXPECT_FALSE(row->Pending());
     EXPECT_STREQ("Received cheque for dollars 1.00", row->Text().c_str());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(ot::otx::client::StorageBox::INCOMINGCHEQUE, row->Type());
     EXPECT_TRUE(row->Last());
 }
@@ -1587,7 +1588,7 @@ TEST_F(Integration, activity_summary_alex_4)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), "Sent cheque for dollars 0.75");
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::OUTGOINGCHEQUE);
     EXPECT_FALSE(row->Last());
 
@@ -1597,7 +1598,7 @@ TEST_F(Integration, activity_summary_alex_4)
     EXPECT_STREQ("", row->ImageURI().c_str());
     EXPECT_STREQ("Received cheque", row->Text().c_str());
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(ot::otx::client::StorageBox::INCOMINGCHEQUE, row->Type());
 }
 
@@ -1618,7 +1619,7 @@ TEST_F(Integration, contact_activity_bob_alex_3)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), firstMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_FALSE(row->Last());
 
@@ -1630,7 +1631,7 @@ TEST_F(Integration, contact_activity_bob_alex_3)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), secondMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_FALSE(row->Last());
 
@@ -1642,7 +1643,7 @@ TEST_F(Integration, contact_activity_bob_alex_3)
     EXPECT_EQ(row->Memo(), CHEQUE_MEMO);
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), "Sent cheque for dollars 0.75");
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::OUTGOINGCHEQUE);
     EXPECT_TRUE(row->Last());
 }
@@ -1685,7 +1686,7 @@ TEST_F(Integration, contact_activity_alex_bob_2)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), firstMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILINBOX);
     EXPECT_FALSE(row->Last());
 
@@ -1698,7 +1699,7 @@ TEST_F(Integration, contact_activity_alex_bob_2)
     EXPECT_EQ(row->Memo(), "");
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), secondMessage);
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::MAILOUTBOX);
     EXPECT_FALSE(row->Last());
 
@@ -1717,7 +1718,7 @@ TEST_F(Integration, contact_activity_alex_bob_2)
     EXPECT_EQ(row->Memo(), CHEQUE_MEMO);
     EXPECT_FALSE(row->Pending());
     EXPECT_EQ(row->Text(), "Received cheque");
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::INCOMINGCHEQUE);
     EXPECT_TRUE(row->Last());
 }
@@ -1735,7 +1736,7 @@ TEST_F(Integration, activity_summary_bob_3)
     EXPECT_EQ(row->ImageURI(), "");
     EXPECT_EQ(row->Text(), "Received cheque");
     EXPECT_FALSE(row->ThreadID().empty());
-    EXPECT_LT(0, ot::Clock::to_time_t(row->Timestamp()));
+    EXPECT_LT(0, ot::seconds_since_epoch(row->Timestamp()).value());
     EXPECT_EQ(row->Type(), ot::otx::client::StorageBox::INCOMINGCHEQUE);
     EXPECT_TRUE(row->Last());
 }

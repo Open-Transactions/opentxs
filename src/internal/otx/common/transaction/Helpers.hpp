@@ -9,9 +9,9 @@
 #include <cstdint>
 #include <memory>
 
+#include "opentxs/Time.hpp"
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

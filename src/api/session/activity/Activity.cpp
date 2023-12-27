@@ -236,14 +236,7 @@ auto Activity::AddPaymentEvent(
     if (false == verify_thread_exists(nymID, threadID)) { return false; }
 
     const bool saved = api_.Storage().Internal().Store(
-        nymID,
-        threadID,
-        itemID,
-        Clock::to_time_t(time),
-        {},
-        {},
-        type,
-        workflowID);
+        nymID, threadID, itemID, time, {}, {}, type, workflowID);
 
     if (saved) { publish(nymID, threadID); }
 
@@ -460,7 +453,14 @@ auto Activity::Mail(
     if (false == verify_thread_exists(nym, contactID)) { return {}; }
 
     const bool saved = api_.Storage().Internal().Store(
-        nym, contactID, id, mail.time_, alias, data, box, {});
+        nym,
+        contactID,
+        id,
+        seconds_since_epoch(mail.time_).value(),
+        alias,
+        data,
+        box,
+        {});
 
     if (saved) {
         publish(nym, contactID);

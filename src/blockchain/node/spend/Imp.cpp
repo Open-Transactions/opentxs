@@ -34,8 +34,8 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/util/Time.hpp"
 #include "matterfi/PaymentCode.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -136,7 +136,7 @@ SpendPrivate::SpendPrivate(
           chain,
           api.Factory().IdentifierFromBase58(proto.id()),
           api.Factory().NymIDFromHash(proto.initiator()),
-          convert_time(proto.expires()),
+          seconds_since_epoch(proto.expires()).value(),
           api.Factory().PasswordPrompt(proto.password_prompt()))
 {
     memo_.assign(proto.memo());
@@ -699,7 +699,7 @@ auto SpendPrivate::Serialize(
         out.set_version(version_);
         out.set_id(id_.asBase58(api_.Crypto()));
         out.set_initiator(spender_.data(), spender_.size());
-        out.set_expires(Clock::to_time_t(expires_));
+        out.set_expires(seconds_since_epoch_unsigned(expires_).value());
         out.set_memo(memo_.data(), memo_.size());
         const auto& addr = address_recipients_;
         const auto& pc = pc_recipients_;

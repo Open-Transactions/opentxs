@@ -17,6 +17,7 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -32,7 +33,6 @@
 #include "opentxs/identifier/HDSeed.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::blockchain::crypto

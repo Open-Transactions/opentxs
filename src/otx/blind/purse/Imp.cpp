@@ -27,7 +27,7 @@
 #include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -353,8 +353,8 @@ Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
           api.Factory().UnitIDFromBase58(in.mint()),
           opentxs::translate(in.state()),
           factory::Amount(in.totalvalue()),
-          convert_stime(in.latestvalidfrom()),
-          convert_stime(in.earliestvalidto()),
+          seconds_since_epoch_unsigned(in.latestvalidfrom()).value(),
+          seconds_since_epoch_unsigned(in.earliestvalidto()).value(),
           {},
           nullptr,
           get_passwords(in),
@@ -756,8 +756,10 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
         output.set_notary(notary_.asBase58(api_.Crypto()));
         output.set_mint(unit_.asBase58(api_.Crypto()));
         total_value_.Serialize(writer(output.mutable_totalvalue()));
-        output.set_latestvalidfrom(Clock::to_time_t(latest_valid_from_));
-        output.set_earliestvalidto(Clock::to_time_t(earliest_valid_to_));
+        output.set_latestvalidfrom(
+            seconds_since_epoch(latest_valid_from_).value());
+        output.set_earliestvalidto(
+            seconds_since_epoch(earliest_valid_to_).value());
 
         for (const auto& token : tokens_) {
             token.Internal().Serialize(*output.add_token());

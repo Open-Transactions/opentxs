@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "opentxs/Time.hpp"
 #include "opentxs/otx/blind/Types.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

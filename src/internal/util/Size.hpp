@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
-#include <ctime>
 #include <limits>
 #include <stdexcept>
 #include <string_view>
@@ -33,19 +33,28 @@ auto convert_to_size(Input in) noexcept(false) -> Output
     return static_cast<Output>(in);
 }
 
+inline auto int64_to_size(std::int64_t in) noexcept(false) -> std::size_t
+{
+    return convert_to_size<std::int64_t, std::size_t>(in);
+}
+
 inline auto shorten(std::size_t in) noexcept(false) -> std::uint32_t
 {
     return convert_to_size<std::size_t, std::uint32_t>(in);
 }
 
-inline auto shorten(std::time_t in) noexcept(false) -> std::uint32_t
-{
-    return convert_to_size<std::time_t, std::uint32_t>(in);
-}
 inline auto size_to_int(std::size_t in) noexcept(false) -> int
 {
     return convert_to_size<std::size_t, int>(in);
 }
+
+inline auto uint64_to_size(std::uint64_t in) noexcept(false) -> std::size_t
+{
+    return convert_to_size<std::uint64_t, std::size_t>(in);
+}
+
+extern template auto convert_to_size<std::int64_t, std::size_t>(
+    std::int64_t) noexcept(false) -> std::size_t;
 extern template auto convert_to_size<std::uint64_t, std::size_t>(
     std::uint64_t) noexcept(false) -> std::size_t;
 extern template auto convert_to_size<std::size_t, std::uint32_t>(

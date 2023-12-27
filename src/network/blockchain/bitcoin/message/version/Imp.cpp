@@ -17,15 +17,14 @@
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
-#include "internal/util/Time.hpp"
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::version
 {
@@ -121,7 +120,7 @@ Message::Message(
               chain,
               data.version_.value(),
               GetServices(data.remote_.services_.value())),
-          convert_stime(data.timestamp_.value()),
+          seconds_since_epoch_unsigned(data.timestamp_.value()).value(),
           [&] {
               auto out = std::make_pair(BitcoinFormat_106{}, CString{alloc});
               out.second.clear();
@@ -368,7 +367,7 @@ Message::BitcoinFormat_1::BitcoinFormat_1(
     const Time time) noexcept
     : version_(version)
     , services_(GetServiceBytes(localServices))
-    , timestamp_(Clock::to_time_t(time))
+    , timestamp_(seconds_since_epoch_unsigned(time).value())
     , remote_(remoteServices, remoteAddress)
 {
     static_assert(46 == sizeof(BitcoinFormat_1));

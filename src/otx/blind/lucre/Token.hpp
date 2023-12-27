@@ -9,10 +9,10 @@
 #include <memory>
 
 #include "internal/core/String.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/blind/token/Imp.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

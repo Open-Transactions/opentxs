@@ -10,11 +10,11 @@
 #include "internal/identity/wot/Verification.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identity/wot/Types.hpp"
 #include "opentxs/identity/wot/verification/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

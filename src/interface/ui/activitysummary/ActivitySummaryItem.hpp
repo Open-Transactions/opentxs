@@ -14,11 +14,11 @@
 #include "internal/interface/ui/UI.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 class QVariant;

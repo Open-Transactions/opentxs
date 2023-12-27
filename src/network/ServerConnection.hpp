@@ -7,7 +7,6 @@
 
 #include <atomic>
 #include <cstdint>
-#include <ctime>
 #include <mutex>
 #include <thread>
 
@@ -21,13 +20,13 @@
 #include "internal/util/Flag.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -113,7 +112,7 @@ private:
     OTZMQDealerSocket registration_socket_;
     OTZMQRequestSocket socket_;
     OTZMQPushSocket notification_socket_;
-    std::atomic<std::time_t> last_activity_{0};
+    std::atomic<sTime> last_activity_;
     OTFlag sockets_ready_;
     OTFlag status_;
     OTFlag use_proxy_;

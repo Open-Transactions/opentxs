@@ -241,7 +241,7 @@ void Bidirectional<InterfaceType, MessageType>::thread() noexcept
     while (this->running_.get()) {
         if (this->have_callback()) { break; }
 
-        Sleep(std::chrono::milliseconds(callback_wait_milliseconds_));
+        sleep(std::chrono::milliseconds(callback_wait_milliseconds_));
     }
 
     LogTrace()()("Callback ready").Flush();

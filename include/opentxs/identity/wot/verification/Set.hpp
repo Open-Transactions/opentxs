@@ -6,9 +6,9 @@
 #pragma once
 
 #include "opentxs/Export.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -22,8 +22,8 @@
 
 #include "api/network/asio/Context.hpp"
 #include "network/asio/WebRequest.tpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::asio
 {
@@ -84,7 +84,7 @@ HTTPS::HTTPS(
                 LogError()()(e.what()).Flush();
             }
 
-            Sleep(retry);
+            sleep(retry);
             retry *= 2;
         }
 

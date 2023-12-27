@@ -21,6 +21,7 @@
 #include "internal/api/network/Asio.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "opentxs/Context.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Network.hpp"
@@ -35,7 +36,6 @@
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/ScopeGuard.hpp"
 
 namespace opentxs::storage::tree

@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <utility>
 
@@ -402,11 +403,13 @@ auto OTMarket::GetNym_OfferList(
             return buf;
         }();
 
-        pOfferData->valid_from_ = std::to_string(Clock::to_time_t(tValidFrom));
-        pOfferData->valid_to_ = std::to_string(Clock::to_time_t(tValidTo));
+        pOfferData->valid_from_ =
+            std::to_string(seconds_since_epoch(tValidFrom).value());
+        pOfferData->valid_to_ =
+            std::to_string(seconds_since_epoch(tValidTo).value());
 
         pOfferData->date_ =
-            std::to_string(Clock::to_time_t(tDateAddedToMarket));
+            std::to_string(seconds_since_epoch(tDateAddedToMarket).value());
 
         pOfferData->notary_id_ = strNotaryID->Get();
         pOfferData->instrument_definition_id_ =
@@ -559,7 +562,7 @@ auto OTMarket::GetOfferList(
             return buf;
         }();
         pOfferData->date_ =
-            std::to_string(Clock::to_time_t(tDateAddedToMarket));
+            std::to_string(seconds_since_epoch(tDateAddedToMarket).value());
 
         // *pOfferData is CLONED at this time (I'm still responsible to delete.)
         // That's also why I add it here, below: So the data is set right before
@@ -604,7 +607,7 @@ auto OTMarket::GetOfferList(
             return buf;
         }();
         pOfferData->date_ =
-            std::to_string(Clock::to_time_t(tDateAddedToMarket));
+            std::to_string(seconds_since_epoch(tDateAddedToMarket).value());
 
         // *pOfferData is CLONED at this time (I'm still responsible to delete.)
         // That's also why I add it here, below: So the data is set right before
@@ -1966,7 +1969,7 @@ void OTMarket::ProcessTrade(
                     pTradeData->transaction_id_ =
                         std::to_string(lTransactionNum);
                     pTradeData->date_ =
-                        std::to_string(Clock::to_time_t(theDate));
+                        std::to_string(seconds_since_epoch(theDate).value());
                     pTradeData->price_ = [&] {
                         auto buf = UnallocatedCString{};
                         theOtherOffer.GetPriceLimit().Serialize(writer(buf));

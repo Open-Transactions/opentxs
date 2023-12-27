@@ -116,12 +116,12 @@ TEST_F(DealerReply, Dealer_Reply)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 5;
-    while (!replyReturned && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyReturned && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyReturned);
 
     end = std::time(nullptr) + 5;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }
@@ -252,12 +252,12 @@ TEST_F(DealerReply, Dealer_Reply_Multipart)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 5;
-    while (!replyReturned && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyReturned && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyReturned);
 
     end = std::time(nullptr) + 5;
-    while (!replyProcessed && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!replyProcessed && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     EXPECT_TRUE(replyProcessed);
 }

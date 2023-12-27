@@ -13,7 +13,7 @@ namespace ottest
 {
 auto StateMachine::callback() -> bool
 {
-    while (step_.load() <= counter_.load()) { ot::Sleep(10us); }
+    while (step_.load() <= counter_.load()) { ot::sleep(10us); }
 
     ++counter_;
 

@@ -8,6 +8,7 @@
 #include <irrxml/irrXML.hpp>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "internal/core/Armored.hpp"
@@ -22,7 +23,7 @@
 #include "internal/otx/common/util/Tag.hpp"
 #include "internal/otx/consensus/Base.hpp"
 #include "internal/util/Pimpl.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -34,7 +35,6 @@
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 #define ERROR_STRING "error"
 #define PING_NOTARY "pingNotary"
@@ -457,12 +457,14 @@ void Message::UpdateContents(const PasswordPrompt& reason)
     // I release this because I'm about to repopulate it.
     xml_unsigned_->Release();
 
-    time_ = Clock::to_time_t(Clock::now());
+    time_ = seconds_since_epoch(Clock::now()).value();
 
     Tag tag("notaryMessage");
 
     tag.add_attribute("version", version_->Get());
-    tag.add_attribute("dateSigned", formatTimestamp(convert_stime(time_)));
+    tag.add_attribute(
+        "dateSigned",
+        formatTimestamp(seconds_since_epoch_unsigned(time_).value()));
 
     if (!updateContentsByType(tag)) {
         TagPtr pTag(new Tag(command_->Get()));
@@ -587,7 +589,8 @@ auto Message::processXmlNodeNotaryMessage(
     auto strDateSigned = String::Factory(xml->getAttributeValue("dateSigned"));
 
     if (strDateSigned->Exists()) {
-        time_ = Clock::to_time_t(parseTimestamp(strDateSigned->Get()));
+        time_ =
+            seconds_since_epoch(parseTimestamp(strDateSigned->Get())).value();
     }
 
     LogVerbose()()("===> Loading XML for Message into memory structures... ")

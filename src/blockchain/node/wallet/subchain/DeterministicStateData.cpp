@@ -24,6 +24,7 @@
 #include "internal/blockchain/database/Wallet.hpp"
 #include "internal/blockchain/node/wallet/subchain/statemachine/Index.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
+#include "opentxs/Time.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -38,7 +39,6 @@
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::blockchain::node::wallet
 {

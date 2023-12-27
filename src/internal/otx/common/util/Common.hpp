@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "opentxs/Time.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs
 {

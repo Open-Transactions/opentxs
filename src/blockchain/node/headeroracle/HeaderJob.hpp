@@ -10,9 +10,9 @@
 
 #include "internal/blockchain/node/headeroracle/HeaderJob.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"  // IWYU pragma: keep
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -432,7 +432,7 @@ auto Regtest_fixture_simple::WaitForSynchro(
                 .Flush();
             break;
         }
-        ot::Sleep(std::chrono::seconds(5));
+        ot::sleep(std::chrono::seconds(5));
     }
 }
 }  // namespace ottest

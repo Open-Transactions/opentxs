@@ -13,6 +13,7 @@
 #include <optional>
 
 #include "internal/crypto/Envelope.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
@@ -23,7 +24,6 @@
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/blind/purse/Purse.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)

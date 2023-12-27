@@ -290,7 +290,7 @@ auto Regtest_fixture_base::Connect(
         }
     }();
 
-    if (address.Type() != zmq) { ot::Sleep(1s); }
+    if (address.Type() != zmq) { ot::sleep(1s); }
 
     const auto syncServer = [&] {
         const auto handle =

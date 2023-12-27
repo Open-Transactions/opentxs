@@ -33,7 +33,7 @@ auto wait_for_counter(Counter& data, const bool hard) noexcept -> bool
     auto& [expected, updated] = data;
 
     while ((updated < expected) && ((ot::Clock::now() - start) < limit)) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
     }
 
     if (false == hard) { updated.store(expected.load()); }

@@ -10,12 +10,12 @@
 #include <string_view>
 #include <tuple>
 
+#include "opentxs/Time.hpp"
 #include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/storage/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

@@ -19,6 +19,7 @@
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/AddressType.hpp"  // IWYU pragma: keep
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/api/Context.hpp"
@@ -55,7 +56,6 @@
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
-#include "opentxs/util/Time.hpp"
 #include "otx/common/OTStorage.hpp"
 #include "otx/server/Server.hpp"
 #include "otx/server/ServerSettings.hpp"

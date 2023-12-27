@@ -30,7 +30,7 @@
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/Time.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Outpoint.hpp"
@@ -395,7 +395,7 @@ auto BitcoinTransaction(
             in.locktime(),
             blockchain::block::TransactionHash{in.txid()},
             blockchain::block::TransactionHash{in.wtxid()},
-            convert_stime(in.time()),
+            seconds_since_epoch_unsigned(in.time()).value(),
             in.memo(),
             inputs,
             outputs,

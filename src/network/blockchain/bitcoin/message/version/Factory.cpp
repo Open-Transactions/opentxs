@@ -14,12 +14,12 @@
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/util/PMR.hpp"
 #include "network/blockchain/bitcoin/message/version/Imp.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::factory
 {

@@ -56,7 +56,7 @@ public:
             const auto wait =
                 std::chrono::duration_cast<std::chrono::microseconds>(
                     delay - elapsed);
-            opentxs::Sleep(std::max(wait, zero));
+            opentxs::sleep(std::max(wait, zero));
             QCoreApplication::exit(0);
 
             if (thread_.joinable()) { thread_.join(); }

@@ -12,13 +12,13 @@
 #include "internal/blockchain/block/Parser.hpp"
 #include "internal/network/blockchain/bitcoin/message/Types.hpp"
 #include "internal/util/Bytes.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/util/Log.hpp"
-#include "opentxs/util/Time.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::tx
 {

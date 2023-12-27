@@ -99,7 +99,7 @@ TEST_F(PairSocket, PairSocket_Send1)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (!callbackFinished && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!callbackFinished && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     ASSERT_TRUE(callbackFinished);
 }
@@ -142,7 +142,7 @@ TEST_F(PairSocket, PairSocket_Send2)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (!callbackFinished && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!callbackFinished && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     ASSERT_TRUE(callbackFinished);
 }
@@ -185,7 +185,7 @@ TEST_F(PairSocket, PairSocket_Send3)
     ASSERT_TRUE(sent);
 
     auto end = std::time(nullptr) + 15;
-    while (!callbackFinished && std::time(nullptr) < end) { ot::Sleep(100ms); }
+    while (!callbackFinished && std::time(nullptr) < end) { ot::sleep(100ms); }
 
     ASSERT_TRUE(callbackFinished);
 }
@@ -254,7 +254,7 @@ TEST_F(PairSocket, PairSocket_Send_Two_Way)
     auto end = std::time(nullptr) + 15;
     while (!peerCallbackFinished && !callbackFinished &&
            std::time(nullptr) < end) {
-        ot::Sleep(100ms);
+        ot::sleep(100ms);
     }
 
     ASSERT_TRUE(peerCallbackFinished);

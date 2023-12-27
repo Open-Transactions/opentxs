@@ -69,6 +69,7 @@
 #include "internal/interface/ui/Widget.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -85,7 +86,6 @@
 #include "opentxs/interface/ui/Types.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

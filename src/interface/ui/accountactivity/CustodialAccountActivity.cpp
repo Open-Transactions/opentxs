@@ -13,6 +13,7 @@
 #include <compare>
 #include <future>
 #include <memory>
+#include <optional>
 #include <span>
 
 #include "internal/api/session/Storage.hpp"
@@ -23,8 +24,8 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
-#include "internal/util/Time.hpp"
 #include "opentxs/AccountType.hpp"  // IWYU pragma: keep
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -132,7 +133,8 @@ auto CustodialAccountActivity::extract_event(
     auto& [time, event_p] = output;
 
     for (const auto& event : workflow.event()) {
-        const auto eventTime = convert_stime(event.time());
+        const auto eventTime =
+            seconds_since_epoch_unsigned(event.time()).value();
 
         if (eventType != event.type()) { continue; }
 

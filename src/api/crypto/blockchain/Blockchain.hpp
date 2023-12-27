@@ -18,6 +18,7 @@
 #include <string_view>
 
 #include "internal/api/crypto/Blockchain.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
@@ -36,7 +37,6 @@
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

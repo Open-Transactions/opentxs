@@ -8,7 +8,6 @@
 #include <array>
 #include <compare>
 #include <cstring>
-#include <ctime>
 #include <limits>
 #include <stdexcept>
 #include <utility>
@@ -17,7 +16,8 @@
 #include "blockchain/protocol/bitcoin/base/block/header/Imp.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/PMR.hpp"
-#include "internal/util/Time.hpp"
+#include "internal/util/Size.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
@@ -42,7 +42,8 @@ auto BitcoinBlockHeader(
 
     try {
         static const auto now = []() {
-            return static_cast<std::uint32_t>(Clock::to_time_t(Clock::now()));
+            return shorten(uint64_to_size(
+                seconds_since_epoch_unsigned(Clock::now()).value()));
         };
         static const auto checkPoW = [](const auto& pow, const auto& target) {
             return blockchain::block::NumericHash{pow} < target;
@@ -87,7 +88,7 @@ auto BitcoinBlockHeader(
             serialized.version_.value(),
             blockchain::block::Hash{previous.Hash()},
             std::move(merkle),
-            convert_stime(std::time_t(serialized.time_.value())),
+            seconds_since_epoch_unsigned(serialized.time_.value()).value(),
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             false);
@@ -163,7 +164,7 @@ auto BitcoinBlockHeader(
             serialized.version_.value(),
             ReadView{serialized.previous_.data(), serialized.previous_.size()},
             ReadView{serialized.merkle_.data(), serialized.merkle_.size()},
-            convert_stime(std::time_t(serialized.time_.value())),
+            seconds_since_epoch_unsigned(serialized.time_.value()).value(),
             serialized.nbits_.value(),
             serialized.nonce_.value(),
             isGenesis);

@@ -18,6 +18,7 @@
 #include "internal/api/session/Storage.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -33,7 +34,6 @@
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 #include "util/storage/Config.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -470,7 +470,7 @@ public:
         const identifier::Nym& nymid,
         const identifier::Generic& threadid,
         const identifier::Generic& itemid,
-        const std::uint64_t time,
+        Time time,
         std::string_view alias,
         const UnallocatedCString& data,
         const otx::client::StorageBox box,

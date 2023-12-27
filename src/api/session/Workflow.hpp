@@ -23,12 +23,12 @@
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
-#include "opentxs/util/Time.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
