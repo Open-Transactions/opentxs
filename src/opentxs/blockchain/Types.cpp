@@ -23,10 +23,10 @@
 
 #include "internal/blockchain/params/ChainData.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/UnitType.hpp"                   // IWYU pragma: keep
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
-#include "opentxs/crypto/HashType.hpp"            // IWYU pragma: keep
+#include "opentxs/UnitType.hpp"             // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"      // IWYU pragma: keep
+#include "opentxs/crypto/HashType.hpp"      // IWYU pragma: keep
 #include "opentxs/display/Definition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

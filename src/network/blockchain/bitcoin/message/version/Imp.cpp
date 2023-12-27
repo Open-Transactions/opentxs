@@ -20,7 +20,8 @@
 #include "network/blockchain/bitcoin/message/base/MessagePrivate.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"

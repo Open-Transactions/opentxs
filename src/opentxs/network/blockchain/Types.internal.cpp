@@ -19,7 +19,8 @@
 
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/crypto/Types.hpp"
 #include "opentxs/identifier/Account.hpp"            // IWYU pragma: keep
 #include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep

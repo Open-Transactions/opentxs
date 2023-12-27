@@ -306,7 +306,7 @@ Actor::Actor(
                 const auto& addr =
                     out.emplace_back(api_.Factory().BlockchainAddress(
                         params.P2PDefaultProtocol(),
-                        type(*a),
+                        network::asio::type(*a),
                         serialized.Bytes(),
                         params.P2PDefaultPort(),
                         chain_,
@@ -773,7 +773,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
             const auto addr = serialize(*boost);
             auto address = api_.Factory().BlockchainAddress(
                 params.P2PDefaultProtocol(),
-                type(*boost),
+                network::asio::type(*boost),
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -808,7 +808,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
             const auto addr = serialize(*boost);
             auto address = api_.Factory().BlockchainAddress(
                 params.P2PDefaultProtocol(),
-                type(*boost),
+                network::asio::type(*boost),
                 addr.Bytes(),
                 params::get(chain_).P2PDefaultPort(),
                 chain_,
@@ -835,7 +835,7 @@ auto Actor::first_time_init(allocator_type monotonic) noexcept -> void
                 auto& addr = seed.address_;
                 addr = api_.Factory().BlockchainAddressZMQ(
                     params::get(chain_).P2PDefaultProtocol(),
-                    type(*boost),
+                    network::asio::type(*boost),
                     serialize(*boost).Bytes(),
                     chain_,
                     Time{},

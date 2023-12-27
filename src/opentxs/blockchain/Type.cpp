@@ -3,4 +3,4 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: associated
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: associated

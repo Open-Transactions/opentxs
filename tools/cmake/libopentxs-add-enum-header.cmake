@@ -12,7 +12,7 @@ macro(
   include(libopentxs-add-public-moc-header)
 
   if(OT_QT_EXPORT)
-    set(MAYBE_INCLUDE_QOBJECT "#include <QObject>\n")
+    set(MAYBE_INCLUDE_QOBJECT "#include <QMetaObject>\n")
     set(MAYBE_OPEN_NAMESPACE
         "{\nQ_NAMESPACE\nQ_CLASSINFO(\"RegisterEnumClassesUnscoped\", \"true\")\n"
     )

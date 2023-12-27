@@ -10,14 +10,14 @@ add_subdirectory(node)
 add_subdirectory(protocol)
 add_subdirectory(token)
 
-libopentxs_add_public_header("blockchain" "BlockchainType.hpp")
+libopentxs_add_enum_header("blockchain" "Type")
 libopentxs_add_public_header("blockchain" "Category.hpp")
 libopentxs_add_public_header("blockchain" "Types.hpp")
 
 target_sources(
   opentxs-common
   PRIVATE
-    "BlockchainType.cpp"
     "Category.cpp"
+    "Type.cpp"
     "Types.cpp"
 )

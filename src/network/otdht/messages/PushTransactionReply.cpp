@@ -16,7 +16,7 @@
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
 #include "opentxs/network/otdht/Block.hpp"        // IWYU pragma: keep

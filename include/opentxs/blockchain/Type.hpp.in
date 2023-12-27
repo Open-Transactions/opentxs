@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <limits>
+@MAYBE_INCLUDE_QOBJECT@#include <limits>
 #include <type_traits>
 
 #include "opentxs/blockchain/Types.hpp"  // IWYU pragma: keep
 
-namespace opentxs::blockchain
-{
+namespace opentxs::blockchain::inline type
+@MAYBE_OPEN_NAMESPACE@
 enum class Type : std::underlying_type_t<Type> {
     UnknownBlockchain = 0,
     Bitcoin = 1,
@@ -117,5 +117,5 @@ enum class Type : std::underlying_type_t<Type> {
     Zcash = 98,
     Zilliqa = 99,
     UnitTest = std::numeric_limits<int>::max(),
-};
+@MAYBE_EXPORT_ENUM@
 }  // namespace opentxs::blockchain

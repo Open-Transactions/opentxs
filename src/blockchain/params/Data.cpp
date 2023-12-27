@@ -7,9 +7,9 @@
 
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/UnitType.hpp"                   // IWYU pragma: keep
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
+#include "opentxs/UnitType.hpp"             // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"       // IWYU pragma: keep
 #include "opentxs/blockchain/crypto/AddressStyle.hpp"      // IWYU pragma: keep

@@ -38,7 +38,11 @@ using UnconfirmedBalance = Amount;
 using Balance = std::pair<ConfirmedBalance, UnconfirmedBalance>;
 
 enum class Category : std::uint32_t;  // IWYU pragma: export
-enum class Type : std::uint32_t;      // IWYU pragma: export
+
+inline namespace type
+{
+enum class Type : std::uint32_t;  // IWYU pragma: export
+}  // namespace type
 
 OPENTXS_EXPORT auto associated_mainnet(Type) noexcept -> Type;
 OPENTXS_EXPORT auto blockchain_to_unit(const Type type) noexcept -> UnitType;

@@ -92,7 +92,7 @@
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/api/session/Workflow.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Type.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/PaymentCode.hpp"
 #include "opentxs/crypto/Language.hpp"

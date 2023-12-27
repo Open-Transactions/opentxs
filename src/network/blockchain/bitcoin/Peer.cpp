@@ -75,8 +75,8 @@
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
 #include "opentxs/api/session/Factory.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
-#include "opentxs/blockchain/Category.hpp"        // IWYU pragma: keep
+#include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"      // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
