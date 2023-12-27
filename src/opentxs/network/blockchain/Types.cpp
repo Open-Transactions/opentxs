@@ -15,7 +15,7 @@
 #include <utility>
 
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"     // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"               // IWYU pragma: keep
 #include "opentxs/network/blockchain/Protocol.hpp"   // IWYU pragma: keep
 #include "opentxs/network/blockchain/Subchain.hpp"   // IWYU pragma: keep
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep

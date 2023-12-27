@@ -7,14 +7,15 @@
 
 #include <utility>
 
-#include "opentxs/interface/rpc/request/Base.hpp"
-#include "opentxs/interface/rpc/response/Base.hpp"
+#include "opentxs/rpc/request/Message.hpp"
+#include "opentxs/rpc/request/internal.factory.hpp"
+#include "opentxs/rpc/response/Message.hpp"
 
 namespace opentxs::api
 {
 auto ContextPrivate::RPC(const ReadView command, Writer&& response)
     const noexcept -> bool
 {
-    return RPC(*rpc::request::Factory(command))->Serialize(std::move(response));
+    return RPC(*factory::RPCRequest(command))->Serialize(std::move(response));
 }
 }  // namespace opentxs::api

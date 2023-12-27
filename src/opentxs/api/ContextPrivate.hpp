@@ -35,7 +35,7 @@
 #include "opentxs/api/network/ZAP.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Notary.hpp"
-#include "opentxs/interface/rpc/request/Base.hpp"
+#include "opentxs/rpc/request/Message.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Options.hpp"
 #include "util/ScopeGuard.hpp"
@@ -84,15 +84,12 @@ class Context;  // IWYU pragma: keep
 
 namespace rpc
 {
-namespace internal
-{
-struct RPC;
-}  // namespace internal
-
 namespace response
 {
-class Base;
+class Message;
 }  // namespace response
+
+class Processor;
 }  // namespace rpc
 
 class PasswordCallback;
@@ -142,8 +139,8 @@ public:
     auto QtRootObject(QObject* parent) const noexcept -> QObject* final;
     auto Reschedule(TaskID, std::chrono::seconds interval) const noexcept
         -> bool final;
-    auto RPC(const rpc::request::Base& command) const noexcept
-        -> std::unique_ptr<rpc::response::Base> final;
+    auto RPC(const rpc::request::Message& command) const noexcept
+        -> std::unique_ptr<rpc::response::Message> final;
     auto RPC(const ReadView command, Writer&& response) const noexcept
         -> bool final;
     auto Schedule(std::chrono::seconds interval, SimpleCallback task)
@@ -232,7 +229,7 @@ private:
     std::shared_ptr<api::Crypto> crypto_;
     std::shared_ptr<api::internal::Factory> factory_;
     mutable GuardedSessions sessions_;
-    std::unique_ptr<rpc::internal::RPC> rpc_;
+    std::unique_ptr<rpc::Processor> rpc_;
     mutable boost::interprocess::file_lock file_lock_;
     mutable GuardedSignals signal_handler_;
     api::Context self_;

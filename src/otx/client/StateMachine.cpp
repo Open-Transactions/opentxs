@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "otx/client/StateMachine.tpp"  // IWYU pragma: associated
+#include "otx/client/StateMachine.hpp"  // IWYU pragma: associated
 
 #include <UnitDefinition.pb.h>
 #include <atomic>
@@ -15,7 +15,6 @@
 #include <memory>
 #include <new>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 #include "core/StateMachine.hpp"
@@ -35,34 +34,40 @@
 #include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/Time.hpp"
-#include "opentxs/UnitType.hpp"
+#include "opentxs/Types.hpp"
+#include "opentxs/api/Factory.internal.hpp"
+#include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
-#include "opentxs/contract/ContractType.hpp"
+#include "opentxs/contract/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/core/Secret.hpp"
+#include "opentxs/core/contract/peer/Reply.hpp"
+#include "opentxs/core/contract/peer/Request.hpp"
+#include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
-#include "opentxs/identity/wot/claim/ClaimType.hpp"
-#include "opentxs/identity/wot/claim/SectionType.hpp"
+#include "opentxs/identity/wot/claim/ClaimType.hpp"    // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
+#include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/internal.factory.hpp"
-#include "opentxs/otx/LastReplyStatus.hpp"
-#include "opentxs/otx/OperationType.hpp"
+#include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/OperationType.hpp"    // IWYU pragma: keep
+#include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/NymEditor.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
-#include "opentxs/util/Writer.hpp"
-#include "otx/client/StateMachine.hpp"
+#include "otx/client/StateMachine.tpp"
 #include "util/Blank.hpp"
 
 #define CONTRACT_DOWNLOAD_MILLISECONDS 10000

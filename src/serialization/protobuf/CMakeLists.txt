@@ -15,4 +15,5 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/Proto.hpp"
     "${opentxs_SOURCE_DIR}/src/internal/serialization/protobuf/Proto.tpp"
     "Proto.cpp"
+    "Proto.tpp.cpp"
 )

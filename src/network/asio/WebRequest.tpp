@@ -5,10 +5,20 @@
 
 #pragma once
 
-#include "internal/network/asio/WebRequest.hpp"  // IWYU pragma: associated
+#include <boost/intrusive/list.hpp>
+#include <exception>
+#include <functional>
+#include <future>
+#include <optional>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 #include "BoostAsio.hpp"
 #include "api/network/asio/Context.hpp"  // IWYU pragma: keep
+#include "internal/network/asio/WebRequest.hpp"
+#include "internal/util/alloc/Allocated.hpp"
+#include "opentxs/util/Container.hpp"
 
 namespace opentxs::network::asio
 {

@@ -7,7 +7,7 @@
 
 #include "crypto/library/packetcrypt/PacketCrypt.hpp"
 #include "internal/blockchain/block/Validator.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 
 namespace opentxs::blockchain::node::internal

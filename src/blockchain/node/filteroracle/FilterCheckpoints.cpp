@@ -5,7 +5,7 @@
 
 #include "blockchain/node/filteroracle/FilterOracle.hpp"  // IWYU pragma: associated
 
-#include "opentxs/blockchain/BlockchainType.hpp"
+#include "opentxs/blockchain/Type.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"
 #include "opentxs/util/Writer.hpp"
 

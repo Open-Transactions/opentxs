@@ -5,9 +5,12 @@
 
 #pragma once
 
-#include "network/zeromq/socket/Sender.hpp"  // IWYU pragma: associated
+#include "network/zeromq/socket/Sender.hpp"
 
-#include "network/zeromq/socket/Socket.hpp"
+#include <utility>
+
+#include "internal/util/Mutex.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation
 {

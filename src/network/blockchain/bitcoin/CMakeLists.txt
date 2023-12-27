@@ -19,6 +19,7 @@ if(OT_BLOCKCHAIN_EXPORT)
       "Peer.cpp"
       "Peer.hpp"
       "Peer.tpp"
+      "Peer.tpp.cpp"
   )
 endif()
 

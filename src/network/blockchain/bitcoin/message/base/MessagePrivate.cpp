@@ -58,7 +58,8 @@
 #include "network/blockchain/bitcoin/message/tx/MessagePrivate.hpp"
 #include "network/blockchain/bitcoin/message/verack/MessagePrivate.hpp"
 #include "network/blockchain/bitcoin/message/version/MessagePrivate.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 
 namespace opentxs::network::blockchain::bitcoin::message::internal
 {

@@ -1,3 +1,4 @@
+// Copyright (c) 2010-2022 The Open-Transactions developers
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -6,22 +7,40 @@
 
 #pragma once
 
-#include "network/zeromq/socket/Receiver.hpp"  // IWYU pragma: associated
-
 #include <zmq.h>
 #include <array>
+#include <chrono>
+#include <functional>
 #include <iostream>
-#include <memory>
 #include <mutex>
+#include <source_location>
+#include <string_view>
 #include <thread>
+#include <utility>
 
 #include "internal/util/Flag.hpp"
+#include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
 #include "internal/util/Thread.hpp"
+#include "network/zeromq/socket/Receiver.hpp"
+#include "network/zeromq/socket/Socket.hpp"
 #include "opentxs/Time.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
-#include "opentxs/network/zeromq/message/Message.hpp"
-#include "opentxs/network/zeromq/socket/Types.internal.hpp"
+#include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace network
+{
+namespace zeromq
+{
+class Context;
+}  // namespace zeromq
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::zeromq::socket::implementation
 {

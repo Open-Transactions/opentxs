@@ -13,8 +13,8 @@
 #include "blockchain/protocol/bitcoin/pkt/block/Parser.hpp"
 #include "internal/blockchain/node/blockoracle/Types.hpp"
 #include "internal/util/P0330.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"
 #include "opentxs/blockchain/Category.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"

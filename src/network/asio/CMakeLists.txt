@@ -22,5 +22,6 @@ target_sources(
     "Socket.cpp"
     "Socket.hpp"
     "WebRequest.tpp"
+    "WebRequest.tpp.cpp"
 )
 libopentxs_link_external(Boost::system)

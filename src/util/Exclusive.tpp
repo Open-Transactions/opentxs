@@ -5,10 +5,13 @@
 
 #pragma once
 
-#include "internal/util/Exclusive.hpp"  // IWYU pragma: associated
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
 
-#include <utility>
-
+#include "internal/util/Exclusive.hpp"
+#include "internal/util/Mutex.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs

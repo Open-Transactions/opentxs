@@ -125,7 +125,7 @@ TEST_F(RPC_fixture, bad_client_session)
 {
     constexpr auto index{88};
     const auto accounts = [&] {
-        auto out = ot::rpc::request::Base::Identifiers{};
+        auto out = ot::rpc::request::Message::Identifiers{};
         out.emplace_back(registered_accounts_.at(issuer_).front());
 
         return out;
@@ -170,7 +170,7 @@ TEST_F(RPC_fixture, bad_server_session)
 {
     constexpr auto index{99};
     const auto accounts = [&] {
-        auto out = ot::rpc::request::Base::Identifiers{};
+        auto out = ot::rpc::request::Message::Identifiers{};
         out.emplace_back(registered_accounts_.at(issuer_).front());
 
         return out;
@@ -215,7 +215,7 @@ TEST_F(RPC_fixture, all_accounts)
 {
     constexpr auto session{0};
     const auto accounts = [&] {
-        auto out = ot::rpc::request::Base::Identifiers{};
+        auto out = ot::rpc::request::Message::Identifiers{};
         const auto& i = registered_accounts_.at(issuer_);
         const auto& b = registered_accounts_.at(brian_);
         const auto& c = registered_accounts_.at(chris_);

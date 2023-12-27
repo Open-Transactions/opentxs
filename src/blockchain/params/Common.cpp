@@ -18,7 +18,8 @@
 #include "blockchain/params/ChainDataPrivate.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "opentxs/Types.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
 #include "opentxs/blockchain/block/Position.hpp"
 #include "opentxs/blockchain/cfilter/FilterType.hpp"  // IWYU pragma: keep

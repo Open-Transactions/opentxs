@@ -7,7 +7,8 @@
 
 #include <QQmlEngine>  // IWYU pragma: keep
 
-#include "opentxs/UnitType.hpp"  // IWYU pragma: keep
+#include "opentxs/UnitType.hpp"         // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
 
 namespace opentxs
 {
@@ -20,5 +21,12 @@ auto RegisterQMLTypes() noexcept -> void
         VersionMinor(),
         "UnitType",
         "Access to opentxs::UnitType enum class");
+    qmlRegisterUncreatableMetaObject(
+        opentxs::blockchain::type::staticMetaObject,
+        "org.opentransactions.blockchain.type",
+        VersionMajor(),
+        VersionMinor(),
+        "Type",
+        "Access to opentxs::blockchain::Type enum class");
 }
 }  // namespace opentxs

@@ -28,7 +28,7 @@
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Client.internal.hpp"
 #include "opentxs/api/session/Endpoints.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/node/Manager.hpp"
 #include "opentxs/network/blockchain/Protocol.hpp"  // IWYU pragma: keep

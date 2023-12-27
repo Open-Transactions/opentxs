@@ -56,12 +56,12 @@ namespace rpc
 {
 namespace request
 {
-class Base;
+class Message;
 }  // namespace request
 
 namespace response
 {
-class Base;
+class Message;
 }  // namespace response
 }  // namespace rpc
 
@@ -98,8 +98,8 @@ public:
         -> QObject* = 0;
     virtual auto RPC(const ReadView command, Writer&& response) const noexcept
         -> bool = 0;
-    virtual auto RPC(const rpc::request::Base& command) const noexcept
-        -> std::unique_ptr<rpc::response::Base> = 0;
+    virtual auto RPC(const rpc::request::Message& command) const noexcept
+        -> std::unique_ptr<rpc::response::Message> = 0;
     virtual auto Self() const noexcept -> const api::Context& = 0;
     virtual auto ShuttingDown() const noexcept -> bool = 0;
     virtual auto StartClientSession(const int instance) const

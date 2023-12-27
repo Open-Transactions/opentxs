@@ -18,7 +18,7 @@
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "network/otdht/messages/Base.hpp"
-#include "opentxs/blockchain/BlockchainType.hpp"  // IWYU pragma: keep
+#include "opentxs/blockchain/Type.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/Types.hpp"
 #include "opentxs/blockchain/block/Transaction.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"

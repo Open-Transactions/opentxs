@@ -11,6 +11,7 @@
 #include "internal/util/Mutex.hpp"
 #include "network/zeromq/curve/Server.hpp"
 #include "network/zeromq/socket/Receiver.hpp"
+#include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -21,7 +22,6 @@ namespace network
 namespace zeromq
 {
 class Context;
-class Message;
 class ReplyCallback;
 }  // namespace zeromq
 }  // namespace network

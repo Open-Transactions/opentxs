@@ -5,12 +5,11 @@
 
 #pragma once
 
-#include "StateMachine.hpp"  // IWYU pragma: associated
-
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "otx/client/StateMachine.hpp"
 
 // NOLINTBEGIN(misc-definitions-in-headers)
 namespace opentxs::otx::client::implementation

@@ -21,6 +21,7 @@ target_sources(
     "Frame.hpp"
     "Message.cpp"
     "Message.cpp"
+    "Message.tpp.cpp"
 )
 libopentxs_link_internal("${OT_ZMQ_TARGET}")
 libopentxs_link_external("${OT_ZMQ_TARGET}")
