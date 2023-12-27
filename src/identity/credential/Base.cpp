@@ -3,42 +3,47 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "identity/credential/Base.tpp"  // IWYU pragma: associated
+#include "identity/credential/Base.hpp"  // IWYU pragma: associated
 
 #include <ChildCredentialParameters.pb.h>
 #include <Credential.pb.h>
 #include <Enums.pb.h>
 #include <Signature.pb.h>
 #include <memory>
+#include <span>
 #include <stdexcept>
+#include <utility>
 
 #include "core/contract/Signable.hpp"
-#include "identity/credential/Base.hpp"
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
+#include "internal/serialization/protobuf/Check.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/Proto.tpp"
+#include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/util/Pimpl.hpp"
+#include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
-#include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/api/session/Wallet.hpp"
 #include "opentxs/api/session/Wallet.internal.hpp"
 #include "opentxs/core/ByteArray.hpp"
-#include "opentxs/core/contract/Signable.hpp"
+#include "opentxs/core/Data.hpp"
 #include "opentxs/crypto/Parameters.hpp"
-#include "opentxs/crypto/SignatureRole.hpp"
-#include "opentxs/crypto/asymmetric/Mode.hpp"
+#include "opentxs/crypto/SignatureRole.hpp"  // IWYU pragma: keep
+#include "opentxs/crypto/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
-#include "opentxs/identity/CredentialRole.hpp"
+#include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
 #include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
 namespace opentxs::identity::credential::internal

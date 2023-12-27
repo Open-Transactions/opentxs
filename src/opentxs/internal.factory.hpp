@@ -34,7 +34,6 @@ namespace session
 class Client;
 }  // namespace session
 
-class Context;
 class Crypto;
 class Session;
 }  // namespace api
@@ -141,14 +140,6 @@ class VerificationIdentity;
 class VerificationItem;
 class VerificationSet;
 }  // namespace proto
-
-namespace rpc
-{
-namespace internal
-{
-struct RPC;
-}  // namespace internal
-}  // namespace rpc
 
 class Armored;
 class Data;
@@ -311,7 +302,6 @@ public:
         const identity::Source& source,
         const proto::Credential& credential)
         -> identity::credential::internal::Primary*;
-    static auto RPC(const api::Context& context) -> rpc::internal::RPC*;
     static auto SecondaryCredential(
         const api::Session& api,
         identity::internal::Authority& parent,

@@ -24,7 +24,7 @@ auto verify_account_balance(
     const ot::UnallocatedCString& account,
     const ot::Amount required) noexcept -> bool;
 auto verify_response_codes(
-    const ot::rpc::response::Base::Responses& codes,
+    const ot::rpc::response::Message::Responses& codes,
     const std::size_t count,
     const ot::rpc::ResponseCode required =
         ot::rpc::ResponseCode::success) noexcept -> bool;
@@ -165,7 +165,7 @@ auto verify_account_balance(
 }
 
 auto verify_response_codes(
-    const ot::rpc::response::Base::Responses& codes,
+    const ot::rpc::response::Message::Responses& codes,
     const std::size_t count,
     const ot::rpc::ResponseCode required) noexcept -> bool
 {

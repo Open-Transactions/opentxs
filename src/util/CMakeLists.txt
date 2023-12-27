@@ -55,6 +55,7 @@ target_sources(
     "Bytes.cpp"
     "Container.hpp"
     "Exclusive.tpp"
+    "Exclusive.tpp.cpp"
     "Flag.cpp"
     "Flag.hpp"
     "Gatekeeper.cpp"

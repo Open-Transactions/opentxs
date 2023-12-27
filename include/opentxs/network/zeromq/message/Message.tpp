@@ -6,9 +6,23 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace network
+{
+namespace zeromq
+{
+class Envelope;
+}  // namespace zeromq
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::zeromq
 {

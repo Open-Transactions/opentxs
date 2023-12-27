@@ -5,9 +5,59 @@
 
 #pragma once
 
-#include "network/blockchain/bitcoin/Peer.hpp"  // IWYU pragma: associated
+#include <functional>
+#include <stdexcept>
+#include <utility>
 
 #include "internal/network/blockchain/bitcoin/message/Factory.hpp"
+#include "internal/network/blockchain/bitcoin/message/Message.hpp"
+#include "internal/network/blockchain/bitcoin/message/Types.hpp"
+#include "network/blockchain/bitcoin/Peer.hpp"
+#include "opentxs/api/Session.hpp"
+#include "opentxs/blockchain/Types.hpp"
+#include "opentxs/util/Container.hpp"
+#include "opentxs/util/Log.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace network
+{
+namespace blockchain
+{
+namespace bitcoin
+{
+namespace message
+{
+namespace internal
+{
+class Addr2;
+class Addr;
+class Block;
+class Cfheaders;
+class Cfilter;
+class Getaddr;
+class Getcfheaders;
+class Getcfilters;
+class Getdata;
+class Getheaders;
+class Headers;
+class Inv;
+class Mempool;
+class Notfound;
+class Ping;
+class Pong;
+class Sendaddr2;
+class Tx;
+class Verack;
+class Version;
+}  // namespace internal
+}  // namespace message
+}  // namespace bitcoin
+}  // namespace blockchain
+}  // namespace network
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::network::blockchain::bitcoin
 {

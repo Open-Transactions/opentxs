@@ -5,23 +5,28 @@
 
 #pragma once
 
-#include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: associated
-
 extern "C" {
 #include <sodium.h>
 }
 
 #include <boost/endian/buffers.hpp>
+#include <array>
+#include <cstddef>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
 #include <string_view>
 
-#include "internal/core/Core.hpp"
 #include "internal/util/P0330.hpp"
+#include "opentxs/Types.hpp"
 #include "opentxs/Types.internal.hpp"
+#include "opentxs/core/Data.hpp"
+#include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 

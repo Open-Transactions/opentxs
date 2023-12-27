@@ -57,12 +57,12 @@ namespace rpc
 {
 namespace request
 {
-class Base;
+class Message;
 }  // namespace request
 
 namespace response
 {
-class Base;
+class Message;
 }  // namespace response
 }  // namespace rpc
 
@@ -117,8 +117,8 @@ public:
     auto Reschedule(TaskID task, std::chrono::seconds interval) const noexcept
         -> bool final;
     /// Used for sending RPC requests. Returns RPC response.
-    auto RPC(const rpc::request::Base& command) const noexcept
-        -> std::unique_ptr<rpc::response::Base>;
+    auto RPC(const rpc::request::Message& command) const noexcept
+        -> std::unique_ptr<rpc::response::Message>;
     auto RPC(const ReadView command, Writer&& response) const noexcept -> bool;
     auto Schedule(std::chrono::seconds interval, opentxs::SimpleCallback task)
         const noexcept -> TaskID final;

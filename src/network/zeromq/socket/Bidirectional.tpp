@@ -5,23 +5,29 @@
 
 #pragma once
 
-#include "network/zeromq/socket/Bidirectional.hpp"  // IWYU pragma: associated
-
 #include <zmq.h>
 #include <array>
+#include <chrono>
+#include <iostream>
 #include <memory>
 #include <mutex>
+#include <source_location>
+#include <string_view>
 #include <thread>
+#include <utility>
 
-#include "internal/util/Flag.hpp"
+#include "internal/util/Mutex.hpp"
 #include "internal/util/Signals.hpp"
-#include "network/zeromq/socket/Receiver.tpp"
-#include "network/zeromq/socket/Sender.tpp"
+#include "internal/util/Thread.hpp"
+#include "network/zeromq/socket/Bidirectional.hpp"
+#include "network/zeromq/socket/Receiver.hpp"
+#include "network/zeromq/socket/Socket.hpp"
+#include "opentxs/Time.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
-#include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/Types.internal.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::network::zeromq::socket::implementation

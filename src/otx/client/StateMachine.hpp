@@ -5,23 +5,17 @@
 
 #pragma once
 
-#include <algorithm>
 #include <atomic>
 #include <cstring>
 #include <functional>
 #include <future>
 #include <memory>
 #include <mutex>
-#include <tuple>
 #include <utility>
 
 #include "core/StateMachine.hpp"
 #include "internal/api/session/OTX.hpp"
-#include "internal/api/session/OTX.hpp"
 #include "internal/otx/client/Client.hpp"
-#include "internal/otx/client/OTPayment.hpp"
-#include "internal/util/Pimpl.hpp"
-#include "internal/util/SharedPimpl.hpp"
 #include "internal/util/UniqueQueue.hpp"
 #include "opentxs/Export.hpp"
 #include "opentxs/api/Session.hpp"
@@ -31,6 +25,7 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/Nym.hpp"
+#include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
 #include "otx/client/PaymentTasks.hpp"
@@ -38,20 +33,6 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace api
-{
-namespace session
-{
-class Client;
-class OTX;
-}  // namespace session
-}  // namespace api
-
-namespace identifier
-{
-class UnitDefinition;
-}  // namespace identifier
-
 namespace otx
 {
 namespace context

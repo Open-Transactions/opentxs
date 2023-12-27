@@ -21,7 +21,6 @@
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/core/String.hpp"
-#include "internal/interface/rpc/RPC.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Log.hpp"
@@ -44,10 +43,12 @@
 #include "opentxs/crypto/Language.hpp"   // IWYU pragma: keep
 #include "opentxs/crypto/SeedStyle.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
-#include "opentxs/identifier/HDSeed.hpp"            // IWYU pragma: keep
-#include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
+#include "opentxs/identifier/HDSeed.hpp"  // IWYU pragma: keep
 #include "opentxs/internal.factory.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
+#include "opentxs/rpc/Processor.internal.hpp"
+#include "opentxs/rpc/internal.factory.hpp"
+#include "opentxs/rpc/response/Message.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -217,7 +218,7 @@ auto ContextPrivate::Init(
     std::shared_ptr<const api::internal::Context> me) noexcept -> void
 {
     me_ = std::move(me);
-    rpc_.reset(opentxs::Factory::RPC(Self()));
+    rpc_ = factory::RPC(Self());
     assert_false(nullptr == rpc_);
     Init_Log();
     Init_Periodic();
@@ -352,8 +353,8 @@ auto ContextPrivate::ProfileId() const noexcept -> std::string_view
     return profile_id_.get();
 }
 
-auto ContextPrivate::RPC(const rpc::request::Base& command) const noexcept
-    -> std::unique_ptr<rpc::response::Base>
+auto ContextPrivate::RPC(const rpc::request::Message& command) const noexcept
+    -> std::unique_ptr<rpc::response::Message>
 {
     return rpc_->Process(command);
 }

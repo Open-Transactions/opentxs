@@ -32,6 +32,8 @@ target_sources(
     "Core.cpp"
     "Data.cpp"
     "FixedByteArray.cpp"
+    "FixedByteArray.tpp"
+    "FixedByteArray.tpp.cpp"
     "Secret.cpp"
     "SecretPrivate.cpp"
     "SecretPrivate.hpp"
@@ -44,7 +46,7 @@ target_sources(
     "Worker.hpp"
 )
 
-libopentxs_add_platform_specific("FixedByteArray")
+libopentxs_add_platform_specific("FixedByteArray.tpp")
 libopentxs_add_platform_specific("String")
 libopentxs_link_internal(unofficial-sodium::sodium)
 libopentxs_link_external(Boost::system)

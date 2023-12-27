@@ -10,7 +10,7 @@
 #include "internal/util/Signals.hpp"
 #include "opentxs/api/Context.internal.hpp"
 #include "opentxs/api/Paths.internal.hpp"
-#include "opentxs/interface/rpc/response/Base.hpp"  // IWYU pragma: keep
+#include "opentxs/rpc/response/Message.hpp"  // IWYU pragma: keep
 
 namespace opentxs::api
 {
@@ -102,8 +102,8 @@ auto Context::Reschedule(TaskID task, std::chrono::seconds interval)
     return imp_->Reschedule(task, interval);
 }
 
-auto Context::RPC(const rpc::request::Base& command) const noexcept
-    -> std::unique_ptr<rpc::response::Base>
+auto Context::RPC(const rpc::request::Message& command) const noexcept
+    -> std::unique_ptr<rpc::response::Message>
 {
     return imp_->RPC(command);
 }

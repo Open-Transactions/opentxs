@@ -3,13 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "internal/serialization/protobuf/Proto.tpp"  // IWYU pragma: associated
+#include "internal/serialization/protobuf/Proto.hpp"  // IWYU pragma: associated
 
 #include <Identifier.pb.h>
 #include <limits>
 
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/util/Bytes.hpp"
+#include "opentxs/util/Container.hpp"
 #include "opentxs/util/WriteBuffer.hpp"
 #include "opentxs/util/Writer.hpp"
 

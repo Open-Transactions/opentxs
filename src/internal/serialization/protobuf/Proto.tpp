@@ -5,9 +5,6 @@
 
 #pragma once
 
-#include "internal/serialization/protobuf/Proto.hpp"  // IWYU pragma: associated
-
-#include <cassert>
 #include <cstddef>
 #include <iostream>
 #include <limits>
@@ -15,10 +12,21 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
+#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
+
+// NOLINTBEGIN(modernize-concat-nested-namespaces)
+namespace opentxs
+{
+namespace api
+{
+class Crypto;
+}  // namespace api
+}  // namespace opentxs
+// NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::proto
 {

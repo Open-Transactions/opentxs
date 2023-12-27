@@ -4,5 +4,4 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 add_subdirectory(qt)
-add_subdirectory(rpc)
 add_subdirectory(ui)

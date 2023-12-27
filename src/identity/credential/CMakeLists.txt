@@ -18,6 +18,7 @@ target_sources(
     "${opentxs_SOURCE_DIR}/src/internal/identity/credential/Types.hpp"
     "Base.cpp"
     "Base.tpp"
+    "Base.tpp.cpp"
     "Contact.cpp"
     "Contact.hpp"
     "Credential.cpp"

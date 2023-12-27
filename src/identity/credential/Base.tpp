@@ -3,12 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "identity/credential/Base.hpp"  // IWYU pragma: associated
-
 #include <Credential.pb.h>
-#include <Enums.pb.h>
 #include <cstdint>
+#include <memory>
 
+#include "internal/identity/credential/Credential.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
 #include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/serialization/protobuf/verify/Credential.hpp"
@@ -37,6 +36,12 @@ class Authority;
 
 class Source;
 }  // namespace identity
+
+namespace proto
+{
+enum CredentialRole : int;
+enum KeyMode : int;
+}  // namespace proto
 
 class PasswordPrompt;
 }  // namespace opentxs
