@@ -20,7 +20,8 @@ rm -rf "${WORK}/"*
 /usr/bin/cmake \
     -S "${SRC}" \
     -B "${WORK}" \
-    --preset "${PRESET}"
+    --preset "${PRESET}" \
+    -DOT_BUNDLED_SECP256K1=OFF
 /usr/bin/cmake \
     --build "${WORK}" \
     -- -k 0 \
