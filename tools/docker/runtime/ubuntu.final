@@ -1,0 +1,3 @@
+FROM base-runtime AS runtime
+
+FROM base-sdk AS sdk

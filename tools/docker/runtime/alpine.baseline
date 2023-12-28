@@ -1,0 +1,32 @@
+ARG BASE_ALPINE_VERSION="3.19.0"
+
+FROM alpine:${BASE_ALPINE_VERSION} AS base
+
+FROM base AS build
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
+    g++ \
+    gcc \
+    git \
+    libsecp256k1-dev \
+    libsodium-dev \
+    lmdb-dev \
+    ninja-build \
+    onetbb-dev \
+    openssl-dev \
+    protobuf-dev \
+    rsync \
+    samurai \
+    zeromq-dev
+
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
+    libsecp256k1 \
+    libsodium \
+    lmdb \
+    onetbb \
+    openssl \
+    protobuf \
+    zeromq
+
+FROM build AS cmake-bootstrap
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add cmake

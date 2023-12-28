@@ -1,0 +1,23 @@
+FROM base-runtime AS runtime
+
+FROM build AS iwyu-bootstrap
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    clang-devel \
+    llvm-devel
+
+FROM iwyu-bootstrap AS iwyu
+COPY --from=cmake /opt/cmake /opt/cmake
+COPY --from=iwyu-download /usr/src/iwyu /usr/src/iwyu
+RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
+    && /usr/bin/cmake -GNinja /usr/src/iwyu \
+    && /usr/bin/cmake --build . \
+    && /usr/bin/cmake --install .
+
+FROM opentransactions/ci:39_0 AS ci
+
+FROM base-sdk AS sdk
+COPY --from=iwyu /usr/local /usr
+COPY --from=ci /usr/bin/run-iwyu.sh /usr/bin/run-iwyu.sh
+COPY --from=ci /usr/bin/build-opentxs.sh /usr/bin/build-opentxs.sh
+RUN sed -i 's~/usr/bin/cmake~/opt/cmake/bin/cmake~' /usr/bin/build-opentxs.sh /usr/bin/run-iwyu.sh
+RUN ldconfig
