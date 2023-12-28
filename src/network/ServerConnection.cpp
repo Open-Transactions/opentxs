@@ -11,6 +11,7 @@
 #include <chrono>
 #include <compare>
 #include <cstdint>
+#include <ctime>
 #include <memory>
 #include <span>
 #include <sstream>
@@ -153,7 +154,7 @@ ServerConnection::Imp::Imp(
     , socket_(zmq.Context().Internal().RequestSocket())
     , notification_socket_(
           zmq.Context().Internal().PushSocket(zmq::socket::Direction::Connect))
-    , last_activity_()
+    , last_activity_(std::time(nullptr))
     , sockets_ready_(Flag::Factory(false))
     , status_(Flag::Factory(false))
     , use_proxy_(Flag::Factory(false))
@@ -176,8 +177,8 @@ auto ServerConnection::Imp::activity_timer() -> void
 {
     while (zmq_.Running()) {
         const auto limit = zmq_.KeepAlive();
-        const auto now = sClock::now();
-        const auto last = last_activity_.load();
+        const auto now = std::chrono::seconds(std::time(nullptr));
+        const auto last = std::chrono::seconds(last_activity_.load());
         const auto duration = now - last;
 
         if (duration > limit) {
@@ -438,7 +439,7 @@ auto ServerConnection::Imp::reset_socket(const Lock& lock) -> void
 
 auto ServerConnection::Imp::reset_timer() -> void
 {
-    last_activity_.store(sTime{});
+    last_activity_.store(std::time(nullptr));
 }
 
 auto ServerConnection::Imp::Send(
