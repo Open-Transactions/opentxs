@@ -14,7 +14,7 @@ macro(
   if(OT_QT_EXPORT)
     set(MAYBE_INCLUDE_QOBJECT "#include <QMetaObject>\n")
     set(MAYBE_OPEN_NAMESPACE
-        "{\nQ_NAMESPACE\nQ_CLASSINFO(\"RegisterEnumClassesUnscoped\", \"true\")\n"
+        "{\nQ_NAMESPACE_EXPORT(OPENTXS_EXPORT)\nQ_CLASSINFO(\"RegisterEnumClassesUnscoped\", \"true\")\n"
     )
     set(MAYBE_EXPORT_ENUM "};\nQ_ENUM_NS(${enum_name})\n")
   else()
