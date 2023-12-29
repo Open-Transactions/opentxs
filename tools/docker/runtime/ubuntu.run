@@ -1,0 +1,9 @@
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    liblmdb0 \
+    libprotobuf-lite23 \
+    libsecp256k1-0 \
+    libsodium23 \
+    libtbb12 \
+    libzmq5

@@ -1,0 +1,108 @@
+ARG CMAKE_VERSION="3.28.1"
+ARG OPENSSL_VERSION=3.1.4
+ARG BOOST_FOR_ANDROID_COMMIT_HASH=64a5ba21b3ce0ca192d0ea0fbc8e21854f0ffcc7
+ARG SODIUM_COMMIT_HASH=940ef42797baa0278df6b7fd9e67c7590f87744b
+ARG LMDB_COMMIT_HASH=8d0cbbc936091eb85972501a9b31a8f86d4c51a7
+ARG PROTOBUF_COMMIT_HASH=2c5fa078d8e86e5f4bd34e6f4c9ea9e8d7d4d44a
+ARG LIBZMQ_COMMIT_HASH=4097855ddaaa65ed7b5e8cb86d143842a594eebd
+ARG GTEST=f8d7d77c06936315286eb55f8de22cd23c188571
+ARG SECP256K1_COMMIT_HASH=1ad5185cd42c0636104129fcc9f6a4bf9c67cc40
+ARG QT_BRANCH=6.6
+ARG QT_RELEASE=official_releases
+ARG QT_VERSION=6.6.1
+
+FROM download AS cmake-download
+ARG CMAKE_VERSION
+RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
+    && wget -O /tmp/download/cmake.tar.gz "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.tar.gz" \
+    && tar -xf cmake.tar.gz \
+    && mv "cmake-${CMAKE_VERSION}" /usr/src/cmake
+
+FROM download AS boost-download
+ARG BOOST_MAJOR
+ARG BOOST_MINOR
+ARG BOOST_PATCH
+RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
+    && wget -O /tmp/download/boost.tar.bz2 "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_PATCH}/source/boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_PATCH}.tar.bz2" \
+    && tar -xf /tmp/download/boost.tar.bz2 -C /tmp/download \
+    && mkdir -p /tmp/download \
+    && mv "/tmp/download/boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_PATCH}" /usr/src/boost
+
+FROM download AS otcommon-download
+ARG OTCOMMON_COMMIT_HASH
+RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
+    && wget -O /tmp/download/otcommon.tar.gz "https://github.com/Open-Transactions/otcommon/archive/${OTCOMMON_COMMIT_HASH}.tar.gz" \
+    && tar -xf otcommon.tar.gz \
+    && mv "otcommon-${OTCOMMON_COMMIT_HASH}" /usr/src/otcommon
+
+FROM download AS opentxs-download
+ARG OPENTXS_REPO
+ARG OPENTXS_COMMIT
+RUN mkdir -p /usr/src && git clone --recursive "${OPENTXS_REPO}" /usr/src/opentxs && cd /usr/src/opentxs && git reset --hard "${OPENTXS_COMMIT}"
+
+FROM download AS openssl-download
+ARG OPENSSL_VERSION
+RUN mkdir -p /usr/src \
+    && cd /usr/src \
+    && wget "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" \
+    && tar -xf "openssl-${OPENSSL_VERSION}.tar.gz" \
+    && rm "openssl-${OPENSSL_VERSION}.tar.gz" \
+    && mv "openssl-${OPENSSL_VERSION}" openssl
+
+FROM download AS boostforandroid-download
+ARG BOOST_FOR_ANDROID_COMMIT_HASH
+ARG BOOST_MAJOR
+ARG BOOST_MINOR
+ARG BOOST_PATCH
+RUN mkdir -p /usr/src && cd /usr/src \
+    && wget "https://github.com/Open-Transactions/Boost-for-Android/archive/${BOOST_FOR_ANDROID_COMMIT_HASH}.zip" \
+    && unzip "${BOOST_FOR_ANDROID_COMMIT_HASH}.zip" \
+    && rm "${BOOST_FOR_ANDROID_COMMIT_HASH}.zip" \
+    && mv "Boost-for-Android-${BOOST_FOR_ANDROID_COMMIT_HASH}" boost \
+    && cd /usr/src/boost \
+    && wget "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_PATCH}/source/boost_${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_PATCH}.tar.bz2"
+
+FROM download AS sodium-download
+ARG SODIUM_COMMIT_HASH
+RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/jedisct1/libsodium/archive/${SODIUM_COMMIT_HASH}.zip" \
+    && unzip "${SODIUM_COMMIT_HASH}.zip" && rm "${SODIUM_COMMIT_HASH}.zip" && mv "libsodium-${SODIUM_COMMIT_HASH}" sodium
+
+FROM download AS lmdb-download
+ARG LMDB_COMMIT_HASH
+RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/LMDB/lmdb/archive/${LMDB_COMMIT_HASH}.zip" \
+    && unzip "${LMDB_COMMIT_HASH}.zip" && rm "${LMDB_COMMIT_HASH}.zip" && mv "lmdb-${LMDB_COMMIT_HASH}" lmdb
+
+FROM download AS protobuf-download
+ARG PROTOBUF_COMMIT_HASH
+RUN mkdir -p /usr/src \
+    && cd /usr/src \
+    && git clone https://github.com/protocolbuffers/protobuf /usr/src/protobuf \
+    && git -C /usr/src/protobuf reset --hard "${PROTOBUF_COMMIT_HASH}" \
+    && git -C /usr/src/protobuf submodule update --init --recursive
+
+FROM download AS zeromq-download
+ARG LIBZMQ_COMMIT_HASH
+RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/zeromq/libzmq/archive/${LIBZMQ_COMMIT_HASH}.zip" \
+    && unzip "${LIBZMQ_COMMIT_HASH}.zip" && rm "${LIBZMQ_COMMIT_HASH}.zip" && mv "libzmq-${LIBZMQ_COMMIT_HASH}" zeromq
+
+FROM download AS gtest-download
+ARG GTEST
+RUN mkdir -p /usr/src && cd /usr/src && git clone https://github.com/google/googletest.git \
+    && cd googletest && git checkout "${GTEST}" && git submodule update --init --recursive
+
+FROM download AS secp256k1-download
+ARG SECP256K1_COMMIT_HASH
+RUN --mount=type=tmpfs,target=/tmp/download/ cd /tmp/download \
+    && wget -O /tmp/download/secp256k1.tar.gz "https://github.com/bitcoin-core/secp256k1/archive/${SECP256K1_COMMIT_HASH}.tar.gz" \
+    && tar -xf secp256k1.tar.gz \
+    && mv "secp256k1-${SECP256K1_COMMIT_HASH}" /usr/src/secp256k1
+
+FROM download AS qt-download
+ARG QT_RELEASE
+ARG QT_BRANCH
+ARG QT_VERSION
+RUN mkdir -p /usr/src && cd /usr/src \
+    && wget "https://download.qt.io/${QT_RELEASE}/qt/${QT_BRANCH}/${QT_VERSION}/single/qt-everywhere-src-${QT_VERSION}.tar.xz" \
+    && tar -xf "qt-everywhere-src-${QT_VERSION}.tar.xz" \
+    && rm "qt-everywhere-src-${QT_VERSION}.tar.xz" \
+    && mv qt-everywhere-src-${QT_VERSION} qt

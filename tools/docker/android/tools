@@ -1,0 +1,19 @@
+FROM run AS tools
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    automake \
+    bzip2 \
+    diffutils \
+    findutils \
+    gcc \
+    gcc-c++ \
+    java-devel \
+    libtool \
+    make \
+    patch \
+    perl-core \
+    python \
+    rsync \
+    unzip \
+    wget \
+    which \
+    xz

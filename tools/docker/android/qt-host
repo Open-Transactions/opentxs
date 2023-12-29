@@ -1,0 +1,19 @@
+FROM qt-bootstrap AS qt-host
+RUN ln -s /opt/cmake/bin/cmake /bin/cmake
+COPY --from=qt-download /usr/src/qt /usr/src/qt
+RUN cd /opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/ && \
+    ln -s llvm-ranlib i686-linux-android-ranlib && \
+    ln -s llvm-ranlib x86_64-linux-android-ranlib && \
+    ln -s llvm-ranlib arm-linux-androideabi-ranlib && \
+    ln -s llvm-ranlib aarch64-linux-android-ranlib
+RUN mkdir -p /tmp/build && cd /tmp/build && /usr/src/qt/configure \
+    --prefix=/opt/qt \
+    -opensource \
+    -confirm-license \
+    -nomake tests \
+    -nomake examples \
+    -no-warnings-are-errors \
+    -c++std c++20 \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build \
+    && rm -rf /tmp/build

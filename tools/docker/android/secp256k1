@@ -1,0 +1,103 @@
+FROM build-base AS secp256k1
+COPY --from=secp256k1-download /usr/src/secp256k1 /usr/src/secp256k1
+ARG ANDROID_LEVEL
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/secp256k1 \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=arm64-v8a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm64 \
+        -DBUILD_SHARED_LIBS=ON \
+        -DSECP256K1_INSTALL=ON \
+        -DSECP256K1_ENABLE_MODULE_ECDH=ON \
+        -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+        -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \
+        -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \
+        -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \
+        -DSECP256K1_VALGRIND=OFF \
+        -DSECP256K1_BUILD_BENCHMARK=OFF \
+        -DSECP256K1_BUILD_TESTS=OFF \
+        -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+        -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+        -DSECP256K1_BUILD_EXAMPLES=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/secp256k1 \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=armeabi-v7a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm \
+        -DBUILD_SHARED_LIBS=ON \
+        -DSECP256K1_INSTALL=ON \
+        -DSECP256K1_ENABLE_MODULE_ECDH=ON \
+        -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+        -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \
+        -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \
+        -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \
+        -DSECP256K1_VALGRIND=OFF \
+        -DSECP256K1_BUILD_BENCHMARK=OFF \
+        -DSECP256K1_BUILD_TESTS=OFF \
+        -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+        -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+        -DSECP256K1_BUILD_EXAMPLES=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/secp256k1 \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86_64 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x64 \
+        -DBUILD_SHARED_LIBS=ON \
+        -DSECP256K1_INSTALL=ON \
+        -DSECP256K1_ENABLE_MODULE_ECDH=ON \
+        -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+        -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \
+        -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \
+        -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \
+        -DSECP256K1_VALGRIND=OFF \
+        -DSECP256K1_BUILD_BENCHMARK=OFF \
+        -DSECP256K1_BUILD_TESTS=OFF \
+        -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+        -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+        -DSECP256K1_BUILD_EXAMPLES=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/secp256k1 \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x86 \
+        -DBUILD_SHARED_LIBS=ON \
+        -DSECP256K1_INSTALL=ON \
+        -DSECP256K1_ENABLE_MODULE_ECDH=ON \
+        -DSECP256K1_ENABLE_MODULE_RECOVERY=ON \
+        -DSECP256K1_ENABLE_MODULE_EXTRAKEYS=ON \
+        -DSECP256K1_ENABLE_MODULE_SCHNORRSIG=ON \
+        -DSECP256K1_ENABLE_MODULE_ELLSWIFT=ON \
+        -DSECP256K1_VALGRIND=OFF \
+        -DSECP256K1_BUILD_BENCHMARK=OFF \
+        -DSECP256K1_BUILD_TESTS=OFF \
+        -DSECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF \
+        -DSECP256K1_BUILD_CTIME_TESTS=OFF \
+        -DSECP256K1_BUILD_EXAMPLES=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build

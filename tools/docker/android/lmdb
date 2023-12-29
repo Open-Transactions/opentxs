@@ -1,0 +1,36 @@
+FROM build-base AS lmdb
+COPY --from=lmdb-download /usr/src/lmdb /usr/src/lmdb
+ARG ANDROID_LEVEL_TOOLCHAIN
+ARG JOBS
+RUN --mount=type=tmpfs,target=/tmp/build \
+    rsync -a /usr/src/lmdb/libraries/liblmdb/ /tmp/build \
+    && sed -i "s~gcc~/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android${ANDROID_LEVEL_TOOLCHAIN}-clang~" /tmp/build/Makefile \
+    && sed -i "s~= ar~= /opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar~" /tmp/build/Makefile \
+    && sed -i "s~/usr/local~/usr/android/arm64~" /tmp/build/Makefile \
+    && sed -i "s/liblmdb.a liblmdb\$(SOEXT)/liblmdb\$(SOEXT)/" /tmp/build/Makefile \
+    && cd /tmp/build \
+    && make -j$JOBS install
+RUN --mount=type=tmpfs,target=/tmp/build \
+    rsync -a /usr/src/lmdb/libraries/liblmdb/ /tmp/build \
+    && sed -i "s~gcc~/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi${ANDROID_LEVEL_TOOLCHAIN}-clang~" /tmp/build/Makefile \
+    && sed -i "s~= ar~= /opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar~" /tmp/build/Makefile \
+    && sed -i "s~/usr/local~/usr/android/arm~" /tmp/build/Makefile \
+    && sed -i "s/liblmdb.a liblmdb\$(SOEXT)/liblmdb\$(SOEXT)/" /tmp/build/Makefile \
+    && cd /tmp/build \
+    && make -j$JOBS install
+RUN --mount=type=tmpfs,target=/tmp/build \
+    rsync -a /usr/src/lmdb/libraries/liblmdb/ /tmp/build \
+    && sed -i "s~gcc~/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android${ANDROID_LEVEL_TOOLCHAIN}-clang~" /tmp/build/Makefile \
+    && sed -i "s~= ar~= /opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar~" /tmp/build/Makefile \
+    && sed -i "s~/usr/local~/usr/android/x64~" /tmp/build/Makefile \
+    && sed -i "s/liblmdb.a liblmdb\$(SOEXT)/liblmdb\$(SOEXT)/" /tmp/build/Makefile \
+    && cd /tmp/build \
+    && make -j$JOBS install
+RUN --mount=type=tmpfs,target=/tmp/build \
+    rsync -a /usr/src/lmdb/libraries/liblmdb/ /tmp/build \
+    && sed -i "s~gcc~/opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/i686-linux-android${ANDROID_LEVEL_TOOLCHAIN}-clang~" /tmp/build/Makefile \
+    && sed -i "s~= ar~= /opt/ndk/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar~" /tmp/build/Makefile \
+    && sed -i "s~/usr/local~/usr/android/x86~" /tmp/build/Makefile \
+    && sed -i "s/liblmdb.a liblmdb\$(SOEXT)/liblmdb\$(SOEXT)/" /tmp/build/Makefile \
+    && cd /tmp/build \
+    && make -j$JOBS install

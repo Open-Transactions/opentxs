@@ -1,0 +1,25 @@
+FROM build-base AS openssl
+COPY --from=openssl-download /usr/src/openssl /usr/src/openssl
+ARG JOBS
+ARG ANDROID_LEVEL
+ENV ANDROID_NDK_ROOT=/opt/ndk
+RUN --mount=type=tmpfs,target=/tmp/build export export PATH="${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" \
+    && cd /tmp/build \
+    && /usr/src/openssl/Configure --prefix=/usr/android/arm64 android-arm64 "-D__ANDROID_API__=${ANDROID_LEVEL}" \
+    && make -j${JOBS} build_sw \
+    && make install_sw
+RUN --mount=type=tmpfs,target=/tmp/build export export PATH="${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" \
+    && cd /tmp/build \
+    && /usr/src/openssl/Configure --prefix=/usr/android/arm android-arm "-D__ANDROID_API__=${ANDROID_LEVEL}" \
+    && make -j${JOBS} build_sw \
+    && make install_sw
+RUN --mount=type=tmpfs,target=/tmp/build export export PATH="${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" \
+    && cd /tmp/build \
+    && /usr/src/openssl/Configure --prefix=/usr/android/x64 android-x86_64 "-D__ANDROID_API__=${ANDROID_LEVEL}" \
+    && make -j${JOBS} build_sw \
+    && make install_sw
+RUN --mount=type=tmpfs,target=/tmp/build export export PATH="${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" \
+    && cd /tmp/build \
+    && /usr/src/openssl/Configure --prefix=/usr/android/x86 android-x86 "-D__ANDROID_API__=${ANDROID_LEVEL}" \
+    && make -j${JOBS} build_sw \
+    && make install_sw

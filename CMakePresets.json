@@ -383,8 +383,8 @@
                 "ANDROID_STL": "c++_shared",
                 "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-lGLESv2",
                 "CMAKE_EXE_LINKER_FLAGS": "-Wl,-lGLESv2",
-                "Protobuf_PROTOC_EXECUTABLE": "/usr/bin/protoc",
-                "QT_HOST_PATH": "/usr/host_qt",
+                "Protobuf_PROTOC_EXECUTABLE": "/opt/protobuf/bin/protoc",
+                "QT_HOST_PATH": "/opt/qt",
                 "HAVE_GLESv2": "ON",
                 "BUILD_SHARED_LIBS": "ON",
                 "OPENTXS_PEDANTIC_BUILD": "ON",
@@ -394,7 +394,8 @@
                 "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
                 "OT_ENABLE_RPC": "OFF",
                 "OT_USE_PSTL": "OFF",
-                "OT_WITH_TBB": "OFF"
+                "OT_WITH_TBB": "OFF",
+                "OT_BUNDLED_SECP256K1": "OFF"
             }
         },
         {
@@ -407,7 +408,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "arm64-v8a",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/arm64;/usr/qt-for-android/arm64;/usr/otcommon"
+                    "/usr/android/arm64;/usr/qt-for-android/arm64;/opt/otcommon"
             }
         },
         {
@@ -420,7 +421,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "armeabi-v7a",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/arm;/usr/qt-for-android/arm;/usr/otcommon"
+                    "/usr/android/arm;/usr/qt-for-android/arm;/opt/otcommon"
             }
         },
         {
@@ -433,7 +434,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "x86_64",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/x64;/usr/qt-for-android/x64;/usr/otcommon"
+                    "/usr/android/x64;/usr/qt-for-android/x64;/opt/otcommon"
             }
         },
         {
@@ -446,7 +447,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "x86",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/x86;/usr/qt-for-android/x86;/usr/otcommon"
+                    "/usr/android/x86;/usr/qt-for-android/x86;/opt/otcommon"
             }
         },
         {

@@ -1,0 +1,128 @@
+FROM build-base AS zeromq
+COPY --from=zeromq-download /usr/src/zeromq /usr/src/zeromq
+COPY --from=sodium /usr/android /usr/android
+ARG ANDROID_LEVEL
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/zeromq \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=arm64-v8a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm64 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/arm64 \
+        -DBUILD_SHARED_LIBS=ON \
+        -DENABLE_ASAN=OFF \
+        -DENABLE_INTRINSICS=OFF \
+        -DWITH_OPENPGM=OFF \
+        -DWITH_VMCI=OFF \
+        -DZMQ_BUILD_FRAMEWORK=OFF \
+        -DWITH_LIBSODIUM=ON \
+        -DENABLE_CURVE=ON \
+        -DENABLE_DRAFTS=OFF \
+        -DWITH_MILITANT=OFF \
+        -DLIBZMQ_PEDANTIC=OFF \
+        -DLIBZMQ_WERROR=OFF \
+        -DWITH_DOCS=OFF \
+        -DBUILD_SHARED=ON \
+        -DBUILD_STATIC=OFF \
+        -DWITH_PERF_TOOL=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_CPACK=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/zeromq \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=armeabi-v7a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/arm \
+        -DBUILD_SHARED_LIBS=ON \
+        -DENABLE_ASAN=OFF \
+        -DENABLE_INTRINSICS=OFF \
+        -DWITH_OPENPGM=OFF \
+        -DWITH_VMCI=OFF \
+        -DZMQ_BUILD_FRAMEWORK=OFF \
+        -DWITH_LIBSODIUM=ON \
+        -DENABLE_CURVE=ON \
+        -DENABLE_DRAFTS=OFF \
+        -DWITH_MILITANT=OFF \
+        -DLIBZMQ_PEDANTIC=OFF \
+        -DLIBZMQ_WERROR=OFF \
+        -DWITH_DOCS=OFF \
+        -DBUILD_SHARED=ON \
+        -DBUILD_STATIC=OFF \
+        -DWITH_PERF_TOOL=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_CPACK=OFF \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/zeromq \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86_64 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x64 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/x64 \
+        -DENABLE_ASAN=OFF \
+        -DENABLE_INTRINSICS=OFF \
+        -DWITH_OPENPGM=OFF \
+        -DWITH_VMCI=OFF \
+        -DZMQ_BUILD_FRAMEWORK=OFF \
+        -DWITH_LIBSODIUM=ON \
+        -DENABLE_CURVE=ON \
+        -DENABLE_DRAFTS=OFF \
+        -DWITH_MILITANT=OFF \
+        -DLIBZMQ_PEDANTIC=OFF \
+        -DLIBZMQ_WERROR=OFF \
+        -DWITH_DOCS=OFF \
+        -DBUILD_SHARED=ON \
+        -DBUILD_STATIC=OFF \
+        -DWITH_PERF_TOOL=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_CPACK=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/zeromq \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x86 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/x86 \
+        -DENABLE_ASAN=OFF \
+        -DENABLE_INTRINSICS=OFF \
+        -DWITH_OPENPGM=OFF \
+        -DWITH_VMCI=OFF \
+        -DZMQ_BUILD_FRAMEWORK=OFF \
+        -DWITH_LIBSODIUM=ON \
+        -DENABLE_CURVE=ON \
+        -DENABLE_DRAFTS=OFF \
+        -DWITH_MILITANT=OFF \
+        -DLIBZMQ_PEDANTIC=OFF \
+        -DLIBZMQ_WERROR=OFF \
+        -DWITH_DOCS=OFF \
+        -DBUILD_SHARED=ON \
+        -DBUILD_STATIC=OFF \
+        -DWITH_PERF_TOOL=OFF \
+        -DBUILD_TESTS=OFF \
+        -DENABLE_CPACK=OFF \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build

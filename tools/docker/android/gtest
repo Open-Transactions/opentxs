@@ -1,0 +1,59 @@
+FROM build-base AS gtest
+COPY --from=gtest-download /usr/src/googletest /usr/src/googletest
+ARG ANDROID_LEVEL
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/googletest \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=arm64-v8a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm64 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/arm64 \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/googletest \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=armeabi-v7a \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/arm \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/arm \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/googletest \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86_64 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x64 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/x64 \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/googletest \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE="Release" \
+        -DANDROID_ABI=x86 \
+        -DANDROID_PLATFORM="android-${ANDROID_LEVEL}" \
+        -DANDROID_STL="c++_shared" \
+        -DCMAKE_TOOLCHAIN_FILE="/opt/ndk/build/cmake/android.toolchain.cmake" \
+        -DCMAKE_INSTALL_PREFIX=/usr/android/x86 \
+        -DCMAKE_FIND_ROOT_PATH=/usr/android/x86 \
+        -DBUILD_SHARED_LIBS=ON \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build

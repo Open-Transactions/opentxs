@@ -1,0 +1,18 @@
+FROM baseline AS build
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    clang \
+    clang-analyzer \
+    clang-tools-extra \
+    cppcheck \
+    findutils \
+    gmock-devel \
+    gtest-devel \
+    llvm \
+    pip \
+    qt6-qtbase-devel \
+    qt6-qtdeclarative-devel \
+    qt6-qtsvg-devel \
+    sqlite-devel \
+    which
+RUN pip install cmakelang
+RUN git config --global --add safe.directory '*'

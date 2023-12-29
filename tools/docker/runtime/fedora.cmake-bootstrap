@@ -1,0 +1,2 @@
+FROM build AS cmake-bootstrap
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y cmake

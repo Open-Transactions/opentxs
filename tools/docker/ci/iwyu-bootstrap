@@ -1,0 +1,5 @@
+FROM build AS iwyu-bootstrap
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    clang-devel \
+    llvm-devel
+COPY --from=cmake /opt/cmake /opt/cmake

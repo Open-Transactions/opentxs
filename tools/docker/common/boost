@@ -1,0 +1,7 @@
+FROM cmake-bootstrap AS boost
+COPY --from=boost-download /usr/src/boost /usr/src/boost
+RUN --mount=type=tmpfs,target=/tmp/build rsync -a /usr/src/boost/ /tmp/build/ \
+    && cd /tmp/build \
+    && ./bootstrap.sh --prefix=/opt/boost --with-libraries=all \
+    && ./b2 \
+    && ./b2 --prefix=/opt/boost install

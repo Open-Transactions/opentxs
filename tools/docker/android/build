@@ -36,13 +36,13 @@ fi
 set -e
 
 rm -rf "${OUT}/"*
-/usr/local/bin/cmake \
+/opt/cmake/bin/cmake \
     -S "${SRC}" \
     -B "${WORK}" \
     --preset "android-${ARCH}" \
     -DANDROID_PLATFORM="${ANDROID_PLATFORM}"
-/usr/local/bin/cmake \
+/opt/cmake/bin/cmake \
     --build "${WORK}" \
     -- -k 0
-/usr/local/bin/cmake \
+/opt/cmake/bin/cmake \
     --install "${WORK}"

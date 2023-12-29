@@ -24,8 +24,8 @@ if [ -e "${SRC}/.cmake-format.py" ]; then
     mv "${SRC}/.cmake-format.py" "${SRC}/.cmake-format.py.backup"
 fi
 
-cp /usr/share/otcommon/format/clang-format "${SRC}/.clang-format"
-cp /usr/share/otcommon/format/cmake-format.py "${SRC}/.cmake-format.py"
+cp /opt/otcommon/share/otcommon/format/clang-format "${SRC}/.clang-format"
+cp /opt/otcommon/share/otcommon/format/cmake-format.py "${SRC}/.cmake-format.py"
 
 CLANG_FORMAT_COMMAND="find ${SRC} \( -name '*.*pp' -o -name '*.json' \)"
 
