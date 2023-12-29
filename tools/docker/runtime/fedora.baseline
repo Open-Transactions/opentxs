@@ -1,0 +1,39 @@
+ARG BASE_FEDORA_VERSION="39"
+
+FROM fedora:${BASE_FEDORA_VERSION} AS base
+
+FROM base AS build
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    gcc \
+    gcc-c++ \
+    git \
+    libsecp256k1-devel \
+    libsodium-devel \
+    llvm \
+    lmdb-devel \
+    ninja-build \
+    openssl-devel \
+    protobuf-compiler \
+    protobuf-lite-devel \
+    qt6-qtbase-devel \
+    qt6-qtdeclarative-devel \
+    qt6-qtsvg-devel \
+    rsync \
+    tbb-devel \
+    zeromq-devel
+
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    libsecp256k1 \
+    libsodium \
+    lmdb \
+    openssl-libs \
+    protobuf-lite \
+    qt6-qtbase \
+    qt6-qtdeclarative \
+    qt6-qtsvg \
+    tbb \
+    zeromq
+
+FROM build AS cmake-bootstrap
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y cmake

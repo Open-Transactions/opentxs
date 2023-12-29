@@ -1,0 +1,35 @@
+ARG BASE_UBUNTU_VERSION="22.04"
+
+FROM ubuntu:${BASE_UBUNTU_VERSION} AS base
+
+FROM base AS build
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    g++-12 \
+    gcc-12 \
+    git \
+    liblmdb-dev \
+    libprotobuf-dev \
+    libsecp256k1-dev \
+    libsodium-dev \
+    libssl-dev \
+    libtbb-dev \
+    libzmq3-dev \
+    ninja-build \
+    protobuf-compiler \
+    rsync \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
+
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    liblmdb0 \
+    libprotobuf-lite23 \
+    libsecp256k1-0 \
+    libsodium23 \
+    libtbb12 \
+    libzmq5
+
+FROM build AS cmake-bootstrap
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install cmake
