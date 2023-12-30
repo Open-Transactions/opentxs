@@ -1,0 +1,12 @@
+FROM cmake-bootstrap AS cmake
+COPY --from=cmake-download /usr/src/cmake /usr/src/cmake
+COPY --from=openssl /opt/openssl /opt/openssl
+ENV OPENSSL_ROOT_DIR="/opt/openssl"
+RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
+    && /usr/bin/cmake \
+        -S /usr/src/cmake \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX=/opt/cmake \
+    && /usr/bin/cmake --build /tmp/build \
+    && /usr/bin/cmake --install /tmp/build

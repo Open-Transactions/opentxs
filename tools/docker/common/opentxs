@@ -1,0 +1,22 @@
+FROM build AS opentxs
+ENV BOOST_ROOT=/opt/boost
+ENV OTCOMMON_ROOT=/opt/otcommon
+COPY --from=cmake /opt/cmake /opt/cmake
+COPY --from=boost /opt/boost /opt/boost
+COPY --from=otcommon /opt/otcommon /opt/otcommon
+COPY --from=opentxs-download /usr/src/opentxs /usr/src/opentxs
+ARG OT_CMAKE_ARGS
+RUN --mount=type=tmpfs,target=/tmp/opentxs /opt/cmake/bin/cmake \
+        -S /usr/src/opentxs \
+        -B /tmp/opentxs \
+        --preset prod \
+        -DCMAKE_INSTALL_PREFIX=/opt/opentxs \
+        -DBUILD_SHARED_LIBS=ON \
+        -DOPENTXS_PEDANTIC_BUILD=OFF \
+        -DCMAKE_C_FLAGS="-O2" \
+        -DCMAKE_CXX_FLAGS="-O2" \
+        -DOT_STORAGE_SQLITE=OFF \
+        -DOT_BUNDLED_SECP256K1=OFF \
+        ${OT_CMAKE_ARGS} \
+    && /opt/cmake/bin/cmake --build /tmp/opentxs \
+    && /opt/cmake/bin/cmake --install /tmp/opentxs

@@ -1,0 +1,12 @@
+FROM build AS otcommon
+COPY --from=cmake /opt/cmake /opt/cmake
+ARG OTCOMMON_VERSION
+COPY --from=otcommon-download /usr/src/otcommon /usr/src/otcommon
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/otcommon \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX=/opt/otcommon \
+        -Dotcommon_GIT_VERSION=${OTCOMMON_VERSION} \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build

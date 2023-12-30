@@ -1,0 +1,14 @@
+ARG DOWNLOAD_UBUNTU_VERSION="22.04"
+
+FROM ubuntu:${DOWNLOAD_UBUNTU_VERSION} AS downloader
+RUN mkdir -p /usr/src
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install \
+    bzip2 \
+    git \
+    lzop \
+    p7zip \
+    rsync \
+    unzip \
+    wget \
+    xz-utils

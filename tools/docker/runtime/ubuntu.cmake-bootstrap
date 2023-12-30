@@ -1,0 +1,3 @@
+FROM build AS cmake-bootstrap
+RUN --mount=type=tmpfs,target=/var/lib/apt/lists apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install cmake

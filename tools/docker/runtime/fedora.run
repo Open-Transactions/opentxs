@@ -1,0 +1,9 @@
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
+    libsecp256k1 \
+    libsodium \
+    lmdb \
+    openssl-libs \
+    protobuf-lite \
+    tbb \
+    zeromq

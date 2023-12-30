@@ -1,0 +1,79 @@
+FROM qt-host AS qt
+ARG ANDROID_LEVEL_TOOLCHAIN
+ENV JAVA_HOME=/usr/lib/jvm/java
+RUN mkdir -p /tmp/build && cd /tmp/build && export PATH=$PATH:$JAVA_HOME/bin && /usr/src/qt/configure \
+    --prefix=/usr/qt-for-android/arm64 \
+    --disable-rpath \
+    -qt-host-path /opt/qt \
+    -opensource \
+    -confirm-license \
+    -linker lld \
+    -xplatform android-clang \
+    -android-ndk-platform android-${ANDROID_LEVEL_TOOLCHAIN} \
+    -android-ndk /opt/ndk \
+    -android-sdk /opt/android-sdk-linux \
+    -android-abis arm64-v8a \
+    -nomake tests \
+    -nomake examples \
+    -no-warnings-are-errors \
+    -c++std c++20 \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build \
+    && rm -rf /tmp/build
+RUN mkdir -p /tmp/build && cd /tmp/build && export PATH=$PATH:$JAVA_HOME/bin && /usr/src/qt/configure \
+    --prefix=/usr/qt-for-android/arm \
+    --disable-rpath \
+    -qt-host-path /opt/qt \
+    -opensource \
+    -confirm-license \
+    -linker lld \
+    -xplatform android-clang \
+    -android-ndk-platform android-${ANDROID_LEVEL_TOOLCHAIN} \
+    -android-ndk /opt/ndk \
+    -android-sdk /opt/android-sdk-linux \
+    -android-abis armeabi-v7a \
+    -nomake tests \
+    -nomake examples \
+    -no-warnings-are-errors \
+    -c++std c++20 \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build \
+    && rm -rf /tmp/build
+RUN mkdir -p /tmp/build && cd /tmp/build && export PATH=$PATH:$JAVA_HOME/bin && /usr/src/qt/configure \
+    --prefix=/usr/qt-for-android/x64 \
+    --disable-rpath \
+    -qt-host-path /opt/qt \
+    -opensource \
+    -confirm-license \
+    -linker lld \
+    -xplatform android-clang \
+    -android-ndk-platform android-${ANDROID_LEVEL_TOOLCHAIN} \
+    -android-ndk /opt/ndk \
+    -android-sdk /opt/android-sdk-linux \
+    -android-abis x86_64 \
+    -nomake tests \
+    -nomake examples \
+    -no-warnings-are-errors \
+    -c++std c++20 \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build \
+    && rm -rf /tmp/build
+RUN mkdir -p /tmp/build && cd /tmp/build && export PATH=$PATH:$JAVA_HOME/bin && /usr/src/qt/configure \
+    --prefix=/usr/qt-for-android/x86 \
+    --disable-rpath \
+    -qt-host-path /opt/qt \
+    -opensource \
+    -confirm-license \
+    -linker lld \
+    -xplatform android-clang \
+    -android-ndk-platform android-${ANDROID_LEVEL_TOOLCHAIN} \
+    -android-ndk /opt/ndk \
+    -android-sdk /opt/android-sdk-linux \
+    -android-abis x86 \
+    -nomake tests \
+    -nomake examples \
+    -no-warnings-are-errors \
+    -c++std c++20 \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build \
+    && rm -rf /tmp/build

@@ -1,0 +1,16 @@
+FROM tools AS android
+ARG ANDROID_TOOLS
+ARG ANDROID_LEVEL
+ARG ANDROID_BUILD_TOOLS
+ARG NDK_VERSION
+ENV JAVA_HOME=/usr/lib/jvm/java
+RUN mkdir -p /opt/android && \
+    cd /opt/android && \
+    wget "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_TOOLS}_latest.zip" && \
+    unzip "commandlinetools-linux-${ANDROID_TOOLS}_latest.zip" && \
+    rm "commandlinetools-linux-${ANDROID_TOOLS}_latest.zip" && \
+    yes | /opt/android/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux --update && \
+    yes | /opt/android/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux "ndk;${NDK_VERSION}" && \
+    yes | /opt/android/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux "platforms;android-${ANDROID_LEVEL}" && \
+    yes | /opt/android/cmdline-tools/bin/sdkmanager --sdk_root=/opt/android-sdk-linux "build-tools;${ANDROID_BUILD_TOOLS}" && \
+    find /opt/android-sdk-linux/ndk -name libz.a -delete

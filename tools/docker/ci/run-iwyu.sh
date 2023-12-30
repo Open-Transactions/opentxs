@@ -17,12 +17,12 @@ if [ ! -d "${WORK}" ]; then
 fi
 
 rm -rf "${WORK}/"*
-/usr/bin/cmake \
+/opt/cmake/bin/cmake \
     -S "${SRC}" \
     -B "${WORK}" \
     --preset "${PRESET}" \
     -DOT_BUNDLED_SECP256K1=OFF
-/usr/bin/cmake \
+/opt/cmake/bin/cmake \
     --build "${WORK}" \
     -- -k 0 \
     | tee "${WORK}/iwyu.txt"

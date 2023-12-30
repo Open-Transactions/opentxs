@@ -6,8 +6,10 @@ These images construct build environments for compiling and testing Open-Transac
 
 ### Building the image
 
+Run the following command in the parent directory to this README.md file:
+
 ```
-docker image build -t opentransactions/ci .
+docker buildx bake ci
 ```
 
 ### Compiling opentxs

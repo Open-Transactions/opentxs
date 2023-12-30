@@ -15,43 +15,21 @@ This image creates an Android NDK development environment and compiles all opent
 * Libsodium (1.0.18)
 * Protocol Buffers (23.4)
 * Qt (6.6.1)
+* secp256k1 (0.4.1)
 * ZeroMQ (4.3.4)
 
 ## Usage
 
 ### Building the image
 
-Set the JOBS build argument to match the available number of cores on the host to speed up the image creation process.
+Run the following command in the parent directory to this README.md file:
 
 ```
-docker image build -t opentransactions/android --build-arg JOBS=8 .
+docker buildx bake android
 ```
 
 This image is available on Docker Hub as [opentransactions/android](https://hub.docker.com/r/opentransactions/android)
 
-
-#### Optional arguments for customizing the image contents
-
-* ANDROID_BUILD_TOOLS
-* ANDROID_LEVEL
-* ANDROID_LEVEL_TOOLCHAIN
-* ANDROID_TOOLS
-* BOOST_FOR_ANDROID_COMMIT_HASH
-* CMAKE_BUILD_TYPE
-* CMAKE_VERSION
-* GTEST
-* JAVA_HOME_ARG
-* JOBS
-* LIBZMQ_COMMIT_HASH
-* LMDB_COMMIT_HASH
-* NDK_VERSION
-* OPENSSL_VERSION
-* OTCOMMON_VERSION
-* PROTOBUF_COMMIT_HASH
-* QT_BRANCH
-* QT_RELEASE
-* QT_VERSION
-* SODIUM_COMMIT_HASH
 
 ### Compiling opentxs
 

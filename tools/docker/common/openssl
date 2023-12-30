@@ -1,0 +1,7 @@
+FROM openssl-bootstrap AS openssl
+ARG JOBS
+COPY --from=openssl-download /usr/src/openssl /usr/src/openssl
+RUN --mount=type=tmpfs,target=/tmp/build cd /tmp/build \
+    && /usr/src/openssl/Configure --prefix=/opt/openssl \
+    && make -j${JOBS} build_sw \
+    && make install_sw

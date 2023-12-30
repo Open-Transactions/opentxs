@@ -1,0 +1,15 @@
+FROM build-base AS boost
+COPY --from=boostforandroid-download /usr/src/boost /usr/src/boost
+ARG ANDROID_LEVEL
+ARG BOOST_MAJOR
+ARG BOOST_MINOR
+ARG BOOST_PATCH
+COPY --from=files boost.patch "/usr/src/boost/patches/boost-${BOOST_MAJOR}_${BOOST_MINOR}_${BOOST_PATCH}/suffix.patch"
+RUN --mount=type=tmpfs,target=/tmp/build rsync -a /usr/src/boost/ /tmp/build/ \
+    && cd /tmp/build \
+    && ./build-android.sh --boost="${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_PATCH}" --arch=armeabi-v7a,arm64-v8a,x86,x86_64 --target-version="${ANDROID_LEVEL}" --layout=system /opt/ndk \
+    && mkdir -p /usr/android \
+    && mv /tmp/build/build/out/arm64-v8a /usr/android/arm64 \
+    && mv /tmp/build/build/out/armeabi-v7a /usr/android/arm \
+    && mv /tmp/build/build/out/x86_64 /usr/android/x64 \
+    && mv /tmp/build/build/out/x86 /usr/android/x86

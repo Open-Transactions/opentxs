@@ -1,0 +1,15 @@
+FROM base AS build
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
+    g++ \
+    gcc \
+    git \
+    libsecp256k1-dev \
+    libsodium-dev \
+    lmdb-dev \
+    ninja-build \
+    onetbb-dev \
+    openssl-dev \
+    protobuf-dev \
+    rsync \
+    samurai \
+    zeromq-dev

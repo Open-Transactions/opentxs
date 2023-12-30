@@ -1,0 +1,9 @@
+FROM base AS run
+RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
+    libsecp256k1 \
+    libsodium \
+    lmdb \
+    onetbb \
+    openssl \
+    protobuf \
+    zeromq

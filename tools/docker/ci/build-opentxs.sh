@@ -33,7 +33,7 @@ fi
 set -e
 
 rm -rf "${WORK}/"*
-/usr/bin/cmake \
+/opt/cmake/bin/cmake \
     -S "${SRC}" \
     -B "${WORK}" \
     --preset "${PRESET}" \
@@ -41,6 +41,6 @@ rm -rf "${WORK}/"*
     -DOT_BUNDLED_SECP256K1=OFF \
     -DCMAKE_C_COMPILER="${CMAKE_C_COMPILER}" \
     -DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
-/usr/bin/cmake \
+/opt/cmake/bin/cmake \
     --build "${WORK}" \
     -- -k 0

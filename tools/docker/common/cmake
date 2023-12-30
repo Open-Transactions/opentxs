@@ -1,0 +1,9 @@
+FROM cmake-bootstrap AS cmake
+COPY --from=cmake-download /usr/src/cmake /usr/src/cmake
+RUN --mount=type=tmpfs,target=/tmp/build /usr/bin/cmake \
+        -S /usr/src/cmake \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX=/opt/cmake \
+    && /usr/bin/cmake --build /tmp/build \
+    && /usr/bin/cmake --install /tmp/build

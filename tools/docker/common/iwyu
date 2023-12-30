@@ -1,0 +1,9 @@
+FROM iwyu-bootstrap AS iwyu
+COPY --from=iwyu-download /usr/src/iwyu /usr/src/iwyu
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/iwyu \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX=/opt/iwyu \
+    && /opt/cmake/bin/cmake --build /tmp/build \
+    && /opt/cmake/bin/cmake --install /tmp/build

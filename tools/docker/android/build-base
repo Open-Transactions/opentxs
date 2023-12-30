@@ -1,0 +1,6 @@
+FROM tools AS build-base
+ARG NDK_VERSION
+COPY --from=android /opt/android-sdk-linux /opt/android-sdk-linux
+RUN ln -s "/opt/android-sdk-linux/ndk/${NDK_VERSION}" /opt/ndk
+COPY --from=cmake /opt/cmake /opt/cmake
+COPY --from=openssl_host /opt/openssl /opt/openssl
