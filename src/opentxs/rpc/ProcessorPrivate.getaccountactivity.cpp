@@ -25,6 +25,7 @@
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/rpc/AccountEventType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/ResponseCode.hpp"      // IWYU pragma: keep

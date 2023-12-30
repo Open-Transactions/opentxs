@@ -46,6 +46,7 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

@@ -64,6 +64,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"  // IWYU pragma: keep
+#include "opentxs/otx/client/StorageBox.hpp"           // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

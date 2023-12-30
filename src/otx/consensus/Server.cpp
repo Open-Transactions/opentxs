@@ -118,6 +118,8 @@
 #include "opentxs/otx/blind/Token.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/client/SendResult.hpp"            // IWYU pragma: keep
+#include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"

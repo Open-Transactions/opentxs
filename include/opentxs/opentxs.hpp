@@ -281,8 +281,15 @@
 #include "opentxs/otx/blind/Token.hpp"                   // IWYU pragma: export
 #include "opentxs/otx/blind/TokenState.hpp"              // IWYU pragma: export
 #include "opentxs/otx/blind/Types.hpp"                   // IWYU pragma: export
+#include "opentxs/otx/client/Depositability.hpp"         // IWYU pragma: export
+#include "opentxs/otx/client/Messagability.hpp"          // IWYU pragma: export
+#include "opentxs/otx/client/PaymentType.hpp"            // IWYU pragma: export
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"   // IWYU pragma: export
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"    // IWYU pragma: export
+#include "opentxs/otx/client/RemoteBoxType.hpp"          // IWYU pragma: export
+#include "opentxs/otx/client/SendResult.hpp"             // IWYU pragma: export
+#include "opentxs/otx/client/StorageBox.hpp"             // IWYU pragma: export
+#include "opentxs/otx/client/ThreadStatus.hpp"           // IWYU pragma: export
 #include "opentxs/otx/client/Types.hpp"                  // IWYU pragma: export
 #include "opentxs/rpc/AccountData.hpp"                   // IWYU pragma: export
 #include "opentxs/rpc/AccountEvent.hpp"                  // IWYU pragma: export

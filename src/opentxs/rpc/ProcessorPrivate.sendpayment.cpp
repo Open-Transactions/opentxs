@@ -29,6 +29,7 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Notary.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Nym.hpp"
+#include "opentxs/otx/client/Messagability.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/rpc/PaymentType.hpp"   // IWYU pragma: keep
 #include "opentxs/rpc/ResponseCode.hpp"  // IWYU pragma: keep

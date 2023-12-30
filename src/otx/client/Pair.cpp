@@ -75,6 +75,7 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

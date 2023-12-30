@@ -73,6 +73,7 @@
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/Types.internal.hpp"
+#include "opentxs/otx/client/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
