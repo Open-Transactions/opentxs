@@ -5,14 +5,13 @@
 
 #include "opentxs/network/otdht/QueryContract.hpp"  // IWYU pragma: associated
 
-#include <Identifier.pb.h>
+#include <opentxs/protobuf/Identifier.pb.h>
 #include <memory>
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -25,6 +24,7 @@
 #include "opentxs/network/otdht/State.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 
 namespace opentxs::factory
 {
@@ -91,7 +91,7 @@ public:
         if (false == serialize_type(out)) { return false; }
 
         out.Internal().AddFrame([&] {
-            auto data = proto::Identifier{};
+            auto data = protobuf::Identifier{};
             contract_id_.Internal().Serialize(data);
 
             return data;
@@ -114,7 +114,7 @@ public:
     }
     Imp(const api::Session& api, const ReadView id) noexcept
         : Imp(api.Factory().Internal().Session().Identifier(
-              proto::Factory<proto::Identifier>(id.data(), id.size())))
+              protobuf::Factory<protobuf::Identifier>(id.data(), id.size())))
     {
     }
     Imp(const Imp&) = delete;

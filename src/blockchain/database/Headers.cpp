@@ -5,8 +5,8 @@
 
 #include "blockchain/database/Headers.hpp"  // IWYU pragma: associated
 
-#include <BlockchainBlockHeader.pb.h>
-#include <BlockchainBlockLocalData.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainBlockLocalData.pb.h>
 #include <cstring>
 #include <iterator>
 #include <optional>
@@ -22,7 +22,6 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Header.hpp"  // IWYU pragma: keep
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -46,6 +45,8 @@
 #include "opentxs/network/zeromq/message/Message.hpp"
 #include "opentxs/network/zeromq/socket/SocketType.hpp"
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -252,7 +253,7 @@ auto Headers::ApplyUpdate(const node::UpdateTransaction& update) noexcept
                 auto out = block::internal::Header::SerializedType{};
                 data.second.first.Internal().Serialize(out);
 
-                return proto::ToString(out.local());
+                return to_string(out.local());
             }(),
             parentTxn);
 
@@ -524,7 +525,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
                     auto proto = block::internal::Header::SerializedType{};
                     header.Internal().Serialize(proto);
 
-                    return proto::ToString(proto.local());
+                    return to_string(proto.local());
                 }());
 
             assert_true(result.first);
@@ -548,7 +549,7 @@ auto Headers::import_genesis(const blockchain::Type type) const noexcept -> void
                                   block::internal::Header::SerializedType{};
                               genesis.Internal().Serialize(proto);
 
-                              return proto::ToString(proto.local());
+                              return to_string(proto.local());
                           }())
                       .first;
 
@@ -589,7 +590,7 @@ auto Headers::load_header(const block::Hash& hash) const -> block::Header
     const auto haveMeta =
         lmdb_.Load(BlockHeaderMetadata, hash.Bytes(), [&](const auto data) {
             *proto.mutable_local() =
-                proto::Factory<proto::BlockchainBlockLocalData>(
+                protobuf::Factory<protobuf::BlockchainBlockLocalData>(
                     data.data(), data.size());
         });
 

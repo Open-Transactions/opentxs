@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
-#include <GCS.pb.h>
+#include <opentxs/protobuf/GCS.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
@@ -16,10 +16,6 @@
 #include "blockchain/cfilter/GCSPrivate.hpp"
 #include "internal/blockchain/block/Block.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/GCS.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/blockchain/block/Block.hpp"
@@ -28,6 +24,9 @@
 #include "opentxs/blockchain/cfilter/GCS.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/GCS.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -80,7 +79,7 @@ auto GCS(
 
 auto GCS(
     const api::Session& api,
-    const proto::GCS& in,
+    const protobuf::GCS& in,
     alloc::Default alloc) noexcept -> blockchain::cfilter::GCS
 {
     using ReturnType = blockchain::cfilter::implementation::GCS;
@@ -111,9 +110,10 @@ auto GCS(
     using BlankType = blockchain::cfilter::GCSPrivate;
 
     try {
-        const auto proto = proto::Factory<proto::GCS>(in.data(), in.size());
+        const auto proto =
+            protobuf::Factory<protobuf::GCS>(in.data(), in.size());
 
-        if (false == proto::Validate(proto, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), proto)) {
             throw std::runtime_error{"invalid serialized gcs"};
         }
 

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageAccounts.pb.h>
+#include <opentxs/protobuf/StorageAccounts.pb.h>
 #include <functional>
 #include <string_view>
 #include <tuple>
@@ -160,7 +160,7 @@ private:
     auto get_account_data(
         const Lock& lock,
         const identifier::Account& accountID) const -> AccountData&;
-    auto serialize() const -> proto::StorageAccounts;
+    auto serialize() const -> protobuf::StorageAccounts;
 
     auto check_update_account(
         const Lock& lock,

@@ -5,7 +5,7 @@
 
 #include "interface/ui/accountactivity/BalanceItem.hpp"  // IWYU pragma: associated
 
-#include <PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
 #include <chrono>
 #include <memory>
 
@@ -13,7 +13,6 @@
 #include "interface/ui/accountactivity/TransferBalanceItem.hpp"
 #include "internal/api/session/Types.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -128,7 +128,7 @@ auto BalanceItem::DisplayAmount() const noexcept -> UnallocatedCString
 
 auto BalanceItem::extract_contacts(
     const api::session::Client& api,
-    const proto::PaymentWorkflow& workflow) noexcept
+    const protobuf::PaymentWorkflow& workflow) noexcept
     -> UnallocatedVector<UnallocatedCString>
 {
     UnallocatedVector<UnallocatedCString> output{};
@@ -142,7 +142,8 @@ auto BalanceItem::extract_contacts(
     return output;
 }
 
-auto BalanceItem::extract_type(const proto::PaymentWorkflow& workflow) noexcept
+auto BalanceItem::extract_type(
+    const protobuf::PaymentWorkflow& workflow) noexcept
     -> otx::client::StorageBox
 {
     switch (translate(workflow.type())) {
@@ -194,7 +195,7 @@ auto BalanceItem::get_contact_name(const identifier::Nym& nymID) const noexcept
 }
 
 auto BalanceItem::recover_workflow(CustomData& custom) noexcept
-    -> const proto::PaymentWorkflow&
+    -> const protobuf::PaymentWorkflow&
 {
     assert_true(2 <= custom.size());
 
@@ -202,7 +203,7 @@ auto BalanceItem::recover_workflow(CustomData& custom) noexcept
 
     assert_false(nullptr == input);
 
-    return *static_cast<const proto::PaymentWorkflow*>(input);
+    return *static_cast<const protobuf::PaymentWorkflow*>(input);
 }
 
 auto BalanceItem::reindex(

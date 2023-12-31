@@ -7,7 +7,7 @@
 
 #include "opentxs/otx/blind/Token.hpp"  // IWYU pragma: associated
 
-#include <Token.pb.h>
+#include <opentxs/protobuf/Token.pb.h>
 #include <memory>
 #include <utility>
 
@@ -50,7 +50,7 @@ auto Token(
 auto Token(
     const api::Session& api,
     otx::blind::internal::Purse& purse,
-    const proto::Token& serialized) noexcept -> otx::blind::Token
+    const protobuf::Token& serialized) noexcept -> otx::blind::Token
 {
     const auto type = translate(serialized.type());
 

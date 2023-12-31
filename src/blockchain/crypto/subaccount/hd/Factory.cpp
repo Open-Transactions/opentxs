@@ -5,9 +5,9 @@
 
 #include "internal/blockchain/crypto/Factory.hpp"  // IWYU pragma: associated
 
-#include <BlockchainDeterministicAccountData.pb.h>
-#include <HDAccount.pb.h>
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/BlockchainDeterministicAccountData.pb.h>
+#include <opentxs/protobuf/HDAccount.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <memory>
 #include <stdexcept>
 
@@ -26,7 +26,7 @@ auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>
@@ -56,7 +56,7 @@ auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDAccount& serialized) noexcept
+    const protobuf::HDAccount& serialized) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>
 {
     using ReturnType = blockchain::crypto::HDPrivate;

@@ -5,7 +5,7 @@
 
 #include "opentxs/network/otdht/State.hpp"  // IWYU pragma: associated
 
-#include <P2PBlockchainChainState.pb.h>
+#include <opentxs/protobuf/P2PBlockchainChainState.pb.h>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -43,7 +43,7 @@ struct State::Imp {
 
 State::State(
     const api::Session& api,
-    const proto::P2PBlockchainChainState& in) noexcept(false)
+    const protobuf::P2PBlockchainChainState& in) noexcept(false)
     : State(
           static_cast<opentxs::blockchain::Type>(in.chain()),
           opentxs::blockchain::block::Position{
@@ -75,7 +75,7 @@ auto State::Position() const noexcept
     return imp_->position_;
 }
 
-auto State::Serialize(proto::P2PBlockchainChainState& dest) const noexcept
+auto State::Serialize(protobuf::P2PBlockchainChainState& dest) const noexcept
     -> bool
 {
     const auto& pos = imp_->position_;

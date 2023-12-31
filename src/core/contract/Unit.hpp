@@ -30,10 +30,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class AccountVisitor;
 class Factory;
@@ -135,7 +135,7 @@ private:
     auto get_displayscales(const SerializedType&) const
         -> std::optional<display::Definition>;
     auto get_unitofaccount(const SerializedType&) const -> opentxs::UnitType;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool override;
 };
 }  // namespace opentxs::contract::implementation

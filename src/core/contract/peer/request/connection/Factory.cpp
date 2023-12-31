@@ -52,7 +52,7 @@ auto ConnectionRequest(
 auto ConnectionRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& proto,
+    const protobuf::PeerRequest& proto,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*
 {
     using ReturnType = contract::peer::request::connection::Implementation;

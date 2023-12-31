@@ -9,10 +9,10 @@ extern "C" {
 #include <sodium.h>
 }
 
-#include <Ciphertext.pb.h>
-#include <Enums.pb.h>
 #include <SHA1/sha1.hpp>
 #include <argon2.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <array>
 #include <cstring>
 #include <memory>
@@ -66,7 +66,7 @@ auto Sodium::blank_private() noexcept -> ReadView
 }
 
 auto Sodium::Decrypt(
-    const proto::Ciphertext& ciphertext,
+    const protobuf::Ciphertext& ciphertext,
     const std::uint8_t* key,
     const std::size_t keySize,
     std::uint8_t* plaintext) const -> bool
@@ -89,7 +89,7 @@ auto Sodium::Decrypt(
     }
 
     switch (ciphertext.mode()) {
-        case proto::SMODE_CHACHA20POLY1305: {
+        case protobuf::SMODE_CHACHA20POLY1305: {
             return (
                 0 == crypto_aead_chacha20poly1305_ietf_decrypt_detached(
                          plaintext,
@@ -102,7 +102,7 @@ auto Sodium::Decrypt(
                          reinterpret_cast<const unsigned char*>(nonce.data()),
                          key));
         }
-        case proto::SMODE_ERROR:
+        case protobuf::SMODE_ERROR:
         default: {
             LogError()()("Unsupported encryption mode (")(mode)(").").Flush();
         }
@@ -356,7 +356,7 @@ auto Sodium::Encrypt(
     const std::size_t inputSize,
     const std::uint8_t* key,
     const std::size_t keySize,
-    proto::Ciphertext& ciphertext) const -> bool
+    protobuf::Ciphertext& ciphertext) const -> bool
 {
     assert_false(nullptr == input);
     assert_false(nullptr == key);

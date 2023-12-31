@@ -31,10 +31,10 @@ class Key;
 }  // namespace asymmetric
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -45,16 +45,16 @@ class Asymmetric : virtual public api::crypto::Asymmetric
 public:
     virtual auto API() const noexcept -> const api::Session& = 0;
     virtual auto InstantiateECKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc = {}) const noexcept
         -> opentxs::crypto::asymmetric::key::EllipticCurve = 0;
     virtual auto InstantiateHDKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc = {}) const noexcept
         -> opentxs::crypto::asymmetric::key::HD = 0;
     using crypto::Asymmetric::InstantiateKey;
     virtual auto InstantiateKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc = {}) const noexcept
         -> opentxs::crypto::asymmetric::Key = 0;
     auto Internal() const noexcept -> const Asymmetric& final { return *this; }

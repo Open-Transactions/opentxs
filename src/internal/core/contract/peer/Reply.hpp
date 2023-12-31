@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class PeerReply;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -22,7 +22,7 @@ namespace opentxs::contract::peer::internal
 class Reply
 {
 public:
-    using serialized_type = proto::PeerReply;
+    using serialized_type = protobuf::PeerReply;
 
     virtual auto Serialize(serialized_type& out) const noexcept -> bool;
 

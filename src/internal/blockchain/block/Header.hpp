@@ -47,10 +47,10 @@ class Header;
 class Work;
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainBlockHeader;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -61,7 +61,7 @@ namespace opentxs::blockchain::block::internal
 class Header
 {
 public:
-    using SerializedType = proto::BlockchainBlockHeader;
+    using SerializedType = protobuf::BlockchainBlockHeader;
 
     enum class Status : std::uint32_t {
         Error,

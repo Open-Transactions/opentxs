@@ -39,10 +39,10 @@ class Account;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -58,17 +58,17 @@ struct Account : virtual public crypto::Account {
     virtual auto Get(Notifications& out) const noexcept -> void = 0;
 
     virtual auto AddEthereum(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddHD(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddPaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto Startup() noexcept -> void = 0;
     using crypto::Account::Subaccount;

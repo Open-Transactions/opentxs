@@ -11,9 +11,9 @@ extern "C" {
 #include <openssl/types.h>
 }
 
-#include <Ciphertext.pb.h>
-#include <LucreTokenData.pb.h>
-#include <Token.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/LucreTokenData.pb.h>
+#include <opentxs/protobuf/Token.pb.h>
 #include <algorithm>
 #include <cctype>
 #include <functional>
@@ -73,7 +73,7 @@ auto TokenLucre(
 auto TokenLucre(
     const api::Session& api,
     otx::blind::internal::Purse& purse,
-    const proto::Token& serialized) noexcept -> otx::blind::Token
+    const protobuf::Token& serialized) noexcept -> otx::blind::Token
 {
     using ReturnType = otx::blind::token::Lucre;
 
@@ -107,9 +107,9 @@ Lucre::Lucre(
     const Time validFrom,
     const Time validTo,
     const String& signature,
-    std::shared_ptr<proto::Ciphertext> publicKey,
-    std::shared_ptr<proto::Ciphertext> privateKey,
-    std::shared_ptr<proto::Ciphertext> spendable)
+    std::shared_ptr<protobuf::Ciphertext> publicKey,
+    std::shared_ptr<protobuf::Ciphertext> privateKey,
+    std::shared_ptr<protobuf::Ciphertext> spendable)
     : Token(
           api,
           purse,
@@ -164,7 +164,7 @@ Lucre::Lucre(const Lucre& rhs, blind::internal::Purse& newOwner)
 Lucre::Lucre(
     const api::Session& api,
     blind::internal::Purse& purse,
-    const proto::Token& in)
+    const protobuf::Token& in)
     : Lucre(
           api,
           purse,
@@ -198,21 +198,22 @@ Lucre::Lucre(
     if (lucre.has_privateprototoken()) {
         LogInsane()()("This token has a private prototoken").Flush();
         private_ =
-            std::make_shared<proto::Ciphertext>(lucre.privateprototoken());
+            std::make_shared<protobuf::Ciphertext>(lucre.privateprototoken());
     } else {
         LogInsane()()("This token does not have a private prototoken").Flush();
     }
 
     if (lucre.has_publicprototoken()) {
         LogInsane()()("This token has a public prototoken").Flush();
-        public_ = std::make_shared<proto::Ciphertext>(lucre.publicprototoken());
+        public_ =
+            std::make_shared<protobuf::Ciphertext>(lucre.publicprototoken());
     } else {
         LogInsane()()("This token does not have a public prototoken").Flush();
     }
 
     if (lucre.has_spendable()) {
         LogInsane()()("This token has a spendable string").Flush();
-        spend_ = std::make_shared<proto::Ciphertext>(lucre.spendable());
+        spend_ = std::make_shared<protobuf::Ciphertext>(lucre.spendable());
     } else {
         LogInsane()()("This token does not have a spendable string").Flush();
     }
@@ -336,8 +337,8 @@ auto Lucre::GenerateTokenRequest(
         return false;
     }
 
-    private_ = std::make_shared<proto::Ciphertext>();
-    public_ = std::make_shared<proto::Ciphertext>();
+    private_ = std::make_shared<protobuf::Ciphertext>();
+    public_ = std::make_shared<protobuf::Ciphertext>();
 
     if (false == bool(private_)) {
         LogError()()("Failed to instantiate private prototoken").Flush();
@@ -621,7 +622,7 @@ auto Lucre::Process(
         LogInsane()()("Obtained spendable token").Flush();
     }
 
-    spend_ = std::make_shared<proto::Ciphertext>();
+    spend_ = std::make_shared<protobuf::Ciphertext>();
 
     if (false == bool(spend_)) {
         LogError()()("Failed to instantiate spendable ciphertext").Flush();
@@ -653,7 +654,7 @@ auto Lucre::Process(
     return true;
 }
 
-auto Lucre::Serialize(proto::Token& output) const noexcept -> bool
+auto Lucre::Serialize(protobuf::Token& output) const noexcept -> bool
 {
     if (false == Token::Serialize(output)) { return false; }
 
@@ -700,7 +701,7 @@ auto Lucre::Serialize(proto::Token& output) const noexcept -> bool
     return true;
 }
 
-void Lucre::serialize_private(proto::LucreTokenData& lucre) const
+void Lucre::serialize_private(protobuf::LucreTokenData& lucre) const
 {
     if (false == bool(private_)) {
         throw std::runtime_error("missing private prototoken");
@@ -709,7 +710,7 @@ void Lucre::serialize_private(proto::LucreTokenData& lucre) const
     *lucre.mutable_privateprototoken() = *private_;
 }
 
-void Lucre::serialize_public(proto::LucreTokenData& lucre) const
+void Lucre::serialize_public(protobuf::LucreTokenData& lucre) const
 {
     if (false == bool(public_)) {
         throw std::runtime_error("missing public prototoken");
@@ -718,14 +719,14 @@ void Lucre::serialize_public(proto::LucreTokenData& lucre) const
     *lucre.mutable_publicprototoken() = *public_;
 }
 
-void Lucre::serialize_signature(proto::LucreTokenData& lucre) const
+void Lucre::serialize_signature(protobuf::LucreTokenData& lucre) const
 {
     if (signature_->empty()) { throw std::runtime_error("missing signature"); }
 
     lucre.set_signature(signature_->Get(), signature_->GetLength());
 }
 
-void Lucre::serialize_spendable(proto::LucreTokenData& lucre) const
+void Lucre::serialize_spendable(protobuf::LucreTokenData& lucre) const
 {
     if (false == bool(spend_)) {
         throw std::runtime_error("missing spendable token");

@@ -33,11 +33,11 @@ class Claim;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Claim;
 class ContactItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -57,12 +57,12 @@ auto Claim(
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 auto Claim(
     const api::Session& api,
-    const proto::Claim& proto,
+    const protobuf::Claim& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 auto Claim(
     const api::Session& api,
     const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
-    const proto::ContactItem& proto,
+    const protobuf::ContactItem& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*;
 }  // namespace opentxs::factory

@@ -5,8 +5,8 @@
 
 #include "otx/consensus/Base.hpp"  // IWYU pragma: associated
 
-#include <Context.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <filesystem>
 #include <stdexcept>
 #include <utility>
@@ -66,7 +66,7 @@ template <typename CRTP, typename DataType>
 Base<CRTP, DataType>::Base(
     const api::Session& api,
     const VersionNumber targetVersion,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     const identifier::Notary& server)
@@ -187,7 +187,7 @@ auto Base<CRTP, DataType>::ConsumeIssued(const TransactionNumber& number)
 }
 
 template <typename CRTP, typename DataType>
-auto Base<CRTP, DataType>::contract(const Data& data) const -> proto::Context
+auto Base<CRTP, DataType>::contract(const Data& data) const -> protobuf::Context
 {
     auto output = serialize(data);
 
@@ -445,7 +445,7 @@ auto Base<CRTP, DataType>::RecoverAvailableNumber(
 
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::Refresh(
-    proto::Context& out,
+    protobuf::Context& out,
     const PasswordPrompt& reason) -> bool
 {
     auto handle = get_data();
@@ -535,9 +535,9 @@ auto Base<CRTP, DataType>::save(Data& data, const PasswordPrompt& reason)
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::serialize(
     const Data& data,
-    const otx::ConsensusType type) const -> proto::Context
+    const otx::ConsensusType type) const -> protobuf::Context
 {
-    auto output = proto::Context{};
+    auto output = protobuf::Context{};
     output.set_version(version(data));
     output.set_type(translate(type));
 
@@ -578,7 +578,7 @@ auto Base<CRTP, DataType>::Serialize(Writer&& out) const noexcept -> bool
 
     return serialize(
         [&] {
-            auto proto = proto::Context{};
+            auto proto = protobuf::Context{};
             serialize(data, proto);
 
             return proto;
@@ -587,7 +587,7 @@ auto Base<CRTP, DataType>::Serialize(Writer&& out) const noexcept -> bool
 }
 
 template <typename CRTP, typename DataType>
-auto Base<CRTP, DataType>::serialize(const Data& data, proto::Context& out)
+auto Base<CRTP, DataType>::serialize(const Data& data, protobuf::Context& out)
     const -> bool
 {
     out = contract(data);
@@ -658,7 +658,8 @@ auto Base<CRTP, DataType>::signatures(const Data& data) const noexcept
 }
 
 template <typename CRTP, typename DataType>
-auto Base<CRTP, DataType>::sig_version(const Data& data) const -> proto::Context
+auto Base<CRTP, DataType>::sig_version(const Data& data) const
+    -> protobuf::Context
 {
     auto output = serialize(data, Type());
     output.clear_signature();
@@ -689,7 +690,7 @@ auto Base<CRTP, DataType>::update_signature(
         serialized, crypto::SignatureRole::Context, signature, reason);
 
     if (success) {
-        data.sig_ = std::make_shared<proto::Signature>(signature);
+        data.sig_ = std::make_shared<protobuf::Signature>(signature);
     } else {
         LogError()()("(")(type())(") ")("Failed to create signature.").Flush();
     }
@@ -776,7 +777,7 @@ auto Base<CRTP, DataType>::verify_issued_number(
 
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::verify_signature(
-    const proto::Signature& signature) const -> bool
+    const protobuf::Signature& signature) const -> bool
 {
     LogAbort()().Abort();
 }
@@ -784,7 +785,7 @@ auto Base<CRTP, DataType>::verify_signature(
 template <typename CRTP, typename DataType>
 auto Base<CRTP, DataType>::verify_signature(
     const Data& data,
-    const proto::Signature& signature) const -> bool
+    const protobuf::Signature& signature) const -> bool
 {
     if (!Signable::verify_signature(signature)) {
         LogError()()("(")(type())(") ")("Error: invalid signature.").Flush();

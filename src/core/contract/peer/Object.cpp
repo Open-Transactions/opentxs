@@ -8,9 +8,9 @@
 
 #include "core/contract/peer/Object.hpp"  // IWYU pragma: associated
 
-#include <Nym.pb.h>
-#include <PeerObject.pb.h>
-#include <PeerRequest.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PeerObject.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
 #include <memory>
 #include <utility>
 
@@ -20,9 +20,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/blind/Factory.hpp"
 #include "internal/otx/blind/Purse.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -38,6 +35,8 @@
 #include "opentxs/core/contract/peer/Types.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/protobuf/syntax/PeerObject.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -74,7 +73,7 @@ Object::Object(
 Object::Object(
     const api::session::Client& api,
     const Nym_p& signerNym,
-    const proto::PeerObject serialized) noexcept(false)
+    const protobuf::PeerObject serialized) noexcept(false)
     : Object(
           api,
           {},
@@ -218,12 +217,12 @@ Object::Object(
 {
 }
 
-auto Object::Serialize(proto::PeerObject& output) const noexcept -> bool
+auto Object::Serialize(protobuf::PeerObject& output) const noexcept -> bool
 {
     output.set_type(translate(type_));
 
-    auto publicNym = [&](Nym_p nym) -> proto::Nym {
-        auto data = proto::Nym{};
+    auto publicNym = [&](Nym_p nym) -> protobuf::Nym {
+        auto data = protobuf::Nym{};
         if (false == nym->Internal().Serialize(data)) {
             LogError()()("Failed to serialize nym.").Flush();
         }
@@ -337,10 +336,10 @@ auto Object::Validate() const noexcept -> bool
         }
     }
 
-    auto output = proto::PeerObject{};
+    auto output = protobuf::PeerObject{};
     if (false == Serialize(output)) { return false; }
 
-    const bool validProto = proto::Validate(output, VERBOSE);
+    const bool validProto = protobuf::syntax::check(LogError(), output);
 
     return (validChildren && validProto);
 }

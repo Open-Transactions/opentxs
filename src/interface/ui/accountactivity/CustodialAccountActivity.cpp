@@ -5,9 +5,9 @@
 
 #include "interface/ui/accountactivity/CustodialAccountActivity.hpp"  // IWYU pragma: associated
 
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -22,7 +22,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/otx/common/Account.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/Time.hpp"
@@ -45,6 +44,7 @@
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -124,8 +124,8 @@ auto CustodialAccountActivity::DisplayUnit() const noexcept
 }
 
 auto CustodialAccountActivity::extract_event(
-    const proto::PaymentEventType eventType,
-    const proto::PaymentWorkflow& workflow) noexcept -> EventRow
+    const protobuf::PaymentEventType eventType,
+    const protobuf::PaymentWorkflow& workflow) noexcept -> EventRow
 {
     bool success{false};
     bool found{false};
@@ -177,7 +177,7 @@ auto CustodialAccountActivity::extract_event(
 }
 
 auto CustodialAccountActivity::extract_rows(
-    const proto::PaymentWorkflow& workflow) noexcept
+    const protobuf::PaymentWorkflow& workflow) noexcept
     -> UnallocatedVector<RowKey>
 {
     auto output = UnallocatedVector<RowKey>{};
@@ -189,30 +189,30 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Conveyed:
                 case otx::client::PaymentWorkflowState::Expired: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CREATE,
+                        protobuf::PAYMENTEVENTTYPE_CREATE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CREATE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CREATE, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Cancelled: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CREATE,
+                        protobuf::PAYMENTEVENTTYPE_CREATE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CREATE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CREATE, workflow));
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CANCEL,
+                        protobuf::PAYMENTEVENTTYPE_CANCEL,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CANCEL, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CANCEL, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Accepted:
                 case otx::client::PaymentWorkflowState::Completed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CREATE,
+                        protobuf::PAYMENTEVENTTYPE_CREATE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CREATE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CREATE, workflow));
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACCEPT,
+                        protobuf::PAYMENTEVENTTYPE_ACCEPT,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACCEPT, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACCEPT, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Error:
                 case otx::client::PaymentWorkflowState::Initiated:
@@ -232,9 +232,9 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Expired:
                 case otx::client::PaymentWorkflowState::Completed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CONVEY,
+                        protobuf::PAYMENTEVENTTYPE_CONVEY,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CONVEY, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CONVEY, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Error:
                 case otx::client::PaymentWorkflowState::Unsent:
@@ -256,19 +256,19 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Acknowledged:
                 case otx::client::PaymentWorkflowState::Accepted: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACKNOWLEDGE,
+                        protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Completed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACKNOWLEDGE,
+                        protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_COMPLETE,
+                        protobuf::PAYMENTEVENTTYPE_COMPLETE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_COMPLETE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_COMPLETE, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Initiated:
                 case otx::client::PaymentWorkflowState::Aborted: {
@@ -290,19 +290,19 @@ auto CustodialAccountActivity::extract_rows(
             switch (translate(workflow.state())) {
                 case otx::client::PaymentWorkflowState::Conveyed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CONVEY,
+                        protobuf::PAYMENTEVENTTYPE_CONVEY,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CONVEY, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CONVEY, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Completed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_CONVEY,
+                        protobuf::PAYMENTEVENTTYPE_CONVEY,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_CONVEY, workflow));
+                            protobuf::PAYMENTEVENTTYPE_CONVEY, workflow));
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACCEPT,
+                        protobuf::PAYMENTEVENTTYPE_ACCEPT,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACCEPT, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACCEPT, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Error:
                 case otx::client::PaymentWorkflowState::Unsent:
@@ -326,19 +326,19 @@ auto CustodialAccountActivity::extract_rows(
                 case otx::client::PaymentWorkflowState::Conveyed:
                 case otx::client::PaymentWorkflowState::Accepted: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACKNOWLEDGE,
+                        protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Completed: {
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_ACKNOWLEDGE,
+                        protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE, workflow));
                     output.emplace_back(
-                        proto::PAYMENTEVENTTYPE_COMPLETE,
+                        protobuf::PAYMENTEVENTTYPE_COMPLETE,
                         extract_event(
-                            proto::PAYMENTEVENTTYPE_COMPLETE, workflow));
+                            protobuf::PAYMENTEVENTTYPE_COMPLETE, workflow));
                 } break;
                 case otx::client::PaymentWorkflowState::Initiated:
                 case otx::client::PaymentWorkflowState::Aborted: {
@@ -536,7 +536,7 @@ auto CustodialAccountActivity::process_workflow(
     UnallocatedSet<AccountActivityRowID>& active) noexcept -> void
 {
     const auto workflow = [&] {
-        auto out = proto::PaymentWorkflow{};
+        auto out = protobuf::PaymentWorkflow{};
         api_.Workflow().LoadWorkflow(primary_id_, workflowID, out);
 
         return out;
@@ -547,8 +547,8 @@ auto CustodialAccountActivity::process_workflow(
         const auto& [time, event_p] = row;
         auto key = AccountActivityRowID{workflowID, type};
         auto custom = CustomData{
-            new proto::PaymentWorkflow(workflow),
-            new proto::PaymentEvent(*event_p)};
+            new protobuf::PaymentWorkflow(workflow),
+            new protobuf::PaymentEvent(*event_p)};
         add_item(key, time, custom);
         active.emplace(std::move(key));
     }

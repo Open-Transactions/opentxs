@@ -19,7 +19,7 @@ struct SendPayment final : public Message::Imp {
     {
         return static_cast<const response::SendPayment&>(*parent_);
     }
-    auto serialize(proto::RPCResponse& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCResponse& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             serialize_tasks(dest);
@@ -40,7 +40,7 @@ struct SendPayment final : public Message::Imp {
     }
     SendPayment(
         const response::SendPayment* parent,
-        const proto::RPCResponse& in) noexcept(false)
+        const protobuf::RPCResponse& in) noexcept(false)
         : Imp(parent, in)
     {
     }
@@ -68,7 +68,8 @@ SendPayment::SendPayment(
 {
 }
 
-SendPayment::SendPayment(const proto::RPCResponse& serialized) noexcept(false)
+SendPayment::SendPayment(const protobuf::RPCResponse& serialized) noexcept(
+    false)
     : Message(std::make_unique<implementation::SendPayment>(this, serialized))
 {
 }

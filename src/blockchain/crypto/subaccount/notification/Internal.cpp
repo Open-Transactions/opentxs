@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/crypto/Notification.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -48,5 +48,5 @@ auto Notification::LocalPaymentCode() const noexcept
     return blank;
 }
 
-auto Notification::Path() const noexcept -> proto::HDPath { return {}; }
+auto Notification::Path() const noexcept -> protobuf::HDPath { return {}; }
 }  // namespace opentxs::blockchain::crypto::internal

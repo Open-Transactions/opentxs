@@ -56,10 +56,10 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Context;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -104,7 +104,7 @@ private:
     OTZMQPublishSocket reply_received_;
 
     void instantiate_server_context(
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& localNym,
         const Nym_p& remoteNym,
         std::shared_ptr<otx::context::internal::Base>& output) const final;

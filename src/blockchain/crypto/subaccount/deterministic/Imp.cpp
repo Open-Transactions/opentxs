@@ -5,8 +5,8 @@
 
 #include "blockchain/crypto/subaccount/deterministic/Imp.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -53,7 +53,7 @@ DeterministicPrivate::DeterministicPrivate(
     identifier::Generic source,
     std::string_view sourceName,
     std::string_view name,
-    proto::HDPath path,
+    protobuf::HDPath path,
     ChainData&& data) noexcept
     : SubaccountPrivate(
           api,

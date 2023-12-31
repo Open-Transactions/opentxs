@@ -28,7 +28,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 Ed25519::Ed25519(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     allocator_type alloc) noexcept(false)
     : KeyPrivate(alloc)
     , EllipticCurvePrivate(alloc)
@@ -70,7 +70,7 @@ Ed25519::Ed25519(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,

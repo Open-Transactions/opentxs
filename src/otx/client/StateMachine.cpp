@@ -5,7 +5,7 @@
 
 #include "otx/client/StateMachine.hpp"  // IWYU pragma: associated
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -647,7 +647,7 @@ auto StateMachine::issue_unit_definition(
     try {
         const auto& [unitID, label, advertise] = task;
         auto unitDefinition = api_.Wallet().Internal().UnitDefinition(unitID);
-        auto serialized = std::make_shared<proto::UnitDefinition>();
+        auto serialized = std::make_shared<protobuf::UnitDefinition>();
 
         assert_false(nullptr == serialized);
 

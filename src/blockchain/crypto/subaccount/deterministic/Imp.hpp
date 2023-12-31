@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <BlockchainDeterministicAccountData.pb.h>
-#include <HDPath.pb.h>
 #include <boost/container/flat_map.hpp>
+#include <opentxs/protobuf/BlockchainDeterministicAccountData.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstddef>
 #include <mutex>
 #include <optional>
@@ -91,7 +91,7 @@ public:
         const Bip32Index index,
         const PasswordPrompt& reason) const noexcept
         -> const opentxs::crypto::asymmetric::key::EllipticCurve = 0;
-    auto Path() const noexcept -> proto::HDPath final { return path_; }
+    auto Path() const noexcept -> protobuf::HDPath final { return path_; }
     auto PathRoot() const noexcept -> const opentxs::crypto::SeedID& final;
     auto Reserve(
         const Subchain type,
@@ -140,7 +140,7 @@ public:
 
 protected:
     using IndexMap = UnallocatedMap<Subchain, Bip32Index>;
-    using SerializedType = proto::BlockchainDeterministicAccountData;
+    using SerializedType = protobuf::BlockchainDeterministicAccountData;
 
     struct ChainData {
         AddressData internal_;
@@ -165,7 +165,7 @@ protected:
     static constexpr Bip32Index max_allocation_{2000u};
     static constexpr Bip32Index max_index_{2147483648u};
 
-    const proto::HDPath path_;
+    const protobuf::HDPath path_;
     const opentxs::crypto::SeedID seed_id_;
     mutable ChainData data_;
     mutable IndexMap generated_;
@@ -225,7 +225,7 @@ protected:
         identifier::Generic source,
         std::string_view sourceName,
         std::string_view name,
-        proto::HDPath path,
+        protobuf::HDPath path,
         ChainData&& data) noexcept;
     DeterministicPrivate(
         const api::Session& api,

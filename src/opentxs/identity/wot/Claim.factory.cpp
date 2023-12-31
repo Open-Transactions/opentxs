@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemAttribute
 
 #include "opentxs/identity/wot/internal.factory.hpp"  // IWYU pragma: associated
 
-#include <Claim.pb.h>
-#include <ContactItem.pb.h>
-#include <ContactItemAttribute.pb.h>
+#include <opentxs/protobuf/Claim.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/ContactItemAttribute.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -73,7 +73,7 @@ auto Claim(
 
 auto Claim(
     const api::Session& api,
-    const proto::Claim& proto,
+    const protobuf::Claim& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
     using ReturnType = identity::wot::ClaimPrivate;
@@ -131,7 +131,7 @@ auto Claim(
     const api::Session& api,
     const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
-    const proto::ContactItem& proto,
+    const protobuf::ContactItem& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::internal::Claim*
 {
     using ReturnType = identity::wot::ClaimPrivate;
@@ -155,8 +155,8 @@ auto Claim(
                 a.reserve(in.size());
                 a.clear();
                 static const auto translate = [](const auto& v) {
-                    return proto::translate(
-                        static_cast<proto::ContactItemAttribute>(v));
+                    return protobuf::translate(
+                        static_cast<protobuf::ContactItemAttribute>(v));
                 };
                 std::ranges::transform(
                     in, std::inserter(a, a.end()), translate);

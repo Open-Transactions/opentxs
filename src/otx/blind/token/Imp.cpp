@@ -5,7 +5,7 @@
 
 #include "otx/blind/token/Imp.hpp"  // IWYU pragma: associated
 
-#include <Token.pb.h>
+#include <opentxs/protobuf/Token.pb.h>
 #include <optional>
 #include <string>
 
@@ -76,7 +76,7 @@ Token::Token(const Token& rhs)
 Token::Token(
     const api::Session& api,
     blind::internal::Purse& purse,
-    const proto::Token& in)
+    const protobuf::Token& in)
     : Token(
           api,
           purse,
@@ -121,7 +121,7 @@ auto Token::reencrypt(
     const PasswordPrompt& oldPassword,
     const crypto::symmetric::Key& newKey,
     const PasswordPrompt& newPassword,
-    proto::Ciphertext& ciphertext) -> bool
+    protobuf::Ciphertext& ciphertext) -> bool
 {
     auto plaintext = ByteArray{};
     auto output = oldKey.Internal().Decrypt(
@@ -149,7 +149,7 @@ auto Token::reencrypt(
     return output;
 }
 
-auto Token::Serialize(proto::Token& output) const noexcept -> bool
+auto Token::Serialize(protobuf::Token& output) const noexcept -> bool
 {
     output.set_version(version_);
     output.set_type(opentxs::translate(type_));

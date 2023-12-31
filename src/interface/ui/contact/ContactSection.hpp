@@ -9,7 +9,6 @@
 #include "interface/ui/base/List.hpp"
 #include "interface/ui/base/RowType.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -17,6 +16,7 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -33,10 +33,10 @@ class Section;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 enum ContactItemType : int;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace ui
 {
@@ -74,7 +74,7 @@ public:
         -> UnallocatedCString final
     {
         return UnallocatedCString{
-            proto::TranslateSectionName(translate(row_id_), lang)};
+            protobuf::TranslateSectionName(translate(row_id_), lang)};
     }
     auto Type() const noexcept -> identity::wot::claim::SectionType final
     {
@@ -98,11 +98,11 @@ public:
 private:
     static const std::map<
         identity::wot::claim::SectionType,
-        UnallocatedSet<proto::ContactItemType>>
+        UnallocatedSet<protobuf::ContactItemType>>
         allowed_types_;
     static const UnallocatedMap<
         identity::wot::claim::SectionType,
-        UnallocatedMap<proto::ContactItemType, int>>
+        UnallocatedMap<protobuf::ContactItemType, int>>
         sort_keys_;
 
     static auto sort_key(const ContactSectionRowID type) noexcept -> int;

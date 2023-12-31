@@ -7,8 +7,8 @@
 
 #if defined(OTDB_PROTOCOL_BUFFERS)
 
-#include <Generics.pb.h>
-#include <Markets.pb.h>
+#include <opentxs/OTDB/Generics.pb.h>
+#include <opentxs/OTDB/Markets.pb.h>
 #include <iostream>
 
 #include "opentxs/util/Container.hpp"

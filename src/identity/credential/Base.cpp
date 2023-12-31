@@ -5,10 +5,10 @@
 
 #include "identity/credential/Base.hpp"  // IWYU pragma: associated
 
-#include <ChildCredentialParameters.pb.h>
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/ChildCredentialParameters.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -21,10 +21,6 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -42,6 +38,9 @@
 #include "opentxs/identity/CredentialRole.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Source.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -79,7 +78,7 @@ Base::Base(
     const api::Session& api,
     const identity::internal::Authority& parent,
     const identity::Source& source,
-    const proto::Credential& serialized,
+    const protobuf::Credential& serialized,
     const identifier_type& masterID) noexcept(false)
     : Signable(
           api,
@@ -110,13 +109,13 @@ auto Base::add_master_signature(
     const PasswordPrompt& reason,
     Signatures& out) noexcept(false) -> void
 {
-    auto serializedMasterSignature = std::make_shared<proto::Signature>();
+    auto serializedMasterSignature = std::make_shared<protobuf::Signature>();
     auto serialized = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
     auto& signature = *serialized->add_signature();
 
     const auto havePublicSig = master.Sign(
         [&serialized]() -> UnallocatedCString {
-            return proto::ToString(*serialized);
+            return to_string(*serialized);
         },
         crypto::SignatureRole::PublicCredential,
         signature,
@@ -160,7 +159,7 @@ auto Base::extract_signatures(const SerializedType& serialized) -> Signatures
     auto output = Signatures{};
 
     for (const auto& it : serialized.signature()) {
-        output.push_back(std::make_shared<proto::Signature>(it));
+        output.push_back(std::make_shared<protobuf::Signature>(it));
     }
 
     return output;
@@ -168,7 +167,7 @@ auto Base::extract_signatures(const SerializedType& serialized) -> Signatures
 
 auto Base::get_master_id(
     const api::Session& api,
-    const proto::Credential& serialized,
+    const protobuf::Credential& serialized,
     const internal::Primary& master) noexcept(false) -> const identifier_type&
 {
     const auto& out = master.ID();
@@ -186,14 +185,14 @@ auto Base::get_master_id(
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 auto Base::id_form() const -> std::shared_ptr<SerializedType>
 {
-    auto out = std::make_shared<proto::Credential>();
+    auto out = std::make_shared<protobuf::Credential>();
     out->set_version(Version());
     out->set_type(translate((type_)));
     out->set_role(translate(role_));
 
     if (identity::CredentialRole::MasterKey != role_) {
-        std::unique_ptr<proto::ChildCredentialParameters> parameters;
-        parameters = std::make_unique<proto::ChildCredentialParameters>();
+        std::unique_ptr<protobuf::ChildCredentialParameters> parameters;
+        parameters = std::make_unique<protobuf::ChildCredentialParameters>();
         parameters->set_version(1);
         master_id_.Internal().Serialize(*parameters->mutable_masterid());
         out->set_allocated_childdata(parameters.release());
@@ -240,9 +239,9 @@ auto Base::isValid(std::shared_ptr<SerializedType>& credential) const -> bool
 
     credential = serialize(serializationMode, WITH_SIGNATURES);
 
-    return proto::Validate<proto::Credential>(
+    return protobuf::syntax::check(
+        LogError(),
         *credential,
-        VERBOSE,
         translate(mode_),
         translate(role_),
         true);  // with signatures
@@ -251,7 +250,7 @@ auto Base::isValid(std::shared_ptr<SerializedType>& credential) const -> bool
 auto Base::MasterSignature() const -> contract::Signature
 {
     auto masterSignature = contract::Signature{};
-    const auto targetRole{proto::SIGROLE_PUBCREDENTIAL};
+    const auto targetRole{protobuf::SIGROLE_PUBCREDENTIAL};
     const auto targetID = master_id_;
 
     for (const auto& sig : signatures()) {
@@ -292,8 +291,8 @@ auto Base::SelfSignature(CredentialModeFlag version) const
     -> contract::Signature
 {
     const auto targetRole{
-        (PRIVATE_VERSION == version) ? proto::SIGROLE_PRIVCREDENTIAL
-                                     : proto::SIGROLE_PUBCREDENTIAL};
+        (PRIVATE_VERSION == version) ? protobuf::SIGROLE_PRIVCREDENTIAL
+                                     : protobuf::SIGROLE_PUBCREDENTIAL};
     const auto& self = ID();
 
     for (const auto& sig : signatures()) {
@@ -348,7 +347,7 @@ auto Base::serialize(
 
 auto Base::Serialize(Writer&& out) const noexcept -> bool
 {
-    auto serialized = proto::Credential{};
+    auto serialized = protobuf::Credential{};
     Serialize(serialized, Private() ? AS_PRIVATE : AS_PUBLIC, WITH_SIGNATURES);
 
     return serialize(serialized, std::move(out));
@@ -383,7 +382,7 @@ auto Base::SourceSignature() const -> contract::Signature
         const auto id =
             api_.Factory().Internal().Identifier(sig->credentialid());
 
-        if ((sig->role() == proto::SIGROLE_NYMIDSOURCE) && (id == nym_id_)) {
+        if ((sig->role() == protobuf::SIGROLE_NYMIDSOURCE) && (id == nym_id_)) {
 
             return sig;
         }
@@ -412,10 +411,10 @@ auto Base::validate() const -> bool
 auto Base::Validate() const noexcept -> bool { return validate(); }
 
 auto Base::Verify(
-    const proto::Credential& credential,
+    const protobuf::Credential& credential,
     const identity::CredentialRole& role,
     const identifier_type& masterID,
-    const proto::Signature& masterSig) const -> bool
+    const protobuf::Signature& masterSig) const -> bool
 {
     LogError()()("Non-key credentials are not able to verify signatures")
         .Flush();

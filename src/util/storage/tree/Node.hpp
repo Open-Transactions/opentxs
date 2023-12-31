@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageEnums.pb.h>
+#include <opentxs/protobuf/StorageEnums.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -15,9 +15,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
@@ -25,6 +22,9 @@
 #include "opentxs/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.hpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
@@ -46,13 +46,13 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Contact;
 class Nym;
 class Seed;
 class StorageItemHash;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -98,11 +98,11 @@ protected:
         auto valid{false};
 
         if (loaded) {
-            serialized = proto::DynamicFactory<T>(raw.data(), raw.size());
+            serialized = protobuf::DynamicFactory<T>(raw.data(), raw.size());
 
             assert_false(nullptr == serialized);
 
-            valid = proto::Validate<T>(*serialized, VERBOSE);
+            valid = protobuf::syntax::check<T>(LogError(), *serialized);
         } else {
 
             return false;
@@ -132,9 +132,11 @@ protected:
     auto StoreProto(const T& data, Hash& key, UnallocatedCString& plaintext)
         const noexcept -> bool
     {
-        if (false == proto::Validate<T>(data, VERBOSE)) { return false; }
+        if (false == protobuf::syntax::check<T>(LogError(), data)) {
+            return false;
+        }
 
-        plaintext = proto::ToString(data);
+        plaintext = protobuf::to_string(data);
 
         return plugin_.Store(plaintext, key);
     }
@@ -267,9 +269,10 @@ protected:
         -> void;
     virtual auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
         -> bool;
-    auto extract_revision(const proto::Contact& input) const -> std::uint64_t;
-    auto extract_revision(const proto::Nym& input) const -> std::uint64_t;
-    auto extract_revision(const proto::Seed& input) const -> std::uint64_t;
+    auto extract_revision(const protobuf::Contact& input) const
+        -> std::uint64_t;
+    auto extract_revision(const protobuf::Nym& input) const -> std::uint64_t;
+    auto extract_revision(const protobuf::Seed& input) const -> std::uint64_t;
     auto get_alias(const identifier::Generic& id) const -> UnallocatedCString;
     auto load_raw(
         const identifier::Generic& id,
@@ -281,15 +284,15 @@ protected:
         const identifier::Generic& id,
         const Hash& hash,
         ReadView alias,
-        proto::StorageItemHash& output,
-        const proto::StorageHashType type =
-            proto::STORAGEHASH_PROTO) const noexcept -> void;
+        protobuf::StorageItemHash& output,
+        const protobuf::StorageHashType type =
+            protobuf::STORAGEHASH_PROTO) const noexcept -> void;
     auto serialize_index(
         const identifier::Generic& id,
         const Metadata& metadata,
-        proto::StorageItemHash& output,
-        const proto::StorageHashType type = proto::STORAGEHASH_PROTO) const
-        -> void;
+        protobuf::StorageItemHash& output,
+        const protobuf::StorageHashType type =
+            protobuf::STORAGEHASH_PROTO) const -> void;
 
     virtual auto blank() noexcept -> void;
     auto delete_item(const identifier::Generic& id) -> bool;
@@ -299,9 +302,9 @@ protected:
     auto set_hash(
         const identifier::Generic& id,
         const Hash& hash,
-        proto::StorageItemHash& output,
-        const proto::StorageHashType type =
-            proto::STORAGEHASH_PROTO) const noexcept -> void;
+        protobuf::StorageItemHash& output,
+        const protobuf::StorageHashType type =
+            protobuf::STORAGEHASH_PROTO) const noexcept -> void;
     auto store_raw(
         const UnallocatedCString& data,
         const identifier::Generic& id,
@@ -315,19 +318,20 @@ protected:
 
     virtual void init(const Hash& hash) = 0;
     auto init_map(
-        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+        const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>&
             items) noexcept -> void;
     auto init_map(
         const Lock& lock,
-        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+        const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>&
             items) noexcept -> void;
-    auto init_map(const Lock& lock, const proto::StorageItemHash& item) noexcept
-        -> void;
     auto init_map(
-        const google::protobuf::RepeatedPtrField<proto::StorageItemHash>& in,
+        const Lock& lock,
+        const protobuf::StorageItemHash& item) noexcept -> void;
+    auto init_map(
+        const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>& in,
         Index& out) noexcept -> void;
-    auto init_map(const proto::StorageItemHash& in, Index& out) const noexcept
-        -> void;
+    auto init_map(const protobuf::StorageItemHash& in, Index& out)
+        const noexcept -> void;
     auto set_original_version(VersionNumber version) noexcept -> VersionNumber;
     virtual auto upgrade(const Lock& lock) noexcept -> bool = 0;
 

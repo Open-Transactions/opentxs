@@ -5,8 +5,8 @@
 
 #include "opentxs/blockchain/protocol/bitcoin/bitcoincash/token/cashtoken/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionOutput.pb.h>
-#include <Cashtoken.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>
+#include <opentxs/protobuf/Cashtoken.pb.h>
 #include <cstring>
 #include <stdexcept>
 #include <string>
@@ -122,7 +122,7 @@ auto Value::Serialize(Writer&& out) const noexcept(false) -> void
     if (has_amount()) { serialize_compact_size(aSize, buf, "amount"); }
 }
 
-auto Value::Serialize(proto::BlockchainTransactionOutput& out) const noexcept
+auto Value::Serialize(protobuf::BlockchainTransactionOutput& out) const noexcept
     -> void
 {
     static constexpr auto version = VersionNumber{1};
@@ -155,8 +155,8 @@ auto Value::View() const noexcept -> cashtoken::View
 
 namespace opentxs::blockchain::protocol::bitcoin::bitcoincash::token::cashtoken
 {
-auto deserialize(const proto::BlockchainTransactionOutput& in) noexcept(false)
-    -> std::optional<Value>
+auto deserialize(const protobuf::BlockchainTransactionOutput& in) noexcept(
+    false) -> std::optional<Value>
 {
     if (false == in.has_cashtoken()) { return std::nullopt; }
 

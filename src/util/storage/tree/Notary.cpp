@@ -5,26 +5,26 @@
 
 #include "util/storage/tree/Notary.hpp"  // IWYU pragma: associated
 
-#include <BlindedSeriesList.pb.h>
-#include <SpentTokenList.pb.h>
-#include <StorageEnums.pb.h>
-#include <StorageItemHash.pb.h>
-#include <StorageNotary.pb.h>
+#include <opentxs/protobuf/BlindedSeriesList.pb.h>
+#include <opentxs/protobuf/SpentTokenList.pb.h>
+#include <opentxs/protobuf/StorageEnums.pb.h>
+#include <opentxs/protobuf/StorageItemHash.pb.h>
+#include <opentxs/protobuf/StorageNotary.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <utility>
 #include <variant>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/SpentTokenList.hpp"
-#include "internal/serialization/protobuf/verify/StorageNotary.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/SpentTokenList.hpp"
+#include "opentxs/protobuf/syntax/StorageNotary.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -89,10 +89,10 @@ auto Notary::CheckSpent(
 auto Notary::create_list(
     const identifier::UnitDefinition& unitID,
     const MintSeries series,
-    std::shared_ptr<proto::SpentTokenList>& output) const -> Hash
+    std::shared_ptr<protobuf::SpentTokenList>& output) const -> Hash
 {
     auto hash = Hash{};
-    output.reset(new proto::SpentTokenList);
+    output.reset(new protobuf::SpentTokenList);
 
     assert_false(nullptr == output);
 
@@ -133,11 +133,11 @@ auto Notary::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
 auto Notary::get_or_create_list(
     const Lock& lock,
     const identifier::UnitDefinition& unitID,
-    const MintSeries series) const -> proto::SpentTokenList
+    const MintSeries series) const -> protobuf::SpentTokenList
 {
     assert_true(verify_write_lock(lock));
 
-    std::shared_ptr<proto::SpentTokenList> output{};
+    std::shared_ptr<protobuf::SpentTokenList> output{};
     auto& hash = mint_map_[unitID][series];
 
     if (false == is_valid(hash)) {
@@ -155,7 +155,7 @@ auto Notary::get_or_create_list(
 
 auto Notary::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNotary>{};
+    auto p = std::shared_ptr<protobuf::StorageNotary>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -202,7 +202,7 @@ auto Notary::MarkSpent(
     auto list = get_or_create_list(lock, unit, series);
     list.add_spent(key.data(), key.size());
 
-    assert_true(proto::Validate(list, VERBOSE));
+    assert_true(protobuf::syntax::check(LogError(), list));
 
     auto& hash = mint_map_[unit][series];
     LogTrace()()("Token ")(key)(" marked as spent.").Flush();
@@ -220,14 +220,16 @@ auto Notary::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
 
-auto Notary::serialize() const -> proto::StorageNotary
+auto Notary::serialize() const -> protobuf::StorageNotary
 {
-    proto::StorageNotary serialized;
+    protobuf::StorageNotary serialized;
     serialized.set_version(version_);
     serialized.set_id(id_.asBase58(crypto_));
 
@@ -243,7 +245,7 @@ auto Notary::serialize() const -> proto::StorageNotary
                 hash,
                 std::to_string(seriesNumber),
                 *series.add_series(),
-                proto::STORAGEHASH_PROTO);
+                protobuf::STORAGEHASH_PROTO);
         }
     }
 

@@ -7,13 +7,12 @@
 
 #include "api/crypto/Symmetric.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <memory>
 
 #include "internal/api/Crypto.hpp"
 #include "internal/api/crypto/Factory.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/crypto/Symmetric.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Source.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 
 namespace opentxs::factory
 {
@@ -77,7 +77,8 @@ auto Symmetric::Key(
     alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     const auto& provider = api_.Crypto().Internal().SymmetricProvider(mode);
-    auto ciphertext = proto::Factory<proto::Ciphertext>(serializedCiphertext);
+    auto ciphertext =
+        protobuf::Factory<protobuf::Ciphertext>(serializedCiphertext);
 
     return api_.Factory().Internal().Session().SymmetricKey(
         provider, ciphertext.key(), alloc);
@@ -175,7 +176,7 @@ auto Symmetric::Key(
 }
 
 auto Symmetric::Key(
-    const proto::SymmetricKey& serialized,
+    const protobuf::SymmetricKey& serialized,
     opentxs::crypto::symmetric::Algorithm mode,
     alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {

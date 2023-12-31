@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/verification/Implementation.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
-#include <VerificationRequest.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/VerificationRequest.pb.h>
 #include <utility>
 
 #include "opentxs/api/Factory.internal.hpp"

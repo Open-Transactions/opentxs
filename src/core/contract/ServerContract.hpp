@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ServerContract.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
 #include <cstdint>
 #include <string_view>
 
@@ -27,10 +27,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class Factory;
@@ -57,8 +57,8 @@ public:
     auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final;
-    auto Serialize(proto::ServerContract& output, bool includeNym = false) const
-        -> bool final;
+    auto Serialize(protobuf::ServerContract& output, bool includeNym = false)
+        const -> bool final;
     auto Statistics(String& strContents) const -> bool final;
     auto TransportKey() const -> const Data& final;
     auto TransportKey(Data& pubkey, const PasswordPrompt& reason) const
@@ -82,7 +82,7 @@ public:
     Server(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::ServerContract& serialized);
+        const protobuf::ServerContract& serialized);
     Server() = delete;
     Server(const Server&);
     Server(Server&&) = delete;
@@ -99,15 +99,15 @@ private:
     const ByteArray transport_key_;
 
     static auto extract_endpoints(
-        const proto::ServerContract& serialized) noexcept
+        const protobuf::ServerContract& serialized) noexcept
         -> UnallocatedList<contract::Server::Endpoint>;
 
     auto calculate_id() const -> identifier_type final;
-    auto contract() const -> proto::ServerContract;
-    auto IDVersion() const -> proto::ServerContract;
-    auto SigVersion() const -> proto::ServerContract;
+    auto contract() const -> protobuf::ServerContract;
+    auto IDVersion() const -> protobuf::ServerContract;
+    auto SigVersion() const -> protobuf::ServerContract;
     auto validate() const -> bool final;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool final;
 
     auto update_signature(const PasswordPrompt& reason) -> bool final;

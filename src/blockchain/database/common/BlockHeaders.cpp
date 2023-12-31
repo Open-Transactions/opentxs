@@ -5,19 +5,19 @@
 
 #include "blockchain/database/common/BlockHeaders.hpp"  // IWYU pragma: associated
 
-#include <BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
 #include <optional>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/blockchain/block/Header.hpp"
 #include "internal/blockchain/database/common/Common.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
 #include "opentxs/blockchain/block/Header.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -42,12 +42,13 @@ auto BlockHeader::Forget(const block::Hash& hash) const noexcept -> bool
 }
 
 auto BlockHeader::Load(const block::Hash& hash) const noexcept(false)
-    -> proto::BlockchainBlockHeader
+    -> protobuf::BlockchainBlockHeader
 {
-    auto output = std::optional<proto::BlockchainBlockHeader>{std::nullopt};
+    auto output = std::optional<protobuf::BlockchainBlockHeader>{std::nullopt};
     auto cb = [&](const auto in) {
         if (valid(in)) {
-            output.emplace(proto::Factory<proto::BlockchainBlockHeader>(in));
+            output.emplace(
+                protobuf::Factory<protobuf::BlockchainBlockHeader>(in));
         }
     };
     lmdb_.Load(table_, hash.Bytes(), cb);
@@ -97,7 +98,7 @@ auto BlockHeader::Store(const UpdatedHeader& headers) const noexcept -> bool
             const auto bytes = [&]() {
                 auto out = ByteArray{};
 
-                if (false == proto::write(proto, out.WriteInto())) {
+                if (false == protobuf::write(proto, out.WriteInto())) {
                     const auto error =
                         CString{"failed to serialize block header to bytes: "}
                             .append(hash.asHex());

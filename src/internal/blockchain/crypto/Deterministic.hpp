@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstddef>
 #include <optional>
 #include <string_view>
@@ -71,7 +71,7 @@ public:
     virtual auto LastGenerated(const Subchain type) const noexcept
         -> std::optional<Bip32Index>;
     virtual auto Lookahead() const noexcept -> std::size_t;
-    virtual auto Path() const noexcept -> proto::HDPath;
+    virtual auto Path() const noexcept -> protobuf::HDPath;
     virtual auto PathRoot() const noexcept -> const opentxs::crypto::SeedID&;
     virtual auto Reserve(
         const Subchain type,

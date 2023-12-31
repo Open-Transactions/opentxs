@@ -139,7 +139,6 @@ add_subdirectory(interface)
 add_subdirectory(matterfi)
 add_subdirectory(network)
 add_subdirectory(otx)
-add_subdirectory(serialization)
 add_subdirectory(std)
 add_subdirectory(util)
 

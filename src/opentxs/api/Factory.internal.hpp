@@ -11,7 +11,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -72,12 +72,12 @@ class Frame;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class BlockchainPeerAddress;
 class HDPath;
 class Identifier;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Cheque;
@@ -96,10 +96,10 @@ public:
         const noexcept -> identifier::Account = 0;
     virtual auto AccountID(
         const identity::wot::claim::ClaimType type,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         alloc::Default alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto AccountID(
-        const proto::Identifier& in,
+        const protobuf::Identifier& in,
         alloc::Default alloc = {}) const noexcept -> identifier::Account = 0;
     virtual auto AccountIDConvertSafe(
         const identifier::Generic& in,
@@ -173,7 +173,7 @@ public:
         const Set<opentxs::network::blockchain::bitcoin::Service>& services)
         const noexcept -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainAddress(
-        const proto::BlockchainPeerAddress& serialized) const noexcept
+        const protobuf::BlockchainPeerAddress& serialized) const noexcept
         -> opentxs::network::blockchain::Address = 0;
     virtual auto BlockchainAddressIncoming(
         const opentxs::network::blockchain::Protocol protocol,
@@ -224,7 +224,7 @@ public:
     virtual auto Identifier(const Item& item, alloc::Default alloc = {})
         const noexcept -> identifier::Generic = 0;
     virtual auto Identifier(
-        const proto::Identifier& in,
+        const protobuf::Identifier& in,
         alloc::Default alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromBase58(
         const std::string_view base58,
@@ -237,10 +237,10 @@ public:
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         alloc::Default alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto IdentifierFromPreimage(
@@ -259,7 +259,7 @@ public:
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Generic = 0;
     virtual auto NotaryID(
-        const proto::Identifier& in,
+        const protobuf::Identifier& in,
         alloc::Default alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDConvertSafe(
         const identifier::Generic& in,
@@ -275,10 +275,10 @@ public:
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         alloc::Default alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Notary = 0;
     virtual auto NotaryIDFromPreimage(
@@ -296,8 +296,9 @@ public:
     virtual auto NotaryIDFromRandom(
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept -> identifier::Notary = 0;
-    virtual auto NymID(const proto::Identifier& in, alloc::Default alloc = {})
-        const noexcept -> identifier::Nym = 0;
+    virtual auto NymID(
+        const protobuf::Identifier& in,
+        alloc::Default alloc = {}) const noexcept -> identifier::Nym = 0;
     virtual auto NymIDConvertSafe(
         const identifier::Generic& in,
         alloc::Default alloc = {}) const noexcept -> identifier::Nym = 0;
@@ -331,8 +332,9 @@ public:
         -> opentxs::Secret = 0;
     virtual auto SecretFromText(const std::string_view text) const noexcept
         -> opentxs::Secret = 0;
-    virtual auto SeedID(const proto::Identifier& in, alloc::Default alloc = {})
-        const noexcept -> identifier::HDSeed = 0;
+    virtual auto SeedID(
+        const protobuf::Identifier& in,
+        alloc::Default alloc = {}) const noexcept -> identifier::HDSeed = 0;
     virtual auto SeedIDFromBase58(
         const std::string_view base58,
         alloc::Default alloc = {}) const noexcept -> identifier::HDSeed = 0;
@@ -360,8 +362,10 @@ public:
     virtual auto Self() const noexcept -> const api::Factory& = 0;
     virtual auto Session() const noexcept
         -> const api::session::internal::Factory& = 0;
-    virtual auto UnitID(const proto::Identifier& in, alloc::Default alloc = {})
-        const noexcept -> identifier::UnitDefinition = 0;
+    virtual auto UnitID(
+        const protobuf::Identifier& in,
+        alloc::Default alloc = {}) const noexcept
+        -> identifier::UnitDefinition = 0;
     virtual auto UnitIDConvertSafe(
         const identifier::Generic& in,
         alloc::Default alloc = {}) const noexcept
@@ -378,11 +382,11 @@ public:
         alloc::Default alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     virtual auto UnitIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         alloc::Default alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;
     virtual auto UnitIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc = {}) const noexcept
         -> identifier::UnitDefinition = 0;

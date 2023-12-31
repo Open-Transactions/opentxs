@@ -5,10 +5,10 @@
 
 #include "identity/credential/Base.hpp"  // IWYU pragma: associated
 
-#include <Enums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <functional>
 
 #include "internal/identity/credential/Credential.hpp"
@@ -19,13 +19,13 @@
 namespace opentxs::identity::credential
 {
 using CredentialRoleMap =
-    frozen::unordered_map<CredentialRole, proto::CredentialRole, 5>;
+    frozen::unordered_map<CredentialRole, protobuf::CredentialRole, 5>;
 using CredentialRoleReverseMap =
-    frozen::unordered_map<proto::CredentialRole, CredentialRole, 5>;
+    frozen::unordered_map<protobuf::CredentialRole, CredentialRole, 5>;
 using CredentialTypeMap =
-    frozen::unordered_map<CredentialType, proto::CredentialType, 3>;
+    frozen::unordered_map<CredentialType, protobuf::CredentialType, 3>;
 using CredentialTypeReverseMap =
-    frozen::unordered_map<proto::CredentialType, CredentialType, 3>;
+    frozen::unordered_map<protobuf::CredentialType, CredentialType, 3>;
 
 auto credentialrole_map() noexcept -> const CredentialRoleMap&;
 auto credentialtype_map() noexcept -> const CredentialTypeMap&;
@@ -36,7 +36,7 @@ namespace opentxs::identity::credential
 auto credentialrole_map() noexcept -> const CredentialRoleMap&
 {
     using enum identity::CredentialRole;
-    using enum proto::CredentialRole;
+    using enum protobuf::CredentialRole;
     static constexpr auto map = CredentialRoleMap{
         {Error, CREDROLE_ERROR},
         {MasterKey, CREDROLE_MASTERKEY},
@@ -51,7 +51,7 @@ auto credentialrole_map() noexcept -> const CredentialRoleMap&
 auto credentialtype_map() noexcept -> const CredentialTypeMap&
 {
     using enum identity::CredentialType;
-    using enum proto::CredentialType;
+    using enum protobuf::CredentialType;
     static constexpr auto map = CredentialTypeMap{
         {Error, CREDTYPE_ERROR},
         {HD, CREDTYPE_HD},
@@ -65,26 +65,26 @@ auto credentialtype_map() noexcept -> const CredentialTypeMap&
 namespace opentxs
 {
 auto translate(const identity::CredentialRole in) noexcept
-    -> proto::CredentialRole
+    -> protobuf::CredentialRole
 {
     try {
         return identity::credential::credentialrole_map().at(in);
     } catch (...) {
-        return proto::CREDROLE_ERROR;
+        return protobuf::CREDROLE_ERROR;
     }
 }
 
 auto translate(const identity::CredentialType in) noexcept
-    -> proto::CredentialType
+    -> protobuf::CredentialType
 {
     try {
         return identity::credential::credentialtype_map().at(in);
     } catch (...) {
-        return proto::CREDTYPE_ERROR;
+        return protobuf::CREDTYPE_ERROR;
     }
 }
 
-auto translate(const proto::CredentialRole in) noexcept
+auto translate(const protobuf::CredentialRole in) noexcept
     -> identity::CredentialRole
 {
     static const auto map = frozen::invert_unordered_map(
@@ -97,7 +97,7 @@ auto translate(const proto::CredentialRole in) noexcept
     }
 }
 
-auto translate(const proto::CredentialType in) noexcept
+auto translate(const protobuf::CredentialType in) noexcept
     -> identity::CredentialType
 {
     static const auto map = frozen::invert_unordered_map(

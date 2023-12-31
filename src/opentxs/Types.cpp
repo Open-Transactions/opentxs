@@ -20,7 +20,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/AccountType.hpp"        // IWYU pragma: keep
 #include "opentxs/AddressType.hpp"        // IWYU pragma: keep
 #include "opentxs/BlockchainProfile.hpp"  // IWYU pragma: keep
@@ -28,6 +27,7 @@
 #include "opentxs/WorkType.internal.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -293,7 +293,7 @@ auto print(OTZMQWorkType in) noexcept -> std::string_view
 
 auto print(UnitType in) noexcept -> std::string_view
 {
-    return proto::TranslateItemType(translate(UnitToClaim(in)));
+    return protobuf::TranslateItemType(translate(UnitToClaim(in)));
 }
 
 auto print(WorkType in) noexcept -> std::string_view

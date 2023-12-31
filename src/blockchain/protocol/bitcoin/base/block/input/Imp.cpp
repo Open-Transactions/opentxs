@@ -5,11 +5,11 @@
 
 #include "blockchain/protocol/bitcoin/base/block/input/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainInputWitness.pb.h>
-#include <BlockchainPreviousOutput.pb.h>
-#include <BlockchainTransactionInput.pb.h>
-#include <BlockchainWalletKey.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <opentxs/protobuf/BlockchainInputWitness.pb.h>
+#include <opentxs/protobuf/BlockchainPreviousOutput.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionInput.pb.h>
+#include <opentxs/protobuf/BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>

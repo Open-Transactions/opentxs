@@ -5,10 +5,10 @@
 
 #include "crypto/Envelope.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Ciphertext.pb.h>
-#include <Envelope.pb.h>
-#include <TaggedKey.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Envelope.pb.h>
+#include <opentxs/protobuf/TaggedKey.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -22,8 +22,6 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -49,6 +47,8 @@
 #include "opentxs/identity/Authority.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
 #include "opentxs/util/Log.hpp"
@@ -67,7 +67,7 @@ auto Factory::Envelope(const api::Session& api) noexcept
 
 auto Factory::Envelope(
     const api::Session& api,
-    const proto::Envelope& serialized) noexcept(false)
+    const protobuf::Envelope& serialized) noexcept(false)
     -> std::unique_ptr<crypto::Envelope>
 {
     using ReturnType = crypto::implementation::Envelope;
@@ -139,7 +139,7 @@ Envelope::Envelope(const api::Session& api, const SerializedType& in) noexcept(
 }
 
 Envelope::Envelope(const api::Session& api, const ReadView& in) noexcept(false)
-    : Envelope(api, proto::Factory<proto::Envelope>(in))
+    : Envelope(api, protobuf::Factory<protobuf::Envelope>(in))
 {
 }
 
@@ -154,7 +154,7 @@ Envelope::Envelope(const Envelope& rhs) noexcept
 
 auto Envelope::Armored(opentxs::Armored& ciphertext) const noexcept -> bool
 {
-    auto serialized = proto::Envelope{};
+    auto serialized = protobuf::Envelope{};
     if (false == Serialize(serialized)) { return false; }
 
     return ciphertext.SetData(api_.Factory().Internal().Data(serialized));
@@ -251,7 +251,7 @@ auto Envelope::calculate_solutions() noexcept -> Solutions
 
 auto Envelope::clone(const Ciphertext& rhs) noexcept -> Ciphertext
 {
-    if (rhs) { return std::make_unique<proto::Ciphertext>(*rhs); }
+    if (rhs) { return std::make_unique<protobuf::Ciphertext>(*rhs); }
 
     return {};
 }
@@ -385,7 +385,7 @@ auto Envelope::read_sk(
 auto Envelope::read_ct(const SerializedType& rhs) noexcept -> Ciphertext
 {
     if (rhs.has_ciphertext()) {
-        return std::make_unique<proto::Ciphertext>(rhs.ciphertext());
+        return std::make_unique<protobuf::Ciphertext>(rhs.ciphertext());
     }
 
     return {};
@@ -494,7 +494,7 @@ auto Envelope::seal(
     auto password = api_.Factory().PasswordPrompt(reason);
     set_default_password(api_, password);
     auto masterKey = api_.Crypto().Symmetric().Key(password);
-    ciphertext_ = std::make_unique<proto::Ciphertext>();
+    ciphertext_ = std::make_unique<protobuf::Ciphertext>();
 
     assert_false(nullptr == ciphertext_);
 
@@ -529,7 +529,7 @@ auto Envelope::set_default_password(
 
 auto Envelope::Serialize(Writer&& destination) const noexcept -> bool
 {
-    auto serialized = proto::Envelope{};
+    auto serialized = protobuf::Envelope{};
     if (false == Serialize(serialized)) { return false; }
 
     return write(serialized, std::move(destination));
@@ -541,7 +541,7 @@ auto Envelope::Serialize(SerializedType& output) const noexcept -> bool
 
     for (const auto& [type, set] : dh_keys_) {
         for (const auto& key : set) {
-            auto serialized = proto::AsymmetricKey{};
+            auto serialized = protobuf::AsymmetricKey{};
             if (false == key.asPublic().Internal().Serialize(serialized)) {
                 return false;
             }

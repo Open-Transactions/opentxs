@@ -5,7 +5,7 @@
 
 #include "network/blockchain/address/AddressPrivate.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -297,7 +297,7 @@ auto AddressPrivate::ID() const noexcept -> const identifier::Generic&
 auto AddressPrivate::Incoming() const noexcept -> bool { return incoming_; }
 
 auto AddressPrivate::instantiate_services(
-    const proto::BlockchainPeerAddress& serialized) noexcept
+    const protobuf::BlockchainPeerAddress& serialized) noexcept
     -> Set<bitcoin::Service>
 {
     auto output = Set<bitcoin::Service>{};
@@ -336,8 +336,8 @@ auto AddressPrivate::RemoveService(const bitcoin::Service service) noexcept
     services_.erase(service);
 }
 
-auto AddressPrivate::Serialize(proto::BlockchainPeerAddress& out) const noexcept
-    -> bool
+auto AddressPrivate::Serialize(
+    protobuf::BlockchainPeerAddress& out) const noexcept -> bool
 {
     out = serialize(
         version_,
@@ -366,9 +366,9 @@ auto AddressPrivate::serialize(
     const opentxs::blockchain::Type chain,
     const Time lastConnected,
     const Set<bitcoin::Service>& services) noexcept
-    -> proto::BlockchainPeerAddress
+    -> protobuf::BlockchainPeerAddress
 {
-    auto output = proto::BlockchainPeerAddress{};
+    auto output = protobuf::BlockchainPeerAddress{};
     output.set_version(version);
     output.set_protocol(static_cast<std::uint8_t>(protocol));
     output.set_network(static_cast<std::uint8_t>(network));

@@ -37,11 +37,11 @@ class Key;
 }  // namespace symmetric
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class Ciphertext;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -104,12 +104,12 @@ protected:
     const crypto::EcdsaProvider& ecdsa_;
 
     static auto serialize_public(EllipticCurve* copy)
-        -> std::shared_ptr<proto::AsymmetricKey>;
+        -> std::shared_ptr<protobuf::AsymmetricKey>;
 
     EllipticCurve(
         const api::Session& api,
         const crypto::EcdsaProvider& ecdsa,
-        const proto::AsymmetricKey& serializedKey,
+        const protobuf::AsymmetricKey& serializedKey,
         allocator_type alloc) noexcept(false);
     EllipticCurve(
         const api::Session& api,
@@ -154,8 +154,8 @@ private:
     static auto extract_key(
         const api::Session& api,
         const crypto::EcdsaProvider& ecdsa,
-        const proto::AsymmetricKey& serialized,
-        Data& publicKey) -> std::unique_ptr<proto::Ciphertext>;
+        const protobuf::AsymmetricKey& serialized,
+        Data& publicKey) -> std::unique_ptr<protobuf::Ciphertext>;
 
     virtual auto replace_public_key(
         const ReadView newPubkey,

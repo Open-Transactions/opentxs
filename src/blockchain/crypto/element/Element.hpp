@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <BlockchainAddress.pb.h>
 #include <boost/container/flat_set.hpp>
 #include <cs_shared_guarded.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
 #include <functional>
 #include <optional>
 #include <shared_mutex>
@@ -51,10 +51,10 @@ class DeterministicPrivate;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -183,7 +183,7 @@ private:
 
     static auto instantiate(
         const api::Session& api,
-        const proto::AsymmetricKey& serialized) noexcept(false)
+        const protobuf::AsymmetricKey& serialized) noexcept(false)
         -> opentxs::crypto::asymmetric::key::EllipticCurve;
 
     auto update_element() const noexcept -> void;

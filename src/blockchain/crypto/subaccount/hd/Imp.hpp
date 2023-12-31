@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <BlockchainAddress.pb.h>
-#include <HDAccount.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
+#include <opentxs/protobuf/HDAccount.pb.h>
 #include <memory>
 #include <optional>
 
@@ -47,10 +47,10 @@ class Account;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -62,7 +62,7 @@ class HDPrivate final : public internal::HD, public DeterministicPrivate
 {
 public:
     using Element = implementation::Element;
-    using SerializedType = proto::HDAccount;
+    using SerializedType = protobuf::HDAccount;
 
     auto asDeterministicPublic() const noexcept
         -> const crypto::Deterministic& final
@@ -99,7 +99,7 @@ public:
         const api::Session& api,
         const crypto::Account& parent,
         const identifier::Account& id,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const HDProtocol standard,
         const PasswordPrompt& reason,
         opentxs::crypto::SeedID seed) noexcept(false);

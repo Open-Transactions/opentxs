@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <BlockchainEthereumAccountData.pb.h>
-#include <HDPath.pb.h>
 #include <boost/container/flat_set.hpp>
+#include <opentxs/protobuf/BlockchainEthereumAccountData.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <memory>
 #include <optional>
 
@@ -57,7 +57,7 @@ namespace opentxs::blockchain::crypto
 class EthereumPrivate final : public internal::Ethereum, public ImportedPrivate
 {
 public:
-    using SerializedType = proto::BlockchainEthereumAccountData;
+    using SerializedType = protobuf::BlockchainEthereumAccountData;
 
     auto asImportedPublic() const noexcept -> const crypto::Imported& final
     {
@@ -121,7 +121,7 @@ public:
         const api::Session& api,
         const crypto::Account& parent,
         const identifier::Account& id,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const HDProtocol standard,
         const PasswordPrompt& reason,
         opentxs::crypto::SeedID seed) noexcept(false);
@@ -143,7 +143,7 @@ private:
 
     static constexpr auto default_version_ = VersionNumber{1};
 
-    const proto::HDPath path_;
+    const protobuf::HDPath path_;
     const HDProtocol standard_;
     VersionNumber version_;
     Amount balance_;

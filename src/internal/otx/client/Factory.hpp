@@ -39,10 +39,10 @@ class ServerAction;
 }  // namespace client
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Issuer;
-}  // namespace proto
+}  // namespace protobuf
 
 class Flag;
 }  // namespace opentxs
@@ -55,7 +55,7 @@ auto Issuer(
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
-    const proto::Issuer& serialized) -> otx::client::Issuer*;
+    const protobuf::Issuer& serialized) -> otx::client::Issuer*;
 auto Issuer(
     const api::Crypto& crypto,
     const api::session::Factory& factory,

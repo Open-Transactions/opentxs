@@ -5,8 +5,8 @@
 
 #include "opentxs/network/otdht/PublishContract.hpp"  // IWYU pragma: associated
 
-#include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <opentxs/protobuf/Identifier.pb.h>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -17,7 +17,6 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/message/Message.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -35,6 +34,7 @@
 #include "opentxs/network/otdht/State.hpp"        // IWYU pragma: keep
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -183,7 +183,7 @@ public:
 
         out.AddFrame(Buffer{static_cast<std::uint32_t>(contract_type_)});
         out.Internal().AddFrame([&] {
-            auto data = proto::Identifier{};
+            auto data = protobuf::Identifier{};
             contract_id_.Internal().Serialize(data);
 
             return data;
@@ -223,7 +223,9 @@ public:
         const ReadView payload) noexcept
         : Imp(type,
               api.Factory().Internal().Session().Identifier(
-                  proto::Factory<proto::Identifier>(id.data(), id.size())),
+                  protobuf::Factory<protobuf::Identifier>(
+                      id.data(),
+                      id.size())),
               space(payload))
     {
     }

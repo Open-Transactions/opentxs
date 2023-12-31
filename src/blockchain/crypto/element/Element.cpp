@@ -5,9 +5,9 @@
 
 #include "blockchain/crypto/element/Element.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <BlockchainAddress.pb.h>
 #include <boost/container/vector.hpp>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <compare>
@@ -21,7 +21,6 @@
 #include "internal/api/crypto/Blockchain.hpp"
 #include "internal/blockchain/crypto/Subaccount.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
@@ -35,6 +34,7 @@
 #include "opentxs/crypto/asymmetric/Key.hpp"
 #include "opentxs/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "opentxs/crypto/asymmetric/key/HD.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -230,7 +230,7 @@ auto Element::Elements() const noexcept -> UnallocatedSet<ByteArray>
 
 auto Element::instantiate(
     const api::Session& api,
-    const proto::AsymmetricKey& serialized) noexcept(false)
+    const protobuf::AsymmetricKey& serialized) noexcept(false)
     -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     auto output =
@@ -350,7 +350,7 @@ auto Element::Serialize(bool withPrivate) const noexcept
 
     if (false == data.cached_.has_value()) {
         const auto key = [&] {
-            auto serialized = proto::AsymmetricKey{};
+            auto serialized = protobuf::AsymmetricKey{};
 
             if (key_.HasPrivate() && (false == withPrivate)) {
                 key_.asPublic().Internal().Serialize(serialized);

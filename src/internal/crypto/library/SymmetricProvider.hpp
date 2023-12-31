@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -26,7 +26,7 @@ class SymmetricProvider
 {
 public:
     virtual auto Decrypt(
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         const std::uint8_t* key,
         const std::size_t keySize,
         std::uint8_t* plaintext) const -> bool = 0;
@@ -48,7 +48,7 @@ public:
         const std::size_t inputSize,
         const std::uint8_t* key,
         const std::size_t keySize,
-        proto::Ciphertext& ciphertext) const -> bool = 0;
+        protobuf::Ciphertext& ciphertext) const -> bool = 0;
     virtual auto IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t = 0;
     virtual auto KeySize(const opentxs::crypto::symmetric::Algorithm mode) const

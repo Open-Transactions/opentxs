@@ -7,13 +7,13 @@
 
 #include "otx/server/UserCommandProcessor.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <BasketItem.pb.h>
-#include <BasketParams.pb.h>
-#include <Context.pb.h>
-#include <Nym.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/BasketItem.pb.h>
+#include <opentxs/protobuf/BasketParams.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <filesystem>
 #include <memory>
 #include <span>
@@ -44,10 +44,6 @@
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -79,6 +75,10 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/otx/Types.internal.hpp"
 #include "opentxs/otx/blind/Mint.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -401,7 +401,7 @@ auto UserCommandProcessor::check_ping_notary(const Message& msgIn) const -> bool
 {
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_check_notary_id);
 
-    const auto serialized = proto::StringToProto<proto::AsymmetricKey>(
+    const auto serialized = protobuf::StringToProto<protobuf::AsymmetricKey>(
         api_.Crypto(), msgIn.nym_public_key_);
     auto nymAuthentKey =
         api_.Factory().Internal().Session().AsymmetricKey(serialized);
@@ -550,7 +550,7 @@ auto UserCommandProcessor::cmd_check_nym(ReplyMessage& reply) const -> bool
         server_.API().Factory().NymIDFromBase58(targetNym->Bytes()));
 
     if (nym) {
-        auto publicNym = proto::Nym{};
+        auto publicNym = protobuf::Nym{};
         if (false == nym->Internal().Serialize(publicNym)) {
             LogError()()("Failed to serialize nym ")(targetNym.get()).Flush();
             reply.SetBool(false);
@@ -933,7 +933,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
             auto contract = api.Wallet().Nym(id);
 
             if (contract) {
-                auto publicNym = proto::Nym{};
+                auto publicNym = protobuf::Nym{};
                 if (false == contract->Internal().Serialize(publicNym)) {
                     LogError()()("Failed to serialize nym.").Flush();
                     return false;
@@ -949,7 +949,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
 
             try {
                 const auto contract = api.Wallet().Internal().Server(id);
-                auto proto = proto::ServerContract{};
+                auto proto = protobuf::ServerContract{};
 
                 if (false == contract->Serialize(proto, true)) {
                     LogError()()("Failed to serialize server contract.")
@@ -972,7 +972,7 @@ auto UserCommandProcessor::cmd_get_instrument_definition(
             try {
                 const auto contract =
                     api.Wallet().Internal().UnitDefinition(id);
-                auto proto = proto::UnitDefinition{};
+                auto proto = protobuf::UnitDefinition{};
 
                 if (false == contract->Serialize(proto, true)) {
                     LogError()()("Failed to serialize unit definition.")
@@ -1303,9 +1303,9 @@ auto UserCommandProcessor::cmd_issue_basket(ReplyMessage& reply) const -> bool
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_issue_basket);
 
     auto serialized =
-        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.payload_});
+        protobuf::Factory<protobuf::UnitDefinition>(ByteArray{msgIn.payload_});
 
-    if (false == proto::Validate(serialized, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
         LogError()()("Invalid contract.").Flush();
 
         return false;
@@ -2002,11 +2002,11 @@ auto UserCommandProcessor::cmd_register_contract(ReplyMessage& reply) const
     switch (type) {
         case (contract::Type::nym): {
             const auto nym =
-                proto::Factory<proto::Nym>(ByteArray{msgIn.payload_});
+                protobuf::Factory<protobuf::Nym>(ByteArray{msgIn.payload_});
             reply.SetSuccess(bool(server_.API().Wallet().Internal().Nym(nym)));
         } break;
         case (contract::Type::notary): {
-            const auto server = proto::Factory<proto::ServerContract>(
+            const auto server = protobuf::Factory<protobuf::ServerContract>(
                 ByteArray{msgIn.payload_});
             try {
                 server_.API().Wallet().Internal().Server(server);
@@ -2019,7 +2019,7 @@ auto UserCommandProcessor::cmd_register_contract(ReplyMessage& reply) const
         case (contract::Type::unit): {
             try {
                 server_.API().Wallet().Internal().UnitDefinition(
-                    proto::Factory<proto::UnitDefinition>(
+                    protobuf::Factory<protobuf::UnitDefinition>(
                         ByteArray{msgIn.payload_}));
                 reply.SetSuccess(true);
             } catch (const std::exception& e) {
@@ -2059,7 +2059,7 @@ auto UserCommandProcessor::cmd_register_instrument_definition(
     }
 
     const auto serialized =
-        proto::Factory<proto::UnitDefinition>(ByteArray{msgIn.payload_});
+        protobuf::Factory<protobuf::UnitDefinition>(ByteArray{msgIn.payload_});
 
     if (contract::UnitDefinitionType::Basket == translate(serialized.type())) {
         LogError()()("Incorrect unit type.").Flush();
@@ -2131,7 +2131,7 @@ auto UserCommandProcessor::cmd_register_nym(ReplyMessage& reply) const -> bool
     OT_ENFORCE_PERMISSION_MSG(ServerSettings::_cmd_create_user_acct);
 
     auto serialized =
-        proto::Factory<proto::Nym>(ByteArray{reply.Original().payload_});
+        protobuf::Factory<protobuf::Nym>(ByteArray{reply.Original().payload_});
     auto sender_nym = server_.API().Wallet().Internal().Nym(serialized);
 
     if (false == bool(sender_nym)) {
@@ -2978,7 +2978,7 @@ auto UserCommandProcessor::reregister_nym(ReplyMessage& reply) const -> bool
     }
 
     reply.SetPayload(api_.Factory().Internal().Data([&] {
-        auto proto = proto::Context{};
+        auto proto = protobuf::Context{};
         context.Refresh(proto, reason_);
 
         return proto;

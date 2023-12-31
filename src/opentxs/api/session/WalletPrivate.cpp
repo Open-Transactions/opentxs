@@ -7,15 +7,15 @@
 
 #include "opentxs/api/session/WalletPrivate.hpp"  // IWYU pragma: associated
 
-#include <Context.pb.h>
-#include <Credential.pb.h>
-#include <Issuer.pb.h>  // IWYU pragma: keep
-#include <Nym.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
-#include <Purse.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Issuer.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <algorithm>
 #include <compare>
 #include <functional>
@@ -55,13 +55,6 @@
 #include "internal/otx/common/XML.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/Nym.hpp"
-#include "internal/serialization/protobuf/verify/Purse.hpp"
-#include "internal/serialization/protobuf/verify/ServerContract.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Shared.hpp"
@@ -123,6 +116,12 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Nym.hpp"
+#include "opentxs/protobuf/syntax/Purse.hpp"
+#include "opentxs/protobuf/syntax/ServerContract.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -823,7 +822,7 @@ auto WalletPrivate::context(
     if (inMap) { return it->second; }
 
     // Load from storage, if it exists.
-    auto serialized = proto::Context{};
+    auto serialized = protobuf::Context{};
     using enum opentxs::storage::ErrorReporting;
     const bool loaded = api_.Storage().Internal().Load(
         localNymID, remoteNymID, serialized, silent);
@@ -1050,7 +1049,7 @@ auto WalletPrivate::issuer(
             .Flush();
     }
 
-    auto serialized = proto::Issuer{};
+    auto serialized = protobuf::Issuer{};
     using enum opentxs::storage::ErrorReporting;
     const bool loaded =
         api_.Storage().Internal().Load(nymID, issuerID, serialized, silent);
@@ -1122,7 +1121,7 @@ auto WalletPrivate::Nym(
     bool valid = false;
 
     if (!inMap) {
-        auto serialized = proto::Nym{};
+        auto serialized = protobuf::Nym{};
         auto alias = UnallocatedCString{};
         using enum opentxs::storage::ErrorReporting;
         const bool loaded =
@@ -1170,7 +1169,7 @@ auto WalletPrivate::Nym(
     return nullptr;
 }
 
-auto WalletPrivate::Nym(const proto::Nym& serialized) const -> Nym_p
+auto WalletPrivate::Nym(const protobuf::Nym& serialized) const -> Nym_p
 {
     const auto nymID = api_.Factory().Internal().NymID(serialized.id());
 
@@ -1222,7 +1221,7 @@ auto WalletPrivate::Nym(const proto::Nym& serialized) const -> Nym_p
 
 auto WalletPrivate::Nym(const ReadView& bytes) const -> Nym_p
 {
-    return Nym(proto::Factory<proto::Nym>(bytes));
+    return Nym(protobuf::Factory<protobuf::Nym>(bytes));
 }
 
 auto WalletPrivate::Nym(
@@ -1503,7 +1502,7 @@ auto WalletPrivate::PeerReply(
     try {
         const auto proto = [&] {
             auto lock = Lock{peer_lock(id.asBase58(api_.Crypto()))};
-            auto out = proto::PeerReply{};
+            auto out = protobuf::PeerReply{};
             using enum opentxs::storage::ErrorReporting;
             const auto loaded =
                 api_.Storage().Internal().Load(id, reply, box, out, silent);
@@ -1528,7 +1527,7 @@ auto WalletPrivate::PeerReplyComplete(
     const identifier::Generic& replyID) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
-    auto reply = proto::PeerReply{};
+    auto reply = protobuf::PeerReply{};
     const auto lock = Lock{peer_lock(nymID)};
     using enum opentxs::storage::ErrorReporting;
     const bool haveReply = api_.Storage().Internal().Load(
@@ -1563,8 +1562,8 @@ auto WalletPrivate::PeerReplyComplete(
 
 auto WalletPrivate::PeerReplyCreate(
     const identifier::Nym& nym,
-    const proto::PeerRequest& request,
-    const proto::PeerReply& reply) const -> bool
+    const protobuf::PeerRequest& request,
+    const protobuf::PeerReply& reply) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto requestID = api_.Factory().Internal().Identifier(request.id());
@@ -1620,7 +1619,7 @@ auto WalletPrivate::PeerReplyCreateRollback(
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto lock = Lock{peer_lock(nymID)};
     const auto replyID = reply.asBase58(api_.Crypto());
-    auto requestItem = proto::PeerRequest{};
+    auto requestItem = protobuf::PeerRequest{};
     bool output = true;
     auto notUsed = Time{};
     const bool loadedRequest = api_.Storage().Internal().Load(
@@ -1733,7 +1732,7 @@ auto WalletPrivate::PeerReplyReceive(
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto lock = Lock{peer_lock(nymID)};
     const auto& requestID = request.ID();
-    auto serializedRequest = proto::PeerRequest{};
+    auto serializedRequest = protobuf::PeerRequest{};
     auto notUsed = Time{};
     using enum opentxs::storage::ErrorReporting;
     const bool haveRequest = api_.Storage().Internal().Load(
@@ -1752,7 +1751,7 @@ auto WalletPrivate::PeerReplyReceive(
         return false;
     }
 
-    auto serialized = proto::PeerReply{};
+    auto serialized = protobuf::PeerReply{};
 
     if (false == reply.Internal().Serialize(serialized)) {
         LogError()()("Failed to serialize reply.").Flush();
@@ -1817,7 +1816,7 @@ auto WalletPrivate::PeerRequest(
         auto time = Time{};
         const auto proto = [&] {
             auto lock = Lock{peer_lock(id.asBase58(api_.Crypto()))};
-            auto out = proto::PeerRequest{};
+            auto out = protobuf::PeerRequest{};
             using enum opentxs::storage::ErrorReporting;
             const auto loaded = api_.Storage().Internal().Load(
                 id, request, box, out, time, silent);
@@ -1846,7 +1845,7 @@ auto WalletPrivate::PeerRequestComplete(
 {
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto lock = Lock{peer_lock(nymID)};
-    auto reply = proto::PeerReply{};
+    auto reply = protobuf::PeerReply{};
     using enum opentxs::storage::ErrorReporting;
     const bool haveReply = api_.Storage().Internal().Load(
         nym,
@@ -1885,7 +1884,7 @@ auto WalletPrivate::PeerRequestComplete(
 
 auto WalletPrivate::PeerRequestCreate(
     const identifier::Nym& nym,
-    const proto::PeerRequest& request) const -> bool
+    const protobuf::PeerRequest& request) const -> bool
 {
     const auto nymID = nym.asBase58(api_.Crypto());
     const auto lock = Lock{peer_lock(nymID)};
@@ -1982,7 +1981,7 @@ auto WalletPrivate::PeerRequestReceive(
         return false;
     }
 
-    auto serialized = proto::PeerRequest{};
+    auto serialized = protobuf::PeerRequest{};
 
     if (false == request.Internal().Serialize(serialized)) {
         LogError()()("Failed to serialize request.").Flush();
@@ -2411,7 +2410,7 @@ auto WalletPrivate::purse(
 
     if (purse) { return out; }
 
-    auto serialized = proto::Purse{};
+    auto serialized = protobuf::Purse{};
     const auto loaded =
         api_.Storage().Internal().Load(nym, server, unit, serialized, checking);
 
@@ -2425,7 +2424,7 @@ auto WalletPrivate::purse(
         return out;
     }
 
-    if (false == proto::Validate(serialized, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
         LogError()()("Invalid purse").Flush();
 
         return out;
@@ -2621,7 +2620,7 @@ void WalletPrivate::save(const Lock& lock, otx::client::Issuer* in) const
 
     const auto& nymID = in->LocalNymID();
     const auto& issuerID = in->IssuerID();
-    auto serialized = proto::Issuer{};
+    auto serialized = protobuf::Issuer{};
     auto loaded = in->Serialize(serialized);
 
     assert_true(loaded);
@@ -2650,13 +2649,13 @@ void WalletPrivate::save(
     if (!purse) { LogAbort()().Abort(); }
 
     const auto serialized = [&] {
-        auto proto = proto::Purse{};
+        auto proto = protobuf::Purse{};
         purse.Internal().Serialize(proto);
 
         return proto;
     }();
 
-    assert_true(proto::Validate(serialized, VERBOSE));
+    assert_true(protobuf::syntax::check(LogError(), serialized));
 
     const auto stored = api_.Storage().Internal().Store(nym, serialized);
 
@@ -2691,13 +2690,13 @@ void WalletPrivate::save(
 
 auto WalletPrivate::SaveCredentialIDs(const identity::Nym& nym) const -> bool
 {
-    auto index = proto::Nym{};
+    auto index = protobuf::Nym{};
     if (false == dynamic_cast<const identity::internal::Nym&>(nym)
                      .SerializeCredentialIndex(
                          index, identity::internal::Nym::Mode::Abbreviated)) {
         return false;
     }
-    const bool valid = proto::Validate(index, VERBOSE);
+    const auto valid = protobuf::syntax::check(LogError(), index);
 
     if (!valid) { return false; }
 
@@ -2814,7 +2813,7 @@ auto WalletPrivate::Server(
     bool valid = false;
 
     if (!inMap) {
-        auto serialized = proto::ServerContract{};
+        auto serialized = protobuf::ServerContract{};
         auto alias = UnallocatedCString{};
         using enum opentxs::storage::ErrorReporting;
         const bool loaded =
@@ -2894,7 +2893,7 @@ auto WalletPrivate::server(std::unique_ptr<contract::Server> contract) const
     assert_false(id.empty());
     assert_true(contract->Alias() == contract->EffectiveName());
 
-    auto serialized = proto::ServerContract{};
+    auto serialized = protobuf::ServerContract{};
 
     if (false == contract->Serialize(serialized)) {
         LogError()()("Failed to serialize contract.").Flush();
@@ -2914,10 +2913,10 @@ auto WalletPrivate::server(std::unique_ptr<contract::Server> contract) const
     return Server(id);
 }
 
-auto WalletPrivate::Server(const proto::ServerContract& contract) const
+auto WalletPrivate::Server(const protobuf::ServerContract& contract) const
     -> OTServerContract
 {
-    if (false == proto::Validate(contract, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), contract)) {
         throw std::runtime_error("Invalid serialized server contract");
     }
 
@@ -2963,7 +2962,7 @@ auto WalletPrivate::Server(const proto::ServerContract& contract) const
         throw std::runtime_error("Wrong contract ID");
     }
 
-    auto serialized = proto::ServerContract{};
+    auto serialized = protobuf::ServerContract{};
 
     if (false == candidate->Serialize(serialized)) {
         throw std::runtime_error("Failed to serialize server contract");
@@ -2988,7 +2987,8 @@ auto WalletPrivate::Server(const proto::ServerContract& contract) const
 
 auto WalletPrivate::Server(const ReadView& contract) const -> OTServerContract
 {
-    return Server(opentxs::proto::Factory<proto::ServerContract>(contract));
+    return Server(
+        opentxs::protobuf::Factory<protobuf::ServerContract>(contract));
 }
 
 auto WalletPrivate::Server(
@@ -3157,7 +3157,7 @@ auto WalletPrivate::UnitDefinition(
     bool valid = false;
 
     if (!inMap) {
-        auto serialized = proto::UnitDefinition{};
+        auto serialized = protobuf::UnitDefinition{};
         UnallocatedCString alias;
         using enum opentxs::storage::ErrorReporting;
         const bool loaded =
@@ -3232,7 +3232,7 @@ auto WalletPrivate::unit_definition(
         return out;
     }();
 
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
 
     if (false == contract->Serialize(serialized)) {
         LogError()()("Failed to serialize unit definition").Flush();
@@ -3258,10 +3258,10 @@ auto WalletPrivate::unit_definition(
     return UnitDefinition(id);
 }
 
-auto WalletPrivate::UnitDefinition(const proto::UnitDefinition& contract) const
-    -> OTUnitDefinition
+auto WalletPrivate::UnitDefinition(
+    const protobuf::UnitDefinition& contract) const -> OTUnitDefinition
 {
-    if (false == proto::Validate(contract, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), contract)) {
         throw std::runtime_error("Invalid serialized unit definition");
     }
 
@@ -3302,7 +3302,7 @@ auto WalletPrivate::UnitDefinition(const proto::UnitDefinition& contract) const
         throw std::runtime_error("Wrong contract ID");
     }
 
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
 
     if (false == candidate->Serialize(serialized)) {
         throw std::runtime_error("Failed to serialize unit definition");
@@ -3329,7 +3329,7 @@ auto WalletPrivate::UnitDefinition(const ReadView contract) const
     -> OTUnitDefinition
 {
     return UnitDefinition(
-        opentxs::proto::Factory<proto::UnitDefinition>(contract));
+        opentxs::protobuf::Factory<protobuf::UnitDefinition>(contract));
 }
 
 auto WalletPrivate::CurrencyContract(
@@ -3469,10 +3469,10 @@ auto WalletPrivate::SecurityContract(
 
 auto WalletPrivate::LoadCredential(
     const identifier::Generic& id,
-    std::shared_ptr<proto::Credential>& credential) const -> bool
+    std::shared_ptr<protobuf::Credential>& credential) const -> bool
 {
     if (false == bool(credential)) {
-        credential = std::make_shared<proto::Credential>();
+        credential = std::make_shared<protobuf::Credential>();
     }
 
     assert_false(nullptr == credential);
@@ -3480,7 +3480,7 @@ auto WalletPrivate::LoadCredential(
     return api_.Storage().Internal().Load(id, *credential);
 }
 
-auto WalletPrivate::SaveCredential(const proto::Credential& credential) const
+auto WalletPrivate::SaveCredential(const protobuf::Credential& credential) const
     -> bool
 {
     return api_.Storage().Internal().Store(credential);

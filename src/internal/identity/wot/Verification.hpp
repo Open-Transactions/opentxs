@@ -31,12 +31,12 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Signature;
 class Verification;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -60,7 +60,7 @@ public:
     static auto CalculateID(
         const api::Session& api,
         const identifier::Nym& verifier,
-        const proto::VerificationItem& serialized,
+        const protobuf::VerificationItem& serialized,
         alloc::Strategy alloc) noexcept -> VerificationID;
     static auto Serialize(
         const wot::ClaimID& claim,
@@ -69,7 +69,7 @@ public:
         Time start,
         Time end,
         std::span<const identity::wot::VerificationID> superscedes) noexcept
-        -> proto::VerificationItem;
+        -> protobuf::VerificationItem;
     static auto Serialize(
         const identifier::Nym& verifier,
         const wot::ClaimID& claim,
@@ -78,7 +78,7 @@ public:
         Time start,
         Time end,
         std::span<const identity::wot::VerificationID> superscedes) noexcept
-        -> proto::Verification;
+        -> protobuf::Verification;
     static auto Sign(
         const identity::Nym& signer,
         const PasswordPrompt& reason,
@@ -89,9 +89,9 @@ public:
         Time start,
         Time end,
         std::span<const identity::wot::VerificationID>
-            superscedes) noexcept(false) -> proto::Signature;
+            superscedes) noexcept(false) -> protobuf::Signature;
 
-    virtual auto Serialize(proto::Verification& out) const noexcept -> void;
+    virtual auto Serialize(protobuf::Verification& out) const noexcept -> void;
 
     virtual ~Verification() = default;
 };

@@ -3,14 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ConsensusType
-// IWYU pragma: no_forward_declare opentxs::proto::OTXPushType
+// IWYU pragma: no_forward_declare opentxs::protobuf::ConsensusType
+// IWYU pragma: no_forward_declare opentxs::protobuf::OTXPushType
 // IWYU pragma: no_include "opentxs/otx/PushType.hpp"
 
 #pragma once
 
-#include <ConsensusEnums.pb.h>
-#include <OTXEnums.pb.h>
+#include <opentxs/protobuf/ConsensusEnums.pb.h>
+#include <opentxs/protobuf/OTXEnums.pb.h>
 #include <cstdint>
 
 #include "opentxs/otx/Types.hpp"
@@ -405,14 +405,15 @@ enum class transactionType : std::int8_t {
 // WARNING If you add any types to this list, update the list of strings at the
 // top of OTTransaction.cpp.
 
-auto translate(ConsensusType in) noexcept -> proto::ConsensusType;
-auto translate(LastReplyStatus in) noexcept -> proto::LastReplyStatus;
-auto translate(PushType in) noexcept -> proto::OTXPushType;
-auto translate(ServerReplyType in) noexcept -> proto::ServerReplyType;
-auto translate(ServerRequestType in) noexcept -> proto::ServerRequestType;
-auto translate(const proto::ConsensusType in) noexcept -> ConsensusType;
-auto translate(const proto::LastReplyStatus in) noexcept -> LastReplyStatus;
-auto translate(const proto::OTXPushType in) noexcept -> PushType;
-auto translate(const proto::ServerReplyType in) noexcept -> ServerReplyType;
-auto translate(const proto::ServerRequestType in) noexcept -> ServerRequestType;
+auto translate(ConsensusType in) noexcept -> protobuf::ConsensusType;
+auto translate(LastReplyStatus in) noexcept -> protobuf::LastReplyStatus;
+auto translate(PushType in) noexcept -> protobuf::OTXPushType;
+auto translate(ServerReplyType in) noexcept -> protobuf::ServerReplyType;
+auto translate(ServerRequestType in) noexcept -> protobuf::ServerRequestType;
+auto translate(const protobuf::ConsensusType in) noexcept -> ConsensusType;
+auto translate(const protobuf::LastReplyStatus in) noexcept -> LastReplyStatus;
+auto translate(const protobuf::OTXPushType in) noexcept -> PushType;
+auto translate(const protobuf::ServerReplyType in) noexcept -> ServerReplyType;
+auto translate(const protobuf::ServerRequestType in) noexcept
+    -> ServerRequestType;
 }  // namespace opentxs::otx

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <chrono>
 #include <filesystem>
 #include <functional>
@@ -185,7 +185,7 @@ protected:
     std::unique_ptr<api::session::internal::Wallet> wallet_;
 
 private:
-    proto::Ciphertext encrypted_secret_;
+    protobuf::Ciphertext encrypted_secret_;
 
 protected:
     using NetworkMaker = std::function<api::internal::Network*(
@@ -196,7 +196,7 @@ protected:
     static auto make_master_key(
         const api::Context& parent,
         const api::session::Factory& factory,
-        proto::Ciphertext& encrypted_secret_,
+        protobuf::Ciphertext& encrypted_secret_,
         std::optional<Secret>& master_secret_,
         const api::crypto::Symmetric& symmetric,
         const api::session::Storage& storage)

@@ -23,7 +23,7 @@ auto BitcoinBlockHeader(
 
 auto BitcoinBlockHeader(
     const api::Crypto&,
-    const proto::BlockchainBlockHeader&,
+    const protobuf::BlockchainBlockHeader&,
     alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     return blockchain::block::HeaderPrivate::Blank(alloc.result_);

@@ -27,11 +27,11 @@ namespace api
 class Factory;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -59,18 +59,18 @@ public:
     std::int32_t n_bits_;
     Space params_;
     OTKeypair source_keypair_;
-    std::shared_ptr<proto::ContactData> contact_data_;
-    std::shared_ptr<proto::VerificationSet> verification_set_;
+    std::shared_ptr<protobuf::ContactData> contact_data_;
+    std::shared_ptr<protobuf::VerificationSet> verification_set_;
     mutable std::optional<ByteArray> hashed_;
 
     auto operator<(const Parameters& rhs) const noexcept -> bool final;
     auto operator==(const Parameters& rhs) const noexcept -> bool final;
 
     auto clone() const noexcept -> Imp*;
-    auto GetContactData(proto::ContactData& serialized) const noexcept
+    auto GetContactData(protobuf::ContactData& serialized) const noexcept
         -> bool final;
-    auto GetVerificationSet(proto::VerificationSet& serialized) const noexcept
-        -> bool final;
+    auto GetVerificationSet(
+        protobuf::VerificationSet& serialized) const noexcept -> bool final;
     auto Hash() const noexcept -> ByteArray final;
     auto Keypair() const noexcept -> const key::Keypair& final
     {
@@ -78,10 +78,11 @@ public:
     }
 
     auto Keypair() noexcept -> OTKeypair& final { return source_keypair_; }
-    auto SetContactData(const proto::ContactData& contactData) noexcept
+    auto SetContactData(const protobuf::ContactData& contactData) noexcept
         -> void final;
     auto SetVerificationSet(
-        const proto::VerificationSet& verificationSet) noexcept -> void final;
+        const protobuf::VerificationSet& verificationSet) noexcept
+        -> void final;
 
     Imp(const api::Factory& factory,
         const ParameterType type,

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageNym.pb.h>
+#include <opentxs/protobuf/StorageNym.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <functional>
@@ -61,13 +61,13 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class BlockchainEthereumAccountData;
 class HDAccount;
 class Nym;
 class Purse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -145,32 +145,32 @@ public:
     auto Alias() const -> UnallocatedCString;
     auto Load(
         const identifier::Account& id,
-        std::shared_ptr<proto::BlockchainEthereumAccountData>& output,
+        std::shared_ptr<protobuf::BlockchainEthereumAccountData>& output,
         ErrorReporting checking) const -> bool;
     auto Load(
         const identifier::Account& id,
-        std::shared_ptr<proto::HDAccount>& output,
+        std::shared_ptr<protobuf::HDAccount>& output,
         ErrorReporting checking) const -> bool;
     auto Load(
-        std::shared_ptr<proto::Nym>& output,
+        std::shared_ptr<protobuf::Nym>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
     auto Load(
         const identifier::Notary& notary,
         const identifier::UnitDefinition& unit,
-        std::shared_ptr<proto::Purse>& output,
+        std::shared_ptr<protobuf::Purse>& output,
         ErrorReporting checking) const -> bool;
 
     auto SetAlias(std::string_view alias) -> bool;
     auto Store(
         const UnitType type,
-        const proto::BlockchainEthereumAccountData& data) -> bool;
-    auto Store(const UnitType type, const proto::HDAccount& data) -> bool;
+        const protobuf::BlockchainEthereumAccountData& data) -> bool;
+    auto Store(const UnitType type, const protobuf::HDAccount& data) -> bool;
     auto Store(
-        const proto::Nym& data,
+        const protobuf::Nym& data,
         std::string_view alias,
         UnallocatedCString& plaintext) -> bool;
-    auto Store(const proto::Purse& purse) -> bool;
+    auto Store(const protobuf::Purse& purse) -> bool;
 
     Nym(const api::Crypto& crypto,
         const api::session::Factory& factory,
@@ -246,7 +246,7 @@ private:
     UnallocatedMap<UnitType, UnallocatedSet<identifier::Account>>
         blockchain_account_types_{};
     UnallocatedMap<identifier::Account, UnitType> blockchain_account_index_;
-    UnallocatedMap<identifier::Account, std::shared_ptr<proto::HDAccount>>
+    UnallocatedMap<identifier::Account, std::shared_ptr<protobuf::HDAccount>>
         blockchain_accounts_{};
     Hash issuers_root_;
     mutable std::mutex issuers_lock_;
@@ -261,7 +261,7 @@ private:
     UnallocatedMap<identifier::Account, UnitType> ethereum_account_index_;
     UnallocatedMap<
         identifier::Account,
-        std::shared_ptr<proto::BlockchainEthereumAccountData>>
+        std::shared_ptr<protobuf::BlockchainEthereumAccountData>>
         ethereum_accounts_{};
 
     template <typename T, typename... Args>
@@ -297,7 +297,7 @@ private:
     auto save(const Lock& lock) const -> bool final;
     template <typename O>
     void _save(O* input, const Lock& lock, std::mutex& mutex, Hash& root);
-    auto serialize() const -> proto::StorageNym;
+    auto serialize() const -> protobuf::StorageNym;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 };
 }  // namespace opentxs::storage::tree

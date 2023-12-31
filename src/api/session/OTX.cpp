@@ -9,8 +9,8 @@
 
 #include "api/session/OTX.hpp"  // IWYU pragma: associated
 
-#include <ServerContract.pb.h>
-#include <ServerReply.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/ServerReply.pb.h>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -35,7 +35,6 @@
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Future.hpp"
@@ -110,6 +109,7 @@
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
 #include "opentxs/otx/client/ThreadStatus.hpp"          // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -1967,8 +1967,8 @@ void OTX::process_notification(const zmq::Message& message) const
     assert_true(0 < body.size());
 
     const auto& frame = body[0];
-    const auto notification =
-        otx::Reply::Factory(api_, proto::Factory<proto::ServerReply>(frame));
+    const auto notification = otx::Reply::Factory(
+        api_, protobuf::Factory<protobuf::ServerReply>(frame));
     const auto& nymID = notification.Recipient();
     const auto& serverID = notification.Server();
 
@@ -2309,7 +2309,7 @@ auto OTX::SetIntroductionServer(ReadView contract) const noexcept
     const auto lock = Lock{introduction_server_lock_};
 
     return set_introduction_server(
-        lock, proto::Factory<proto::ServerContract>(contract));
+        lock, protobuf::Factory<protobuf::ServerContract>(contract));
 }
 
 auto OTX::schedule_download_nymbox(
@@ -2504,7 +2504,7 @@ auto OTX::set_introduction_server(
     assert_true(CheckLock(lock, introduction_server_lock_));
 
     try {
-        auto proto = proto::ServerContract{};
+        auto proto = protobuf::ServerContract{};
 
         if (false == contract.Serialize(proto, true)) {
 
@@ -2521,7 +2521,8 @@ auto OTX::set_introduction_server(
 
 auto OTX::set_introduction_server(
     const Lock& lock,
-    const proto::ServerContract& contract) const noexcept -> identifier::Notary
+    const protobuf::ServerContract& contract) const noexcept
+    -> identifier::Notary
 {
     assert_true(CheckLock(lock, introduction_server_lock_));
 

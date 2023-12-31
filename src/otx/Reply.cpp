@@ -5,9 +5,9 @@
 
 #include "otx/Reply.hpp"  // IWYU pragma: associated
 
-#include <OTXPush.pb.h>
-#include <ServerReply.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/OTXPush.pb.h>
+#include <opentxs/protobuf/ServerReply.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <span>
 #include <utility>
 
@@ -15,10 +15,6 @@
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/Types.hpp"
@@ -36,6 +32,9 @@
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/ServerReply.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -47,9 +46,9 @@ const VersionNumber Reply::DefaultVersion{1};
 const VersionNumber Reply::MaxVersion{1};
 
 static auto construct_push(PushType pushtype, const UnallocatedCString& payload)
-    -> std::shared_ptr<proto::OTXPush>
+    -> std::shared_ptr<protobuf::OTXPush>
 {
-    auto pPush = std::make_shared<proto::OTXPush>();
+    auto pPush = std::make_shared<protobuf::OTXPush>();
     auto& push = *pPush;
     push.set_version(1);
     push.set_type(translate(pushtype));
@@ -67,7 +66,7 @@ auto Reply::Factory(
     const RequestNumber number,
     const bool success,
     const PasswordPrompt& reason,
-    std::shared_ptr<const proto::OTXPush>&& push) -> Reply
+    std::shared_ptr<const protobuf::OTXPush>&& push) -> Reply
 {
     assert_false(nullptr == signer);
 
@@ -116,19 +115,20 @@ auto Reply::Factory(
 
 auto Reply::Factory(
     const api::Session& api,
-    const proto::ServerReply serialized) -> Reply
+    const protobuf::ServerReply serialized) -> Reply
 {
     return Reply{new Reply::Imp(api, serialized)};
 }
 
 auto Reply::Factory(const api::Session& api, const ReadView& view) -> Reply
 {
-    return Reply{new Reply::Imp(api, proto::Factory<proto::ServerReply>(view))};
+    return Reply{
+        new Reply::Imp(api, protobuf::Factory<protobuf::ServerReply>(view))};
 }
 
 auto Reply::Number() const -> RequestNumber { return imp_->Number(); }
 
-auto Reply::Push() const -> std::shared_ptr<const proto::OTXPush>
+auto Reply::Push() const -> std::shared_ptr<const protobuf::OTXPush>
 {
     return imp_->Push();
 }
@@ -143,7 +143,7 @@ auto Reply::Serialize(Writer&& destination) const noexcept -> bool
     return imp_->Serialize(std::move(destination));
 }
 
-auto Reply::Serialize(proto::ServerReply& serialized) const -> bool
+auto Reply::Serialize(protobuf::ServerReply& serialized) const -> bool
 {
     return imp_->Serialize(serialized);
 }
@@ -235,7 +235,7 @@ Reply::Imp::Imp(
     const otx::ServerReplyType type,
     const RequestNumber number,
     const bool success,
-    std::shared_ptr<const proto::OTXPush>&& push)
+    std::shared_ptr<const protobuf::OTXPush>&& push)
     : Signable(api, signer, DefaultVersion, "", "")
     , recipient_(recipient)
     , server_(server)
@@ -248,7 +248,7 @@ Reply::Imp::Imp(
 }
 
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
-Reply::Imp::Imp(const api::Session& api, const proto::ServerReply serialized)
+Reply::Imp::Imp(const api::Session& api, const protobuf::ServerReply serialized)
     : Signable(
           api,
           extract_nym(api, serialized),
@@ -258,7 +258,7 @@ Reply::Imp::Imp(const api::Session& api, const proto::ServerReply serialized)
           "",
           api.Factory().Internal().Identifier(serialized.id()),
           serialized.has_signature()
-              ? Signatures{std::make_shared<proto::Signature>(
+              ? Signatures{std::make_shared<protobuf::Signature>(
                     serialized.signature())}
               : Signatures{})
     , recipient_(api_.Factory().Internal().NymID(serialized.nym()))
@@ -268,8 +268,8 @@ Reply::Imp::Imp(const api::Session& api, const proto::ServerReply serialized)
     , number_(serialized.request())
     , payload_(
           serialized.has_push()
-              ? std::make_shared<proto::OTXPush>(serialized.push())
-              : std::shared_ptr<proto::OTXPush>{})
+              ? std::make_shared<protobuf::OTXPush>(serialized.push())
+              : std::shared_ptr<protobuf::OTXPush>{})
 {
     init_serialized();
 }
@@ -294,7 +294,7 @@ auto Reply::Imp::calculate_id() const -> identifier_type
 
 auto Reply::Imp::extract_nym(
     const api::Session& api,
-    const proto::ServerReply serialized) -> Nym_p
+    const protobuf::ServerReply serialized) -> Nym_p
 {
     const auto serverID =
         api.Factory().Internal().NotaryID(serialized.server());
@@ -308,7 +308,7 @@ auto Reply::Imp::extract_nym(
     }
 }
 
-auto Reply::Imp::full_version() const -> proto::ServerReply
+auto Reply::Imp::full_version() const -> protobuf::ServerReply
 {
     auto contract = signature_version();
 
@@ -319,9 +319,9 @@ auto Reply::Imp::full_version() const -> proto::ServerReply
     return contract;
 }
 
-auto Reply::Imp::id_version() const -> proto::ServerReply
+auto Reply::Imp::id_version() const -> protobuf::ServerReply
 {
-    proto::ServerReply output{};
+    protobuf::ServerReply output{};
     output.set_version(Version());
     output.clear_id();  // Must be blank
     output.set_type(translate(type_));
@@ -339,26 +339,26 @@ auto Reply::Imp::id_version() const -> proto::ServerReply
 
 auto Reply::Imp::Serialize(Writer&& destination) const noexcept -> bool
 {
-    auto serialized = proto::ServerReply{};
+    auto serialized = protobuf::ServerReply{};
 
     if (false == serialize(serialized)) { return false; }
 
     return serialize(serialized, std::move(destination));
 }
 
-auto Reply::Imp::Serialize(proto::ServerReply& output) const -> bool
+auto Reply::Imp::Serialize(protobuf::ServerReply& output) const -> bool
 {
     return serialize(output);
 }
 
-auto Reply::Imp::serialize(proto::ServerReply& output) const -> bool
+auto Reply::Imp::serialize(protobuf::ServerReply& output) const -> bool
 {
     output = full_version();
 
     return true;
 }
 
-auto Reply::Imp::signature_version() const -> proto::ServerReply
+auto Reply::Imp::signature_version() const -> protobuf::ServerReply
 {
     auto contract = id_version();
     ID().Internal().Serialize(*contract.mutable_id());
@@ -378,7 +378,7 @@ auto Reply::Imp::update_signature(const PasswordPrompt& reason) -> bool
         serialized, crypto::SignatureRole::ServerReply, signature, reason);
 
     if (success) {
-        sigs.emplace_back(new proto::Signature(signature));
+        sigs.emplace_back(new protobuf::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
         LogError()()("Failed to create signature.").Flush();
@@ -399,7 +399,8 @@ auto Reply::Imp::validate() const -> bool
         return false;
     }
 
-    const bool validSyntax = proto::Validate(full_version(), VERBOSE);
+    const bool validSyntax =
+        protobuf::syntax::check(LogError(), full_version());
 
     if (false == validSyntax) {
         LogError()()("Invalid syntax.").Flush();
@@ -430,7 +431,7 @@ auto Reply::Imp::validate() const -> bool
     return true;
 }
 
-auto Reply::Imp::verify_signature(const proto::Signature& signature) const
+auto Reply::Imp::verify_signature(const protobuf::Signature& signature) const
     -> bool
 {
     if (false == Signable::verify_signature(signature)) { return false; }

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
@@ -122,7 +122,7 @@ public:
         const api::session::Client& api,
         const identifier::Nym& nymID,
         const identifier::Notary& serverID,
-        const proto::UnitDefinition& unitDefinition,
+        const protobuf::UnitDefinition& unitDefinition,
         const UnallocatedCString& label);
     explicit OTAPI_Func(
         const PasswordPrompt& reason,
@@ -306,7 +306,7 @@ private:
     contract::peer::ConnectionInfoType info_type_{
         contract::peer::ConnectionInfoType::Error};
     contract::peer::SecretType secret_type_{contract::peer::SecretType::Error};
-    proto::UnitDefinition unit_definition_{};
+    protobuf::UnitDefinition unit_definition_{};
 
     auto nym_to_account(const identifier::Nym& id) const noexcept
         -> identifier::Account;

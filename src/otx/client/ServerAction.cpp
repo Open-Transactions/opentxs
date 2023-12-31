@@ -247,7 +247,7 @@ auto ServerAction::IssueBasketCurrency(
     const PasswordPrompt& reason,
     const identifier::Nym& localNymID,
     const identifier::Notary& serverID,
-    const proto::UnitDefinition& basket,
+    const protobuf::UnitDefinition& basket,
     const UnallocatedCString& label) const -> Action
 {
     return std::make_unique<OTAPI_Func>(reason,

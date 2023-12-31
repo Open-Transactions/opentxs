@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/connection/Implementation.hpp"  // IWYU pragma: associated
 
-#include <ConnectionInfo.pb.h>
-#include <PeerRequest.pb.h>
+#include <opentxs/protobuf/ConnectionInfo.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
 #include <utility>
 
 #include "opentxs/contract/peer/Types.internal.hpp"

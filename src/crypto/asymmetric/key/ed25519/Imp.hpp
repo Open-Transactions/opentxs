@@ -50,11 +50,11 @@ class Key;
 class EcdsaProvider;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -133,7 +133,7 @@ public:
         const opentxs::Secret& privateKey,
         const opentxs::Secret& chainCode,
         const Data& publicKey,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const Bip32Fingerprint parent,
         const crypto::asymmetric::Role role,
         const VersionNumber version,
@@ -143,7 +143,7 @@ public:
     Ed25519(
         const api::Session& api,
         const crypto::EcdsaProvider& ecdsa,
-        const proto::AsymmetricKey& serializedKey,
+        const protobuf::AsymmetricKey& serializedKey,
         allocator_type alloc) noexcept(false);
     Ed25519(
         const Ed25519& rhs,

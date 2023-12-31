@@ -5,20 +5,20 @@
 
 #pragma once
 
-#include <APIArgument.pb.h>
-#include <AcceptPendingPayment.pb.h>
-#include <AccountEvent.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
-#include <RPCCommand.pb.h>
-#include <RPCEnums.pb.h>
-#include <RPCPush.pb.h>
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <RPCTask.pb.h>
-#include <SendPayment.pb.h>
-#include <TaskComplete.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/APIArgument.pb.h>
+#include <opentxs/protobuf/AcceptPendingPayment.pb.h>
+#include <opentxs/protobuf/AccountEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCPush.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/RPCTask.pb.h>
+#include <opentxs/protobuf/SendPayment.pb.h>
+#include <opentxs/protobuf/TaskComplete.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -30,8 +30,8 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/verify/RPCPush.hpp"
-#include "internal/serialization/protobuf/verify/RPCResponse.hpp"
+#include "opentxs/protobuf/syntax/RPCPush.hpp"
+#include "opentxs/protobuf/syntax/RPCResponse.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 
@@ -52,7 +52,7 @@ namespace ot = opentxs;
 class OPENTXS_EXPORT RpcAsync : virtual public Base
 {
 public:
-    using PushChecker = std::function<bool(const ot::proto::RPCPush&)>;
+    using PushChecker = std::function<bool(const ot::protobuf::RPCPush&)>;
 
     RpcAsync();
 
@@ -77,10 +77,10 @@ protected:
     static const ot::api::Session& get_session(const std::int32_t instance);
     static void process_notification(
         const ot::network::zeromq::Message&& incoming);
-    static bool default_push_callback(const ot::proto::RPCPush& push);
+    static bool default_push_callback(const ot::protobuf::RPCPush& push);
     static void setup();
 
-    ot::proto::RPCCommand init(ot::proto::RPCCommandType commandtype);
+    ot::protobuf::RPCCommand init(ot::protobuf::RPCCommandType commandtype);
     std::future<ot::UnallocatedVector<bool>> set_push_checker(
         PushChecker func,
         std::size_t count = 1);

@@ -39,12 +39,12 @@ class Key;
 class EcdsaProvider;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class Ciphertext;
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -76,7 +76,7 @@ public:
     auto Fingerprint() const noexcept -> Bip32Fingerprint final;
     auto Parent() const noexcept -> Bip32Fingerprint final { return parent_; }
     auto Path() const noexcept -> const UnallocatedCString final;
-    auto Path(proto::HDPath& output) const noexcept -> bool final;
+    auto Path(protobuf::HDPath& output) const noexcept -> bool final;
     auto Xprv(const PasswordPrompt& reason, Writer&& out) const noexcept
         -> bool final;
     auto Xpub(const PasswordPrompt& reason, Writer&& out) const noexcept
@@ -101,7 +101,7 @@ protected:
 
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
-       const proto::AsymmetricKey& serializedKey,
+       const protobuf::AsymmetricKey& serializedKey,
        allocator_type alloc) noexcept(false);
     HD(const api::Session& api,
        const crypto::EcdsaProvider& ecdsa,
@@ -127,7 +127,7 @@ protected:
        const opentxs::Secret& privateKey,
        const opentxs::Secret& chainCode,
        const Data& publicKey,
-       const proto::HDPath& path,
+       const protobuf::HDPath& path,
        const Bip32Fingerprint parent,
        const crypto::asymmetric::Role role,
        const VersionNumber version,
@@ -140,7 +140,7 @@ protected:
        const opentxs::Secret& privateKey,
        const opentxs::Secret& chainCode,
        const Data& publicKey,
-       const proto::HDPath& path,
+       const protobuf::HDPath& path,
        const Bip32Fingerprint parent,
        const crypto::asymmetric::Role role,
        const VersionNumber version,
@@ -150,8 +150,8 @@ protected:
     HD(const HD& rhs, Secret&& newSecretKey, allocator_type alloc) noexcept;
 
 private:
-    const std::shared_ptr<const proto::HDPath> path_;
-    const std::unique_ptr<const proto::Ciphertext> chain_code_;
+    const std::shared_ptr<const protobuf::HDPath> path_;
+    const std::unique_ptr<const protobuf::Ciphertext> chain_code_;
     mutable Secret plaintext_chain_code_;
     const Bip32Fingerprint parent_;
 

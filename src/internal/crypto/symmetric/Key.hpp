@@ -21,11 +21,11 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
 class SymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Secret;
@@ -40,19 +40,19 @@ class Key
 public:
     virtual auto API() const noexcept -> const api::Session& = 0;
     [[nodiscard]] virtual auto Decrypt(
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Encrypt(
         ReadView plaintext,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Encrypt(
         ReadView plaintext,
         Algorithm mode,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool = 0;
@@ -60,7 +60,7 @@ public:
         Secret& output,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
     [[nodiscard]] virtual auto Serialize(
-        proto::SymmetricKey& output) const noexcept -> bool = 0;
+        protobuf::SymmetricKey& output) const noexcept -> bool = 0;
 
     Key(const Key&) = delete;
     Key(Key&&) = delete;

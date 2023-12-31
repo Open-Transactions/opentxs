@@ -5,8 +5,8 @@
 
 #include "otx/consensus/ClientPrivate.hpp"  // IWYU pragma: associated
 
-#include <ClientContext.pb.h>
-#include <Context.pb.h>
+#include <opentxs/protobuf/ClientContext.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
 
 namespace opentxs::otx::context
 {
@@ -19,7 +19,7 @@ ClientPrivate::ClientPrivate(const VersionNumber targetVersion) noexcept
 ClientPrivate::ClientPrivate(
     const api::Session& api,
     const VersionNumber targetVersion,
-    const proto::Context& serialized) noexcept
+    const protobuf::Context& serialized) noexcept
     : ConsensusPrivate(api, targetVersion, serialized)
     , open_cron_items_([&] {
         auto out = decltype(open_cron_items_){};

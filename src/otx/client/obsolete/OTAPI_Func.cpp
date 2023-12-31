@@ -5,7 +5,7 @@
 
 #include "otx/client/obsolete/OTAPI_Func.hpp"  // IWYU pragma: associated
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 #include <exception>
 #include <utility>
@@ -175,7 +175,7 @@ OTAPI_Func::OTAPI_Func(
     const api::session::Client& api,
     const identifier::Nym& nymID,
     const identifier::Notary& serverID,
-    const proto::UnitDefinition& unitDefinition,
+    const protobuf::UnitDefinition& unitDefinition,
     const UnallocatedCString& label)
     : OTAPI_Func(reason, apilock, api, nymID, serverID, theType)
 {

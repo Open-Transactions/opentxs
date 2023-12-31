@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <BlockchainAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainAccountData.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -15,7 +15,6 @@
 #include <string_view>
 
 #include "internal/blockchain/crypto/Subaccount.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
@@ -26,6 +25,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -45,10 +45,10 @@ class TransactionHash;
 }  // namespace block
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainActivity;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -142,8 +142,8 @@ protected:
     mutable std::atomic<Revision> revision_;
 
     using SerializedActivity =
-        google::protobuf::RepeatedPtrField<proto::BlockchainActivity>;
-    using SerializedType = proto::BlockchainAccountData;
+        google::protobuf::RepeatedPtrField<protobuf::BlockchainActivity>;
+    using SerializedType = protobuf::BlockchainAccountData;
 
     static auto describe(
         const api::Session& api,

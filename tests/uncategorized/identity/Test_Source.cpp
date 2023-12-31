@@ -3,19 +3,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <AsymmetricKey.pb.h>
-#include <ChildCredentialParameters.pb.h>
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <KeyCredential.pb.h>
-#include <MasterCredentialParameters.pb.h>
-#include <NymIDSource.pb.h>  // IWYU pragma: keep
-#include <PaymentCode.pb.h>
-#include <Signature.pb.h>
-#include <SourceProof.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/ChildCredentialParameters.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/KeyCredential.pb.h>
+#include <opentxs/protobuf/MasterCredentialParameters.pb.h>
+#include <opentxs/protobuf/NymIDSource.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/PaymentCode.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/SourceProof.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <tuple>
@@ -35,8 +35,8 @@ namespace ottest
 /////////////// Constructors ////////////////
 TEST_F(Source, Constructor_WithProtoOfTypeBIP47_ShouldNotThrow)
 {
-    opentxs::proto::NymIDSource nymIdProto;
-    nymIdProto.set_type(ot::proto::SOURCETYPE_BIP47);
+    opentxs::protobuf::NymIDSource nymIdProto;
+    nymIdProto.set_type(ot::protobuf::SOURCETYPE_BIP47);
     *nymIdProto.mutable_paymentcode()->mutable_chaincode() = "test";
     source_.reset(ot::Factory::NymIDSource(api_, nymIdProto));
     EXPECT_NE(source_, nullptr);
@@ -44,8 +44,8 @@ TEST_F(Source, Constructor_WithProtoOfTypeBIP47_ShouldNotThrow)
 
 TEST_F(Source, Constructor_WithProtoOfTypePUBKEY_ShouldNotThrow)
 {
-    opentxs::proto::NymIDSource nymIdProto;
-    nymIdProto.set_type(ot::proto::SOURCETYPE_PUBKEY);
+    opentxs::protobuf::NymIDSource nymIdProto;
+    nymIdProto.set_type(ot::protobuf::SOURCETYPE_PUBKEY);
 
     source_.reset(ot::Factory::NymIDSource(api_, nymIdProto));
     EXPECT_NE(source_, nullptr);
@@ -124,11 +124,11 @@ TEST_F(Source, Constructor_WithParametersSourceTypeError_ShouldReturnNullptr)
 TEST_F(Source, Serialize_seedBIP39SourceBip47_ShouldSetProperFields)
 {
     setupSourceForBip47(ot::crypto::SeedStyle::BIP39);
-    opentxs::proto::NymIDSource nymIdProto;
+    opentxs::protobuf::NymIDSource nymIdProto;
 
     EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(nymIdProto.version(), version_);
-    EXPECT_EQ(nymIdProto.type(), ot::proto::SourceType::SOURCETYPE_BIP47);
+    EXPECT_EQ(nymIdProto.type(), ot::protobuf::SourceType::SOURCETYPE_BIP47);
     EXPECT_FALSE(nymIdProto.paymentcode().key().empty());
     EXPECT_FALSE(nymIdProto.paymentcode().chaincode().empty());
     EXPECT_EQ(nymIdProto.paymentcode().version(), version_);
@@ -137,14 +137,14 @@ TEST_F(Source, Serialize_seedBIP39SourceBip47_ShouldSetProperFields)
 TEST_F(Source, Serialize_seedBIP39SourcePubKey_ShouldSetProperFields)
 {
     setupSourceForPubKey(ot::crypto::SeedStyle::BIP39);
-    opentxs::proto::NymIDSource nymIdProto;
+    opentxs::protobuf::NymIDSource nymIdProto;
     EXPECT_TRUE(source_->Internal().Serialize(nymIdProto));
     EXPECT_EQ(
         nymIdProto.version(),
         opentxs::crypto::asymmetric::Key::DefaultVersion());
 
-    EXPECT_EQ(nymIdProto.key().role(), ot::proto::KEYROLE_SIGN);
-    EXPECT_EQ(nymIdProto.type(), ot::proto::SourceType::SOURCETYPE_PUBKEY);
+    EXPECT_EQ(nymIdProto.key().role(), ot::protobuf::KEYROLE_SIGN);
+    EXPECT_EQ(nymIdProto.type(), ot::protobuf::SourceType::SOURCETYPE_PUBKEY);
     EXPECT_TRUE(nymIdProto.paymentcode().key().empty());
     EXPECT_TRUE(nymIdProto.paymentcode().chaincode().empty());
 }
@@ -154,7 +154,7 @@ TEST_F(Source, Sign_ShouldReturnTrue)
 {
     setupSourceForBip47(ot::crypto::SeedStyle::BIP39);
     const ot::identity::credential::PrimaryMock credentialMock;
-    ot::proto::Signature sig;
+    ot::protobuf::Signature sig;
     Authority();
     EXPECT_CALL(credentialMock, Internal())
         .WillOnce(
@@ -203,33 +203,34 @@ TEST_F(Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
         path);
     const auto& pubkey = std::get<2>(derivedKey);
 
-    opentxs::proto::Credential credential;
+    opentxs::protobuf::Credential credential;
     credential.set_version(version_);
     serialize_identifier_to_pb(masterId, *credential.mutable_id());
-    credential.set_type(ot::proto::CREDTYPE_HD);
-    credential.set_role(ot::proto::CREDROLE_MASTERKEY);
-    credential.set_mode(ot::proto::KEYMODE_PUBLIC);
+    credential.set_type(ot::protobuf::CREDTYPE_HD);
+    credential.set_role(ot::protobuf::CREDROLE_MASTERKEY);
+    credential.set_mode(ot::protobuf::KEYMODE_PUBLIC);
     serialize_identifier_to_pb(nymId, *credential.mutable_nymid());
     credential.mutable_publiccredential()->set_version(version_);
-    credential.mutable_publiccredential()->set_mode(ot::proto::KEYMODE_PUBLIC);
+    credential.mutable_publiccredential()->set_mode(
+        ot::protobuf::KEYMODE_PUBLIC);
 
     for (int i = 1; i < 4; ++i) {
         auto* key = credential.mutable_publiccredential()->add_key();
         key->set_version(version_);
-        key->set_mode(ot::proto::KEYMODE_PUBLIC);
-        key->set_type(ot::proto::AKEYTYPE_SECP256K1);
-        key->set_role(static_cast<ot::proto::KeyRole>(i));
+        key->set_mode(ot::protobuf::KEYMODE_PUBLIC);
+        key->set_type(ot::protobuf::AKEYTYPE_SECP256K1);
+        key->set_role(static_cast<ot::protobuf::KeyRole>(i));
         *key->mutable_key() = pubkey.Bytes();
     }
     auto* masterData = credential.mutable_masterdata();
     masterData->set_version(version_);
     masterData->mutable_sourceproof()->set_version(version_);
     masterData->mutable_sourceproof()->set_type(
-        ot::proto::SOURCEPROOFTYPE_SELF_SIGNATURE);
+        ot::protobuf::SOURCEPROOFTYPE_SELF_SIGNATURE);
 
     auto* source = masterData->mutable_source();
     source->set_version(version_);
-    source->set_type(ot::proto::SOURCETYPE_BIP47);
+    source->set_type(ot::protobuf::SOURCETYPE_BIP47);
     source->mutable_paymentcode()->set_version(version_);
     *source->mutable_paymentcode()->mutable_key() =
         "SOME CHAINCODE BIGGER THAN 20 CHARS";
@@ -241,7 +242,7 @@ TEST_F(Source, Verify_seedPubKeySourceBip47_ShouldReturnTrue)
     childCredentialParameters->set_version(version_);
     serialize_identifier_to_pb(
         masterId, *childCredentialParameters->mutable_masterid());
-    opentxs::proto::Signature sourceSignature;
+    opentxs::protobuf::Signature sourceSignature;
     sourceSignature.set_version(version_);
 
     source_->Internal().Verify(credential, sourceSignature);

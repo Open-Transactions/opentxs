@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::PaymentWorkflowState
+// IWYU pragma: no_forward_declare opentxs::protobuf::PaymentWorkflowState
 
 #include "opentxs/rpc/AccountEvent.hpp"  // IWYU pragma: associated
 
-#include <AccountEvent.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/AccountEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -141,7 +141,7 @@ AccountEvent::AccountEvent(
 {
 }
 
-AccountEvent::AccountEvent(const proto::AccountEvent& in) noexcept(false)
+AccountEvent::AccountEvent(const protobuf::AccountEvent& in) noexcept(false)
     : imp_(std::make_unique<Imp>(
                in.version(),
                in.id(),
@@ -211,7 +211,8 @@ auto AccountEvent::PendingAmount_str() const noexcept
     return imp_->pending_formatted_;
 }
 
-auto AccountEvent::Serialize(proto::AccountEvent& dest) const noexcept -> bool
+auto AccountEvent::Serialize(protobuf::AccountEvent& dest) const noexcept
+    -> bool
 {
     const auto& imp = *imp_;
     dest.set_version(std::max(Imp::default_version_, imp.version_));
@@ -224,7 +225,7 @@ auto AccountEvent::Serialize(proto::AccountEvent& dest) const noexcept -> bool
     dest.set_timestamp(seconds_since_epoch(imp.time_).value());
     dest.set_memo(imp.memo_);
     dest.set_uuid(imp.uuid_);
-    dest.set_state(static_cast<proto::PaymentWorkflowState>(imp.state_));
+    dest.set_state(static_cast<protobuf::PaymentWorkflowState>(imp.state_));
     dest.set_amountformatted(imp.amount_formatted_);
     dest.set_pendingamountformatted(imp.pending_formatted_);
 

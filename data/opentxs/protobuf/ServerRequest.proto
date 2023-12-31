@@ -1,0 +1,28 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTServerRequest";
+option optimize_for = LITE_RUNTIME;
+
+import public "Nym.proto";
+import public "OTXEnums.proto";
+import public "Signature.proto";
+import public "Identifier.proto";
+
+message ServerRequest
+{
+    optional uint32 version = 1;
+    optional Identifier id = 2;
+    optional ServerRequestType type = 3;
+    optional Identifier nym = 4;
+    optional Identifier server = 5;
+    optional uint64 request = 6;
+    optional Nym credentials = 14;
+    optional Signature signature = 15;
+}

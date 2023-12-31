@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <memory>
 
 #include "internal/util/Editor.hpp"
@@ -94,7 +94,7 @@ private:
 
     auto init(const Hash& hash) -> void final;
     auto save(const Lock& lock) const -> bool final;
-    auto serialize() const -> proto::StorageNymList;
+    auto serialize() const -> protobuf::StorageNymList;
     auto set_default(const Lock& lock, const identifier::Nym& id) -> void;
     auto upgrade(const Lock& lock) noexcept -> bool final;
     auto upgrade_create_local_nym_index(const Lock& lock) noexcept -> void;

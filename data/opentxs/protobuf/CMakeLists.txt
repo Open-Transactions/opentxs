@@ -1,0 +1,421 @@
+# Copyright (c) 2010-2022 The Open-Transactions developers
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+set(PROTO_SOURCES
+    APIArgument.proto
+    AcceptPendingPayment.proto
+    AccountData.proto
+    AccountEvent.proto
+    AddClaim.proto
+    AddContact.proto
+    AsymmetricKey.proto
+    Authority.proto
+    Bailment.proto
+    BailmentReply.proto
+    BasketItem.proto
+    BasketParams.proto
+    Bip47Channel.proto
+    Bip47Direction.proto
+    BitcoinBlockHeaderFields.proto
+    BlindedSeriesList.proto
+    BlockchainAccountData.proto
+    BlockchainActivity.proto
+    BlockchainAddress.proto
+    BlockchainBlockHeader.proto
+    BlockchainBlockLocalData.proto
+    BlockchainDeterministicAccountData.proto
+    BlockchainEnums.proto
+    BlockchainEthereumAccountData.proto
+    BlockchainExternalAddress.proto
+    BlockchainFilterHeader.proto
+    BlockchainHDAccountData.proto
+    BlockchainImportedAccountData.proto
+    BlockchainInputWitness.proto
+    BlockchainOutputMultisigDetails.proto
+    BlockchainPeerAddress.proto
+    BlockchainPreviousOutput.proto
+    BlockchainTransaction.proto
+    BlockchainTransactionInput.proto
+    BlockchainTransactionOutput.proto
+    BlockchainTransactionProposal.proto
+    BlockchainTransactionProposedNotification.proto
+    BlockchainTransactionProposedOutput.proto
+    BlockchainTransactionProposedSweep.proto
+    BlockchainWalletKey.proto
+    CashEnums.proto
+    Cashtoken.proto
+    ChildCredentialParameters.proto
+    Ciphertext.proto
+    Claim.proto
+    ClientContext.proto
+    ConnectionInfo.proto
+    ConnectionInfoReply.proto
+    ConsensusEnums.proto
+    Contact.proto
+    ContactData.proto
+    ContactEvent.proto
+    ContactItem.proto
+    ContactItemAttribute.proto
+    ContactItemType.proto
+    ContactSection.proto
+    ContactSectionName.proto
+    Context.proto
+    ContractEnums.proto
+    CreateInstrumentDefinition.proto
+    CreateNym.proto
+    Credential.proto
+    CurrencyParams.proto
+    DisplayScale.proto
+    Enums.proto
+    Envelope.proto
+    EquityParams.proto
+    EthereumBlockHeaderFields.proto
+    Faucet.proto
+    FaucetReply.proto
+    GCS.proto
+    GetWorkflow.proto
+    HDAccount.proto
+    HDPath.proto
+    HDSeed.proto
+    Identifier.proto
+    InstrumentRevision.proto
+    Issuer.proto
+    KeyCredential.proto
+    ListenAddress.proto
+    LucreTokenData.proto
+    MasterCredentialParameters.proto
+    ModifyAccount.proto
+    MoveFunds.proto
+    NoticeAcknowledgement.proto
+    Nym.proto
+    NymIDSource.proto
+    OTXEnums.proto
+    OTXPush.proto
+    OutBailment.proto
+    OutBailmentReply.proto
+    P2PBlockchainChainState.proto
+    P2PBlockchainHello.proto
+    P2PBlockchainSync.proto
+    PairEvent.proto
+    PaymentCode.proto
+    PaymentEvent.proto
+    PaymentWorkflow.proto
+    PaymentWorkflowEnums.proto
+    PeerEnums.proto
+    PeerObject.proto
+    PeerReply.proto
+    PeerRequest.proto
+    PeerRequestHistory.proto
+    PeerRequestWorkflow.proto
+    PendingBailment.proto
+    PendingCommand.proto
+    Purse.proto
+    PurseExchange.proto
+    RPCCommand.proto
+    RPCEnums.proto
+    RPCPush.proto
+    RPCResponse.proto
+    RPCStatus.proto
+    RPCTask.proto
+    ScaleRatio.proto
+    Seed.proto
+    SendMessage.proto
+    SendPayment.proto
+    ServerContext.proto
+    ServerContract.proto
+    ServerReply.proto
+    ServerRequest.proto
+    SessionData.proto
+    Signature.proto
+    SourceProof.proto
+    SpentTokenList.proto
+    StorageAccountIndex.proto
+    StorageAccounts.proto
+    StorageBip47AddressIndex.proto
+    StorageBip47ChannelList.proto
+    StorageBip47Contexts.proto
+    StorageBip47NymAddressIndex.proto
+    StorageBlockchainAccountList.proto
+    StorageBlockchainTransactions.proto
+    StorageContactAddressIndex.proto
+    StorageContactNymIndex.proto
+    StorageContacts.proto
+    StorageCredentials.proto
+    StorageEnums.proto
+    StorageIDList.proto
+    StorageIssuers.proto
+    StorageItemHash.proto
+    StorageItems.proto
+    StorageNotary.proto
+    StorageNym.proto
+    StorageNymList.proto
+    StoragePaymentWorkflows.proto
+    StoragePurse.proto
+    StorageRoot.proto
+    StorageSeeds.proto
+    StorageServers.proto
+    StorageThread.proto
+    StorageThreadItem.proto
+    StorageUnits.proto
+    StorageWorkflowIndex.proto
+    StorageWorkflowType.proto
+    StoreSecret.proto
+    SymmetricKey.proto
+    TaggedKey.proto
+    TaskComplete.proto
+    Token.proto
+    TransactionData.proto
+    UnitAccountMap.proto
+    UnitDefinition.proto
+    Verification.proto
+    VerificationGroup.proto
+    VerificationIdentity.proto
+    VerificationItem.proto
+    VerificationKind.proto
+    VerificationOffer.proto
+    VerificationReply.proto
+    VerificationRequest.proto
+    VerificationSet.proto
+    VerifyClaim.proto
+    ZMQEnums.proto
+)
+
+protobuf_generate_cpp(
+  PROTO_SRC
+  PROTO_HEADER
+  ${PROTO_SOURCES}
+)
+
+add_library(opentxs-protobuf OBJECT ${PROTO_SRC} ${PROTO_HEADER})
+libopentxs_configure_cxx_target(opentxs-protobuf)
+target_link_libraries(opentxs-protobuf PUBLIC protobuf::libprotobuf-lite)
+target_include_directories(
+  opentxs-protobuf SYSTEM PUBLIC "${opentxs_BINARY_DIR}/data"
+)
+
+if(MSVC)
+  target_compile_options(opentxs-protobuf PRIVATE "/wd4244" "/wd4267")
+else()
+  target_compile_options(
+    opentxs-protobuf
+    PRIVATE
+      -Wno-c++20-compat
+      -Wno-effc++
+      -Wno-extra-semi
+      -Wno-extra-semi-stmt
+      -Wno-gnu-offsetof-extensions
+      -Wno-missing-declarations
+      -Wno-reserved-identifier
+      -Wno-shorten-64-to-32
+      -Wno-suggest-destructor-override
+      -Wno-switch-default
+      -Wno-switch-enum
+      -Wno-undef
+      -Wno-unsafe-buffer-usage
+      -Wno-unused-macros
+  )
+endif()
+
+if(WIN32)
+  set_target_properties(opentxs-protobuf PROPERTIES UNITY_BUILD OFF)
+endif()
+
+set_target_properties(
+  opentxs-protobuf
+  PROPERTIES
+    C_INCLUDE_WHAT_YOU_USE ""
+    CXX_INCLUDE_WHAT_YOU_USE ""
+    C_CLANG_TIDY ""
+    CXX_CLANG_TIDY ""
+)
+
+libopentxs_link_internal(opentxs-protobuf)
+libopentxs_link_external(protobuf::libprotobuf-lite)
+libopentxs_link_external($<BUILD_INTERFACE:opentxs-protobuf>)
+libopentxs_add_sources($<TARGET_OBJECTS:opentxs-protobuf>)
+add_dependencies(generated_code opentxs-protobuf)
+
+if(OT_PCH)
+  target_precompile_headers(
+    opentxs-common
+    PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/APIArgument.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AcceptPendingPayment.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AccountEvent.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AddClaim.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AddContact.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/AsymmetricKey.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Authority.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Bailment.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BailmentReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BasketItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BasketParams.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Bip47Channel.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Bip47Direction.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BitcoinBlockHeaderFields.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlindedSeriesList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainActivity.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainAddress.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainBlockHeader.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainBlockLocalData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainDeterministicAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainEthereumAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainExternalAddress.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainFilterHeader.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainHDAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainImportedAccountData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainInputWitness.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainOutputMultisigDetails.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainPeerAddress.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainPreviousOutput.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransaction.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionInput.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionOutput.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionProposal.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionProposedNotification.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionProposedOutput.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainTransactionProposedSweep.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/BlockchainWalletKey.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/CashEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Cashtoken.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ChildCredentialParameters.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Ciphertext.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Claim.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ClientContext.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ConnectionInfo.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ConnectionInfoReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ConsensusEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Contact.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactEvent.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactItemAttribute.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactItemType.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactSection.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContactSectionName.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Context.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ContractEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/CreateInstrumentDefinition.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/CreateNym.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Credential.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/CurrencyParams.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/DisplayScale.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Enums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Envelope.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/EquityParams.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/EthereumBlockHeaderFields.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Faucet.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/FaucetReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/GCS.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/GetWorkflow.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/HDAccount.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/HDPath.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/HDSeed.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Identifier.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/InstrumentRevision.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Issuer.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/KeyCredential.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ListenAddress.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/LucreTokenData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/MasterCredentialParameters.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ModifyAccount.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/MoveFunds.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/NoticeAcknowledgement.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Nym.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/NymIDSource.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/OTXEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/OTXPush.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/OutBailment.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/OutBailmentReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/P2PBlockchainChainState.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/P2PBlockchainHello.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/P2PBlockchainSync.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PairEvent.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PaymentCode.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PaymentEvent.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PaymentWorkflow.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PaymentWorkflowEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerObject.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerRequest.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerRequestHistory.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PeerRequestWorkflow.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PendingBailment.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PendingCommand.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Purse.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/PurseExchange.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCCommand.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCPush.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCResponse.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCStatus.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/RPCTask.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ScaleRatio.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Seed.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SendMessage.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SendPayment.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ServerContext.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ServerContract.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ServerReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ServerRequest.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SessionData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Signature.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SourceProof.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SpentTokenList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageAccountIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageAccounts.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBip47AddressIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBip47ChannelList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBip47Contexts.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBip47NymAddressIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBlockchainAccountList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageBlockchainTransactions.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageContactAddressIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageContactNymIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageContacts.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageCredentials.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageEnums.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageIDList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageIssuers.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageItemHash.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageItems.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageNotary.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageNym.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageNymList.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StoragePaymentWorkflows.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StoragePurse.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageRoot.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageSeeds.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageServers.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageThread.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageThreadItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageUnits.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageWorkflowIndex.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StorageWorkflowType.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/StoreSecret.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/SymmetricKey.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/TaggedKey.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/TaskComplete.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Token.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/TransactionData.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/UnitAccountMap.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/UnitDefinition.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/Verification.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationGroup.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationIdentity.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationItem.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationKind.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationOffer.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationReply.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationRequest.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerificationSet.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/VerifyClaim.pb.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<opentxs/protobuf/ZMQEnums.pb.h$<ANGLE-R>>"
+  )
+endif()

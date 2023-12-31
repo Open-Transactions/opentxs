@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::AsymmetricKeyType
+// IWYU pragma: no_forward_declare opentxs::protobuf::AsymmetricKeyType
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
@@ -15,19 +15,19 @@
 namespace opentxs
 {
 auto translate(const crypto::asymmetric::Algorithm in) noexcept
-    -> proto::AsymmetricKeyType;
-auto translate(const crypto::asymmetric::Mode in) noexcept -> proto::KeyMode;
-auto translate(const crypto::asymmetric::Role in) noexcept -> proto::KeyRole;
+    -> protobuf::AsymmetricKeyType;
+auto translate(const crypto::asymmetric::Mode in) noexcept -> protobuf::KeyMode;
+auto translate(const crypto::asymmetric::Role in) noexcept -> protobuf::KeyRole;
 auto translate(const crypto::symmetric::Source in) noexcept
-    -> proto::SymmetricKeyType;
+    -> protobuf::SymmetricKeyType;
 auto translate(const crypto::symmetric::Algorithm in) noexcept
-    -> proto::SymmetricMode;
-auto translate(const proto::KeyMode in) noexcept -> crypto::asymmetric::Mode;
-auto translate(const proto::KeyRole in) noexcept -> crypto::asymmetric::Role;
-auto translate(const proto::AsymmetricKeyType in) noexcept
+    -> protobuf::SymmetricMode;
+auto translate(const protobuf::KeyMode in) noexcept -> crypto::asymmetric::Mode;
+auto translate(const protobuf::KeyRole in) noexcept -> crypto::asymmetric::Role;
+auto translate(const protobuf::AsymmetricKeyType in) noexcept
     -> crypto::asymmetric::Algorithm;
-auto translate(const proto::SymmetricKeyType in) noexcept
+auto translate(const protobuf::SymmetricKeyType in) noexcept
     -> crypto::symmetric::Source;
-auto translate(const proto::SymmetricMode in) noexcept
+auto translate(const protobuf::SymmetricMode in) noexcept
     -> crypto::symmetric::Algorithm;
 }  // namespace opentxs

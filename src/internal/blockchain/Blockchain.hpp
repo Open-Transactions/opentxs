@@ -53,10 +53,10 @@ namespace display
 class Definition;
 }  // namespace display
 
-namespace proto
+namespace protobuf
 {
 class GCS;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class ByteArray;
@@ -185,7 +185,7 @@ auto GCS(
     alloc::Default monotonic) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,
-    const proto::GCS& serialized,
+    const protobuf::GCS& serialized,
     alloc::Default alloc) noexcept -> blockchain::cfilter::GCS;
 auto GCS(
     const api::Session& api,

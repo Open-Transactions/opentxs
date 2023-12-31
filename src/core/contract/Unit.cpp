@@ -5,12 +5,12 @@
 
 #include "core/contract/Unit.hpp"  // IWYU pragma: associated
 
-#include <CurrencyParams.pb.h>
-#include <DisplayScale.pb.h>
-#include <Nym.pb.h>
-#include <ScaleRatio.pb.h>
-#include <Signature.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/CurrencyParams.pb.h>
+#include <opentxs/protobuf/DisplayScale.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/ScaleRatio.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cmath>  // IWYU pragma: keep
 #include <cstddef>
 #include <memory>
@@ -31,9 +31,6 @@
 #include "internal/identity/Nym.hpp"
 #include "internal/otx/common/Account.hpp"
 #include "internal/otx/common/AccountVisitor.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
@@ -63,6 +60,9 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -80,7 +80,7 @@ auto Factory::UnitDefinition(const api::Session& api) noexcept
 auto Factory::UnitDefinition(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) noexcept
+    const protobuf::UnitDefinition serialized) noexcept
     -> std::shared_ptr<contract::Unit>
 {
     switch (translate(serialized.type())) {
@@ -152,7 +152,7 @@ Unit::Unit(
               .asBase58(api.Crypto()),
           api.Factory().Internal().UnitID(serialized.id()),
           serialized.has_signature()
-              ? Signatures{std::make_shared<proto::Signature>(
+              ? Signatures{std::make_shared<protobuf::Signature>(
                     serialized.signature())}
               : Signatures{})
     , unit_of_account_(get_unitofaccount(serialized))
@@ -547,7 +547,7 @@ auto Unit::Serialize(Writer&& out) const noexcept -> bool
 
 auto Unit::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
 
     if (false == Serialize(serialized, includeNym)) {
         LogError()()("Failed to serialize unit definition.").Flush();
@@ -564,7 +564,7 @@ auto Unit::Serialize(SerializedType& serialized, bool includeNym) const -> bool
     serialized = contract();
 
     if (includeNym && Signer()) {
-        auto publicNym = proto::Nym{};
+        auto publicNym = protobuf::Nym{};
         if (false == Signer()->Internal().Serialize(publicNym)) {
             return false;
         }
@@ -602,7 +602,7 @@ auto Unit::update_signature(const PasswordPrompt& reason) -> bool
         serialized, crypto::SignatureRole::UnitDefinition, signature, reason);
 
     if (success) {
-        sigs.emplace_back(new proto::Signature(signature));
+        sigs.emplace_back(new protobuf::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
         LogError()()("Failed to create signature.").Flush();
@@ -617,7 +617,8 @@ auto Unit::validate() const -> bool
 
     if (Signer()) { validNym = Signer()->VerifyPseudonym(); }
 
-    const auto validSyntax = proto::Validate(contract(), VERBOSE, true);
+    const auto validSyntax =
+        protobuf::syntax::check(LogError(), contract(), true);
     const auto sigs = signatures();
 
     if (1_uz != sigs.size()) {
@@ -634,7 +635,7 @@ auto Unit::validate() const -> bool
     return (validNym && validSyntax && validSig);
 }
 
-auto Unit::verify_signature(const proto::Signature& signature) const -> bool
+auto Unit::verify_signature(const protobuf::Signature& signature) const -> bool
 {
     if (!Signable::verify_signature(signature)) { return false; }
 

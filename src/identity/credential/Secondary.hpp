@@ -36,10 +36,10 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
-}  // namespace proto
+}  // namespace protobuf
 
 class Factory;
 class PasswordPrompt;
@@ -82,6 +82,6 @@ private:
         const identity::internal::Authority& other,
         const identity::Source& source,
         const internal::Primary& master,
-        const proto::Credential& serializedCred) noexcept(false);
+        const protobuf::Credential& serializedCred) noexcept(false);
 };
 }  // namespace opentxs::identity::credential::implementation

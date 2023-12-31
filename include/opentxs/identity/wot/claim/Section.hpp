@@ -39,11 +39,11 @@ class Item;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class ContactSection;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -69,7 +69,7 @@ public:
     auto Serialize(Writer&& destination, const bool withIDs = false) const
         -> bool;
     OPENTXS_NO_EXPORT auto SerializeTo(
-        proto::ContactData& data,
+        protobuf::ContactData& data,
         const bool withIDs = false) const -> bool;
     auto Size() const -> std::size_t;
     auto Type() const -> const claim::SectionType&;
@@ -93,7 +93,7 @@ public:
         const api::Session& api,
         const UnallocatedCString& nym,
         const VersionNumber parentVersion,
-        const proto::ContactSection& serialized);
+        const protobuf::ContactSection& serialized);
     Section(
         const api::Session& api,
         const UnallocatedCString& nym,

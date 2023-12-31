@@ -58,10 +58,10 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionProposal;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -130,9 +130,9 @@ public:
         alloc::Default alloc = {}) const noexcept -> Vector<UTXO> = 0;
     virtual auto GetWalletHeight() const noexcept -> block::Height = 0;
     virtual auto LoadProposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal> = 0;
+        -> std::optional<protobuf::BlockchainTransactionProposal> = 0;
     virtual auto LoadProposals() const noexcept
-        -> UnallocatedVector<proto::BlockchainTransactionProposal> = 0;
+        -> UnallocatedVector<protobuf::BlockchainTransactionProposal> = 0;
     virtual auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic> = 0;
     virtual auto PublishBalance() const noexcept -> void = 0;
@@ -159,7 +159,7 @@ public:
     virtual auto AddProposal(
         const Log& log,
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx,
+        const protobuf::BlockchainTransactionProposal& tx,
         alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto AdvanceTo(
         const Log& log,
@@ -172,7 +172,7 @@ public:
     virtual auto FinalizeProposal(
         const Log& log,
         const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
+        const protobuf::BlockchainTransactionProposal& proposal,
         const block::Transaction& transaction,
         alloc::Strategy alloc) noexcept -> bool = 0;
     virtual auto FinalizeReorg(

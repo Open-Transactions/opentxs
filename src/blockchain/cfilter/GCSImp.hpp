@@ -28,10 +28,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class GCS;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Data;
@@ -66,7 +66,7 @@ public:
     {
         return compressed_.size();
     }
-    auto Serialize(proto::GCS& out) const noexcept -> bool final;
+    auto Serialize(protobuf::GCS& out) const noexcept -> bool final;
     auto Serialize(Writer&& out) const noexcept -> bool final;
     auto Test(const Data& target, allocator_type monotonic) const noexcept
         -> bool final;

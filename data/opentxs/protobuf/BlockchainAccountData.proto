@@ -1,0 +1,24 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTBlockchainAccountData";
+option optimize_for = LITE_RUNTIME;
+
+import public "BlockchainActivity.proto";
+import public "ContactItemType.proto";
+
+message BlockchainAccountData
+{
+    optional uint32 version = 1;
+    optional string id = 2;
+    optional uint64 revision = 3;
+    optional ContactItemType chain = 4;
+    repeated BlockchainActivity unspent = 5;
+    repeated BlockchainActivity spent = 6;
+}

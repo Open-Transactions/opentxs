@@ -28,10 +28,10 @@ class Crypto;
 class Factory;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class BlockchainPeerAddress;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -43,7 +43,7 @@ public:
     static const VersionNumber DefaultVersion;
 
     static auto instantiate_services(
-        const proto::BlockchainPeerAddress& serialized) noexcept
+        const protobuf::BlockchainPeerAddress& serialized) noexcept
         -> Set<bitcoin::Service>;
 
     auto Bytes() const noexcept -> ByteArray final;
@@ -59,7 +59,7 @@ public:
     auto Port() const noexcept -> std::uint16_t final;
     auto PreviousLastConnected() const noexcept -> Time final;
     auto PreviousServices() const noexcept -> Set<bitcoin::Service> final;
-    auto Serialize(proto::BlockchainPeerAddress& out) const noexcept
+    auto Serialize(protobuf::BlockchainPeerAddress& out) const noexcept
         -> bool final;
     auto Services() const noexcept -> Set<bitcoin::Service> final;
     auto Subtype() const noexcept -> Transport final;
@@ -136,6 +136,6 @@ private:
         const opentxs::blockchain::Type chain,
         const Time lastConnected,
         const Set<bitcoin::Service>& services) noexcept
-        -> proto::BlockchainPeerAddress;
+        -> protobuf::BlockchainPeerAddress;
 };
 }  // namespace opentxs::network::blockchain

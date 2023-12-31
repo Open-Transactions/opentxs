@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <SpentTokenList.pb.h>
-#include <StorageNotary.pb.h>
+#include <opentxs/protobuf/SpentTokenList.pb.h>
+#include <opentxs/protobuf/StorageNotary.pb.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -85,15 +85,15 @@ private:
     auto create_list(
         const identifier::UnitDefinition& unitID,
         const MintSeries series,
-        std::shared_ptr<proto::SpentTokenList>& output) const -> Hash;
+        std::shared_ptr<protobuf::SpentTokenList>& output) const -> Hash;
     auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
         -> bool final;
     auto get_or_create_list(
         const Lock& lock,
         const identifier::UnitDefinition& unitID,
-        const MintSeries series) const -> proto::SpentTokenList;
+        const MintSeries series) const -> protobuf::SpentTokenList;
     auto save(const Lock& lock) const -> bool final;
-    auto serialize() const -> proto::StorageNotary;
+    auto serialize() const -> protobuf::StorageNotary;
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto upgrade(const Lock& lock) noexcept -> bool final;

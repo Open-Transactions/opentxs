@@ -5,13 +5,13 @@
 
 #include "ottest/fixtures/contact/ContactItem.hpp"  // IWYU pragma: associated
 
-#include <ContactItem.pb.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/ContactItem.pb.h>
 #include <span>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/identity/wot/claim/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 
 namespace ottest
 {
@@ -41,8 +41,9 @@ auto deserialize_contact_item(
     opentxs::identity::wot::claim::SectionType section,
     opentxs::ReadView bytes) noexcept -> opentxs::identity::wot::claim::Item
 {
-    const auto proto = opentxs::proto::Factory<opentxs::proto::ContactItem>(
-        bytes.data(), bytes.size());
+    const auto proto =
+        opentxs::protobuf::Factory<opentxs::protobuf::ContactItem>(
+            bytes.data(), bytes.size());
 
     return opentxs::factory::ContactItem(api, proto, claimant, section, {});
 }

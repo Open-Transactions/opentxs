@@ -21,10 +21,10 @@ class PairEventCallback;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class PairEvent;
-}  // namespace proto
+}  // namespace protobuf
 
 using OTZMQPairEventCallback = Pimpl<network::zeromq::PairEventCallback>;
 }  // namespace opentxs
@@ -35,7 +35,7 @@ namespace opentxs::network::zeromq
 class PairEventCallback : virtual public ListenCallback
 {
 public:
-    using ReceiveCallback = std::function<void(const proto::PairEvent&)>;
+    using ReceiveCallback = std::function<void(const protobuf::PairEvent&)>;
 
     static auto Factory(ReceiveCallback callback) -> OTZMQPairEventCallback;
 

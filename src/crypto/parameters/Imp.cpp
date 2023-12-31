@@ -5,15 +5,14 @@
 
 #include "crypto/parameters/Imp.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <ContactData.pb.h>
-#include <VerificationSet.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 #include <compare>
 #include <cstdint>
 #include <memory>
 
 #include "internal/crypto/key/Factory.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/PaymentCode.hpp"
@@ -26,6 +25,7 @@
 #include "opentxs/identity/SourceProofType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/SourceType.hpp"       // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -107,7 +107,7 @@ auto Parameters::Imp::clone() const noexcept -> Imp*
 }
 
 auto Parameters::Imp::GetContactData(
-    proto::ContactData& serialized) const noexcept -> bool
+    protobuf::ContactData& serialized) const noexcept -> bool
 {
     if (contact_data_) {
         serialized = *contact_data_;
@@ -119,7 +119,7 @@ auto Parameters::Imp::GetContactData(
 }
 
 auto Parameters::Imp::GetVerificationSet(
-    proto::VerificationSet& serialized) const noexcept -> bool
+    protobuf::VerificationSet& serialized) const noexcept -> bool
 {
     if (verification_set_) {
         serialized = *verification_set_;
@@ -153,9 +153,9 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         out.Concatenate(params_.data(), params_.size());
         const auto keypair = [this] {
             auto output = Space{};
-            auto proto = proto::AsymmetricKey{};
+            auto proto = protobuf::AsymmetricKey{};
             source_keypair_->Serialize(proto, false);
-            proto::write(proto, writer(output));
+            protobuf::write(proto, writer(output));
 
             return output;
         }();
@@ -164,7 +164,7 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         if (contact_data_) {
             const auto data = [this] {
                 auto output = Space{};
-                proto::write(*contact_data_, writer(output));
+                protobuf::write(*contact_data_, writer(output));
 
                 return output;
             }();
@@ -174,7 +174,7 @@ auto Parameters::Imp::Hash() const noexcept -> ByteArray
         if (verification_set_) {
             const auto data = [this] {
                 auto output = Space{};
-                proto::write(*verification_set_, writer(output));
+                protobuf::write(*verification_set_, writer(output));
 
                 return output;
             }();
@@ -197,15 +197,15 @@ auto Parameters::Imp::operator==(const Parameters& rhs) const noexcept -> bool
     return Hash() != rhs.Hash();
 }
 
-auto Parameters::Imp::SetContactData(const proto::ContactData& in) noexcept
+auto Parameters::Imp::SetContactData(const protobuf::ContactData& in) noexcept
     -> void
 {
-    contact_data_ = std::make_unique<proto::ContactData>(in);
+    contact_data_ = std::make_unique<protobuf::ContactData>(in);
 }
 
 auto Parameters::Imp::SetVerificationSet(
-    const proto::VerificationSet& in) noexcept -> void
+    const protobuf::VerificationSet& in) noexcept -> void
 {
-    verification_set_ = std::make_unique<proto::VerificationSet>(in);
+    verification_set_ = std::make_unique<protobuf::VerificationSet>(in);
 }
 }  // namespace opentxs::crypto

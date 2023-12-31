@@ -5,10 +5,11 @@
 
 #include "blockchain/database/common/BlockFilter.hpp"  // IWYU pragma: associated
 
-#include <BlockchainFilterHeader.pb.h>
-#include <GCS.pb.h>
-#include <google/protobuf/arena.h>  // IWYU pragma: keep
+#include <google/protobuf/arena.h>
+#include <opentxs/protobuf/BlockchainFilterHeader.pb.h>
+#include <opentxs/protobuf/GCS.pb.h>
 #include <cstring>
+#include <new>
 #include <optional>
 #include <span>
 #include <stdexcept>
@@ -19,8 +20,6 @@
 #include "blockchain/database/common/Bulk.hpp"
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
 #include "internal/util/storage/file/Index.hpp"
@@ -35,6 +34,8 @@
 #include "opentxs/blockchain/cfilter/Header.hpp"
 #include "opentxs/blockchain/cfilter/Types.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -173,7 +174,7 @@ auto BlockFilter::LoadCfilters(
     for (const auto& file : files) {
         try {
             output.emplace_back(factory::GCS(
-                api_, proto::Factory<proto::GCS>(file), alloc.result_));
+                api_, protobuf::Factory<protobuf::GCS>(file), alloc.result_));
         } catch (const std::exception& e) {
             LogVerbose()()(e.what()).Flush();
 
@@ -195,8 +196,8 @@ auto BlockFilter::LoadCfilterHash(
 
         if ((nullptr == in.data()) || (0 == size)) { return; }
 
-        auto proto =
-            proto::Factory<proto::BlockchainFilterHeader>(in.data(), in.size());
+        auto proto = protobuf::Factory<protobuf::BlockchainFilterHeader>(
+            in.data(), in.size());
         const auto& field = proto.hash();
         auto bytes = filterHash.Reserve(field.size());
 
@@ -226,8 +227,8 @@ auto BlockFilter::LoadCfheader(
 
         if ((nullptr == in.data()) || (0 == size)) { return; }
 
-        auto proto =
-            proto::Factory<proto::BlockchainFilterHeader>(in.data(), in.size());
+        auto proto = protobuf::Factory<protobuf::BlockchainFilterHeader>(
+            in.data(), in.size());
         const auto& field = proto.header();
         output = copy(field, std::move(header));
     };
@@ -280,8 +281,9 @@ auto BlockFilter::parse(
         }
 
         const auto& hash = hashes.emplace_back(block.Bytes());
-        auto* pProto = protos.emplace_back(
-            google::protobuf::Arena::Create<proto::GCS>(std::addressof(arena)));
+        auto* pProto =
+            protos.emplace_back(google::protobuf::Arena::Create<protobuf::GCS>(
+                std::addressof(arena)));
 
         if (nullptr == pProto) {
             throw std::runtime_error{"failed to allocate protobuf"};
@@ -342,7 +344,7 @@ auto BlockFilter::store(
 
             in.emplace_back(
                 [proto](auto&& writer) {
-                    return proto::write(*proto, std::move(writer));
+                    return protobuf::write(*proto, std::move(writer));
                 },
                 bytes);
             out.emplace_back(std::move(location));
@@ -391,7 +393,7 @@ auto BlockFilter::store_cfheaders(
     storage::lmdb::Transaction& tx) const noexcept -> bool
 {
     for (const auto& [block, header, hash] : headers) {
-        auto proto = proto::BlockchainFilterHeader();
+        auto proto = protobuf::BlockchainFilterHeader();
         proto.set_version(1);
         proto.set_header(header.data(), header.size());
         proto.set_hash(hash.data(), hash.size());

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageContacts.pb.h>
+#include <opentxs/protobuf/StorageContacts.pb.h>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -36,10 +36,10 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Contact;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -65,7 +65,7 @@ public:
     auto List() const -> ObjectList final;
     auto Load(
         const identifier::Generic& id,
-        std::shared_ptr<proto::Contact>& output,
+        std::shared_ptr<protobuf::Contact>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
     auto NymOwner(const identifier::Nym& nym) const -> identifier::Generic;
@@ -74,7 +74,7 @@ public:
     auto Delete(const identifier::Generic& id) -> bool;
     auto SetAlias(const identifier::Generic& id, std::string_view alias)
         -> bool;
-    auto Store(const proto::Contact& data, std::string_view alias) -> bool;
+    auto Store(const protobuf::Contact& data, std::string_view alias) -> bool;
 
     Contacts() = delete;
     Contacts(const Contacts&) = delete;
@@ -98,14 +98,14 @@ private:
     Map<identifier::Generic, identifier::Generic> merged_;
     mutable Map<identifier::Nym, identifier::Generic> nym_contact_index_;
 
-    void extract_nyms(const Lock& lock, const proto::Contact& data) const;
+    void extract_nyms(const Lock& lock, const protobuf::Contact& data) const;
     auto nomalize_id(const identifier::Generic& input) const
         -> const identifier::Generic&;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageContacts;
+    auto serialize() const -> protobuf::StorageContacts;
 
     auto init(const Hash& hash) noexcept(false) -> void final;
-    void reconcile_maps(const Lock& lock, const proto::Contact& data);
+    void reconcile_maps(const Lock& lock, const protobuf::Contact& data);
     void reverse_merged();
     auto upgrade(const Lock& lock) noexcept -> bool final;
 

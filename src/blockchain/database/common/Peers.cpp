@@ -5,7 +5,7 @@
 
 #include "blockchain/database/common/Peers.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <compare>
@@ -19,10 +19,6 @@
 #include <utility>
 
 #include "internal/network/blockchain/Address.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/BlockchainPeerAddress.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
@@ -39,6 +35,10 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/blockchain/Transport.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/BlockchainPeerAddress.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 #include "util/ScopeGuard.hpp"
 
@@ -550,10 +550,10 @@ auto Peers::insert(
                 Table::PeerDetails,
                 encodedID,
                 [&] {
-                    auto proto = proto::BlockchainPeerAddress{};
+                    auto proto = protobuf::BlockchainPeerAddress{};
                     address.Internal().Serialize(proto);
 
-                    return proto::ToString(proto);
+                    return to_string(proto);
                 }(),
                 parentTxn);
 
@@ -700,12 +700,12 @@ auto Peers::last_connected(
 auto Peers::load_address(const network::blockchain::AddressID& id) noexcept(
     false) -> network::blockchain::Address
 {
-    auto output = std::optional<proto::BlockchainPeerAddress>{};
+    auto output = std::optional<protobuf::BlockchainPeerAddress>{};
     lmdb_.Load(
         Table::PeerDetails,
         id.asBase58(api_.Crypto()),
         [&](const auto data) -> void {
-            output = proto::Factory<proto::BlockchainPeerAddress>(
+            output = protobuf::Factory<protobuf::BlockchainPeerAddress>(
                 data.data(), data.size());
         });
 
@@ -716,7 +716,7 @@ auto Peers::load_address(const network::blockchain::AddressID& id) noexcept(
 
     const auto& serialized = output.value();
 
-    if (false == proto::Validate(serialized, SILENT)) {
+    if (false == protobuf::syntax::check(LogTrace(), serialized)) {
 
         throw std::out_of_range("Invalid address");
     }

@@ -5,19 +5,16 @@
 
 #include "util/storage/tree/Accounts.hpp"  // IWYU pragma: associated
 
-#include <StorageAccountIndex.pb.h>
-#include <StorageAccounts.pb.h>
-#include <StorageEnums.pb.h>
-#include <StorageIDList.pb.h>
+#include <opentxs/protobuf/StorageAccountIndex.pb.h>
+#include <opentxs/protobuf/StorageAccounts.pb.h>
+#include <opentxs/protobuf/StorageEnums.pb.h>
+#include <opentxs/protobuf/StorageIDList.pb.h>
 #include <atomic>
 #include <memory>
 #include <source_location>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageAccounts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
@@ -30,6 +27,9 @@
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/StorageAccounts.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -342,7 +342,7 @@ auto Accounts::get_account_data(
 
 auto Accounts::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageAccounts>{};
+    auto p = std::shared_ptr<protobuf::StorageAccounts>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -398,14 +398,16 @@ auto Accounts::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
 
-auto Accounts::serialize() const -> proto::StorageAccounts
+auto Accounts::serialize() const -> protobuf::StorageAccounts
 {
-    proto::StorageAccounts serialized;
+    protobuf::StorageAccounts serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -418,7 +420,7 @@ auto Accounts::serialize() const -> proto::StorageAccounts
                 item.first,
                 item.second,
                 *serialized.add_account(),
-                proto::STORAGEHASH_RAW);
+                protobuf::STORAGEHASH_RAW);
         }
     }
 

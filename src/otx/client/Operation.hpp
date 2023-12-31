@@ -63,10 +63,10 @@ class Base;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class Cheque;
@@ -109,7 +109,7 @@ public:
         const contract::Type type) -> bool override;
     auto GetFuture() -> Future override;
     auto IssueUnitDefinition(
-        const std::shared_ptr<const proto::UnitDefinition> unitDefinition,
+        const std::shared_ptr<const protobuf::UnitDefinition> unitDefinition,
         const otx::context::Server::ExtraArgs& args) -> bool override;
     auto IssueUnitDefinition(
         const ReadView& unitDefinition,
@@ -214,7 +214,7 @@ private:
     identifier::Notary target_server_id_;
     identifier::UnitDefinition target_unit_id_;
     contract::Type contract_type_;
-    std::shared_ptr<const proto::UnitDefinition> unit_definition_;
+    std::shared_ptr<const protobuf::UnitDefinition> unit_definition_;
     identifier::Account account_id_;
     identifier::Account account_id2_;
     identifier::Generic generic_id_;

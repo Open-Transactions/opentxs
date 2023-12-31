@@ -10,13 +10,13 @@
 
 #include "interface/ui/base/Combined.hpp"
 #include "interface/ui/base/Widget.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Group.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -74,7 +74,7 @@ auto ContactSubsection::Name(const UnallocatedCString& lang) const noexcept
     -> UnallocatedCString
 {
     return UnallocatedCString{
-        proto::TranslateItemType(translate(row_id_.second), lang)};
+        protobuf::TranslateItemType(translate(row_id_.second), lang)};
 }
 
 auto ContactSubsection::process_group(

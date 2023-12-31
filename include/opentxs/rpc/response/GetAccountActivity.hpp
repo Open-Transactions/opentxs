@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCResponse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -43,7 +43,7 @@ public:
         Responses&& response,
         Events&& events) noexcept(false);
     OPENTXS_NO_EXPORT GetAccountActivity(
-        const proto::RPCResponse& serialized) noexcept(false);
+        const protobuf::RPCResponse& serialized) noexcept(false);
     GetAccountActivity() noexcept;
     GetAccountActivity(const GetAccountActivity&) = delete;
     GetAccountActivity(GetAccountActivity&&) = delete;

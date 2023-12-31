@@ -12,10 +12,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class AccountData;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 }  // namespace opentxs
@@ -34,13 +34,13 @@ public:
     auto Owner() const noexcept -> const UnallocatedCString&;
     auto PendingBalance() const noexcept -> Amount;
     auto PendingBalance_str() const noexcept -> UnallocatedCString;
-    OPENTXS_NO_EXPORT auto Serialize(proto::AccountData& dest) const noexcept
+    OPENTXS_NO_EXPORT auto Serialize(protobuf::AccountData& dest) const noexcept
         -> bool;
     auto Type() const noexcept -> AccountType;
     auto Unit() const noexcept -> const UnallocatedCString&;
 
     OPENTXS_NO_EXPORT AccountData(
-        const proto::AccountData& serialized) noexcept(false);
+        const protobuf::AccountData& serialized) noexcept(false);
     OPENTXS_NO_EXPORT AccountData(
         const UnallocatedCString& id,
         const UnallocatedCString& name,

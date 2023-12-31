@@ -18,10 +18,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class BlockchainPeerAddress;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 }  // namespace opentxs
@@ -48,7 +48,7 @@ public:
     virtual auto Port() const noexcept -> std::uint16_t;
     virtual auto PreviousLastConnected() const noexcept -> Time;
     virtual auto PreviousServices() const noexcept -> Set<bitcoin::Service>;
-    virtual auto Serialize(proto::BlockchainPeerAddress& out) const noexcept
+    virtual auto Serialize(protobuf::BlockchainPeerAddress& out) const noexcept
         -> bool;
     virtual auto Services() const noexcept -> Set<bitcoin::Service>;
     virtual auto Style() const noexcept -> Protocol;

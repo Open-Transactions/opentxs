@@ -5,8 +5,8 @@
 
 #include "interface/ui/contactactivity/ContactActivity.hpp"  // IWYU pragma: associated
 
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
 #include <atomic>
 #include <chrono>
 #include <functional>
@@ -22,7 +22,6 @@
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/core/contract/Unit.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -50,6 +49,7 @@
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/Messagability.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -244,8 +244,8 @@ auto ContactActivity::GetDraft() const noexcept -> UnallocatedCString
     return draft_;
 }
 
-auto ContactActivity::load_contacts(const proto::StorageThread& thread) noexcept
-    -> void
+auto ContactActivity::load_contacts(
+    const protobuf::StorageThread& thread) noexcept -> void
 {
     auto& contacts =
         const_cast<UnallocatedSet<identifier::Generic>&>(contacts_);
@@ -255,8 +255,8 @@ auto ContactActivity::load_contacts(const proto::StorageThread& thread) noexcept
     }
 }
 
-auto ContactActivity::load_thread(const proto::StorageThread& thread) noexcept
-    -> void
+auto ContactActivity::load_thread(
+    const protobuf::StorageThread& thread) noexcept -> void
 {
     LogDetail()()("Loading ")(thread.item().size())(" items.").Flush();
 
@@ -475,7 +475,7 @@ auto ContactActivity::process_contact(const Message& in) noexcept -> void
 }
 
 auto ContactActivity::process_item(
-    const proto::StorageThreadItem& item) noexcept(false)
+    const protobuf::StorageThreadItem& item) noexcept(false)
     -> ContactActivityRowID
 {
     const auto id = ContactActivityRowID{
@@ -666,7 +666,7 @@ auto ContactActivity::process_thread(const Message& message) noexcept -> void
 
 auto ContactActivity::refresh_thread() noexcept -> void
 {
-    auto thread = proto::StorageThread{};
+    auto thread = protobuf::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
     if (false == loaded) { return; }
@@ -882,7 +882,7 @@ auto ContactActivity::set_participants() noexcept -> void
 
 auto ContactActivity::startup() noexcept -> void
 {
-    auto thread = proto::StorageThread{};
+    auto thread = protobuf::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, thread_id_, thread);
 
     if (loaded) {

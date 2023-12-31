@@ -5,7 +5,7 @@
 
 #include "opentxs/rpc/AccountData.hpp"  // IWYU pragma: associated
 
-#include <AccountData.pb.h>
+#include <opentxs/protobuf/AccountData.pb.h>
 #include <algorithm>
 #include <cassert>
 #include <memory>
@@ -112,7 +112,7 @@ AccountData::AccountData(
 {
 }
 
-AccountData::AccountData(const proto::AccountData& in) noexcept(false)
+AccountData::AccountData(const protobuf::AccountData& in) noexcept(false)
     : imp_(std::make_unique<Imp>(
                in.version(),
                in.id(),
@@ -183,7 +183,7 @@ auto AccountData::PendingBalance_str() const noexcept -> UnallocatedCString
     return imp_->pending_formatted_;
 }
 
-auto AccountData::Serialize(proto::AccountData& dest) const noexcept -> bool
+auto AccountData::Serialize(protobuf::AccountData& dest) const noexcept -> bool
 {
     const auto& imp = *imp_;
     dest.set_version(std::max(Imp::default_version_, imp.version_));

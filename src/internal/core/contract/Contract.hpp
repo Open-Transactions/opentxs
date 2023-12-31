@@ -3,21 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ProtocolVersion
+// IWYU pragma: no_forward_declare opentxs::protobuf::ProtocolVersion
 // IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
-#include <ContractEnums.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/ContractEnums.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 #include <string_view>
 #include <utility>
 
 #include "internal/core/contract/ServerContract.hpp"
 #include "internal/core/contract/Unit.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -31,6 +30,7 @@
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -104,10 +104,10 @@ struct Unit final : virtual public opentxs::contract::Unit,
     auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final
     {
-        return write(proto::UnitDefinition{}, std::move(destination));
+        return write(protobuf::UnitDefinition{}, std::move(destination));
     }
-    auto Serialize(proto::UnitDefinition& output, bool includeNym = false) const
-        -> bool final;
+    auto Serialize(protobuf::UnitDefinition& output, bool includeNym = false)
+        const -> bool final;
     auto Type() const -> contract::UnitDefinitionType final { return {}; }
     auto UnitOfAccount() const -> opentxs::UnitType final { return {}; }
     auto VisitAccountRecords(
@@ -149,10 +149,10 @@ struct Server final : virtual public opentxs::contract::Server,
     auto Serialize(Writer&& destination, bool includeNym = false) const
         -> bool final
     {
-        return write(proto::ServerContract{}, std::move(destination));
+        return write(protobuf::ServerContract{}, std::move(destination));
     }
-    auto Serialize(proto::ServerContract& output, bool includeNym = false) const
-        -> bool final;
+    auto Serialize(protobuf::ServerContract& output, bool includeNym = false)
+        const -> bool final;
     auto Statistics(String&) const -> bool final { return {}; }
     auto TransportKey() const -> const Data& final { return id_; }
     auto TransportKey(Data&, const PasswordPrompt&) const -> Secret final
@@ -180,11 +180,11 @@ private:
 namespace opentxs
 {
 auto translate(const contract::ProtocolVersion in) noexcept
-    -> proto::ProtocolVersion;
+    -> protobuf::ProtocolVersion;
 auto translate(const contract::UnitDefinitionType in) noexcept
-    -> proto::UnitType;
-auto translate(const proto::ProtocolVersion in) noexcept
+    -> protobuf::UnitType;
+auto translate(const protobuf::ProtocolVersion in) noexcept
     -> contract::ProtocolVersion;
-auto translate(const proto::UnitType in) noexcept
+auto translate(const protobuf::UnitType in) noexcept
     -> contract::UnitDefinitionType;
 }  // namespace opentxs

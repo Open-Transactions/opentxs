@@ -130,7 +130,7 @@ auto Keypair::GetPublicKeyBySignature(
     return 0;
 }
 
-auto Keypair::Serialize(proto::AsymmetricKey& serialized, bool privateKey)
+auto Keypair::Serialize(protobuf::AsymmetricKey& serialized, bool privateKey)
     const noexcept -> bool
 {
     if (privateKey) {

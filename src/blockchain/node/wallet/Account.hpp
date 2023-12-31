@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <memory>
 #include <string_view>
 
@@ -122,7 +122,7 @@ private:
     const CString from_parent_;
     const Nym_p nym_;
     const opentxs::PaymentCode local_;
-    const proto::HDPath path_;
+    const protobuf::HDPath path_;
     const identifier::Generic self_contact_;
     State state_;
     HandledReorgs reorgs_;

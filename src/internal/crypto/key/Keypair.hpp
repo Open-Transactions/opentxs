@@ -29,10 +29,10 @@ class Keypair;
 }  // namespace key
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -66,7 +66,7 @@ public:
         const Signature& theSignature,
         bool bInclusive = false) const noexcept -> std::int32_t = 0;
     OPENTXS_NO_EXPORT virtual auto Serialize(
-        proto::AsymmetricKey& serialized,
+        protobuf::AsymmetricKey& serialized,
         bool privateKey) const noexcept -> bool = 0;
     virtual auto GetTransportKey(
         Data& publicKey,

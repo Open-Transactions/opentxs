@@ -47,7 +47,7 @@ auto BlockchainAddress(
 auto BlockchainAddress(
     const api::Crypto&,
     const api::Factory&,
-    const proto::BlockchainPeerAddress&) noexcept
+    const protobuf::BlockchainPeerAddress&) noexcept
     -> network::blockchain::Address
 {
     return {};

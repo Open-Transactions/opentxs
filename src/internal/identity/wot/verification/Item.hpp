@@ -16,19 +16,19 @@ class Crypto;
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
 class VerificationGroup;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::identity::wot::verification::internal
 {
 struct Item : virtual public verification::Item {
-    using SerializedType = proto::VerificationItem;
+    using SerializedType = protobuf::VerificationItem;
 
     auto Internal() const noexcept -> const internal::Item& final
     {
@@ -36,7 +36,7 @@ struct Item : virtual public verification::Item {
     }
     virtual auto Serialize(const api::Crypto& crypto) const noexcept
         -> SerializedType = 0;
-    virtual auto Signature() const noexcept -> const proto::Signature& = 0;
+    virtual auto Signature() const noexcept -> const protobuf::Signature& = 0;
 
     auto Internal() noexcept -> internal::Item& final { return *this; }
 

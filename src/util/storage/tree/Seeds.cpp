@@ -5,24 +5,23 @@
 
 #include "util/storage/tree/Seeds.hpp"  // IWYU pragma: associated
 
-#include <Seed.pb.h>
-#include <StorageSeeds.pb.h>
+#include <opentxs/protobuf/Seed.pb.h>
+#include <opentxs/protobuf/StorageSeeds.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Seed.hpp"
-#include "internal/serialization/protobuf/verify/StorageSeeds.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/syntax/Seed.hpp"
+#include "opentxs/protobuf/syntax/StorageSeeds.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -72,7 +71,7 @@ auto Seeds::Delete(const opentxs::crypto::SeedID& id) -> bool
 
 auto Seeds::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageSeeds>{};
+    auto p = std::shared_ptr<protobuf::StorageSeeds>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -95,11 +94,11 @@ auto Seeds::init(const Hash& hash) noexcept(false) -> void
 
 auto Seeds::Load(
     const opentxs::crypto::SeedID& id,
-    std::shared_ptr<proto::Seed>& output,
+    std::shared_ptr<protobuf::Seed>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::Seed>(id, output, alias, checking);
+    return load_proto<protobuf::Seed>(id, output, alias, checking);
 }
 
 auto Seeds::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -108,14 +107,14 @@ auto Seeds::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Seeds::serialize() const -> proto::StorageSeeds
+auto Seeds::serialize() const -> protobuf::StorageSeeds
 {
-    proto::StorageSeeds serialized;
+    protobuf::StorageSeeds serialized;
     serialized.set_version(version_);
     serialized.set_defaultseed(default_seed_.asBase58(crypto_));
 
@@ -154,7 +153,7 @@ auto Seeds::SetDefault(const opentxs::crypto::SeedID& id) -> bool
     return save(lock);
 }
 
-auto Seeds::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+auto Seeds::Store(const opentxs::crypto::SeedID& id, const protobuf::Seed& data)
     -> bool
 {
     auto lock = Lock{write_lock_};
@@ -165,7 +164,7 @@ auto Seeds::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
 
     if (existingKey) {
         const bool revisionCheck =
-            check_revision<proto::Seed>(incomingRevision, metadata);
+            check_revision<protobuf::Seed>(incomingRevision, metadata);
 
         if (false == revisionCheck) {
             // We're trying to save a seed with a lower index than has already

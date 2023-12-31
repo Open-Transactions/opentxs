@@ -5,9 +5,9 @@
 
 #include "otx/server/MessageProcessor.hpp"  // IWYU pragma: associated
 
-#include <OTXPush.pb.h>
-#include <ServerReply.pb.h>
-#include <ServerRequest.pb.h>
+#include <opentxs/protobuf/OTXPush.pb.h>
+#include <opentxs/protobuf/ServerReply.pb.h>
+#include <opentxs/protobuf/ServerRequest.pb.h>
 #include <chrono>
 #include <memory>
 #include <span>
@@ -27,10 +27,6 @@
 #include "internal/network/zeromq/socket/Raw.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/server/Types.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/Size.hpp"
@@ -64,6 +60,9 @@
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/ServerRequest.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/server/Server.hpp"
@@ -217,9 +216,9 @@ auto MessageProcessor::Imp::DropOutgoing(const int count) const noexcept -> void
 }
 
 auto MessageProcessor::Imp::extract_proto(
-    const zmq::Frame& incoming) const noexcept -> proto::ServerRequest
+    const zmq::Frame& incoming) const noexcept -> protobuf::ServerRequest
 {
-    return proto::Factory<proto::ServerRequest>(incoming);
+    return protobuf::Factory<protobuf::ServerRequest>(incoming);
 }
 
 auto MessageProcessor::Imp::init(
@@ -313,7 +312,7 @@ auto MessageProcessor::Imp::process_backend(
 }
 
 auto MessageProcessor::Imp::process_command(
-    const proto::ServerRequest& serialized,
+    const protobuf::ServerRequest& serialized,
     identifier::Nym& nymID) noexcept -> bool
 {
     const auto allegedNymID = api_.Factory().Internal().NymID(serialized.nym());
@@ -542,11 +541,11 @@ auto MessageProcessor::Imp::process_notification(
         true,
         false,
         reason_,
-        proto::DynamicFactory<proto::OTXPush>(payload));
+        protobuf::DynamicFactory<protobuf::OTXPush>(payload));
 
     assert_true(message.Validate());
 
-    auto serialized = proto::ServerReply{};
+    auto serialized = protobuf::ServerReply{};
 
     if (false == message.Serialize(serialized)) {
         LogVerbose()()("Failed to serialize reply.").Flush();
@@ -600,7 +599,7 @@ auto MessageProcessor::Imp::process_proto(
     }();
     const auto command = extract_proto(payload);
 
-    if (false == proto::Validate(command, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), command)) {
         LogError()()("Invalid otx request.").Flush();
 
         return;

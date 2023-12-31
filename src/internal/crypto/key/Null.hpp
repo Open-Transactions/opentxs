@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <AsymmetricKey.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
 
 #include "internal/crypto/key/Keypair.hpp"
 
@@ -47,7 +47,7 @@ public:
     {
         return {};
     }
-    auto Serialize(proto::AsymmetricKey& serialized, bool) const noexcept
+    auto Serialize(protobuf::AsymmetricKey& serialized, bool) const noexcept
         -> bool final
     {
         serialized = {};

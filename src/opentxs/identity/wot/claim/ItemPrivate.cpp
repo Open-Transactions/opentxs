@@ -5,16 +5,16 @@
 
 #include "opentxs/identity/wot/claim/ItemPrivate.hpp"  // IWYU pragma: associated
 
-#include <ContactItem.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/Claim.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -87,7 +87,7 @@ auto ItemPrivate::Serialize(Writer&& out, bool withID) const noexcept -> bool
 {
     return write(
         [&] {
-            auto proto = proto::ContactItem{};
+            auto proto = protobuf::ContactItem{};
             Serialize(proto, withID);
 
             return proto;
@@ -95,8 +95,8 @@ auto ItemPrivate::Serialize(Writer&& out, bool withID) const noexcept -> bool
         std::move(out));
 }
 
-auto ItemPrivate::Serialize(proto::ContactItem& out, bool withID) const noexcept
-    -> bool
+auto ItemPrivate::Serialize(protobuf::ContactItem& out, bool withID)
+    const noexcept -> bool
 {
     out.set_version(Version());
 

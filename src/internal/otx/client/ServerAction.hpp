@@ -27,10 +27,10 @@ class Notary;
 class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class OTPaymentPlan;
@@ -112,7 +112,7 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const proto::UnitDefinition& basket,
+        const protobuf::UnitDefinition& basket,
         const UnallocatedCString& label = "") const -> Action = 0;
     virtual auto KillMarketOffer(
         const PasswordPrompt& reason,

@@ -17,10 +17,10 @@ namespace identifier
 class IdentifierPrivate;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Identifier;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -37,7 +37,8 @@ class Identifier
 {
 public:
     virtual auto Get() const noexcept -> const IdentifierPrivate& = 0;
-    virtual auto Serialize(proto::Identifier& out) const noexcept -> bool = 0;
+    virtual auto Serialize(protobuf::Identifier& out) const noexcept
+        -> bool = 0;
 
     Identifier(const Identifier&) = delete;
     Identifier(Identifier&&) = delete;

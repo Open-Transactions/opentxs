@@ -61,7 +61,7 @@ class Notary;
 class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Bip47Channel;
 class BlockchainEthereumAccountData;
@@ -80,7 +80,7 @@ class Seed;
 class ServerContract;
 class StorageThread;
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -187,51 +187,51 @@ public:
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
-        proto::Bip47Channel& output,
+        protobuf::Bip47Channel& output,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        proto::BlockchainEthereumAccountData& output,
+        protobuf::BlockchainEthereumAccountData& output,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
-        proto::Ciphertext& output,
+        protobuf::Ciphertext& output,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Generic& id,
-        proto::Contact& contact,
+        protobuf::Contact& contact,
         UnallocatedCString& alias,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Generic& id,
-        proto::Contact& contact,
+        protobuf::Contact& contact,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& localNym,
         const identifier::Nym& remoteNym,
-        proto::Context& context,
+        protobuf::Context& context,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Generic& id,
-        proto::Credential& cred,
+        protobuf::Credential& cred,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        proto::HDAccount& output,
+        protobuf::HDAccount& output,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Nym& id,
-        proto::Issuer& issuer,
+        protobuf::Issuer& issuer,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
@@ -244,33 +244,33 @@ public:
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& id,
-        proto::Nym& nym,
+        protobuf::Nym& nym,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& id,
-        proto::Nym& nym,
+        protobuf::Nym& nym,
         UnallocatedCString& alias,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Generic& workflowID,
-        proto::PaymentWorkflow& workflow,
+        protobuf::PaymentWorkflow& workflow,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Generic& id,
         const otx::client::StorageBox box,
-        proto::PeerReply& request,
+        protobuf::PeerReply& request,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymID,
         const identifier::Generic& id,
         const otx::client::StorageBox box,
-        proto::PeerRequest& request,
+        protobuf::PeerRequest& request,
         Time& time,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
@@ -278,42 +278,42 @@ public:
         const identifier::Nym& nym,
         const identifier::Notary& notary,
         const identifier::UnitDefinition& unit,
-        proto::Purse& output,
+        protobuf::Purse& output,
         ErrorReporting checking) const noexcept -> bool = 0;
     virtual auto Load(
         const opentxs::crypto::SeedID& id,
-        proto::Seed& seed,
+        protobuf::Seed& seed,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const opentxs::crypto::SeedID& id,
-        proto::Seed& seed,
+        protobuf::Seed& seed,
         UnallocatedCString& alias,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Notary& id,
-        proto::ServerContract& contract,
+        protobuf::ServerContract& contract,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Notary& id,
-        proto::ServerContract& contract,
+        protobuf::ServerContract& contract,
         UnallocatedCString& alias,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::Nym& nymId,
         const identifier::Generic& threadId,
-        proto::StorageThread& thread) const noexcept -> bool = 0;
+        protobuf::StorageThread& thread) const noexcept -> bool = 0;
     virtual auto Load(
         const identifier::UnitDefinition& id,
-        proto::UnitDefinition& contract,
+        protobuf::UnitDefinition& contract,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
     virtual auto Load(
         const identifier::UnitDefinition& id,
-        proto::UnitDefinition& contract,
+        protobuf::UnitDefinition& contract,
         UnallocatedCString& alias,
         ErrorReporting checking = ErrorReporting::silent) const noexcept
         -> bool = 0;
@@ -433,25 +433,28 @@ public:
     virtual auto Store(
         const identifier::Nym& nymID,
         const identifier::Account& channelID,
-        const proto::Bip47Channel& data) const noexcept -> bool = 0;
+        const protobuf::Bip47Channel& data) const noexcept -> bool = 0;
     virtual auto Store(
         const identifier::Nym& nymID,
         const UnitType type,
-        const proto::BlockchainEthereumAccountData& data) const noexcept
+        const protobuf::BlockchainEthereumAccountData& data) const noexcept
         -> bool = 0;
-    virtual auto Store(const proto::Ciphertext& serialized) const noexcept
+    virtual auto Store(const protobuf::Ciphertext& serialized) const noexcept
         -> bool = 0;
-    virtual auto Store(const proto::Contact& data) const noexcept -> bool = 0;
-    virtual auto Store(const proto::Context& data) const noexcept -> bool = 0;
-    virtual auto Store(const proto::Credential& data) const noexcept
+    virtual auto Store(const protobuf::Contact& data) const noexcept
+        -> bool = 0;
+    virtual auto Store(const protobuf::Context& data) const noexcept
+        -> bool = 0;
+    virtual auto Store(const protobuf::Credential& data) const noexcept
         -> bool = 0;
     virtual auto Store(
         const identifier::Nym& nymID,
         const UnitType type,
-        const proto::HDAccount& data) const noexcept -> bool = 0;
-    virtual auto Store(const identifier::Nym& nymID, const proto::Issuer& data)
-        const noexcept -> bool = 0;
-    virtual auto Store(const proto::Nym& data, std::string_view alias = {})
+        const protobuf::HDAccount& data) const noexcept -> bool = 0;
+    virtual auto Store(
+        const identifier::Nym& nymID,
+        const protobuf::Issuer& data) const noexcept -> bool = 0;
+    virtual auto Store(const protobuf::Nym& data, std::string_view alias = {})
         const noexcept -> bool = 0;
     virtual auto Store(const ReadView& data, std::string_view alias = {})
         const noexcept -> bool = 0;
@@ -472,25 +475,25 @@ public:
         const Time time) const noexcept -> bool = 0;
     virtual auto Store(
         const identifier::Nym& nymID,
-        const proto::PaymentWorkflow& data) const noexcept -> bool = 0;
+        const protobuf::PaymentWorkflow& data) const noexcept -> bool = 0;
     virtual auto Store(
-        const proto::PeerReply& data,
+        const protobuf::PeerReply& data,
         const identifier::Nym& nymid,
         const otx::client::StorageBox box) const noexcept -> bool = 0;
     virtual auto Store(
-        const proto::PeerRequest& data,
+        const protobuf::PeerRequest& data,
         const identifier::Nym& nymid,
         const otx::client::StorageBox box) const noexcept -> bool = 0;
-    virtual auto Store(const identifier::Nym& nym, const proto::Purse& purse)
+    virtual auto Store(const identifier::Nym& nym, const protobuf::Purse& purse)
         const noexcept -> bool = 0;
     virtual auto Store(
         const opentxs::crypto::SeedID& id,
-        const proto::Seed& data) const noexcept -> bool = 0;
+        const protobuf::Seed& data) const noexcept -> bool = 0;
     virtual auto Store(
-        const proto::ServerContract& data,
+        const protobuf::ServerContract& data,
         std::string_view alias = {}) const noexcept -> bool = 0;
     virtual auto Store(
-        const proto::UnitDefinition& data,
+        const protobuf::UnitDefinition& data,
         std::string_view alias = {}) const noexcept -> bool = 0;
     virtual auto ThreadList(const identifier::Nym& nymID, const bool unreadOnly)
         const noexcept -> ObjectList = 0;

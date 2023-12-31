@@ -9,12 +9,12 @@
 
 #include "opentxs/core/Contact.hpp"  // IWYU pragma: associated
 
-#include <Contact.pb.h>
-#include <ContactItem.pb.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Contact.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -27,10 +27,6 @@
 
 #include "internal/api/crypto/Encode.hpp"
 #include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/ContactItem.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/Time.hpp"
@@ -66,6 +62,10 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/identity/wot/claim/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/ContactItem.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -194,7 +194,7 @@ struct Contact::Imp {
         return output;
     }
 
-    Imp(const api::session::Client& api, const proto::Contact& serialized)
+    Imp(const api::session::Client& api, const protobuf::Contact& serialized)
         : api_(api)
         , version_(check_version(serialized.version(), OT_CONTACT_VERSION))
         , label_(serialized.label())
@@ -278,13 +278,14 @@ struct Contact::Imp {
         const auto version = std::make_pair(
             item->Version(), identity::wot::claim::translate(item->Section()));
         const auto proto = [&] {
-            auto out = proto::ContactItem{};
+            auto out = protobuf::ContactItem{};
             item->Internal().Serialize(out, true);
             return out;
         }();
 
-        if (false == proto::Validate<proto::ContactItem>(
-                         proto, VERBOSE, proto::ClaimType::Indexed, version)) {
+        if (false ==
+            protobuf::syntax::check(
+                LogError(), proto, protobuf::ClaimType::Indexed, version)) {
             LogError()()("Invalid claim.").Flush();
 
             return false;
@@ -493,7 +494,7 @@ struct Contact::Imp {
 
 Contact::Contact(
     const api::session::Client& api,
-    const proto::Contact& serialized)
+    const protobuf::Contact& serialized)
     : imp_(std::make_unique<Imp>(api, serialized))
 {
     assert_false(nullptr == imp_);
@@ -809,7 +810,7 @@ auto Contact::BlockchainAddresses() const -> UnallocatedVector<
 
         assert_false(nullptr == group);
 
-        const bool currency = proto::ValidContactItemType(
+        const bool currency = protobuf::ValidContactItemType(
             {version, translate(identity::wot::claim::SectionType::Contract)},
             translate(type));
 
@@ -1088,7 +1089,7 @@ auto Contact::RemoveNym(const identifier::Nym& nymID) -> bool
     return (0 < result);
 }
 
-auto Contact::Serialize(proto::Contact& output) const -> bool
+auto Contact::Serialize(protobuf::Contact& output) const -> bool
 {
     auto lock = Lock{imp_->lock_};
     output.set_version(imp_->version_);
@@ -1152,7 +1153,7 @@ auto Contact::Type() const -> identity::wot::claim::ClaimType
     return imp_->type(lock);
 }
 
-void Contact::Update(const proto::Nym& serialized)
+void Contact::Update(const protobuf::Nym& serialized)
 {
     auto nym = imp_->api_.Wallet().Internal().Nym(serialized);
 

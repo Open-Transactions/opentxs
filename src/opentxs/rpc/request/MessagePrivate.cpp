@@ -5,13 +5,13 @@
 
 #include "opentxs/rpc/request/MessagePrivate.hpp"  // IWYU pragma: associated
 
-#include <RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
 #include <cassert>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/Types.hpp"
 #include "opentxs/rpc/Types.internal.hpp"
@@ -53,7 +53,9 @@ Message::Imp::Imp(
     check_dups(associate_nym_, "associated nym");
 }
 
-Message::Imp::Imp(const Message* parent, const proto::RPCCommand& in) noexcept
+Message::Imp::Imp(
+    const Message* parent,
+    const protobuf::RPCCommand& in) noexcept
     : Imp(
           parent,
           in.version(),
@@ -231,7 +233,7 @@ auto Message::Imp::make_cookie() noexcept -> UnallocatedCString
     return out;
 }
 
-auto Message::Imp::serialize(proto::RPCCommand& dest) const noexcept -> bool
+auto Message::Imp::serialize(protobuf::RPCCommand& dest) const noexcept -> bool
 {
     dest.set_version(version_);
     dest.set_cookie(cookie_);
@@ -247,7 +249,7 @@ auto Message::Imp::serialize(Writer&& dest) const noexcept -> bool
 {
     try {
         const auto proto = [&] {
-            auto out = proto::RPCCommand{};
+            auto out = protobuf::RPCCommand{};
 
             if (false == serialize(out)) {
                 throw std::runtime_error{"serialization error"};
@@ -256,32 +258,32 @@ auto Message::Imp::serialize(Writer&& dest) const noexcept -> bool
             return out;
         }();
 
-        return proto::write(proto, std::move(dest));
+        return protobuf::write(proto, std::move(dest));
     } catch (...) {
 
         return false;
     }
 }
 
-auto Message::Imp::serialize_identifiers(proto::RPCCommand& dest) const noexcept
-    -> void
+auto Message::Imp::serialize_identifiers(
+    protobuf::RPCCommand& dest) const noexcept -> void
 {
     for (const auto& id : identifiers_) { dest.add_identifier(id); }
 }
 
-auto Message::Imp::serialize_notary(proto::RPCCommand& dest) const noexcept
+auto Message::Imp::serialize_notary(protobuf::RPCCommand& dest) const noexcept
     -> void
 {
     if (false == notary_.empty()) { dest.set_notary(notary_); }
 }
 
-auto Message::Imp::serialize_owner(proto::RPCCommand& dest) const noexcept
+auto Message::Imp::serialize_owner(protobuf::RPCCommand& dest) const noexcept
     -> void
 {
     if (false == owner_.empty()) { dest.set_owner(owner_); }
 }
 
-auto Message::Imp::serialize_unit(proto::RPCCommand& dest) const noexcept
+auto Message::Imp::serialize_unit(protobuf::RPCCommand& dest) const noexcept
     -> void
 {
     if (false == unit_.empty()) { dest.set_unit(unit_); }
@@ -327,7 +329,7 @@ auto Message::Serialize(Writer&& dest) const noexcept -> bool
     return imp_->serialize(std::move(dest));
 }
 
-auto Message::Serialize(proto::RPCCommand& dest) const noexcept -> bool
+auto Message::Serialize(protobuf::RPCCommand& dest) const noexcept -> bool
 {
     return imp_->serialize(dest);
 }

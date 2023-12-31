@@ -5,18 +5,18 @@
 
 #include "internal/core/contract/peer/PairEvent.hpp"  // IWYU pragma: associated
 
-#include <PairEvent.pb.h>
+#include <opentxs/protobuf/PairEvent.pb.h>
 
-#include "internal/serialization/protobuf/Proto.tpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 
 namespace opentxs::contract::peer::internal
 {
 PairEvent::PairEvent(const ReadView view)
-    : PairEvent(proto::Factory<proto::PairEvent>(view))
+    : PairEvent(protobuf::Factory<protobuf::PairEvent>(view))
 {
 }
 
-PairEvent::PairEvent(const proto::PairEvent& serialized)
+PairEvent::PairEvent(const protobuf::PairEvent& serialized)
     : PairEvent(
           serialized.version(),
           translate(serialized.type()),

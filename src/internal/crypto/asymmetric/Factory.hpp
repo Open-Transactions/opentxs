@@ -36,11 +36,11 @@ class EcdsaProvider;
 class Parameters;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -53,7 +53,7 @@ namespace opentxs::factory
 auto Ed25519Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519;
 auto Ed25519Key(
     const api::Session& api,
@@ -68,7 +68,7 @@ auto Ed25519Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -77,7 +77,7 @@ auto Ed25519Key(
 auto RSAKey(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
-    const proto::AsymmetricKey& input,
+    const protobuf::AsymmetricKey& input,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA;
 auto RSAKey(
     const api::Session& api,
@@ -90,7 +90,7 @@ auto RSAKey(
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1;
 auto Secp256k1Key(
     const api::Session& api,
@@ -114,7 +114,7 @@ auto Secp256k1Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -126,7 +126,7 @@ auto Secp256k1Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,

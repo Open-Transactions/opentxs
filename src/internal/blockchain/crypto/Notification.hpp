@@ -17,10 +17,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PaymentCode;
 }  // namespace opentxs
@@ -39,7 +39,7 @@ public:
 
     virtual auto LocalPaymentCode() const noexcept
         -> const opentxs::PaymentCode&;
-    virtual auto Path() const noexcept -> proto::HDPath;
+    virtual auto Path() const noexcept -> protobuf::HDPath;
 
     Notification() = default;
     Notification(const Notification&) = delete;

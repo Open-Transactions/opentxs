@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/storesecret/Implementation.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
-#include <StoreSecret.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/StoreSecret.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>

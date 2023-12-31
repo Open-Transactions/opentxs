@@ -9,9 +9,9 @@
 
 #include "blockchain/database/wallet/OutputCache.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
 #include <boost/container/vector.hpp>
 #include <boost/endian/conversion.hpp>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
 #include <algorithm>
 #include <chrono>  // IWYU pragma: keep
 #include <cstring>
@@ -29,8 +29,6 @@
 #include "internal/blockchain/database/Types.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Output.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/TSV.hpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Transaction.hpp"
@@ -53,6 +51,8 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/display/Definition.hpp"
 #include "opentxs/identifier/Account.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -1004,7 +1004,7 @@ auto OutputCache::Populate() noexcept -> void
                 api_.Crypto().Blockchain(),
                 api_.Factory(),
                 chain_,
-                proto::Factory<proto::BlockchainTransactionOutput>(value),
+                protobuf::Factory<protobuf::BlockchainTransactionOutput>(value),
                 {}  // TODO allocator
                 ));
 
@@ -1515,7 +1515,7 @@ auto OutputCache::write_output(
                 return proto;
             }();
 
-            if (false == proto::write(data, writer(out))) {
+            if (false == protobuf::write(data, writer(out))) {
                 throw std::runtime_error{"failed to serialize as bytes"};
             }
 

@@ -7,11 +7,11 @@
 
 #include "blockchain/crypto/subaccount/paymentcode/Imp.hpp"  // IWYU pragma: associated
 
-#include <Bip47Channel.pb.h>
-#include <Bip47Direction.pb.h>
-#include <BlockchainAddress.pb.h>
-#include <HDPath.pb.h>
-#include <PaymentCode.pb.h>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
+#include <opentxs/protobuf/Bip47Direction.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/PaymentCode.pb.h>
 #include <iterator>
 #include <memory>
 #include <stdexcept>
@@ -25,7 +25,6 @@
 #include "internal/blockchain/crypto/Account.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
 #include "internal/core/PaymentCode.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Contacts.hpp"
@@ -44,6 +43,7 @@
 #include "opentxs/crypto/asymmetric/key/HD.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/AccountSubtype.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -56,7 +56,7 @@ PaymentCodePrivate::PaymentCodePrivate(
     const identifier::Account& id,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept(false)
     : DeterministicPrivate(
           api,
@@ -370,14 +370,14 @@ auto PaymentCodePrivate::save(const rLock& lock) const noexcept -> bool
     auto serialized = SerializedType{};
     serialized.set_version(version_);
     serialize_deterministic(lock, *serialized.mutable_deterministic());
-    auto local = proto::PaymentCode{};
+    auto local = protobuf::PaymentCode{};
     if (false == local_.get().Internal().Serialize(local)) {
         LogError()()("Failed to serialize local paymentcode").Flush();
 
         return false;
     }
     *serialized.mutable_local() = local;
-    auto remote = proto::PaymentCode{};
+    auto remote = protobuf::PaymentCode{};
     if (false == remote_.get().Internal().Serialize(remote)) {
         LogError()()("Failed to serialize remote paymentcode").Flush();
 

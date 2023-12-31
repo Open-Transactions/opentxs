@@ -17,7 +17,7 @@ namespace opentxs::factory
 {
 auto ContactItem(
     const api::Session& api,
-    const proto::ContactItem& proto,
+    const protobuf::ContactItem& proto,
     const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     alloc::Strategy alloc) noexcept -> identity::wot::claim::internal::Item*

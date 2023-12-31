@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Context.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
 #include <cstddef>
 
 #include "internal/otx/consensus/Consensus.hpp"
@@ -76,7 +76,7 @@ public:
         const identifier::Notary& server);
     ClientContext(
         const api::Session& api,
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& local,
         const Nym_p& remote,
         const identifier::Notary& server);
@@ -97,7 +97,7 @@ private:
 
     auto client_nym_id() const -> const identifier::Nym& final;
     using Base<ClientContext, ClientPrivate>::serialize;
-    auto serialize(const Data& data) const -> proto::Context final;
+    auto serialize(const Data& data) const -> protobuf::Context final;
     auto server_nym_id() const -> const identifier::Nym& final;
     auto type() const -> UnallocatedCString final { return "client"; }
 };

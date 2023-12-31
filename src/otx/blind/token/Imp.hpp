@@ -47,11 +47,11 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
 class Token;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -114,14 +114,14 @@ protected:
         const PasswordPrompt& oldPassword,
         const crypto::symmetric::Key& newKey,
         const PasswordPrompt& newPassword,
-        proto::Ciphertext& ciphertext) -> bool;
+        protobuf::Ciphertext& ciphertext) -> bool;
 
-    auto Serialize(proto::Token& out) const noexcept -> bool override;
+    auto Serialize(protobuf::Token& out) const noexcept -> bool override;
 
     Token(
         const api::Session& api,
         blind::internal::Purse& purse,
-        const proto::Token& serialized);
+        const protobuf::Token& serialized);
     Token(
         const api::Session& api,
         blind::internal::Purse& purse,

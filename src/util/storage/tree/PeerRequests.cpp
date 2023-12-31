@@ -5,23 +5,22 @@
 
 #include "util/storage/tree/PeerRequests.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/PeerRequest.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/syntax/PeerRequest.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -58,7 +57,7 @@ auto PeerRequests::Delete(const identifier::Generic& id) -> bool
 
 auto PeerRequests::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -78,11 +77,11 @@ auto PeerRequests::init(const Hash& hash) noexcept(false) -> void
 
 auto PeerRequests::Load(
     const identifier::Generic& id,
-    std::shared_ptr<proto::PeerRequest>& output,
+    std::shared_ptr<protobuf::PeerRequest>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::PeerRequest>(id, output, alias, checking);
+    return load_proto<protobuf::PeerRequest>(id, output, alias, checking);
 }
 
 auto PeerRequests::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -91,14 +90,14 @@ auto PeerRequests::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto PeerRequests::serialize() const -> proto::StorageNymList
+auto PeerRequests::serialize() const -> protobuf::StorageNymList
 {
-    proto::StorageNymList serialized;
+    protobuf::StorageNymList serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -121,8 +120,9 @@ auto PeerRequests::SetAlias(
     return set_alias(id, alias);
 }
 
-auto PeerRequests::Store(const proto::PeerRequest& data, std::string_view alias)
-    -> bool
+auto PeerRequests::Store(
+    const protobuf::PeerRequest& data,
+    std::string_view alias) -> bool
 {
     const auto id = factory_.Internal().Identifier(data.id());
 

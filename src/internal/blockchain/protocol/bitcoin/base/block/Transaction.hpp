@@ -66,10 +66,10 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransaction;
-}  // namespace proto
+}  // namespace protobuf
 
 class Log;
 class Writer;
@@ -81,7 +81,7 @@ namespace opentxs::blockchain::protocol::bitcoin::base::block::internal
 class Transaction : virtual public blockchain::block::internal::Transaction
 {
 public:
-    using SerializeType = proto::BlockchainTransaction;
+    using SerializeType = protobuf::BlockchainTransaction;
     using SigHash = blockchain::protocol::bitcoin::base::SigOption;
 
     static auto Blank() noexcept -> Transaction&;

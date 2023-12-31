@@ -5,7 +5,7 @@
 
 #include "opentxs/identity/wot/claim/Group.hpp"  // IWYU pragma: associated
 
-#include <ContactSection.pb.h>
+#include <opentxs/protobuf/ContactSection.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -246,7 +246,7 @@ auto Group::Primary() const -> const identifier::Generic&
     return imp_->primary_;
 }
 
-auto Group::SerializeTo(proto::ContactSection& section, const bool withIDs)
+auto Group::SerializeTo(protobuf::ContactSection& section, const bool withIDs)
     const -> bool
 {
     if (translate(section.name()) != imp_->section_) {

@@ -31,10 +31,10 @@ class Client;
 }  // namespace session
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class PaymentWorkflow;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace ui
 {
@@ -56,7 +56,7 @@ public:
     const api::session::Client& api_;
 
     static auto recover_workflow(CustomData& custom) noexcept
-        -> const proto::PaymentWorkflow&;
+        -> const protobuf::PaymentWorkflow&;
 
     auto Confirmations() const noexcept -> int override { return 1; }
     auto Contacts() const noexcept
@@ -86,7 +86,7 @@ protected:
     UnallocatedCString text_;
     Time time_;
 
-    static auto extract_type(const proto::PaymentWorkflow& workflow) noexcept
+    static auto extract_type(const protobuf::PaymentWorkflow& workflow) noexcept
         -> otx::client::StorageBox;
 
     auto get_contact_name(const identifier::Nym& nymID) const noexcept
@@ -112,7 +112,7 @@ private:
 
     static auto extract_contacts(
         const api::session::Client& api,
-        const proto::PaymentWorkflow& workflow) noexcept
+        const protobuf::PaymentWorkflow& workflow) noexcept
         -> UnallocatedVector<UnallocatedCString>;
 
     virtual auto effective_amount() const noexcept -> opentxs::Amount = 0;

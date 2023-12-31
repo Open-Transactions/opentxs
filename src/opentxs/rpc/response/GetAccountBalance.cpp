@@ -6,7 +6,7 @@
 #include "opentxs/rpc/response/GetAccountBalance.hpp"  // IWYU pragma: associated
 #include "opentxs/rpc/response/MessagePrivate.hpp"  // IWYU pragma: associated
 
-#include <RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <memory>
@@ -27,7 +27,7 @@ struct GetAccountBalance final : public Message::Imp {
     {
         return static_cast<const response::GetAccountBalance&>(*parent_);
     }
-    auto serialize(proto::RPCResponse& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCResponse& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             for (const auto& balance : balances_) {
@@ -54,7 +54,7 @@ struct GetAccountBalance final : public Message::Imp {
     }
     GetAccountBalance(
         const response::GetAccountBalance* parent,
-        const proto::RPCResponse& in) noexcept(false)
+        const protobuf::RPCResponse& in) noexcept(false)
         : Imp(parent, in)
         , balances_([&] {
             auto out = Data{};
@@ -89,7 +89,7 @@ GetAccountBalance::GetAccountBalance(
 }
 
 GetAccountBalance::GetAccountBalance(
-    const proto::RPCResponse& serialized) noexcept(false)
+    const protobuf::RPCResponse& serialized) noexcept(false)
     : Message(
           std::make_unique<implementation::GetAccountBalance>(this, serialized))
 {

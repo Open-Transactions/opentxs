@@ -18,7 +18,7 @@ struct ListAccounts final : public Message::Imp {
     {
         return static_cast<const request::ListAccounts&>(*parent_);
     }
-    auto serialize(proto::RPCCommand& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCCommand& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             serialize_owner(dest);
@@ -52,7 +52,7 @@ struct ListAccounts final : public Message::Imp {
     }
     ListAccounts(
         const request::ListAccounts* parent,
-        const proto::RPCCommand& in) noexcept(false)
+        const protobuf::RPCCommand& in) noexcept(false)
         : Imp(parent, in)
     {
         check_session();
@@ -86,7 +86,7 @@ ListAccounts::ListAccounts(
 {
 }
 
-ListAccounts::ListAccounts(const proto::RPCCommand& in) noexcept(false)
+ListAccounts::ListAccounts(const protobuf::RPCCommand& in) noexcept(false)
     : Message(std::make_unique<implementation::ListAccounts>(this, in))
 {
 }

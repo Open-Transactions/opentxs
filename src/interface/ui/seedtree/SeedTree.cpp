@@ -5,7 +5,7 @@
 
 #include "interface/ui/seedtree/SeedTree.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -283,7 +283,7 @@ auto SeedTree::load_nym(identifier::Nym&& nymID, ChildMap& out) const noexcept
         }
 
         const auto path = [&] {
-            auto data = proto::HDPath{};
+            auto data = protobuf::HDPath{};
             nym->Internal().Path(data);
 
             return data;

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -26,5 +26,6 @@ namespace opentxs::factory
 auto ZMQFrame(std::size_t size) noexcept -> network::zeromq::Frame;
 auto ZMQFrame(const void* data, const std::size_t size) noexcept
     -> network::zeromq::Frame;
-auto ZMQFrame(const ProtobufType& data) noexcept -> network::zeromq::Frame;
+auto ZMQFrame(const protobuf::MessageType& data) noexcept
+    -> network::zeromq::Frame;
 }  // namespace opentxs::factory

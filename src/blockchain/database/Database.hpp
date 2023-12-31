@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <BlockchainTransactionProposal.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
 #include <functional>
 #include <optional>
 #include <span>
@@ -134,7 +134,7 @@ public:
     auto AddProposal(
         const Log& log,
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx,
+        const protobuf::BlockchainTransactionProposal& tx,
         alloc::Strategy alloc) noexcept -> bool final
     {
         return wallet_.AddProposal(log, id, tx, alloc);
@@ -225,7 +225,7 @@ public:
     auto FinalizeProposal(
         const Log& log,
         const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
+        const protobuf::BlockchainTransactionProposal& proposal,
         const block::Transaction& transaction,
         alloc::Strategy alloc) noexcept -> bool final
     {
@@ -430,12 +430,12 @@ public:
         return headers_.LoadHeader(hash);
     }
     auto LoadProposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal> final
+        -> std::optional<protobuf::BlockchainTransactionProposal> final
     {
         return wallet_.LoadProposal(id);
     }
     auto LoadProposals() const noexcept
-        -> UnallocatedVector<proto::BlockchainTransactionProposal> final
+        -> UnallocatedVector<protobuf::BlockchainTransactionProposal> final
     {
         return wallet_.LoadProposals();
     }

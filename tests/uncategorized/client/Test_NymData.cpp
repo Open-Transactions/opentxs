@@ -3,20 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemType
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 // IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
-#include <ContactItemType.pb.h>
 #include <boost/unordered/unordered_flat_set.hpp>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/ContactItemType.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <span>
 
-#include "internal/serialization/protobuf/Contact.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/contact/Types.internal.hpp"
 #include "ottest/fixtures/client/NymData.hpp"
 
 namespace ottest
@@ -417,8 +417,8 @@ TEST_F(NymData, SocialMediaProfiles)
 
 TEST_F(NymData, SocialMediaProfileTypes)
 {
-    auto profileTypes =
-        ot::proto::AllowedItemTypes().at(ot::proto::ContactSectionVersion(
+    auto profileTypes = ot::protobuf::contact::AllowedItemTypes().at(
+        ot::protobuf::contact::ContactSectionVersion(
             opentxs::identity::wot::claim::DefaultVersion(),
             translate(ot::identity::wot::claim::SectionType::Profile)));
 
@@ -427,7 +427,7 @@ TEST_F(NymData, SocialMediaProfileTypes)
         profileTypes.begin(),
         profileTypes.end(),
         std::inserter(output, output.end()),
-        [](ot::proto::ContactItemType itemtype)
+        [](ot::protobuf::ContactItemType itemtype)
             -> ot::identity::wot::claim::ClaimType {
             return translate(itemtype);
         });

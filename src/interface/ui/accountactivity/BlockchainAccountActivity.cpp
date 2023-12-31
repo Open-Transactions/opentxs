@@ -5,10 +5,10 @@
 
 #include "interface/ui/accountactivity/BlockchainAccountActivity.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <atomic>
 #include <chrono>
 #include <future>
@@ -26,7 +26,6 @@
 #include "internal/core/Factory.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/Pipeline.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/AccountType.hpp"  // IWYU pragma: keep
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -66,6 +65,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -495,7 +495,8 @@ auto BlockchainAccountActivity::process_txid(const Message& in) noexcept -> void
 
     if (chain != chain_) { return; }
 
-    const auto proto = proto::Factory<proto::BlockchainTransaction>(body[3]);
+    const auto proto =
+        protobuf::Factory<protobuf::BlockchainTransaction>(body[3]);
     process_txid(
         txid,
         api.Factory().Internal().Session().BlockchainTransaction(proto, {}));
@@ -515,7 +516,7 @@ auto BlockchainAccountActivity::process_txid(
 {
     const auto rowID = AccountActivityRowID{
         blockchain_thread_item_id(api_.Crypto(), api_.Factory(), chain_, txid),
-        proto::PAYMENTEVENTTYPE_COMPLETE};
+        protobuf::PAYMENTEVENTTYPE_COMPLETE};
 
     if (false == tx.IsValid()) { return std::nullopt; }
 
@@ -534,8 +535,8 @@ auto BlockchainAccountActivity::process_txid(
     auto description =
         api_.Crypto().Blockchain().ActivityDescription(primary_id_, chain_, tx);
     auto custom = CustomData{
-        new proto::PaymentWorkflow(),
-        new proto::PaymentEvent(),
+        new protobuf::PaymentWorkflow(),
+        new protobuf::PaymentEvent(),
         new blockchain::block::Transaction{std::move(tx)},
         new blockchain::Type{chain_},
         new UnallocatedCString{std::move(description)},

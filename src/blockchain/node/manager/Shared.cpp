@@ -5,7 +5,7 @@
 
 #include "blockchain/node/manager/Shared.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <optional>
 #include <stdexcept>
@@ -28,7 +28,6 @@
 #include "internal/network/blockchain/OTDHT.hpp"
 #include "internal/network/otdht/Factory.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/BlockchainProfile.hpp"  // IWYU pragma: keep
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.internal.hpp"
@@ -51,6 +50,7 @@
 #include "opentxs/network/blockchain/Address.hpp"
 #include "opentxs/network/otdht/PushTransaction.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -163,7 +163,7 @@ auto Shared::AddPeer(const network::blockchain::Address& address) const noexcept
 {
     try {
         const auto proto = [&] {
-            auto out = proto::BlockchainPeerAddress{};
+            auto out = protobuf::BlockchainPeerAddress{};
 
             if (false == address.Internal().Serialize(out)) {
                 throw std::runtime_error{
@@ -175,7 +175,7 @@ auto Shared::AddPeer(const network::blockchain::Address& address) const noexcept
         using enum PeerManagerJobs;
         auto work = MakeWork(addpeer);
 
-        if (false == proto::write(proto, work.AppendBytes())) {
+        if (false == protobuf::write(proto, work.AppendBytes())) {
             throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
 
@@ -327,7 +327,7 @@ auto Shared::Listen(const network::blockchain::Address& address) const noexcept
 {
     try {
         const auto proto = [&] {
-            auto out = proto::BlockchainPeerAddress{};
+            auto out = protobuf::BlockchainPeerAddress{};
 
             if (false == address.Internal().Serialize(out)) {
                 throw std::runtime_error{
@@ -339,7 +339,7 @@ auto Shared::Listen(const network::blockchain::Address& address) const noexcept
         using enum PeerManagerJobs;
         auto work = MakeWork(addlistener);
 
-        if (false == proto::write(proto, work.AppendBytes())) {
+        if (false == protobuf::write(proto, work.AppendBytes())) {
             throw std::runtime_error{"failed to serialize protobuf to bytes"};
         }
 

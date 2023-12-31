@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 
 #include "internal/api/crypto/Asymmetric.hpp"
 #include "opentxs/Types.hpp"
@@ -40,10 +40,10 @@ namespace crypto
 class Parameters;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Secret;
@@ -57,11 +57,11 @@ class Asymmetric final : virtual public api::crypto::internal::Asymmetric
 public:
     auto API() const noexcept -> const api::Session& final;
     auto InstantiateECKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::EllipticCurve final;
     auto InstantiateHDKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
@@ -97,7 +97,7 @@ public:
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::key::HD final;
     auto InstantiateKey(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::asymmetric::Key final;
     auto InstantiateSecp256k1Key(
@@ -259,7 +259,7 @@ private:
     static auto serialize_path(
         const api::Crypto& api,
         const opentxs::crypto::SeedID& seedID,
-        const opentxs::crypto::Bip32::Path& children) -> proto::HDPath;
+        const opentxs::crypto::Bip32::Path& children) -> protobuf::HDPath;
 
     template <typename ReturnType>
     auto instantiate_hd_key(
@@ -272,7 +272,7 @@ private:
         alloc::Default alloc) const noexcept -> ReturnType;
     template <typename ReturnType>
     auto instantiate_serialized_key(
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         alloc::Default alloc) const noexcept -> ReturnType;
 };
 }  // namespace opentxs::api::crypto::imp

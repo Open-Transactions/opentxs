@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/reply/storesecret/Implementation.hpp"  // IWYU pragma: associated
 
-#include <NoticeAcknowledgement.pb.h>
-#include <PeerReply.pb.h>
+#include <opentxs/protobuf/NoticeAcknowledgement.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
 #include <utility>
 
 #include "opentxs/identifier/Generic.hpp"

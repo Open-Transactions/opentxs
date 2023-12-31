@@ -5,20 +5,20 @@
 
 #include "ottest/fixtures/rpc/RpcAsync.hpp"  // IWYU pragma: associated
 
-#include <APIArgument.pb.h>
-#include <AcceptPendingPayment.pb.h>
-#include <AccountEvent.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
-#include <RPCCommand.pb.h>
-#include <RPCEnums.pb.h>
-#include <RPCPush.pb.h>
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <RPCTask.pb.h>
-#include <SendPayment.pb.h>
-#include <TaskComplete.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/APIArgument.pb.h>
+#include <opentxs/protobuf/AcceptPendingPayment.pb.h>
+#include <opentxs/protobuf/AccountEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCPush.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/RPCTask.pb.h>
+#include <opentxs/protobuf/SendPayment.pb.h>
+#include <opentxs/protobuf/TaskComplete.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -30,8 +30,8 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/verify/RPCPush.hpp"
-#include "internal/serialization/protobuf/verify/RPCResponse.hpp"
+#include "opentxs/protobuf/syntax/RPCPush.hpp"
+#include "opentxs/protobuf/syntax/RPCResponse.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 
@@ -82,11 +82,12 @@ bool RpcAsync::check_push_results(const ot::UnallocatedVector<bool>& results)
         results.cbegin(), results.cend(), [](bool result) { return result; });
 }
 
-ot::proto::RPCCommand RpcAsync::init(ot::proto::RPCCommandType commandtype)
+ot::protobuf::RPCCommand RpcAsync::init(
+    ot::protobuf::RPCCommandType commandtype)
 {
     auto cookie = ot::identifier::Generic::Random()->str();
 
-    ot::proto::RPCCommand command;
+    ot::protobuf::RPCCommand command;
     command.set_version(COMMAND_VERSION);
     command.set_cookie(cookie);
     command.set_type(commandtype);
@@ -136,7 +137,7 @@ void RpcAsync::process_notification(
     if (1 < incoming.Body().size()) { return; }
 
     const auto& frame = incoming.Body().at(0);
-    const auto rpcpush = ot::proto::Factory<proto::RPCPush>(frame);
+    const auto rpcpush = ot::protobuf::Factory<protobuf::RPCPush>(frame);
 
     if (push_checker_) {
         push_results_.emplace_back(push_checker_(rpcpush));
@@ -158,17 +159,19 @@ void RpcAsync::process_notification(
     }
 }
 
-bool RpcAsync::default_push_callback(const ot::proto::RPCPush& push)
+bool RpcAsync::default_push_callback(const ot::protobuf::RPCPush& push)
 {
-    if (false == ot::proto::Validate(push, VERBOSE)) { return false; }
+    if (false == ot::protobuf::Validate(opentxs::LogError(), push)) {
+        return false;
+    }
 
-    if (ot::proto::RPCPUSH_TASK != push.type()) { return false; }
+    if (ot::protobuf::RPCPUSH_TASK != push.type()) { return false; }
 
     auto& task = push.taskcomplete();
 
     if (false == task.result()) { return false; }
 
-    if (ot::proto::RPCRESPONSE_SUCCESS != task.code()) { return false; }
+    if (ot::protobuf::RPCRESPONSE_SUCCESS != task.code()) { return false; }
 
     return true;
 }
@@ -192,16 +195,16 @@ void RpcAsync::setup()
     intro_server_id_ =
         ot::identifier::Notary::Factory(intro_server_contract->ID()->str());
     auto cookie = ot::identifier::Generic::Random()->str();
-    ot::proto::RPCCommand command;
+    ot::protobuf::RPCCommand command;
     command.set_version(COMMAND_VERSION);
     command.set_cookie(cookie);
-    command.set_type(ot::proto::RPCCOMMAND_ADDCLIENTSESSION);
+    command.set_type(ot::protobuf::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
     auto response = ot.RPC(command);
 
-    ASSERT_TRUE(ot::proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(ot::protobuf::Validate(opentxs::LogError(), response));
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(ot::proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(ot::protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     auto& senderClient =
         ot.Client(static_cast<int>(get_index(response.session())));
@@ -209,13 +212,13 @@ void RpcAsync::setup()
 
     cookie = ot::identifier::Generic::Random()->str();
     command.set_cookie(cookie);
-    command.set_type(ot::proto::RPCCOMMAND_ADDCLIENTSESSION);
+    command.set_type(ot::protobuf::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
     response = ot.RPC(command);
 
-    ASSERT_TRUE(ot::proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(ot::protobuf::Validate(opentxs::LogError(), response));
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(ot::proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(ot::protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     auto& receiverClient =
         ot.Client(static_cast<int>(get_index(response.session())));

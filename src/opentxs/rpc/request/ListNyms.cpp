@@ -29,7 +29,7 @@ struct ListNyms final : public Message::Imp {
     }
     ListNyms(
         const request::ListNyms* parent,
-        const proto::RPCCommand& in) noexcept(false)
+        const protobuf::RPCCommand& in) noexcept(false)
         : Imp(parent, in)
     {
         check_session();
@@ -55,7 +55,7 @@ ListNyms::ListNyms(SessionIndex session, const AssociateNyms& nyms)
 {
 }
 
-ListNyms::ListNyms(const proto::RPCCommand& in) noexcept(false)
+ListNyms::ListNyms(const protobuf::RPCCommand& in) noexcept(false)
     : Message(std::make_unique<implementation::ListNyms>(this, in))
 {
 }

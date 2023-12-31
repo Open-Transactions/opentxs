@@ -107,13 +107,13 @@ class CompactSize;
 }  // namespace blockchain
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class BlockchainBlockHeader;
 class BlockchainTransaction;
 class BlockchainTransactionInput;
 class BlockchainTransactionOutput;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -156,7 +156,7 @@ auto BitcoinBlock(
     alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
-    const proto::BlockchainBlockHeader& serialized,
+    const protobuf::BlockchainBlockHeader& serialized,
     alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*;
 [[nodiscard]] auto BitcoinBlockHeader(
     const api::Crypto& crypto,
@@ -255,7 +255,7 @@ auto BitcoinTransaction(
 [[nodiscard]] auto BitcoinTransaction(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
-    const proto::BlockchainTransaction& serialized,
+    const protobuf::BlockchainTransaction& serialized,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::TransactionPrivate*;
 [[nodiscard]] auto BitcoinTransaction(
@@ -287,7 +287,7 @@ auto BitcoinTransactionInput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
-    const proto::BlockchainTransactionInput&,
+    const protobuf::BlockchainTransactionInput&,
     const bool isGeneration,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Input;
@@ -315,7 +315,7 @@ auto BitcoinTransactionOutput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
-    const proto::BlockchainTransactionOutput& in,
+    const protobuf::BlockchainTransactionOutput& in,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Output;
 }  // namespace opentxs::factory

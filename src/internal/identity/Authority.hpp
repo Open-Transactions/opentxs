@@ -36,7 +36,7 @@ class Primary;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Authority;
 class ContactData;
@@ -44,7 +44,7 @@ class HDPath;
 class Signature;
 class VerificationItem;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,13 +54,13 @@ class Authority : virtual public identity::Authority
 {
 public:
     using AuthorityKeys = identity::Nym::AuthorityKeys;
-    using Serialized = proto::Authority;
+    using Serialized = protobuf::Authority;
 
     static auto NymToContactCredential(const VersionNumber nym) noexcept(false)
         -> VersionNumber;
 
     virtual auto EncryptionTargets() const noexcept -> AuthorityKeys = 0;
-    virtual auto GetContactData(proto::ContactData& contactData) const
+    virtual auto GetContactData(protobuf::ContactData& contactData) const
         -> bool = 0;
     virtual auto GetMasterCredential() const -> const credential::Primary& = 0;
     auto Internal() const noexcept -> const internal::Authority& final
@@ -108,42 +108,43 @@ public:
         const String::List* plistRevokedIDs = nullptr) const
         -> const crypto::key::Keypair& = 0;
     virtual auto GetVerificationSet(
-        proto::VerificationSet& verificationSet) const -> bool = 0;
-    virtual auto Path(proto::HDPath& output) const -> bool = 0;
+        protobuf::VerificationSet& verificationSet) const -> bool = 0;
+    virtual auto Path(protobuf::HDPath& output) const -> bool = 0;
     virtual auto Serialize(
         Serialized& serialized,
         const CredentialIndexModeFlag mode) const -> bool = 0;
     virtual auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         crypto::HashType hash,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
     virtual auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         crypto::HashType hash,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool = 0;
-    virtual auto Verify(const Data& plaintext, const proto::Signature& sig)
+    virtual auto Verify(const Data& plaintext, const protobuf::Signature& sig)
         const -> bool = 0;
     virtual auto Verify(
         const Data& plaintext,
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool = 0;
-    virtual auto Verify(const proto::VerificationItem& item) const -> bool = 0;
+    virtual auto Verify(const protobuf::VerificationItem& item) const
+        -> bool = 0;
     virtual auto VerifyInternally() const -> bool = 0;
     virtual auto WriteCredentials() const -> bool = 0;
 
@@ -151,10 +152,10 @@ public:
         const crypto::Parameters& nymParameters,
         const PasswordPrompt& reason) -> identifier::Generic = 0;
     virtual auto AddVerificationCredential(
-        const proto::VerificationSet& verificationSet,
+        const protobuf::VerificationSet& verificationSet,
         const PasswordPrompt& reason) -> bool = 0;
     virtual auto AddContactCredential(
-        const proto::ContactData& contactData,
+        const protobuf::ContactData& contactData,
         const PasswordPrompt& reason) -> bool = 0;
     auto Internal() noexcept -> internal::Authority& final { return *this; }
     virtual void RevokeContactCredentials(

@@ -1,0 +1,25 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTStorageContacts";
+option optimize_for = LITE_RUNTIME;
+
+import public "StorageContactAddressIndex.proto";
+import public "StorageContactNymIndex.proto";
+import public "StorageIDList.proto";
+import public "StorageItemHash.proto";
+
+message StorageContacts
+{
+    optional uint32 version = 1;
+    repeated StorageIDList merge = 2;
+    repeated StorageItemHash contact = 3;
+    repeated StorageContactAddressIndex address = 4;
+    repeated StorageContactNymIndex nym = 5;
+}

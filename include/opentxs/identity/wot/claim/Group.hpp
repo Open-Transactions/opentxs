@@ -27,10 +27,10 @@ class Item;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactSection;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -54,8 +54,9 @@ public:
     auto end() const -> ItemMap::const_iterator;
     auto Primary() const -> const identifier::Generic&;
     auto PrimaryClaim() const -> std::shared_ptr<Item>;
-    auto SerializeTo(proto::ContactSection& section, const bool withIDs = false)
-        const -> bool;
+    auto SerializeTo(
+        protobuf::ContactSection& section,
+        const bool withIDs = false) const -> bool;
     auto Size() const -> std::size_t;
     auto Type() const -> const claim::ClaimType&;
 

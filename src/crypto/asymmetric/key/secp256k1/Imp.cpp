@@ -30,7 +30,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 Secp256k1::Secp256k1(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     allocator_type alloc) noexcept(false)
     : KeyPrivate(alloc)
     , EllipticCurvePrivate(alloc)
@@ -103,7 +103,7 @@ Secp256k1::Secp256k1(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -138,7 +138,7 @@ Secp256k1::Secp256k1(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,

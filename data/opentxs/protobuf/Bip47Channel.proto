@@ -1,0 +1,26 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTBip47Channel";
+option optimize_for = LITE_RUNTIME;
+
+import public "Bip47Direction.proto";
+import public "BlockchainDeterministicAccountData.proto";
+import public "PaymentCode.proto";
+
+message Bip47Channel
+{
+    optional uint32 version = 1;
+    optional BlockchainDeterministicAccountData deterministic = 2;
+    optional PaymentCode local = 3;
+    optional PaymentCode remote = 4;
+    optional Bip47Direction incoming = 5;
+    optional Bip47Direction outgoing = 6;
+    optional string contact = 7;
+}

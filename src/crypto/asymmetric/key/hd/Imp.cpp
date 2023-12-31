@@ -5,9 +5,9 @@
 
 #include "crypto/asymmetric/key/hd/Imp.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Ciphertext.pb.h>
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstdint>
 #include <iterator>
 #include <limits>
@@ -39,16 +39,17 @@ namespace opentxs::crypto::asymmetric::key::implementation
 HD::HD(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     allocator_type alloc) noexcept(false)
     : EllipticCurve(api, ecdsa, serializedKey, alloc)
     , path_(
           serializedKey.has_path()
-              ? std::make_shared<proto::HDPath>(serializedKey.path())
+              ? std::make_shared<protobuf::HDPath>(serializedKey.path())
               : nullptr)
     , chain_code_(
           serializedKey.has_chaincode()
-              ? std::make_unique<proto::Ciphertext>(serializedKey.chaincode())
+              ? std::make_unique<protobuf::Ciphertext>(
+                    serializedKey.chaincode())
               : nullptr)
     , plaintext_chain_code_(api.Factory().Secret(0))
     , parent_(serializedKey.bip32_parent())
@@ -116,7 +117,7 @@ HD::HD(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -134,7 +135,7 @@ HD::HD(
           sessionKey,
           reason,
           alloc)
-    , path_(std::make_shared<proto::HDPath>(path))
+    , path_(std::make_shared<protobuf::HDPath>(path))
     , chain_code_(encrypt_key(chainCode.Bytes(), false, sessionKey, reason))
     , plaintext_chain_code_(chainCode)
     , parent_(parent)
@@ -150,7 +151,7 @@ HD::HD(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -164,7 +165,7 @@ HD::HD(
           role,
           version,
           alloc)
-    , path_(std::make_shared<proto::HDPath>(path))
+    , path_(std::make_shared<protobuf::HDPath>(path))
     , chain_code_()
     , plaintext_chain_code_(chainCode)
     , parent_(parent)
@@ -174,9 +175,9 @@ HD::HD(
 
 HD::HD(const HD& rhs, allocator_type alloc) noexcept
     : EllipticCurve(rhs, alloc)
-    , path_(bool(rhs.path_) ? new proto::HDPath(*rhs.path_) : nullptr)
+    , path_(bool(rhs.path_) ? new protobuf::HDPath(*rhs.path_) : nullptr)
     , chain_code_(
-          bool(rhs.chain_code_) ? new proto::Ciphertext(*rhs.chain_code_)
+          bool(rhs.chain_code_) ? new protobuf::Ciphertext(*rhs.chain_code_)
                                 : nullptr)
     , plaintext_chain_code_(rhs.plaintext_chain_code_)
     , parent_(rhs.parent_)
@@ -231,8 +232,9 @@ auto HD::Depth() const noexcept -> int
 auto HD::erase_private_data(const Lock& lock) -> void
 {
     EllipticCurve::erase_private_data(lock);
-    const_cast<std::shared_ptr<const proto::HDPath>&>(path_).reset();
-    const_cast<std::unique_ptr<const proto::Ciphertext>&>(chain_code_).reset();
+    const_cast<std::shared_ptr<const protobuf::HDPath>&>(path_).reset();
+    const_cast<std::unique_ptr<const protobuf::Ciphertext>&>(chain_code_)
+        .reset();
 }
 
 auto HD::Fingerprint() const noexcept -> Bip32Fingerprint
@@ -342,7 +344,7 @@ auto HD::Path() const noexcept -> const UnallocatedCString
     return path->Get();
 }
 
-auto HD::Path(proto::HDPath& output) const noexcept -> bool
+auto HD::Path(protobuf::HDPath& output) const noexcept -> bool
 {
     if (path_) {
         output = *path_;

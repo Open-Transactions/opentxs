@@ -107,7 +107,7 @@ auto PaymentCode::Imp::Locator(Writer&&, const std::uint8_t) const noexcept
     return {};
 }
 
-auto PaymentCode::Imp::operator==(const proto::PaymentCode&) const noexcept
+auto PaymentCode::Imp::operator==(const protobuf::PaymentCode&) const noexcept
     -> bool
 {
     return {};
@@ -132,7 +132,7 @@ auto PaymentCode::Imp::Serialize(Serialized& serialized) const noexcept -> bool
 
 auto PaymentCode::Imp::Sign(
     const identity::credential::Base&,
-    proto::Signature&,
+    protobuf::Signature&,
     const opentxs::PasswordPrompt&) const noexcept -> bool
 {
     return {};
@@ -165,8 +165,8 @@ auto PaymentCode::Imp::UnblindV3(
 auto PaymentCode::Imp::Valid() const noexcept -> bool { return {}; }
 
 auto PaymentCode::Imp::Verify(
-    const proto::Credential& master,
-    const proto::Signature& sourceSignature) const noexcept -> bool
+    const protobuf::Credential& master,
+    const protobuf::Signature& sourceSignature) const noexcept -> bool
 {
     return {};
 }

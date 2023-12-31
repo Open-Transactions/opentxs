@@ -5,13 +5,12 @@
 
 #include "opentxs/rpc/request/internal.factory.hpp"  // IWYU pragma: associated
 
-#include <RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
 #include <stdexcept>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/RPCCommand.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/RPCCommand.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/Types.hpp"
 #include "opentxs/rpc/Types.internal.hpp"
@@ -21,16 +20,17 @@
 #include "opentxs/rpc/request/ListNyms.hpp"
 #include "opentxs/rpc/request/Message.hpp"
 #include "opentxs/rpc/request/SendPayment.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
 {
-auto RPCRequest(const proto::RPCCommand& proto) noexcept
+auto RPCRequest(const protobuf::RPCCommand& proto) noexcept
     -> std::unique_ptr<rpc::request::Message>
 {
     using enum rpc::CommandType;
 
     try {
-        if (false == proto::Validate(proto, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), proto)) {
             throw std::runtime_error{"invalid serialized rpc request"};
         }
 
@@ -110,6 +110,6 @@ auto RPCRequest(const proto::RPCCommand& proto) noexcept
 auto RPCRequest(ReadView protobuf) noexcept
     -> std::unique_ptr<rpc::request::Message>
 {
-    return RPCRequest(proto::Factory<proto::RPCCommand>(protobuf));
+    return RPCRequest(protobuf::Factory<protobuf::RPCCommand>(protobuf));
 }
 }  // namespace opentxs::factory

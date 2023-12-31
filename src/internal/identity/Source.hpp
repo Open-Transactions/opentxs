@@ -19,12 +19,12 @@ class Primary;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class NymIDSource;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -43,14 +43,14 @@ public:
     }
 
     auto Internal() noexcept -> internal::Source& final { return *this; }
-    virtual auto Serialize(proto::NymIDSource& serialized) const noexcept
+    virtual auto Serialize(protobuf::NymIDSource& serialized) const noexcept
         -> bool = 0;
     virtual auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept -> bool = 0;
+        const protobuf::Credential& master,
+        const protobuf::Signature& sourceSignature) const noexcept -> bool = 0;
     virtual auto Sign(
         const identity::credential::Primary& credential,
-        proto::Signature& sig,
+        protobuf::Signature& sig,
         const PasswordPrompt& reason) const noexcept -> bool = 0;
 
     Source(const Source&) = delete;

@@ -6,12 +6,12 @@
 #include "crypto/Seed.hpp"              // IWYU pragma: associated
 #include "internal/crypto/Factory.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
-#include <Enums.pb.h>
-#include <Seed.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/Seed.pb.h>
 #include <algorithm>
 #include <compare>
 #include <cstddef>
@@ -26,9 +26,6 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Seed.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -44,6 +41,8 @@
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/protobuf/syntax/Seed.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -141,7 +140,7 @@ auto Seed(
     const api::crypto::Symmetric& symmetric,
     const api::session::Factory& factory,
     const api::session::Storage& storage,
-    const proto::Seed& proto,
+    const protobuf::Seed& proto,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed
 {
     using ReturnType = opentxs::crypto::Seed::Imp;
@@ -154,15 +153,17 @@ auto Seed(
 
 namespace opentxs::crypto::internal
 {
-using SeedTypeMap = frozen::unordered_map<SeedStyle, proto::SeedType, 3>;
-using SeedTypeReverseMap = frozen::unordered_map<proto::SeedType, SeedStyle, 3>;
-using SeedLangMap = frozen::unordered_map<Language, proto::SeedLang, 2>;
-using SeedLangReverseMap = frozen::unordered_map<proto::SeedLang, Language, 2>;
+using SeedTypeMap = frozen::unordered_map<SeedStyle, protobuf::SeedType, 3>;
+using SeedTypeReverseMap =
+    frozen::unordered_map<protobuf::SeedType, SeedStyle, 3>;
+using SeedLangMap = frozen::unordered_map<Language, protobuf::SeedLang, 2>;
+using SeedLangReverseMap =
+    frozen::unordered_map<protobuf::SeedLang, Language, 2>;
 
 static auto seed_lang_map() noexcept -> const SeedLangMap&
 {
     using enum Language;
-    using enum proto::SeedLang;
+    using enum protobuf::SeedLang;
     static constexpr auto map = SeedLangMap{
         {none, SEEDLANG_NONE},
         {en, SEEDLANG_EN},
@@ -173,7 +174,7 @@ static auto seed_lang_map() noexcept -> const SeedLangMap&
 static auto seed_type_map() noexcept -> const SeedTypeMap&
 {
     using enum SeedStyle;
-    using enum proto::SeedType;
+    using enum protobuf::SeedType;
     static constexpr auto map = SeedTypeMap{
         {BIP32, SEEDTYPE_RAW},
         {BIP39, SEEDTYPE_BIP39},
@@ -182,27 +183,27 @@ static auto seed_type_map() noexcept -> const SeedTypeMap&
 
     return map;
 }
-static auto translate(const SeedStyle in) noexcept -> proto::SeedType
+static auto translate(const SeedStyle in) noexcept -> protobuf::SeedType
 {
     try {
 
         return seed_type_map().at(in);
     } catch (...) {
 
-        return proto::SEEDTYPE_ERROR;
+        return protobuf::SEEDTYPE_ERROR;
     }
 }
-static auto translate(const Language in) noexcept -> proto::SeedLang
+static auto translate(const Language in) noexcept -> protobuf::SeedLang
 {
     try {
 
         return seed_lang_map().at(in);
     } catch (...) {
 
-        return proto::SEEDLANG_NONE;
+        return protobuf::SEEDLANG_NONE;
     }
 }
-static auto translate(const proto::SeedLang in) noexcept -> Language
+static auto translate(const protobuf::SeedLang in) noexcept -> Language
 {
     static const auto map = frozen::invert_unordered_map(seed_lang_map());
 
@@ -215,7 +216,7 @@ static auto translate(const proto::SeedLang in) noexcept -> Language
     }
 }
 
-static auto translate(const proto::SeedType in) noexcept -> SeedStyle
+static auto translate(const protobuf::SeedType in) noexcept -> SeedStyle
 {
     static const auto map = frozen::invert_unordered_map(seed_type_map());
 
@@ -230,7 +231,7 @@ static auto translate(const proto::SeedType in) noexcept -> SeedStyle
 
 auto Seed::Translate(const int proto) noexcept -> SeedStyle
 {
-    return translate(static_cast<proto::SeedType>(proto));
+    return translate(static_cast<protobuf::SeedType>(proto));
 }
 }  // namespace opentxs::crypto::internal
 
@@ -378,8 +379,8 @@ Seed::Imp::Imp(
           entropy_,
           words_,
           phrase_,
-          const_cast<proto::Ciphertext&>(encrypted_words_),
-          const_cast<proto::Ciphertext&>(encrypted_phrase_),
+          const_cast<protobuf::Ciphertext&>(encrypted_words_),
+          const_cast<protobuf::Ciphertext&>(encrypted_phrase_),
           reason))
     , created_time_(createdTime)
     , api_(api)
@@ -419,8 +420,8 @@ Seed::Imp::Imp(
           entropy_,
           words_,
           phrase_,
-          const_cast<proto::Ciphertext&>(encrypted_words_),
-          const_cast<proto::Ciphertext&>(encrypted_phrase_),
+          const_cast<protobuf::Ciphertext&>(encrypted_words_),
+          const_cast<protobuf::Ciphertext&>(encrypted_phrase_),
           reason))
     , created_time_(createdTime)
     , api_(api)
@@ -441,7 +442,7 @@ Seed::Imp::Imp(
     const api::crypto::Symmetric& symmetric,
     const api::session::Factory& factory,
     const api::session::Storage& storage,
-    const proto::Seed& proto,
+    const protobuf::Seed& proto,
     const PasswordPrompt& reason) noexcept(false)
     : type_(internal::translate(proto.type()))
     , lang_(internal::translate(proto.lang()))
@@ -450,10 +451,11 @@ Seed::Imp::Imp(
     , entropy_(factory.Secret(0))
     , id_(factory.Internal().SeedID(proto.id()))
     , storage_(&storage)
-    , encrypted_words_(proto.has_words() ? proto.words() : proto::Ciphertext{})
+    , encrypted_words_(
+          proto.has_words() ? proto.words() : protobuf::Ciphertext{})
     , encrypted_phrase_(
-          proto.has_passphrase() ? proto.passphrase() : proto::Ciphertext{})
-    , encrypted_entropy_(proto.has_raw() ? proto.raw() : proto::Ciphertext{})
+          proto.has_passphrase() ? proto.passphrase() : protobuf::Ciphertext{})
+    , encrypted_entropy_(proto.has_raw() ? proto.raw() : protobuf::Ciphertext{})
     , created_time_(seconds_since_epoch(proto.created_time()).value())
     , api_(api)
     , data_(proto.version(), proto.index())
@@ -504,8 +506,8 @@ Seed::Imp::Imp(
             throw std::runtime_error{"Failed to calculate entropy"};
         }
 
-        auto ctext = const_cast<proto::Ciphertext&>(encrypted_entropy_);
-        auto cwords = const_cast<proto::Ciphertext&>(encrypted_words_);
+        auto ctext = const_cast<protobuf::Ciphertext&>(encrypted_entropy_);
+        auto cwords = const_cast<protobuf::Ciphertext&>(encrypted_words_);
 
         if (!key.Internal().Encrypt(entropy_.Bytes(), ctext, reason, true)) {
             throw std::runtime_error{"Failed to encrypt entropy"};
@@ -525,9 +527,9 @@ auto Seed::Imp::encrypt(
     const Secret& entropy,
     const Secret& words,
     const Secret& phrase,
-    proto::Ciphertext& cwords,
-    proto::Ciphertext& cphrase,
-    const PasswordPrompt& reason) noexcept(false) -> proto::Ciphertext
+    protobuf::Ciphertext& cwords,
+    protobuf::Ciphertext& cphrase,
+    const PasswordPrompt& reason) noexcept(false) -> protobuf::Ciphertext
 {
     auto key =
         symmetric.Key(crypto::symmetric::Algorithm::ChaCha20Poly1305, reason);
@@ -548,7 +550,7 @@ auto Seed::Imp::encrypt(
         }
     }
 
-    auto out = proto::Ciphertext{};
+    auto out = protobuf::Ciphertext{};
 
     if (!key.Internal().Encrypt(entropy.Bytes(), out, reason, true)) {
         throw std::runtime_error{"Failed to encrypt entropy"};
@@ -600,7 +602,7 @@ auto Seed::Imp::save(const MutableData& data) const noexcept -> bool
 
     *proto.mutable_raw() = encrypted_entropy_;
 
-    if (false == proto::Validate(proto, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), proto)) {
         LogAbort()()("Invalid serialized seed").Abort();
     }
 

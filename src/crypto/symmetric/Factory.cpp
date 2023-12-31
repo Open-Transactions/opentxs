@@ -5,20 +5,19 @@
 
 #include "internal/crypto/symmetric/Factory.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 
 #include "crypto/symmetric/KeyPrivate.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/crypto/symmetric/Algorithm.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
+#include "opentxs/protobuf/syntax/SymmetricKey.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -58,14 +57,14 @@ auto SymmetricKey(
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey& serialized,
+    const protobuf::SymmetricKey& serialized,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*
 {
     using ReturnType = crypto::symmetric::implementation::Key;
     using BlankType = crypto::symmetric::KeyPrivate;
 
     try {
-        if (false == proto::Validate(serialized, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), serialized)) {
 
             throw std::runtime_error{"invalid serialized key"};
         }

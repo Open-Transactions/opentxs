@@ -5,30 +5,23 @@
 
 #include "util/storage/tree/Nym.hpp"  // IWYU pragma: associated
 
-#include <BlockchainAccountData.pb.h>
-#include <BlockchainDeterministicAccountData.pb.h>
-#include <BlockchainEthereumAccountData.pb.h>
-#include <BlockchainImportedAccountData.pb.h>
-#include <Enums.pb.h>
-#include <HDAccount.pb.h>
-#include <Nym.pb.h>
-#include <Purse.pb.h>
-#include <StorageBlockchainAccountList.pb.h>
-#include <StorageItemHash.pb.h>
-#include <StorageNym.pb.h>
-#include <StoragePurse.pb.h>
+#include <opentxs/protobuf/BlockchainAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainDeterministicAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainEthereumAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainImportedAccountData.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDAccount.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/StorageBlockchainAccountList.pb.h>
+#include <opentxs/protobuf/StorageItemHash.pb.h>
+#include <opentxs/protobuf/StorageNym.pb.h>
+#include <opentxs/protobuf/StoragePurse.pb.h>
 #include <functional>
 #include <source_location>
 #include <stdexcept>
 #include <variant>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/BlockchainEthereumAccountData.hpp"
-#include "internal/serialization/protobuf/verify/HDAccount.hpp"
-#include "internal/serialization/protobuf/verify/Nym.hpp"
-#include "internal/serialization/protobuf/verify/Purse.hpp"
-#include "internal/serialization/protobuf/verify/StorageNym.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.hpp"
@@ -41,6 +34,13 @@
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/BlockchainEthereumAccountData.hpp"
+#include "opentxs/protobuf/syntax/HDAccount.hpp"
+#include "opentxs/protobuf/syntax/Nym.hpp"
+#include "opentxs/protobuf/syntax/Purse.hpp"
+#include "opentxs/protobuf/syntax/StorageNym.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Bip47Channels.hpp"
@@ -416,7 +416,7 @@ auto Nym::IncomingReplyBox() const -> const PeerReplies&
 
 auto Nym::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNym>{};
+    auto p = std::shared_ptr<protobuf::StorageNym>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -439,8 +439,8 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
                     ethereum_accounts_.emplace(
                         factory_.AccountIDFromBase58(
                             account.imported().common().id()),
-                        std::make_shared<proto::BlockchainEthereumAccountData>(
-                            account));
+                        std::make_shared<
+                            protobuf::BlockchainEthereumAccountData>(account));
                 }
 
                 [[fallthrough]];
@@ -489,7 +489,7 @@ auto Nym::init(const Hash& hash) noexcept(false) -> void
                     blockchain_accounts_.emplace(
                         factory_.AccountIDFromBase58(
                             account.deterministic().common().id()),
-                        std::make_shared<proto::HDAccount>(account));
+                        std::make_shared<protobuf::HDAccount>(account));
                 }
 
                 [[fallthrough]];
@@ -559,7 +559,7 @@ auto Nym::Issuers() const -> const tree::Issuers& { return *issuers(); }
 
 auto Nym::Load(
     const identifier::Account& id,
-    std::shared_ptr<proto::BlockchainEthereumAccountData>& output,
+    std::shared_ptr<protobuf::BlockchainEthereumAccountData>& output,
     ErrorReporting checking) const -> bool
 {
     const auto lock = Lock{ethereum_lock_};
@@ -583,7 +583,7 @@ auto Nym::Load(
 
 auto Nym::Load(
     const identifier::Account& id,
-    std::shared_ptr<proto::HDAccount>& output,
+    std::shared_ptr<protobuf::HDAccount>& output,
     ErrorReporting checking) const -> bool
 {
     const auto lock = Lock{blockchain_lock_};
@@ -606,7 +606,7 @@ auto Nym::Load(
 }
 
 auto Nym::Load(
-    std::shared_ptr<proto::Nym>& output,
+    std::shared_ptr<protobuf::Nym>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
@@ -628,7 +628,7 @@ auto Nym::Load(
 
     if (!checked_.get()) { return false; }
 
-    private_->Set(proto::NYM_PRIVATE == output->mode());
+    private_->Set(protobuf::NYM_PRIVATE == output->mode());
     revision_.store(output->revision());
 
     return true;
@@ -637,7 +637,7 @@ auto Nym::Load(
 auto Nym::Load(
     const identifier::Notary& notary,
     const identifier::UnitDefinition& unit,
-    std::shared_ptr<proto::Purse>& output,
+    std::shared_ptr<protobuf::Purse>& output,
     ErrorReporting checking) const -> bool
 {
     const auto lock = Lock{write_lock_};
@@ -831,7 +831,7 @@ auto Nym::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
@@ -881,9 +881,9 @@ auto Nym::SentReplyBox() const -> const PeerReplies&
     return *sent_reply_box();
 }
 
-auto Nym::serialize() const -> proto::StorageNym
+auto Nym::serialize() const -> protobuf::StorageNym
 {
-    auto proto = proto::StorageNym{};
+    auto proto = protobuf::StorageNym{};
     proto.set_version(version_);
     proto.set_nymid(nymid_.asBase58(crypto_));
 
@@ -970,7 +970,7 @@ auto Nym::SetAlias(std::string_view alias) -> bool
 
 auto Nym::Store(
     const UnitType type,
-    const proto::BlockchainEthereumAccountData& data) -> bool
+    const protobuf::BlockchainEthereumAccountData& data) -> bool
 {
     const auto& accountID =
         factory_.AccountIDFromBase58(data.imported().common().id());
@@ -981,7 +981,7 @@ auto Nym::Store(
         return false;
     }
 
-    if (false == proto::Validate(data, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), data)) {
         LogError()()("Invalid account.").Flush();
 
         return false;
@@ -994,7 +994,7 @@ auto Nym::Store(
 
     if (ethereum_accounts_.end() == accountItem) {
         ethereum_accounts_[accountID] =
-            std::make_shared<proto::BlockchainEthereumAccountData>(data);
+            std::make_shared<protobuf::BlockchainEthereumAccountData>(data);
     } else {
         auto& existing = accountItem->second;
 
@@ -1003,7 +1003,7 @@ auto Nym::Store(
             LogError()()("Not saving object with older revision.").Flush();
         } else {
             existing =
-                std::make_shared<proto::BlockchainEthereumAccountData>(data);
+                std::make_shared<protobuf::BlockchainEthereumAccountData>(data);
         }
     }
 
@@ -1014,7 +1014,7 @@ auto Nym::Store(
     return save(writeLock);
 }
 
-auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
+auto Nym::Store(const UnitType type, const protobuf::HDAccount& data) -> bool
 {
     const auto& accountID =
         factory_.AccountIDFromBase58(data.deterministic().common().id());
@@ -1025,7 +1025,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
         return false;
     }
 
-    if (false == proto::Validate(data, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), data)) {
         LogError()()("Invalid account.").Flush();
 
         return false;
@@ -1038,7 +1038,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
 
     if (blockchain_accounts_.end() == accountItem) {
         blockchain_accounts_[accountID] =
-            std::make_shared<proto::HDAccount>(data);
+            std::make_shared<protobuf::HDAccount>(data);
     } else {
         auto& existing = accountItem->second;
 
@@ -1046,7 +1046,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
             data.deterministic().common().revision()) {
             LogError()()("Not saving object with older revision.").Flush();
         } else {
-            existing = std::make_shared<proto::HDAccount>(data);
+            existing = std::make_shared<protobuf::HDAccount>(data);
         }
     }
 
@@ -1058,7 +1058,7 @@ auto Nym::Store(const UnitType type, const proto::HDAccount& data) -> bool
 }
 
 auto Nym::Store(
-    const proto::Nym& data,
+    const protobuf::Nym& data,
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {
@@ -1066,7 +1066,7 @@ auto Nym::Store(
 
     const std::uint64_t revision = data.revision();
     bool saveOk = false;
-    const bool incomingPublic = (proto::NYM_PUBLIC == data.mode());
+    const bool incomingPublic = (protobuf::NYM_PUBLIC == data.mode());
     const bool existing = is_valid(credentials_);
 
     if (existing) {
@@ -1074,7 +1074,7 @@ auto Nym::Store(
             if (checked_.get()) {
                 saveOk = !private_.get();
             } else {
-                std::shared_ptr<proto::Nym> serialized;
+                std::shared_ptr<protobuf::Nym> serialized;
                 using enum ErrorReporting;
                 LoadProto(credentials_, serialized, silent);
                 saveOk = !private_.get();
@@ -1093,7 +1093,7 @@ auto Nym::Store(
     if (saveOk) {
         if (upgrade) {
             const auto saved =
-                StoreProto<proto::Nym>(data, credentials_, plaintext);
+                StoreProto<protobuf::Nym>(data, credentials_, plaintext);
 
             if (!saved) { return false; }
 
@@ -1109,7 +1109,7 @@ auto Nym::Store(
     return save(lock);
 }
 
-auto Nym::Store(const proto::Purse& purse) -> bool
+auto Nym::Store(const protobuf::Purse& purse) -> bool
 {
     const auto lock = Lock{write_lock_};
     const PurseID id{

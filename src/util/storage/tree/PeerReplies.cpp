@@ -5,24 +5,23 @@
 
 #include "util/storage/tree/PeerReplies.hpp"  // IWYU pragma: associated
 
-#include <PeerReply.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/PeerReply.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/syntax/PeerReply.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -59,7 +58,7 @@ auto PeerReplies::Delete(const identifier::Generic& id) -> bool
 
 auto PeerReplies::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -79,14 +78,14 @@ auto PeerReplies::init(const Hash& hash) noexcept(false) -> void
 
 auto PeerReplies::Load(
     const identifier::Generic& id,
-    std::shared_ptr<proto::PeerReply>& output,
+    std::shared_ptr<protobuf::PeerReply>& output,
     ErrorReporting checking) const -> bool
 {
     UnallocatedCString notUsed;
     using enum ErrorReporting;
 
     const bool loaded =
-        load_proto<proto::PeerReply>(id, output, notUsed, silent);
+        load_proto<protobuf::PeerReply>(id, output, notUsed, silent);
 
     if (loaded) { return true; }
 
@@ -109,7 +108,7 @@ auto PeerReplies::Load(
 
     if (realID.empty()) { return false; }
 
-    return load_proto<proto::PeerReply>(realID, output, notUsed, checking);
+    return load_proto<protobuf::PeerReply>(realID, output, notUsed, checking);
 }
 
 auto PeerReplies::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -118,14 +117,14 @@ auto PeerReplies::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto PeerReplies::serialize() const -> proto::StorageNymList
+auto PeerReplies::serialize() const -> protobuf::StorageNymList
 {
-    proto::StorageNymList serialized;
+    protobuf::StorageNymList serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -141,7 +140,7 @@ auto PeerReplies::serialize() const -> proto::StorageNymList
     return serialized;
 }
 
-auto PeerReplies::Store(const proto::PeerReply& data) -> bool
+auto PeerReplies::Store(const protobuf::PeerReply& data) -> bool
 {
     const auto id = factory_.Internal().Identifier(data.id());
     const auto cookie = factory_.Internal().Identifier(data.cookie());

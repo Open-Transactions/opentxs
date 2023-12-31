@@ -14,10 +14,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class PairEvent;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -40,6 +40,6 @@ private:
         const std::uint32_t,
         const PairEventType,
         const UnallocatedCString&);
-    PairEvent(const proto::PairEvent&);
+    PairEvent(const protobuf::PairEvent&);
 };
 }  // namespace opentxs::contract::peer::internal

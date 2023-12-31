@@ -5,8 +5,8 @@
 
 #include "interface/ui/activitysummary/ActivitySummary.hpp"  // IWYU pragma: associated
 
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -15,7 +15,6 @@
 #include <thread>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/session/Activity.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -25,6 +24,7 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -74,7 +74,7 @@ auto ActivitySummary::construct_row(
 }
 
 auto ActivitySummary::display_name(
-    const proto::StorageThread& thread) const noexcept -> UnallocatedCString
+    const protobuf::StorageThread& thread) const noexcept -> UnallocatedCString
 {
     auto names = UnallocatedSet<UnallocatedCString>{};
 
@@ -98,10 +98,10 @@ auto ActivitySummary::display_name(
 
 auto ActivitySummary::newest_item(
     const identifier::Generic& id,
-    const proto::StorageThread& thread,
-    CustomData& custom) noexcept -> const proto::StorageThreadItem&
+    const protobuf::StorageThread& thread,
+    CustomData& custom) noexcept -> const protobuf::StorageThreadItem&
 {
-    const proto::StorageThreadItem* output{nullptr};
+    const protobuf::StorageThreadItem* output{nullptr};
     auto* time = new Time;
 
     assert_false(nullptr == time);
@@ -137,7 +137,7 @@ auto ActivitySummary::newest_item(
 void ActivitySummary::process_thread(const UnallocatedCString& id) noexcept
 {
     const auto threadID = api_.Factory().IdentifierFromBase58(id);
-    auto thread = proto::StorageThread{};
+    auto thread = protobuf::StorageThread{};
     auto loaded = api_.Activity().Thread(primary_id_, threadID, thread);
 
     assert_true(loaded);

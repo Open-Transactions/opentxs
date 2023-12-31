@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -57,12 +57,13 @@ struct Message::Imp {
     virtual auto asSendPayment() const noexcept -> const SendPayment&;
     auto check_identifiers() const noexcept(false) -> void;
     auto check_session() const noexcept(false) -> void;
-    virtual auto serialize(proto::RPCCommand& dest) const noexcept -> bool;
+    virtual auto serialize(protobuf::RPCCommand& dest) const noexcept -> bool;
     auto serialize(Writer&& dest) const noexcept -> bool;
-    auto serialize_identifiers(proto::RPCCommand& dest) const noexcept -> void;
-    auto serialize_notary(proto::RPCCommand& dest) const noexcept -> void;
-    auto serialize_owner(proto::RPCCommand& dest) const noexcept -> void;
-    auto serialize_unit(proto::RPCCommand& dest) const noexcept -> void;
+    auto serialize_identifiers(protobuf::RPCCommand& dest) const noexcept
+        -> void;
+    auto serialize_notary(protobuf::RPCCommand& dest) const noexcept -> void;
+    auto serialize_owner(protobuf::RPCCommand& dest) const noexcept -> void;
+    auto serialize_unit(protobuf::RPCCommand& dest) const noexcept -> void;
 
     Imp(const Message* parent) noexcept;
     Imp(const Message* parent,
@@ -84,7 +85,7 @@ struct Message::Imp {
         const UnallocatedCString& notary,
         const UnallocatedCString& unit,
         const AssociateNyms& nyms) noexcept;
-    Imp(const Message* parent, const proto::RPCCommand& serialized) noexcept;
+    Imp(const Message* parent, const protobuf::RPCCommand& serialized) noexcept;
     Imp() = delete;
     Imp(const Imp&) = delete;
     Imp(Imp&&) = delete;

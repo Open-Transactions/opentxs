@@ -5,8 +5,8 @@
 
 #include "opentxs/api/session/client/WalletPrivate.hpp"  // IWYU pragma: associated
 
-#include <Context.pb.h>
-#include <ServerContext.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/ServerContext.pb.h>
 #include <functional>
 
 #include "internal/network/zeromq/Context.hpp"
@@ -64,7 +64,7 @@ auto WalletPrivate::Context(
 }
 
 void WalletPrivate::instantiate_server_context(
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& localNym,
     const Nym_p& remoteNym,
     std::shared_ptr<otx::context::internal::Base>& output) const

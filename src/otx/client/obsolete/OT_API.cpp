@@ -5,9 +5,9 @@
 
 #include "internal/otx/client/obsolete/OT_API.hpp"  // IWYU pragma: associated
 
-#include <BasketItem.pb.h>
-#include <BasketParams.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/BasketItem.pb.h>
+#include <opentxs/protobuf/BasketParams.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <compare>
 #include <cstdlib>
 #include <filesystem>
@@ -2308,7 +2308,7 @@ auto OT_API::LoadNymbox(
 auto OT_API::IsBasketCurrency(const identifier::UnitDefinition& id) const
     -> bool  // returns true or false.
 {
-    auto contract = proto::UnitDefinition{};
+    auto contract = protobuf::UnitDefinition{};
     using enum opentxs::storage::ErrorReporting;
 
     if (false == api_.Storage().Internal().Load(id, contract, silent)) {
@@ -2326,7 +2326,7 @@ auto OT_API::IsBasketCurrency(const identifier::UnitDefinition& id) const
 auto OT_API::GetBasketMemberCount(const identifier::UnitDefinition& id) const
     -> std::int32_t
 {
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
     using enum opentxs::storage::ErrorReporting;
 
     if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
@@ -2351,7 +2351,7 @@ auto OT_API::GetBasketMemberType(
     std::int32_t nIndex,
     identifier::UnitDefinition& theOutputMemberType) const -> bool
 {
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
     using enum opentxs::storage::ErrorReporting;
 
     if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
@@ -2385,7 +2385,7 @@ auto OT_API::GetBasketMemberMinimumTransferAmount(
     const identifier::UnitDefinition& id,
     std::int32_t nIndex) const -> std::int64_t
 {
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
     using enum opentxs::storage::ErrorReporting;
 
     if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
@@ -2412,7 +2412,7 @@ auto OT_API::GetBasketMemberMinimumTransferAmount(
 auto OT_API::GetBasketMinimumTransferAmount(
     const identifier::UnitDefinition& id) const -> Amount
 {
-    auto serialized = proto::UnitDefinition{};
+    auto serialized = protobuf::UnitDefinition{};
     using enum opentxs::storage::ErrorReporting;
 
     if (false == api_.Storage().Internal().Load(id, serialized, silent)) {
@@ -2430,7 +2430,7 @@ auto OT_API::GetBasketMinimumTransferAmount(
 //
 // Used for creating a request to generate a new basket currency.
 auto OT_API::AddBasketCreationItem(
-    proto::UnitDefinition& basketTemplate,
+    protobuf::UnitDefinition& basketTemplate,
     const String& currencyID,
     const std::uint64_t weight) const -> bool
 {
@@ -2464,7 +2464,7 @@ auto OT_API::AddBasketCreationItem(
 // basket.
 auto OT_API::issueBasket(
     otx::context::Server& context,
-    const proto::UnitDefinition& basket,
+    const protobuf::UnitDefinition& basket,
     const UnallocatedCString& label) const -> CommandResult
 {
     const auto lock = rLock{lock_callback_(

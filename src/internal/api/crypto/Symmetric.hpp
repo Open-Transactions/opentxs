@@ -21,10 +21,10 @@ class Key;
 }  // namespace symmetric
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class SymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -40,7 +40,7 @@ public:
 
     using crypto::Symmetric::Key;
     virtual auto Key(
-        const proto::SymmetricKey& serialized,
+        const protobuf::SymmetricKey& serialized,
         const opentxs::crypto::symmetric::Algorithm mode,
         alloc::Default alloc = {}) const noexcept
         -> opentxs::crypto::symmetric::Key = 0;

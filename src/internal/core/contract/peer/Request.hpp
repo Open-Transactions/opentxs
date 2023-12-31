@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class PeerRequest;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -22,7 +22,7 @@ namespace opentxs::contract::peer::internal
 class Request
 {
 public:
-    using serialized_type = proto::PeerRequest;
+    using serialized_type = protobuf::PeerRequest;
 
     [[nodiscard]] virtual auto Serialize(serialized_type& out) const noexcept
         -> bool;

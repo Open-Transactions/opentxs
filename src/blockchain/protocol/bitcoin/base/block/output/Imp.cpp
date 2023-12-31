@@ -5,8 +5,8 @@
 
 #include "blockchain/protocol/bitcoin/base/block/output/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionOutput.pb.h>
-#include <BlockchainWalletKey.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>
+#include <opentxs/protobuf/BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>

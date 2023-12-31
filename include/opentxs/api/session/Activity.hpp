@@ -54,10 +54,10 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class StorageThread;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class PeerObject;
@@ -177,7 +177,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
-        proto::StorageThread& serialized) const noexcept -> bool = 0;
+        protobuf::StorageThread& serialized) const noexcept -> bool = 0;
     virtual auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,

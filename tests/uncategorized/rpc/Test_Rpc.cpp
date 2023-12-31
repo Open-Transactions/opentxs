@@ -3,28 +3,28 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <APIArgument.pb.h>
-#include <AddClaim.pb.h>
-#include <AddContact.pb.h>
-#include <ContactItem.pb.h>
-#include <CreateInstrumentDefinition.pb.h>
-#include <CreateNym.pb.h>
-#include <Enums.pb.h>
-#include <GetWorkflow.pb.h>
-#include <HDSeed.pb.h>
-#include <ModifyAccount.pb.h>
-#include <MoveFunds.pb.h>
-#include <Nym.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
-#include <RPCCommand.pb.h>
-#include <RPCEnums.pb.h>
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <ServerContract.pb.h>
-#include <SessionData.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/APIArgument.pb.h>
+#include <opentxs/protobuf/AddClaim.pb.h>
+#include <opentxs/protobuf/AddContact.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/CreateInstrumentDefinition.pb.h>
+#include <opentxs/protobuf/CreateNym.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/GetWorkflow.pb.h>
+#include <opentxs/protobuf/HDSeed.pb.h>
+#include <opentxs/protobuf/ModifyAccount.pb.h>
+#include <opentxs/protobuf/MoveFunds.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/SessionData.pb.h>
 #include <chrono>
 #include <cstdint>
 #include <iosfwd>
@@ -33,8 +33,8 @@
 
 #include "internal/otx/common/Account.hpp"
 #include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/verify/RPCResponse.hpp"
 #include "internal/util/Shared.hpp"
+#include "opentxs/protobuf/syntax/RPCResponse.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/rpc/Rpc.hpp"
@@ -52,26 +52,26 @@ namespace ot = opentxs;
 
 TEST_F(Rpc, List_Client_Sessions_None)
 {
-    list(proto::RPCCOMMAND_LISTCLIENTSESSIONS);
+    list(protobuf::RPCCOMMAND_LISTCLIENTSESSIONS);
 }
 
 TEST_F(Rpc, List_Server_Sessions_None)
 {
-    list(proto::RPCCOMMAND_LISTSERVERSESSIONS);
+    list(protobuf::RPCCOMMAND_LISTSERVERSESSIONS);
 }
 
 // The client created in this test gets used in subsequent tests.
 TEST_F(Rpc, Add_Client_Session)
 {
-    auto command = init(proto::RPCCOMMAND_ADDCLIENTSESSION);
+    auto command = init(protobuf::RPCCOMMAND_ADDCLIENTSESSION);
     command.set_session(-1);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -81,17 +81,17 @@ TEST_F(Rpc, Add_Client_Session)
 
 TEST_F(Rpc, List_Server_Contracts_None)
 {
-    list(proto::RPCCOMMAND_LISTSERVERCONTRACTS, 0);
+    list(protobuf::RPCCOMMAND_LISTSERVERCONTRACTS, 0);
 }
 
-TEST_F(Rpc, List_Seeds_None) { list(proto::RPCCOMMAND_LISTHDSEEDS, 0); }
+TEST_F(Rpc, List_Seeds_None) { list(protobuf::RPCCOMMAND_LISTHDSEEDS, 0); }
 
 // The server created in this test gets used in subsequent tests.
 TEST_F(Rpc, Add_Server_Session)
 {
     ArgList args{{OPENTXS_ARG_INPROC, {std::to_string(ot_.Servers() * 2 + 1)}}};
 
-    auto command = init(proto::RPCCOMMAND_ADDSERVERSESSION);
+    auto command = init(protobuf::RPCCOMMAND_ADDSERVERSESSION);
 
     command.set_session(-1);
     for (auto& arg : args) {
@@ -103,10 +103,10 @@ TEST_F(Rpc, Add_Server_Session)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -133,11 +133,11 @@ TEST_F(Rpc, Add_Server_Session)
 
 TEST_F(Rpc, Get_Server_Password)
 {
-    auto command = init(proto::RPCCOMMAND_GETSERVERPASSWORD);
+    auto command = init(protobuf::RPCCOMMAND_GETSERVERPASSWORD);
     command.set_session(1);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -147,7 +147,7 @@ TEST_F(Rpc, Get_Server_Password)
 
     EXPECT_EQ(STATUS_VERSION, status.version());
     EXPECT_EQ(status.index(), 0);
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, status.code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, status.code());
     EXPECT_EQ(1, response.identifier_size());
 
     const auto& password = response.identifier(0);
@@ -157,11 +157,11 @@ TEST_F(Rpc, Get_Server_Password)
 
 TEST_F(Rpc, Get_Admin_Nym_None)
 {
-    auto command = init(proto::RPCCOMMAND_GETADMINNYM);
+    auto command = init(protobuf::RPCCOMMAND_GETADMINNYM);
     command.set_session(1);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -171,28 +171,28 @@ TEST_F(Rpc, Get_Admin_Nym_None)
 
     EXPECT_EQ(STATUS_VERSION, status.version());
     EXPECT_EQ(status.index(), 0);
-    EXPECT_EQ(proto::RPCRESPONSE_NONE, status.code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NONE, status.code());
     EXPECT_EQ(response.identifier_size(), 0);
 }
 
 TEST_F(Rpc, List_Client_Sessions)
 {
     ArgList args;
-    auto added = add_session(proto::RPCCOMMAND_ADDCLIENTSESSION, args);
+    auto added = add_session(protobuf::RPCCOMMAND_ADDCLIENTSESSION, args);
     EXPECT_TRUE(added);
 
-    added = add_session(proto::RPCCOMMAND_ADDCLIENTSESSION, args);
+    added = add_session(protobuf::RPCCOMMAND_ADDCLIENTSESSION, args);
     EXPECT_TRUE(added);
 
-    auto command = init(proto::RPCCOMMAND_LISTCLIENTSESSIONS);
+    auto command = init(protobuf::RPCCOMMAND_LISTCLIENTSESSIONS);
     command.set_session(-1);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -211,23 +211,23 @@ TEST_F(Rpc, List_Server_Sessions)
 {
     ArgList args{{OPENTXS_ARG_INPROC, {std::to_string(ot_.Servers() * 2 + 1)}}};
 
-    auto added = add_session(proto::RPCCOMMAND_ADDSERVERSESSION, args);
+    auto added = add_session(protobuf::RPCCOMMAND_ADDSERVERSESSION, args);
     EXPECT_TRUE(added);
 
     args[OPENTXS_ARG_INPROC] = {std::to_string(ot_.Servers() * 2 + 1)};
 
-    added = add_session(proto::RPCCOMMAND_ADDSERVERSESSION, args);
+    added = add_session(protobuf::RPCCOMMAND_ADDSERVERSESSION, args);
     EXPECT_TRUE(added);
 
-    auto command = init(proto::RPCCOMMAND_LISTSERVERSESSIONS);
+    auto command = init(protobuf::RPCCOMMAND_LISTSERVERSESSIONS);
     command.set_session(-1);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -244,15 +244,15 @@ TEST_F(Rpc, List_Server_Sessions)
 
 TEST_F(Rpc, List_Server_Contracts)
 {
-    auto command = init(proto::RPCCOMMAND_LISTSERVERCONTRACTS);
+    auto command = init(protobuf::RPCCOMMAND_LISTSERVERCONTRACTS);
     command.set_session(1);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -262,16 +262,16 @@ TEST_F(Rpc, List_Server_Contracts)
 
 TEST_F(Rpc, Get_Notary_Contract)
 {
-    auto command = init(proto::RPCCOMMAND_GETSERVERCONTRACT);
+    auto command = init(protobuf::RPCCOMMAND_GETSERVERCONTRACT);
     command.set_session(0);
     command.add_identifier(server_id_);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -283,18 +283,18 @@ TEST_F(Rpc, Get_Notary_Contract)
 
 TEST_F(Rpc, Get_Notary_Contracts)
 {
-    auto command = init(proto::RPCCOMMAND_GETSERVERCONTRACT);
+    auto command = init(protobuf::RPCCOMMAND_GETSERVERCONTRACT);
     command.set_session(0);
     command.add_identifier(server2_id_);
     command.add_identifier(server3_id_);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(2, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(1).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -307,17 +307,17 @@ TEST_F(Rpc, Get_Notary_Contracts)
 
 TEST_F(Rpc, Import_Server_Contract)
 {
-    auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
+    auto command = init(protobuf::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(2);
     auto& server = *command.add_server();
     server = server_contract_;
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -325,7 +325,7 @@ TEST_F(Rpc, Import_Server_Contract)
 
 TEST_F(Rpc, Import_Server_Contracts)
 {
-    auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
+    auto command = init(protobuf::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(2);
     auto& server = *command.add_server();
     server = server2_contract_;
@@ -333,10 +333,10 @@ TEST_F(Rpc, Import_Server_Contracts)
     server2 = server3_contract_;
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(2, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(1).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -344,7 +344,7 @@ TEST_F(Rpc, Import_Server_Contracts)
 
 TEST_F(Rpc, Import_Server_Contract_Partial)
 {
-    auto command = init(proto::RPCCOMMAND_IMPORTSERVERCONTRACT);
+    auto command = init(protobuf::RPCCOMMAND_IMPORTSERVERCONTRACT);
     command.set_session(3);
     auto& server = *command.add_server();
     server = server_contract_;
@@ -353,16 +353,16 @@ TEST_F(Rpc, Import_Server_Contract_Partial)
     invalid_server.set_nymid("invalid nym identifier");
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(2, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-    EXPECT_EQ(proto::RPCRESPONSE_NONE, response.status(1).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NONE, response.status(1).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 }
 
-TEST_F(Rpc, List_Contacts_None) { list(proto::RPCCOMMAND_LISTCONTACTS, 0); }
+TEST_F(Rpc, List_Contacts_None) { list(protobuf::RPCCOMMAND_LISTCONTACTS, 0); }
 
 // The nym created in this test is used in subsequent tests.
 TEST_F(Rpc, Create_Nym)
@@ -370,7 +370,7 @@ TEST_F(Rpc, Create_Nym)
     // Add tests for specifying the seedid and index (not -1).
     // Add tests for adding claims.
 
-    auto command = init(proto::RPCCOMMAND_CREATENYM);
+    auto command = init(protobuf::RPCCOMMAND_CREATENYM);
     command.set_session(0);
 
     auto createnym = command.mutable_createnym();
@@ -384,10 +384,10 @@ TEST_F(Rpc, Create_Nym)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -397,7 +397,7 @@ TEST_F(Rpc, Create_Nym)
     nym1_id_ = response.identifier(0);
 
     // Now create more nyms for later tests.
-    command = init(proto::RPCCOMMAND_CREATENYM);
+    command = init(protobuf::RPCCOMMAND_CREATENYM);
     command.set_session(0);
 
     createnym = command.mutable_createnym();
@@ -411,16 +411,16 @@ TEST_F(Rpc, Create_Nym)
 
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_TRUE(0 != response.identifier_size());
 
     nym2_id_ = response.identifier(0);
 
-    command = init(proto::RPCCOMMAND_CREATENYM);
+    command = init(protobuf::RPCCOMMAND_CREATENYM);
     command.set_session(0);
 
     createnym = command.mutable_createnym();
@@ -434,10 +434,10 @@ TEST_F(Rpc, Create_Nym)
 
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_TRUE(0 != response.identifier_size());
 
@@ -446,19 +446,19 @@ TEST_F(Rpc, Create_Nym)
 
 TEST_F(Rpc, List_Contacts)
 {
-    auto command = init(proto::RPCCOMMAND_LISTCONTACTS);
+    auto command = init(protobuf::RPCCOMMAND_LISTCONTACTS);
     command.set_session(0);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_TRUE(3 == response.identifier_size());
 }
@@ -466,7 +466,7 @@ TEST_F(Rpc, List_Contacts)
 TEST_F(Rpc, Add_Contact)
 {
     // Add a contact using a label.
-    auto command = init(proto::RPCCOMMAND_ADDCONTACT);
+    auto command = init(protobuf::RPCCOMMAND_ADDCONTACT);
     command.set_session(0);
 
     auto& addcontact = *command.add_addcontact();
@@ -475,14 +475,14 @@ TEST_F(Rpc, Add_Contact)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_EQ(1, response.identifier_size());
 
@@ -492,7 +492,7 @@ TEST_F(Rpc, Add_Contact)
 
     ot_.ClientSession(2);
 
-    command = init(proto::RPCCOMMAND_ADDCONTACT);
+    command = init(protobuf::RPCCOMMAND_ADDCONTACT);
 
     command.set_session(2);
 
@@ -502,19 +502,19 @@ TEST_F(Rpc, Add_Contact)
 
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_EQ(1, response.identifier_size());
 
     // Add a contact using a payment code.
-    command = init(proto::RPCCOMMAND_ADDCONTACT);
+    command = init(protobuf::RPCCOMMAND_ADDCONTACT);
 
     command.set_session(2);
 
@@ -526,26 +526,26 @@ TEST_F(Rpc, Add_Contact)
 
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 
     EXPECT_EQ(1, response.identifier_size());
 }
 
 TEST_F(Rpc, List_Unit_Definitions_None)
 {
-    list(proto::RPCCOMMAND_LISTUNITDEFINITIONS, 0);
+    list(protobuf::RPCCOMMAND_LISTUNITDEFINITIONS, 0);
 }
 
 TEST_F(Rpc, Create_Unit_Definition)
 {
-    auto command = init(proto::RPCCOMMAND_CREATEUNITDEFINITION);
+    auto command = init(protobuf::RPCCOMMAND_CREATEUNITDEFINITION);
     command.set_session(0);
     command.set_owner(nym1_id_);
     auto def = command.mutable_createunit();
@@ -563,9 +563,9 @@ TEST_F(Rpc, Create_Unit_Definition)
     def->set_unitofaccount(translate(identity::wot::claim::ClaimType::Usd));
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -582,13 +582,13 @@ TEST_F(Rpc, Create_Unit_Definition)
 
 TEST_F(Rpc, List_Unit_Definitions)
 {
-    auto command = init(proto::RPCCOMMAND_LISTUNITDEFINITIONS);
+    auto command = init(protobuf::RPCCOMMAND_LISTUNITDEFINITIONS);
     command.set_session(0);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -602,7 +602,7 @@ TEST_F(Rpc, List_Unit_Definitions)
 
 TEST_F(Rpc, Add_Claim)
 {
-    auto command = init(proto::RPCCOMMAND_ADDCLAIM);
+    auto command = init(protobuf::RPCCOMMAND_ADDCLAIM);
     command.set_session(0);
 
     command.set_owner(nym1_id_);
@@ -610,26 +610,26 @@ TEST_F(Rpc, Add_Claim)
     auto& addclaim = *command.add_claim();
     addclaim.set_version(ADDCLAIM_VERSION);
     addclaim.set_sectionversion(ADDCLAIM_SECTION_VERSION);
-    addclaim.set_sectiontype(proto::CONTACTSECTION_RELATIONSHIP);
+    addclaim.set_sectiontype(protobuf::CONTACTSECTION_RELATIONSHIP);
 
     auto& additem = *addclaim.mutable_item();
     additem.set_version(CONTACTITEM_VERSION);
-    additem.set_type(proto::CITEMTYPE_ALIAS);
+    additem.set_type(protobuf::CITEMTYPE_ALIAS);
     additem.set_value("RPCCOMMAND_ADDCLAIM");
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 }
 
 TEST_F(Rpc, Add_Claim_No_Nym)
 {
-    auto command = init(proto::RPCCOMMAND_ADDCLAIM);
+    auto command = init(protobuf::RPCCOMMAND_ADDCLAIM);
     command.set_session(0);
 
     // Use an id that isn't a nym.
@@ -638,28 +638,28 @@ TEST_F(Rpc, Add_Claim_No_Nym)
     auto& addclaim = *command.add_claim();
     addclaim.set_version(ADDCLAIM_VERSION);
     addclaim.set_sectionversion(ADDCLAIM_SECTION_VERSION);
-    addclaim.set_sectiontype(proto::CONTACTSECTION_RELATIONSHIP);
+    addclaim.set_sectiontype(protobuf::CONTACTSECTION_RELATIONSHIP);
 
     auto& additem = *addclaim.mutable_item();
     additem.set_version(CONTACTITEM_VERSION);
-    additem.set_type(proto::CITEMTYPE_ALIAS);
+    additem.set_type(protobuf::CITEMTYPE_ALIAS);
     additem.set_value("RPCCOMMAND_ADDCLAIM");
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
 }
 
 TEST_F(Rpc, Delete_Claim_No_Nym)
 {
-    auto command = init(proto::RPCCOMMAND_DELETECLAIM);
+    auto command = init(protobuf::RPCCOMMAND_DELETECLAIM);
     command.set_session(0);
 
     command.set_owner(unit_definition_id_->str());
@@ -675,76 +675,76 @@ TEST_F(Rpc, Delete_Claim_No_Nym)
     command.add_identifier(claim_id_);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
 }
 
 TEST_F(Rpc, Delete_Claim)
 {
-    auto command = init(proto::RPCCOMMAND_DELETECLAIM);
+    auto command = init(protobuf::RPCCOMMAND_DELETECLAIM);
     command.set_session(0);
     command.set_owner(nym1_id_);
     command.add_identifier(claim_id_);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
 }
 
 TEST_F(Rpc, RegisterNym)
 {
-    auto command = init(proto::RPCCOMMAND_REGISTERNYM);
+    auto command = init(protobuf::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
     command.set_owner(nym1_id_);
     auto& server = ot_.Server(0);
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
     // Register the other nyms.
-    command = init(proto::RPCCOMMAND_REGISTERNYM);
+    command = init(protobuf::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
     command.set_owner(nym2_id_);
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
-    command = init(proto::RPCCOMMAND_REGISTERNYM);
+    command = init(protobuf::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
     command.set_owner(nym3_id_);
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -752,7 +752,7 @@ TEST_F(Rpc, RegisterNym)
 
 TEST_F(Rpc, RegisterNym_No_Nym)
 {
-    auto command = init(proto::RPCCOMMAND_REGISTERNYM);
+    auto command = init(protobuf::RPCCOMMAND_REGISTERNYM);
     command.set_session(0);
     // Use an id that isn't a nym.
     command.set_owner(unit_definition_id_->str());
@@ -760,9 +760,9 @@ TEST_F(Rpc, RegisterNym_No_Nym)
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NYM_NOT_FOUND, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -770,7 +770,7 @@ TEST_F(Rpc, RegisterNym_No_Nym)
 
 TEST_F(Rpc, Create_Issuer_Account)
 {
-    auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
+    auto command = init(protobuf::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(0);
     command.set_owner(nym1_id_);
     auto& server = ot_.Server(0);
@@ -782,9 +782,9 @@ TEST_F(Rpc, Create_Issuer_Account)
     command.add_identifier(ISSUER_ACCOUNT_LABEL);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -797,14 +797,14 @@ TEST_F(Rpc, Create_Issuer_Account)
 
 TEST_F(Rpc, Lookup_Account_ID)
 {
-    auto command = init(proto::RPCCOMMAND_LOOKUPACCOUNTID);
+    auto command = init(protobuf::RPCCOMMAND_LOOKUPACCOUNTID);
     command.set_session(0);
     command.set_param(ISSUER_ACCOUNT_LABEL);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -814,16 +814,16 @@ TEST_F(Rpc, Lookup_Account_ID)
 
 TEST_F(Rpc, Get_Unit_Definition)
 {
-    auto command = init(proto::RPCCOMMAND_GETUNITDEFINITION);
+    auto command = init(protobuf::RPCCOMMAND_GETUNITDEFINITION);
     command.set_session(0);
     command.add_identifier(unit_definition_id_->str());
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -832,7 +832,7 @@ TEST_F(Rpc, Get_Unit_Definition)
 
 TEST_F(Rpc, Create_Issuer_Account_Unnecessary)
 {
-    auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
+    auto command = init(protobuf::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(0);
     command.set_owner(nym1_id_);
     auto& server = ot_.Server(0);
@@ -844,10 +844,10 @@ TEST_F(Rpc, Create_Issuer_Account_Unnecessary)
     command.add_identifier(ISSUER_ACCOUNT_LABEL);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_UNNECESSARY, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_UNNECESSARY, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -856,7 +856,7 @@ TEST_F(Rpc, Create_Issuer_Account_Unnecessary)
 
 TEST_F(Rpc, Create_Account)
 {
-    auto command = init(proto::RPCCOMMAND_CREATEACCOUNT);
+    auto command = init(protobuf::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(0);
     command.set_owner(nym2_id_);
     auto& server = ot_.Server(0);
@@ -868,9 +868,9 @@ TEST_F(Rpc, Create_Account)
     command.add_identifier(USER_ACCOUNT_LABEL);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -885,7 +885,7 @@ TEST_F(Rpc, Create_Account)
     }
 
     // Create two accounts for nym 3.
-    command = init(proto::RPCCOMMAND_CREATEACCOUNT);
+    command = init(protobuf::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(0);
     command.set_owner(nym3_id_);
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
@@ -893,10 +893,10 @@ TEST_F(Rpc, Create_Account)
     command.add_identifier(USER_ACCOUNT_LABEL);
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -911,7 +911,7 @@ TEST_F(Rpc, Create_Account)
         nym3_account1_id_ = response.identifier(0);
     }
 
-    command = init(proto::RPCCOMMAND_CREATEACCOUNT);
+    command = init(protobuf::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(0);
     command.set_owner(nym3_id_);
     command.set_notary(server.ID().asBase58(ot_.Crypto()));
@@ -919,10 +919,10 @@ TEST_F(Rpc, Create_Account)
     command.add_identifier(USER_ACCOUNT_LABEL);
     response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -998,7 +998,7 @@ TEST_F(Rpc, Send_Payment_Transfer)
 // RPCPAYMENTTYPE_BLIND
 TEST_F(Rpc, Move_Funds)
 {
-    auto command = init(proto::RPCCOMMAND_MOVEFUNDS);
+    auto command = init(protobuf::RPCCOMMAND_MOVEFUNDS);
     command.set_session(0);
     const auto& manager = ot_.ClientSession(0);
     auto nym3id = ot::identifier::Nym::Factory(nym3_id_);
@@ -1007,16 +1007,16 @@ TEST_F(Rpc, Move_Funds)
     EXPECT_NE(nullptr, movefunds);
 
     movefunds->set_version(MOVEFUNDS_VERSION);
-    movefunds->set_type(proto::RPCPAYMENTTYPE_TRANSFER);
+    movefunds->set_type(protobuf::RPCPAYMENTTYPE_TRANSFER);
     movefunds->set_sourceaccount(nym3_account1_id_);
     movefunds->set_destinationaccount(nym3_account2_id_);
     movefunds->set_memo("Move_Funds test");
     movefunds->set_amount(25);
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -1066,7 +1066,7 @@ TEST_F(Rpc, Get_Workflow)
 
     auto workflowid = *workflows.begin();
 
-    auto command = init(proto::RPCCOMMAND_GETWORKFLOW);
+    auto command = init(protobuf::RPCCOMMAND_GETWORKFLOW);
 
     command.set_session(0);
 
@@ -1077,11 +1077,11 @@ TEST_F(Rpc, Get_Workflow)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -1102,7 +1102,7 @@ TEST_F(Rpc, Get_Workflow)
 
 TEST_F(Rpc, Get_Compatible_Account_No_Cheque)
 {
-    auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
+    auto command = init(protobuf::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
     command.set_session(0);
     command.set_owner(nym3_id_);
@@ -1111,11 +1111,12 @@ TEST_F(Rpc, Get_Compatible_Account_No_Cheque)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_CHEQUE_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(
+        protobuf::RPCRESPONSE_CHEQUE_NOT_FOUND, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -1125,7 +1126,7 @@ TEST_F(Rpc, Get_Compatible_Account_No_Cheque)
 
 TEST_F(Rpc, Rename_Account_Not_Found)
 {
-    auto command = init(proto::RPCCOMMAND_RENAMEACCOUNT);
+    auto command = init(protobuf::RPCCOMMAND_RENAMEACCOUNT);
     command.set_session(0);
     ot_.ClientSession(0);
 
@@ -1137,18 +1138,19 @@ TEST_F(Rpc, Rename_Account_Not_Found)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(1, response.status_size());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
 
-    EXPECT_EQ(proto::RPCRESPONSE_ACCOUNT_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(
+        protobuf::RPCRESPONSE_ACCOUNT_NOT_FOUND, response.status(0).code());
 }
 
 TEST_F(Rpc, Rename_Accounts)
 {
-    auto command = init(proto::RPCCOMMAND_RENAMEACCOUNT);
+    auto command = init(protobuf::RPCCOMMAND_RENAMEACCOUNT);
     command.set_session(0);
     ot_.ClientSession(0);
     const ot::UnallocatedVector<ot::UnallocatedCString> accounts{
@@ -1166,26 +1168,26 @@ TEST_F(Rpc, Rename_Accounts)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(4, response.status_size());
 
     for (const auto& status : response.status()) {
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, status.code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, status.code());
     }
 }
 
 TEST_F(Rpc, Get_Nym)
 {
-    auto command = init(proto::RPCCOMMAND_GETNYM);
+    auto command = init(protobuf::RPCCOMMAND_GETNYM);
     command.set_session(0);
     command.add_identifier(nym1_id_);
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -1195,7 +1197,7 @@ TEST_F(Rpc, Get_Nym)
     const auto& credentialindex = response.nym(0);
     EXPECT_EQ(identity::Nym::DefaultVersion, credentialindex.version());
     EXPECT_STREQ(nym1_id_.c_str(), credentialindex.nymid().c_str());
-    EXPECT_EQ(proto::NYM_PUBLIC, credentialindex.mode());
+    EXPECT_EQ(protobuf::NYM_PUBLIC, credentialindex.mode());
     EXPECT_EQ(4, credentialindex.revision());
     EXPECT_EQ(1, credentialindex.activecredentials_size());
     EXPECT_EQ(credentialindex.revokedcredentials_size(), 0);
@@ -1203,7 +1205,7 @@ TEST_F(Rpc, Get_Nym)
 
 TEST_F(Rpc, Get_Nyms)
 {
-    auto command = init(proto::RPCCOMMAND_GETNYM);
+    auto command = init(protobuf::RPCCOMMAND_GETNYM);
     command.set_session(0);
     command.add_identifier(nym1_id_);
     command.add_identifier(nym2_id_);
@@ -1213,13 +1215,13 @@ TEST_F(Rpc, Get_Nyms)
 
     auto response = ot_.RPC(command);
 
-    EXPECT_TRUE(proto::Validate(response, VERBOSE));
+    EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
     EXPECT_EQ(4, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(2).code());
-    EXPECT_EQ(proto::RPCRESPONSE_NYM_NOT_FOUND, response.status(3).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(1).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(2).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_NYM_NOT_FOUND, response.status(3).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_EQ(command.cookie(), response.cookie());
     EXPECT_EQ(command.type(), response.type());
@@ -1232,7 +1234,7 @@ TEST_F(Rpc, Get_Nyms)
         nym1_id_ == credentialindex.nymid() ||
         nym2_id_ == credentialindex.nymid() ||
         nym3_id_ == credentialindex.nymid());
-    EXPECT_EQ(proto::NYM_PUBLIC, credentialindex.mode());
+    EXPECT_EQ(protobuf::NYM_PUBLIC, credentialindex.mode());
     EXPECT_EQ(4, credentialindex.revision());
     EXPECT_EQ(1, credentialindex.activecredentials_size());
     EXPECT_EQ(credentialindex.revokedcredentials_size(), 0);
@@ -1241,7 +1243,7 @@ TEST_F(Rpc, Get_Nyms)
 TEST_F(Rpc, Import_Seed_Invalid)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_IMPORTHDSEED);
+        auto command = init(protobuf::RPCCOMMAND_IMPORTHDSEED);
         command.set_session(0);
         auto& seed = *command.mutable_hdseed();
         seed.set_version(1);
@@ -1250,10 +1252,10 @@ TEST_F(Rpc, Import_Seed_Invalid)
 
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
         EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_INVALID, response.status(0).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_INVALID, response.status(0).code());
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         EXPECT_EQ(command.cookie(), response.cookie());
         EXPECT_EQ(command.type(), response.type());
@@ -1267,7 +1269,7 @@ TEST_F(Rpc, Import_Seed_Invalid)
 TEST_F(Rpc, Import_Seed)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_IMPORTHDSEED);
+        auto command = init(protobuf::RPCCOMMAND_IMPORTHDSEED);
         command.set_session(0);
         auto& seed = *command.mutable_hdseed();
         seed.set_version(1);
@@ -1276,10 +1278,10 @@ TEST_F(Rpc, Import_Seed)
 
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
         EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         EXPECT_EQ(command.cookie(), response.cookie());
         EXPECT_EQ(command.type(), response.type());
@@ -1295,15 +1297,15 @@ TEST_F(Rpc, Import_Seed)
 TEST_F(Rpc, List_Seeds)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_LISTHDSEEDS);
+        auto command = init(protobuf::RPCCOMMAND_LISTHDSEEDS);
         command.set_session(0);
 
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
 
         EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         EXPECT_EQ(command.cookie(), response.cookie());
         EXPECT_EQ(command.type(), response.type());
@@ -1325,14 +1327,14 @@ TEST_F(Rpc, List_Seeds)
 TEST_F(Rpc, Get_Seed)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_GETHDSEED);
+        auto command = init(protobuf::RPCCOMMAND_GETHDSEED);
         command.set_session(0);
         command.add_identifier(seed_id_);
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
         EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         EXPECT_EQ(command.cookie(), response.cookie());
         EXPECT_EQ(command.type(), response.type());
@@ -1351,16 +1353,16 @@ TEST_F(Rpc, Get_Seed)
 TEST_F(Rpc, Get_Seeds)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_GETHDSEED);
+        auto command = init(protobuf::RPCCOMMAND_GETHDSEED);
         command.set_session(0);
         command.add_identifier(seed_id_);
         command.add_identifier(seed2_id_);
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
         EXPECT_EQ(2, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
-        EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(1).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
+        EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(1).code());
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         EXPECT_EQ(command.cookie(), response.cookie());
         EXPECT_EQ(command.type(), response.type());
@@ -1381,14 +1383,15 @@ TEST_F(Rpc, Get_Seeds)
 TEST_F(Rpc, Get_Transaction_Data)
 {
     if (ot::api::crypto::HaveHDKeys()) {
-        auto command = init(proto::RPCCOMMAND_GETTRANSACTIONDATA);
+        auto command = init(protobuf::RPCCOMMAND_GETTRANSACTIONDATA);
         command.set_session(0);
         command.add_identifier(seed_id_);  // Not a real uuid
         auto response = ot_.RPC(command);
 
-        EXPECT_TRUE(proto::Validate(response, VERBOSE));
+        EXPECT_TRUE(protobuf::Validate(opentxs::LogError(), response));
         EXPECT_EQ(1, response.status_size());
-        EXPECT_EQ(proto::RPCRESPONSE_UNIMPLEMENTED, response.status(0).code());
+        EXPECT_EQ(
+            protobuf::RPCRESPONSE_UNIMPLEMENTED, response.status(0).code());
     } else {
         // TODO
     }

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 
 #include "core/contract/Unit.hpp"
@@ -62,7 +62,7 @@ public:
     Basket(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized);
+        const protobuf::UnitDefinition serialized);
     Basket(Basket&&) = delete;
     auto operator=(const Basket&) -> Basket& = delete;
     auto operator=(Basket&&) -> Basket& = delete;
@@ -75,8 +75,8 @@ private:
     const Subcontracts subcontracts_;
     const std::uint64_t weight_;
 
-    auto BasketIDVersion() const -> proto::UnitDefinition;
-    auto IDVersion() const -> proto::UnitDefinition final;
+    auto BasketIDVersion() const -> protobuf::UnitDefinition;
+    auto IDVersion() const -> protobuf::UnitDefinition final;
 
     Basket(const Basket&);
 };

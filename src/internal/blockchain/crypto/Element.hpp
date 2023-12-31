@@ -28,10 +28,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainAddress;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -39,7 +39,7 @@ namespace opentxs::blockchain::crypto::internal
 {
 struct Element : virtual public crypto::Element {
     using Txid = opentxs::blockchain::block::TransactionHash;
-    using SerializedType = proto::BlockchainAddress;
+    using SerializedType = protobuf::BlockchainAddress;
 
     enum class Availability {
         NeverUsed,

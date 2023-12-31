@@ -5,9 +5,9 @@
 
 #include "ottest/fixtures/blockchain/Cashtoken.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>  // IWYU pragma: keep
 #include <boost/json.hpp>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>  // IWYU pragma: keep
 #include <optional>
 
 #include "internal/blockchain/block/Transaction.hpp"

@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/crypto/Factory.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <exception>
 #include <memory>
 
@@ -28,7 +28,7 @@ auto BlockchainNotificationSubaccount(
     try {
         using ReturnType = blockchain::crypto::NotificationPrivate;
         auto out = std::make_shared<ReturnType>(api, parent, id, code, [&] {
-            auto path = proto::HDPath{};
+            auto path = protobuf::HDPath{};
             nym.Internal().PaymentCodePath(path);
 
             return path;

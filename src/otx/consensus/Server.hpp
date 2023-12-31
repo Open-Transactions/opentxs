@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <ConsensusEnums.pb.h>
-#include <Context.pb.h>
+#include <opentxs/protobuf/ConsensusEnums.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -83,10 +83,10 @@ class TransactionStatement;
 class Reply;
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class OTXPush;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class Ledger;
@@ -200,7 +200,7 @@ public:
     using Base<Server, ServerPrivate>::Request;
     auto Request(const ServerPrivate& data) const -> RequestNumber final;
     auto ResetThread() -> void final;
-    auto Resync(const proto::Context& serialized) -> bool final;
+    auto Resync(const protobuf::Context& serialized) -> bool final;
     auto SendMessage(
         const api::session::Client& client,
         const UnallocatedSet<otx::context::ManagedNumber>& pending,
@@ -238,7 +238,7 @@ public:
         const api::session::Client& api,
         const network::zeromq::socket::Publish& requestSent,
         const network::zeromq::socket::Publish& replyReceived,
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& local,
         const Nym_p& remote,
         network::ServerConnection& connection);
@@ -423,7 +423,7 @@ private:
         const Message& reply,
         const PasswordPrompt& reason) const -> bool;
     using Base<Server, ServerPrivate>::serialize;
-    auto serialize(const Data& data) const -> proto::Context final;
+    auto serialize(const Data& data) const -> protobuf::Context final;
     auto server_nym_id() const -> const identifier::Nym& final;
     auto statement(
         const Data& data,
@@ -529,13 +529,13 @@ private:
     auto process_account_push(
         Data& data,
         const api::session::Client& client,
-        const proto::OTXPush& push,
+        const protobuf::OTXPush& push,
         const PasswordPrompt& reason) -> bool;
     auto process_box_item(
         Data& data,
         const api::session::Client& client,
         const identifier::Account& accountID,
-        const proto::OTXPush& push,
+        const protobuf::OTXPush& push,
         const PasswordPrompt& reason) -> bool;
     auto process_check_nym_response(
         Data& data,
@@ -694,8 +694,9 @@ private:
         Data& data,
         DeliveryResult&& result,
         const PasswordPrompt& reason,
-        const proto::DeliveryState state = proto::DELIVERTYSTATE_ERROR) -> void;
-    auto resync(Data& data, const proto::Context& serialized) -> bool;
+        const protobuf::DeliveryState state = protobuf::DELIVERTYSTATE_ERROR)
+        -> void;
+    auto resync(Data& data, const protobuf::Context& serialized) -> bool;
     auto start(
         Data& data,
         const Lock& decisionLock,
@@ -703,7 +704,8 @@ private:
         const api::session::Client& client,
         std::shared_ptr<Message> message,
         const ExtraArgs& args,
-        const proto::DeliveryState state = proto::DELIVERTYSTATE_PENDINGSEND,
+        const protobuf::DeliveryState state =
+            protobuf::DELIVERTYSTATE_PENDINGSEND,
         const ActionType type = ActionType::Normal,
         std::shared_ptr<Ledger> inbox = {},
         std::shared_ptr<Ledger> outbox = {},
@@ -732,7 +734,7 @@ private:
         bool& sendStatus) -> RequestNumber;
     auto update_state(
         Data& data,
-        const proto::DeliveryState state,
+        const protobuf::DeliveryState state,
         const PasswordPrompt& reason,
         const otx::LastReplyStatus status = otx::LastReplyStatus::Invalid)
         -> void;

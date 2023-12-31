@@ -5,8 +5,8 @@
 
 #include "blockchain/node/peermanager/PeerManager.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
 #include <boost/json.hpp>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <compare>
@@ -38,8 +38,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Timer.hpp"
 #include "network/blockchain/Seednodes.hpp"
@@ -86,6 +84,8 @@
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -1028,12 +1028,12 @@ auto Actor::listen_tcp(const network::blockchain::Address& address) noexcept
                 using enum network::blockchain::PeerJob;
                 auto out = MakeWork(gossip_address);
                 const auto proto = [&] {
-                    auto p = proto::BlockchainPeerAddress{};
+                    auto p = protobuf::BlockchainPeerAddress{};
                     address.Internal().Serialize(p);
 
                     return p;
                 }();
-                proto::write(proto, out.AppendBytes());
+                protobuf::write(proto, out.AppendBytes());
 
                 return out;
             }());
@@ -1192,7 +1192,7 @@ auto Actor::process_addlistener(
     assert_true(1 < body.size());
 
     auto address = api_.Factory().Internal().Session().BlockchainAddress(
-        proto::Factory<proto::BlockchainPeerAddress>(body[1]));
+        protobuf::Factory<protobuf::BlockchainPeerAddress>(body[1]));
 
     if (address.IsValid()) {
         listen(address, monotonic);
@@ -1207,7 +1207,7 @@ auto Actor::process_addpeer(Message&& msg) noexcept -> void
     assert_true(1 < body.size());
 
     auto address = api_.Factory().Internal().Session().BlockchainAddress(
-        proto::Factory<proto::BlockchainPeerAddress>(body[1]));
+        protobuf::Factory<protobuf::BlockchainPeerAddress>(body[1]));
 
     if (address.IsValid()) {
         add_peer(std::move(address), false);
@@ -1269,7 +1269,7 @@ auto Actor::process_gossip_address(Message&& msg) noexcept -> void
 
     for (auto& frame : addresses) {
         auto addr = api_.Factory().Internal().Session().BlockchainAddress(
-            proto::Factory<proto::BlockchainPeerAddress>(frame));
+            protobuf::Factory<protobuf::BlockchainPeerAddress>(frame));
 
         if (addr.IsValid()) {
             log()(name_)(": adding ")(addr.Display())(" on ")(

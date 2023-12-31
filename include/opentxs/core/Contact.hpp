@@ -56,11 +56,11 @@ class Item;
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Contact;
 class Nym;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Data;
@@ -84,7 +84,7 @@ public:
 
     OPENTXS_NO_EXPORT Contact(
         const api::session::Client& api,
-        const proto::Contact& serialized);
+        const protobuf::Contact& serialized);
     Contact(const api::session::Client& api, std::string_view label);
 
     auto operator+=(Contact& rhs) -> Contact&;
@@ -111,7 +111,7 @@ public:
     auto PaymentCodes(alloc::Default alloc) const -> Set<opentxs::PaymentCode>;
     auto PhoneNumbers(bool active = true) const -> UnallocatedCString;
     auto Print() const -> UnallocatedCString;
-    OPENTXS_NO_EXPORT auto Serialize(proto::Contact& out) const -> bool;
+    OPENTXS_NO_EXPORT auto Serialize(protobuf::Contact& out) const -> bool;
     auto SocialMediaProfiles(
         const identity::wot::claim::ClaimType type,
         bool active = true) const -> UnallocatedCString;
@@ -148,7 +148,7 @@ public:
         const bool active) -> bool;
     auto RemoveNym(const identifier::Nym& nymID) -> bool;
     void SetLabel(std::string_view label);
-    OPENTXS_NO_EXPORT void Update(const proto::Nym& nym);
+    OPENTXS_NO_EXPORT void Update(const protobuf::Nym& nym);
 
     Contact() = delete;
     Contact(const Contact&) = delete;

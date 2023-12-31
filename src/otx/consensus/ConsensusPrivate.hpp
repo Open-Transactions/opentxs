@@ -18,10 +18,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Context;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -52,6 +52,6 @@ protected:
     ConsensusPrivate(
         const api::Session& api,
         const VersionNumber targetVersion,
-        const proto::Context& serialized) noexcept;
+        const protobuf::Context& serialized) noexcept;
 };
 }  // namespace opentxs::otx::context

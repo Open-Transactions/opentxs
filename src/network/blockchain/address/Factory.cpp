@@ -5,7 +5,7 @@
 
 #include "internal/network/blockchain/Factory.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -107,7 +107,7 @@ auto BlockchainAddress(
 auto BlockchainAddress(
     const api::Crypto& crypto,
     const api::Factory& factory,
-    const proto::BlockchainPeerAddress& serialized) noexcept
+    const protobuf::BlockchainPeerAddress& serialized) noexcept
     -> network::blockchain::Address
 {
     using ReturnType = network::blockchain::AddressPrivate;

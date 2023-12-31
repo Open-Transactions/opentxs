@@ -5,10 +5,10 @@
 
 #include "core/contract/ServerContract.hpp"  // IWYU pragma: associated
 
-#include <ListenAddress.pb.h>
-#include <Nym.pb.h>
-#include <ServerContract.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/ListenAddress.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -24,9 +24,6 @@
 #include "internal/core/contract/Contract.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/ServerContract.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.internal.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -43,6 +40,9 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/ServerContract.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -114,12 +114,12 @@ auto Factory::ServerContract(
 auto Factory::ServerContract(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::ServerContract& serialized) noexcept
+    const protobuf::ServerContract& serialized) noexcept
     -> std::unique_ptr<contract::Server>
 {
     using ReturnType = contract::implementation::Server;
 
-    if (false == proto::Validate<proto::ServerContract>(serialized, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
         return nullptr;
     }
 
@@ -169,7 +169,7 @@ Server::Server(
 Server::Server(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::ServerContract& serialized)
+    const protobuf::ServerContract& serialized)
     : Signable(
           api,
           nym,
@@ -179,7 +179,7 @@ Server::Server(
           ""s,
           api.Factory().Internal().NotaryID(serialized.id()),
           serialized.has_signature()
-              ? Signatures{std::make_shared<proto::Signature>(
+              ? Signatures{std::make_shared<protobuf::Signature>(
                     serialized.signature())}
               : Signatures{})
     , listen_params_(extract_endpoints(serialized))
@@ -218,7 +218,8 @@ auto Server::EffectiveName() const -> UnallocatedCString
     return output;
 }
 
-auto Server::extract_endpoints(const proto::ServerContract& serialized) noexcept
+auto Server::extract_endpoints(
+    const protobuf::ServerContract& serialized) noexcept
     -> UnallocatedList<contract::Server::Endpoint>
 {
     auto output = UnallocatedList<contract::Server::Endpoint>{};
@@ -273,7 +274,7 @@ auto Server::ConnectInfo(
     return false;
 }
 
-auto Server::contract() const -> proto::ServerContract
+auto Server::contract() const -> protobuf::ServerContract
 {
     auto contract = SigVersion();
     const auto sigs = signatures();
@@ -285,9 +286,9 @@ auto Server::contract() const -> proto::ServerContract
     return contract;
 }
 
-auto Server::IDVersion() const -> proto::ServerContract
+auto Server::IDVersion() const -> protobuf::ServerContract
 {
-    proto::ServerContract contract;
+    protobuf::ServerContract contract;
     contract.set_version(Version());
     contract.clear_id();         // reinforcing that this field must be blank.
     contract.clear_signature();  // reinforcing that this field must be blank.
@@ -327,7 +328,7 @@ auto Server::SetAlias(std::string_view alias) noexcept -> bool
     return true;
 }
 
-auto Server::SigVersion() const -> proto::ServerContract
+auto Server::SigVersion() const -> protobuf::ServerContract
 {
     auto contract = IDVersion();
     ID().Internal().Serialize(*contract.mutable_id());
@@ -342,7 +343,7 @@ auto Server::Serialize(Writer&& out) const noexcept -> bool
 
 auto Server::Serialize(Writer&& destination, bool includeNym) const -> bool
 {
-    auto serialized = proto::ServerContract{};
+    auto serialized = protobuf::ServerContract{};
     if (false == Serialize(serialized, includeNym)) {
         LogError()()("Failed to serialize server.").Flush();
         return false;
@@ -353,13 +354,13 @@ auto Server::Serialize(Writer&& destination, bool includeNym) const -> bool
     return true;
 }
 
-auto Server::Serialize(proto::ServerContract& serialized, bool includeNym) const
-    -> bool
+auto Server::Serialize(protobuf::ServerContract& serialized, bool includeNym)
+    const -> bool
 {
     serialized = contract();
 
     if (includeNym && Signer()) {
-        auto publicNym = proto::Nym{};
+        auto publicNym = protobuf::Nym{};
         if (false == Signer()->Internal().Serialize(publicNym)) {
             return false;
         }
@@ -402,7 +403,7 @@ auto Server::update_signature(const PasswordPrompt& reason) -> bool
         serialized, crypto::SignatureRole::ServerContract, signature, reason);
 
     if (success) {
-        sigs.emplace_back(new proto::Signature(signature));
+        sigs.emplace_back(new protobuf::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
         LogError()()("failed to create signature.").Flush();
@@ -423,7 +424,7 @@ auto Server::validate() const -> bool
         return false;
     }
 
-    const bool validSyntax = proto::Validate(contract(), VERBOSE);
+    const bool validSyntax = protobuf::syntax::check(LogError(), contract());
 
     if (!validSyntax) {
         LogError()()("Invalid syntax.").Flush();
@@ -453,7 +454,8 @@ auto Server::validate() const -> bool
     return true;
 }
 
-auto Server::verify_signature(const proto::Signature& signature) const -> bool
+auto Server::verify_signature(const protobuf::Signature& signature) const
+    -> bool
 {
     if (!Signable::verify_signature(signature)) { return false; }
 

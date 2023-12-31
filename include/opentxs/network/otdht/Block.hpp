@@ -16,10 +16,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class P2PBlockchainSync;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -37,11 +37,11 @@ public:
     auto Header() const noexcept -> ReadView;
     auto Height() const noexcept -> opentxs::blockchain::block::Height;
     OPENTXS_NO_EXPORT auto Serialize(
-        proto::P2PBlockchainSync& dest) const noexcept -> bool;
+        protobuf::P2PBlockchainSync& dest) const noexcept -> bool;
     OPENTXS_NO_EXPORT auto Serialize(Writer&& dest) const noexcept -> bool;
 
     OPENTXS_NO_EXPORT Block(
-        const proto::P2PBlockchainSync& serialized) noexcept(false);
+        const protobuf::P2PBlockchainSync& serialized) noexcept(false);
     OPENTXS_NO_EXPORT Block(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Height height,

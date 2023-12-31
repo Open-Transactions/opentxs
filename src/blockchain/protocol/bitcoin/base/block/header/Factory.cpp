@@ -101,7 +101,7 @@ auto BitcoinBlockHeader(
 
 auto BitcoinBlockHeader(
     const api::Crypto& crypto,
-    const proto::BlockchainBlockHeader& serialized,
+    const protobuf::BlockchainBlockHeader& serialized,
     alloc::Strategy alloc) noexcept -> blockchain::block::HeaderPrivate*
 {
     using ReturnType =

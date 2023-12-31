@@ -37,10 +37,10 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Purse;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -54,7 +54,7 @@ public:
     virtual auto Type() const -> blind::CashType = 0;
     virtual auto Unit() const -> const identifier::UnitDefinition& = 0;
     virtual auto Notary() const -> const identifier::Notary& = 0;
-    virtual auto Serialize(proto::Purse&) const noexcept -> bool = 0;
+    virtual auto Serialize(protobuf::Purse&) const noexcept -> bool = 0;
 
     virtual auto PrimaryKey(PasswordPrompt& password) noexcept(false)
         -> crypto::symmetric::Key& = 0;

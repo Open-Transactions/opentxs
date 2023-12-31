@@ -5,8 +5,8 @@
 
 #include "otx/consensus/Client.hpp"  // IWYU pragma: associated
 
-#include <ClientContext.pb.h>
-#include <Context.pb.h>
+#include <opentxs/protobuf/ClientContext.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
 #include <memory>
 #include <shared_mutex>
 #include <utility>
@@ -34,7 +34,7 @@ auto ClientContext(
 
 auto ClientContext(
     const api::Session& api,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     const identifier::Notary& server) -> otx::context::internal::Client*
@@ -64,7 +64,7 @@ ClientContext::ClientContext(
 
 ClientContext::ClientContext(
     const api::Session& api,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     const identifier::Notary& server)
@@ -171,7 +171,7 @@ auto ClientContext::OpenCronItems() const -> std::size_t
     return data.open_cron_items_.size();
 }
 
-auto ClientContext::serialize(const Data& data) const -> proto::Context
+auto ClientContext::serialize(const Data& data) const -> protobuf::Context
 {
     auto output = serialize(data, Type());
     auto& client = *output.mutable_clientcontext();

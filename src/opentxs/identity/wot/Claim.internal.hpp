@@ -33,10 +33,10 @@ class Claim;  // IWYU pragma: keep
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Claim;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -71,7 +71,7 @@ public:
         -> const wot::Claim::identifier_type&;
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
     [[nodiscard]] virtual auto Section() const noexcept -> claim::SectionType;
-    virtual auto Serialize(proto::Claim& out) const noexcept -> void;
+    virtual auto Serialize(protobuf::Claim& out) const noexcept -> void;
     [[nodiscard]] virtual auto Serialize(Writer&& out) const noexcept -> bool;
     [[nodiscard]] virtual auto Start() const noexcept -> Time;
     [[nodiscard]] virtual auto Stop() const noexcept -> Time;

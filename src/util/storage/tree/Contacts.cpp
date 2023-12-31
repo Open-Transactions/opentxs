@@ -5,23 +5,19 @@
 
 #include "util/storage/tree/Contacts.hpp"  // IWYU pragma: associated
 
-#include <Contact.pb.h>
-#include <ContactData.pb.h>
-#include <ContactItem.pb.h>
-#include <ContactSection.pb.h>
-#include <StorageContactNymIndex.pb.h>
-#include <StorageContacts.pb.h>
-#include <StorageIDList.pb.h>
+#include <opentxs/protobuf/Contact.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/ContactSection.pb.h>
+#include <opentxs/protobuf/StorageContactNymIndex.pb.h>
+#include <opentxs/protobuf/StorageContacts.pb.h>
+#include <opentxs/protobuf/StorageIDList.pb.h>
 #include <atomic>
 #include <cstdlib>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Contact.hpp"
-#include "internal/serialization/protobuf/verify/StorageContacts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -30,6 +26,10 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Contact.hpp"
+#include "opentxs/protobuf/syntax/StorageContacts.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -72,7 +72,8 @@ auto Contacts::Delete(const identifier::Generic& id) -> bool
     return delete_item(id);
 }
 
-void Contacts::extract_nyms(const Lock& lock, const proto::Contact& data) const
+void Contacts::extract_nyms(const Lock& lock, const protobuf::Contact& data)
+    const
 {
     if (false == verify_write_lock(lock)) {
         LogError()()("Lock failure.").Flush();
@@ -102,7 +103,7 @@ void Contacts::extract_nyms(const Lock& lock, const proto::Contact& data) const
 
 auto Contacts::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageContacts>{};
+    auto p = std::shared_ptr<protobuf::StorageContacts>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -158,13 +159,13 @@ auto Contacts::List() const -> ObjectList
 
 auto Contacts::Load(
     const identifier::Generic& id,
-    std::shared_ptr<proto::Contact>& output,
+    std::shared_ptr<protobuf::Contact>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
     const auto& normalized = nomalize_id(id);
 
-    return load_proto<proto::Contact>(normalized, output, alias, checking);
+    return load_proto<protobuf::Contact>(normalized, output, alias, checking);
 }
 
 auto Contacts::nomalize_id(const identifier::Generic& input) const
@@ -190,7 +191,7 @@ auto Contacts::NymOwner(const identifier::Nym& nym) const -> identifier::Generic
     return it->second;
 }
 
-void Contacts::reconcile_maps(const Lock& lock, const proto::Contact& data)
+void Contacts::reconcile_maps(const Lock& lock, const protobuf::Contact& data)
 {
     if (false == verify_write_lock(lock)) {
         LogError()()("Lock failure.").Flush();
@@ -243,7 +244,9 @@ auto Contacts::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
@@ -255,9 +258,9 @@ auto Contacts::Save() const -> bool
     return save(lock);
 }
 
-auto Contacts::serialize() const -> proto::StorageContacts
+auto Contacts::serialize() const -> protobuf::StorageContacts
 {
-    proto::StorageContacts serialized;
+    protobuf::StorageContacts serialized;
     serialized.set_version(version_);
 
     for (const auto& parent : merge_) {
@@ -312,9 +315,10 @@ auto Contacts::SetAlias(const identifier::Generic& id, std::string_view alias)
     return set_alias(normalized, alias);
 }
 
-auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
+auto Contacts::Store(const protobuf::Contact& data, std::string_view alias)
+    -> bool
 {
-    if (false == proto::Validate(data, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), data)) { return false; }
 
     const auto lock = Lock{write_lock_};
 
@@ -326,7 +330,7 @@ auto Contacts::Store(const proto::Contact& data, std::string_view alias) -> bool
 
     if (existingKey) {
         const bool revisionCheck =
-            check_revision<proto::Contact>(incomingRevision, metadata);
+            check_revision<protobuf::Contact>(incomingRevision, metadata);
 
         if (false == revisionCheck) {
             // We're trying to save a contact with a lower revision than has

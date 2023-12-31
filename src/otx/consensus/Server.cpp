@@ -5,18 +5,18 @@
 
 #include "otx/consensus/Server.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <ConsensusEnums.pb.h>
-#include <Context.pb.h>
-#include <Nym.pb.h>
-#include <OTXEnums.pb.h>
-#include <OTXPush.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PendingCommand.pb.h>
-#include <Purse.pb.h>
-#include <ServerContext.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/ConsensusEnums.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/OTXEnums.pb.h>
+#include <opentxs/protobuf/OTXPush.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PendingCommand.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/ServerContext.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <algorithm>
 #include <atomic>
 #include <filesystem>
@@ -63,11 +63,6 @@
 #include "internal/otx/consensus/ManagedNumber.hpp"
 #include "internal/otx/consensus/Server.hpp"
 #include "internal/otx/consensus/TransactionStatement.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/Context.hpp"
-#include "internal/serialization/protobuf/verify/Purse.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/P0330.hpp"
@@ -120,6 +115,10 @@
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/SendResult.hpp"            // IWYU pragma: keep
 #include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Context.hpp"
+#include "opentxs/protobuf/syntax/Purse.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Iterator.hpp"
@@ -167,7 +166,7 @@ auto ServerContext(
     const api::session::Client& api,
     const network::zeromq::socket::Publish& requestSent,
     const network::zeromq::socket::Publish& replyReceived,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     network::ServerConnection& connection) -> otx::context::internal::Server*
@@ -206,7 +205,7 @@ Server::Server(
     const api::session::Client& api,
     const network::zeromq::socket::Publish& requestSent,
     const network::zeromq::socket::Publish& replyReceived,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     network::ServerConnection& connection)
@@ -1626,7 +1625,7 @@ auto Server::harvest_unused(Data& data, const api::session::Client& client)
     // harvested
     for (const auto& [id, alias] : workflows) {
         const auto workflowID = api_.Factory().IdentifierFromBase58(id);
-        auto proto = proto::PaymentWorkflow{};
+        auto proto = protobuf::PaymentWorkflow{};
 
         if (false == client.Workflow().LoadWorkflow(nymID, workflowID, proto)) {
             LogError()()("Failed to load workflow ")(workflowID, api_.Crypto())(
@@ -2263,7 +2262,7 @@ void Server::need_box_items(
                     // Downloading a box receipt shouldn't fail. If it does, the
                     // only reasonable option is to download the nymbox again.
                     update_state(
-                        data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+                        data, protobuf::DELIVERTYSTATE_NEEDNYMBOX, reason);
                 }
 
                 [[fallthrough]];
@@ -2282,7 +2281,7 @@ void Server::need_box_items(
     }
 
     if (nymbox->GetTransactionMap().size() == have) {
-        update_state(data, proto::DELIVERTYSTATE_NEEDPROCESSNYMBOX, reason);
+        update_state(data, protobuf::DELIVERTYSTATE_NEEDPROCESSNYMBOX, reason);
     }
 }
 
@@ -2317,7 +2316,8 @@ auto Server::need_nymbox(
                     data.pending_message_ = result.second;
                 }
 
-                update_state(data, proto::DELIVERTYSTATE_NEEDBOXITEMS, reason);
+                update_state(
+                    data, protobuf::DELIVERTYSTATE_NEEDBOXITEMS, reason);
 
                 return;
             }
@@ -2373,10 +2373,10 @@ auto Server::need_process_nymbox(
             DeliveryResult result{
                 otx::LastReplyStatus::MessageSuccess, data.pending_message_};
             resolve_queue(
-                data, std::move(result), reason, proto::DELIVERTYSTATE_IDLE);
+                data, std::move(result), reason, protobuf::DELIVERTYSTATE_IDLE);
         } else {
             // The server never received the original message.
-            update_state(data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+            update_state(data, protobuf::DELIVERTYSTATE_PENDINGSEND, reason);
         }
 
         return;
@@ -2412,16 +2412,17 @@ auto Server::need_process_nymbox(
                     data,
                     std::move(result),
                     reason,
-                    proto::DELIVERTYSTATE_IDLE);
+                    protobuf::DELIVERTYSTATE_IDLE);
             } else {
                 // The server never received the original message.
-                update_state(data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+                update_state(
+                    data, protobuf::DELIVERTYSTATE_PENDINGSEND, reason);
             }
         } else {
             LogError()()("Failed trying to accept the entire "
                          "Nymbox. (And no, it's not empty).")
                 .Flush();
-            update_state(data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+            update_state(data, protobuf::DELIVERTYSTATE_NEEDNYMBOX, reason);
         }
 
         return;
@@ -2467,11 +2468,11 @@ auto Server::need_process_nymbox(
                         data,
                         std::move(resultProcessNymbox),
                         reason,
-                        proto::DELIVERTYSTATE_IDLE);
+                        protobuf::DELIVERTYSTATE_IDLE);
                 } else {
                     // The server never received the original message.
                     update_state(
-                        data, proto::DELIVERTYSTATE_PENDINGSEND, reason);
+                        data, protobuf::DELIVERTYSTATE_PENDINGSEND, reason);
                 }
 
                 return;
@@ -2489,7 +2490,7 @@ auto Server::need_process_nymbox(
             // the last time we downloaded it. Also if the reply was dropped
             // we might have actually processed it without realizig it.
             LogError()()("Error processing nymbox").Flush();
-            update_state(data, proto::DELIVERTYSTATE_NEEDNYMBOX, reason);
+            update_state(data, protobuf::DELIVERTYSTATE_NEEDNYMBOX, reason);
 
             return;
         }
@@ -2579,7 +2580,7 @@ auto Server::pending_send(
             }
 
             resolve_queue(
-                data, std::move(output), reason, proto::DELIVERTYSTATE_IDLE);
+                data, std::move(output), reason, protobuf::DELIVERTYSTATE_IDLE);
 
         } break;
         case client::SendResult::TIMEOUT:
@@ -2587,7 +2588,7 @@ auto Server::pending_send(
             if (needRequestNumber) {
                 update_state(
                     data,
-                    proto::DELIVERTYSTATE_NEEDNYMBOX,
+                    protobuf::DELIVERTYSTATE_NEEDNYMBOX,
                     reason,
                     otx::LastReplyStatus::Unknown);
             }
@@ -2617,7 +2618,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
         return {};
     }
 
-    auto serializedAuthKey = proto::AsymmetricKey{};
+    auto serializedAuthKey = protobuf::AsymmetricKey{};
     if (false ==
         Signer()->GetPublicAuthKey().Internal().Serialize(serializedAuthKey)) {
         LogError()()("Failed to serialize auth key").Flush();
@@ -2625,7 +2626,7 @@ auto Server::PingNotary(const PasswordPrompt& reason)
         return {};
     }
 
-    auto serializedEncryptKey = proto::AsymmetricKey{};
+    auto serializedEncryptKey = protobuf::AsymmetricKey{};
     if (false == Signer()->GetPublicEncrKey().Internal().Serialize(
                      serializedEncryptKey)) {
         LogError()()("Failed to serialize encrypt key").Flush();
@@ -2675,7 +2676,7 @@ auto Server::ProcessNotification(
     const auto& push = *pPush;
 
     switch (push.type()) {
-        case proto::OTXPUSH_NYMBOX: {
+        case protobuf::OTXPUSH_NYMBOX: {
             // Nymbox items don't have an intrinsic account ID. Use nym ID
             // instead.
             const auto account = api_.Factory().AccountIDFromHash(
@@ -2684,11 +2685,11 @@ auto Server::ProcessNotification(
 
             return process_box_item(data, client, account, push, reason);
         }
-        case proto::OTXPUSH_INBOX: {
+        case protobuf::OTXPUSH_INBOX: {
             return process_account_push(data, client, push, reason);
         }
-        case proto::OTXPUSH_ERROR:
-        case proto::OTXPUSH_OUTBOX:
+        case protobuf::OTXPUSH_ERROR:
+        case protobuf::OTXPUSH_OUTBOX:
         default: {
             LogError()()("Unsupported push type").Flush();
 
@@ -3340,7 +3341,7 @@ auto Server::process_account_data(
 auto Server::process_account_push(
     Data& data,
     const api::session::Client& client,
-    const proto::OTXPush& push,
+    const protobuf::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
     const auto accountID = api_.Factory().AccountIDFromBase58(push.accountid());
@@ -3370,7 +3371,7 @@ auto Server::process_box_item(
     Data& data,
     const api::session::Client& client,
     const identifier::Account& accountID,
-    const proto::OTXPush& push,
+    const protobuf::OTXPush& push,
     const PasswordPrompt& reason) -> bool
 {
     assert_false(nullptr == Signer());
@@ -3382,16 +3383,16 @@ auto Server::process_box_item(
     BoxType box{BoxType::Invalid};
 
     switch (push.type()) {
-        case proto::OTXPUSH_NYMBOX: {
+        case protobuf::OTXPUSH_NYMBOX: {
             box = BoxType::Nymbox;
         } break;
-        case proto::OTXPUSH_INBOX: {
+        case protobuf::OTXPUSH_INBOX: {
             box = BoxType::Inbox;
         } break;
-        case proto::OTXPUSH_OUTBOX: {
+        case protobuf::OTXPUSH_OUTBOX: {
             box = BoxType::Outbox;
         } break;
-        case proto::OTXPUSH_ERROR:
+        case protobuf::OTXPUSH_ERROR:
         default: {
             LogError()()("Invalid box type").Flush();
 
@@ -3498,7 +3499,8 @@ auto Server::process_check_nym_response(
         return true;
     }
 
-    auto serialized = proto::Factory<proto::Nym>(ByteArray{reply.payload_});
+    auto serialized =
+        protobuf::Factory<protobuf::Nym>(ByteArray{reply.payload_});
 
     auto nym = client.Wallet().Internal().Nym(serialized);
 
@@ -4182,7 +4184,7 @@ auto Server::process_get_unit_definition_response(
 
     switch (static_cast<contract::Type>(reply.enum_)) {
         case contract::Type::nym: {
-            const auto serialized = proto::Factory<proto::Nym>(raw);
+            const auto serialized = protobuf::Factory<protobuf::Nym>(raw);
             const auto contract = api_.Wallet().Internal().Nym(serialized);
 
             if (contract) {
@@ -4192,7 +4194,8 @@ auto Server::process_get_unit_definition_response(
             }
         } break;
         case contract::Type::notary: {
-            const auto serialized = proto::Factory<proto::ServerContract>(raw);
+            const auto serialized =
+                protobuf::Factory<protobuf::ServerContract>(raw);
 
             try {
                 const auto contract =
@@ -4204,7 +4207,7 @@ auto Server::process_get_unit_definition_response(
             }
         } break;
         case contract::Type::unit: {
-            auto serialized = proto::Factory<proto::UnitDefinition>(raw);
+            auto serialized = protobuf::Factory<protobuf::UnitDefinition>(raw);
 
             try {
                 const auto contract =
@@ -4742,8 +4745,9 @@ auto Server::process_register_nym_response(
     const api::session::Client& client,
     const Message& reply) -> bool
 {
-    auto serialized = proto::Factory<proto::Context>(ByteArray{reply.payload_});
-    auto verified = proto::Validate(serialized, VERBOSE);
+    auto serialized =
+        protobuf::Factory<protobuf::Context>(ByteArray{reply.payload_});
+    auto verified = protobuf::syntax::check(LogError(), serialized);
 
     if (false == verified) {
         LogError()()("Invalid context.").Flush();
@@ -5054,9 +5058,9 @@ auto Server::process_response_transaction_cash_deposit(
     const auto& item = *pItem;
     auto rawPurse = ByteArray{};
     item.GetAttachment(rawPurse);
-    const auto serializedPurse = proto::Factory<proto::Purse>(rawPurse);
+    const auto serializedPurse = protobuf::Factory<protobuf::Purse>(rawPurse);
 
-    if (false == proto::Validate(serializedPurse, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serializedPurse)) {
         LogError()()("Invalid purse").Flush();
 
         return;
@@ -6036,9 +6040,9 @@ auto Server::process_incoming_cash_withdrawal(
     const auto& nymID = nym.ID();
     auto rawPurse = ByteArray{};
     item.GetAttachment(rawPurse);
-    const auto serializedPurse = proto::Factory<proto::Purse>(rawPurse);
+    const auto serializedPurse = protobuf::Factory<protobuf::Purse>(rawPurse);
 
-    if (false == proto::Validate(serializedPurse, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serializedPurse)) {
         LogError()()("Invalid serialized purse").Flush();
 
         return;
@@ -6281,7 +6285,7 @@ auto Server::Queue(
         client,
         message,
         args,
-        proto::DELIVERTYSTATE_PENDINGSEND,
+        protobuf::DELIVERTYSTATE_PENDINGSEND,
         ActionType::Normal,
         inbox,
         outbox,
@@ -6301,7 +6305,7 @@ auto Server::RefreshNymbox(
         client,
         nullptr,
         {},
-        proto::DELIVERTYSTATE_NEEDNYMBOX,
+        protobuf::DELIVERTYSTATE_NEEDNYMBOX,
         ActionType::ProcessNymbox);
 }
 
@@ -6861,9 +6865,9 @@ auto Server::resolve_queue(
     Data& data,
     DeliveryResult&& result,
     const PasswordPrompt& reason,
-    const proto::DeliveryState state) -> void
+    const protobuf::DeliveryState state) -> void
 {
-    if (proto::DELIVERTYSTATE_ERROR != state) { data.state_.store(state); }
+    if (protobuf::DELIVERTYSTATE_ERROR != state) { data.state_.store(state); }
 
     data.last_status_.store(std::get<0>(result));
     data.inbox_.reset();
@@ -6878,12 +6882,12 @@ auto Server::resolve_queue(
     assert_true(saved);
 }
 
-auto Server::Resync(const proto::Context& serialized) -> bool
+auto Server::Resync(const protobuf::Context& serialized) -> bool
 {
     return resync(*get_data(), serialized);
 }
 
-auto Server::resync(Data& data, const proto::Context& serialized) -> bool
+auto Server::resync(Data& data, const protobuf::Context& serialized) -> bool
 {
     TransactionNumbers serverNumbers{};
 
@@ -6926,7 +6930,7 @@ auto Server::Revision() const -> std::uint64_t
 
 auto Server::update_state(
     Data& data,
-    const proto::DeliveryState state,
+    const protobuf::DeliveryState state,
     const PasswordPrompt& reason,
     const otx::LastReplyStatus status) -> void
 {
@@ -6988,7 +6992,7 @@ auto Server::SendMessage(
     return result;
 }
 
-auto Server::serialize(const Data& data) const -> proto::Context
+auto Server::serialize(const Data& data) const -> protobuf::Context
 {
     auto output = serialize(data, Type());
     auto& server = *output.mutable_servercontext();
@@ -7187,7 +7191,7 @@ auto Server::start(
     const api::session::Client& client,
     std::shared_ptr<Message> message,
     const ExtraArgs& args,
-    const proto::DeliveryState state,
+    const protobuf::DeliveryState state,
     const ActionType type,
     std::shared_ptr<Ledger> inbox,
     std::shared_ptr<Ledger> outbox,
@@ -7224,30 +7228,30 @@ auto Server::state_machine(Data& data) noexcept -> bool
     const auto& client = *pClient;
 
     switch (data.state_.load()) {
-        case proto::DELIVERTYSTATE_PENDINGSEND: {
+        case protobuf::DELIVERTYSTATE_PENDINGSEND: {
             LogDetail()()("Attempting to send message").Flush();
             pending_send(data, client, reason);
         } break;
-        case proto::DELIVERTYSTATE_NEEDNYMBOX: {
+        case protobuf::DELIVERTYSTATE_NEEDNYMBOX: {
             LogDetail()()("Downloading nymbox").Flush();
             need_nymbox(data, client, reason);
         } break;
-        case proto::DELIVERTYSTATE_NEEDBOXITEMS: {
+        case protobuf::DELIVERTYSTATE_NEEDBOXITEMS: {
             LogDetail()()("Downloading box items").Flush();
             need_box_items(data, client, reason);
         } break;
-        case proto::DELIVERTYSTATE_NEEDPROCESSNYMBOX: {
+        case protobuf::DELIVERTYSTATE_NEEDPROCESSNYMBOX: {
             LogDetail()()("Processing nymbox").Flush();
             need_process_nymbox(data, client, reason);
         } break;
-        case proto::DELIVERTYSTATE_IDLE:
-        case proto::DELIVERTYSTATE_ERROR:
+        case protobuf::DELIVERTYSTATE_IDLE:
+        case protobuf::DELIVERTYSTATE_ERROR:
         default: {
             LogAbort()()("Unexpected state").Abort();
         }
     }
 
-    const bool more = proto::DELIVERTYSTATE_IDLE != data.state_.load();
+    const bool more = protobuf::DELIVERTYSTATE_IDLE != data.state_.load();
     const bool retry = failure_count_limit_ >= data.failure_counter_.load();
 
     if (false == more) {
@@ -7258,14 +7262,14 @@ auto Server::state_machine(Data& data) noexcept -> bool
             data,
             DeliveryResult{otx::LastReplyStatus::NotSent, nullptr},
             reason,
-            proto::DELIVERTYSTATE_IDLE);
+            protobuf::DELIVERTYSTATE_IDLE);
     } else if (shutdown().load()) {
         LogError()()("Shutting down").Flush();
         resolve_queue(
             data,
             DeliveryResult{otx::LastReplyStatus::NotSent, nullptr},
             reason,
-            proto::DELIVERTYSTATE_IDLE);
+            protobuf::DELIVERTYSTATE_IDLE);
     } else {
         LogDetail()()("Continuing").Flush();
 
@@ -7594,15 +7598,16 @@ Server::~Server()
     Stop().get();
     auto handle = get_data();
     auto& data = *handle;
-    const bool needPromise = (false == data.pending_result_set_.load()) &&
-                             (proto::DELIVERTYSTATE_IDLE != data.state_.load());
+    const bool needPromise =
+        (false == data.pending_result_set_.load()) &&
+        (protobuf::DELIVERTYSTATE_IDLE != data.state_.load());
 
     if (needPromise) {
         resolve_queue(
             data,
             DeliveryResult{otx::LastReplyStatus::Unknown, nullptr},
             reason,
-            proto::DELIVERTYSTATE_IDLE);
+            protobuf::DELIVERTYSTATE_IDLE);
     }
 }
 }  // namespace opentxs::otx::context::implementation

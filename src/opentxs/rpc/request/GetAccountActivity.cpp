@@ -19,7 +19,7 @@ struct GetAccountActivity final : public Message::Imp {
     {
         return static_cast<const request::GetAccountActivity&>(*parent_);
     }
-    auto serialize(proto::RPCCommand& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCCommand& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             serialize_identifiers(dest);
@@ -48,7 +48,7 @@ struct GetAccountActivity final : public Message::Imp {
     }
     GetAccountActivity(
         const request::GetAccountActivity* parent,
-        const proto::RPCCommand& in) noexcept(false)
+        const protobuf::RPCCommand& in) noexcept(false)
         : Imp(parent, in)
     {
         check_session();
@@ -79,7 +79,7 @@ GetAccountActivity::GetAccountActivity(
 {
 }
 
-GetAccountActivity::GetAccountActivity(const proto::RPCCommand& in) noexcept(
+GetAccountActivity::GetAccountActivity(const protobuf::RPCCommand& in) noexcept(
     false)
     : Message(std::make_unique<implementation::GetAccountActivity>(this, in))
 {

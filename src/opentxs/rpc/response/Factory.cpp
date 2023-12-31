@@ -5,13 +5,12 @@
 
 #include "opentxs/rpc/response/Factory.hpp"  // IWYU pragma: associated
 
-#include <RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
 #include <stdexcept>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/RPCResponse.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/RPCResponse.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/Types.hpp"
 #include "opentxs/rpc/Types.internal.hpp"
@@ -21,15 +20,16 @@
 #include "opentxs/rpc/response/ListNyms.hpp"
 #include "opentxs/rpc/response/Message.hpp"
 #include "opentxs/rpc/response/SendPayment.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs::rpc::response
 {
 auto Factory(ReadView protobuf) noexcept -> std::unique_ptr<Message>
 {
     try {
-        const auto proto = proto::Factory<proto::RPCResponse>(protobuf);
+        const auto proto = protobuf::Factory<protobuf::RPCResponse>(protobuf);
 
-        if (false == proto::Validate(proto, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), proto)) {
             throw std::runtime_error{"invalid serialized rpc response"};
         }
 

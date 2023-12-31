@@ -40,10 +40,10 @@ class ItemPrivate;  // IWYU pragma: keep
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -74,8 +74,8 @@ public:
     auto Section() const noexcept -> claim::SectionType final;
     auto Serialize(Writer&& destination, bool withID) const noexcept
         -> bool final;
-    auto Serialize(proto::ContactItem& out, bool withID = false) const noexcept
-        -> bool final;
+    auto Serialize(protobuf::ContactItem& out, bool withID = false)
+        const noexcept -> bool final;
     auto Start() const noexcept -> Time final;
     auto Subtype() const noexcept -> ReadView final;
     auto Type() const noexcept -> claim::ClaimType final;

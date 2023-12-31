@@ -7,7 +7,7 @@
 
 #include "blockchain/protocol/bitcoin/base/node/Manager.hpp"  // IWYU pragma: associated
 
-#include <BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
 #include <memory>
 
 #include "internal/blockchain/node/Factory.hpp"

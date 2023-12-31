@@ -49,11 +49,11 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Purse;
 class Token;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class PasswordPrompt;
@@ -73,7 +73,7 @@ auto MintLucre(
     const identifier::Notary& notary,
     const identifier::Nym& serverNym,
     const identifier::UnitDefinition& unit) noexcept -> otx::blind::Mint;
-auto Purse(const api::Session& api, const proto::Purse& serialized) noexcept
+auto Purse(const api::Session& api, const protobuf::Purse& serialized) noexcept
     -> otx::blind::Purse;
 auto Purse(const api::Session& api, const ReadView& serialized) noexcept
     -> otx::blind::Purse;
@@ -111,7 +111,7 @@ auto Token(
 auto Token(
     const api::Session& api,
     otx::blind::internal::Purse& purse,
-    const proto::Token& serialized) noexcept -> otx::blind::Token;
+    const protobuf::Token& serialized) noexcept -> otx::blind::Token;
 auto Token(
     const api::Session& api,
     const identity::Nym& owner,
@@ -125,7 +125,7 @@ auto TokenLucre(
 auto TokenLucre(
     const api::Session& api,
     otx::blind::internal::Purse& purse,
-    const proto::Token& serialized) noexcept -> otx::blind::Token;
+    const protobuf::Token& serialized) noexcept -> otx::blind::Token;
 auto TokenLucre(
     const api::Session& api,
     const identity::Nym& owner,

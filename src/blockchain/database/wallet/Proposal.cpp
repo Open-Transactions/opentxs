@@ -5,19 +5,19 @@
 
 #include "blockchain/database/wallet/Proposal.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionProposal.pb.h>
 #include <cs_plain_guarded.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
 #include <stdexcept>
 
 #include "internal/blockchain/database/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/storage/lmdb/Database.hpp"
 #include "internal/util/storage/lmdb/Types.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -38,19 +38,20 @@ struct Proposal::Imp {
         return lmdb_.Exists(table_, id.Bytes());
     }
     auto LoadProposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal>
+        -> std::optional<protobuf::BlockchainTransactionProposal>
     {
         return load_proposal(id);
     }
     auto LoadProposals() const noexcept
-        -> UnallocatedVector<proto::BlockchainTransactionProposal>
+        -> UnallocatedVector<protobuf::BlockchainTransactionProposal>
     {
-        auto output = UnallocatedVector<proto::BlockchainTransactionProposal>{};
+        auto output =
+            UnallocatedVector<protobuf::BlockchainTransactionProposal>{};
         lmdb_.Read(
             table_,
             [&](const auto key, const auto value) -> bool {
                 output.emplace_back(
-                    proto::Factory<proto::BlockchainTransactionProposal>(
+                    protobuf::Factory<protobuf::BlockchainTransactionProposal>(
                         value.data(), value.size()));
 
                 return true;
@@ -62,13 +63,13 @@ struct Proposal::Imp {
 
     auto AddProposal(
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx) noexcept -> bool
+        const protobuf::BlockchainTransactionProposal& tx) noexcept -> bool
     {
         try {
             const auto bytes = [&] {
                 auto out = ByteArray{};
 
-                if (false == proto::write(tx, out.WriteInto())) {
+                if (false == protobuf::write(tx, out.WriteInto())) {
                     throw std::runtime_error{"failed to serialize proposal"};
                 }
 
@@ -173,11 +174,11 @@ private:
         }
     }
     auto load_proposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal>
+        -> std::optional<protobuf::BlockchainTransactionProposal>
     {
-        auto out = std::optional<proto::BlockchainTransactionProposal>{};
+        auto out = std::optional<protobuf::BlockchainTransactionProposal>{};
         lmdb_.Load(Table::Proposals, id.Bytes(), [&](const auto bytes) {
-            out = proto::Factory<proto::BlockchainTransactionProposal>(
+            out = protobuf::Factory<protobuf::BlockchainTransactionProposal>(
                 bytes.data(), bytes.size());
         });
 
@@ -195,7 +196,7 @@ Proposal::Proposal(
 
 auto Proposal::AddProposal(
     const identifier::Generic& id,
-    const proto::BlockchainTransactionProposal& tx) noexcept -> bool
+    const protobuf::BlockchainTransactionProposal& tx) noexcept -> bool
 {
     return imp_->AddProposal(id, tx);
 }
@@ -232,13 +233,13 @@ auto Proposal::ForgetProposals(
 }
 
 auto Proposal::LoadProposal(const identifier::Generic& id) const noexcept
-    -> std::optional<proto::BlockchainTransactionProposal>
+    -> std::optional<protobuf::BlockchainTransactionProposal>
 {
     return imp_->LoadProposal(id);
 }
 
 auto Proposal::LoadProposals() const noexcept
-    -> UnallocatedVector<proto::BlockchainTransactionProposal>
+    -> UnallocatedVector<protobuf::BlockchainTransactionProposal>
 {
     return imp_->LoadProposals();
 }

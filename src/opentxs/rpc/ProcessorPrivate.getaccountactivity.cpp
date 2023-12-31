@@ -5,8 +5,8 @@
 
 #include "opentxs/rpc/ProcessorPrivate.hpp"  // IWYU pragma: associated
 
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <utility>
 
 #include "internal/api/session/Storage.hpp"
@@ -94,13 +94,13 @@ auto ProcessorPrivate::get_account_activity(const request::Message& base) const
                     return {};
                 }();
                 const auto state = [&] {
-                    auto out{proto::PAYMENTWORKFLOWSTATE_ERROR};
+                    auto out{protobuf::PAYMENTWORKFLOWSTATE_ERROR};
                     const auto wid =
                         api.Factory().IdentifierFromBase58(row.Workflow());
 
                     if (wid.empty()) { return out; }
 
-                    auto proto = proto::PaymentWorkflow{};
+                    auto proto = protobuf::PaymentWorkflow{};
 
                     if (api.Workflow().LoadWorkflow(owner, wid, proto)) {
                         return proto.state();

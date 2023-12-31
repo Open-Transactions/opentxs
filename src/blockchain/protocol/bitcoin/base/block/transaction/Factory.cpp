@@ -3,15 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemType
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
-#include <BlockchainTransactionInput.pb.h>
-#include <BlockchainTransactionOutput.pb.h>
-#include <ContactItemType.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionInput.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>
+#include <opentxs/protobuf/ContactItemType.pb.h>
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -27,7 +27,6 @@
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
 #include "internal/core/Amount.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/Time.hpp"
@@ -47,6 +46,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -304,7 +304,7 @@ auto BitcoinTransaction(
 auto BitcoinTransaction(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
-    const proto::BlockchainTransaction& in,
+    const protobuf::BlockchainTransaction& in,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::TransactionPrivate*
 {
@@ -320,7 +320,7 @@ auto BitcoinTransaction(
             std::inserter(chains, chains.end()),
             [](const auto type) -> auto {
                 return unit_to_blockchain(ClaimToUnit(
-                    translate(static_cast<proto::ContactItemType>(type))));
+                    translate(static_cast<protobuf::ContactItemType>(type))));
             });
 
         if (chains.empty()) { throw std::runtime_error{"invalid chains"}; }

@@ -7,8 +7,8 @@
 
 #include "api/crypto/Seed.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
-#include <Seed.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Seed.pb.h>
 #include <functional>
 #include <memory>
 #include <sstream>
@@ -25,7 +25,6 @@
 #include "internal/crypto/asymmetric/Factory.hpp"
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/Types.hpp"
@@ -64,6 +63,7 @@
 #include "opentxs/crypto/symmetric/Key.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -134,7 +134,7 @@ Seed::Seed(
 }
 
 auto Seed::AccountChildKey(
-    const proto::HDPath& rootPath,
+    const protobuf::HDPath& rootPath,
     const opentxs::blockchain::crypto::Bip44Subchain subchain,
     const opentxs::crypto::Bip32Index index,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
@@ -153,11 +153,11 @@ auto Seed::AccountChildKey(
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
     return AccountChildKey(
-        proto::Factory<proto::HDPath>(view), subchain, index, reason);
+        protobuf::Factory<protobuf::HDPath>(view), subchain, index, reason);
 }
 
 auto Seed::AccountKey(
-    const proto::HDPath& rootPath,
+    const protobuf::HDPath& rootPath,
     const opentxs::blockchain::crypto::Bip44Subchain subchain,
     const PasswordPrompt& reason) const -> opentxs::crypto::asymmetric::key::HD
 {
@@ -420,7 +420,7 @@ auto Seed::GetPaymentCode(
         return out;
     }();
     const auto path = [&] {
-        auto out = proto::HDPath{};
+        auto out = protobuf::HDPath{};
         key.Internal().Path(out);
 
         return out;
@@ -507,7 +507,7 @@ auto Seed::get_seed(
     const PasswordPrompt& reason) const noexcept(false)
     -> opentxs::crypto::Seed&
 {
-    auto proto = proto::Seed{};
+    auto proto = protobuf::Seed{};
 
     if (auto it{seeds_.find(seedID)}; it != seeds_.end()) { return it->second; }
 
@@ -744,7 +744,7 @@ auto Seed::SeedDescription(const opentxs::crypto::SeedID& seedID) const noexcept
 
     try {
         const auto [type, alias] = [&] {
-            auto proto = proto::Seed{};
+            auto proto = protobuf::Seed{};
             auto name = UnallocatedCString{};
 
             if (false == storage_.Internal().Load(effective, proto, name)) {

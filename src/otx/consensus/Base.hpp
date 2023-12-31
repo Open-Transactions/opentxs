@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <Context.pb.h>
 #include <cs_shared_guarded.h>
+#include <opentxs/protobuf/Context.pb.h>
 #include <cstddef>
 #include <memory>
 #include <shared_mutex>
@@ -14,9 +14,9 @@
 
 #include "core/contract/Signable.hpp"
 #include "internal/otx/consensus/Consensus.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Editor.hpp"
 #include "opentxs/contract/Types.internal.hpp"
+#include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identity/Nym.hpp"
@@ -40,10 +40,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Factory;
 class NymFile;
@@ -94,7 +94,7 @@ public:
     auto mutable_Nymfile(const PasswordPrompt& reason)
         -> Editor<opentxs::NymFile> final;
     auto RecoverAvailableNumber(const TransactionNumber& number) -> bool final;
-    auto Refresh(proto::Context& out, const PasswordPrompt& reason)
+    auto Refresh(protobuf::Context& out, const PasswordPrompt& reason)
         -> bool final;
     auto RemoveAcknowledgedNumber(const UnallocatedSet<RequestNumber>& req)
         -> bool final;
@@ -121,7 +121,7 @@ protected:
     const VersionNumber target_version_;
 
     auto calculate_id() const -> identifier_type final;
-    auto contract(const Data& data) const -> proto::Context;
+    auto contract(const Data& data) const -> protobuf::Context;
     auto get_data() const noexcept
     {
         return static_cast<const CRTP*>(this)->data_.lock_shared();
@@ -130,9 +130,9 @@ protected:
     auto have_remote_nymbox_hash(const Data& data) const -> bool;
     using Signable::serialize;
     auto serialize(const Data& data, const otx::ConsensusType type) const
-        -> proto::Context;
-    auto serialize(const Data& data, proto::Context& out) const -> bool;
-    virtual auto serialize(const Data& data) const -> proto::Context = 0;
+        -> protobuf::Context;
+    auto serialize(const Data& data, protobuf::Context& out) const -> bool;
+    virtual auto serialize(const Data& data) const -> protobuf::Context = 0;
     using Signable::signatures;
     auto signatures() const noexcept
         -> std::span<const contract::Signature> final;
@@ -191,7 +191,7 @@ protected:
     Base(
         const api::Session& api,
         const VersionNumber targetVersion,
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& local,
         const Nym_p& remote,
         const identifier::Notary& server);
@@ -206,12 +206,13 @@ private:
 
     virtual auto client_nym_id() const -> const identifier::Nym& = 0;
     virtual auto server_nym_id() const -> const identifier::Nym& = 0;
-    auto sig_version(const Data& data) const -> proto::Context;
+    auto sig_version(const Data& data) const -> protobuf::Context;
     using Signable::verify_signature;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool final;
-    auto verify_signature(const Data& data, const proto::Signature& signature)
-        const -> bool;
+    auto verify_signature(
+        const Data& data,
+        const protobuf::Signature& signature) const -> bool;
 
     auto clear_signatures(Data& data) noexcept -> void;
     auto insert_available_number(Data& data, const TransactionNumber& number)

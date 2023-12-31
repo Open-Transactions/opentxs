@@ -5,11 +5,11 @@
 
 #include "util/storage/tree/Bip47Channels.hpp"  // IWYU pragma: associated
 
-#include <Bip47Channel.pb.h>
-#include <BlockchainAccountData.pb.h>
-#include <BlockchainDeterministicAccountData.pb.h>
-#include <StorageBip47ChannelList.pb.h>
-#include <StorageBip47Contexts.pb.h>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
+#include <opentxs/protobuf/BlockchainAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainDeterministicAccountData.pb.h>
+#include <opentxs/protobuf/StorageBip47ChannelList.pb.h>
+#include <opentxs/protobuf/StorageBip47Contexts.pb.h>
 #include <atomic>
 #include <mutex>
 #include <source_location>
@@ -17,10 +17,6 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Bip47Channel.hpp"
-#include "internal/serialization/protobuf/verify/StorageBip47Contexts.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/UnitType.hpp"  // IWYU pragma: keep
@@ -31,6 +27,10 @@
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Bip47Channel.hpp"
+#include "opentxs/protobuf/syntax/StorageBip47Contexts.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -114,7 +114,7 @@ auto Bip47Channels::get_channel_data(
 auto Bip47Channels::index(
     const eLock& lock,
     const identifier::Account& id,
-    const proto::Bip47Channel& data) -> void
+    const protobuf::Bip47Channel& data) -> void
 {
     const auto& common = data.deterministic().common();
     auto& chain = channel_data_[id];
@@ -124,7 +124,7 @@ auto Bip47Channels::index(
 
 auto Bip47Channels::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageBip47Contexts>{};
+    auto p = std::shared_ptr<protobuf::StorageBip47Contexts>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -155,12 +155,12 @@ auto Bip47Channels::init(const Hash& hash) noexcept(false) -> void
 
 auto Bip47Channels::Load(
     const identifier::Account& id,
-    std::shared_ptr<proto::Bip47Channel>& output,
+    std::shared_ptr<protobuf::Bip47Channel>& output,
     ErrorReporting checking) const -> bool
 {
     UnallocatedCString alias{""};
 
-    return load_proto<proto::Bip47Channel>(id, output, alias, checking);
+    return load_proto<protobuf::Bip47Channel>(id, output, alias, checking);
 }
 
 auto Bip47Channels::repair_indices() noexcept -> void
@@ -170,7 +170,7 @@ auto Bip47Channels::repair_indices() noexcept -> void
 
         for (const auto& [strid, alias] : List()) {
             const auto id = factory_.AccountIDFromBase58(strid);
-            auto data = std::shared_ptr<proto::Bip47Channel>{};
+            auto data = std::shared_ptr<protobuf::Bip47Channel>{};
             using enum ErrorReporting;
             const auto loaded = Load(id, data, verbose);
 
@@ -191,14 +191,14 @@ auto Bip47Channels::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Bip47Channels::serialize() const -> proto::StorageBip47Contexts
+auto Bip47Channels::serialize() const -> protobuf::StorageBip47Contexts
 {
-    auto serialized = proto::StorageBip47Contexts{};
+    auto serialized = protobuf::StorageBip47Contexts{};
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -226,7 +226,7 @@ auto Bip47Channels::serialize() const -> proto::StorageBip47Contexts
 
 auto Bip47Channels::Store(
     const identifier::Account& id,
-    const proto::Bip47Channel& data) -> bool
+    const protobuf::Bip47Channel& data) -> bool
 {
     {
         auto lock = eLock{index_lock_};

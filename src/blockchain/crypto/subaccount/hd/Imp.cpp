@@ -5,9 +5,9 @@
 
 #include "blockchain/crypto/subaccount/hd/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainAddress.pb.h>
-#include <BlockchainDeterministicAccountData.pb.h>
-#include <BlockchainHDAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
+#include <opentxs/protobuf/BlockchainDeterministicAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainHDAccountData.pb.h>
 #include <cstdint>
 #include <memory>
 #include <tuple>
@@ -18,7 +18,6 @@
 #include "internal/api/crypto/Seed.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/blockchain/crypto/Element.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
 #include "opentxs/api/crypto/Seed.hpp"
@@ -39,6 +38,7 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -48,7 +48,7 @@ HDPrivate::HDPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const HDProtocol standard,
     const PasswordPrompt& reason,
     opentxs::crypto::SeedID seed) noexcept(false)

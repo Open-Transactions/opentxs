@@ -9,8 +9,8 @@
 // IWYU pragma: no_forward_declare opentxs::crypto::AsymmetricProvider
 // IWYU pragma: no_forward_declare opentxs::identifier::Generic
 // IWYU pragma: no_forward_declare opentxs::identity::Authority
-// IWYU pragma: no_forward_declare opentxs::proto::HDPath
-// IWYU pragma: no_forward_declare opentxs::proto::Signature
+// IWYU pragma: no_forward_declare opentxs::protobuf::HDPath
+// IWYU pragma: no_forward_declare opentxs::protobuf::Signature
 
 #include "crypto/asymmetric/base/KeyPrivate.hpp"  // IWYU pragma: associated
 
@@ -110,7 +110,7 @@ auto Key::Params() const noexcept -> ReadView { return {}; }
 
 auto Key::Path() const noexcept -> const UnallocatedCString { return {}; }
 
-auto Key::Path(proto::HDPath&) const noexcept -> bool { return {}; }
+auto Key::Path(protobuf::HDPath&) const noexcept -> bool { return {}; }
 
 auto Key::Provider() const noexcept -> const crypto::AsymmetricProvider&
 {
@@ -124,7 +124,7 @@ auto Key::Serialize(Serialized&) const noexcept -> bool { return {}; }
 auto Key::Sign(
     const GetPreimage,
     const crypto::SignatureRole,
-    proto::Signature&,
+    protobuf::Signature&,
     const identifier::Generic&,
     const crypto::HashType,
     const PasswordPrompt&) const noexcept -> bool
@@ -135,7 +135,7 @@ auto Key::Sign(
 auto Key::Sign(
     const GetPreimage,
     const crypto::SignatureRole,
-    proto::Signature&,
+    protobuf::Signature&,
     const identifier::Generic&,
     const PasswordPrompt&) const noexcept -> bool
 {
@@ -148,7 +148,7 @@ auto Key::TransportKey(Data&, Secret&, const PasswordPrompt&) const noexcept
     return {};
 }
 
-auto Key::Verify(const Data&, const proto::Signature&) const noexcept -> bool
+auto Key::Verify(const Data&, const protobuf::Signature&) const noexcept -> bool
 {
     return {};
 }

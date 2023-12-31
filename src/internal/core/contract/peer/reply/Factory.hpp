@@ -51,10 +51,10 @@ class Verification;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class PeerReply;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -73,7 +73,7 @@ auto BailmentNoticeReply(
 auto BailmentNoticeReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto BailmentReply(
     const api::Session& api,
@@ -86,7 +86,7 @@ auto BailmentReply(
 auto BailmentReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto ConnectionReply(
     const api::Session& api,
@@ -103,7 +103,7 @@ auto ConnectionReply(
 auto ConnectionReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto FaucetReply(
     const api::Session& api,
@@ -116,7 +116,7 @@ auto FaucetReply(
 auto FaucetReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto NoticeAcknowledgement(
     const api::Session& api,
@@ -131,7 +131,7 @@ auto NoticeAcknowledgement(
 auto NoticeAcknowledgement(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto OutbailmentReply(
     const api::Session& api,
@@ -144,7 +144,7 @@ auto OutbailmentReply(
 auto OutbailmentReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto StoreSecretReply(
     const api::Session& api,
@@ -157,7 +157,7 @@ auto StoreSecretReply(
 auto StoreSecretReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 auto VerificationReply(
     const api::Session& api,
@@ -170,6 +170,6 @@ auto VerificationReply(
 auto VerificationReply(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerReply& serialized,
+    const protobuf::PeerReply& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*;
 }  // namespace opentxs::factory

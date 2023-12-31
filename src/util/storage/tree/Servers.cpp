@@ -5,24 +5,23 @@
 
 #include "util/storage/tree/Servers.hpp"  // IWYU pragma: associated
 
-#include <ServerContract.pb.h>
-#include <StorageServers.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/StorageServers.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/ServerContract.hpp"
-#include "internal/serialization/protobuf/verify/StorageServers.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Notary.hpp"
+#include "opentxs/protobuf/syntax/ServerContract.hpp"
+#include "opentxs/protobuf/syntax/StorageServers.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -64,7 +63,7 @@ auto Servers::Delete(const identifier::Notary& id) -> bool
 
 auto Servers::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageServers>{};
+    auto p = std::shared_ptr<protobuf::StorageServers>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -84,11 +83,11 @@ auto Servers::init(const Hash& hash) noexcept(false) -> void
 
 auto Servers::Load(
     const identifier::Notary& id,
-    std::shared_ptr<proto::ServerContract>& output,
+    std::shared_ptr<protobuf::ServerContract>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::ServerContract>(id, output, alias, checking);
+    return load_proto<protobuf::ServerContract>(id, output, alias, checking);
 }
 
 auto Servers::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -97,14 +96,14 @@ auto Servers::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Servers::serialize() const -> proto::StorageServers
+auto Servers::serialize() const -> protobuf::StorageServers
 {
-    proto::StorageServers serialized;
+    protobuf::StorageServers serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -127,7 +126,7 @@ auto Servers::SetAlias(const identifier::Notary& id, std::string_view alias)
 }
 
 auto Servers::Store(
-    const proto::ServerContract& data,
+    const protobuf::ServerContract& data,
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {

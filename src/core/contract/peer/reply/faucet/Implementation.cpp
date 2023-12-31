@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/reply/faucet/Implementation.hpp"  // IWYU pragma: associated
 
-#include <FaucetReply.pb.h>
-#include <PeerReply.pb.h>
+#include <opentxs/protobuf/FaucetReply.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
 #include <memory>
 #include <string>
 #include <utility>

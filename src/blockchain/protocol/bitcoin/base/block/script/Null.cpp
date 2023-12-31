@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemType
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"  // IWYU pragma: associated
 

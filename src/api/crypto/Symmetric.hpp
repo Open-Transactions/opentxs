@@ -26,10 +26,10 @@ class Session;
 }  // namespace internal
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class SymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Secret;
@@ -94,7 +94,7 @@ public:
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::symmetric::Key final;
     auto Key(
-        const proto::SymmetricKey& serialized,
+        const protobuf::SymmetricKey& serialized,
         const opentxs::crypto::symmetric::Algorithm mode,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::symmetric::Key final;

@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -35,7 +35,7 @@ public:
         const Identifiers& accounts,
         const AssociateNyms& nyms = {}) noexcept(false);
     OPENTXS_NO_EXPORT GetAccountBalance(
-        const proto::RPCCommand& serialized) noexcept(false);
+        const protobuf::RPCCommand& serialized) noexcept(false);
     GetAccountBalance() noexcept;
     GetAccountBalance(const GetAccountBalance&) = delete;
     GetAccountBalance(GetAccountBalance&&) = delete;

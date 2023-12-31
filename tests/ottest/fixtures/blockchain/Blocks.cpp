@@ -5,9 +5,9 @@
 
 #include "ottest/fixtures/blockchain/Blocks.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
 #include <optional>
 #include <span>
 #include <string_view>
@@ -17,10 +17,10 @@
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/Bitcoin.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 
 namespace ottest
 {
@@ -166,9 +166,9 @@ auto BlockchainBlocks::check_protobuf(
 
     if (false == proto2.has_value()) { return false; }
 
-    EXPECT_TRUE(opentxs::operator==(*proto, *proto2));
+    EXPECT_EQ(*proto, *proto2);
 
-    result &= opentxs::operator==(*proto, *proto2);
+    result &= (*proto == *proto2);
 
     return result;
 }

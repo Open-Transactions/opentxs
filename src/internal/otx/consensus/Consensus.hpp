@@ -140,7 +140,7 @@ auto ClientContext(
     const identifier::Notary& server) -> otx::context::internal::Client*;
 auto ClientContext(
     const api::Session& api,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     const identifier::Notary& server) -> otx::context::internal::Client*;
@@ -158,7 +158,7 @@ auto ServerContext(
     const api::session::Client& api,
     const network::zeromq::socket::Publish& requestSent,
     const network::zeromq::socket::Publish& replyReceived,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& local,
     const Nym_p& remote,
     network::ServerConnection& connection) -> otx::context::internal::Server*;

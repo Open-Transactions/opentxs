@@ -5,22 +5,22 @@
 
 #pragma once
 
-#include <RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
 
 #include "opentxs/rpc/Types.hpp"
 
 namespace opentxs::rpc
 {
-auto translate(AccountEventType) noexcept -> proto::AccountEventType;
-auto translate(AccountType) noexcept -> proto::AccountType;
-auto translate(CommandType) noexcept -> proto::RPCCommandType;
-auto translate(ContactEventType) noexcept -> proto::ContactEventType;
-auto translate(PaymentType) noexcept -> proto::RPCPaymentType;
-auto translate(PushType) noexcept -> proto::RPCPushType;
-auto translate(ResponseCode) noexcept -> proto::RPCResponseCode;
+auto translate(AccountEventType) noexcept -> protobuf::AccountEventType;
+auto translate(AccountType) noexcept -> protobuf::AccountType;
+auto translate(CommandType) noexcept -> protobuf::RPCCommandType;
+auto translate(ContactEventType) noexcept -> protobuf::ContactEventType;
+auto translate(PaymentType) noexcept -> protobuf::RPCPaymentType;
+auto translate(PushType) noexcept -> protobuf::RPCPushType;
+auto translate(ResponseCode) noexcept -> protobuf::RPCResponseCode;
 }  // namespace opentxs::rpc
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(AccountEventType) noexcept -> rpc::AccountEventType;
 auto translate(AccountType) noexcept -> rpc::AccountType;
@@ -29,4 +29,4 @@ auto translate(RPCCommandType) noexcept -> rpc::CommandType;
 auto translate(RPCPaymentType) noexcept -> rpc::PaymentType;
 auto translate(RPCPushType) noexcept -> rpc::PushType;
 auto translate(RPCResponseCode) noexcept -> rpc::ResponseCode;
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

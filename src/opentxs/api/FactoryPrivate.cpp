@@ -5,10 +5,10 @@
 
 #include "opentxs/api/FactoryPrivate.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
-#include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <boost/endian/conversion.hpp>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Identifier.pb.h>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -23,8 +23,6 @@
 #include "internal/network/blockchain/Factory.hpp"
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Item.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -52,6 +50,8 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -274,14 +274,14 @@ auto FactoryPrivate::id_from_preimage(
 template <typename IDType>
 auto FactoryPrivate::id_from_preimage(
     const identifier::Algorithm type,
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> IDType
 {
     try {
         const auto serialized = [&] {
             auto out = ByteArray{alloc};
 
-            if (false == proto::write(proto, out.WriteInto())) {
+            if (false == protobuf::write(proto, out.WriteInto())) {
                 throw std::runtime_error{"failed to serialize protobuf"};
             }
 
@@ -299,7 +299,7 @@ auto FactoryPrivate::id_from_preimage(
 
 template <typename IDType>
 auto FactoryPrivate::id_from_protobuf(
-    const proto::Identifier& proto,
+    const protobuf::Identifier& proto,
     alloc::Default alloc) const noexcept -> IDType
 {
     using namespace identifier;
@@ -391,12 +391,12 @@ FactoryPrivate::FactoryPrivate(const api::Crypto& crypto) noexcept
 
 auto FactoryPrivate::AccountID(
     const identity::wot::claim::ClaimType type,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     alloc::Default alloc) const noexcept -> identifier::Account
 {
     const auto preimage = [&] {
         auto out = ByteArray{};
-        proto::write(path, out.WriteInto());
+        protobuf::write(path, out.WriteInto());
         auto sType = static_cast<std::uint32_t>(type);
         boost::endian::native_to_little_inplace(sType);
         out.Concatenate(std::addressof(sType), sizeof(sType));
@@ -410,7 +410,7 @@ auto FactoryPrivate::AccountID(
 }
 
 auto FactoryPrivate::AccountID(
-    const proto::Identifier& in,
+    const protobuf::Identifier& in,
     alloc::Default alloc) const noexcept -> identifier::Account
 {
     return id_from_protobuf<identifier::Account>(in, std::move(alloc));
@@ -504,7 +504,7 @@ auto FactoryPrivate::AccountIDFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::Account
 {
-    return AccountID(proto::Factory<proto::Identifier>(bytes), alloc);
+    return AccountID(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::AccountIDFromRandom(
@@ -534,7 +534,7 @@ auto FactoryPrivate::AccountIDFromZMQ(
     const ReadView frame,
     alloc::Default alloc) const noexcept -> identifier::Account
 {
-    return AccountID(proto::Factory<proto::Identifier>(frame), alloc);
+    return AccountID(protobuf::Factory<protobuf::Identifier>(frame), alloc);
 }
 
 auto FactoryPrivate::Amount(const opentxs::network::zeromq::Frame& zmq)
@@ -570,13 +570,14 @@ auto FactoryPrivate::Armored(const opentxs::crypto::Envelope& input) const
     return OTArmored{opentxs::Factory::Armored(crypto_, input)};
 }
 
-auto FactoryPrivate::Armored(const ProtobufType& input) const -> OTArmored
+auto FactoryPrivate::Armored(const protobuf::MessageType& input) const
+    -> OTArmored
 {
     return OTArmored{opentxs::Factory::Armored(crypto_, Data(input))};
 }
 
 auto FactoryPrivate::Armored(
-    const ProtobufType& input,
+    const protobuf::MessageType& input,
     const UnallocatedCString& header) const -> OTString
 {
     auto armored = Armored(Data(input));
@@ -633,7 +634,7 @@ auto FactoryPrivate::BlockchainAddress(
 }
 
 auto FactoryPrivate::BlockchainAddress(
-    const proto::BlockchainPeerAddress& serialized) const noexcept
+    const protobuf::BlockchainPeerAddress& serialized) const noexcept
     -> opentxs::network::blockchain::Address
 {
     return factory::BlockchainAddress(crypto_, Self(), serialized);
@@ -790,7 +791,7 @@ auto FactoryPrivate::DataFromHex(ReadView input) const -> ByteArray
     }
 }
 
-auto FactoryPrivate::Data(const ProtobufType& input) const -> ByteArray
+auto FactoryPrivate::Data(const protobuf::MessageType& input) const -> ByteArray
 {
     auto output = ByteArray{};
     const auto size{input.ByteSize()};
@@ -825,7 +826,7 @@ auto FactoryPrivate::Identifier(const Item& item, alloc::Default alloc)
 }
 
 auto FactoryPrivate::Identifier(
-    const proto::Identifier& in,
+    const protobuf::Identifier& in,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
     return id_from_protobuf<identifier::Generic>(in, std::move(alloc));
@@ -872,7 +873,7 @@ auto FactoryPrivate::IdentifierFromPreimage(
 }
 
 auto FactoryPrivate::IdentifierFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
     return IdentifierFromPreimage(
@@ -880,7 +881,7 @@ auto FactoryPrivate::IdentifierFromPreimage(
 }
 
 auto FactoryPrivate::IdentifierFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
@@ -891,7 +892,7 @@ auto FactoryPrivate::IdentifierFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
-    return Identifier(proto::Factory<proto::Identifier>(bytes), alloc);
+    return Identifier(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::IdentifierFromRandom(alloc::Default alloc) const noexcept
@@ -908,8 +909,9 @@ auto FactoryPrivate::IdentifierFromRandom(
     return id_from_random<identifier::Generic>(type, std::move(alloc));
 }
 
-auto FactoryPrivate::NotaryID(const proto::Identifier& in, alloc::Default alloc)
-    const noexcept -> identifier::Notary
+auto FactoryPrivate::NotaryID(
+    const protobuf::Identifier& in,
+    alloc::Default alloc) const noexcept -> identifier::Notary
 {
     return id_from_protobuf<identifier::Notary>(in, std::move(alloc));
 }
@@ -984,7 +986,7 @@ auto FactoryPrivate::NotaryIDFromPreimage(
 }
 
 auto FactoryPrivate::NotaryIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::Notary
 {
     return NotaryIDFromPreimage(
@@ -992,7 +994,7 @@ auto FactoryPrivate::NotaryIDFromPreimage(
 }
 
 auto FactoryPrivate::NotaryIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::Notary
 {
@@ -1003,7 +1005,7 @@ auto FactoryPrivate::NotaryIDFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::Notary
 {
-    return NotaryID(proto::Factory<proto::Identifier>(bytes), alloc);
+    return NotaryID(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::NotaryIDFromRandom(alloc::Default alloc) const noexcept
@@ -1019,7 +1021,7 @@ auto FactoryPrivate::NotaryIDFromRandom(
     return id_from_random<identifier::Notary>(type, std::move(alloc));
 }
 
-auto FactoryPrivate::NymID(const proto::Identifier& in, alloc::Default alloc)
+auto FactoryPrivate::NymID(const protobuf::Identifier& in, alloc::Default alloc)
     const noexcept -> identifier::Nym
 {
     return id_from_protobuf<identifier::Nym>(in, std::move(alloc));
@@ -1096,7 +1098,7 @@ auto FactoryPrivate::NymIDFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::Nym
 {
-    return NymID(proto::Factory<proto::Identifier>(bytes), alloc);
+    return NymID(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::NymIDFromRandom(alloc::Default alloc) const noexcept
@@ -1130,8 +1132,9 @@ auto FactoryPrivate::SecretFromText(const std::string_view text) const noexcept
     return factory::Secret(text, false);
 }
 
-auto FactoryPrivate::SeedID(const proto::Identifier& in, alloc::Default alloc)
-    const noexcept -> identifier::HDSeed
+auto FactoryPrivate::SeedID(
+    const protobuf::Identifier& in,
+    alloc::Default alloc) const noexcept -> identifier::HDSeed
 {
     return id_from_protobuf<identifier::HDSeed>(in, std::move(alloc));
 }
@@ -1179,7 +1182,7 @@ auto FactoryPrivate::SeedIDFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::HDSeed
 {
-    return SeedID(proto::Factory<proto::Identifier>(bytes), alloc);
+    return SeedID(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::SeedIDFromRandom(alloc::Default alloc) const noexcept
@@ -1206,8 +1209,9 @@ auto FactoryPrivate::Session() noexcept -> api::session::internal::Factory&
     LogAbort()()("not a session instance").Abort();
 }
 
-auto FactoryPrivate::UnitID(const proto::Identifier& in, alloc::Default alloc)
-    const noexcept -> identifier::UnitDefinition
+auto FactoryPrivate::UnitID(
+    const protobuf::Identifier& in,
+    alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
     return id_from_protobuf<identifier::UnitDefinition>(in, std::move(alloc));
 }
@@ -1282,7 +1286,7 @@ auto FactoryPrivate::UnitIDFromPreimage(
 }
 
 auto FactoryPrivate::UnitIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
     return UnitIDFromPreimage(
@@ -1290,7 +1294,7 @@ auto FactoryPrivate::UnitIDFromPreimage(
 }
 
 auto FactoryPrivate::UnitIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
@@ -1302,7 +1306,7 @@ auto FactoryPrivate::UnitIDFromProtobuf(
     const ReadView bytes,
     alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
-    return UnitID(proto::Factory<proto::Identifier>(bytes), alloc);
+    return UnitID(protobuf::Factory<protobuf::Identifier>(bytes), alloc);
 }
 
 auto FactoryPrivate::UnitIDFromRandom(alloc::Default alloc) const noexcept

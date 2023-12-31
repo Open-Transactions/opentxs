@@ -5,20 +5,19 @@
 
 #include "util/storage/tree/Root.hpp"  // IWYU pragma: associated
 
-#include <StorageRoot.pb.h>
+#include <opentxs/protobuf/StorageRoot.pb.h>
 #include <functional>
 #include <memory>
 #include <source_location>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/StorageRoot.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/storage/drivers/Plugin.hpp"
 #include "opentxs/Time.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/StorageRoot.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -85,8 +84,8 @@ auto Root::CheckSequence(
                     .append(" driver")};
         }
 
-        const auto proto =
-            proto::Factory<proto::StorageRoot>(bytes.data(), bytes.size());
+        const auto proto = protobuf::Factory<protobuf::StorageRoot>(
+            bytes.data(), bytes.size());
 
         return proto.sequence();
     } catch (const std::exception& e) {
@@ -129,7 +128,7 @@ auto Root::GCStatus() const noexcept -> GCParams
 
 auto Root::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageRoot>{};
+    auto p = std::shared_ptr<protobuf::StorageRoot>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -170,7 +169,9 @@ auto Root::save(const Lock& lock) const -> bool
     sequence_++;
     auto serialized = serialize(lock);
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
@@ -191,9 +192,9 @@ auto Root::save(tree::Trunk* tree, const Lock& lock) -> void
 
 auto Root::Sequence() const -> std::uint64_t { return sequence_.load(); }
 
-auto Root::serialize(const Lock&) const -> proto::StorageRoot
+auto Root::serialize(const Lock&) const -> protobuf::StorageRoot
 {
-    auto output = proto::StorageRoot{};
+    auto output = protobuf::StorageRoot{};
     output.set_version(version_);
     write(tree_root_, *output.mutable_items());
     output.set_altlocation(static_cast<bool>(current_bucket_.load()));

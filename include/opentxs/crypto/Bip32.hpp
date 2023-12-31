@@ -33,10 +33,10 @@ struct Bip32;
 }  // namespace internal
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Data;
@@ -48,8 +48,8 @@ class Writer;
 
 namespace opentxs::crypto
 {
-auto Print(const proto::HDPath& node) noexcept -> UnallocatedCString;
-auto Print(const proto::HDPath& node, bool showSeedID) noexcept
+auto Print(const protobuf::HDPath& node) noexcept -> UnallocatedCString;
+auto Print(const protobuf::HDPath& node, bool showSeedID) noexcept
     -> UnallocatedCString;
 
 class OPENTXS_EXPORT Bip32

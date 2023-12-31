@@ -5,11 +5,11 @@
 
 #include "opentxs/identity/wot/claim/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <ContactItemAttribute.pb.h>
-#include <ContactSectionName.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/ContactItemAttribute.pb.h>
+#include <opentxs/protobuf/ContactSectionName.pb.h>
 #include <cstdint>
 #include <functional>
 #include <utility>
@@ -21,24 +21,26 @@ namespace opentxs::identity::wot::claim
 {
 constexpr auto attribute_map_ = [] {
     using enum Attribute;
-    using enum proto::ContactItemAttribute;
+    using enum protobuf::ContactItemAttribute;
 
-    return frozen::make_unordered_map<Attribute, proto::ContactItemAttribute>({
+    return frozen::
+        make_unordered_map<Attribute, protobuf::ContactItemAttribute>({
 #include "opentxs/identity/wot/claim/attribute_to_contactitemattribute.inc"  // IWYU pragma: keep
-    });
+        });
 }();
 
 constexpr auto sectiontype_map_ = [] {
     using enum SectionType;
-    using enum proto::ContactSectionName;
+    using enum protobuf::ContactSectionName;
 
-    return frozen::make_unordered_map<SectionType, proto::ContactSectionName>({
+    return frozen::
+        make_unordered_map<SectionType, protobuf::ContactSectionName>({
 #include "opentxs/identity/wot/claim/section_to_contactitemsection.inc"  // IWYU pragma: keep
-    });
+        });
 }();
 }  // namespace opentxs::identity::wot::claim
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(const ContactItemAttribute in) noexcept
     -> identity::wot::claim::Attribute
@@ -75,12 +77,12 @@ auto translate(const ContactSectionName in) noexcept
         return identity::wot::claim::SectionType::Error;
     }
 }
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf
 
 namespace opentxs::identity::wot::claim
 {
 auto translate(const identity::wot::claim::Attribute in) noexcept
-    -> proto::ContactItemAttribute
+    -> protobuf::ContactItemAttribute
 {
     const auto& map = attribute_map_;
 
@@ -89,18 +91,19 @@ auto translate(const identity::wot::claim::Attribute in) noexcept
         return i->second;
     } else {
 
-        return proto::CITEMATTR_ERROR;
+        return protobuf::CITEMATTR_ERROR;
     }
 }
 
 auto translate(const identity::wot::claim::ClaimType in) noexcept
-    -> proto::ContactItemType
+    -> protobuf::ContactItemType
 {
-    return static_cast<proto::ContactItemType>(static_cast<std::uint32_t>(in));
+    return static_cast<protobuf::ContactItemType>(
+        static_cast<std::uint32_t>(in));
 }
 
 auto translate(const identity::wot::claim::SectionType in) noexcept
-    -> proto::ContactSectionName
+    -> protobuf::ContactSectionName
 {
     const auto& map = identity::wot::claim::sectiontype_map_;
 
@@ -109,7 +112,7 @@ auto translate(const identity::wot::claim::SectionType in) noexcept
         return i->second;
     } else {
 
-        return proto::CONTACTSECTION_ERROR;
+        return protobuf::CONTACTSECTION_ERROR;
     }
 }
 }  // namespace opentxs::identity::wot::claim

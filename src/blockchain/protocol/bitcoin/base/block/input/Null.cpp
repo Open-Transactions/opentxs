@@ -40,7 +40,7 @@ auto BitcoinTransactionInput(
     const api::crypto::Blockchain&,
     const api::Factory&,
     const blockchain::Type,
-    const proto::BlockchainTransactionInput&,
+    const protobuf::BlockchainTransactionInput&,
     const bool,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Input

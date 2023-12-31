@@ -45,10 +45,10 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class PeerObject;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class PasswordPrompt;
@@ -79,8 +79,10 @@ public:
         const contract::peer::Request& request,
         const VersionNumber version) const
         -> std::unique_ptr<opentxs::PeerObject> final;
-    auto PeerObject(const Nym_p& signerNym, const proto::PeerObject& serialized)
-        const -> std::unique_ptr<opentxs::PeerObject> final;
+    auto PeerObject(
+        const Nym_p& signerNym,
+        const protobuf::PeerObject& serialized) const
+        -> std::unique_ptr<opentxs::PeerObject> final;
     auto PeerObject(
         const Nym_p& recipientNym,
         const opentxs::Armored& encrypted,

@@ -29,10 +29,10 @@ class CompactSize;
 }  // namespace blockchain
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionOutput;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -56,7 +56,7 @@ struct Value {
 
     auto Bytes() const noexcept -> std::size_t;
     auto Serialize(Writer&& out) const noexcept(false) -> void;
-    auto Serialize(proto::BlockchainTransactionOutput& out) const noexcept
+    auto Serialize(protobuf::BlockchainTransactionOutput& out) const noexcept
         -> void;
     auto View() const noexcept -> cashtoken::View;
 
@@ -69,8 +69,8 @@ private:
     auto has_commitment() const noexcept -> bool;
 };
 
-auto deserialize(const proto::BlockchainTransactionOutput& in) noexcept(false)
-    -> std::optional<Value>;
+auto deserialize(const protobuf::BlockchainTransactionOutput& in) noexcept(
+    false) -> std::optional<Value>;
 auto deserialize(ReadView& bytes, std::optional<Value>& out) noexcept(false)
     -> void;
 }  // namespace

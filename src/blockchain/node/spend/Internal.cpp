@@ -11,7 +11,7 @@
 
 namespace opentxs::blockchain::node::internal
 {
-auto Spend::Add(const proto::BlockchainTransaction&) noexcept -> void {}
+auto Spend::Add(const protobuf::BlockchainTransaction&) noexcept -> void {}
 
 auto Spend::AddNotification(const block::TransactionHash&) const noexcept
     -> void
@@ -45,7 +45,7 @@ auto Spend::PaymentCodeRecipients() const noexcept
 
 auto Spend::Policy() const noexcept -> SpendPolicy { return {}; }
 
-auto Spend::Serialize(proto::BlockchainTransactionProposal&) const noexcept
+auto Spend::Serialize(protobuf::BlockchainTransactionProposal&) const noexcept
     -> bool
 {
     return false;

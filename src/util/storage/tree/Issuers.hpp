@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageIssuers.pb.h>
+#include <opentxs/protobuf/StorageIssuers.pb.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -35,10 +35,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Issuer;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -62,12 +62,12 @@ class Issuers final : public Node
 public:
     auto Load(
         const identifier::Nym& id,
-        std::shared_ptr<proto::Issuer>& output,
+        std::shared_ptr<protobuf::Issuer>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::Nym& id) -> bool;
-    auto Store(const proto::Issuer& data, std::string_view alias) -> bool;
+    auto Store(const protobuf::Issuer& data, std::string_view alias) -> bool;
 
     Issuers() = delete;
     Issuers(const Issuers&) = delete;
@@ -84,7 +84,7 @@ private:
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageIssuers;
+    auto serialize() const -> protobuf::StorageIssuers;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Issuers(

@@ -5,7 +5,7 @@
 
 #include "crypto/asymmetric/key/hd/Imp.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
@@ -61,7 +61,7 @@ auto HD::ChildKey(
         }();
         const auto& [privkey, ccode, pubkey, spath, parent] = serialized;
         const auto path = [&] {
-            auto out = proto::HDPath{};
+            auto out = protobuf::HDPath{};
 
             if (path_) {
                 out = *path_;

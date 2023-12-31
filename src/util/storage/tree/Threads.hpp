@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -122,7 +122,7 @@ private:
         -> bool final;
 
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageNymList;
+    auto serialize() const -> protobuf::StorageNymList;
     auto thread(const identifier::Generic& id) const -> tree::Thread*;
     auto thread(
         const identifier::Generic& id,

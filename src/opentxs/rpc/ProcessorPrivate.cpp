@@ -3,36 +3,36 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemAttribute
 
 #include "opentxs/rpc/ProcessorPrivate.hpp"  // IWYU pragma: associated
 
-#include <APIArgument.pb.h>
-#include <AcceptPendingPayment.pb.h>
-#include <AccountEvent.pb.h>
-#include <AddClaim.pb.h>
-#include <AddContact.pb.h>
-#include <ContactItem.pb.h>
-#include <ContactItemAttribute.pb.h>
-#include <CreateInstrumentDefinition.pb.h>
-#include <CreateNym.pb.h>
-#include <GetWorkflow.pb.h>
-#include <HDSeed.pb.h>
-#include <ModifyAccount.pb.h>
-#include <MoveFunds.pb.h>
-#include <Nym.pb.h>
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <RPCCommand.pb.h>
-#include <RPCEnums.pb.h>
-#include <RPCPush.pb.h>
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <RPCTask.pb.h>
-#include <ServerContract.pb.h>
-#include <SessionData.pb.h>
-#include <TaskComplete.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/APIArgument.pb.h>
+#include <opentxs/protobuf/AcceptPendingPayment.pb.h>
+#include <opentxs/protobuf/AccountEvent.pb.h>
+#include <opentxs/protobuf/AddClaim.pb.h>
+#include <opentxs/protobuf/AddContact.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/ContactItemAttribute.pb.h>
+#include <opentxs/protobuf/CreateInstrumentDefinition.pb.h>
+#include <opentxs/protobuf/CreateNym.pb.h>
+#include <opentxs/protobuf/GetWorkflow.pb.h>
+#include <opentxs/protobuf/HDSeed.pb.h>
+#include <opentxs/protobuf/ModifyAccount.pb.h>
+#include <opentxs/protobuf/MoveFunds.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCPush.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/RPCTask.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/SessionData.pb.h>
+#include <opentxs/protobuf/TaskComplete.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <functional>
@@ -63,8 +63,6 @@
 #include "internal/otx/common/Cheque.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/verify/RPCCommand.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -119,6 +117,8 @@
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/syntax/RPCCommand.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/ProcessorPrivate.tpp"
 #include "opentxs/rpc/ResponseCode.hpp"  // IWYU pragma: keep
@@ -156,7 +156,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
 
 #define CHECK_OWNER()                                                          \
     if (false == session.Wallet().IsLocalNym(command.owner())) {               \
-        add_output_status(output, proto::RPCRESPONSE_NYM_NOT_FOUND);           \
+        add_output_status(output, protobuf::RPCRESPONSE_NYM_NOT_FOUND);        \
                                                                                \
         return output;                                                         \
     }                                                                          \
@@ -169,7 +169,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
     INIT();                                                                    \
                                                                                \
     if (false == is_session_valid(command.session())) {                        \
-        add_output_status(output, proto::RPCRESPONSE_BAD_SESSION);             \
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SESSION);          \
                                                                                \
         return output;                                                         \
     }                                                                          \
@@ -181,7 +181,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
     INIT_SESSION();                                                            \
                                                                                \
     if (false == is_client_session(command.session())) {                       \
-        add_output_status(output, proto::RPCRESPONSE_INVALID);                 \
+        add_output_status(output, protobuf::RPCRESPONSE_INVALID);              \
                                                                                \
         return output;                                                         \
     }                                                                          \
@@ -196,7 +196,7 @@ constexpr auto TASKCOMPLETE_VERSION = 2;
     INIT_SESSION();                                                            \
                                                                                \
     if (false == is_server_session(command.session())) {                       \
-        add_output_status(output, proto::RPCRESPONSE_INVALID);                 \
+        add_output_status(output, protobuf::RPCRESPONSE_INVALID);              \
                                                                                \
         return output;                                                         \
     }                                                                          \
@@ -253,10 +253,10 @@ ProcessorPrivate::ProcessorPrivate(const api::Context& native)
 }
 
 auto ProcessorPrivate::accept_pending_payments(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
-    CHECK_INPUT(acceptpendingpayment, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(acceptpendingpayment, protobuf::RPCRESPONSE_INVALID);
 
     for (auto acceptpendingpayment : command.acceptpendingpayment()) {
         const auto destinationaccountID = client.Factory().AccountIDFromBase58(
@@ -268,12 +268,12 @@ auto ProcessorPrivate::accept_pending_payments(
 
         try {
             const auto paymentWorkflow = [&] {
-                auto out = proto::PaymentWorkflow{};
+                auto out = protobuf::PaymentWorkflow{};
 
                 if (!client.Workflow().LoadWorkflow(nymID, workflowID, out)) {
                     add_output_task(output, "");
                     add_output_status(
-                        output, proto::RPCRESPONSE_WORKFLOW_NOT_FOUND);
+                        output, protobuf::RPCRESPONSE_WORKFLOW_NOT_FOUND);
 
                     throw std::runtime_error{
                         UnallocatedCString{"Invalid workflow"} +
@@ -298,7 +298,7 @@ auto ProcessorPrivate::accept_pending_payments(
                             .Flush();
                         add_output_task(output, "");
                         add_output_status(
-                            output, proto::RPCRESPONSE_CHEQUE_NOT_FOUND);
+                            output, protobuf::RPCRESPONSE_CHEQUE_NOT_FOUND);
 
                         continue;
                     }
@@ -315,7 +315,7 @@ auto ProcessorPrivate::accept_pending_payments(
                 default: {
                     LogError()()("Unsupported workflow type").Flush();
                     add_output_task(output, "");
-                    add_output_status(output, proto::RPCRESPONSE_ERROR);
+                    add_output_status(output, protobuf::RPCRESPONSE_ERROR);
 
                     continue;
                 }
@@ -324,7 +324,8 @@ auto ProcessorPrivate::accept_pending_payments(
             if (false == bool(payment)) {
                 LogError()()("Failed to instantiate payment").Flush();
                 add_output_task(output, "");
-                add_output_status(output, proto::RPCRESPONSE_PAYMENT_NOT_FOUND);
+                add_output_status(
+                    output, protobuf::RPCRESPONSE_PAYMENT_NOT_FOUND);
 
                 continue;
             }
@@ -335,7 +336,8 @@ auto ProcessorPrivate::accept_pending_payments(
 
             if (false == ready) {
                 add_output_task(output, "");
-                add_output_status(output, proto::RPCRESPONSE_START_TASK_FAILED);
+                add_output_status(
+                    output, protobuf::RPCRESPONSE_START_TASK_FAILED);
             } else {
                 queue_task(
                     nymID,
@@ -356,12 +358,12 @@ auto ProcessorPrivate::accept_pending_payments(
     return output;
 }
 
-auto ProcessorPrivate::add_claim(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::add_claim(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
     CHECK_OWNER();
-    CHECK_INPUT(claim, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(claim, protobuf::RPCRESPONSE_INVALID);
 
     const auto nymID = ot_.Factory().NymIDFromBase58(command.owner());
     auto nymdata = session.Wallet().mutable_Nym(nymID, reason);
@@ -373,24 +375,24 @@ auto ProcessorPrivate::add_claim(const proto::RPCCommand& command) const
 
         for (const auto& attr : contactitem.attribute()) {
             claim.Add(
-                translate(static_cast<proto::ContactItemAttribute>(attr)));
+                translate(static_cast<protobuf::ContactItemAttribute>(attr)));
         }
 
         if (nymdata.AddClaim(claim, reason)) {
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         } else {
-            add_output_status(output, proto::RPCRESPONSE_ADD_CLAIM_FAILED);
+            add_output_status(output, protobuf::RPCRESPONSE_ADD_CLAIM_FAILED);
         }
     }
 
     return output;
 }
 
-auto ProcessorPrivate::add_contact(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::add_contact(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
-    CHECK_INPUT(addcontact, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(addcontact, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& addContact : command.addcontact()) {
         const auto contact = client.Contacts().NewContact(
@@ -399,15 +401,15 @@ auto ProcessorPrivate::add_contact(const proto::RPCCommand& command) const
             client.Factory().PaymentCodeFromBase58(addContact.paymentcode()));
 
         if (false == bool(contact)) {
-            add_output_status(output, proto::RPCRESPONSE_ADD_CONTACT_FAILED);
+            add_output_status(output, protobuf::RPCRESPONSE_ADD_CONTACT_FAILED);
         } else {
             output.add_identifier(contact->ID().asBase58(ot_.Crypto()));
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         }
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     }
 
     return output;
@@ -415,21 +417,21 @@ auto ProcessorPrivate::add_contact(const proto::RPCCommand& command) const
 
 void ProcessorPrivate::add_output_identifier(
     const UnallocatedCString& id,
-    proto::TaskComplete& output)
+    protobuf::TaskComplete& output)
 {
     output.set_identifier(id);
 }
 
 void ProcessorPrivate::add_output_identifier(
     const UnallocatedCString& id,
-    proto::RPCResponse& output)
+    protobuf::RPCResponse& output)
 {
     output.add_identifier(id);
 }
 
 void ProcessorPrivate::add_output_status(
-    proto::RPCResponse& output,
-    proto::RPCResponseCode code)
+    protobuf::RPCResponse& output,
+    protobuf::RPCResponseCode code)
 {
     auto& status = *output.add_status();
     status.set_version(StatusVersionMap.at(output.version()));
@@ -438,14 +440,14 @@ void ProcessorPrivate::add_output_status(
 }
 
 void ProcessorPrivate::add_output_status(
-    proto::TaskComplete& output,
-    proto::RPCResponseCode code)
+    protobuf::TaskComplete& output,
+    protobuf::RPCResponseCode code)
 {
     output.set_code(code);
 }
 
 void ProcessorPrivate::add_output_task(
-    proto::RPCResponse& output,
+    protobuf::RPCResponse& output,
     const UnallocatedCString& taskid)
 {
     auto& task = *output.add_task();
@@ -474,8 +476,8 @@ auto ProcessorPrivate::client_session(const request::Message& command) const
     }
 }
 
-auto ProcessorPrivate::create_account(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::create_account(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
@@ -491,7 +493,7 @@ auto ProcessorPrivate::create_account(const proto::RPCCommand& command) const
     // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
 
         return output;
     }
@@ -513,11 +515,11 @@ auto ProcessorPrivate::create_account(const proto::RPCCommand& command) const
 }
 
 auto ProcessorPrivate::create_compatible_account(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     const auto workflowID =
         ot_.Factory().IdentifierFromBase58(command.identifier(0));
@@ -526,7 +528,7 @@ auto ProcessorPrivate::create_compatible_account(
 
     try {
         const auto workflow = [&] {
-            auto out = proto::PaymentWorkflow{};
+            auto out = protobuf::PaymentWorkflow{};
 
             if (!client.Workflow().LoadWorkflow(ownerID, workflowID, out)) {
                 throw std::runtime_error{""};
@@ -544,7 +546,7 @@ auto ProcessorPrivate::create_compatible_account(
 
                 if (false == bool(cheque)) {
                     add_output_status(
-                        output, proto::RPCRESPONSE_CHEQUE_NOT_FOUND);
+                        output, protobuf::RPCRESPONSE_CHEQUE_NOT_FOUND);
 
                     return output;
                 }
@@ -553,13 +555,13 @@ auto ProcessorPrivate::create_compatible_account(
                 unitID = cheque->GetInstrumentDefinitionID();
             } break;
             default: {
-                add_output_status(output, proto::RPCRESPONSE_INVALID);
+                add_output_status(output, protobuf::RPCRESPONSE_INVALID);
 
                 return output;
             }
         }
     } catch (...) {
-        add_output_status(output, proto::RPCRESPONSE_WORKFLOW_NOT_FOUND);
+        add_output_status(output, protobuf::RPCRESPONSE_WORKFLOW_NOT_FOUND);
 
         return output;
     }
@@ -569,7 +571,7 @@ auto ProcessorPrivate::create_compatible_account(
     // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
 
         return output;
     }
@@ -591,7 +593,7 @@ auto ProcessorPrivate::create_compatible_account(
 }
 
 auto ProcessorPrivate::create_issuer_account(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
@@ -608,12 +610,13 @@ auto ProcessorPrivate::create_issuer_account(
 
         if (ownerID != unitdefinition->Signer()->ID()) {
             add_output_status(
-                output, proto::RPCRESPONSE_UNITDEFINITION_NOT_FOUND);
+                output, protobuf::RPCRESPONSE_UNITDEFINITION_NOT_FOUND);
 
             return output;
         }
     } catch (...) {
-        add_output_status(output, proto::RPCRESPONSE_UNITDEFINITION_NOT_FOUND);
+        add_output_status(
+            output, protobuf::RPCRESPONSE_UNITDEFINITION_NOT_FOUND);
 
         return output;
     }
@@ -621,7 +624,7 @@ auto ProcessorPrivate::create_issuer_account(
     const auto account = client.Wallet().Internal().IssuerAccount(unitID);
 
     if (account) {
-        add_output_status(output, proto::RPCRESPONSE_UNNECESSARY);
+        add_output_status(output, protobuf::RPCRESPONSE_UNNECESSARY);
 
         return output;
     }
@@ -632,7 +635,7 @@ auto ProcessorPrivate::create_issuer_account(
     // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
 
         return output;
     }
@@ -653,8 +656,8 @@ auto ProcessorPrivate::create_issuer_account(
     return output;
 }
 
-auto ProcessorPrivate::create_nym(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::create_nym(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
 
@@ -668,7 +671,7 @@ auto ProcessorPrivate::create_nym(const proto::RPCCommand& command) const
         createnym.name());
 
     if (false == bool(pNym)) {
-        add_output_status(output, proto::RPCRESPONSE_CREATE_NYM_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_CREATE_NYM_FAILED);
 
         return output;
     }
@@ -686,8 +689,8 @@ auto ProcessorPrivate::create_nym(const proto::RPCCommand& command) const
                 contactitem);
 
             for (const auto& attr : contactitem.attribute()) {
-                claim.Add(
-                    translate(static_cast<proto::ContactItemAttribute>(attr)));
+                claim.Add(translate(
+                    static_cast<protobuf::ContactItemAttribute>(attr)));
             }
 
             nymdata.AddClaim(claim, reason);
@@ -695,13 +698,13 @@ auto ProcessorPrivate::create_nym(const proto::RPCCommand& command) const
     }
 
     output.add_identifier(nym.ID().asBase58(ot_.Crypto()));
-    add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+    add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
 
     return output;
 }
 
 auto ProcessorPrivate::create_unit_definition(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
     CHECK_OWNER();
@@ -719,21 +722,21 @@ auto ProcessorPrivate::create_unit_definition(
                 reason);
 
         output.add_identifier(unitdefinition->ID().asBase58(ot_.Crypto()));
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     } catch (...) {
         add_output_status(
-            output, proto::RPCRESPONSE_CREATE_UNITDEFINITION_FAILED);
+            output, protobuf::RPCRESPONSE_CREATE_UNITDEFINITION_FAILED);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::delete_claim(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::delete_claim(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
     CHECK_OWNER();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     auto nymdata = session.Wallet().mutable_Nym(
 
@@ -744,9 +747,10 @@ auto ProcessorPrivate::delete_claim(const proto::RPCCommand& command) const
             nymdata.DeleteClaim(ot_.Factory().IdentifierFromBase58(id), reason);
 
         if (deleted) {
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         } else {
-            add_output_status(output, proto::RPCRESPONSE_DELETE_CLAIM_FAILED);
+            add_output_status(
+                output, protobuf::RPCRESPONSE_DELETE_CLAIM_FAILED);
         }
     }
 
@@ -756,7 +760,7 @@ auto ProcessorPrivate::delete_claim(const proto::RPCCommand& command) const
 void ProcessorPrivate::evaluate_deposit_payment(
     const api::session::Client& client,
     const api::session::OTX::Result& result,
-    proto::TaskComplete& output) const
+    protobuf::TaskComplete& output) const
 {
     // TODO use structured binding
     // const auto& [status, pReply] = result;
@@ -764,11 +768,11 @@ void ProcessorPrivate::evaluate_deposit_payment(
     const auto& pReply = std::get<1>(result);
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_TRANSACTION_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_TRANSACTION_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
         assert_false(nullptr == pReply);
 
@@ -780,7 +784,7 @@ void ProcessorPrivate::evaluate_deposit_payment(
 void ProcessorPrivate::evaluate_move_funds(
     const api::session::Client& client,
     const api::session::OTX::Result& result,
-    proto::RPCResponse& output) const
+    protobuf::RPCResponse& output) const
 {
     // TODO use structured binding
     // const auto& [status, pReply] = result;
@@ -788,11 +792,11 @@ void ProcessorPrivate::evaluate_move_funds(
     const auto& pReply = std::get<1>(result);
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_MOVE_FUNDS_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_MOVE_FUNDS_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
         assert_false(nullptr == pReply);
 
@@ -803,34 +807,34 @@ void ProcessorPrivate::evaluate_move_funds(
 
 auto ProcessorPrivate::evaluate_send_payment_cheque(
     const api::session::OTX::Result& result,
-    proto::TaskComplete& output) const noexcept -> void
+    protobuf::TaskComplete& output) const noexcept -> void
 {
     const auto& [status, pReply] = result;
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_SEND_PAYMENT_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_SEND_PAYMENT_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 }
 
 auto ProcessorPrivate::evaluate_send_payment_transfer(
     const api::session::Client& api,
     const api::session::OTX::Result& result,
-    proto::TaskComplete& output) const noexcept -> void
+    protobuf::TaskComplete& output) const noexcept -> void
 {
     const auto& [status, pReply] = result;
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_SEND_PAYMENT_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_SEND_PAYMENT_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
         assert_false(nullptr == pReply);
 
@@ -925,11 +929,11 @@ auto ProcessorPrivate::get_client(const std::int32_t instance) const
 }
 
 auto ProcessorPrivate::get_compatible_accounts(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     const auto workflowID =
         ot_.Factory().IdentifierFromBase58(command.identifier(0));
@@ -937,7 +941,7 @@ auto ProcessorPrivate::get_compatible_accounts(
 
     try {
         const auto workflow = [&] {
-            auto out = proto::PaymentWorkflow{};
+            auto out = protobuf::PaymentWorkflow{};
 
             if (!client.Workflow().LoadWorkflow(ownerID, workflowID, out)) {
                 throw std::runtime_error{""};
@@ -956,7 +960,7 @@ auto ProcessorPrivate::get_compatible_accounts(
 
                 if (false == bool(cheque)) {
                     add_output_status(
-                        output, proto::RPCRESPONSE_CHEQUE_NOT_FOUND);
+                        output, protobuf::RPCRESPONSE_CHEQUE_NOT_FOUND);
 
                     return output;
                 }
@@ -964,13 +968,14 @@ auto ProcessorPrivate::get_compatible_accounts(
                 unitID.Assign(cheque->GetInstrumentDefinitionID());
             } break;
             default: {
-                add_output_status(output, proto::RPCRESPONSE_CHEQUE_NOT_FOUND);
+                add_output_status(
+                    output, protobuf::RPCRESPONSE_CHEQUE_NOT_FOUND);
 
                 return output;
             }
         }
     } catch (...) {
-        add_output_status(output, proto::RPCRESPONSE_WORKFLOW_NOT_FOUND);
+        add_output_status(output, protobuf::RPCRESPONSE_WORKFLOW_NOT_FOUND);
 
         return output;
     }
@@ -988,9 +993,9 @@ auto ProcessorPrivate::get_compatible_accounts(
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
@@ -1001,25 +1006,25 @@ auto ProcessorPrivate::get_index(const std::int32_t instance) -> std::size_t
     return (instance - (instance % 2)) / 2;
 }
 
-auto ProcessorPrivate::get_nyms(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::get_nyms(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& id : command.identifier()) {
         auto pNym = session.Wallet().Nym(ot_.Factory().NymIDFromBase58(id));
 
         if (pNym) {
-            auto publicNym = proto::Nym{};
+            auto publicNym = protobuf::Nym{};
             if (false == pNym->Internal().Serialize(publicNym)) {
-                add_output_status(output, proto::RPCRESPONSE_NYM_NOT_FOUND);
+                add_output_status(output, protobuf::RPCRESPONSE_NYM_NOT_FOUND);
             } else {
                 *output.add_nym() = publicNym;
-                add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+                add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
             }
         } else {
-            add_output_status(output, proto::RPCRESPONSE_NYM_NOT_FOUND);
+            add_output_status(output, protobuf::RPCRESPONSE_NYM_NOT_FOUND);
         }
     }
 
@@ -1027,7 +1032,7 @@ auto ProcessorPrivate::get_nyms(const proto::RPCCommand& command) const
 }
 
 auto ProcessorPrivate::get_pending_payments(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
@@ -1052,7 +1057,7 @@ auto ProcessorPrivate::get_pending_payments(
     for (auto workflowID : workflows) {
         try {
             const auto paymentWorkflow = [&] {
-                auto out = proto::PaymentWorkflow{};
+                auto out = protobuf::PaymentWorkflow{};
 
                 if (!workflow.LoadWorkflow(ownerID, workflowID, out)) {
                     throw std::runtime_error{""};
@@ -1071,11 +1076,11 @@ auto ProcessorPrivate::get_pending_payments(
 
             auto& accountEvent = *output.add_accountevent();
             accountEvent.set_version(ACCOUNTEVENT_VERSION);
-            auto accountEventType = proto::ACCOUNTEVENT_INCOMINGCHEQUE;
+            auto accountEventType = protobuf::ACCOUNTEVENT_INCOMINGCHEQUE;
 
             if (otx::client::PaymentWorkflowType::IncomingInvoice ==
                 opentxs::translate(paymentWorkflow.type())) {
-                accountEventType = proto::ACCOUNTEVENT_INCOMINGINVOICE;
+                accountEventType = protobuf::ACCOUNTEVENT_INCOMINGINVOICE;
             }
 
             accountEvent.set_type(accountEventType);
@@ -1099,19 +1104,19 @@ auto ProcessorPrivate::get_pending_payments(
     }
 
     if (0 == output.accountevent_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::get_seeds(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::get_seeds(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     if (api::crypto::HaveHDKeys()) {
         const auto& hdseeds = session.Crypto().Seed();
@@ -1127,9 +1132,9 @@ auto ProcessorPrivate::get_seeds(const proto::RPCCommand& command) const
                 id.Internal().Serialize(*seed.mutable_id());
                 seed.set_words(words);
                 seed.set_passphrase(passphrase);
-                add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+                add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
             } else {
-                add_output_status(output, proto::RPCRESPONSE_NONE);
+                add_output_status(output, protobuf::RPCRESPONSE_NONE);
             }
         }
     }
@@ -1160,41 +1165,41 @@ auto ProcessorPrivate::get_server(const std::int32_t instance) const
 }
 
 auto ProcessorPrivate::get_server_admin_nym(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SERVER_ONLY();
 
     const auto password = server.GetAdminNym();
 
     if (password.empty()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
         output.add_identifier(password);
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
 auto ProcessorPrivate::get_server_contracts(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& id : command.identifier()) {
         try {
             const auto contract = session.Wallet().Internal().Server(
                 ot_.Factory().NotaryIDFromBase58(id));
-            auto serialized = proto::ServerContract{};
+            auto serialized = protobuf::ServerContract{};
             if (false == contract->Serialize(serialized, true)) {
-                add_output_status(output, proto::RPCRESPONSE_NONE);
+                add_output_status(output, protobuf::RPCRESPONSE_NONE);
             } else {
                 *output.add_notary() = serialized;
-                add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+                add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
             }
         } catch (...) {
-            add_output_status(output, proto::RPCRESPONSE_NONE);
+            add_output_status(output, protobuf::RPCRESPONSE_NONE);
         }
     }
 
@@ -1202,17 +1207,17 @@ auto ProcessorPrivate::get_server_contracts(
 }
 
 auto ProcessorPrivate::get_server_password(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SERVER_ONLY();
 
     const auto password = server.GetAdminPassword();
 
     if (password.empty()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
         output.add_identifier(password);
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
@@ -1229,23 +1234,23 @@ auto ProcessorPrivate::get_session(const std::int32_t instance) const
 }
 
 auto ProcessorPrivate::get_transaction_data(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     for ([[maybe_unused]] const auto& id : command.identifier()) {
-        add_output_status(output, proto::RPCRESPONSE_UNIMPLEMENTED);
+        add_output_status(output, protobuf::RPCRESPONSE_UNIMPLEMENTED);
     }
 
     return output;
 }
 
 auto ProcessorPrivate::get_unit_definitions(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
-    CHECK_INPUT(identifier, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(identifier, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& id : command.identifier()) {
         try {
@@ -1253,35 +1258,35 @@ auto ProcessorPrivate::get_unit_definitions(
                 ot_.Factory().UnitIDFromBase58(id));
 
             if (contract->Version() > 1 && command.version() < 3) {
-                add_output_status(output, proto::RPCRESPONSE_INVALID);
+                add_output_status(output, protobuf::RPCRESPONSE_INVALID);
 
             } else {
-                auto serialized = proto::UnitDefinition{};
+                auto serialized = protobuf::UnitDefinition{};
                 if (false == contract->Serialize(serialized, true)) {
-                    add_output_status(output, proto::RPCRESPONSE_NONE);
+                    add_output_status(output, protobuf::RPCRESPONSE_NONE);
                 } else {
                     *output.add_unit() = serialized;
-                    add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+                    add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
                 }
             }
         } catch (...) {
-            add_output_status(output, proto::RPCRESPONSE_NONE);
+            add_output_status(output, protobuf::RPCRESPONSE_NONE);
         }
     }
 
     return output;
 }
 
-auto ProcessorPrivate::get_workflow(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::get_workflow(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
-    CHECK_INPUT(getworkflow, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(getworkflow, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& getworkflow : command.getworkflow()) {
         try {
             const auto workflow = [&] {
-                auto out = proto::PaymentWorkflow{};
+                auto out = protobuf::PaymentWorkflow{};
 
                 if (false ==
                     client.Workflow().LoadWorkflow(
@@ -1297,9 +1302,9 @@ auto ProcessorPrivate::get_workflow(const proto::RPCCommand& command) const
 
             auto& paymentworkflow = *output.add_workflow();
             paymentworkflow = workflow;
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         } catch (...) {
-            add_output_status(output, proto::RPCRESPONSE_NONE);
+            add_output_status(output, protobuf::RPCRESPONSE_NONE);
         }
     }
 
@@ -1349,8 +1354,8 @@ auto ProcessorPrivate::immediate_register_nym(
     }
 }
 
-auto ProcessorPrivate::import_seed(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::import_seed(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
 
@@ -1366,10 +1371,10 @@ auto ProcessorPrivate::import_seed(const proto::RPCCommand& command) const
             reason);
 
         if (identifier.empty()) {
-            add_output_status(output, proto::RPCRESPONSE_INVALID);
+            add_output_status(output, protobuf::RPCRESPONSE_INVALID);
         } else {
             output.add_identifier(identifier.asBase58(ot_.Crypto()));
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         }
     }
 
@@ -1377,27 +1382,27 @@ auto ProcessorPrivate::import_seed(const proto::RPCCommand& command) const
 }
 
 auto ProcessorPrivate::import_server_contract(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
-    CHECK_INPUT(server, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(server, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& servercontract : command.server()) {
         try {
             session.Wallet().Internal().Server(servercontract);
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         } catch (...) {
-            add_output_status(output, proto::RPCRESPONSE_NONE);
+            add_output_status(output, protobuf::RPCRESPONSE_NONE);
         }
     }
 
     return output;
 }
 
-auto ProcessorPrivate::init(const proto::RPCCommand& command)
-    -> proto::RPCResponse
+auto ProcessorPrivate::init(const protobuf::RPCCommand& command)
+    -> protobuf::RPCResponse
 {
-    proto::RPCResponse output{};
+    protobuf::RPCResponse output{};
     output.set_version(command.version());
     output.set_cookie(command.cookie());
     output.set_type(command.type());
@@ -1405,12 +1410,12 @@ auto ProcessorPrivate::init(const proto::RPCCommand& command)
     return output;
 }
 
-auto ProcessorPrivate::invalid_command(const proto::RPCCommand& command)
-    -> proto::RPCResponse
+auto ProcessorPrivate::invalid_command(const protobuf::RPCCommand& command)
+    -> protobuf::RPCResponse
 {
     INIT();
 
-    add_output_status(output, proto::RPCRESPONSE_INVALID);
+    add_output_status(output, protobuf::RPCRESPONSE_INVALID);
 
     return output;
 }
@@ -1455,28 +1460,28 @@ auto ProcessorPrivate::is_session_valid(std::int32_t instance) const -> bool
 }
 
 auto ProcessorPrivate::list_client_sessions(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT();
     auto lock = Lock{lock_};
 
     for (std::size_t i = 0; i < ot_.ClientSessionCount(); ++i) {
-        proto::SessionData& data = *output.add_sessions();
+        protobuf::SessionData& data = *output.add_sessions();
         data.set_version(SESSION_DATA_VERSION);
         data.set_instance(ot_.ClientSession(static_cast<int>(i)).Instance());
     }
 
     if (0 == output.sessions_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::list_contacts(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::list_contacts(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
 
@@ -1487,16 +1492,16 @@ auto ProcessorPrivate::list_contacts(const proto::RPCCommand& command) const
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::list_seeds(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::list_seeds(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_SESSION();
 
@@ -1507,16 +1512,16 @@ auto ProcessorPrivate::list_seeds(const proto::RPCCommand& command) const
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
 auto ProcessorPrivate::list_server_contracts(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
 
@@ -1525,16 +1530,16 @@ auto ProcessorPrivate::list_server_contracts(
     for (const auto& server : servers) { output.add_identifier(server.first); }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
 auto ProcessorPrivate::list_server_sessions(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT();
     auto lock = Lock{lock_};
@@ -1546,16 +1551,16 @@ auto ProcessorPrivate::list_server_sessions(
     }
 
     if (0 == output.sessions_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
 auto ProcessorPrivate::list_unit_definitions(
-    const proto::RPCCommand& command) const -> proto::RPCResponse
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
 
@@ -1566,16 +1571,16 @@ auto ProcessorPrivate::list_unit_definitions(
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::lookup_account_id(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::lookup_account_id(
+    const protobuf::RPCCommand& command) const -> protobuf::RPCResponse
 {
     INIT_SESSION();
 
@@ -1586,16 +1591,16 @@ auto ProcessorPrivate::lookup_account_id(const proto::RPCCommand& command) const
     }
 
     if (0 == output.identifier_size()) {
-        add_output_status(output, proto::RPCRESPONSE_NONE);
+        add_output_status(output, protobuf::RPCRESPONSE_NONE);
     } else {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 
     return output;
 }
 
-auto ProcessorPrivate::move_funds(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::move_funds(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
 
@@ -1605,7 +1610,7 @@ auto ProcessorPrivate::move_funds(const proto::RPCCommand& command) const
     auto sender = client.Storage().Internal().AccountOwner(sourceaccount);
 
     switch (movefunds.type()) {
-        case proto::RPCPAYMENTTYPE_TRANSFER: {
+        case protobuf::RPCPAYMENTTYPE_TRANSFER: {
             const auto targetaccount = ot_.Factory().AccountIDFromBase58(
                 movefunds.destinationaccount());
             const auto notary =
@@ -1623,31 +1628,31 @@ auto ProcessorPrivate::move_funds(const proto::RPCCommand& command) const
             // NOLINTEND(misc-const-correctness)
 
             if (false == ready) {
-                add_output_status(output, proto::RPCRESPONSE_ERROR);
+                add_output_status(output, protobuf::RPCRESPONSE_ERROR);
 
                 return output;
             }
 
             evaluate_move_funds(client, future.get(), output);
         } break;
-        case proto::RPCPAYMENTTYPE_CHEQUE:
-        case proto::RPCPAYMENTTYPE_VOUCHER:
-        case proto::RPCPAYMENTTYPE_INVOICE:
-        case proto::RPCPAYMENTTYPE_BLINDED:
-        case proto::RPCPAYMENTTYPE_ERROR:
-        case proto::RPCPAYMENTTYPE_BLOCKCHAIN:
+        case protobuf::RPCPAYMENTTYPE_CHEQUE:
+        case protobuf::RPCPAYMENTTYPE_VOUCHER:
+        case protobuf::RPCPAYMENTTYPE_INVOICE:
+        case protobuf::RPCPAYMENTTYPE_BLINDED:
+        case protobuf::RPCPAYMENTTYPE_ERROR:
+        case protobuf::RPCPAYMENTTYPE_BLOCKCHAIN:
         default: {
-            add_output_status(output, proto::RPCRESPONSE_INVALID);
+            add_output_status(output, protobuf::RPCRESPONSE_INVALID);
         }
     }
 
     return output;
 }
 
-auto ProcessorPrivate::Process(const proto::RPCCommand& command) const noexcept
-    -> proto::RPCResponse
+auto ProcessorPrivate::Process(
+    const protobuf::RPCCommand& command) const noexcept -> protobuf::RPCResponse
 {
-    const auto valid = proto::Validate(command, VERBOSE);
+    const auto valid = protobuf::syntax::check(LogError(), command);
 
     if (false == valid) {
         LogError()()("Invalid serialized command").Flush();
@@ -1656,126 +1661,126 @@ auto ProcessorPrivate::Process(const proto::RPCCommand& command) const noexcept
     }
 
     switch (command.type()) {
-        case proto::RPCCOMMAND_LISTNYMS:
-        case proto::RPCCOMMAND_LISTACCOUNTS:
-        case proto::RPCCOMMAND_GETACCOUNTBALANCE:
-        case proto::RPCCOMMAND_GETACCOUNTACTIVITY:
-        case proto::RPCCOMMAND_SENDPAYMENT: {
+        case protobuf::RPCCOMMAND_LISTNYMS:
+        case protobuf::RPCCOMMAND_LISTACCOUNTS:
+        case protobuf::RPCCOMMAND_GETACCOUNTBALANCE:
+        case protobuf::RPCCOMMAND_GETACCOUNTACTIVITY:
+        case protobuf::RPCCOMMAND_SENDPAYMENT: {
             const auto response = Process(*factory::RPCRequest(command));
-            auto output = proto::RPCResponse{};
+            auto output = protobuf::RPCResponse{};
             response->Serialize(output);
 
             return output;
         }
-        case proto::RPCCOMMAND_ADDCLIENTSESSION: {
+        case protobuf::RPCCOMMAND_ADDCLIENTSESSION: {
             return start_client(command);
         }
-        case proto::RPCCOMMAND_ADDSERVERSESSION: {
+        case protobuf::RPCCOMMAND_ADDSERVERSESSION: {
             return start_server(command);
         }
-        case proto::RPCCOMMAND_LISTCLIENTSESSIONS: {
+        case protobuf::RPCCOMMAND_LISTCLIENTSESSIONS: {
             return list_client_sessions(command);
         }
-        case proto::RPCCOMMAND_LISTSERVERSESSIONS: {
+        case protobuf::RPCCOMMAND_LISTSERVERSESSIONS: {
             return list_server_sessions(command);
         }
-        case proto::RPCCOMMAND_IMPORTHDSEED: {
+        case protobuf::RPCCOMMAND_IMPORTHDSEED: {
             return import_seed(command);
         }
-        case proto::RPCCOMMAND_LISTHDSEEDS: {
+        case protobuf::RPCCOMMAND_LISTHDSEEDS: {
             return list_seeds(command);
         }
-        case proto::RPCCOMMAND_GETHDSEED: {
+        case protobuf::RPCCOMMAND_GETHDSEED: {
             return get_seeds(command);
         }
-        case proto::RPCCOMMAND_CREATENYM: {
+        case protobuf::RPCCOMMAND_CREATENYM: {
             return create_nym(command);
         }
-        case proto::RPCCOMMAND_GETNYM: {
+        case protobuf::RPCCOMMAND_GETNYM: {
             return get_nyms(command);
         }
-        case proto::RPCCOMMAND_ADDCLAIM: {
+        case protobuf::RPCCOMMAND_ADDCLAIM: {
             return add_claim(command);
         }
-        case proto::RPCCOMMAND_DELETECLAIM: {
+        case protobuf::RPCCOMMAND_DELETECLAIM: {
             return delete_claim(command);
         }
-        case proto::RPCCOMMAND_IMPORTSERVERCONTRACT: {
+        case protobuf::RPCCOMMAND_IMPORTSERVERCONTRACT: {
             return import_server_contract(command);
         }
-        case proto::RPCCOMMAND_LISTSERVERCONTRACTS: {
+        case protobuf::RPCCOMMAND_LISTSERVERCONTRACTS: {
             return list_server_contracts(command);
         }
-        case proto::RPCCOMMAND_REGISTERNYM: {
+        case protobuf::RPCCOMMAND_REGISTERNYM: {
             return register_nym(command);
         }
-        case proto::RPCCOMMAND_CREATEUNITDEFINITION: {
+        case protobuf::RPCCOMMAND_CREATEUNITDEFINITION: {
             return create_unit_definition(command);
         }
-        case proto::RPCCOMMAND_LISTUNITDEFINITIONS: {
+        case protobuf::RPCCOMMAND_LISTUNITDEFINITIONS: {
             return list_unit_definitions(command);
         }
-        case proto::RPCCOMMAND_ISSUEUNITDEFINITION: {
+        case protobuf::RPCCOMMAND_ISSUEUNITDEFINITION: {
             return create_issuer_account(command);
         }
-        case proto::RPCCOMMAND_CREATEACCOUNT: {
+        case protobuf::RPCCOMMAND_CREATEACCOUNT: {
             return create_account(command);
         }
-        case proto::RPCCOMMAND_MOVEFUNDS: {
+        case protobuf::RPCCOMMAND_MOVEFUNDS: {
             return move_funds(command);
         }
-        case proto::RPCCOMMAND_GETSERVERCONTRACT: {
+        case protobuf::RPCCOMMAND_GETSERVERCONTRACT: {
             return get_server_contracts(command);
         }
-        case proto::RPCCOMMAND_ADDCONTACT: {
+        case protobuf::RPCCOMMAND_ADDCONTACT: {
             return add_contact(command);
         }
-        case proto::RPCCOMMAND_LISTCONTACTS: {
+        case protobuf::RPCCOMMAND_LISTCONTACTS: {
             return list_contacts(command);
         }
-        case proto::RPCCOMMAND_GETCONTACT:
-        case proto::RPCCOMMAND_ADDCONTACTCLAIM:
-        case proto::RPCCOMMAND_DELETECONTACTCLAIM:
-        case proto::RPCCOMMAND_VERIFYCLAIM:
-        case proto::RPCCOMMAND_ACCEPTVERIFICATION:
-        case proto::RPCCOMMAND_SENDCONTACTMESSAGE:
-        case proto::RPCCOMMAND_GETCONTACTACTIVITY: {
+        case protobuf::RPCCOMMAND_GETCONTACT:
+        case protobuf::RPCCOMMAND_ADDCONTACTCLAIM:
+        case protobuf::RPCCOMMAND_DELETECONTACTCLAIM:
+        case protobuf::RPCCOMMAND_VERIFYCLAIM:
+        case protobuf::RPCCOMMAND_ACCEPTVERIFICATION:
+        case protobuf::RPCCOMMAND_SENDCONTACTMESSAGE:
+        case protobuf::RPCCOMMAND_GETCONTACTACTIVITY: {
             LogError()()("Command not implemented.").Flush();
         } break;
-        case proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS: {
+        case protobuf::RPCCOMMAND_ACCEPTPENDINGPAYMENTS: {
             return accept_pending_payments(command);
         }
-        case proto::RPCCOMMAND_GETPENDINGPAYMENTS: {
+        case protobuf::RPCCOMMAND_GETPENDINGPAYMENTS: {
             return get_pending_payments(command);
         }
-        case proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS: {
+        case protobuf::RPCCOMMAND_GETCOMPATIBLEACCOUNTS: {
             return get_compatible_accounts(command);
         }
-        case proto::RPCCOMMAND_CREATECOMPATIBLEACCOUNT: {
+        case protobuf::RPCCOMMAND_CREATECOMPATIBLEACCOUNT: {
             return create_compatible_account(command);
         }
-        case proto::RPCCOMMAND_GETWORKFLOW: {
+        case protobuf::RPCCOMMAND_GETWORKFLOW: {
             return get_workflow(command);
         }
-        case proto::RPCCOMMAND_GETSERVERPASSWORD: {
+        case protobuf::RPCCOMMAND_GETSERVERPASSWORD: {
             return get_server_password(command);
         }
-        case proto::RPCCOMMAND_GETADMINNYM: {
+        case protobuf::RPCCOMMAND_GETADMINNYM: {
             return get_server_admin_nym(command);
         }
-        case proto::RPCCOMMAND_GETUNITDEFINITION: {
+        case protobuf::RPCCOMMAND_GETUNITDEFINITION: {
             return get_unit_definitions(command);
         }
-        case proto::RPCCOMMAND_GETTRANSACTIONDATA: {
+        case protobuf::RPCCOMMAND_GETTRANSACTIONDATA: {
             return get_transaction_data(command);
         }
-        case proto::RPCCOMMAND_LOOKUPACCOUNTID: {
+        case protobuf::RPCCOMMAND_LOOKUPACCOUNTID: {
             return lookup_account_id(command);
         }
-        case proto::RPCCOMMAND_RENAMEACCOUNT: {
+        case protobuf::RPCCOMMAND_RENAMEACCOUNT: {
             return rename_account(command);
         }
-        case proto::RPCCOMMAND_ERROR:
+        case protobuf::RPCCOMMAND_ERROR:
         default: {
             LogError()()("Unsupported command.").Flush();
         }
@@ -1857,7 +1862,7 @@ auto ProcessorPrivate::queue_task(
     const UnallocatedCString taskID,
     Finish&& finish,
     Future&& future,
-    proto::RPCResponse& output) const -> void
+    protobuf::RPCResponse& output) const -> void
 {
     auto lock = Lock{task_lock_};
     queued_tasks_.emplace(
@@ -1866,7 +1871,7 @@ auto ProcessorPrivate::queue_task(
         std::forward_as_tuple(std::move(future), std::move(finish), nymID));
     const auto taskIDCompat = ot_.Factory().IdentifierFromPreimage(taskID);
     add_output_task(output, taskIDCompat.asBase58(ot_.Crypto()));
-    add_output_status(output, proto::RPCRESPONSE_QUEUED);
+    add_output_status(output, protobuf::RPCRESPONSE_QUEUED);
 }
 
 auto ProcessorPrivate::queue_task(
@@ -1889,8 +1894,8 @@ auto ProcessorPrivate::queue_task(
     return hashedID.asBase58(ot_.Crypto());
 }
 
-auto ProcessorPrivate::register_nym(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::register_nym(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
     CHECK_OWNER();
@@ -1901,7 +1906,7 @@ auto ProcessorPrivate::register_nym(const proto::RPCCommand& command) const
             ownerID, notaryID);
 
     if (registered) {
-        add_output_status(output, proto::RPCRESPONSE_UNNECESSARY);
+        add_output_status(output, protobuf::RPCRESPONSE_UNNECESSARY);
 
         return output;
     }
@@ -1911,7 +1916,7 @@ auto ProcessorPrivate::register_nym(const proto::RPCCommand& command) const
     // NOLINTEND(misc-const-correctness)
 
     if (false == ready) {
-        add_output_status(output, proto::RPCRESPONSE_REGISTER_NYM_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_REGISTER_NYM_FAILED);
 
         return output;
     }
@@ -1932,11 +1937,11 @@ auto ProcessorPrivate::register_nym(const proto::RPCCommand& command) const
     return output;
 }
 
-auto ProcessorPrivate::rename_account(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::rename_account(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT_CLIENT_ONLY();
-    CHECK_INPUT(modifyaccount, proto::RPCRESPONSE_INVALID);
+    CHECK_INPUT(modifyaccount, protobuf::RPCRESPONSE_INVALID);
 
     for (const auto& rename : command.modifyaccount()) {
         const auto accountID =
@@ -1946,9 +1951,9 @@ auto ProcessorPrivate::rename_account(const proto::RPCCommand& command) const
 
         if (account) {
             account.get().SetAlias(rename.label());
-            add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+            add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
         } else {
-            add_output_status(output, proto::RPCRESPONSE_ACCOUNT_NOT_FOUND);
+            add_output_status(output, protobuf::RPCRESPONSE_ACCOUNT_NOT_FOUND);
         }
     }
 
@@ -1974,8 +1979,8 @@ auto ProcessorPrivate::session(const request::Message& command) const
     }
 }
 
-auto ProcessorPrivate::start_client(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::start_client(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT();
     auto lock = Lock{lock_};
@@ -1994,19 +1999,19 @@ auto ProcessorPrivate::start_client(const proto::RPCCommand& command) const
         assert_true(bound);
 
     } catch (...) {
-        add_output_status(output, proto::RPCRESPONSE_INVALID);
+        add_output_status(output, protobuf::RPCRESPONSE_INVALID);
 
         return output;
     }
 
     output.set_session(instance);
-    add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+    add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
 
     return output;
 }
 
-auto ProcessorPrivate::start_server(const proto::RPCCommand& command) const
-    -> proto::RPCResponse
+auto ProcessorPrivate::start_server(const protobuf::RPCCommand& command) const
+    -> protobuf::RPCResponse
 {
     INIT();
     auto lock = Lock{lock_};
@@ -2019,15 +2024,15 @@ auto ProcessorPrivate::start_server(const proto::RPCCommand& command) const
             ot_.StartNotarySession(get_args(command.arg()), session);
         instance = manager.Instance();
     } catch (const std::invalid_argument&) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_ARGUMENT);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_ARGUMENT);
         return output;
     } catch (...) {
-        add_output_status(output, proto::RPCRESPONSE_INVALID);
+        add_output_status(output, protobuf::RPCRESPONSE_INVALID);
         return output;
     }
 
     output.set_session(instance);
-    add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+    add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
 
     return output;
 }
@@ -2052,7 +2057,7 @@ void ProcessorPrivate::task_handler(const zmq::Message& in)
     auto lock = Lock{task_lock_};
     auto it = queued_tasks_.find(taskID);
     lock.unlock();
-    proto::RPCPush message{};
+    protobuf::RPCPush message{};
     auto& task = *message.mutable_taskcomplete();
 
     if (queued_tasks_.end() != it) {
@@ -2070,7 +2075,7 @@ void ProcessorPrivate::task_handler(const zmq::Message& in)
     queued_tasks_.erase(it);
     lock.unlock();
     message.set_version(RPCPUSH_VERSION);
-    message.set_type(proto::RPCPUSH_TASK);
+    message.set_type(protobuf::RPCPUSH_TASK);
     task.set_version(TASKCOMPLETE_VERSION);
     const auto taskIDStr = String::Factory(taskID);
     const auto taskIDCompat =

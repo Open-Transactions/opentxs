@@ -35,10 +35,10 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Token;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -61,7 +61,7 @@ public:
     virtual auto ValidFrom() const -> Time = 0;
     virtual auto ValidTo() const -> Time = 0;
     virtual auto Value() const -> Denomination = 0;
-    virtual auto Serialize(proto::Token& out) const noexcept -> bool = 0;
+    virtual auto Serialize(protobuf::Token& out) const noexcept -> bool = 0;
 
     virtual auto ChangeOwner(
         blind::internal::Purse& oldOwner,

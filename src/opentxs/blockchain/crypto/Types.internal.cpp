@@ -5,10 +5,10 @@
 
 #include "opentxs/blockchain/crypto/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstdint>
 #include <sstream>
 #include <string_view>
@@ -83,7 +83,7 @@ auto deserialize(std::span<const network::zeromq::Frame> in) noexcept -> Target
     }
 }
 
-auto get_name(const proto::HDPath& path, HDProtocol type) noexcept
+auto get_name(const protobuf::HDPath& path, HDProtocol type) noexcept
     -> UnallocatedCString
 {
     auto out = std::stringstream{};
@@ -94,7 +94,7 @@ auto get_name(const proto::HDPath& path, HDProtocol type) noexcept
     return out.str();
 }
 
-auto get_standard(const proto::HDPath& path) noexcept -> HDProtocol
+auto get_standard(const protobuf::HDPath& path) noexcept -> HDProtocol
 {
     using Index = opentxs::HDIndex<opentxs::crypto::Bip43Purpose>;
     using enum opentxs::crypto::Bip43Purpose;

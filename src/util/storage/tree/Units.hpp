@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageUnits.pb.h>
+#include <opentxs/protobuf/StorageUnits.pb.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -34,10 +34,10 @@ namespace identifier
 class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -63,7 +63,7 @@ public:
         -> UnallocatedCString;
     auto Load(
         const identifier::UnitDefinition& id,
-        std::shared_ptr<proto::UnitDefinition>& output,
+        std::shared_ptr<protobuf::UnitDefinition>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
 
@@ -71,7 +71,7 @@ public:
     auto SetAlias(const identifier::UnitDefinition& id, std::string_view alias)
         -> bool;
     auto Store(
-        const proto::UnitDefinition& data,
+        const protobuf::UnitDefinition& data,
         std::string_view alias,
         UnallocatedCString& plaintext) -> bool;
 
@@ -88,7 +88,7 @@ private:
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageUnits;
+    auto serialize() const -> protobuf::StorageUnits;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Units(

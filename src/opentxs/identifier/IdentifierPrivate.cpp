@@ -5,10 +5,10 @@
 
 #include "opentxs/identifier/IdentifierPrivate.hpp"  // IWYU pragma: associated
 
-#include <Identifier.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Identifier.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -248,7 +248,8 @@ auto IdentifierPrivate::text(const api::Crypto& api, alloc::Default alloc)
     return ss;
 }
 
-auto IdentifierPrivate::Serialize(proto::Identifier& out) const noexcept -> bool
+auto IdentifierPrivate::Serialize(protobuf::Identifier& out) const noexcept
+    -> bool
 {
     out.set_version(proto_version_);
     static constexpr auto badAlgo = identifier::Algorithm::invalid;
@@ -278,7 +279,7 @@ auto IdentifierPrivate::Serialize(network::zeromq::Message& out) const noexcept
     -> bool
 {
     out.Internal().AddFrame([this] {
-        auto p = proto::Identifier{};
+        auto p = protobuf::Identifier{};
         Serialize(p);
 
         return p;

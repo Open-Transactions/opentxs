@@ -33,10 +33,10 @@ class Claim;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -44,7 +44,7 @@ namespace opentxs::factory
 {
 auto ContactItem(
     const api::Session& api,
-    const proto::ContactItem& proto,
+    const protobuf::ContactItem& proto,
     const identity::wot::Claimant& claimant,
     identity::wot::claim::SectionType section,
     alloc::Strategy alloc) noexcept -> identity::wot::claim::internal::Item*;

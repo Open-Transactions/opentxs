@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <Bip47Channel.pb.h>
-#include <BlockchainAddress.pb.h>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -61,10 +61,10 @@ class Account;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -77,7 +77,7 @@ class PaymentCodePrivate final : public internal::PaymentCode,
 {
 public:
     using Element = implementation::Element;
-    using SerializedType = proto::Bip47Channel;
+    using SerializedType = protobuf::Bip47Channel;
 
     auto AddIncomingNotification(
         const block::TransactionHash& tx) const noexcept -> bool final;
@@ -158,7 +158,7 @@ public:
         const identifier::Account& id,
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PasswordPrompt& reason) noexcept(false);
     PaymentCodePrivate(
         const api::Session& api,

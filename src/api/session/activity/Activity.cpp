@@ -7,10 +7,10 @@
 
 #include "api/session/activity/Activity.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -31,7 +31,6 @@
 #include "internal/otx/common/Cheque.hpp"  // IWYU pragma: keep
 #include "internal/otx/common/Item.hpp"    // IWYU pragma: keep
 #include "internal/otx/common/Message.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
@@ -66,6 +65,7 @@
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/StorageBox.hpp"           // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -275,7 +275,7 @@ auto Activity::Cheque(
         }
     }
 
-    auto workflow = proto::PaymentWorkflow{};
+    auto workflow = protobuf::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
         LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
@@ -333,7 +333,7 @@ auto Activity::Transfer(
         }
     }
 
-    auto workflow = proto::PaymentWorkflow{};
+    auto workflow = protobuf::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
         LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
@@ -569,7 +569,7 @@ auto Activity::PaymentText(
         }
     }
 
-    auto workflow = proto::PaymentWorkflow{};
+    auto workflow = protobuf::PaymentWorkflow{};
 
     if (false == api_.Storage().Internal().Load(nym, workflowID, workflow)) {
         LogError()()("Workflow ")(workflowID, api_.Crypto())(" for nym ")(
@@ -696,7 +696,7 @@ auto Activity::start_publisher(
 auto Activity::Thread(
     const identifier::Nym& nymID,
     const identifier::Generic& threadID,
-    proto::StorageThread& output) const noexcept -> bool
+    protobuf::StorageThread& output) const noexcept -> bool
 {
     auto lock = sLock(shared_lock_);
 
@@ -714,7 +714,7 @@ auto Activity::Thread(
 {
     auto lock = sLock(shared_lock_);
 
-    auto serialized = proto::StorageThread{};
+    auto serialized = protobuf::StorageThread{};
     if (false == api_.Storage().Internal().Load(nymID, threadID, serialized)) {
         return false;
     }
@@ -729,7 +729,7 @@ auto Activity::thread_preload_thread(
     const std::size_t start,
     const std::size_t count) const noexcept -> void
 {
-    auto thread = proto::StorageThread{};
+    auto thread = protobuf::StorageThread{};
 
     if (false == api_.Storage().Internal().Load(nymID, threadID, thread)) {
         LogError()()("Unable to load thread ")(threadID, api_.Crypto())(

@@ -70,10 +70,10 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionInput;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class Log;
@@ -86,7 +86,7 @@ namespace opentxs::blockchain::protocol::bitcoin::base::block::internal
 class Input
 {
 public:
-    using SerializeType = proto::BlockchainTransactionInput;
+    using SerializeType = protobuf::BlockchainTransactionInput;
     using Signature = std::pair<ReadView, ReadView>;
     using Signatures = UnallocatedVector<Signature>;
 

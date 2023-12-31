@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
 #include <memory>
 
 #include "internal/core/String.hpp"
@@ -39,17 +39,18 @@ void ProcessorPrivate::evaluate_register_account(
     const auto& [status, pReply] = result;
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_REGISTER_ACCOUNT_FAILED);
+        add_output_status(
+            output, protobuf::RPCRESPONSE_REGISTER_ACCOUNT_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
         assert_false(nullptr == pReply);
 
         const auto& reply = *pReply;
         add_output_identifier(reply.acct_id_->Get(), output);
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 }
 
@@ -61,13 +62,13 @@ void ProcessorPrivate::evaluate_register_nym(
     const auto& [status, pReply] = result;
 
     if (otx::LastReplyStatus::NotSent == status) {
-        add_output_status(output, proto::RPCRESPONSE_ERROR);
+        add_output_status(output, protobuf::RPCRESPONSE_ERROR);
     } else if (otx::LastReplyStatus::Unknown == status) {
-        add_output_status(output, proto::RPCRESPONSE_BAD_SERVER_RESPONSE);
+        add_output_status(output, protobuf::RPCRESPONSE_BAD_SERVER_RESPONSE);
     } else if (otx::LastReplyStatus::MessageFailed == status) {
-        add_output_status(output, proto::RPCRESPONSE_REGISTER_NYM_FAILED);
+        add_output_status(output, protobuf::RPCRESPONSE_REGISTER_NYM_FAILED);
     } else if (otx::LastReplyStatus::MessageSuccess == status) {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     }
 }
 
@@ -76,12 +77,12 @@ void ProcessorPrivate::evaluate_transaction_reply(
     const api::session::Client& client,
     const Message& reply,
     T& output,
-    const proto::RPCResponseCode code) const
+    const protobuf::RPCResponseCode code) const
 {
     const auto success = evaluate_transaction_reply(client, reply);
 
     if (success) {
-        add_output_status(output, proto::RPCRESPONSE_SUCCESS);
+        add_output_status(output, protobuf::RPCRESPONSE_SUCCESS);
     } else {
         add_output_status(output, code);
     }

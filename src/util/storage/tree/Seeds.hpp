@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageSeeds.pb.h>
+#include <opentxs/protobuf/StorageSeeds.pb.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -32,10 +32,10 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Seed;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -61,7 +61,7 @@ public:
     auto Default() const -> opentxs::crypto::SeedID;
     auto Load(
         const opentxs::crypto::SeedID& id,
-        std::shared_ptr<proto::Seed>& output,
+        std::shared_ptr<protobuf::Seed>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
 
@@ -69,7 +69,7 @@ public:
     auto SetAlias(const opentxs::crypto::SeedID& id, std::string_view alias)
         -> bool;
     auto SetDefault(const opentxs::crypto::SeedID& id) -> bool;
-    auto Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
+    auto Store(const opentxs::crypto::SeedID& id, const protobuf::Seed& data)
         -> bool;
 
     Seeds() = delete;
@@ -92,7 +92,7 @@ private:
     auto set_default(
         const std::unique_lock<std::mutex>& lock,
         const opentxs::crypto::SeedID& id) -> void;
-    auto serialize() const -> proto::StorageSeeds;
+    auto serialize() const -> protobuf::StorageSeeds;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Seeds(

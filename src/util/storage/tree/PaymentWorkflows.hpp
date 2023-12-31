@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StoragePaymentWorkflows.pb.h>
+#include <opentxs/protobuf/StoragePaymentWorkflows.pb.h>
 #include <functional>
 #include <memory>
 #include <utility>
@@ -34,10 +34,10 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class PaymentWorkflow;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -73,14 +73,14 @@ public:
         -> Workflows;
     auto Load(
         const identifier::Generic& id,
-        std::shared_ptr<proto::PaymentWorkflow>& output,
+        std::shared_ptr<protobuf::PaymentWorkflow>& output,
         ErrorReporting checking) const -> bool;
     auto LookupBySource(const identifier::Generic& sourceID) const
         -> identifier::Generic;
 
     auto Delete(const identifier::Generic& id) -> bool;
     auto Store(
-        const proto::PaymentWorkflow& data,
+        const protobuf::PaymentWorkflow& data,
         UnallocatedCString& plaintext) -> bool;
 
     PaymentWorkflows() = delete;
@@ -108,7 +108,7 @@ private:
     UnallocatedMap<State, Workflows> state_workflow_map_;
 
     auto save(const Lock& lock) const -> bool final;
-    auto serialize() const -> proto::StoragePaymentWorkflows;
+    auto serialize() const -> protobuf::StoragePaymentWorkflows;
 
     void add_state_index(
         const Lock& lock,

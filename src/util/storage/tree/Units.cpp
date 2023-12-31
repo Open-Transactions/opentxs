@@ -5,24 +5,23 @@
 
 #include "util/storage/tree/Units.hpp"  // IWYU pragma: associated
 
-#include <StorageUnits.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/StorageUnits.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageUnits.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/protobuf/syntax/StorageUnits.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -65,7 +64,7 @@ auto Units::Delete(const identifier::UnitDefinition& id) -> bool
 
 auto Units::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageUnits>{};
+    auto p = std::shared_ptr<protobuf::StorageUnits>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -85,11 +84,11 @@ auto Units::init(const Hash& hash) noexcept(false) -> void
 
 auto Units::Load(
     const identifier::UnitDefinition& id,
-    std::shared_ptr<proto::UnitDefinition>& output,
+    std::shared_ptr<protobuf::UnitDefinition>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::UnitDefinition>(id, output, alias, checking);
+    return load_proto<protobuf::UnitDefinition>(id, output, alias, checking);
 }
 
 auto Units::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -98,14 +97,14 @@ auto Units::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Units::serialize() const -> proto::StorageUnits
+auto Units::serialize() const -> protobuf::StorageUnits
 {
-    proto::StorageUnits serialized;
+    protobuf::StorageUnits serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -129,7 +128,7 @@ auto Units::SetAlias(
 }
 
 auto Units::Store(
-    const proto::UnitDefinition& data,
+    const protobuf::UnitDefinition& data,
     std::string_view alias,
     UnallocatedCString& plaintext) -> bool
 {

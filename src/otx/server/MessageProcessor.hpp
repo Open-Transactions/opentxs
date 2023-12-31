@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ServerRequest.pb.h>
+#include <opentxs/protobuf/ServerRequest.pb.h>
 #include <atomic>
 #include <cstddef>
 #include <mutex>
@@ -112,7 +112,7 @@ private:
     mutable std::shared_mutex connection_map_lock_;
 
     auto extract_proto(const network::zeromq::Frame& incoming) const noexcept
-        -> proto::ServerRequest;
+        -> protobuf::ServerRequest;
 
     auto associate_connection(
         const bool oldFormat,
@@ -124,7 +124,7 @@ private:
         network::zeromq::Message&& incoming) noexcept
         -> network::zeromq::Message;
     auto process_command(
-        const proto::ServerRequest& request,
+        const protobuf::ServerRequest& request,
         identifier::Nym& nymID) noexcept -> bool;
     auto process_frontend(network::zeromq::Message&& incoming) noexcept -> void;
     auto process_internal(network::zeromq::Message&& incoming) noexcept -> void;

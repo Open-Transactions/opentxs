@@ -44,12 +44,12 @@ namespace identity
 class Authority;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class HDPath;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Data;
@@ -64,7 +64,7 @@ namespace opentxs::crypto::asymmetric::internal
 class Key
 {
 public:
-    using Serialized = proto::AsymmetricKey;
+    using Serialized = protobuf::AsymmetricKey;
 
     virtual auto asEllipticCurve() const noexcept -> const key::EllipticCurve&;
     virtual auto asRSA() const noexcept -> const key::RSA&;
@@ -92,27 +92,27 @@ public:
     virtual auto operator==(const Serialized& rhs) const noexcept -> bool;
     virtual auto Params() const noexcept -> ReadView;
     virtual auto Path() const noexcept -> const UnallocatedCString;
-    virtual auto Path(proto::HDPath& output) const noexcept -> bool;
+    virtual auto Path(protobuf::HDPath& output) const noexcept -> bool;
     virtual auto Provider() const noexcept -> const crypto::AsymmetricProvider&;
     virtual auto Serialize(Serialized& serialized) const noexcept -> bool;
     virtual auto Sign(
         const GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const identifier::Generic& credential,
         const crypto::HashType hash,
         const PasswordPrompt& reason) const noexcept -> bool;
     virtual auto Sign(
         const GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const identifier::Generic& credential,
         const PasswordPrompt& reason) const noexcept -> bool;
     virtual auto TransportKey(
         Data& publicKey,
         Secret& privateKey,
         const PasswordPrompt& reason) const noexcept -> bool;
-    virtual auto Verify(const Data& plaintext, const proto::Signature& sig)
+    virtual auto Verify(const Data& plaintext, const protobuf::Signature& sig)
         const noexcept -> bool;
 
     virtual auto asEllipticCurve() noexcept -> key::EllipticCurve&;

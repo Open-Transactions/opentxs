@@ -11,7 +11,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/network/blockchain/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 
@@ -68,12 +68,12 @@ namespace crypto
 class Envelope;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class BlockchainPeerAddress;
 class HDPath;
 class Identifier;
-}  // namespace proto
+}  // namespace protobuf
 
 class Cheque;
 class Contract;
@@ -87,9 +87,9 @@ class opentxs::api::FactoryPrivate final : public internal::Factory
 public:
     auto AccountID(
         const identity::wot::claim::ClaimType type,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         alloc::Default alloc) const noexcept -> identifier::Account final;
-    auto AccountID(const proto::Identifier& in, alloc::Default alloc)
+    auto AccountID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Account final;
     auto AccountID(const Contract& contract, alloc::Default alloc)
         const noexcept -> identifier::Account final;
@@ -139,9 +139,10 @@ public:
     auto Armored(const opentxs::String& input) const -> OTArmored final;
     auto Armored(const opentxs::crypto::Envelope& input) const
         -> OTArmored final;
-    auto Armored(const ProtobufType& input) const -> OTArmored final;
-    auto Armored(const ProtobufType& input, const UnallocatedCString& header)
-        const -> OTString final;
+    auto Armored(const protobuf::MessageType& input) const -> OTArmored final;
+    auto Armored(
+        const protobuf::MessageType& input,
+        const UnallocatedCString& header) const -> OTString final;
     auto BlockchainAddress(
         const opentxs::network::blockchain::Protocol protocol,
         const opentxs::network::blockchain::Transport network,
@@ -187,11 +188,11 @@ public:
         const Set<opentxs::network::blockchain::bitcoin::Service>& services,
         const ReadView key) const noexcept
         -> opentxs::network::blockchain::Address final;
-    auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+    auto BlockchainAddress(const protobuf::BlockchainPeerAddress& serialized)
         const noexcept -> opentxs::network::blockchain::Address final;
     auto Data() const -> ByteArray final;
     auto Data(const opentxs::Armored& input) const -> ByteArray final;
-    auto Data(const ProtobufType& input) const -> ByteArray final;
+    auto Data(const protobuf::MessageType& input) const -> ByteArray final;
     auto Data(const opentxs::network::zeromq::Frame& input) const
         -> ByteArray final;
     auto Data(const std::uint8_t input) const -> ByteArray final;
@@ -208,7 +209,7 @@ public:
         const noexcept -> identifier::Generic final;
     auto Identifier(const Item& item, alloc::Default alloc) const noexcept
         -> identifier::Generic final;
-    auto Identifier(const proto::Identifier& in, alloc::Default alloc)
+    auto Identifier(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromBase58(
         const std::string_view base58,
@@ -226,11 +227,12 @@ public:
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Generic final;
     auto IdentifierFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Generic final;
-    auto IdentifierFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::Generic final;
+    auto IdentifierFromPreimage(
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept -> identifier::Generic final;
     auto IdentifierFromProtobuf(const ReadView bytes, alloc::Default alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromRandom(alloc::Default alloc) const noexcept
@@ -238,7 +240,7 @@ public:
     auto IdentifierFromRandom(
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Generic final;
-    auto NotaryID(const proto::Identifier& in, alloc::Default alloc)
+    auto NotaryID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDConvertSafe(
         const identifier::Generic& in,
@@ -257,10 +259,11 @@ public:
         const ReadView preimage,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::Notary final;
     auto NotaryIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept -> identifier::Notary final;
+    auto NotaryIDFromPreimage(
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Notary final;
     auto NotaryIDFromProtobuf(const ReadView bytes, alloc::Default alloc)
@@ -270,8 +273,8 @@ public:
     auto NotaryIDFromRandom(
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Notary final;
-    auto NymID(const proto::Identifier& in, alloc::Default alloc) const noexcept
-        -> identifier::Nym final;
+    auto NymID(const protobuf::Identifier& in, alloc::Default alloc)
+        const noexcept -> identifier::Nym final;
     auto NymIDConvertSafe(const identifier::Generic& in, alloc::Default alloc)
         const noexcept -> identifier::Nym final;
     auto NymIDFromBase58(const std::string_view base58, alloc::Default alloc)
@@ -321,12 +324,12 @@ public:
     auto SeedIDFromRandom(
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::HDSeed final;
-    auto SeedID(const proto::Identifier& in, alloc::Default alloc = {})
+    auto SeedID(const protobuf::Identifier& in, alloc::Default alloc = {})
         const noexcept -> identifier::HDSeed final;
     auto Self() const noexcept -> const api::Factory& final { return self_; }
     auto Session() const noexcept
         -> const api::session::internal::Factory& final;
-    auto UnitID(const proto::Identifier& in, alloc::Default alloc)
+    auto UnitID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDConvertSafe(const identifier::Generic& in, alloc::Default alloc)
         const noexcept -> identifier::UnitDefinition final;
@@ -346,10 +349,12 @@ public:
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept
         -> identifier::UnitDefinition final;
-    auto UnitIDFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept
+        -> identifier::UnitDefinition final;
+    auto UnitIDFromPreimage(
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept
         -> identifier::UnitDefinition final;
@@ -409,11 +414,12 @@ private:
     template <typename IDType>
     auto id_from_preimage(
         const identifier::Algorithm type,
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         alloc::Default alloc) const noexcept -> IDType;
     template <typename IDType>
-    auto id_from_protobuf(const proto::Identifier& proto, alloc::Default alloc)
-        const noexcept -> IDType;
+    auto id_from_protobuf(
+        const protobuf::Identifier& proto,
+        alloc::Default alloc) const noexcept -> IDType;
     template <typename IDType>
     auto id_from_random(const identifier::Algorithm type, alloc::Default alloc)
         const noexcept -> IDType;

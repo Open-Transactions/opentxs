@@ -5,8 +5,8 @@
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionOutput.pb.h>
-#include <BlockchainWalletKey.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>
+#include <opentxs/protobuf/BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <stdexcept>
 #include <utility>
@@ -15,7 +15,6 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/core/Amount.hpp"
 #include "internal/core/Factory.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
@@ -29,6 +28,7 @@
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -109,7 +109,7 @@ auto BitcoinTransactionOutput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
-    const proto::BlockchainTransactionOutput& in,
+    const protobuf::BlockchainTransactionOutput& in,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Output
 {

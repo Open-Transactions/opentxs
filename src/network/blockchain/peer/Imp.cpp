@@ -8,7 +8,7 @@
 
 #include "network/blockchain/peer/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
 #include <sodium.h>
 #include <algorithm>
 #include <compare>
@@ -32,7 +32,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "network/blockchain/peer/HasJob.hpp"
 #include "network/blockchain/peer/JobType.hpp"
@@ -74,6 +73,7 @@
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Options.hpp"
@@ -1056,7 +1056,7 @@ auto Peer::Imp::process_gossip_address(
     std::ranges::transform(
         frames, std::back_inserter(out), [this](const auto& frame) {
             return api_.Factory().Internal().Session().BlockchainAddress(
-                proto::Factory<proto::BlockchainPeerAddress>(frame));
+                protobuf::Factory<protobuf::BlockchainPeerAddress>(frame));
         });
     log()(name_)(": address queue contains ")(out.size())(" items").Flush();
 }

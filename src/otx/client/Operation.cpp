@@ -5,16 +5,16 @@
 
 #include "otx/client/Operation.hpp"  // IWYU pragma: associated
 
-#include <Nym.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PeerObject.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
-#include <Purse.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>  // IWYU pragma: keep
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PeerObject.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>  // IWYU pragma: keep
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -51,10 +51,6 @@
 #include "internal/otx/consensus/Consensus.hpp"
 #include "internal/otx/consensus/ManagedNumber.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/Time.hpp"
@@ -99,6 +95,9 @@
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -679,7 +678,7 @@ auto Operation::construct_deposit_cash() -> std::shared_ptr<Message>
     }
 
     item.SetAttachment([&] {
-        auto proto = proto::Purse{};
+        auto proto = protobuf::Purse{};
         purse.Internal().Serialize(proto);
 
         return api_.Factory().Internal().Data(proto);
@@ -884,7 +883,7 @@ auto Operation::construct_issue_unit_definition() -> std::shared_ptr<Message>
 
         auto id = contract->ID();
         id.GetString(api_.Crypto(), message.instrument_definition_id_);
-        auto serialized = proto::UnitDefinition{};
+        auto serialized = protobuf::UnitDefinition{};
         if (false == contract->Serialize(serialized, true)) {
             LogError()()("Failed to serialize unit definition").Flush();
 
@@ -914,7 +913,7 @@ auto Operation::construct_publish_nym() -> std::shared_ptr<Message>
     CREATE_MESSAGE(registerContract, -1, true, true);
 
     message.enum_ = static_cast<std::uint8_t>(contract::Type::nym);
-    auto publicNym = proto::Nym{};
+    auto publicNym = protobuf::Nym{};
     if (false == contract->Internal().Serialize(publicNym)) {
         LogError()()("Failed to serialize nym: ")(target_nym_id_, api_.Crypto())
             .Flush();
@@ -935,7 +934,7 @@ auto Operation::construct_publish_server() -> std::shared_ptr<Message>
         CREATE_MESSAGE(registerContract, -1, true, true);
 
         message.enum_ = static_cast<std::uint8_t>(contract::Type::notary);
-        auto serialized = proto::ServerContract{};
+        auto serialized = protobuf::ServerContract{};
         if (false == contract->Serialize(serialized, true)) {
             LogError()()("Failed to serialize server contract: ")(
                 target_server_id_, api_.Crypto())
@@ -964,7 +963,7 @@ auto Operation::construct_publish_unit() -> std::shared_ptr<Message>
         CREATE_MESSAGE(registerContract, -1, true, true);
 
         message.enum_ = static_cast<std::uint8_t>(contract::Type::unit);
-        auto serialized = proto::UnitDefinition{};
+        auto serialized = protobuf::UnitDefinition{};
         if (false == contract->Serialize(serialized)) {
             LogError()()("Failed to serialize unit definition: ")(
                 target_unit_id_, api_.Crypto())
@@ -1021,7 +1020,7 @@ auto Operation::construct_register_nym() -> std::shared_ptr<Message>
     PREPARE_CONTEXT();
     CREATE_MESSAGE(registerNym, -1, true, true);
 
-    auto publicNym = proto::Nym{};
+    auto publicNym = protobuf::Nym{};
     if (false == nym.Internal().Serialize(publicNym)) {
         LogError()()("Failed to serialize nym.");
         return {};
@@ -1063,7 +1062,7 @@ auto Operation::construct_send_nym_object(
     CREATE_MESSAGE(sendNymMessage, recipient->ID(), number, true, true);
 
     auto envelope = api_.Factory().Internal().Session().Envelope();
-    auto output = proto::PeerObject{};
+    auto output = protobuf::PeerObject{};
     if (false == object.Serialize(output)) {
         LogError()()("Failed to serialize object.").Flush();
 
@@ -1212,13 +1211,13 @@ auto Operation::construct_send_peer_reply() -> std::shared_ptr<Message>
     auto& context = contextEditor.get();
     const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
-    auto reply = proto::PeerReply{};
+    auto reply = protobuf::PeerReply{};
     if (false == peer_reply_.Internal().Serialize(reply)) {
         LogError()()("Failed to serialize reply.").Flush();
 
         return {};
     }
-    auto request = proto::PeerRequest{};
+    auto request = protobuf::PeerRequest{};
     if (false == peer_request_.Internal().Serialize(request)) {
         LogError()()("Failed to serialize request.").Flush();
 
@@ -1273,7 +1272,7 @@ auto Operation::construct_send_peer_request() -> std::shared_ptr<Message>
     auto& context = contextEditor.get();
     const auto& nym = *context.Signer();
     context.SetPush(enable_otx_push_.load());
-    auto serialized = proto::PeerRequest{};
+    auto serialized = protobuf::PeerRequest{};
     if (false == peer_request_.Internal().Serialize(serialized)) {
         LogError()()("Failed to serialize request.").Flush();
 
@@ -1435,7 +1434,7 @@ auto Operation::construct_withdraw_cash() -> std::shared_ptr<Message>
 
     item.SetNote(String::Factory("Gimme cash!"));
     item.SetAttachment([&] {
-        auto proto = proto::Purse{};
+        auto proto = protobuf::Purse{};
         purse.Internal().Serialize(proto);
 
         return api_.Factory().Internal().Data(proto);
@@ -1978,7 +1977,7 @@ auto Operation::GetFuture() -> Operation::Future
 }
 
 auto Operation::IssueUnitDefinition(
-    const std::shared_ptr<const proto::UnitDefinition> unitDefinition,
+    const std::shared_ptr<const protobuf::UnitDefinition> unitDefinition,
     const otx::context::Server::ExtraArgs& args) -> bool
 {
     if (false == bool(unitDefinition)) {
@@ -1987,7 +1986,7 @@ auto Operation::IssueUnitDefinition(
         return false;
     }
 
-    if (false == proto::Validate(*unitDefinition, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), *unitDefinition)) {
         LogError()()("Invalid unit definition").Flush();
 
         return false;
@@ -2004,8 +2003,8 @@ auto Operation::IssueUnitDefinition(
     const ReadView& view,
     const otx::context::Server::ExtraArgs& args) -> bool
 {
-    auto unitdefinition = std::make_shared<const proto::UnitDefinition>(
-        proto::Factory<proto::UnitDefinition>(view));
+    auto unitdefinition = std::make_shared<const protobuf::UnitDefinition>(
+        protobuf::Factory<protobuf::UnitDefinition>(view));
     return IssueUnitDefinition(unitdefinition, args);
 }
 
@@ -2394,7 +2393,7 @@ auto Operation::SendCash(
 
     try {
         const auto workflow = [&] {
-            auto out = proto::PaymentWorkflow{};
+            auto out = protobuf::PaymentWorkflow{};
 
             if (!api_.Workflow().LoadWorkflow(nym_id_, workflowID, out)) {
                 throw std::runtime_error{"Failed to load workflow"};

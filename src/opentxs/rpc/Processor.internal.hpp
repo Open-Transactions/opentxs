@@ -10,11 +10,11 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
 class RPCResponse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -36,8 +36,8 @@ namespace opentxs::rpc
 class Processor
 {
 public:
-    virtual auto Process(const proto::RPCCommand& command) const noexcept
-        -> proto::RPCResponse;
+    virtual auto Process(const protobuf::RPCCommand& command) const noexcept
+        -> protobuf::RPCResponse;
     virtual auto Process(const request::Message& command) const noexcept
         -> std::unique_ptr<response::Message>;
 

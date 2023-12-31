@@ -5,8 +5,8 @@
 
 #include "network/ServerConnection.hpp"  // IWYU pragma: associated
 
-#include <ServerReply.pb.h>
-#include <ServerRequest.pb.h>
+#include <opentxs/protobuf/ServerReply.pb.h>
+#include <opentxs/protobuf/ServerRequest.pb.h>
 #include <atomic>
 #include <chrono>
 #include <compare>
@@ -35,10 +35,6 @@
 #include "internal/network/zeromq/socket/Socket.hpp"
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/ServerReply.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/AddressType.hpp"  // IWYU pragma: keep
@@ -64,6 +60,9 @@
 #include "opentxs/otx/ServerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
 #include "opentxs/otx/client/SendResult.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/ServerReply.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -356,9 +355,9 @@ auto ServerConnection::Imp::process_incoming(const zeromq::Message& in) -> void
                 }
             }
         }();
-        const auto proto = proto::Factory<proto::ServerReply>(payload);
+        const auto proto = protobuf::Factory<protobuf::ServerReply>(payload);
 
-        if (false == proto::Validate(proto, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), proto)) {
             throw std::runtime_error{"invalid serialization"};
         }
 
@@ -419,7 +418,7 @@ auto ServerConnection::Imp::register_for_push(
     request.SetIncludeNym(true, reason);
     auto message = zmq::Message{};
     message.AddFrame();
-    auto serialized = proto::ServerRequest{};
+    auto serialized = protobuf::ServerRequest{};
     if (false == request.Serialize(serialized)) {
         LogVerbose()()("Failed to serialize request.").Flush();
 

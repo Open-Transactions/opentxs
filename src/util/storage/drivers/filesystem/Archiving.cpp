@@ -7,19 +7,20 @@
 
 #include "util/storage/drivers/filesystem/Archiving.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <system_error>
 #include <utility>
 
 #include "internal/crypto/symmetric/Key.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/crypto/symmetric/Key.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -109,7 +110,7 @@ auto Archiving::do_write(
     ReadView data) const noexcept(false) -> void
 {
     if (encrypted_) {
-        auto ciphertext = proto::Ciphertext{};
+        auto ciphertext = protobuf::Ciphertext{};
         auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(
             "Storage write");
         const auto encrypt =
@@ -119,7 +120,7 @@ auto Archiving::do_write(
             throw std::runtime_error{"encryption failure"};
         }
 
-        finalize_write(directory, filename, file, proto::ToString(ciphertext));
+        finalize_write(directory, filename, file, to_string(ciphertext));
     } else {
         finalize_write(directory, filename, file, data);
     }
@@ -141,7 +142,7 @@ auto Archiving::finalize_read(UnallocatedCString&& input) const noexcept(false)
 {
     if (false == encrypted_) { return std::move(input); }
 
-    const auto ciphertext = proto::Factory<proto::Ciphertext>(input);
+    const auto ciphertext = protobuf::Factory<protobuf::Ciphertext>(input);
 
     auto output = ""s;
     auto reason = encryption_key_.Internal().API().Factory().PasswordPrompt(

@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::AccountEventType
-// IWYU pragma: no_forward_declare opentxs::proto::PaymentEventType
+// IWYU pragma: no_forward_declare opentxs::protobuf::AccountEventType
+// IWYU pragma: no_forward_declare opentxs::protobuf::PaymentEventType
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
-#include <RPCEnums.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
 #include <memory>
 #include <shared_mutex>
 #include <utility>
@@ -59,10 +59,10 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class PaymentWorkflow;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -151,7 +151,7 @@ public:
     auto LoadWorkflow(
         const identifier::Nym& nymID,
         const identifier::Generic& workflowID,
-        proto::PaymentWorkflow& out) const -> bool final;
+        protobuf::PaymentWorkflow& out) const -> bool final;
     auto ReceiveCash(
         const identifier::Nym& receiver,
         const otx::blind::Purse& purse,
@@ -225,34 +225,35 @@ private:
     mutable UnallocatedMap<UnallocatedCString, std::shared_mutex>
         workflow_locks_;
 
-    static auto can_abort_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_abort_transfer(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_accept_cheque(const proto::PaymentWorkflow& workflow)
+    static auto can_accept_cheque(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_accept_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_accept_transfer(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_acknowledge_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_acknowledge_transfer(
+        const protobuf::PaymentWorkflow& workflow) -> bool;
+    static auto can_cancel_cheque(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_cancel_cheque(const proto::PaymentWorkflow& workflow)
+    static auto can_clear_transfer(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_clear_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_complete_transfer(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_complete_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_convey_cash(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_convey_cash(const proto::PaymentWorkflow& workflow) -> bool;
-    static auto can_convey_cheque(const proto::PaymentWorkflow& workflow)
+    static auto can_convey_cheque(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_convey_transfer(const proto::PaymentWorkflow& workflow)
+    static auto can_convey_transfer(const protobuf::PaymentWorkflow& workflow)
         -> bool;
-    static auto can_deposit_cheque(const proto::PaymentWorkflow& workflow)
+    static auto can_deposit_cheque(const protobuf::PaymentWorkflow& workflow)
         -> bool;
     static auto can_expire_cheque(
         const opentxs::Cheque& cheque,
-        const proto::PaymentWorkflow& workflow) -> bool;
-    static auto can_finish_cheque(const proto::PaymentWorkflow& workflow)
+        const protobuf::PaymentWorkflow& workflow) -> bool;
+    static auto can_finish_cheque(const protobuf::PaymentWorkflow& workflow)
         -> bool;
     static auto cheque_deposit_success(const Message* message) -> bool;
-    static auto extract_conveyed_time(const proto::PaymentWorkflow& workflow)
+    static auto extract_conveyed_time(const protobuf::PaymentWorkflow& workflow)
         -> Time;
     static auto isCheque(const opentxs::Cheque& cheque) -> bool;
     static auto isTransfer(const Item& item) -> bool;
@@ -264,9 +265,9 @@ private:
         const eLock& lock,
         const identifier::Nym& nymID,
         const identifier::Nym& eventNym,
-        proto::PaymentWorkflow& workflow,
+        protobuf::PaymentWorkflow& workflow,
         const otx::client::PaymentWorkflowState newState,
-        const proto::PaymentEventType newEventType,
+        const protobuf::PaymentEventType newEventType,
         const VersionNumber version,
         const Message& request,
         const Message* reply,
@@ -275,9 +276,9 @@ private:
         const eLock& lock,
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        proto::PaymentWorkflow& workflow,
+        protobuf::PaymentWorkflow& workflow,
         const otx::client::PaymentWorkflowState newState,
-        const proto::PaymentEventType newEventType,
+        const protobuf::PaymentEventType newEventType,
         const VersionNumber version,
         const identifier::Nym& recipientNymID,
         const OTTransaction& receipt,
@@ -286,9 +287,9 @@ private:
         const eLock& lock,
         const identifier::Nym& nymID,
         const identifier::Nym& eventNym,
-        proto::PaymentWorkflow& workflow,
+        protobuf::PaymentWorkflow& workflow,
         const otx::client::PaymentWorkflowState newState,
-        const proto::PaymentEventType newEventType,
+        const protobuf::PaymentEventType newEventType,
         const VersionNumber version,
         const Message& message,
         const identifier::Account& account,
@@ -298,9 +299,9 @@ private:
         const identifier::Nym& nymID,
         const UnallocatedCString& notaryID,
         const identifier::Nym& eventNym,
-        proto::PaymentWorkflow& workflow,
+        protobuf::PaymentWorkflow& workflow,
         const otx::client::PaymentWorkflowState newState,
-        const proto::PaymentEventType newEventType,
+        const protobuf::PaymentEventType newEventType,
         const VersionNumber version,
         const OTTransaction& receipt,
         const identifier::Account& account,
@@ -330,7 +331,7 @@ private:
         const identifier::Nym& party,
         const identifier::Account& account,
         const Message* message = nullptr) const
-        -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
+        -> std::pair<identifier::Generic, protobuf::PaymentWorkflow>;
     auto create_transfer(
         const Lock& global,
         const identifier::Nym& nymID,
@@ -344,7 +345,7 @@ private:
         const identifier::Account& account,
         const UnallocatedCString& notaryID,
         const UnallocatedCString& destinationAccountID) const
-        -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
+        -> std::pair<identifier::Generic, protobuf::PaymentWorkflow>;
     auto extract_transfer_from_pending(const OTTransaction& receipt) const
         -> std::unique_ptr<Item>;
     auto extract_transfer_from_receipt(
@@ -355,21 +356,21 @@ private:
         const Lock& global,
         const UnallocatedSet<otx::client::PaymentWorkflowType>& types,
         const identifier::Nym& nymID,
-        const T& source) const -> std::shared_ptr<proto::PaymentWorkflow>;
+        const T& source) const -> std::shared_ptr<protobuf::PaymentWorkflow>;
     auto get_workflow_by_id(
         const UnallocatedSet<otx::client::PaymentWorkflowType>& types,
         const identifier::Nym& nymID,
         const identifier::Generic& workflowID) const
-        -> std::shared_ptr<proto::PaymentWorkflow>;
+        -> std::shared_ptr<protobuf::PaymentWorkflow>;
     auto get_workflow_by_id(
         const identifier::Nym& nymID,
         const identifier::Generic& workflowID) const
-        -> std::shared_ptr<proto::PaymentWorkflow>;
+        -> std::shared_ptr<protobuf::PaymentWorkflow>;
     auto get_workflow_by_source(
         const UnallocatedSet<otx::client::PaymentWorkflowType>& types,
         const identifier::Nym& nymID,
         const identifier::Generic& sourceID) const
-        -> std::shared_ptr<proto::PaymentWorkflow>;
+        -> std::shared_ptr<protobuf::PaymentWorkflow>;
     // Unlocks global after successfully locking the workflow-specific mutex
     auto get_workflow_lock(Lock& global, const UnallocatedCString& id) const
         -> eLock;
@@ -378,22 +379,22 @@ private:
         const identifier::Account& destinationAccount) const -> bool;
     auto save_workflow(
         const identifier::Nym& nymID,
-        const proto::PaymentWorkflow& workflow) const -> bool;
+        const protobuf::PaymentWorkflow& workflow) const -> bool;
     auto save_workflow(
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        const proto::PaymentWorkflow& workflow) const -> bool;
+        const protobuf::PaymentWorkflow& workflow) const -> bool;
     auto save_workflow(
         identifier::Generic&& workflowID,
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        const proto::PaymentWorkflow& workflow) const -> identifier::Generic;
+        const protobuf::PaymentWorkflow& workflow) const -> identifier::Generic;
     auto save_workflow(
-        std::pair<identifier::Generic, proto::PaymentWorkflow>&& workflowID,
+        std::pair<identifier::Generic, protobuf::PaymentWorkflow>&& workflowID,
         const identifier::Nym& nymID,
         const identifier::Account& accountID,
-        const proto::PaymentWorkflow& workflow) const
-        -> std::pair<identifier::Generic, proto::PaymentWorkflow>;
+        const protobuf::PaymentWorkflow& workflow) const
+        -> std::pair<identifier::Generic, protobuf::PaymentWorkflow>;
     auto update_activity(
         const identifier::Nym& localNymID,
         const identifier::Nym& remoteNymID,
@@ -405,7 +406,7 @@ private:
         const identifier::Nym& localNymID,
         const identifier::Nym& remoteNymID,
         const UnallocatedCString& accountID,
-        const proto::AccountEventType type,
+        const protobuf::AccountEventType type,
         const identifier::Generic& workflowID,
         const Amount amount,
         const Amount pending,

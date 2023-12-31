@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <Claim.pb.h>
 #include <boost/container/flat_set.hpp>
 #include <cs_shared_guarded.h>
+#include <opentxs/protobuf/Claim.pb.h>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -86,7 +86,7 @@ public:
         return section_;
     }
     [[nodiscard]] auto Serialize(Writer&& out) const noexcept -> bool final;
-    auto Serialize(proto::Claim& out) const noexcept -> void final;
+    auto Serialize(protobuf::Claim& out) const noexcept -> void final;
     [[nodiscard]] auto Start() const noexcept -> Time final { return start_; }
     [[nodiscard]] auto Stop() const noexcept -> Time final { return stop_; }
     [[nodiscard]] auto Subtype() const noexcept -> ReadView final
@@ -121,7 +121,7 @@ public:
         Time start,
         Time stop,
         std::span<const claim::Attribute> attributes,
-        std::optional<proto::Claim> preimage,
+        std::optional<protobuf::Claim> preimage,
         allocator_type alloc) noexcept;
     ClaimPrivate() = delete;
     ClaimPrivate(const ClaimPrivate& rhs, allocator_type alloc) noexcept;
@@ -168,7 +168,7 @@ private:
     const ByteArray subtype_;
     const Time start_;
     const Time stop_;
-    const proto::Claim preimage_;
+    const protobuf::Claim preimage_;
     const wot::Claim::identifier_type id_;
     Guarded data_;
 };

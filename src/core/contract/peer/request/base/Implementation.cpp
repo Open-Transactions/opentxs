@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/base/Implementation.hpp"  // IWYU pragma: associated
 
-#include <PeerRequest.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <chrono>
 #include <memory>
 #include <stdexcept>
@@ -15,9 +15,6 @@
 
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/PeerRequest.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -29,6 +26,9 @@
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identity/Nym.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/PeerRequest.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::contract::peer::request::base
@@ -222,7 +222,7 @@ auto Implementation::Serialize(Writer&& out) const noexcept -> bool
 {
     if (auto proto = serialized_type{}; Serialize(proto)) {
 
-        return proto::write(proto, std::move(out));
+        return protobuf::write(proto, std::move(out));
     } else {
 
         return false;
@@ -254,7 +254,7 @@ auto Implementation::validate() const noexcept -> bool
         return false;
     }
 
-    if (false == proto::Validate(final_form(), VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), final_form())) {
         LogError()()("invalid syntax").Flush();
 
         return false;
@@ -276,7 +276,7 @@ auto Implementation::validate() const noexcept -> bool
 }
 
 auto Implementation::verify_signature(
-    const proto::Signature& signature) const noexcept -> bool
+    const protobuf::Signature& signature) const noexcept -> bool
 {
     if (false == signer_.operator bool()) {
         LogError()()("missing signer nym").Flush();

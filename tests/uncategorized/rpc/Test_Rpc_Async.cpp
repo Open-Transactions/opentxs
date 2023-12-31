@@ -3,20 +3,20 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <APIArgument.pb.h>
-#include <AcceptPendingPayment.pb.h>
-#include <AccountEvent.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
-#include <RPCCommand.pb.h>
-#include <RPCEnums.pb.h>
-#include <RPCPush.pb.h>
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <RPCTask.pb.h>
-#include <SendPayment.pb.h>
-#include <TaskComplete.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/APIArgument.pb.h>
+#include <opentxs/protobuf/AcceptPendingPayment.pb.h>
+#include <opentxs/protobuf/AccountEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
+#include <opentxs/protobuf/RPCPush.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/RPCTask.pb.h>
+#include <opentxs/protobuf/SendPayment.pb.h>
+#include <opentxs/protobuf/TaskComplete.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -28,8 +28,8 @@
 #include <utility>
 
 #include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/verify/RPCPush.hpp"
-#include "internal/serialization/protobuf/verify/RPCResponse.hpp"
+#include "opentxs/protobuf/syntax/RPCPush.hpp"
+#include "opentxs/protobuf/syntax/RPCResponse.hpp"
 #include "ottest/Basic.hpp"
 #include "ottest/fixtures/common/Base.hpp"
 #include "ottest/fixtures/rpc/RpcAsync.hpp"
@@ -67,7 +67,7 @@ TEST_F(RpcAsync, Setup)
 TEST_F(RpcAsync, RegisterNym_Receiver)
 {
     // Register the receiver nym.
-    auto command = init(proto::RPCCOMMAND_REGISTERNYM);
+    auto command = init(protobuf::RPCCOMMAND_REGISTERNYM);
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
     command.set_notary(server_id_->str());
@@ -75,7 +75,7 @@ TEST_F(RpcAsync, RegisterNym_Receiver)
     auto response = ot_.RPC(command);
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());
@@ -86,7 +86,7 @@ TEST_F(RpcAsync, RegisterNym_Receiver)
 
 TEST_F(RpcAsync, Create_Issuer_Account)
 {
-    auto command = init(proto::RPCCOMMAND_ISSUEUNITDEFINITION);
+    auto command = init(protobuf::RPCCOMMAND_ISSUEUNITDEFINITION);
     command.set_session(sender_session_);
     command.set_owner(sender_nym_id_->str());
     auto& server = ot_.Server(static_cast<int>(get_index(server_)));
@@ -97,7 +97,7 @@ TEST_F(RpcAsync, Create_Issuer_Account)
     auto response = ot_.RPC(command);
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());
@@ -108,7 +108,7 @@ TEST_F(RpcAsync, Create_Issuer_Account)
 TEST_F(RpcAsync, Send_Payment_Cheque_No_Contact)
 {
     auto& client_a = get_session(sender_session_);
-    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    auto command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
 
     const auto issueraccounts =
@@ -123,7 +123,7 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Contact)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     // Use an id that isn't a contact.
     sendpayment->set_contact(receiver_nym_id_->str());
     sendpayment->set_sourceaccount(issueraccountid->str());
@@ -137,14 +137,15 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Contact)
     ASSERT_EQ(command.type(), response.type());
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_CONTACT_NOT_FOUND, response.status(0).code());
+    ASSERT_EQ(
+        protobuf::RPCRESPONSE_CONTACT_NOT_FOUND, response.status(0).code());
 }
 
 TEST_F(RpcAsync, Send_Payment_Cheque_No_Account_Owner)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
-    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    auto command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
 
     const auto issueraccounts =
@@ -164,7 +165,7 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Account_Owner)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     sendpayment->set_contact(contact->ID().asBase58(ot_.Crypto()));
     sendpayment->set_sourceaccount(receiver_nym_id_->str());
     sendpayment->set_memo("Send_Payment_Cheque test");
@@ -178,14 +179,15 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Account_Owner)
 
     ASSERT_EQ(1, response.status_size());
     ASSERT_EQ(
-        proto::RPCRESPONSE_ACCOUNT_OWNER_NOT_FOUND, response.status(0).code());
+        protobuf::RPCRESPONSE_ACCOUNT_OWNER_NOT_FOUND,
+        response.status(0).code());
 }
 
 TEST_F(RpcAsync, Send_Payment_Cheque_No_Path)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
-    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    auto command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
 
     const auto issueraccounts =
@@ -205,7 +207,7 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Path)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     sendpayment->set_contact(contact->ID().asBase58(ot_.Crypto()));
     sendpayment->set_sourceaccount(issueraccountid->str());
     sendpayment->set_memo("Send_Payment_Cheque test");
@@ -219,14 +221,14 @@ TEST_F(RpcAsync, Send_Payment_Cheque_No_Path)
 
     ASSERT_EQ(1, response.status_size());
     ASSERT_EQ(
-        proto::RPCRESPONSE_NO_PATH_TO_RECIPIENT, response.status(0).code());
+        protobuf::RPCRESPONSE_NO_PATH_TO_RECIPIENT, response.status(0).code());
 }
 
 TEST_F(RpcAsync, Send_Payment_Cheque)
 {
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
-    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    auto command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
     auto& client_b = get_session(receiver_session_);
 
@@ -256,13 +258,13 @@ TEST_F(RpcAsync, Send_Payment_Cheque)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     sendpayment->set_contact(contact->ID().asBase58(ot_.Crypto()));
     sendpayment->set_sourceaccount(issueraccountid->str());
     sendpayment->set_memo("Send_Payment_Cheque test");
     sendpayment->set_amount(100);
 
-    proto::RPCResponse response;
+    protobuf::RPCResponse response;
 
     auto future = set_push_checker(default_push_callback);
     do {
@@ -270,23 +272,23 @@ TEST_F(RpcAsync, Send_Payment_Cheque)
 
         ASSERT_EQ(1, response.status_size());
         auto responseCode = response.status(0).code();
-        auto responseIsValid = responseCode == proto::RPCRESPONSE_RETRY ||
-                               responseCode == proto::RPCRESPONSE_QUEUED;
+        auto responseIsValid = responseCode == protobuf::RPCRESPONSE_RETRY ||
+                               responseCode == protobuf::RPCRESPONSE_QUEUED;
         ASSERT_TRUE(responseIsValid);
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
         ASSERT_EQ(command.type(), response.type());
 
-        if (responseCode == proto::RPCRESPONSE_RETRY) {
+        if (responseCode == protobuf::RPCRESPONSE_RETRY) {
             client_a.OTX().ContextIdle(sender_nym_id_, server_id_).get();
             command.set_cookie(ot::identifier::Generic::Random()->str());
         }
-    } while (proto::RPCRESPONSE_RETRY == response.status(0).code());
+    } while (protobuf::RPCRESPONSE_RETRY == response.status(0).code());
 
     client_a.OTX().Refresh();
     client_a.OTX().ContextIdle(sender_nym_id_, server_id_).get();
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
     EXPECT_EQ(1, response.task_size());
     EXPECT_TRUE(check_push_results(future.get()));
 }
@@ -315,18 +317,18 @@ TEST_F(RpcAsync, Get_Pending_Payments)
 
     ASSERT_TRUE(!workflows.empty());
 
-    auto command = init(proto::RPCCOMMAND_GETPENDINGPAYMENTS);
+    auto command = init(protobuf::RPCCOMMAND_GETPENDINGPAYMENTS);
 
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -341,7 +343,7 @@ TEST_F(RpcAsync, Get_Pending_Payments)
 
 TEST_F(RpcAsync, Create_Compatible_Account)
 {
-    auto command = init(proto::RPCCOMMAND_CREATECOMPATIBLEACCOUNT);
+    auto command = init(protobuf::RPCCOMMAND_CREATECOMPATIBLEACCOUNT);
 
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
@@ -349,11 +351,11 @@ TEST_F(RpcAsync, Create_Compatible_Account)
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -366,7 +368,7 @@ TEST_F(RpcAsync, Create_Compatible_Account)
 
 TEST_F(RpcAsync, Get_Compatible_Account_Bad_Workflow)
 {
-    auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
+    auto command = init(protobuf::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
@@ -375,11 +377,12 @@ TEST_F(RpcAsync, Get_Compatible_Account_Bad_Workflow)
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(response.status_size(), 1);
-    EXPECT_EQ(proto::RPCRESPONSE_WORKFLOW_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(
+        protobuf::RPCRESPONSE_WORKFLOW_NOT_FOUND, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -389,7 +392,7 @@ TEST_F(RpcAsync, Get_Compatible_Account_Bad_Workflow)
 
 TEST_F(RpcAsync, Get_Compatible_Account)
 {
-    auto command = init(proto::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
+    auto command = init(protobuf::RPCCOMMAND_GETCOMPATIBLEACCOUNTS);
 
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
@@ -397,11 +400,11 @@ TEST_F(RpcAsync, Get_Compatible_Account)
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -414,7 +417,7 @@ TEST_F(RpcAsync, Get_Compatible_Account)
 
 TEST_F(RpcAsync, Accept_Pending_Payments_Bad_Workflow)
 {
-    auto command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
+    auto command = init(protobuf::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
 
     command.set_session(receiver_session_);
     auto& acceptpendingpayment = *command.add_acceptpendingpayment();
@@ -425,11 +428,12 @@ TEST_F(RpcAsync, Accept_Pending_Payments_Bad_Workflow)
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_WORKFLOW_NOT_FOUND, response.status(0).code());
+    EXPECT_EQ(
+        protobuf::RPCRESPONSE_WORKFLOW_NOT_FOUND, response.status(0).code());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
     EXPECT_EQ(1, response.task_size());
@@ -441,7 +445,7 @@ TEST_F(RpcAsync, Accept_Pending_Payments_Bad_Workflow)
 
 TEST_F(RpcAsync, Accept_Pending_Payments)
 {
-    auto command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
+    auto command = init(protobuf::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
 
     command.set_session(receiver_session_);
     auto& acceptpendingpayment = *command.add_acceptpendingpayment();
@@ -452,11 +456,11 @@ TEST_F(RpcAsync, Accept_Pending_Payments)
     auto future = set_push_checker(default_push_callback);
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
     EXPECT_EQ(1, response.task_size());
@@ -494,20 +498,20 @@ TEST_F(RpcAsync, Get_Account_Activity)
     ASSERT_EQ(1, issueraccounts.size());
     auto issuer_account_id = *issueraccounts.cbegin();
 
-    auto command = init(proto::RPCCOMMAND_GETACCOUNTACTIVITY);
+    auto command = init(protobuf::RPCCOMMAND_GETACCOUNTACTIVITY);
     command.set_session(sender_session_);
     command.add_identifier(issuer_account_id->str());
-    proto::RPCResponse response;
+    protobuf::RPCResponse response;
     do {
         response = ot_.RPC(command);
 
-        ASSERT_TRUE(proto::Validate(response, VERBOSE));
+        ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
         EXPECT_EQ(RESPONSE_VERSION, response.version());
 
         ASSERT_EQ(1, response.status_size());
         auto responseCode = response.status(0).code();
-        auto responseIsValid = responseCode == proto::RPCRESPONSE_NONE ||
-                               responseCode == proto::RPCRESPONSE_SUCCESS;
+        auto responseIsValid = responseCode == protobuf::RPCRESPONSE_NONE ||
+                               responseCode == protobuf::RPCRESPONSE_SUCCESS;
         ASSERT_TRUE(responseIsValid);
         EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
         EXPECT_EQ(command.type(), response.type());
@@ -516,7 +520,7 @@ TEST_F(RpcAsync, Get_Account_Activity)
             client_a.OTX().ContextIdle(sender_nym_id_, server_id_).get();
             command.set_cookie(ot::identifier::Generic::Random()->str());
         }
-    } while (proto::RPCRESPONSE_NONE == response.status(0).code() ||
+    } while (protobuf::RPCRESPONSE_NONE == response.status(0).code() ||
              response.accountevent_size() < 1);
 
     // TODO properly count the number of updates on the appropriate ui widget
@@ -526,7 +530,7 @@ TEST_F(RpcAsync, Get_Account_Activity)
         EXPECT_EQ(ACCOUNTEVENT_VERSION, accountevent.version());
         EXPECT_STREQ(
             issuer_account_id->str().c_str(), accountevent.id().c_str());
-        if (proto::ACCOUNTEVENT_OUTGOINGCHEQUE == accountevent.type()) {
+        if (protobuf::ACCOUNTEVENT_OUTGOINGCHEQUE == accountevent.type()) {
             EXPECT_EQ(-100, accountevent.amount());
             foundevent = true;
         }
@@ -554,19 +558,19 @@ TEST_F(RpcAsync, Get_Account_Activity)
 
     ASSERT_TRUE(!receiverworkflows.empty());
 
-    command = init(proto::RPCCOMMAND_GETACCOUNTACTIVITY);
+    command = init(protobuf::RPCCOMMAND_GETACCOUNTACTIVITY);
     command.set_session(receiver_session_);
     command.add_identifier(destination_account_id_->str());
     do {
         response = ot_.RPC(command);
 
-        ASSERT_TRUE(proto::Validate(response, VERBOSE));
+        ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
         EXPECT_EQ(RESPONSE_VERSION, response.version());
 
         ASSERT_EQ(1, response.status_size());
         auto responseCode = response.status(0).code();
-        auto responseIsValid = responseCode == proto::RPCRESPONSE_NONE ||
-                               responseCode == proto::RPCRESPONSE_SUCCESS;
+        auto responseIsValid = responseCode == protobuf::RPCRESPONSE_NONE ||
+                               responseCode == protobuf::RPCRESPONSE_SUCCESS;
         ASSERT_TRUE(responseIsValid);
         EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
         EXPECT_EQ(command.type(), response.type());
@@ -577,7 +581,7 @@ TEST_F(RpcAsync, Get_Account_Activity)
             command.set_cookie(ot::identifier::Generic::Random()->str());
         }
 
-    } while (proto::RPCRESPONSE_NONE == response.status(0).code() ||
+    } while (protobuf::RPCRESPONSE_NONE == response.status(0).code() ||
              response.accountevent_size() < 1);
 
     // TODO properly count the number of updates on the appropriate ui widget
@@ -587,7 +591,7 @@ TEST_F(RpcAsync, Get_Account_Activity)
         EXPECT_EQ(ACCOUNTEVENT_VERSION, accountevent.version());
         EXPECT_STREQ(
             destination_account_id_->str().c_str(), accountevent.id().c_str());
-        if (proto::ACCOUNTEVENT_INCOMINGCHEQUE == accountevent.type()) {
+        if (protobuf::ACCOUNTEVENT_INCOMINGCHEQUE == accountevent.type()) {
             EXPECT_EQ(100, accountevent.amount());
             foundevent = true;
         }
@@ -602,7 +606,7 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
     auto& client_a =
         ot_.ClientSession(static_cast<int>(get_index(sender_session_)));
-    auto command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    auto command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
     auto& client_b =
         ot_.ClientSession(static_cast<int>(get_index(receiver_session_)));
@@ -633,13 +637,13 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     sendpayment->set_contact(contact->ID().asBase58(ot_.Crypto()));
     sendpayment->set_sourceaccount(issueraccountid->str());
     sendpayment->set_memo("Send_Payment_Cheque test");
     sendpayment->set_amount(100);
 
-    proto::RPCResponse response;
+    protobuf::RPCResponse response;
 
     auto future = set_push_checker(default_push_callback);
     do {
@@ -647,25 +651,25 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
         ASSERT_EQ(1, response.status_size());
         auto responseCode = response.status(0).code();
-        auto responseIsValid = responseCode == proto::RPCRESPONSE_RETRY ||
-                               responseCode == proto::RPCRESPONSE_QUEUED;
+        auto responseIsValid = responseCode == protobuf::RPCRESPONSE_RETRY ||
+                               responseCode == protobuf::RPCRESPONSE_QUEUED;
         ASSERT_TRUE(responseIsValid);
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
         ASSERT_EQ(command.type(), response.type());
 
         command.set_cookie(ot::identifier::Generic::Random()->str());
-    } while (proto::RPCRESPONSE_RETRY == response.status(0).code());
+    } while (protobuf::RPCRESPONSE_RETRY == response.status(0).code());
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
 
     ASSERT_EQ(1, response.task_size());
     EXPECT_TRUE(check_push_results(future.get()));
 
     // Send a second payment.
 
-    command = init(proto::RPCCOMMAND_SENDPAYMENT);
+    command = init(protobuf::RPCCOMMAND_SENDPAYMENT);
     command.set_session(sender_session_);
 
     sendpayment = command.mutable_sendpayment();
@@ -673,7 +677,7 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
     ASSERT_NE(nullptr, sendpayment);
 
     sendpayment->set_version(1);
-    sendpayment->set_type(proto::RPCPAYMENTTYPE_CHEQUE);
+    sendpayment->set_type(protobuf::RPCPAYMENTTYPE_CHEQUE);
     sendpayment->set_contact(contact->ID().asBase58(ot_.Crypto()));
     sendpayment->set_sourceaccount(issueraccountid->str());
     sendpayment->set_memo("Send_Payment_Cheque test");
@@ -685,18 +689,18 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
         ASSERT_EQ(1, response.status_size());
         auto responseCode = response.status(0).code();
-        auto responseIsValid = responseCode == proto::RPCRESPONSE_RETRY ||
-                               responseCode == proto::RPCRESPONSE_QUEUED;
+        auto responseIsValid = responseCode == protobuf::RPCRESPONSE_RETRY ||
+                               responseCode == protobuf::RPCRESPONSE_QUEUED;
         ASSERT_TRUE(responseIsValid);
         EXPECT_EQ(RESPONSE_VERSION, response.version());
         ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
         ASSERT_EQ(command.type(), response.type());
 
         command.set_cookie(ot::identifier::Generic::Random()->str());
-    } while (proto::RPCRESPONSE_RETRY == response.status(0).code());
+    } while (protobuf::RPCRESPONSE_RETRY == response.status(0).code());
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
 
     ASSERT_EQ(1, response.task_size());
     EXPECT_TRUE(check_push_results(future.get()));
@@ -723,18 +727,18 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
     ASSERT_TRUE(!workflows.empty());
 
-    command = init(proto::RPCCOMMAND_GETPENDINGPAYMENTS);
+    command = init(protobuf::RPCCOMMAND_GETPENDINGPAYMENTS);
 
     command.set_session(receiver_session_);
     command.set_owner(receiver_nym_id_->str());
 
     response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(1, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -752,7 +756,7 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
     ASSERT_TRUE(!workflow_id_2.empty());
 
     // Execute RPCCOMMAND_ACCEPTPENDINGPAYMENTS
-    command = init(proto::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
+    command = init(protobuf::RPCCOMMAND_ACCEPTPENDINGPAYMENTS);
 
     command.set_session(receiver_session_);
     auto& acceptpendingpayment = *command.add_acceptpendingpayment();
@@ -769,12 +773,12 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
     response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     EXPECT_EQ(RESPONSE_VERSION, response.version());
 
     ASSERT_EQ(2, response.status_size());
-    EXPECT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
-    EXPECT_EQ(proto::RPCRESPONSE_QUEUED, response.status(1).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
+    EXPECT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(1).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     EXPECT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     EXPECT_EQ(command.type(), response.type());
@@ -784,7 +788,7 @@ TEST_F(RpcAsync, Accept_2_Pending_Payments)
 
 TEST_F(RpcAsync, Create_Account)
 {
-    auto command = init(proto::RPCCOMMAND_CREATEACCOUNT);
+    auto command = init(protobuf::RPCCOMMAND_CREATEACCOUNT);
     command.set_session(sender_session_);
 
     auto& client_a =
@@ -805,7 +809,7 @@ TEST_F(RpcAsync, Create_Account)
     auto response = ot_.RPC(command);
 
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_QUEUED, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_QUEUED, response.status(0).code());
     EXPECT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());
@@ -818,7 +822,7 @@ TEST_F(RpcAsync, Add_Server_Session_Bad_Argument)
     // Start a server on a specific port.
     ArgList args{{OPENTXS_ARG_COMMANDPORT, {"8922"}}};
 
-    auto command = init(proto::RPCCOMMAND_ADDSERVERSESSION);
+    auto command = init(protobuf::RPCCOMMAND_ADDSERVERSESSION);
     command.set_session(-1);
 
     for (auto& arg : args) {
@@ -830,15 +834,15 @@ TEST_F(RpcAsync, Add_Server_Session_Bad_Argument)
 
     auto response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     ASSERT_EQ(1, response.status_size());
-    ASSERT_EQ(proto::RPCRESPONSE_SUCCESS, response.status(0).code());
+    ASSERT_EQ(protobuf::RPCRESPONSE_SUCCESS, response.status(0).code());
     ASSERT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());
 
     // Try to start a second server on the same port.
-    command = init(proto::RPCCOMMAND_ADDSERVERSESSION);
+    command = init(protobuf::RPCCOMMAND_ADDSERVERSESSION);
     command.set_session(-1);
 
     for (auto& arg : args) {
@@ -850,10 +854,10 @@ TEST_F(RpcAsync, Add_Server_Session_Bad_Argument)
 
     response = ot_.RPC(command);
 
-    ASSERT_TRUE(proto::Validate(response, VERBOSE));
+    ASSERT_TRUE(protobuf::Validate(opentxs::LogError(), response));
     ASSERT_EQ(1, response.status_size());
     ASSERT_EQ(
-        proto::RPCRESPONSE_BAD_SERVER_ARGUMENT, response.status(0).code());
+        protobuf::RPCRESPONSE_BAD_SERVER_ARGUMENT, response.status(0).code());
     ASSERT_EQ(RESPONSE_VERSION, response.version());
     ASSERT_STREQ(command.cookie().c_str(), response.cookie().c_str());
     ASSERT_EQ(command.type(), response.type());

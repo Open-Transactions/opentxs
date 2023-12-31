@@ -5,10 +5,10 @@
 
 #include "opentxs/otx/blind/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <CashEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/CashEnums.pb.h>
 #include <functional>
 
 #include "opentxs/otx/blind/CashType.hpp"    // IWYU pragma: keep
@@ -18,17 +18,18 @@
 
 namespace opentxs::otx::blind
 {
-using CashTypeMap = frozen::unordered_map<blind::CashType, proto::CashType, 2>;
+using CashTypeMap =
+    frozen::unordered_map<blind::CashType, protobuf::CashType, 2>;
 using CashTypeReverseMap =
-    frozen::unordered_map<proto::CashType, blind::CashType, 2>;
+    frozen::unordered_map<protobuf::CashType, blind::CashType, 2>;
 using PurseTypeMap =
-    frozen::unordered_map<blind::PurseType, proto::PurseType, 4>;
+    frozen::unordered_map<blind::PurseType, protobuf::PurseType, 4>;
 using PurseTypeReverseMap =
-    frozen::unordered_map<proto::PurseType, blind::PurseType, 4>;
+    frozen::unordered_map<protobuf::PurseType, blind::PurseType, 4>;
 using TokenStateMap =
-    frozen::unordered_map<blind::TokenState, proto::TokenState, 6>;
+    frozen::unordered_map<blind::TokenState, protobuf::TokenState, 6>;
 using TokenStateReverseMap =
-    frozen::unordered_map<proto::TokenState, blind::TokenState, 6>;
+    frozen::unordered_map<protobuf::TokenState, blind::TokenState, 6>;
 
 auto cashtype_map() noexcept -> const CashTypeMap&;
 auto pursetype_map() noexcept -> const PurseTypeMap&;
@@ -40,7 +41,7 @@ namespace opentxs::otx::blind
 auto cashtype_map() noexcept -> const CashTypeMap&
 {
     using enum CashType;
-    using enum proto::CashType;
+    using enum protobuf::CashType;
     static constexpr auto map = CashTypeMap{
         {Error, CASHTYPE_ERROR},
         {Lucre, CASHTYPE_LUCRE},
@@ -52,7 +53,7 @@ auto cashtype_map() noexcept -> const CashTypeMap&
 auto pursetype_map() noexcept -> const PurseTypeMap&
 {
     using enum PurseType;
-    using enum proto::PurseType;
+    using enum protobuf::PurseType;
     static constexpr auto map = PurseTypeMap{
         {Error, PURSETYPE_ERROR},
         {Request, PURSETYPE_REQUEST},
@@ -66,7 +67,7 @@ auto pursetype_map() noexcept -> const PurseTypeMap&
 auto tokenstate_map() noexcept -> const TokenStateMap&
 {
     using enum TokenState;
-    using enum proto::TokenState;
+    using enum protobuf::TokenState;
     static constexpr auto map = TokenStateMap{
         {Error, TOKENSTATE_ERROR},
         {Blinded, TOKENSTATE_BLINDED},
@@ -82,34 +83,34 @@ auto tokenstate_map() noexcept -> const TokenStateMap&
 
 namespace opentxs
 {
-auto translate(const otx::blind::CashType in) noexcept -> proto::CashType
+auto translate(const otx::blind::CashType in) noexcept -> protobuf::CashType
 {
     try {
         return otx::blind::cashtype_map().at(in);
     } catch (...) {
-        return proto::CASHTYPE_ERROR;
+        return protobuf::CASHTYPE_ERROR;
     }
 }
 
-auto translate(const otx::blind::PurseType in) noexcept -> proto::PurseType
+auto translate(const otx::blind::PurseType in) noexcept -> protobuf::PurseType
 {
     try {
         return otx::blind::pursetype_map().at(in);
     } catch (...) {
-        return proto::PURSETYPE_ERROR;
+        return protobuf::PURSETYPE_ERROR;
     }
 }
 
-auto translate(const otx::blind::TokenState in) noexcept -> proto::TokenState
+auto translate(const otx::blind::TokenState in) noexcept -> protobuf::TokenState
 {
     try {
         return otx::blind::tokenstate_map().at(in);
     } catch (...) {
-        return proto::TOKENSTATE_ERROR;
+        return protobuf::TOKENSTATE_ERROR;
     }
 }
 
-auto translate(const proto::CashType in) noexcept -> otx::blind::CashType
+auto translate(const protobuf::CashType in) noexcept -> otx::blind::CashType
 {
     static const auto map =
         frozen::invert_unordered_map(otx::blind::cashtype_map());
@@ -120,7 +121,7 @@ auto translate(const proto::CashType in) noexcept -> otx::blind::CashType
     }
 }
 
-auto translate(const proto::PurseType in) noexcept -> otx::blind::PurseType
+auto translate(const protobuf::PurseType in) noexcept -> otx::blind::PurseType
 {
     static const auto map =
         frozen::invert_unordered_map(otx::blind::pursetype_map());
@@ -131,7 +132,7 @@ auto translate(const proto::PurseType in) noexcept -> otx::blind::PurseType
     }
 }
 
-auto translate(const proto::TokenState in) noexcept -> otx::blind::TokenState
+auto translate(const protobuf::TokenState in) noexcept -> otx::blind::TokenState
 {
     static const auto map =
         frozen::invert_unordered_map(otx::blind::tokenstate_map());

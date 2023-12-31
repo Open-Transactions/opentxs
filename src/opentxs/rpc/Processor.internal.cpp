@@ -5,14 +5,14 @@
 
 #include "opentxs/rpc/Processor.internal.hpp"  // IWYU pragma: associated
 
-#include <RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
 
 #include "opentxs/rpc/response/Message.hpp"  // IWYU pragma: keep
 
 namespace opentxs::rpc
 {
-auto Processor::Process(const proto::RPCCommand& command) const noexcept
-    -> proto::RPCResponse
+auto Processor::Process(const protobuf::RPCCommand& command) const noexcept
+    -> protobuf::RPCResponse
 {
     return {};
 }

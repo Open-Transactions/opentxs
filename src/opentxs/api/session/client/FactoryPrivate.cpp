@@ -66,7 +66,7 @@ auto FactoryPrivate::PeerObject(
 
 auto FactoryPrivate::PeerObject(
     const Nym_p& signerNym,
-    const proto::PeerObject& serialized) const
+    const protobuf::PeerObject& serialized) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
     return std::unique_ptr<opentxs::PeerObject>{opentxs::factory::PeerObject(

@@ -5,9 +5,9 @@
 
 #include "ottest/fixtures/core/Identifier.hpp"  // IWYU pragma: associated
 
-#include <Identifier.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/Identifier.pb.h>
 
 #include "internal/core/identifier/Identifier.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -16,7 +16,7 @@ namespace ottest
 {
 auto serialize_identifier_to_pb(
     const opentxs::identifier::Generic& id,
-    opentxs::proto::Identifier& out) noexcept -> void
+    opentxs::protobuf::Identifier& out) noexcept -> void
 {
     id.Internal().Serialize(out);
 }
@@ -119,7 +119,7 @@ auto AccountID::CheckProtobufSerialization(
     const ot::identifier::Account& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().Identifier(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
@@ -139,7 +139,7 @@ auto GenericID::CheckProtobufSerialization(
     const ot::identifier::Generic& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().Identifier(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
@@ -159,7 +159,7 @@ auto NotaryID::CheckProtobufSerialization(
     const ot::identifier::Notary& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().NotaryID(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
@@ -179,7 +179,7 @@ auto NymID::CheckProtobufSerialization(
     const ot::identifier::Nym& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().NymID(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
@@ -199,7 +199,7 @@ auto SeedID::CheckProtobufSerialization(
     const ot::identifier::HDSeed& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().SeedID(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());
@@ -219,7 +219,7 @@ auto UnitID::CheckProtobufSerialization(
     const ot::identifier::UnitDefinition& in) const noexcept -> bool
 {
     auto out{true};
-    auto proto = ot::proto::Identifier{};
+    auto proto = ot::protobuf::Identifier{};
     const auto serialized = in.Internal().Serialize(proto);
     const auto recovered = ot_.Factory().Internal().UnitID(proto);
     const auto expectedBase58 = in.asBase58(ot_.Crypto());

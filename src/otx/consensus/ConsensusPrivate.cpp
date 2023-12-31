@@ -5,8 +5,8 @@
 
 #include "otx/consensus/ConsensusPrivate.hpp"  // IWYU pragma: associated
 
-#include <Context.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <memory>
 
 #include "opentxs/api/Factory.internal.hpp"
@@ -31,7 +31,7 @@ ConsensusPrivate::ConsensusPrivate(const VersionNumber targetVersion) noexcept
 ConsensusPrivate::ConsensusPrivate(
     const api::Session& api,
     const VersionNumber targetVersion,
-    const proto::Context& serialized) noexcept
+    const protobuf::Context& serialized) noexcept
     : available_transaction_numbers_([&] {
         auto out = decltype(available_transaction_numbers_){};
 
@@ -68,7 +68,8 @@ ConsensusPrivate::ConsensusPrivate(
     , sig_([&]() -> decltype(sig_) {
         if (serialized.has_signature()) {
 
-            return std::make_shared<proto::Signature>(serialized.signature());
+            return std::make_shared<protobuf::Signature>(
+                serialized.signature());
         } else {
 
             return {};

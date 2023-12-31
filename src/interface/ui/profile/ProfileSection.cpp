@@ -5,7 +5,7 @@
 
 #include "interface/ui/profile/ProfileSection.hpp"  // IWYU pragma: associated
 
-#include <ContactItemType.pb.h>
+#include <opentxs/protobuf/ContactItemType.pb.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -16,7 +16,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/identifier/Generic.hpp"
@@ -25,6 +24,7 @@
 #include "opentxs/identity/wot/claim/SectionType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -50,82 +50,82 @@ namespace opentxs::ui
 {
 static const std::map<
     identity::wot::claim::SectionType,
-    UnallocatedSet<proto::ContactItemType>>
+    UnallocatedSet<protobuf::ContactItemType>>
     allowed_types_{
         {identity::wot::claim::SectionType::Communication,
          {
-             proto::CITEMTYPE_PHONE,
-             proto::CITEMTYPE_EMAIL,
-             proto::CITEMTYPE_SKYPE,
-             proto::CITEMTYPE_WIRE,
-             proto::CITEMTYPE_QQ,
-             proto::CITEMTYPE_BITMESSAGE,
-             proto::CITEMTYPE_WHATSAPP,
-             proto::CITEMTYPE_TELEGRAM,
-             proto::CITEMTYPE_KIK,
-             proto::CITEMTYPE_BBM,
-             proto::CITEMTYPE_WECHAT,
-             proto::CITEMTYPE_KAKAOTALK,
+             protobuf::CITEMTYPE_PHONE,
+             protobuf::CITEMTYPE_EMAIL,
+             protobuf::CITEMTYPE_SKYPE,
+             protobuf::CITEMTYPE_WIRE,
+             protobuf::CITEMTYPE_QQ,
+             protobuf::CITEMTYPE_BITMESSAGE,
+             protobuf::CITEMTYPE_WHATSAPP,
+             protobuf::CITEMTYPE_TELEGRAM,
+             protobuf::CITEMTYPE_KIK,
+             protobuf::CITEMTYPE_BBM,
+             protobuf::CITEMTYPE_WECHAT,
+             protobuf::CITEMTYPE_KAKAOTALK,
          }},
         {identity::wot::claim::SectionType::Profile,
          {
-             proto::CITEMTYPE_FACEBOOK,  proto::CITEMTYPE_GOOGLE,
-             proto::CITEMTYPE_LINKEDIN,  proto::CITEMTYPE_VK,
-             proto::CITEMTYPE_ABOUTME,   proto::CITEMTYPE_ONENAME,
-             proto::CITEMTYPE_TWITTER,   proto::CITEMTYPE_MEDIUM,
-             proto::CITEMTYPE_TUMBLR,    proto::CITEMTYPE_YAHOO,
-             proto::CITEMTYPE_MYSPACE,   proto::CITEMTYPE_MEETUP,
-             proto::CITEMTYPE_REDDIT,    proto::CITEMTYPE_HACKERNEWS,
-             proto::CITEMTYPE_WIKIPEDIA, proto::CITEMTYPE_ANGELLIST,
-             proto::CITEMTYPE_GITHUB,    proto::CITEMTYPE_BITBUCKET,
-             proto::CITEMTYPE_YOUTUBE,   proto::CITEMTYPE_VIMEO,
-             proto::CITEMTYPE_TWITCH,    proto::CITEMTYPE_SNAPCHAT,
+             protobuf::CITEMTYPE_FACEBOOK,  protobuf::CITEMTYPE_GOOGLE,
+             protobuf::CITEMTYPE_LINKEDIN,  protobuf::CITEMTYPE_VK,
+             protobuf::CITEMTYPE_ABOUTME,   protobuf::CITEMTYPE_ONENAME,
+             protobuf::CITEMTYPE_TWITTER,   protobuf::CITEMTYPE_MEDIUM,
+             protobuf::CITEMTYPE_TUMBLR,    protobuf::CITEMTYPE_YAHOO,
+             protobuf::CITEMTYPE_MYSPACE,   protobuf::CITEMTYPE_MEETUP,
+             protobuf::CITEMTYPE_REDDIT,    protobuf::CITEMTYPE_HACKERNEWS,
+             protobuf::CITEMTYPE_WIKIPEDIA, protobuf::CITEMTYPE_ANGELLIST,
+             protobuf::CITEMTYPE_GITHUB,    protobuf::CITEMTYPE_BITBUCKET,
+             protobuf::CITEMTYPE_YOUTUBE,   protobuf::CITEMTYPE_VIMEO,
+             protobuf::CITEMTYPE_TWITCH,    protobuf::CITEMTYPE_SNAPCHAT,
          }},
     };
 
 static const UnallocatedMap<
     identity::wot::claim::SectionType,
-    UnallocatedMap<proto::ContactItemType, int>>
+    UnallocatedMap<protobuf::ContactItemType, int>>
     sort_keys_{
         {identity::wot::claim::SectionType::Communication,
          {
-             {proto::CITEMTYPE_PHONE, 0},
-             {proto::CITEMTYPE_EMAIL, 1},
-             {proto::CITEMTYPE_SKYPE, 2},
-             {proto::CITEMTYPE_TELEGRAM, 3},
-             {proto::CITEMTYPE_WIRE, 4},
-             {proto::CITEMTYPE_WECHAT, 5},
-             {proto::CITEMTYPE_QQ, 6},
-             {proto::CITEMTYPE_KIK, 7},
-             {proto::CITEMTYPE_KAKAOTALK, 8},
-             {proto::CITEMTYPE_BBM, 9},
-             {proto::CITEMTYPE_WHATSAPP, 10},
-             {proto::CITEMTYPE_BITMESSAGE, 11},
+             {protobuf::CITEMTYPE_PHONE, 0},
+             {protobuf::CITEMTYPE_EMAIL, 1},
+             {protobuf::CITEMTYPE_SKYPE, 2},
+             {protobuf::CITEMTYPE_TELEGRAM, 3},
+             {protobuf::CITEMTYPE_WIRE, 4},
+             {protobuf::CITEMTYPE_WECHAT, 5},
+             {protobuf::CITEMTYPE_QQ, 6},
+             {protobuf::CITEMTYPE_KIK, 7},
+             {protobuf::CITEMTYPE_KAKAOTALK, 8},
+             {protobuf::CITEMTYPE_BBM, 9},
+             {protobuf::CITEMTYPE_WHATSAPP, 10},
+             {protobuf::CITEMTYPE_BITMESSAGE, 11},
          }},
         {identity::wot::claim::SectionType::Profile,
          {
-             {proto::CITEMTYPE_FACEBOOK, 0},
-             {proto::CITEMTYPE_TWITTER, 1},
-             {proto::CITEMTYPE_REDDIT, 2},
-             {proto::CITEMTYPE_GOOGLE, 3},
-             {proto::CITEMTYPE_SNAPCHAT, 4},
-             {proto::CITEMTYPE_YOUTUBE, 5},
-             {proto::CITEMTYPE_TWITCH, 6},
-             {proto::CITEMTYPE_GITHUB, 7},
-             {proto::CITEMTYPE_LINKEDIN, 8},
-             {proto::CITEMTYPE_MEDIUM, 9},
-             {proto::CITEMTYPE_TUMBLR, 10},
-             {proto::CITEMTYPE_YAHOO, 11},
-             {proto::CITEMTYPE_MYSPACE, 12},
-             {proto::CITEMTYPE_VK, 13},
-             {proto::CITEMTYPE_MEETUP, 14},
-             {proto::CITEMTYPE_VIMEO, 15},
-             {proto::CITEMTYPE_ANGELLIST, 16},
-             {proto::CITEMTYPE_ONENAME, 17},
-             {proto::CITEMTYPE_ABOUTME, 18},
-             {proto::CITEMTYPE_BITBUCKET, 19},
-             {proto::CITEMTYPE_WIKIPEDIA, 20},
-             {proto::CITEMTYPE_HACKERNEWS, 21},
+             {protobuf::CITEMTYPE_FACEBOOK, 0},
+             {protobuf::CITEMTYPE_TWITTER, 1},
+             {protobuf::CITEMTYPE_REDDIT, 2},
+             {protobuf::CITEMTYPE_GOOGLE, 3},
+             {protobuf::CITEMTYPE_SNAPCHAT, 4},
+             {protobuf::CITEMTYPE_YOUTUBE, 5},
+             {protobuf::CITEMTYPE_TWITCH, 6},
+             {protobuf::CITEMTYPE_GITHUB, 7},
+             {protobuf::CITEMTYPE_LINKEDIN, 8},
+             {protobuf::CITEMTYPE_MEDIUM, 9},
+             {protobuf::CITEMTYPE_TUMBLR, 10},
+             {protobuf::CITEMTYPE_YAHOO, 11},
+             {protobuf::CITEMTYPE_MYSPACE, 12},
+             {protobuf::CITEMTYPE_VK, 13},
+             {protobuf::CITEMTYPE_MEETUP, 14},
+             {protobuf::CITEMTYPE_VIMEO, 15},
+             {protobuf::CITEMTYPE_ANGELLIST, 16},
+             {protobuf::CITEMTYPE_ONENAME, 17},
+             {protobuf::CITEMTYPE_ABOUTME, 18},
+             {protobuf::CITEMTYPE_BITBUCKET, 19},
+             {protobuf::CITEMTYPE_WIKIPEDIA, 20},
+             {protobuf::CITEMTYPE_HACKERNEWS, 21},
          }},
     };
 
@@ -138,7 +138,7 @@ auto ProfileSection::AllowedItems(
     try {
         for (const auto& type : allowed_types_.at(section)) {
             output.emplace_back(
-                translate(type), proto::TranslateItemType(type, lang));
+                translate(type), protobuf::TranslateItemType(type, lang));
         }
     } catch (const std::out_of_range&) {
     }
@@ -216,7 +216,7 @@ auto ProfileSection::Name(const UnallocatedCString& lang) const noexcept
     -> UnallocatedCString
 {
     return UnallocatedCString{
-        proto::TranslateSectionName(translate(row_id_), lang)};
+        protobuf::TranslateSectionName(translate(row_id_), lang)};
 }
 
 auto ProfileSection::process_section(

@@ -41,11 +41,11 @@ public:
 
     static auto CalculateBasketID(
         const api::Session& api,
-        const proto::UnitDefinition& serialized) -> identifier_type;
+        const protobuf::UnitDefinition& serialized) -> identifier_type;
     static auto FinalizeTemplate(
         const api::Session& api,
         const Nym_p& nym,
-        proto::UnitDefinition& serialized,
+        protobuf::UnitDefinition& serialized,
         const PasswordPrompt& reason) -> bool;
 
     virtual auto BasketID() const -> identifier_type = 0;

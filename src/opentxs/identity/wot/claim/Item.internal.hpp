@@ -42,10 +42,10 @@ class Claim;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -81,7 +81,7 @@ public:
     virtual auto Section() const noexcept -> claim::SectionType;
     virtual auto Serialize(Writer&& destination, bool withID) const noexcept
         -> bool;
-    virtual auto Serialize(proto::ContactItem& out, bool withID = false)
+    virtual auto Serialize(protobuf::ContactItem& out, bool withID = false)
         const noexcept -> bool;
     virtual auto Start() const noexcept -> Time;
     virtual auto Subtype() const noexcept -> ReadView;

@@ -162,7 +162,7 @@ public:
     virtual auto RemoveTentativeNumber(const TransactionNumber& number)
         -> bool = 0;
     virtual void ResetThread() = 0;
-    virtual auto Resync(const proto::Context& serialized) -> bool = 0;
+    virtual auto Resync(const protobuf::Context& serialized) -> bool = 0;
     [[deprecated]] virtual auto SendMessage(
         const api::session::Client& client,
         const UnallocatedSet<ManagedNumber>& pending,

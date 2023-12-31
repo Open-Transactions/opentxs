@@ -21,10 +21,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Issuer;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace identifier
 {
@@ -84,7 +84,7 @@ public:
     virtual auto PrimaryServer() const -> identifier::Notary = 0;
     virtual auto RequestTypes() const
         -> UnallocatedSet<contract::peer::RequestType> = 0;
-    virtual auto Serialize(proto::Issuer&) const -> bool = 0;
+    virtual auto Serialize(protobuf::Issuer&) const -> bool = 0;
     virtual auto StoreSecretComplete() const -> bool = 0;
     virtual auto StoreSecretInitiated() const -> bool = 0;
 

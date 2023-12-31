@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
 #include <utility>
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"

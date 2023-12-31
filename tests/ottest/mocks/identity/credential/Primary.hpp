@@ -7,13 +7,13 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Weffc++"
 
-#include <BlockchainBlockHeader.pb.h>
-#include <ContactData.pb.h>
-#include <Credential.pb.h>
-#include <VerificationSet.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 
 #include "opentxs/identity/Types.internal.hpp"
 
@@ -24,7 +24,7 @@ class PrimaryMock : public Primary
 public:
     // NOLINTBEGIN(modernize-use-trailing-return-type)
     MOCK_METHOD(UnallocatedCString, Path, (), (const, override));
-    MOCK_METHOD(bool, Path, (proto::HDPath & output), (const, override));
+    MOCK_METHOD(bool, Path, (protobuf::HDPath & output), (const, override));
     MOCK_METHOD(UnallocatedCString, Alias, (), (const, noexcept, override));
     MOCK_METHOD(CString, Alias, (alloc::Strategy), (const, noexcept, override));
     MOCK_METHOD(

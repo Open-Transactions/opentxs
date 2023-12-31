@@ -3,15 +3,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <Credential.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
 #include <cstdint>
 #include <memory>
 
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -37,11 +36,11 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 enum CredentialRole : int;
 enum KeyMode : int;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -56,7 +55,7 @@ template identity::credential::internal::Secondary* Factory::Credential(
     const identity::credential::internal::Primary&,
     const std::uint32_t,
     const crypto::Parameters&,
-    const proto::CredentialRole,
+    const protobuf::CredentialRole,
     const opentxs::PasswordPrompt&);
 template identity::credential::internal::Contact* Factory::Credential(
     const api::Session&,
@@ -65,7 +64,7 @@ template identity::credential::internal::Contact* Factory::Credential(
     const identity::credential::internal::Primary& master,
     const std::uint32_t,
     const crypto::Parameters&,
-    const proto::CredentialRole,
+    const protobuf::CredentialRole,
     const opentxs::PasswordPrompt&);
 template identity::credential::internal::Verification* Factory::Credential(
     const api::Session&,
@@ -74,32 +73,32 @@ template identity::credential::internal::Verification* Factory::Credential(
     const identity::credential::internal::Primary& master,
     const std::uint32_t,
     const crypto::Parameters&,
-    const proto::CredentialRole,
+    const protobuf::CredentialRole,
     const opentxs::PasswordPrompt&);
 template identity::credential::internal::Secondary* Factory::Credential(
     const api::Session&,
     identity::internal::Authority&,
     const identity::Source&,
     const identity::credential::internal::Primary&,
-    const proto::Credential&,
-    const proto::KeyMode,
-    const proto::CredentialRole);
+    const protobuf::Credential&,
+    const protobuf::KeyMode,
+    const protobuf::CredentialRole);
 template identity::credential::internal::Contact* Factory::Credential(
     const api::Session&,
     identity::internal::Authority&,
     const identity::Source&,
     const identity::credential::internal::Primary&,
-    const proto::Credential&,
-    const proto::KeyMode,
-    const proto::CredentialRole);
+    const protobuf::Credential&,
+    const protobuf::KeyMode,
+    const protobuf::CredentialRole);
 template identity::credential::internal::Verification* Factory::Credential(
     const api::Session&,
     identity::internal::Authority&,
     const identity::Source&,
     const identity::credential::internal::Primary&,
-    const proto::Credential&,
-    const proto::KeyMode,
-    const proto::CredentialRole);
+    const protobuf::Credential&,
+    const protobuf::KeyMode,
+    const protobuf::CredentialRole);
 
 template <typename C>
 struct deserialize_credential {
@@ -108,7 +107,7 @@ struct deserialize_credential {
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& serialized) -> C*;
+        const protobuf::Credential& serialized) -> C*;
 };
 template <typename C>
 struct make_credential {
@@ -129,7 +128,7 @@ struct deserialize_credential<identity::credential::internal::Contact> {
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& serialized)
+        const protobuf::Credential& serialized)
         -> identity::credential::internal::Contact*
     {
         return opentxs::Factory::ContactCredential(
@@ -143,7 +142,7 @@ struct deserialize_credential<identity::credential::internal::Secondary> {
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& serialized)
+        const protobuf::Credential& serialized)
         -> identity::credential::internal::Secondary*
     {
         return opentxs::Factory::SecondaryCredential(
@@ -157,7 +156,7 @@ struct deserialize_credential<identity::credential::internal::Verification> {
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& serialized)
+        const protobuf::Credential& serialized)
         -> identity::credential::internal::Verification*
     {
         return opentxs::Factory::VerificationCredential(
@@ -221,7 +220,7 @@ auto Factory::Credential(
     const identity::credential::internal::Primary& master,
     const std::uint32_t version,
     const crypto::Parameters& nymParameters,
-    const proto::CredentialRole role,
+    const protobuf::CredentialRole role,
     const opentxs::PasswordPrompt& reason) -> C*
 {
     std::unique_ptr<C> output{make_credential<C>::Get(
@@ -244,12 +243,12 @@ auto Factory::Credential(
     identity::internal::Authority& parent,
     const identity::Source& source,
     const identity::credential::internal::Primary& master,
-    const proto::Credential& serialized,
-    const proto::KeyMode mode,
-    const proto::CredentialRole role) -> C*
+    const protobuf::Credential& serialized,
+    const protobuf::KeyMode mode,
+    const protobuf::CredentialRole role) -> C*
 {
     // This check allows all constructors to assume inputs are well-formed
-    if (!proto::Validate(serialized, VERBOSE, mode, role)) {
+    if (!protobuf::syntax::check(LogError(), serialized, mode, role)) {
         LogError()()("Invalid serialized credential.").Flush();
 
         return nullptr;

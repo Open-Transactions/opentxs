@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 }  // namespace opentxs
@@ -66,8 +66,8 @@ public:
         const UnallocatedCString& recipientContact = {},
         const UnallocatedCString& memo = {},
         const AssociateNyms& nyms = {}) noexcept(false);
-    OPENTXS_NO_EXPORT SendPayment(const proto::RPCCommand& serialized) noexcept(
-        false);
+    OPENTXS_NO_EXPORT SendPayment(
+        const protobuf::RPCCommand& serialized) noexcept(false);
     SendPayment() noexcept;
     SendPayment(const SendPayment&) = delete;
     SendPayment(SendPayment&&) = delete;

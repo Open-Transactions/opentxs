@@ -5,10 +5,10 @@
 
 #include "otx/client/Issuer.hpp"  // IWYU pragma: associated
 
-#include <Issuer.pb.h>
-#include <PeerRequestHistory.pb.h>
-#include <PeerRequestWorkflow.pb.h>
-#include <UnitAccountMap.pb.h>
+#include <opentxs/protobuf/Issuer.pb.h>
+#include <opentxs/protobuf/PeerRequestHistory.pb.h>
+#include <opentxs/protobuf/PeerRequestWorkflow.pb.h>
+#include <opentxs/protobuf/UnitAccountMap.pb.h>
 #include <cstdint>
 #include <ctime>
 #include <memory>
@@ -17,10 +17,6 @@
 
 #include "internal/core/String.hpp"
 #include "internal/otx/client/Factory.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Issuer.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -48,6 +44,10 @@
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Issuer.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::factory
@@ -57,7 +57,7 @@ auto Issuer(
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
-    const proto::Issuer& serialized) -> otx::client::Issuer*
+    const protobuf::Issuer& serialized) -> otx::client::Issuer*
 {
     using ReturnType = otx::client::implementation::Issuer;
 
@@ -103,7 +103,7 @@ Issuer::Issuer(
     const api::session::Factory& factory,
     const api::session::Wallet& wallet,
     const identifier::Nym& nymID,
-    const proto::Issuer& serialized)
+    const protobuf::Issuer& serialized)
     : crypto_(crypto)
     , factory_(factory)
     , wallet_(wallet)
@@ -194,7 +194,7 @@ auto Issuer::toString() const -> UnallocatedCString
             const auto& claim = *pClaim;
             const auto unitID = factory_.UnitIDFromBase58(claim.Value());
             output << " * "
-                   << proto::TranslateItemType(
+                   << protobuf::TranslateItemType(
                           static_cast<std::uint32_t>(claim.Type()))
                    << ": " << claim.Value() << "\n";
             const auto accountSet = account_map_.find(ClaimToUnit(type));
@@ -639,7 +639,7 @@ auto Issuer::RequestTypes() const -> UnallocatedSet<contract::peer::RequestType>
     return output;
 }
 
-auto Issuer::Serialize(proto::Issuer& output) const -> bool
+auto Issuer::Serialize(protobuf::Issuer& output) const -> bool
 {
     auto lock = Lock{lock_};
     output.set_version(version_);
@@ -672,7 +672,7 @@ auto Issuer::Serialize(proto::Issuer& output) const -> bool
         }
     }
 
-    assert_true(proto::Validate(output, VERBOSE));
+    assert_true(protobuf::syntax::check(LogError(), output));
 
     return true;
 }
