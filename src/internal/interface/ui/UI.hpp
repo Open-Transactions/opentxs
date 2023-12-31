@@ -84,6 +84,7 @@
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/interface/ui/Types.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

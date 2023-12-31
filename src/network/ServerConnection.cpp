@@ -63,6 +63,7 @@
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/ServerRequestType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/client/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 

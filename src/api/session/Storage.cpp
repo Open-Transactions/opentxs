@@ -56,6 +56,7 @@
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"

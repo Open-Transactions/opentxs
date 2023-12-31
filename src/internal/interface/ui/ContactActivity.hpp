@@ -7,6 +7,7 @@
 
 #include "internal/interface/ui/List.hpp"
 #include "internal/util/SharedPimpl.hpp"
+#include "opentxs/otx/client/PaymentType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 

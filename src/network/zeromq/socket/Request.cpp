@@ -24,6 +24,7 @@
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/otx/client/SendResult.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Log.hpp"
 

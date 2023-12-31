@@ -22,6 +22,7 @@
 #include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"

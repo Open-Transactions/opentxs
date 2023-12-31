@@ -70,6 +70,7 @@
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"

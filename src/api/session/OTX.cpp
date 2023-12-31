@@ -104,8 +104,12 @@
 #include "opentxs/otx/Reply.hpp"
 #include "opentxs/otx/ServerReplyType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/client/Depositability.hpp"        // IWYU pragma: keep
+#include "opentxs/otx/client/Messagability.hpp"         // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
+#include "opentxs/otx/client/StorageBox.hpp"            // IWYU pragma: keep
+#include "opentxs/otx/client/ThreadStatus.hpp"          // IWYU pragma: keep
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"

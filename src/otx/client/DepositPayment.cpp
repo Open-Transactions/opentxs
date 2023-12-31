@@ -22,6 +22,7 @@
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/otx/LastReplyStatus.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/Types.hpp"
+#include "opentxs/otx/client/Depositability.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"

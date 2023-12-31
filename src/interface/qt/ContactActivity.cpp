@@ -23,6 +23,7 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/identifier/Account.hpp"
+#include "opentxs/otx/client/PaymentType.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
 #include "util/Polarity.hpp"  // IWYU pragma: keep
 
