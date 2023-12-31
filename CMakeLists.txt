@@ -247,11 +247,6 @@ option(
   ${OT_USE_VCPKG_TARGETS}
 )
 option(
-  OT_BUNDLED_SECP256K1
-  "Compile secp256k1 library as part of opentxs instead of linking to an externally compiled version"
-  ${OT_CRYPTO_USING_LIBSECP256K1}
-)
-option(
   OT_BOOST_JSON_HEADER_ONLY
   "Compile boost::json library as part of opentxs instead of linking to an externally compiled version"
   ON

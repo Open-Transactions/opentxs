@@ -99,7 +99,7 @@ if(OT_STORAGE_LMDB)
   endif()
 endif()
 
-if(OT_CRYPTO_USING_LIBSECP256K1 AND NOT OT_BUNDLED_SECP256K1)
+if(OT_CRYPTO_USING_LIBSECP256K1)
   if(OT_USE_VCPKG_TARGETS)
     find_package(
       unofficial-secp256k1

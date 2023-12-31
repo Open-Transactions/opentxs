@@ -16,7 +16,6 @@
                     "${sourceDir}/deps/vcpkg-overlay/triplets"
             },
             "cacheVariables": {
-                "OT_BUNDLED_SECP256K1": "OFF",
                 "OT_BOOST_JSON_HEADER_ONLY": "OFF"
             }
         },
@@ -394,8 +393,7 @@
                 "OT_CRYPTO_USING_PACKETCRYPT": "OFF",
                 "OT_ENABLE_RPC": "OFF",
                 "OT_USE_PSTL": "OFF",
-                "OT_WITH_TBB": "OFF",
-                "OT_BUNDLED_SECP256K1": "OFF"
+                "OT_WITH_TBB": "OFF"
             }
         },
         {
