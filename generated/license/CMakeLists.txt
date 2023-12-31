@@ -60,11 +60,6 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/external/secp256k1/COPYING"
-  LIBSECP256K1_LICENSE_TEXT
-)
-file(
-  READ
   "${opentxs_SOURCE_DIR}/external/simpleini/LICENCE.txt"
   SIMPLEINI_LICENSE_TEXT
 )
@@ -235,20 +230,6 @@ configure_file(
   "${opentxs_BINARY_DIR}/src/util/license/protobuf.cpp"
   @ONLY
 )
-
-if(LIBSECP256K1_EXPORT)
-  configure_file(
-    "secp256k1.cpp.in"
-    "${opentxs_BINARY_DIR}/src/util/license/secp256k1.cpp"
-    @ONLY
-  )
-else()
-  configure_file(
-    "no-secp256k1.cpp.in"
-    "${opentxs_BINARY_DIR}/src/util/license/secp256k1.cpp"
-    @ONLY
-  )
-endif()
 
 configure_file(
   "simpleini.cpp.in"

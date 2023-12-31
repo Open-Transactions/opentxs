@@ -26,10 +26,6 @@
 	path = external/packetcrypt/packetcrypt_rs
 	url = https://github.com/cjdelisle/packetcrypt_rs
 	shallow = true
-[submodule "deps/secp256k1"]
-	path = external/secp256k1
-	url = https://github.com/Open-Transactions/secp256k1-abc
-	shallow = true
 [submodule "deps/cs_libguarded"]
 	path = external/cs_libguarded
 	url = https://github.com/copperspice/cs_libguarded
