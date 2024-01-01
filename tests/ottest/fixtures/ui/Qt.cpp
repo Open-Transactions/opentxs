@@ -8,6 +8,7 @@
 #include <opentxs/opentxs.hpp>
 #include <QAbstractItemModel>
 #include <QDateTime>
+#include <QJsonArray>
 #include <QList>
 #include <QObject>
 #include <QString>

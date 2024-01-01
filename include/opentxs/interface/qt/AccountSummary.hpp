@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,6 +30,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT AccountSummaryQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     // Tree layout
@@ -37,6 +39,7 @@ public:
         AccountIDRole = Qt::UserRole + 1,
         BalanceRole = Qt::UserRole + 2,
     };
+    Q_ENUM(Roles)
     enum Columns {
         IssuerNameColumn = 0,
         ConnectionStateColumn = 1,
@@ -44,6 +47,7 @@ public:
         AccountNameColumn = 3,
         BalanceColumn = 4,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT AccountSummaryQt(
         internal::AccountSummary& parent) noexcept;

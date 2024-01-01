@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,6 +30,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT SeedListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     enum Roles {
@@ -36,9 +38,11 @@ public:
         SeedNameRole = Qt::UserRole + 1,  // QString
         SeedTypeRole = Qt::UserRole + 2,  // int (crypto::SeedStyle)
     };
+    Q_ENUM(Roles)
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT SeedListQt(internal::SeedList& parent) noexcept;
     SeedListQt(const SeedListQt&) = delete;

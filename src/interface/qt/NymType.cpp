@@ -37,7 +37,7 @@ public:
 
 namespace opentxs::ui
 {
-NymType::NymType() noexcept
+NymType::NymType(int) noexcept
     : imp_(nullptr)
 {
 }

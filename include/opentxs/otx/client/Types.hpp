@@ -26,6 +26,11 @@ class Message;
 
 namespace opentxs::otx::client
 {
+inline namespace storagebox
+{
+enum class StorageBox : std::uint8_t;  // IWYU pragma: export
+}  // namespace storagebox
+
 enum class Depositability : std::int8_t;         // IWYU pragma: export
 enum class Messagability : std::int8_t;          // IWYU pragma: export
 enum class PaymentType : int;                    // IWYU pragma: export
@@ -33,7 +38,6 @@ enum class PaymentWorkflowState : std::uint8_t;  // IWYU pragma: export
 enum class PaymentWorkflowType : std::uint8_t;   // IWYU pragma: export
 enum class RemoteBoxType;                        // IWYU pragma: export
 enum class SendResult : std::int8_t;             // IWYU pragma: export
-enum class StorageBox : std::uint8_t;            // IWYU pragma: export
 enum class ThreadStatus : std::uint8_t;          // IWYU pragma: export
 
 using NetworkOperationStatus = std::int32_t;

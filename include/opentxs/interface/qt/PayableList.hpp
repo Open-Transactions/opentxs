@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,12 +30,14 @@ namespace opentxs::ui
 class OPENTXS_EXPORT PayableListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     // Table layout: name, payment code
     enum Roles {
         ContactIDRole = Qt::UserRole + 0,
         SectionRole = Qt::UserRole + 1,
     };
+    Q_ENUM(Roles)
 
     OPENTXS_NO_EXPORT PayableListQt(internal::PayableList& parent) noexcept;
     PayableListQt(const PayableListQt&) = delete;

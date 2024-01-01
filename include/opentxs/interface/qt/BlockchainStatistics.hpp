@@ -11,6 +11,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -30,6 +31,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT BlockchainStatisticsQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     // Seven columns when used in a table view
     //
@@ -46,6 +48,7 @@ public:
         ActivePeerCount = Qt::UserRole + 6,     // int, std::size_t
         ConnectedPeerCount = Qt::UserRole + 7,  // int, std::size_t
     };
+    Q_ENUM(Roles)
     enum Columns {
         NameColumn = 0,
         BalanceColumn = 1,
@@ -55,6 +58,7 @@ public:
         ActivePeerColumn = 5,
         BlockQueueColumn = 6,
     };
+    Q_ENUM(Columns)
 
     auto headerData(
         int section,

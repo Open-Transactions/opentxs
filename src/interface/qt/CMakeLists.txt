@@ -12,9 +12,24 @@ endif()
 add_subdirectory(qml)
 
 if(OT_QT_EXPORT)
+  if(OT_QML_EXPORT)
+    configure_file(
+      "QML.enabled.hpp"
+      "${opentxs_BINARY_DIR}/include/opentxs/interface/qt/QML.hpp"
+      @ONLY
+    )
+  else()
+    configure_file(
+      "QML.disabled.hpp"
+      "${opentxs_BINARY_DIR}/include/opentxs/interface/qt/QML.hpp"
+      @ONLY
+    )
+  endif()
+
   libopentxs_add_private_moc_header(
     "${CMAKE_CURRENT_SOURCE_DIR}/DraftValidator.hpp"
   )
+  libopentxs_add_public_header("interface/qt" "QML.hpp")
   libopentxs_add_public_header_qt("AccountActivity.hpp")
   libopentxs_add_public_header_qt("AccountList.hpp")
   libopentxs_add_public_header_qt("AccountSummary.hpp")
@@ -69,6 +84,7 @@ if(OT_QT_EXPORT)
       "NymType.cpp"
       "PayableList.cpp"
       "Profile.cpp"
+      "QML.cpp"
       "SeedList.cpp"
       "SeedTree.cpp"
       "SendMonitor.cpp"

@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,13 +30,16 @@ namespace opentxs::ui
 class OPENTXS_EXPORT UnitListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 public:
     enum Columns {
         UnitNameColumn = 0,
     };
+    Q_ENUM(Columns)
     enum Roles {
         UnitIDRole = Qt::UserRole,
     };
+    Q_ENUM(Roles)
 
     OPENTXS_NO_EXPORT UnitListQt(internal::UnitList& parent) noexcept;
     UnitListQt(const UnitListQt&) = delete;

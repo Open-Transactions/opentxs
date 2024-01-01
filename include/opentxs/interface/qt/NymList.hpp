@@ -10,6 +10,7 @@
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -29,16 +30,19 @@ namespace opentxs::ui
 class OPENTXS_EXPORT NymListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     enum Roles {
         IDRole = Qt::UserRole + 0,    // QString
         NameRole = Qt::UserRole + 1,  // QString
     };
+    Q_ENUM(Roles)
     // This model is designed to be used in a list view
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT NymListQt(internal::NymList& parent) noexcept;
     NymListQt() = delete;

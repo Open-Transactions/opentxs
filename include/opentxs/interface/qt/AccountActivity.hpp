@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <QJsonArray>
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
@@ -16,6 +17,7 @@
 #include "opentxs/interface/qt/DestinationValidator.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/qt/DisplayScale.hpp"          // IWYU pragma: keep
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -35,6 +37,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT AccountActivityQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QObject* amountValidator READ getAmountValidator CONSTANT)
     Q_PROPERTY(QObject* destValidator READ getDestValidator CONSTANT)
     Q_PROPERTY(QObject* scaleModel READ getScaleModel CONSTANT)
@@ -89,6 +92,7 @@ public:
         TypeRole = Qt::UserRole + 8,           // int, opentxs::StorageBox)
         ConfirmationsRole = Qt::UserRole + 9,  // int
     };
+    Q_ENUM(Roles)
     enum Columns {
         TimeColumn = 0,
         TextColumn = 1,
@@ -97,6 +101,7 @@ public:
         MemoColumn = 4,
         ConfirmationsColumn = 5,
     };
+    Q_ENUM(Columns)
 
     auto accountID() const noexcept -> QString;
     auto balancePolarity() const noexcept -> int;
