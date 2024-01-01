@@ -8,10 +8,10 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QVariant>
-#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 class QModelIndex;
 

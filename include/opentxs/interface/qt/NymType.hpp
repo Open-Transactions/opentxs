@@ -10,9 +10,9 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QVariant>
-#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs

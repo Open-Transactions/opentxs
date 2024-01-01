@@ -11,13 +11,13 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/AmountValidator.hpp"       // IWYU pragma: keep
 #include "opentxs/interface/qt/DestinationValidator.hpp"  // IWYU pragma: keep
 #include "opentxs/interface/qt/DisplayScale.hpp"          // IWYU pragma: keep
 #include "opentxs/interface/qt/Model.hpp"
+#include "opentxs/interface/qt/QML.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
