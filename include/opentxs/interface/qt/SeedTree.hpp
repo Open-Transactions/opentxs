@@ -8,6 +8,7 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -30,6 +31,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT SeedTreeQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QString defaultNym READ defaultNym NOTIFY defaultNymChanged)
     Q_PROPERTY(QString defaultSeed READ defaultSeed NOTIFY defaultSeedChanged)
 
@@ -52,9 +54,11 @@ public:
         NymNameRole = Qt::UserRole + 4,   // QString
         NymIndexRole = Qt::UserRole + 5,  // unsigned long long
     };
+    Q_ENUM(Roles)
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     auto defaultNym() const noexcept -> QString;
     auto defaultSeed() const noexcept -> QString;

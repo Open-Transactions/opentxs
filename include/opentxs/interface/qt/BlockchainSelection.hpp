@@ -8,6 +8,7 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QVariant>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -32,6 +33,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT BlockchainSelectionQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(int enabledCount READ enabledCount NOTIFY enabledChanged)
 
 Q_SIGNALS:
@@ -54,9 +56,11 @@ public:
         IsEnabled = Qt::UserRole + 2,  // bool
         IsTestnet = Qt::UserRole + 3,  // bool
     };
+    Q_ENUM(Roles)
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     auto enabledCount() const noexcept -> int;
     auto flags(const QModelIndex& index) const -> Qt::ItemFlags final;

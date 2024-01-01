@@ -7,6 +7,7 @@
 
 #include <QMetaObject>
 #include <QObject>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -29,6 +30,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT AccountTreeQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     enum Roles {
@@ -44,9 +46,11 @@ public:
         ContractIdRole = Qt::UserRole + 9,        // QString
         UnitDescriptionRole = Qt::UserRole + 10,  // QString
     };
+    Q_ENUM(Roles)
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT AccountTreeQt(internal::AccountTree& parent) noexcept;
     AccountTreeQt(const AccountTreeQt&) = delete;

@@ -32,7 +32,7 @@ ImpQt::ImpQt(
     : Imp(api, blockchain, running)
     , blank_()
     , identity_manager_(factory::IdentityManagerQt(api_))
-    , nym_type_()
+    , nym_type_(0)
     , accounts_qt_()
     , account_lists_qt_()
     , account_summaries_qt_()

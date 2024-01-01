@@ -7,6 +7,7 @@
 
 #include <QMetaObject>
 #include <QObject>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -29,6 +30,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT AccountListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     enum Roles {
@@ -44,12 +46,14 @@ public:
         ContractIdRole = Qt::UserRole + 9,        // QString
         UnitDescriptionRole = Qt::UserRole + 10,  // QString
     };
+    Q_ENUM(Roles)
     enum Columns {
         NotaryNameColumn = 0,
         DisplayUnitColumn = 1,
         AccountNameColumn = 2,
         DisplayBalanceColumn = 3,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT AccountListQt(internal::AccountList& parent) noexcept;
     AccountListQt(const AccountListQt&) = delete;

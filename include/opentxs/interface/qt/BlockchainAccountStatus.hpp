@@ -8,6 +8,7 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -30,6 +31,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT BlockchainAccountStatusQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(QString nym READ getNym CONSTANT)
     Q_PROPERTY(int chain READ getChain CONSTANT)
 
@@ -42,10 +44,12 @@ public:
         SubchainTypeRole = Qt::UserRole + 4,    // int
         ProgressRole = Qt::UserRole + 5,        // QString
     };
+    Q_ENUM(Roles)
     // This model is designed to be used in a tree view
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     auto getNym() const noexcept -> QString;
     auto getChain() const noexcept -> int;

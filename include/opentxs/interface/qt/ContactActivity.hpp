@@ -10,6 +10,7 @@
 #include <QString>
 #include <QValidator>  // IWYU pragma: keep
 #include <QVariant>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -32,6 +33,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT ContactActivityQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
     Q_PROPERTY(bool canMessage READ canMessage NOTIFY canMessageUpdate)
     Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameUpdate)
     Q_PROPERTY(QString draft READ draft WRITE setDraft NOTIFY draftUpdate)
@@ -72,6 +74,7 @@ public:
         FromRole = Qt::UserRole + 9,      // QString
         UUIDRole = Qt::UserRole + 10,     // QString
     };
+    Q_ENUM(Roles)
     enum Columns {
         TimeColumn = 0,
         FromColumn = 1,
@@ -82,6 +85,7 @@ public:
         PendingColumn = 6,
         TxidColumn = 7,
     };
+    Q_ENUM(Columns)
 
     auto canMessage() const noexcept -> bool;
     auto displayName() const noexcept -> QString;

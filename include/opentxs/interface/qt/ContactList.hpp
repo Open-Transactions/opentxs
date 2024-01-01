@@ -8,6 +8,7 @@
 #include <QMetaObject>
 #include <QObject>
 #include <QString>
+#include <QtQmlIntegration>
 
 #include "opentxs/Export.hpp"
 #include "opentxs/interface/qt/Model.hpp"
@@ -30,6 +31,7 @@ namespace opentxs::ui
 class OPENTXS_EXPORT ContactListQt final : public qt::Model
 {
     Q_OBJECT
+    QML_ELEMENT
 
 public:
     // NOLINTBEGIN(modernize-use-trailing-return-type)
@@ -49,10 +51,12 @@ public:
         ImageRole = Qt::UserRole + 2,    // QPixmap
         SectionRole = Qt::UserRole + 3,  // QString
     };
+    Q_ENUM(Roles)
     // This model is designed to be used in a list view
     enum Columns {
         NameColumn = 0,
     };
+    Q_ENUM(Columns)
 
     OPENTXS_NO_EXPORT ContactListQt(internal::ContactList& parent) noexcept;
     ContactListQt() = delete;

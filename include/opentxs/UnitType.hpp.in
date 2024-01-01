@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "opentxs/Export.hpp"
 #include "opentxs/Types.hpp"  // IWYU pragma: keep
 
 @MAYBE_INCLUDE_QOBJECT@#include <limits>

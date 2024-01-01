@@ -81,11 +81,19 @@ if(OT_QT_EXPORT)
     target_sources(opentxs-common PRIVATE "Blockchain.cpp")
   endif()
 
-  target_link_libraries(opentxs-moc PRIVATE Qt::Core Qt::Gui)
+  target_link_libraries(
+    opentxs-moc
+    PRIVATE
+      Qt::Core
+      Qt::Gui
+      Qt::Qml
+  )
   libopentxs_link_internal(Qt::Core)
   libopentxs_link_internal(Qt::Gui)
+  libopentxs_link_internal(Qt::Qml)
   libopentxs_link_external(Qt::Core)
   libopentxs_link_external(Qt::Gui)
+  libopentxs_link_external(Qt::Qml)
 else()
   target_sources(opentxs-common PRIVATE "no-Qt.cpp")
 endif()

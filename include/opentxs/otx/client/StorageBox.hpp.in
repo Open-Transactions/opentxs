@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include <type_traits>
+@MAYBE_INCLUDE_QOBJECT@#include <type_traits>
 
+#include "opentxs/Export.hpp"
 #include "opentxs/otx/client/Types.hpp"  // IWYU pragma: keep
 
-namespace opentxs::otx::client
-{
+namespace opentxs::otx::client::inline storagebox
+@MAYBE_OPEN_NAMESPACE@
 enum class StorageBox : std::underlying_type_t<StorageBox> {
     SENTPEERREQUEST = 0,
     INCOMINGPEERREQUEST = 1,
@@ -32,5 +33,5 @@ enum class StorageBox : std::underlying_type_t<StorageBox> {
     PENDING_SEND = 253,
     DRAFT = 254,
     UNKNOWN = 255,
-};
+@MAYBE_EXPORT_ENUM@
 }  // namespace opentxs::otx::client
