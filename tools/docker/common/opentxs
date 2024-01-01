@@ -16,7 +16,6 @@ RUN --mount=type=tmpfs,target=/tmp/opentxs /opt/cmake/bin/cmake \
         -DCMAKE_C_FLAGS="-O2" \
         -DCMAKE_CXX_FLAGS="-O2" \
         -DOT_STORAGE_SQLITE=OFF \
-        -DOT_BUNDLED_SECP256K1=OFF \
         ${OT_CMAKE_ARGS} \
     && /opt/cmake/bin/cmake --build /tmp/opentxs \
     && /opt/cmake/bin/cmake --install /tmp/opentxs
