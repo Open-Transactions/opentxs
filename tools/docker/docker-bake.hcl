@@ -1,6 +1,6 @@
-variable "ci_39_revision" { default = "4" }
-variable "ci_38_revision" { default = "10" }
-variable "ci_37_revision" { default = "13" }
+variable "ci_39_revision" { default = "5" }
+variable "ci_38_revision" { default = "11" }
+variable "ci_37_revision" { default = "14" }
 variable "android_revision" { default = "27" }
 
 variable "OT_DOCKER_ARCH" {

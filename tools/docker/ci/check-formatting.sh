@@ -16,6 +16,8 @@ if [ ! -d "${SRC}" ]; then
     exit 1
 fi
 
+# set up configuration files
+
 if [ -e "${SRC}/.clang-format" ]; then
     mv "${SRC}/.clang-format" "${SRC}/.clang-format.backup"
 fi
@@ -27,6 +29,8 @@ fi
 cp /opt/otcommon/share/otcommon/format/clang-format "${SRC}/.clang-format"
 cp /opt/otcommon/share/otcommon/format/cmake-format.py "${SRC}/.cmake-format.py"
 
+# clang-format
+
 CLANG_FORMAT_COMMAND="find ${SRC} \( -name '*.*pp' -o -name '*.json' \)"
 
 if [[ -f "${EXCLUDE_FILE}" ]]; then
@@ -37,6 +41,20 @@ fi
 
 CLANG_FORMAT_COMMAND="${CLANG_FORMAT_COMMAND} -exec clang-format -i {} +"
 
+# qmlformat
+
+QML_FORMAT_COMMAND="find ${SRC} -name '*.qml'"
+
+if [[ -f "${EXCLUDE_FILE}" ]]; then
+    while read p; do
+        QML_FORMAT_COMMAND="${QML_FORMAT_COMMAND} -not -path '${SRC}/${p}/*'"
+    done < "${EXCLUDE_FILE}"
+fi
+
+QML_FORMAT_COMMAND="${QML_FORMAT_COMMAND} -exec /usr/lib64/qt6/bin/qmlformat -i -w 4 -n -l unix --objects-spacing --functions-spacing {} +"
+
+# cmake-format
+
 CMAKE_FORMAT_COMMAND="find ${SRC} \( -name 'CMakeLists.txt' -o -name '*.cmake' \)"
 
 if [[ -f "${EXCLUDE_FILE}" ]]; then
@@ -46,6 +64,8 @@ if [[ -f "${EXCLUDE_FILE}" ]]; then
 fi
 
 CMAKE_FORMAT_COMMAND="${CMAKE_FORMAT_COMMAND} -exec cmake-format -i {} +"
+
+# sort includes
 
 FIX_INCLUDES_COMMAND="find ${SRC} -name '*.*pp'"
 
@@ -58,8 +78,11 @@ fi
 FIX_INCLUDES_COMMAND="${FIX_INCLUDES_COMMAND} -exec /usr/bin/fix_includes.py --blank_lines --nocomments --safe_headers --reorder --sort_only {} +"
 
 eval "${CLANG_FORMAT_COMMAND}"
+eval "${QML_FORMAT_COMMAND}"
 eval "${CMAKE_FORMAT_COMMAND}"
 eval "${FIX_INCLUDES_COMMAND}"
+
+# restore previous configuration files
 
 rm "${SRC}/.clang-format"
 rm "${SRC}/.cmake-format.py"
@@ -71,6 +94,8 @@ fi
 if [ -e "${SRC}/.cmake-format.py.backup" ]; then
     mv "${SRC}/.cmake-format.py.backup" "${SRC}/.cmake-format.py"
 fi
+
+# check for changed files
 
 cd "${SRC}"
 output=$(/usr/bin/git --no-pager diff)
