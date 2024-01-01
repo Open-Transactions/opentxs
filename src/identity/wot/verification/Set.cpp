@@ -5,18 +5,18 @@
 
 #include "identity/wot/verification/Set.hpp"  // IWYU pragma: associated
 
-#include <VerificationGroup.pb.h>
-#include <VerificationItem.pb.h>
-#include <VerificationSet.pb.h>
+#include <opentxs/protobuf/VerificationGroup.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/verification/Set.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -43,7 +43,7 @@ auto Factory::VerificationSet(
 auto Factory::VerificationSet(
     const api::Session& api,
     const identifier::Nym& nym,
-    const proto::VerificationSet& serialized)
+    const protobuf::VerificationSet& serialized)
     -> identity::wot::verification::internal::Set*
 {
     using ReturnType =
@@ -165,7 +165,7 @@ auto Set::instantiate(
 {
     auto output = GroupPointer{};
 
-    if (opentxs::operator==(ChildType::default_instance(), in)) {
+    if (ChildType::default_instance() == in) {
         output.reset(Factory::VerificationGroup(
             parent, Group::DefaultVersion, external));
     } else {
@@ -199,7 +199,7 @@ auto Set::UpgradeGroupVersion(const VersionNumber groupVersion) noexcept -> bool
     try {
         while (true) {
             const auto [min, max] =
-                proto::VerificationSetAllowedGroup().at(nymVersion);
+                protobuf::VerificationSetAllowedGroup().at(nymVersion);
 
             if (groupVersion < min) {
                 LogError()()("Version ")(groupVersion)(" too old").Flush();

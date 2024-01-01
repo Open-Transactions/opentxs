@@ -71,10 +71,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionOutput;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class Log;
@@ -87,7 +87,7 @@ namespace opentxs::blockchain::protocol::bitcoin::base::block::internal
 class Output
 {
 public:
-    using SerializeType = proto::BlockchainTransactionOutput;
+    using SerializeType = protobuf::BlockchainTransactionOutput;
 
     virtual auto AssociatedLocalNyms(
         const api::crypto::Blockchain& crypto,

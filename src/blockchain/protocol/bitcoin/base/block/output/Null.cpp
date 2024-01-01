@@ -45,7 +45,7 @@ auto BitcoinTransactionOutput(
     const api::crypto::Blockchain&,
     const api::Factory&,
     const blockchain::Type,
-    const proto::BlockchainTransactionOutput&,
+    const protobuf::BlockchainTransactionOutput&,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Output
 {

@@ -5,7 +5,7 @@
 
 #include "opentxs/api/SessionPrivate.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -266,7 +266,7 @@ auto SessionPrivate::Paths() const noexcept -> const api::internal::Paths&
 auto SessionPrivate::make_master_key(
     const api::Context& parent,
     const api::session::Factory& factory,
-    proto::Ciphertext& encrypted,
+    protobuf::Ciphertext& encrypted,
     std::optional<Secret>& master_secret,
     const api::crypto::Symmetric& symmetric,
     const api::session::Storage& storage) -> opentxs::crypto::symmetric::Key

@@ -16,10 +16,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -29,10 +29,10 @@ class OPENTXS_EXPORT Verification : virtual public Base
 {
 public:
     OPENTXS_NO_EXPORT static auto SigningForm(
-        const proto::VerificationItem& item) -> proto::VerificationItem;
+        const protobuf::VerificationItem& item) -> protobuf::VerificationItem;
     OPENTXS_NO_EXPORT static auto VerificationID(
         const api::Session& api,
-        const proto::VerificationItem& item) -> UnallocatedCString;
+        const protobuf::VerificationItem& item) -> UnallocatedCString;
 
     Verification(const Verification&) = delete;
     Verification(Verification&&) = delete;

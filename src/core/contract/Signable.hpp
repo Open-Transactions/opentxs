@@ -11,7 +11,6 @@
 #include <span>
 #include <string_view>
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/contract/Types.internal.hpp"
 #include "opentxs/core/contract/Signable.hpp"
@@ -20,6 +19,7 @@
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -32,10 +32,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -84,9 +84,10 @@ protected:
     virtual auto calculate_id() const -> IDType = 0;
     auto check_id() const noexcept -> bool;
     virtual auto signatures() const noexcept -> std::span<const Signature>;
-    auto serialize(const ProtobufType& in, Writer&& out) const noexcept -> bool;
+    auto serialize(const protobuf::MessageType& in, Writer&& out) const noexcept
+        -> bool;
     virtual auto validate() const -> bool = 0;
-    virtual auto verify_signature(const proto::Signature& signature) const
+    virtual auto verify_signature(const protobuf::Signature& signature) const
         -> bool;
 
     auto add_signatures(Signatures signatures) noexcept -> void;

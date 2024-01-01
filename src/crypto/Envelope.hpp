@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <cstdint>
 #include <memory>
 #include <tuple>
@@ -80,7 +80,7 @@ public:
 private:
     friend OTEnvelope;
 
-    using Ciphertext = std::unique_ptr<proto::Ciphertext>;
+    using Ciphertext = std::unique_ptr<protobuf::Ciphertext>;
     using DHMap = std::map<
         crypto::asymmetric::Algorithm,
         UnallocatedVector<crypto::asymmetric::Key>>;

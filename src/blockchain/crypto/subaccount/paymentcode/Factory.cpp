@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/crypto/Factory.hpp"  // IWYU pragma: associated
 
-#include <Bip47Channel.pb.h>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -31,7 +31,7 @@ auto BlockchainPCSubaccount(
     const identifier::Account& id,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>
 {
@@ -55,7 +55,7 @@ auto BlockchainPCSubaccount(
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::Bip47Channel& serialized) noexcept
+    const protobuf::Bip47Channel& serialized) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>
 {
     using ReturnType = blockchain::crypto::PaymentCodePrivate;

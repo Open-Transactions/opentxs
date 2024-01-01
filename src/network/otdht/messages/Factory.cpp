@@ -6,9 +6,9 @@
 #include "internal/network/otdht/Factory.hpp"  // IWYU pragma: associated
 #include "opentxs/network/otdht/Base.hpp"      // IWYU pragma: associated
 
-#include <P2PBlockchainChainState.pb.h>
-#include <P2PBlockchainHello.pb.h>
-#include <P2PBlockchainSync.pb.h>
+#include <opentxs/protobuf/P2PBlockchainChainState.pb.h>
+#include <opentxs/protobuf/P2PBlockchainHello.pb.h>
+#include <opentxs/protobuf/P2PBlockchainSync.pb.h>
 #include <iterator>
 #include <memory>
 #include <optional>
@@ -16,11 +16,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/P2PBlockchainHello.hpp"
-#include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/WorkType.hpp"  // IWYU pragma: keep
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -43,6 +38,11 @@
 #include "opentxs/network/otdht/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/P2PBlockchainHello.hpp"
+#include "opentxs/protobuf/syntax/P2PBlockchainSync.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -188,9 +188,9 @@ auto BlockchainSyncMessage(
         const auto& helloFrame = b[1];
 
         const auto hello =
-            proto::Factory<proto::P2PBlockchainHello>(helloFrame);
+            protobuf::Factory<protobuf::P2PBlockchainHello>(helloFrame);
 
-        if (false == proto::Validate(hello, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), hello)) {
             throw std::runtime_error{"invalid hello"};
         }
 
@@ -238,9 +238,9 @@ auto BlockchainSyncMessage(
 
                 for (auto i{std::next(b.begin(), 3)}; i != b.end(); ++i) {
                     const auto sync =
-                        proto::Factory<proto::P2PBlockchainSync>(*i);
+                        protobuf::Factory<protobuf::P2PBlockchainSync>(*i);
 
-                    if (false == proto::Validate(sync, VERBOSE)) {
+                    if (false == protobuf::syntax::check(LogError(), sync)) {
                         throw std::runtime_error{"invalid sync data"};
                     }
 

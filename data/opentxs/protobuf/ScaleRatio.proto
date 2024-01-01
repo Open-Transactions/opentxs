@@ -1,0 +1,18 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTScaleRatio";
+option optimize_for = LITE_RUNTIME;
+
+message ScaleRatio
+{
+    optional uint32 version = 1;
+    optional uint32 base = 2;
+    optional int32 power = 3;
+}

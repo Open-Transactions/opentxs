@@ -76,11 +76,11 @@ class Data;
 }  // namespace otdht
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class BlockchainBlockHeader;
 class BlockchainTransaction;
-}  // namespace proto
+}  // namespace protobuf
 
 class Contact;
 class Data;
@@ -159,7 +159,7 @@ public:
     auto Import(Vector<network::blockchain::Address> peers) const noexcept
         -> bool;
     auto LoadBlockHeader(const block::Hash& hash) const noexcept(false)
-        -> proto::BlockchainBlockHeader;
+        -> protobuf::BlockchainBlockHeader;
     auto LoadEnabledChains() const noexcept -> UnallocatedVector<EnabledChain>;
     auto LoadFilter(
         const cfilter::Type type,
@@ -187,7 +187,7 @@ public:
         alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LoadTransaction(
         const block::TransactionHash& txid,
-        proto::BlockchainTransaction& out,
+        protobuf::BlockchainTransaction& out,
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
@@ -218,7 +218,7 @@ public:
     auto StoreTransaction(const block::Transaction& tx) const noexcept -> bool;
     auto StoreTransaction(
         const block::Transaction& tx,
-        proto::BlockchainTransaction& out) const noexcept -> bool;
+        protobuf::BlockchainTransaction& out) const noexcept -> bool;
     auto SyncTip(const blockchain::Type chain) const noexcept -> block::Height;
     auto UpdateContact(const Contact& contact) const noexcept
         -> UnallocatedVector<block::TransactionHash>;

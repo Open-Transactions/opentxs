@@ -5,10 +5,10 @@
 
 #include "opentxs/network/otdht/Base.hpp"  // IWYU pragma: associated
 
-#include <P2PBlockchainHello.pb.h>
-#include <P2PBlockchainSync.pb.h>
 #include <boost/endian/buffers.hpp>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/P2PBlockchainHello.pb.h>
+#include <opentxs/protobuf/P2PBlockchainSync.pb.h>
 #include <array>
 #include <cstdint>
 #include <memory>
@@ -199,7 +199,7 @@ auto Base::Imp::serialize(zeromq::Message& out) const noexcept -> bool
 
     try {
         const auto hello = [&] {
-            auto output = proto::P2PBlockchainHello{};
+            auto output = protobuf::P2PBlockchainHello{};
             output.set_version(hello_version_);
 
             for (const auto& state : state_) {
@@ -215,7 +215,7 @@ auto Base::Imp::serialize(zeromq::Message& out) const noexcept -> bool
 
         for (const auto& block : blocks_) {
             const auto data = [&] {
-                auto output = proto::P2PBlockchainSync{};
+                auto output = protobuf::P2PBlockchainSync{};
 
                 if (false == block.Serialize(output)) {
                     throw std::runtime_error{""};

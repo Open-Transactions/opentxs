@@ -7,17 +7,17 @@
 
 #include "core/contract/CurrencyContract.hpp"  // IWYU pragma: associated
 
-#include <Signature.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <memory>
 #include <string_view>
 
 #include "core/contract/Signable.hpp"
 #include "core/contract/Unit.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -51,7 +51,7 @@ auto Factory::CurrencyContract(
 
     if (contract.Signer()) {
         auto serialized = contract.SigVersion();
-        auto sig = std::make_shared<proto::Signature>();
+        auto sig = std::make_shared<protobuf::Signature>();
 
         if (!contract.update_signature(reason)) { return {}; }
     }
@@ -64,14 +64,12 @@ auto Factory::CurrencyContract(
 auto Factory::CurrencyContract(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) noexcept
+    const protobuf::UnitDefinition serialized) noexcept
     -> std::shared_ptr<contract::unit::Currency>
 {
     using ReturnType = contract::unit::implementation::Currency;
 
-    if (false == proto::Validate<ReturnType::SerializedType>(
-                     serialized, VERBOSE, true)) {
-
+    if (false == protobuf::syntax::check(LogError(), serialized, true)) {
         return {};
     }
 
@@ -116,7 +114,7 @@ Currency::Currency(
 Currency::Currency(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized)
+    const protobuf::UnitDefinition serialized)
     : Unit(api, nym, serialized)
 {
     init_serialized();

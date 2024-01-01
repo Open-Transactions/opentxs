@@ -59,7 +59,7 @@ auto BailmentReply(
 auto BailmentReply(
     const api::Session& api,
     const Nym_p& signer,
-    const proto::PeerReply& proto,
+    const protobuf::PeerReply& proto,
     alloc::Strategy alloc) noexcept -> contract::peer::ReplyPrivate*
 {
     using ReturnType = contract::peer::reply::bailment::Implementation;

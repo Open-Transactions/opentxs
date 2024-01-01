@@ -5,8 +5,8 @@
 
 #include "network/blockchain/bitcoin/Peer.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
 #include <frozen/set.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -60,7 +60,6 @@
 #include "internal/network/blockchain/bitcoin/message/Version.hpp"
 #include "internal/network/zeromq/Context.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Future.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/alloc/Logging.hpp"
@@ -104,6 +103,7 @@
 #include "opentxs/network/zeromq/Context.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -461,12 +461,12 @@ auto Peer::process_addresses(
 
         for (const auto& address : data) {
             const auto proto = [&] {
-                auto p = proto::BlockchainPeerAddress{};
+                auto p = protobuf::BlockchainPeerAddress{};
                 address.Internal().Serialize(p);
 
                 return p;
             }();
-            proto::write(proto, out.AppendBytes());
+            protobuf::write(proto, out.AppendBytes());
         }
 
         return out;

@@ -7,6 +7,7 @@ add_library(ottest-basic OBJECT "")
 add_library(ottest-lowlevel OBJECT "")
 libopentxs_configure_cxx_target(ottest-basic)
 libopentxs_configure_cxx_target(ottest-lowlevel)
+target_link_libraries(opentxs-testlib PUBLIC opentxs-protobuf)
 
 if(OT_PCH)
   add_library(ottest-pch OBJECT "pch.cpp")

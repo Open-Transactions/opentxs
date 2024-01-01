@@ -37,11 +37,11 @@ struct SpendPolicy;
 }  // namespace node
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransaction;
 class BlockchainTransactionProposal;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class Log;
@@ -72,9 +72,10 @@ public:
         -> std::span<const PaymentCodeRecipient>;
     virtual auto Policy() const noexcept -> SpendPolicy;
     [[nodiscard]] virtual auto Serialize(
-        proto::BlockchainTransactionProposal& out) const noexcept -> bool;
+        protobuf::BlockchainTransactionProposal& out) const noexcept -> bool;
 
-    virtual auto Add(const proto::BlockchainTransaction& tx) noexcept -> void;
+    virtual auto Add(const protobuf::BlockchainTransaction& tx) noexcept
+        -> void;
     [[nodiscard]] virtual auto Check() noexcept -> std::optional<SendResult>;
     virtual auto Finalize(const Log& log, alloc::Strategy alloc) noexcept(false)
         -> void;

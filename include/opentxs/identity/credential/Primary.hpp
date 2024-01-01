@@ -11,10 +11,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -23,7 +23,7 @@ namespace opentxs::identity::credential
 class OPENTXS_EXPORT Primary : virtual public identity::credential::Key
 {
 public:
-    OPENTXS_NO_EXPORT virtual auto Path(proto::HDPath& output) const
+    OPENTXS_NO_EXPORT virtual auto Path(protobuf::HDPath& output) const
         -> bool = 0;
     virtual auto Path() const -> UnallocatedCString = 0;
 

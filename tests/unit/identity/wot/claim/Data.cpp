@@ -925,7 +925,7 @@ TEST_F(ContactData, AddSocialMediaProfile)
 //    testAddItemMethod3(
 //        std::mem_fn<claim::ContactData(
 //            const ot::UnallocatedCString&,
-//            const ot::proto::ContactSectionName,
+//            const ot::protobuf::ContactSectionName,
 //            const claim::,
 //            const bool,
 //            const bool)

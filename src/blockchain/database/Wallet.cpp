@@ -5,7 +5,7 @@
 
 #include "blockchain/database/Wallet.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionProposal.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -77,7 +77,7 @@ auto Wallet::AddMempoolTransaction(
 auto Wallet::AddProposal(
     const Log& log,
     const identifier::Generic& id,
-    const proto::BlockchainTransactionProposal& tx,
+    const protobuf::BlockchainTransactionProposal& tx,
     alloc::Strategy alloc) noexcept -> bool
 {
     return proposals_.AddProposal(id, tx);
@@ -108,7 +108,7 @@ auto Wallet::CompletedProposals() const noexcept
 auto Wallet::FinalizeProposal(
     const Log& log,
     const identifier::Generic& proposalID,
-    const proto::BlockchainTransactionProposal& proposal,
+    const protobuf::BlockchainTransactionProposal& proposal,
     const block::Transaction& transaction,
     alloc::Strategy alloc) noexcept -> bool
 {
@@ -256,13 +256,13 @@ auto Wallet::GetWalletHeight() const noexcept -> block::Height
 }
 
 auto Wallet::LoadProposal(const identifier::Generic& id) const noexcept
-    -> std::optional<proto::BlockchainTransactionProposal>
+    -> std::optional<protobuf::BlockchainTransactionProposal>
 {
     return proposals_.LoadProposal(id);
 }
 
 auto Wallet::LoadProposals() const noexcept
-    -> UnallocatedVector<proto::BlockchainTransactionProposal>
+    -> UnallocatedVector<protobuf::BlockchainTransactionProposal>
 {
     return proposals_.LoadProposals();
 }

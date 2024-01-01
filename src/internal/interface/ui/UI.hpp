@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::PaymentEventType
+// IWYU pragma: no_forward_declare opentxs::protobuf::PaymentEventType
 // IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -291,7 +291,7 @@ using AccountActivityExternalInterface = ui::AccountActivity;
 using AccountActivityInternalInterface = ui::internal::AccountActivity;
 /** WorkflowID, state */
 using AccountActivityRowID =
-    std::pair<identifier::Generic, proto::PaymentEventType>;
+    std::pair<identifier::Generic, protobuf::PaymentEventType>;
 using AccountActivityRowInterface = ui::BalanceItem;
 using AccountActivityRowInternal = ui::internal::BalanceItem;
 using AccountActivityRowBlank = ui::internal::blank::BalanceItem;

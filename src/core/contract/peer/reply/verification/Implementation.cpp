@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/reply/verification/Implementation.hpp"  // IWYU pragma: associated
 
-#include <PeerReply.pb.h>
-#include <VerificationReply.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/VerificationReply.pb.h>
 #include <utility>
 
 #include "internal/identity/wot/Verification.hpp"

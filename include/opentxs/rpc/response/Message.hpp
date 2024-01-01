@@ -17,10 +17,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCResponse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -60,7 +60,7 @@ public:
     auto Cookie() const noexcept -> const UnallocatedCString&;
     auto ResponseCodes() const noexcept -> const Responses&;
     auto Serialize(Writer&& dest) const noexcept -> bool;
-    OPENTXS_NO_EXPORT auto Serialize(proto::RPCResponse& dest) const noexcept
+    OPENTXS_NO_EXPORT auto Serialize(protobuf::RPCResponse& dest) const noexcept
         -> bool;
     auto Session() const noexcept -> SessionIndex;
     auto Type() const noexcept -> CommandType;

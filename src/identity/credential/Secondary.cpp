@@ -5,9 +5,9 @@
 
 #include "identity/credential/Secondary.hpp"  // IWYU pragma: associated
 
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <memory>
 #include <stdexcept>
 
@@ -48,7 +48,7 @@ auto Factory::SecondaryCredential(
     identity::internal::Authority& parent,
     const identity::Source& source,
     const identity::credential::internal::Primary& master,
-    const proto::Credential& serialized)
+    const protobuf::Credential& serialized)
     -> identity::credential::internal::Secondary*
 {
     using ReturnType = identity::credential::implementation::Secondary;
@@ -93,7 +93,7 @@ Secondary::Secondary(
     const identity::internal::Authority& owner,
     const identity::Source& source,
     const internal::Primary& master,
-    const proto::Credential& serialized) noexcept(false)
+    const protobuf::Credential& serialized) noexcept(false)
     : credential::implementation::Key(
           api,
           owner,
@@ -107,7 +107,7 @@ Secondary::Secondary(
 auto Secondary::id_form() const -> std::shared_ptr<SerializedType>
 {
     auto out = Key::id_form();
-    out->set_role(proto::CREDROLE_CHILDKEY);
+    out->set_role(protobuf::CREDROLE_CHILDKEY);
 
     return out;
 }

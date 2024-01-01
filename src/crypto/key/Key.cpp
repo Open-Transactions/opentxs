@@ -5,10 +5,10 @@
 
 #include "internal/crypto/key/Key.hpp"  // IWYU pragma: associated
 
-#include <Enums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <functional>
 
 #include "opentxs/crypto/asymmetric/Algorithm.hpp"  // IWYU pragma: keep
@@ -21,24 +21,24 @@
 
 namespace opentxs::crypto::key
 {
-using AsymmetricAlgorithmMap =
-    frozen::unordered_map<asymmetric::Algorithm, proto::AsymmetricKeyType, 5>;
-using AsymmetricAlgorithmReverseMap =
-    frozen::unordered_map<proto::AsymmetricKeyType, asymmetric::Algorithm, 5>;
-using ModeMap = frozen::unordered_map<asymmetric::Mode, proto::KeyMode, 4>;
+using AsymmetricAlgorithmMap = frozen::
+    unordered_map<asymmetric::Algorithm, protobuf::AsymmetricKeyType, 5>;
+using AsymmetricAlgorithmReverseMap = frozen::
+    unordered_map<protobuf::AsymmetricKeyType, asymmetric::Algorithm, 5>;
+using ModeMap = frozen::unordered_map<asymmetric::Mode, protobuf::KeyMode, 4>;
 using ModeReverseMap =
-    frozen::unordered_map<proto::KeyMode, asymmetric::Mode, 4>;
-using RoleMap = frozen::unordered_map<asymmetric::Role, proto::KeyRole, 4>;
+    frozen::unordered_map<protobuf::KeyMode, asymmetric::Mode, 4>;
+using RoleMap = frozen::unordered_map<asymmetric::Role, protobuf::KeyRole, 4>;
 using RoleReverseMap =
-    frozen::unordered_map<proto::KeyRole, asymmetric::Role, 4>;
+    frozen::unordered_map<protobuf::KeyRole, asymmetric::Role, 4>;
 using SourceMap =
-    frozen::unordered_map<symmetric::Source, proto::SymmetricKeyType, 5>;
+    frozen::unordered_map<symmetric::Source, protobuf::SymmetricKeyType, 5>;
 using SourceReverseMap =
-    frozen::unordered_map<proto::SymmetricKeyType, symmetric::Source, 5>;
+    frozen::unordered_map<protobuf::SymmetricKeyType, symmetric::Source, 5>;
 using SymmetricAlgorithmMap =
-    frozen::unordered_map<symmetric::Algorithm, proto::SymmetricMode, 2>;
+    frozen::unordered_map<symmetric::Algorithm, protobuf::SymmetricMode, 2>;
 using SymmetricAlgorithmReverseMap =
-    frozen::unordered_map<proto::SymmetricMode, symmetric::Algorithm, 2>;
+    frozen::unordered_map<protobuf::SymmetricMode, symmetric::Algorithm, 2>;
 
 auto asymmetricalgorithm_map() noexcept -> const AsymmetricAlgorithmMap&;
 auto mode_map() noexcept -> const ModeMap&;
@@ -52,7 +52,7 @@ namespace opentxs::crypto::key
 auto asymmetricalgorithm_map() noexcept -> const AsymmetricAlgorithmMap&
 {
     using enum asymmetric::Algorithm;
-    using enum proto::AsymmetricKeyType;
+    using enum protobuf::AsymmetricKeyType;
     static constexpr auto map = AsymmetricAlgorithmMap{
         {Error, AKEYTYPE_ERROR},
         {Null, AKEYTYPE_NULL},
@@ -67,7 +67,7 @@ auto asymmetricalgorithm_map() noexcept -> const AsymmetricAlgorithmMap&
 auto mode_map() noexcept -> const ModeMap&
 {
     using enum asymmetric::Mode;
-    using enum proto::KeyMode;
+    using enum protobuf::KeyMode;
     static constexpr auto map = ModeMap{
         {Error, KEYMODE_ERROR},
         {Null, KEYMODE_NULL},
@@ -81,7 +81,7 @@ auto mode_map() noexcept -> const ModeMap&
 auto role_map() noexcept -> const RoleMap&
 {
     using enum asymmetric::Role;
-    using enum proto::KeyRole;
+    using enum protobuf::KeyRole;
     static constexpr auto map = RoleMap{
         {Error, KEYROLE_ERROR},
         {Auth, KEYROLE_AUTH},
@@ -95,7 +95,7 @@ auto role_map() noexcept -> const RoleMap&
 auto source_map() noexcept -> const SourceMap&
 {
     using enum symmetric::Source;
-    using enum proto::SymmetricKeyType;
+    using enum protobuf::SymmetricKeyType;
     static constexpr auto map = SourceMap{
         {Error, SKEYTYPE_ERROR},
         {Raw, SKEYTYPE_RAW},
@@ -110,7 +110,7 @@ auto source_map() noexcept -> const SourceMap&
 auto symmetricalgorithm_map() noexcept -> const SymmetricAlgorithmMap&
 {
     using enum symmetric::Algorithm;
-    using enum proto::SymmetricMode;
+    using enum protobuf::SymmetricMode;
     static constexpr auto map = SymmetricAlgorithmMap{
         {Error, SMODE_ERROR},
         {ChaCha20Poly1305, SMODE_CHACHA20POLY1305},
@@ -123,54 +123,54 @@ auto symmetricalgorithm_map() noexcept -> const SymmetricAlgorithmMap&
 namespace opentxs
 {
 auto translate(const crypto::asymmetric::Algorithm in) noexcept
-    -> proto::AsymmetricKeyType
+    -> protobuf::AsymmetricKeyType
 {
     try {
         return crypto::key::asymmetricalgorithm_map().at(in);
     } catch (...) {
-        return proto::AKEYTYPE_ERROR;
+        return protobuf::AKEYTYPE_ERROR;
     }
 }
 
-auto translate(const crypto::asymmetric::Mode in) noexcept -> proto::KeyMode
+auto translate(const crypto::asymmetric::Mode in) noexcept -> protobuf::KeyMode
 {
     try {
         return crypto::key::mode_map().at(in);
     } catch (...) {
-        return proto::KEYMODE_ERROR;
+        return protobuf::KEYMODE_ERROR;
     }
 }
 
-auto translate(const crypto::asymmetric::Role in) noexcept -> proto::KeyRole
+auto translate(const crypto::asymmetric::Role in) noexcept -> protobuf::KeyRole
 {
     try {
         return crypto::key::role_map().at(in);
     } catch (...) {
-        return proto::KEYROLE_ERROR;
+        return protobuf::KEYROLE_ERROR;
     }
 }
 
 auto translate(const crypto::symmetric::Source in) noexcept
-    -> proto::SymmetricKeyType
+    -> protobuf::SymmetricKeyType
 {
     try {
         return crypto::key::source_map().at(in);
     } catch (...) {
-        return proto::SKEYTYPE_ERROR;
+        return protobuf::SKEYTYPE_ERROR;
     }
 }
 
 auto translate(const crypto::symmetric::Algorithm in) noexcept
-    -> proto::SymmetricMode
+    -> protobuf::SymmetricMode
 {
     try {
         return crypto::key::symmetricalgorithm_map().at(in);
     } catch (...) {
-        return proto::SMODE_ERROR;
+        return protobuf::SMODE_ERROR;
     }
 }
 
-auto translate(const proto::AsymmetricKeyType in) noexcept
+auto translate(const protobuf::AsymmetricKeyType in) noexcept
     -> crypto::asymmetric::Algorithm
 {
     static const auto map =
@@ -183,7 +183,7 @@ auto translate(const proto::AsymmetricKeyType in) noexcept
     }
 }
 
-auto translate(const proto::KeyMode in) noexcept -> crypto::asymmetric::Mode
+auto translate(const protobuf::KeyMode in) noexcept -> crypto::asymmetric::Mode
 {
     static const auto map =
         frozen::invert_unordered_map(crypto::key::mode_map());
@@ -195,7 +195,7 @@ auto translate(const proto::KeyMode in) noexcept -> crypto::asymmetric::Mode
     }
 }
 
-auto translate(const proto::KeyRole in) noexcept -> crypto::asymmetric::Role
+auto translate(const protobuf::KeyRole in) noexcept -> crypto::asymmetric::Role
 {
     static const auto map =
         frozen::invert_unordered_map(crypto::key::role_map());
@@ -207,7 +207,7 @@ auto translate(const proto::KeyRole in) noexcept -> crypto::asymmetric::Role
     }
 }
 
-auto translate(const proto::SymmetricKeyType in) noexcept
+auto translate(const protobuf::SymmetricKeyType in) noexcept
     -> crypto::symmetric::Source
 {
     static const auto map =
@@ -220,7 +220,7 @@ auto translate(const proto::SymmetricKeyType in) noexcept
     }
 }
 
-auto translate(const proto::SymmetricMode in) noexcept
+auto translate(const protobuf::SymmetricMode in) noexcept
     -> crypto::symmetric::Algorithm
 {
     static const auto map =

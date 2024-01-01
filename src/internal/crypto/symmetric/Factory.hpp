@@ -30,10 +30,10 @@ class KeyPrivate;
 class SymmetricProvider;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class SymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Secret;
@@ -51,7 +51,7 @@ auto SymmetricKey(
 auto SymmetricKey(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey& serialized,
+    const protobuf::SymmetricKey& serialized,
     alloc::Default alloc) noexcept -> crypto::symmetric::KeyPrivate*;
 auto SymmetricKey(
     const api::Session& api,

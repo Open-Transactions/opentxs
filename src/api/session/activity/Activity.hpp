@@ -48,10 +48,10 @@ class Transaction;
 }  // namespace block
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class StorageThread;
-}  // namespace proto
+}  // namespace protobuf
 
 class Contact;
 class PasswordPrompt;
@@ -143,7 +143,7 @@ public:
     auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,
-        proto::StorageThread& serialzied) const noexcept -> bool final;
+        protobuf::StorageThread& serialzied) const noexcept -> bool final;
     auto Thread(
         const identifier::Nym& nymID,
         const identifier::Generic& threadID,

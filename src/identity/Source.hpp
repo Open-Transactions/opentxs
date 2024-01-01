@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::KeyRole
+// IWYU pragma: no_forward_declare opentxs::protobuf::KeyRole
 
 #pragma once
 
-#include <Enums.pb.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <cstddef>
 #include <memory>
 
@@ -47,13 +47,13 @@ class Primary;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class Credential;
 class NymIDSource;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Factory;
@@ -70,13 +70,15 @@ public:
     auto Description() const noexcept -> OTString final;
     auto Type() const noexcept -> identity::SourceType final { return type_; }
     auto NymID() const noexcept -> identifier::Nym final;
-    auto Serialize(proto::NymIDSource& serialized) const noexcept -> bool final;
+    auto Serialize(protobuf::NymIDSource& serialized) const noexcept
+        -> bool final;
     auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept -> bool final;
+        const protobuf::Credential& master,
+        const protobuf::Signature& sourceSignature) const noexcept
+        -> bool final;
     auto Sign(
         const identity::credential::Primary& credential,
-        proto::Signature& sig,
+        protobuf::Signature& sig,
         const PasswordPrompt& reason) const noexcept -> bool final;
 
     Source() = delete;
@@ -90,10 +92,10 @@ private:
     static constexpr auto SourceTypeMapSize = std::size_t{3};
     using SourceTypeMap = frozen::unordered_map<
         identity::SourceType,
-        proto::SourceType,
+        protobuf::SourceType,
         SourceTypeMapSize>;
     using SourceTypeReverseMap = frozen::unordered_map<
-        proto::SourceType,
+        protobuf::SourceType,
         identity::SourceType,
         SourceTypeMapSize>;
 
@@ -110,18 +112,19 @@ private:
     static auto deserialize_pubkey(
         const api::session::Factory& factory,
         const identity::SourceType type,
-        const proto::NymIDSource& serialized) -> crypto::asymmetric::Key;
+        const protobuf::NymIDSource& serialized) -> crypto::asymmetric::Key;
     static auto deserialize_paymentcode(
         const api::session::Factory& factory,
         const identity::SourceType type,
-        const proto::NymIDSource& serialized) -> PaymentCode;
+        const protobuf::NymIDSource& serialized) -> PaymentCode;
     static auto extract_key(
-        const proto::Credential& credential,
-        const proto::KeyRole role) -> std::unique_ptr<proto::AsymmetricKey>;
+        const protobuf::Credential& credential,
+        const protobuf::KeyRole role)
+        -> std::unique_ptr<protobuf::AsymmetricKey>;
     static auto sourcetype_map() noexcept -> const SourceTypeMap&;
     static auto translate(const identity::SourceType in) noexcept
-        -> proto::SourceType;
-    static auto translate(const proto::SourceType in) noexcept
+        -> protobuf::SourceType;
+    static auto translate(const protobuf::SourceType in) noexcept
         -> identity::SourceType;
 
     auto asData() const -> ByteArray;
@@ -129,7 +132,7 @@ private:
     Source(
         const api::Crypto& crypto,
         const api::session::Factory& factory,
-        const proto::NymIDSource& serializedSource) noexcept;
+        const protobuf::NymIDSource& serializedSource) noexcept;
     Source(
         const api::Crypto& crypto,
         const api::session::Factory& factory,

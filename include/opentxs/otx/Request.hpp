@@ -33,10 +33,10 @@ namespace otx
 class Request;
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class ServerRequest;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class PasswordPrompt;
@@ -63,7 +63,7 @@ public:
         const opentxs::PasswordPrompt& reason) -> Request;
     OPENTXS_NO_EXPORT static auto Factory(
         const api::Session& api,
-        const proto::ServerRequest serialized) -> Request;
+        const protobuf::ServerRequest serialized) -> Request;
     static auto Factory(const api::Session& api, const ReadView& view)
         -> Request;
 
@@ -71,7 +71,7 @@ public:
     auto Number() const -> RequestNumber;
     auto Serialize() const noexcept -> ByteArray;
     auto Serialize(Writer&& destination) const noexcept -> bool;
-    OPENTXS_NO_EXPORT auto Serialize(proto::ServerRequest& serialized) const
+    OPENTXS_NO_EXPORT auto Serialize(protobuf::ServerRequest& serialized) const
         -> bool;
     auto Server() const -> const identifier::Notary&;
     auto Type() const -> otx::ServerRequestType;

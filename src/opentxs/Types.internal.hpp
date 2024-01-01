@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::AddressType
+// IWYU pragma: no_forward_declare opentxs::protobuf::AddressType
 
 #pragma once
 
-#include <ContractEnums.pb.h>
+#include <opentxs/protobuf/ContractEnums.pb.h>
 #include <cstddef>
 #include <functional>
 #include <mutex>
@@ -30,10 +30,10 @@ auto check_subset(
     std::size_t available,
     std::size_t requested,
     std::size_t position) noexcept -> bool;
-auto translate(AddressType) noexcept -> proto::AddressType;
+auto translate(AddressType) noexcept -> protobuf::AddressType;
 }  // namespace opentxs
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(AddressType) noexcept -> opentxs::AddressType;
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

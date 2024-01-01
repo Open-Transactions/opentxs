@@ -5,9 +5,9 @@
 
 #include "internal/identity/wot/Verification.hpp"  // IWYU pragma: associated
 
-#include <Signature.pb.h>
-#include <Verification.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/Verification.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <algorithm>
 #include <functional>
 #include <optional>
@@ -39,7 +39,7 @@ auto Verification::CalculateID(
     alloc::Strategy alloc) noexcept -> VerificationID
 {
     const auto proto = [&] {
-        auto out = proto::VerificationItem{};
+        auto out = protobuf::VerificationItem{};
         out.set_version(version);
         claim.Internal().Serialize(*out.mutable_claim());
         out.set_kind(translate(value));
@@ -59,11 +59,11 @@ auto Verification::CalculateID(
 auto Verification::CalculateID(
     const api::Session& api,
     const identifier::Nym& verifier,
-    const proto::VerificationItem& in,
+    const protobuf::VerificationItem& in,
     alloc::Strategy alloc) noexcept -> VerificationID
 {
     const auto preimage = [&] {
-        auto out = proto::Verification{};
+        auto out = protobuf::Verification{};
         out.set_version(in.version());
         verifier.Internal().Serialize(*out.mutable_verifier());
         auto& item = *out.mutable_item();
@@ -85,9 +85,9 @@ auto Verification::Serialize(
     Time start,
     Time end,
     std::span<const identity::wot::VerificationID> superscedes) noexcept
-    -> proto::VerificationItem
+    -> protobuf::VerificationItem
 {
-    auto out = proto::VerificationItem{};
+    auto out = protobuf::VerificationItem{};
     out.set_version(version);
     claim.Internal().Serialize(*out.mutable_claim());
     out.set_kind(translate(value));
@@ -109,9 +109,9 @@ auto Verification::Serialize(
     Time start,
     Time end,
     std::span<const identity::wot::VerificationID> superscedes) noexcept
-    -> proto::Verification
+    -> protobuf::Verification
 {
-    auto out = proto::Verification{};
+    auto out = protobuf::Verification{};
     out.set_version(version);
     verifier.Internal().Serialize(*out.mutable_verifier());
     out.mutable_item()->CopyFrom(
@@ -120,7 +120,7 @@ auto Verification::Serialize(
     return out;
 }
 
-auto Verification::Serialize(proto::Verification&) const noexcept -> void {}
+auto Verification::Serialize(protobuf::Verification&) const noexcept -> void {}
 
 auto Verification::Sign(
     const identity::Nym& signer,
@@ -132,7 +132,7 @@ auto Verification::Sign(
     Time start,
     Time end,
     std::span<const identity::wot::VerificationID> superscedes) noexcept(false)
-    -> proto::Signature
+    -> protobuf::Signature
 {
     auto proto =
         Serialize(signer.ID(), claim, version, value, start, end, superscedes);

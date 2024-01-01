@@ -19,7 +19,7 @@ auto TokenLucre(const otx::blind::Token&, otx::blind::internal::Purse&) noexcept
 auto TokenLucre(
     const api::Session&,
     otx::blind::internal::Purse&,
-    const proto::Token&) noexcept -> otx::blind::Token
+    const protobuf::Token&) noexcept -> otx::blind::Token
 {
     return {};
 }

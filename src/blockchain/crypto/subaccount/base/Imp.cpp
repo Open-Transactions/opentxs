@@ -5,7 +5,7 @@
 
 #include "blockchain/crypto/subaccount/base/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainAccountData.pb.h>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -180,7 +180,7 @@ auto SubaccountPrivate::init(bool) noexcept(false) -> void {}
 
 auto SubaccountPrivate::serialize_common(
     const rLock&,
-    proto::BlockchainAccountData& out) const noexcept -> void
+    protobuf::BlockchainAccountData& out) const noexcept -> void
 {
     out.set_version(BlockchainAccountDataVersion);
     out.set_id(id_.asBase58(api_.Crypto()));

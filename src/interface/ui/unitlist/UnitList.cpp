@@ -14,7 +14,6 @@
 #include "internal/api/crypto/blockchain/Types.hpp"
 #include "internal/api/session/Storage.hpp"
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/Network.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/network/ZeroMQ.hpp"
@@ -33,6 +32,7 @@
 #include "opentxs/network/zeromq/message/Message.tpp"
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -129,7 +129,7 @@ auto UnitList::process_unit(const UnitListRowID& id) noexcept -> void
     add_item(
         id,
         UnallocatedCString{
-            proto::TranslateItemType(translate(UnitToClaim(id)))},
+            protobuf::TranslateItemType(translate(UnitToClaim(id)))},
         custom);
 }
 

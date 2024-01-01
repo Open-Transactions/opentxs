@@ -24,8 +24,11 @@ struct Base : virtual public contract::blank::Signable2<identifier::Generic>,
 
         return blank;
     }
-    auto GetContactData(proto::ContactData&) const -> bool final { return {}; }
-    auto GetVerificationSet(proto::VerificationSet&) const -> bool final
+    auto GetContactData(protobuf::ContactData&) const -> bool final
+    {
+        return {};
+    }
+    auto GetVerificationSet(protobuf::VerificationSet&) const -> bool final
     {
         return {};
     }
@@ -55,16 +58,16 @@ struct Base : virtual public contract::blank::Signable2<identifier::Generic>,
     auto Type() const -> identity::CredentialType final { return {}; }
     auto Verify(
         const Data&,
-        const proto::Signature&,
+        const protobuf::Signature&,
         const opentxs::crypto::asymmetric::Role) const -> bool final
     {
         return {};
     }
     auto Verify(
-        const proto::Credential&,
+        const protobuf::Credential&,
         const identity::CredentialRole&,
         const identifier::Generic&,
-        const proto::Signature&) const -> bool final
+        const protobuf::Signature&) const -> bool final
     {
         return {};
     }
@@ -98,7 +101,7 @@ struct Key : virtual public blank::Base,
     auto Sign(
         const crypto::GetPreimage,
         const crypto::SignatureRole,
-        proto::Signature&,
+        protobuf::Signature&,
         const PasswordPrompt&,
         opentxs::crypto::asymmetric::Role,
         const crypto::HashType hash) const -> bool final

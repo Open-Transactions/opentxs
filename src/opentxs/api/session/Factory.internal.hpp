@@ -159,7 +159,7 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class BlockchainBlockHeader;
@@ -175,7 +175,7 @@ class SymmetricKey;
 class UnitDefinition;
 class Verification;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class Armored;
@@ -239,7 +239,7 @@ public:
         const opentxs::crypto::Parameters& params,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key = 0;
-    virtual auto AsymmetricKey(const proto::AsymmetricKey& serialized)
+    virtual auto AsymmetricKey(const protobuf::AsymmetricKey& serialized)
         const noexcept -> opentxs::crypto::asymmetric::Key = 0;
     virtual auto AsymmetricKey(
         opentxs::crypto::asymmetric::Algorithm type,
@@ -311,7 +311,7 @@ public:
         -> OTBasketContract = 0;
     virtual auto BasketContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract = 0;
     using AbortFunction = std::function<bool()>;
     virtual auto BitcoinBlock(
@@ -360,7 +360,7 @@ public:
         alloc::Default alloc) const noexcept
         -> blockchain::protocol::bitcoin::base::block::Script = 0;
     virtual auto BlockHeader(
-        const proto::BlockchainBlockHeader& proto,
+        const protobuf::BlockchainBlockHeader& proto,
         alloc::Default alloc) const noexcept -> blockchain::block::Header = 0;
     virtual auto BlockHeaderForUnitTests(
         const blockchain::block::Hash& hash,
@@ -398,7 +398,7 @@ public:
         alloc::Default alloc) const noexcept
         -> blockchain::block::Transaction = 0;
     virtual auto BlockchainTransaction(
-        const proto::BlockchainTransaction& serialized,
+        const protobuf::BlockchainTransaction& serialized,
         alloc::Default alloc) const noexcept
         -> blockchain::block::Transaction = 0;
     virtual auto Cheque() const -> std::unique_ptr<opentxs::Cheque> = 0;
@@ -413,7 +413,7 @@ public:
     virtual auto Claim(
         const identity::wot::Claimant& claimant,
         const identity::wot::claim::SectionType section,
-        const proto::ContactItem& proto,
+        const protobuf::ContactItem& proto,
         alloc::Strategy alloc = {}) const noexcept -> identity::wot::Claim = 0;
     virtual auto Claim(
         const identity::wot::Claimant& claimant,
@@ -437,7 +437,7 @@ public:
         Time stop,
         VersionNumber version,
         alloc::Strategy alloc) const noexcept -> identity::wot::Claim = 0;
-    virtual auto Claim(const proto::Claim& proto, alloc::Strategy alloc = {})
+    virtual auto Claim(const protobuf::Claim& proto, alloc::Strategy alloc = {})
         const noexcept -> identity::wot::Claim = 0;
     virtual auto ConnectionReply(
         const Nym_p& responder,
@@ -475,7 +475,7 @@ public:
         -> OTCurrencyContract = 0;
     virtual auto CurrencyContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTCurrencyContract = 0;
     virtual auto Envelope() const noexcept -> OTEnvelope = 0;
     virtual auto Envelope(const opentxs::Armored& ciphertext) const
@@ -542,11 +542,12 @@ public:
         const opentxs::crypto::EcdsaCurve& curve,
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair = 0;
-    virtual auto Keypair(const proto::AsymmetricKey& serializedPubkey) const
+    virtual auto Keypair(const protobuf::AsymmetricKey& serializedPubkey) const
         -> OTKeypair = 0;
     virtual auto Keypair(
-        const proto::AsymmetricKey& serializedPubkey,
-        const proto::AsymmetricKey& serializedPrivkey) const -> OTKeypair = 0;
+        const protobuf::AsymmetricKey& serializedPubkey,
+        const protobuf::AsymmetricKey& serializedPrivkey) const
+        -> OTKeypair = 0;
     virtual auto Ledger(
         const identifier::Account& theAccountID,
         const identifier::Notary& theNotaryID) const
@@ -652,7 +653,7 @@ public:
         const std::uint8_t bitmessageVersion = 0,
         const std::uint8_t bitmessageStream = 0) const noexcept
         -> opentxs::PaymentCode = 0;
-    virtual auto PaymentCode(const proto::PaymentCode& serialized)
+    virtual auto PaymentCode(const protobuf::PaymentCode& serialized)
         const noexcept -> opentxs::PaymentCode = 0;
     virtual auto PaymentCodeFromBase58(const ReadView base58) const noexcept
         -> opentxs::PaymentCode = 0;
@@ -688,7 +689,7 @@ public:
         const -> std::unique_ptr<opentxs::PeerObject> = 0;
     virtual auto PeerObject(
         const Nym_p& signerNym,
-        const proto::PeerObject& serialized) const
+        const protobuf::PeerObject& serialized) const
         -> std::unique_ptr<opentxs::PeerObject> = 0;
     virtual auto PeerObject(
         const contract::peer::Request& request,
@@ -705,7 +706,7 @@ public:
         const opentxs::network::zeromq::Frame& bytes,
         alloc::Strategy alloc = {}) const noexcept -> contract::peer::Reply = 0;
     virtual auto PeerReply(
-        const proto::PeerReply& proto,
+        const protobuf::PeerReply& proto,
         alloc::Strategy alloc = {}) const noexcept -> contract::peer::Reply = 0;
     virtual auto PeerRequest(ReadView bytes, alloc::Strategy alloc = {})
         const noexcept -> contract::peer::Request = 0;
@@ -714,7 +715,7 @@ public:
         alloc::Strategy alloc = {}) const noexcept
         -> contract::peer::Request = 0;
     virtual auto PeerRequest(
-        const proto::PeerRequest& proto,
+        const protobuf::PeerRequest& proto,
         alloc::Strategy alloc = {}) const noexcept
         -> contract::peer::Request = 0;
     virtual auto Purse(
@@ -745,7 +746,7 @@ public:
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse = 0;
-    virtual auto Purse(const proto::Purse& serialized) const noexcept
+    virtual auto Purse(const protobuf::Purse& serialized) const noexcept
         -> otx::blind::Purse = 0;
     virtual auto Scriptable(const String& strCronItem) const
         -> std::unique_ptr<OTScriptable> = 0;
@@ -761,7 +762,7 @@ public:
         -> OTSecurityContract = 0;
     virtual auto SecurityContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTSecurityContract = 0;
     virtual auto ServerContract() const noexcept(false) -> OTServerContract = 0;
     auto Session() const noexcept
@@ -837,7 +838,7 @@ public:
         -> opentxs::crypto::symmetric::Key = 0;
     virtual auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
-        const proto::SymmetricKey serialized,
+        const protobuf::SymmetricKey serialized,
         alloc::Default alloc) const -> opentxs::crypto::symmetric::Key = 0;
     virtual auto Trade() const -> std::unique_ptr<OTTrade> = 0;
     virtual auto Trade(
@@ -901,7 +902,7 @@ public:
     virtual auto UnitDefinition() const noexcept -> OTUnitDefinition = 0;
     virtual auto UnitDefinition(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTUnitDefinition = 0;
     virtual auto Verification(ReadView serialized, alloc::Strategy alloc = {})
         const noexcept -> identity::wot::Verification = 0;
@@ -917,7 +918,7 @@ public:
         -> identity::wot::Verification = 0;
     virtual auto Verification(
         const identifier::Nym& verifier,
-        const proto::VerificationItem& proto,
+        const protobuf::VerificationItem& proto,
         alloc::Strategy alloc = {}) const noexcept
         -> identity::wot::Verification = 0;
     virtual auto Verification(
@@ -931,7 +932,7 @@ public:
         alloc::Strategy alloc = {}) const noexcept
         -> identity::wot::Verification = 0;
     virtual auto Verification(
-        const proto::Verification& proto,
+        const protobuf::Verification& proto,
         alloc::Strategy alloc = {}) const noexcept
         -> identity::wot::Verification = 0;
     virtual auto VerificationReply(

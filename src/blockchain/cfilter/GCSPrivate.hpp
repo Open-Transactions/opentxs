@@ -24,10 +24,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class GCS;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Data;
@@ -73,7 +73,10 @@ public:
         return {};
     }
     auto Range() const noexcept -> gcs::Range override { return {}; }
-    auto Serialize(proto::GCS&) const noexcept -> bool override { return {}; }
+    auto Serialize(protobuf::GCS&) const noexcept -> bool override
+    {
+        return {};
+    }
     virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
     virtual auto size() const noexcept -> std::size_t { return {}; }
     virtual auto Test(const Data&, allocator_type) const noexcept -> bool

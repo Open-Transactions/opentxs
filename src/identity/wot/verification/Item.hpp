@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <span>
 
 #include "internal/identity/wot/verification/Item.hpp"
@@ -59,7 +59,7 @@ public:
     auto ID() const noexcept -> const identifier::Generic& final { return id_; }
     auto Serialize(const api::Crypto& crypto) const noexcept
         -> SerializedType final;
-    auto Signature() const noexcept -> const proto::Signature& final
+    auto Signature() const noexcept -> const protobuf::Signature& final
     {
         return sig_;
     }
@@ -87,7 +87,7 @@ private:
     const Time start_;
     const Time end_;
     const identifier::Generic id_;
-    const proto::Signature sig_;
+    const protobuf::Signature sig_;
     const Vector<VerificationID> superscedes_;
 
     static auto get_sig(
@@ -99,7 +99,7 @@ private:
         Time start,
         Time end,
         std::span<const identity::wot::VerificationID> superscedes,
-        const PasswordPrompt& reason) noexcept(false) -> proto::Signature;
+        const PasswordPrompt& reason) noexcept(false) -> protobuf::Signature;
     static auto sig_form(
         const wot::VerificationID& id,
         const wot::ClaimID& claim,

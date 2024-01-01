@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/CurrencyContract.hpp"
@@ -55,7 +55,7 @@ public:
     Currency(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized);
+        const protobuf::UnitDefinition serialized);
     Currency(Currency&&) = delete;
     auto operator=(const Currency&) -> Currency& = delete;
     auto operator=(Currency&&) -> Currency& = delete;
@@ -63,7 +63,7 @@ public:
     ~Currency() final = default;
 
 private:
-    auto IDVersion() const -> proto::UnitDefinition final;
+    auto IDVersion() const -> protobuf::UnitDefinition final;
 
     Currency(const Currency&);
 };

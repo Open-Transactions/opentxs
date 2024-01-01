@@ -1,0 +1,28 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTAccountData";
+option optimize_for = LITE_RUNTIME;
+
+import public "RPCEnums.proto";
+
+message AccountData
+{
+    optional uint32 version = 1;
+    optional string id = 2;             // account id
+    optional string label = 3;          // account name
+    optional string unit = 4;           // unit definition id
+    optional string owner = 5;          // account owner nym id
+    optional string issuer = 6;         // issuer nym id
+    optional bytes balance = 7;         // current balance
+    optional bytes pendingbalance = 8;  // balance after pending transactions are processed
+    optional AccountType type = 9;
+    optional string balanceformatted = 10;
+    optional string pendingbalanceformatted = 11;
+}

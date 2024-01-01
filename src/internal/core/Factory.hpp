@@ -27,10 +27,10 @@ class Frame;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class PaymentCode;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class PasswordPrompt;
@@ -48,7 +48,7 @@ auto PaymentCode(
     const UnallocatedCString& base58) noexcept -> opentxs::PaymentCode;
 auto PaymentCode(
     const api::Session& api,
-    const proto::PaymentCode& serialized) noexcept -> opentxs::PaymentCode;
+    const protobuf::PaymentCode& serialized) noexcept -> opentxs::PaymentCode;
 auto PaymentCode(
     const api::Session& api,
     const crypto::SeedID& seed,

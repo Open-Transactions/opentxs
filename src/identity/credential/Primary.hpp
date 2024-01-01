@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::SourceProofType
+// IWYU pragma: no_forward_declare opentxs::protobuf::SourceProofType
 
 #pragma once
 
-#include <Enums.pb.h>
-#include <SourceProof.pb.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/SourceProof.pb.h>
 #include <cstddef>
 #include <memory>
 
@@ -45,12 +45,12 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class HDPath;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Factory;
 class PasswordPrompt;
@@ -64,14 +64,14 @@ class Primary final : virtual public credential::internal::Primary,
 {
 public:
     auto hasCapability(const NymCapability& capability) const -> bool final;
-    auto Path(proto::HDPath& output) const -> bool final;
+    auto Path(protobuf::HDPath& output) const -> bool final;
     auto Path() const -> UnallocatedCString final;
     using Base::Verify;
     auto Verify(
-        const proto::Credential& credential,
+        const protobuf::Credential& credential,
         const identity::CredentialRole& role,
         const identifier_type& masterID,
-        const proto::Signature& masterSig) const -> bool final;
+        const protobuf::Signature& masterSig) const -> bool final;
 
     Primary() = delete;
     Primary(const Primary&) = delete;
@@ -87,23 +87,23 @@ private:
     static constexpr auto SourceProofTypeMapSize = std::size_t{3};
     using SourceProofTypeMap = frozen::unordered_map<
         identity::SourceProofType,
-        proto::SourceProofType,
+        protobuf::SourceProofType,
         SourceProofTypeMapSize>;
     using SourceProofTypeReverseMap = frozen::unordered_map<
-        proto::SourceProofType,
+        protobuf::SourceProofType,
         identity::SourceProofType,
         SourceProofTypeMapSize>;
 
     static const VersionConversionMap credential_to_master_params_;
 
-    const proto::SourceProof source_proof_;
+    const protobuf::SourceProof source_proof_;
 
     static auto source_proof(const crypto::Parameters& params)
-        -> proto::SourceProof;
+        -> protobuf::SourceProof;
     static auto sourceprooftype_map() noexcept -> const SourceProofTypeMap&;
     static auto translate(const identity::SourceProofType in) noexcept
-        -> proto::SourceProofType;
-    static auto translate(const proto::SourceProofType in) noexcept
+        -> protobuf::SourceProofType;
+    static auto translate(const protobuf::SourceProofType in) noexcept
         -> identity::SourceProofType;
 
     auto serialize(
@@ -129,6 +129,6 @@ private:
         const api::Session& api,
         const identity::internal::Authority& parent,
         const identity::Source& source,
-        const proto::Credential& serializedCred) noexcept(false);
+        const protobuf::Credential& serializedCred) noexcept(false);
 };
 }  // namespace opentxs::identity::credential::implementation

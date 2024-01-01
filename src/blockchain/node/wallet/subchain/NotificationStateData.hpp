@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <HDPath.pb.h>
 #include <cs_ordered_guarded.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstddef>
 #include <memory>
 #include <shared_mutex>
@@ -96,7 +96,7 @@ private:
         libguarded::ordered_guarded<opentxs::PaymentCode, std::shared_mutex>;
     using Cache = libguarded::ordered_guarded<Vector<block::Position>>;
 
-    const proto::HDPath path_;
+    const protobuf::HDPath path_;
     const opentxs::PaymentCode pc_;
     const CString pc_display_;
     mutable PaymentCode pc_secret_;

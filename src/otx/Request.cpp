@@ -5,9 +5,9 @@
 
 #include "otx/Request.hpp"  // IWYU pragma: associated
 
-#include <Nym.pb.h>
-#include <ServerRequest.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/ServerRequest.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <memory>
 #include <span>
 #include <utility>
@@ -15,10 +15,6 @@
 #include "core/contract/Signable.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/ServerRequest.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.hpp"
@@ -35,6 +31,9 @@
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/otx/Request.hpp"
 #include "opentxs/otx/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/ServerRequest.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -69,15 +68,15 @@ auto Request::Factory(
 
 auto Request::Factory(
     const api::Session& api,
-    const proto::ServerRequest serialized) -> Request
+    const protobuf::ServerRequest serialized) -> Request
 {
     return Request{new Request::Imp(api, serialized)};
 }
 
 auto Request::Factory(const api::Session& api, const ReadView& view) -> Request
 {
-    return Request{
-        new Request::Imp(api, proto::Factory<proto::ServerRequest>(view))};
+    return Request{new Request::Imp(
+        api, protobuf::Factory<protobuf::ServerRequest>(view))};
 }
 
 auto Request::Number() const -> RequestNumber { return imp_->Number(); }
@@ -92,7 +91,7 @@ auto Request::Serialize(Writer&& destination) const noexcept -> bool
     return imp_->Serialize(std::move(destination));
 }
 
-auto Request::Serialize(proto::ServerRequest& serialized) const -> bool
+auto Request::Serialize(protobuf::ServerRequest& serialized) const -> bool
 {
     return imp_->Serialize(serialized);
 }
@@ -203,7 +202,7 @@ Request::Imp::Imp(
 // NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 Request::Imp::Imp(
     const api::Session& api,
-    const proto::ServerRequest serialized)
+    const protobuf::ServerRequest serialized)
     : Signable(
           api,
           extract_nym(api, serialized),
@@ -213,7 +212,7 @@ Request::Imp::Imp(
           "",
           api.Factory().Internal().Identifier(serialized.id()),
           serialized.has_signature()
-              ? Signatures{std::make_shared<proto::Signature>(
+              ? Signatures{std::make_shared<protobuf::Signature>(
                     serialized.signature())}
               : Signatures{})
     , initiator_((Signer()) ? Signer()->ID() : identifier::Nym())
@@ -244,7 +243,7 @@ auto Request::Imp::calculate_id() const -> identifier_type
 
 auto Request::Imp::extract_nym(
     const api::Session& api,
-    const proto::ServerRequest serialized) -> Nym_p
+    const protobuf::ServerRequest serialized) -> Nym_p
 {
     if (serialized.has_credentials()) {
 
@@ -258,7 +257,7 @@ auto Request::Imp::extract_nym(
     return nullptr;
 }
 
-auto Request::Imp::full_version() const -> proto::ServerRequest
+auto Request::Imp::full_version() const -> protobuf::ServerRequest
 {
     auto contract = signature_version();
     const auto sigs = signatures();
@@ -268,7 +267,7 @@ auto Request::Imp::full_version() const -> proto::ServerRequest
     }
 
     if (include_nym_.get() && bool(Signer())) {
-        auto nym = proto::Nym{};
+        auto nym = protobuf::Nym{};
 
         if (Signer()->Internal().Serialize(nym)) {
             contract.mutable_credentials()->CopyFrom(nym);
@@ -278,9 +277,9 @@ auto Request::Imp::full_version() const -> proto::ServerRequest
     return contract;
 }
 
-auto Request::Imp::id_version() const -> proto::ServerRequest
+auto Request::Imp::id_version() const -> protobuf::ServerRequest
 {
-    proto::ServerRequest output{};
+    protobuf::ServerRequest output{};
     output.set_version(Version());
     output.clear_id();  // Must be blank
     output.set_type(translate(type_));
@@ -296,21 +295,21 @@ auto Request::Imp::Number() const -> RequestNumber { return number_; }
 
 auto Request::Imp::Serialize(Writer&& destination) const noexcept -> bool
 {
-    auto serialized = proto::ServerRequest{};
+    auto serialized = protobuf::ServerRequest{};
 
     if (false == serialize(serialized)) { return false; }
 
     return serialize(serialized, std::move(destination));
 }
 
-auto Request::Imp::serialize(proto::ServerRequest& output) const -> bool
+auto Request::Imp::serialize(protobuf::ServerRequest& output) const -> bool
 {
     output = full_version();
 
     return true;
 }
 
-auto Request::Imp::Serialize(proto::ServerRequest& output) const -> bool
+auto Request::Imp::Serialize(protobuf::ServerRequest& output) const -> bool
 {
     return serialize(output);
 }
@@ -328,7 +327,7 @@ auto Request::Imp::SetIncludeNym(
     return true;
 }
 
-auto Request::Imp::signature_version() const -> proto::ServerRequest
+auto Request::Imp::signature_version() const -> protobuf::ServerRequest
 {
     auto contract = id_version();
     ID().Internal().Serialize(*contract.mutable_id());
@@ -348,7 +347,7 @@ auto Request::Imp::update_signature(const PasswordPrompt& reason) -> bool
         serialized, crypto::SignatureRole::ServerRequest, signature, reason);
 
     if (success) {
-        sigs.emplace_back(new proto::Signature(signature));
+        sigs.emplace_back(new protobuf::Signature(signature));
         add_signatures(std::move(sigs));
     } else {
         LogError()()("Failed to create signature.").Flush();
@@ -369,7 +368,8 @@ auto Request::Imp::validate() const -> bool
         return false;
     }
 
-    const bool validSyntax = proto::Validate(full_version(), VERBOSE);
+    const bool validSyntax =
+        protobuf::syntax::check(LogError(), full_version());
 
     if (false == validSyntax) {
         LogError()()("Invalid syntax.").Flush();
@@ -399,7 +399,7 @@ auto Request::Imp::validate() const -> bool
     return true;
 }
 
-auto Request::Imp::verify_signature(const proto::Signature& signature) const
+auto Request::Imp::verify_signature(const protobuf::Signature& signature) const
     -> bool
 {
     if (false == Signable::verify_signature(signature)) { return false; }

@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -30,7 +30,7 @@ public:
     /// throws std::runtime_error for invalid constructor arguments
     ListNyms(SessionIndex session, const AssociateNyms& nyms = {}) noexcept(
         false);
-    OPENTXS_NO_EXPORT ListNyms(const proto::RPCCommand& serialized) noexcept(
+    OPENTXS_NO_EXPORT ListNyms(const protobuf::RPCCommand& serialized) noexcept(
         false);
     ListNyms() noexcept;
     ListNyms(const ListNyms&) = delete;

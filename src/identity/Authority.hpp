@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -57,7 +57,7 @@ class Base;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class Credential;
@@ -65,7 +65,7 @@ class HDPath;
 class Signature;
 class VerificationItem;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class Factory;
@@ -85,7 +85,7 @@ public:
         return authority_to_contact_.at(version_);
     }
     auto EncryptionTargets() const noexcept -> AuthorityKeys final;
-    auto GetContactData(proto::ContactData& contactData) const -> bool final;
+    auto GetContactData(protobuf::ContactData& contactData) const -> bool final;
     auto GetMasterCredential() const -> const credential::Primary& final
     {
         return *master_;
@@ -133,37 +133,37 @@ public:
         -> const crypto::key::Keypair& final;
     auto GetTagCredential(crypto::asymmetric::Algorithm keytype) const
         noexcept(false) -> const credential::Key& final;
-    auto GetVerificationSet(proto::VerificationSet& verificationSet) const
+    auto GetVerificationSet(protobuf::VerificationSet& verificationSet) const
         -> bool final;
     auto hasCapability(const NymCapability& capability) const -> bool final;
     auto Params(const crypto::asymmetric::Algorithm type) const noexcept
         -> ReadView final;
-    auto Path(proto::HDPath& output) const -> bool final;
+    auto Path(protobuf::HDPath& output) const -> bool final;
     auto Serialize(Serialized& serialized, const CredentialIndexModeFlag mode)
         const -> bool final;
     auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         crypto::HashType hash,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Sign(
         const crypto::GetPreimage input,
         crypto::SignatureRole role,
         opentxs::crypto::asymmetric::Role key,
         crypto::HashType hash,
-        proto::Signature& output,
+        protobuf::Signature& output,
         const PasswordPrompt& reason) const -> bool final;
     auto Source() const -> const identity::Source& final
     {
@@ -183,23 +183,23 @@ public:
     {
         return authority_to_verification_.at(version_);
     }
-    auto Verify(const Data& plaintext, const proto::Signature& sig) const
+    auto Verify(const Data& plaintext, const protobuf::Signature& sig) const
         -> bool final;
     auto Verify(
         const Data& plaintext,
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool final;
-    auto Verify(const proto::VerificationItem& item) const -> bool final;
+    auto Verify(const protobuf::VerificationItem& item) const -> bool final;
     auto VerifyInternally() const -> bool final;
 
     auto AddChildKeyCredential(
         const crypto::Parameters& parameters,
         const PasswordPrompt& reason) -> identifier::Generic final;
     auto AddVerificationCredential(
-        const proto::VerificationSet& verificationSet,
+        const protobuf::VerificationSet& verificationSet,
         const PasswordPrompt& reason) -> bool final;
     auto AddContactCredential(
-        const proto::ContactData& contactData,
+        const protobuf::ContactData& contactData,
         const PasswordPrompt& reason) -> bool final;
     void RevokeContactCredentials(
         UnallocatedList<identifier::Generic>& contactCredentialIDs) final;
@@ -250,7 +250,7 @@ private:
     ContactCredentialMap contact_credentials_;
     VerificationCredentialMap verification_credentials_;
     mapOfCredentials revoked_credentials_;
-    proto::KeyMode mode_{proto::KEYMODE_ERROR};
+    protobuf::KeyMode mode_{protobuf::KEYMODE_ERROR};
 
     static auto is_revoked(
         const api::Session& api,
@@ -301,15 +301,15 @@ private:
         internal::Authority& authority,
         const credential::internal::Primary& master,
         const credential::internal::Base::SerializedType& serialized,
-        const proto::KeyMode mode,
-        const proto::CredentialRole role,
+        const protobuf::KeyMode mode,
+        const protobuf::CredentialRole role,
         UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>&
             map) noexcept(false);
     static auto load_master(
         const api::Session& api,
         identity::internal::Authority& owner,
         const identity::Source& source,
-        const proto::KeyMode mode,
+        const protobuf::KeyMode mode,
         const Serialized& serialized) noexcept(false)
         -> std::unique_ptr<credential::internal::Primary>;
     template <typename Type>
@@ -319,13 +319,13 @@ private:
         internal::Authority& authority,
         const credential::internal::Primary& master,
         const Serialized& serialized,
-        const proto::KeyMode mode,
-        const proto::CredentialRole role) noexcept(false)
+        const protobuf::KeyMode mode,
+        const protobuf::CredentialRole role) noexcept(false)
         -> UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>;
 
     auto get_keypair(
         const crypto::asymmetric::Algorithm type,
-        const proto::KeyRole role,
+        const protobuf::KeyRole role,
         const String::List* plistRevokedIDs) const
         -> const crypto::key::Keypair&;
     auto get_secondary_credential(
@@ -337,14 +337,14 @@ private:
     auto validate_credential(const Item& item) const -> bool;
 
     auto LoadChildKeyCredential(const String& strSubID) -> bool;
-    auto LoadChildKeyCredential(const proto::Credential& serializedCred)
+    auto LoadChildKeyCredential(const protobuf::Credential& serializedCred)
         -> bool;
 
     Authority(
         const api::Session& api,
         const identity::Nym& parent,
         const identity::Source& source,
-        const proto::KeyMode mode,
+        const protobuf::KeyMode mode,
         const Serialized& serialized) noexcept(false);
     Authority(
         const api::Session& api,

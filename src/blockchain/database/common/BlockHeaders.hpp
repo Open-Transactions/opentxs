@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
 
 #include "internal/blockchain/database/Types.hpp"
 #include "opentxs/blockchain/block/Hash.hpp"
@@ -31,7 +31,7 @@ public:
     auto Exists(const block::Hash& hash) const noexcept -> bool;
     auto Forget(const block::Hash& hash) const noexcept -> bool;
     auto Load(const block::Hash& hash) const noexcept(false)
-        -> proto::BlockchainBlockHeader;
+        -> protobuf::BlockchainBlockHeader;
     auto Store(const UpdatedHeader& headers) const noexcept -> bool;
 
     BlockHeader(storage::lmdb::Database& lmdb) noexcept(false);

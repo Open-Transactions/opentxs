@@ -5,21 +5,21 @@
 
 #include "opentxs/identity/wot/ClaimPrivate.hpp"  // IWYU pragma: associated
 
-#include <ContactItem.pb.h>
 #include <boost/container/vector.hpp>
+#include <opentxs/protobuf/ContactItem.pb.h>
 #include <algorithm>
 #include <exception>
 #include <memory>
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs::identity::wot
@@ -35,7 +35,7 @@ ClaimPrivate::ClaimPrivate(
     Time start,
     Time stop,
     std::span<const claim::Attribute> attributes,
-    std::optional<proto::Claim> preimage,
+    std::optional<protobuf::Claim> preimage,
     allocator_type alloc) noexcept
     : internal::Claim(alloc)
     , api_(api)
@@ -163,10 +163,10 @@ auto ClaimPrivate::Serialize(Writer&& out) const noexcept -> bool
         proto.mutable_item()->add_attribute(translate(a));
     });
 
-    return proto::write(preimage_, std::move(out));
+    return protobuf::write(preimage_, std::move(out));
 }
 
-auto ClaimPrivate::Serialize(proto::Claim& out) const noexcept -> void
+auto ClaimPrivate::Serialize(protobuf::Claim& out) const noexcept -> void
 {
     out.CopyFrom(preimage_);
 }

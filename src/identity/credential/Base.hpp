@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Credential.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
 #include <memory>
 
 #include "core/contract/Signable.hpp"
@@ -44,12 +44,12 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class Signature;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -65,16 +65,16 @@ class Base
       public opentxs::contract::implementation::Signable<identifier::Generic>
 {
 public:
-    using SerializedType = proto::Credential;
+    using SerializedType = protobuf::Credential;
 
     auto asString(const bool asPrivate = false) const
         -> UnallocatedCString final;
     auto CredentialID() const -> const identifier_type& final { return ID(); }
-    auto GetContactData(proto::ContactData& output) const -> bool override
+    auto GetContactData(protobuf::ContactData& output) const -> bool override
     {
         return false;
     }
-    auto GetVerificationSet(proto::VerificationSet& output) const
+    auto GetVerificationSet(protobuf::VerificationSet& output) const
         -> bool override
     {
         return false;
@@ -108,17 +108,17 @@ public:
     auto Validate() const noexcept -> bool final;
     auto Verify(
         const Data& plaintext,
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const opentxs::crypto::asymmetric::Role key =
             opentxs::crypto::asymmetric::Role::Sign) const -> bool override
     {
         return false;
     }
     auto Verify(
-        const proto::Credential& credential,
+        const protobuf::Credential& credential,
         const identity::CredentialRole& role,
         const identifier_type& masterID,
-        const proto::Signature& masterSig) const -> bool override;
+        const protobuf::Signature& masterSig) const -> bool override;
 
     Base() = delete;
     Base(const Base&) = delete;
@@ -139,7 +139,7 @@ protected:
 
     static auto get_master_id(
         const api::Session& api,
-        const proto::Credential& serialized,
+        const protobuf::Credential& serialized,
         const internal::Primary& master) noexcept(false)
         -> const identifier_type&;
 
@@ -173,7 +173,7 @@ protected:
         const api::Session& api,
         const identity::internal::Authority& owner,
         const identity::Source& source,
-        const proto::Credential& serialized,
+        const protobuf::Credential& serialized,
         const identifier_type& masterID) noexcept(false);
 
 private:

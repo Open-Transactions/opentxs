@@ -5,7 +5,7 @@
 
 #include "crypto/symmetric/KeyPrivate.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -19,10 +19,6 @@
 
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/library/SymmetricProvider.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/SymmetricKey.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/Types.hpp"
@@ -34,6 +30,10 @@
 #include "opentxs/crypto/symmetric/Source.hpp"     // IWYU pragma: keep
 #include "opentxs/crypto/symmetric/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/SymmetricKey.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
@@ -67,7 +67,7 @@ auto KeyPrivate::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 }
 
 auto KeyPrivate::Decrypt(
-    const proto::Ciphertext&,
+    const protobuf::Ciphertext&,
     Writer&&,
     const PasswordPrompt&) const noexcept -> bool
 {
@@ -82,7 +82,7 @@ auto KeyPrivate::Decrypt(ReadView, Writer&&, const PasswordPrompt&)
 
 auto KeyPrivate::Encrypt(
     ReadView,
-    proto::Ciphertext&,
+    protobuf::Ciphertext&,
     const PasswordPrompt&,
     bool,
     ReadView) const noexcept -> bool
@@ -93,7 +93,7 @@ auto KeyPrivate::Encrypt(
 auto KeyPrivate::Encrypt(
     ReadView,
     Algorithm,
-    proto::Ciphertext&,
+    protobuf::Ciphertext&,
     const PasswordPrompt&,
     bool,
     ReadView) const noexcept -> bool
@@ -144,7 +144,7 @@ auto KeyPrivate::RawKey(Secret&, const PasswordPrompt&) const noexcept -> bool
     return false;
 }
 
-auto KeyPrivate::Serialize(proto::SymmetricKey&) const noexcept -> bool
+auto KeyPrivate::Serialize(protobuf::SymmetricKey&) const noexcept -> bool
 {
     return false;
 }
@@ -170,7 +170,7 @@ Key::Data::Data(
     std::uint64_t difficulty,
     std::uint64_t parallel,
     std::optional<Secret> plaintextKey,
-    std::unique_ptr<proto::Ciphertext> encryptedKey,
+    std::unique_ptr<protobuf::Ciphertext> encryptedKey,
     std::optional<identifier::Generic> id,
     allocator_type alloc) noexcept
     : key_size_(keySize)
@@ -195,7 +195,7 @@ Key::Data::Data(const Data& rhs, allocator_type alloc) noexcept
           [&]() -> decltype(encrypted_key_) {
               if (rhs.encrypted_key_) {
 
-                  return std::make_unique<proto::Ciphertext>(
+                  return std::make_unique<protobuf::Ciphertext>(
                       *rhs.encrypted_key_);
               } else {
 
@@ -223,7 +223,7 @@ Key::Key(
     std::uint64_t difficulty,
     std::uint64_t parallel,
     std::optional<Secret> plaintextKey,
-    std::unique_ptr<proto::Ciphertext> encryptedKey,
+    std::unique_ptr<protobuf::Ciphertext> encryptedKey,
     allocator_type alloc) noexcept
     : KeyPrivate(std::move(alloc))
     , api_(api)
@@ -265,7 +265,7 @@ Key::Key(
 Key::Key(
     const api::Session& api,
     const crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey& serialized,
+    const protobuf::SymmetricKey& serialized,
     allocator_type alloc) noexcept
     : Key(api,
           engine,
@@ -277,7 +277,7 @@ Key::Key(
           serialized.difficulty(),
           serialized.parallel(),
           std::nullopt,
-          std::make_unique<proto::Ciphertext>(serialized.key()),
+          std::make_unique<protobuf::Ciphertext>(serialized.key()),
           std::move(alloc))
 {
 }
@@ -380,7 +380,7 @@ auto Key::clone(allocator_type alloc) const noexcept -> KeyPrivate*
 }
 
 auto Key::Decrypt(
-    const proto::Ciphertext& ciphertext,
+    const protobuf::Ciphertext& ciphertext,
     Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept -> bool
 {
@@ -402,7 +402,7 @@ auto Key::Decrypt(
     try {
 
         return Decrypt(
-            proto::Factory<proto::Ciphertext>(ciphertext),
+            protobuf::Factory<protobuf::Ciphertext>(ciphertext),
             std::move(plaintext),
             reason);
     } catch (const std::exception& e) {
@@ -414,7 +414,7 @@ auto Key::Decrypt(
 
 auto Key::decrypt(
     Data& data,
-    const proto::Ciphertext& ciphertext,
+    const protobuf::Ciphertext& ciphertext,
     Writer&& plaintext,
     const PasswordPrompt& reason) const noexcept(false) -> bool
 {
@@ -467,7 +467,7 @@ auto Key::derive(
 
 auto Key::Encrypt(
     ReadView plaintext,
-    proto::Ciphertext& ciphertext,
+    protobuf::Ciphertext& ciphertext,
     const PasswordPrompt& reason,
     bool attachKey,
     ReadView iv) const noexcept -> bool
@@ -486,7 +486,7 @@ auto Key::Encrypt(
 auto Key::Encrypt(
     ReadView plaintext,
     Algorithm mode,
-    proto::Ciphertext& ciphertext,
+    protobuf::Ciphertext& ciphertext,
     const PasswordPrompt& reason,
     bool attachKey,
     ReadView iv) const noexcept -> bool
@@ -512,10 +512,10 @@ auto Key::Encrypt(
     const PasswordPrompt& reason) const noexcept -> bool
 {
     try {
-        auto proto = proto::Ciphertext{};
+        auto proto = protobuf::Ciphertext{};
         encrypt(*data_.lock(), plaintext, mode, proto, reason, attachKey, iv);
 
-        return proto::write(proto, std::move(ciphertext));
+        return protobuf::write(proto, std::move(ciphertext));
     } catch (const std::exception& e) {
         LogError()()(e.what()).Flush();
 
@@ -550,7 +550,7 @@ auto Key::encrypt(
     Data& data,
     ReadView plaintext,
     Algorithm mode,
-    proto::Ciphertext& ciphertext,
+    protobuf::Ciphertext& ciphertext,
     const PasswordPrompt& reason,
     bool attachKey,
     ReadView iv) const noexcept(false) -> void
@@ -605,7 +605,7 @@ auto Key::encrypt_key(
     const PasswordPrompt& reason) const noexcept(false) -> bool
 {
     auto& encrypted = data.encrypted_key_;
-    encrypted = std::make_unique<proto::Ciphertext>();
+    encrypted = std::make_unique<protobuf::Ciphertext>();
 
     assert_false(nullptr == encrypted);
 
@@ -760,7 +760,7 @@ auto Key::SetRawKey(
     return set_raw_key(*data_.lock(), raw, reason);
 }
 
-auto Key::Serialize(proto::SymmetricKey& output) const noexcept -> bool
+auto Key::Serialize(protobuf::SymmetricKey& output) const noexcept -> bool
 {
     try {
 
@@ -772,7 +772,7 @@ auto Key::Serialize(proto::SymmetricKey& output) const noexcept -> bool
     }
 }
 
-auto Key::serialize(const Data& data, proto::SymmetricKey& output) const
+auto Key::serialize(const Data& data, protobuf::SymmetricKey& output) const
     noexcept(false) -> bool
 {
     const auto& encrypted = data.encrypted_key_;
@@ -805,7 +805,7 @@ auto Key::serialize(const Data& data, proto::SymmetricKey& output) const
     output.set_difficulty(data.difficulty_);
     output.set_parallel(data.parallel_);
 
-    return proto::Validate(output, VERBOSE);
+    return protobuf::syntax::check(LogError(), output);
 }
 
 auto Key::set_raw_key(

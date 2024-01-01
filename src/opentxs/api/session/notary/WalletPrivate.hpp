@@ -50,10 +50,10 @@ class Client;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Context;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -93,7 +93,7 @@ private:
     const api::session::Notary& server_;
 
     void instantiate_client_context(
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& localNym,
         const Nym_p& remoteNym,
         std::shared_ptr<otx::context::internal::Base>& output) const final;

@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::KeyRole
+// IWYU pragma: no_forward_declare opentxs::protobuf::KeyRole
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -49,12 +49,12 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class KeyCredential;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -83,12 +83,12 @@ public:
     using Base::Verify;
     auto Verify(
         const Data& plaintext,
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const opentxs::crypto::asymmetric::Role key) const -> bool final;
     auto Sign(
         const crypto::GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const PasswordPrompt& reason,
         opentxs::crypto::asymmetric::Role key,
         const crypto::HashType hash) const -> bool final;
@@ -137,7 +137,7 @@ protected:
     Key(const api::Session& api,
         const identity::internal::Authority& owner,
         const identity::Source& source,
-        const proto::Credential& serializedCred,
+        const protobuf::Credential& serializedCred,
         const identifier_type& masterID) noexcept(false);
 
 private:
@@ -147,10 +147,10 @@ private:
     static auto deserialize_key(
         const api::Session& api,
         const int index,
-        const proto::Credential& credential) -> OTKeypair;
+        const protobuf::Credential& credential) -> OTKeypair;
     static auto new_key(
         const api::Session& api,
-        const proto::KeyRole role,
+        const protobuf::KeyRole role,
         const crypto::Parameters& nymParameters,
         const VersionNumber version,
         const PasswordPrompt& reason,
@@ -163,9 +163,9 @@ private:
         const PasswordPrompt& reason) noexcept(false) -> OTKeypair;
 
     auto addKeytoSerializedKeyCredential(
-        proto::KeyCredential& credential,
+        protobuf::KeyCredential& credential,
         const bool getPrivate,
-        const proto::KeyRole role) const -> bool;
+        const protobuf::KeyRole role) const -> bool;
     auto addKeyCredentialtoSerializedCredential(
         std::shared_ptr<Base::SerializedType> credential,
         const bool addPrivate) const -> bool;
@@ -175,7 +175,7 @@ private:
         const std::optional<Secret> exportPassword = {},
         const bool onlyPrivate = false) const noexcept(false) -> bool;
     auto VerifySig(
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const CredentialModeFlag asPrivate = PRIVATE_VERSION) const -> bool;
     auto VerifySignedBySelf() const -> bool;
 };

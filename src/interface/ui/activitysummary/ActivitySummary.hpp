@@ -22,11 +22,11 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class StorageThread;
 class StorageThreadItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class Flag;
 }  // namespace opentxs
@@ -70,14 +70,14 @@ private:
 
     static auto newest_item(
         const identifier::Generic& id,
-        const proto::StorageThread& thread,
-        CustomData& custom) noexcept -> const proto::StorageThreadItem&;
+        const protobuf::StorageThread& thread,
+        CustomData& custom) noexcept -> const protobuf::StorageThreadItem&;
 
     auto construct_row(
         const ActivitySummaryRowID& id,
         const ActivitySummarySortKey& index,
         CustomData& custom) const noexcept -> RowPointer final;
-    auto display_name(const proto::StorageThread& thread) const noexcept
+    auto display_name(const protobuf::StorageThread& thread) const noexcept
         -> UnallocatedCString;
 
     void process_thread(const UnallocatedCString& threadID) noexcept;

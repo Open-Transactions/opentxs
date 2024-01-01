@@ -43,11 +43,11 @@ class AsymmetricProvider;
 class Parameters;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class Ciphertext;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -106,7 +106,7 @@ public:
         allocator_type alloc) noexcept(false);
     RSA(const api::Session& api,
         const crypto::AsymmetricProvider& engine,
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         allocator_type alloc) noexcept(false);
     RSA(const RSA& rhs, allocator_type alloc) noexcept;
     RSA(const RSA&) = delete;
@@ -122,10 +122,10 @@ private:
 
     static auto deserialize_key(
         const api::Session& api,
-        const proto::AsymmetricKey& serialized,
+        const protobuf::AsymmetricKey& serialized,
         Data& publicKey,
         Secret& privateKey) noexcept(false)
-        -> std::unique_ptr<proto::Ciphertext>;
+        -> std::unique_ptr<protobuf::Ciphertext>;
 
     auto serialize(const Lock& lock, Serialized& serialized) const noexcept
         -> bool final;

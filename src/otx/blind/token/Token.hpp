@@ -36,10 +36,10 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Token;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -69,7 +69,10 @@ public:
     auto ValidFrom() const -> Time override { return {}; }
     auto ValidTo() const -> Time override { return {}; }
     auto Value() const -> Denomination override { return {}; }
-    auto Serialize(proto::Token&) const noexcept -> bool override { return {}; }
+    auto Serialize(protobuf::Token&) const noexcept -> bool override
+    {
+        return {};
+    }
 
     auto ChangeOwner(
         blind::internal::Purse&,

@@ -38,10 +38,10 @@ class Crypto;
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Issuer;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -81,7 +81,7 @@ public:
     auto PrimaryServer() const -> identifier::Notary final;
     auto RequestTypes() const
         -> UnallocatedSet<contract::peer::RequestType> final;
-    auto Serialize(proto::Issuer&) const -> bool final;
+    auto Serialize(protobuf::Issuer&) const -> bool final;
     auto StoreSecretComplete() const -> bool final;
     auto StoreSecretInitiated() const -> bool final;
 
@@ -112,7 +112,7 @@ public:
         const api::session::Factory& factory,
         const api::session::Wallet& wallet,
         const identifier::Nym& nymID,
-        const proto::Issuer& serialized);
+        const protobuf::Issuer& serialized);
     Issuer(
         const api::Crypto& crypto,
         const api::session::Factory& factory,

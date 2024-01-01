@@ -68,10 +68,10 @@ class Context;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -83,7 +83,7 @@ class Seed final : public internal::Seed
 {
 public:
     auto AccountChildKey(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
@@ -95,7 +95,7 @@ public:
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;
     auto AccountKey(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD final;

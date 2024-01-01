@@ -25,10 +25,10 @@ namespace identifier
 class Account;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PaymentCode;
 class PasswordPrompt;
@@ -40,18 +40,18 @@ namespace opentxs::blockchain::crypto::internal
 struct Wallet : virtual public crypto::Wallet {
     virtual auto AddEthereum(
         const identifier::Nym& nym,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddHD(
         const identifier::Nym& nym,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
     virtual auto AddPaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& = 0;
 
     ~Wallet() override = default;

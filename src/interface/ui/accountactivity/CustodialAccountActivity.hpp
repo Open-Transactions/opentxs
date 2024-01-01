@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::PaymentEventType
+// IWYU pragma: no_forward_declare opentxs::protobuf::PaymentEventType
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <utility>
 
 #include "interface/ui/accountactivity/AccountActivity.hpp"
@@ -30,11 +30,11 @@ class Generic;
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class PaymentEvent;
 class PaymentWorkflow;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -68,8 +68,8 @@ public:
 
 private:
     using EventRow =
-        std::pair<AccountActivitySortKey, const proto::PaymentEvent*>;
-    using RowKey = std::pair<proto::PaymentEventType, EventRow>;
+        std::pair<AccountActivitySortKey, const protobuf::PaymentEvent*>;
+    using RowKey = std::pair<protobuf::PaymentEventType, EventRow>;
 
     enum class Work : OTZMQWorkType {
         notary = value(WorkType::NotaryUpdated),
@@ -85,9 +85,9 @@ private:
     UnallocatedCString alias_;
 
     static auto extract_event(
-        const proto::PaymentEventType event,
-        const proto::PaymentWorkflow& workflow) noexcept -> EventRow;
-    static auto extract_rows(const proto::PaymentWorkflow& workflow) noexcept
+        const protobuf::PaymentEventType event,
+        const protobuf::PaymentWorkflow& workflow) noexcept -> EventRow;
+    static auto extract_rows(const protobuf::PaymentWorkflow& workflow) noexcept
         -> UnallocatedVector<RowKey>;
 
     auto display_balance(opentxs::Amount value) const noexcept

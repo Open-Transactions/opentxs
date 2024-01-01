@@ -5,7 +5,7 @@
 
 #include "internal/otx/client/obsolete/OTAPI_Exec.hpp"  // IWYU pragma: associated
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <compare>
 #include <cstdint>
 #include <memory>
@@ -26,7 +26,6 @@
 #include "internal/otx/smartcontract/OTParty.hpp"
 #include "internal/otx/smartcontract/OTPartyAccount.hpp"
 #include "internal/otx/smartcontract/OTVariable.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/LogMacros.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/Time.hpp"
@@ -46,6 +45,7 @@
 #include "opentxs/identifier/Notary.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"  // IWYU pragma: keep
@@ -2638,7 +2638,7 @@ auto OTAPI_Exec::GenerateBasketCreation(
                 displayDefinition,
                 redemptionIncrement);
 
-        auto serialized = proto::UnitDefinition{};
+        auto serialized = protobuf::UnitDefinition{};
         if (false == basketTemplate->Serialize(serialized, true)) {
             LogError()()("Failed to serialize unit definition.").Flush();
             return {};
@@ -2672,7 +2672,7 @@ auto OTAPI_Exec::AddBasketCreationItem(
     assert_false(currencyID.empty(), "Null currencyID passed in.");
 
     bool bAdded = false;
-    auto contract = proto::StringToProto<proto::UnitDefinition>(
+    auto contract = protobuf::StringToProto<protobuf::UnitDefinition>(
         api_.Crypto(), String::Factory(basketTemplate));
 
     bAdded = ot_api_.AddBasketCreationItem(

@@ -3,19 +3,19 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemType
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemType
 // IWYU pragma: no_include <boost/unordered/detail/foa.hpp>
 // IWYU pragma: no_include <boost/unordered/detail/foa/table.hpp>
 
 #include "opentxs/identity/wot/claim/Data.hpp"  // IWYU pragma: associated
 
-#include <ContactData.pb.h>
-#include <ContactItem.pb.h>
-#include <ContactItemType.pb.h>
-#include <ContactSection.pb.h>
-#include <ContactSectionName.pb.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/ContactItemType.pb.h>
+#include <opentxs/protobuf/ContactSection.pb.h>
+#include <opentxs/protobuf/ContactSectionName.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -24,10 +24,6 @@
 #include <string_view>
 #include <utility>
 
-#include "internal/serialization/protobuf/Contact.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -45,6 +41,10 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/identity/wot/claim/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/contact/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -54,7 +54,7 @@ static auto extract_sections(
     const api::Session& api,
     const UnallocatedCString& nym,
     const VersionNumber targetVersion,
-    const proto::ContactData& serialized) -> Data::SectionMap
+    const protobuf::ContactData& serialized) -> Data::SectionMap
 {
     Data::SectionMap sectionMap{};
 
@@ -140,7 +140,7 @@ Data::Data(
     const api::Session& api,
     const UnallocatedCString& nym,
     const VersionNumber targetVersion,
-    const proto::ContactData& serialized)
+    const protobuf::ContactData& serialized)
     : Data(
           api,
           nym,
@@ -159,7 +159,7 @@ Data::Data(
           api,
           nym,
           targetVersion,
-          proto::Factory<proto::ContactData>(serialized))
+          protobuf::Factory<protobuf::ContactData>(serialized))
 {
 }
 
@@ -201,7 +201,7 @@ auto Data::operator+(const Data& rhs) const -> Data
 Data::operator UnallocatedCString() const
 {
     return PrintContactData([&] {
-        auto proto = proto::ContactData{};
+        auto proto = protobuf::ContactData{};
         Serialize(proto, false);
 
         return proto;
@@ -228,7 +228,7 @@ auto Data::AddContract(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(UnitToClaim(currency)), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -271,7 +271,7 @@ auto Data::AddEmail(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -300,7 +300,7 @@ auto Data::AddItem(const wot::Claim& claim) const -> Data
         claim, {}  // TODO allocator
         ));
     assert_false(nullptr == item);
-    item->SetVersion(proto::RequiredVersion(
+    item->SetVersion(protobuf::RequiredVersion(
         translate(claim.Section()), translate(claim.Type()), imp_->version_));
 
     return AddItem(item);
@@ -314,7 +314,7 @@ auto Data::AddItem(const std::shared_ptr<Item>& item) const -> Data
     auto map{imp_->sections_};
     auto it = map.find(sectionID);
 
-    auto version = proto::RequiredVersion(
+    auto version = protobuf::RequiredVersion(
         translate(sectionID), translate(item->Type()), imp_->version_);
 
     if (map.end() == it) {
@@ -360,7 +360,7 @@ auto Data::AddPaymentCode(
         return out;
     }();
     const auto type = UnitToClaim(currency);
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
 
     if (0 == version) {
@@ -410,7 +410,7 @@ auto Data::AddPhoneNumber(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -448,7 +448,7 @@ auto Data::AddPreferredOTServer(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -496,7 +496,7 @@ auto Data::AddSocialMediaProfile(
 
     if (primary || needPrimary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(claim::SectionType::Profile),
         translate(type),
         imp_->version_);
@@ -533,8 +533,8 @@ auto Data::AddSocialMediaProfile(
     assert_false(nullptr == section);
 
     // Add the item to the communication section.
-    auto commSectionTypes =
-        proto::AllowedItemTypes().at(proto::ContactSectionVersion(
+    auto commSectionTypes = protobuf::contact::AllowedItemTypes().at(
+        protobuf::contact::ContactSectionVersion(
             version, translate(claim::SectionType::Communication)));
     if (commSectionTypes.count(translate(type))) {
         auto& commSection = map[claim::SectionType::Communication];
@@ -589,8 +589,8 @@ auto Data::AddSocialMediaProfile(
     }
 
     // Add the item to the identifier section.
-    auto identifierSectionTypes =
-        proto::AllowedItemTypes().at(proto::ContactSectionVersion(
+    auto identifierSectionTypes = protobuf::contact::AllowedItemTypes().at(
+        protobuf::contact::ContactSectionVersion(
             version, translate(claim::SectionType::Identifier)));
     if (identifierSectionTypes.count(translate(type))) {
         auto& identifierSection = map[claim::SectionType::Identifier];
@@ -893,7 +893,7 @@ auto Data::PreferredOTServer() const -> identifier::Notary
     return imp_->api_.Factory().NotaryIDFromBase58(claim->Value());
 }
 
-auto Data::PrintContactData(const proto::ContactData& data)
+auto Data::PrintContactData(const protobuf::ContactData& data)
     -> UnallocatedCString
 {
     std::stringstream output;
@@ -901,20 +901,21 @@ auto Data::PrintContactData(const proto::ContactData& data)
     output << "Sections found: " << data.section().size() << std::endl;
 
     for (const auto& section : data.section()) {
-        output << "- Section: " << proto::TranslateSectionName(section.name())
+        output << "- Section: "
+               << protobuf::TranslateSectionName(section.name())
                << ", version: " << section.version() << " containing "
                << section.item().size() << " item(s)." << std::endl;
 
         for (const auto& item : section.item()) {
             output << "-- Item type: \""
-                   << proto::TranslateItemType(item.type()) << "\", value: \""
-                   << item.value() << "\", start: " << item.start()
-                   << ", end: " << item.end() << ", version: " << item.version()
-                   << std::endl
+                   << protobuf::TranslateItemType(item.type())
+                   << "\", value: \"" << item.value()
+                   << "\", start: " << item.start() << ", end: " << item.end()
+                   << ", version: " << item.version() << std::endl
                    << "--- Attributes: ";
 
             for (const auto& attribute : item.attribute()) {
-                output << proto::TranslateItemAttributes(translate(
+                output << protobuf::TranslateItemAttributes(translate(
                               static_cast<claim::Attribute>(attribute)))
                        << " ";
             }
@@ -942,7 +943,7 @@ auto Data::SetCommonName(const UnallocatedCString& name) const -> Data
     const claim::ClaimType type{claim::ClaimType::Commonname};
     auto attrib = boost::container::flat_set{
         claim::Attribute::Active, claim::Attribute::Primary};
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -979,7 +980,7 @@ auto Data::SetName(const UnallocatedCString& name, const bool primary) const
 
     if (primary) { attrib.emplace(claim::Attribute::Primary); }
 
-    const auto version = proto::RequiredVersion(
+    const auto version = protobuf::RequiredVersion(
         translate(section), translate(type), imp_->version_);
     auto item = std::make_shared<Item>(factory::ContactItem(
         imp_->api_.Factory().Claim(
@@ -1014,7 +1015,7 @@ auto Data::SetScope(const claim::ClaimType type, const UnallocatedCString& name)
         mapCopy.erase(section);
         auto attrib = boost::container::flat_set{
             claim::Attribute::Active, claim::Attribute::Primary};
-        const auto version = proto::RequiredVersion(
+        const auto version = protobuf::RequiredVersion(
             translate(section), translate(type), imp_->version_);
         auto item = std::make_shared<Item>(factory::ContactItem(
             imp_->api_.Factory().Claim(
@@ -1053,7 +1054,7 @@ auto Data::Serialize(Writer&& destination, const bool withID) const -> bool
 {
     return write(
         [&] {
-            auto proto = proto::ContactData{};
+            auto proto = protobuf::ContactData{};
             Serialize(proto);
 
             return proto;
@@ -1061,7 +1062,7 @@ auto Data::Serialize(Writer&& destination, const bool withID) const -> bool
         std::move(destination));
 }
 
-auto Data::Serialize(proto::ContactData& output, const bool withID) const
+auto Data::Serialize(protobuf::ContactData& output, const bool withID) const
     -> bool
 {
     output.set_version(imp_->version_);
@@ -1106,15 +1107,15 @@ auto Data::SocialMediaProfileTypes() const
     -> const UnallocatedSet<claim::ClaimType>
 {
     try {
-        auto profiletypes =
-            proto::AllowedItemTypes().at(proto::ContactSectionVersion(
-                DefaultVersion(), proto::CONTACTSECTION_PROFILE));
+        auto profiletypes = protobuf::contact::AllowedItemTypes().at(
+            protobuf::contact::ContactSectionVersion(
+                DefaultVersion(), protobuf::CONTACTSECTION_PROFILE));
 
         UnallocatedSet<claim::ClaimType> output;
         std::ranges::transform(
             profiletypes,
             std::inserter(output, output.end()),
-            [](proto::ContactItemType itemtype) -> claim::ClaimType {
+            [](protobuf::ContactItemType itemtype) -> claim::ClaimType {
                 return translate(itemtype);
             });
 

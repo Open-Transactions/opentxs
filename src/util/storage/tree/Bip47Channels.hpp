@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageBip47Contexts.pb.h>
+#include <opentxs/protobuf/StorageBip47Contexts.pb.h>
 #include <functional>
 #include <memory>
 #include <shared_mutex>
@@ -31,10 +31,10 @@ class Factory;
 class Crypto;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Bip47Channel;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -62,12 +62,12 @@ public:
     auto ChannelsByChain(const UnitType chain) const -> ChannelList;
     auto Load(
         const identifier::Account& id,
-        std::shared_ptr<proto::Bip47Channel>& output,
+        std::shared_ptr<protobuf::Bip47Channel>& output,
         ErrorReporting checking) const -> bool;
 
     auto Store(
         const identifier::Account& channelID,
-        const proto::Bip47Channel& data) -> bool;
+        const protobuf::Bip47Channel& data) -> bool;
 
     Bip47Channels() = delete;
     Bip47Channels(const Bip47Channels&) = delete;
@@ -100,11 +100,11 @@ private:
     auto index(
         const eLock& lock,
         const identifier::Account& id,
-        const proto::Bip47Channel& data) -> void;
+        const protobuf::Bip47Channel& data) -> void;
     auto init(const Hash& hash) -> void final;
     auto repair_indices() noexcept -> void;
     auto save(const Lock& lock) const -> bool final;
-    auto serialize() const -> proto::StorageBip47Contexts;
+    auto serialize() const -> protobuf::StorageBip47Contexts;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Bip47Channels(

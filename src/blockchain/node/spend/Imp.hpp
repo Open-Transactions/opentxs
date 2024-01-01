@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <BlockchainTransaction.pb.h>  // IWYU pragma: keep
-#include <HDPath.pb.h>                 // IWYU pragma: keep
 #include <boost/container/flat_set.hpp>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/HDPath.pb.h>                 // IWYU pragma: keep
 #include <optional>
 #include <span>
 #include <string_view>
@@ -61,13 +61,13 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionProposal;
 class BlockchainTransactionProposedNotification;
 class BlockchainTransactionProposedOutput;
 class BlockchainTransactionProposedSweep;
-}  // namespace proto
+}  // namespace protobuf
 
 class Log;
 }  // namespace opentxs
@@ -95,8 +95,8 @@ public:
     auto SpendUnconfirmedChange() const noexcept -> bool final;
     auto SpendUnconfirmedIncoming() const noexcept -> bool final;
     auto Spender() const noexcept -> const identifier::Nym& final;
-    [[nodiscard]] auto Serialize(
-        proto::BlockchainTransactionProposal& out) const noexcept -> bool final;
+    [[nodiscard]] auto Serialize(protobuf::BlockchainTransactionProposal& out)
+        const noexcept -> bool final;
     auto SweepFromAccount() const noexcept -> bool final;
     auto SweepFromKey() const noexcept -> const crypto::Key& final;
     auto SweepFromSubaccount() const noexcept
@@ -104,7 +104,7 @@ public:
     auto SweepToAddress() const noexcept -> std::string_view final;
     auto UseEnhancedNotifications() const noexcept -> bool final;
 
-    auto Add(const proto::BlockchainTransaction& tx) noexcept -> void final;
+    auto Add(const protobuf::BlockchainTransaction& tx) noexcept -> void final;
     [[nodiscard]] auto Check() noexcept -> std::optional<SendResult> final;
     auto Finalize(const Log& log, alloc::Strategy alloc) noexcept(false)
         -> void final;
@@ -141,7 +141,7 @@ public:
     SpendPrivate(
         const api::session::Client& api,
         blockchain::Type chain,
-        const proto::BlockchainTransactionProposal& proto) noexcept(false);
+        const protobuf::BlockchainTransactionProposal& proto) noexcept(false);
     SpendPrivate() = delete;
     SpendPrivate(const SpendPrivate&) = delete;
     SpendPrivate(SpendPrivate&&) = delete;
@@ -174,12 +174,12 @@ private:
     bool spend_unconfirmed_change_;
     bool spend_unconfirmed_incoming_;
     bool use_enhanced_notifications_;
-    mutable std::optional<proto::HDPath> payment_code_path_;
+    mutable std::optional<protobuf::HDPath> payment_code_path_;
     mutable std::optional<PaymentCode> sender_payment_code_;
     std::optional<std::pair<ByteArray, crypto::AddressStyle>> sweep_to_address_;
     std::optional<identifier::Account> sweep_subaccount_;
     std::optional<crypto::Key> sweep_key_;
-    std::optional<proto::BlockchainTransaction> transaction_;
+    std::optional<protobuf::BlockchainTransaction> transaction_;
 
     auto account(const PaymentCode& recipient) const noexcept(false)
         -> const crypto::PaymentCode&;
@@ -189,36 +189,37 @@ private:
     auto check_sender() const noexcept -> bool;
     auto is_sweep() const noexcept -> bool;
     auto nym() const noexcept(false) -> const identity::Nym&;
-    auto path() const noexcept(false) -> const proto::HDPath&;
+    auto path() const noexcept(false) -> const protobuf::HDPath&;
     auto sender_payment_code() const noexcept(false) -> const PaymentCode&;
     auto serialize_notification(
         const PaymentCode& sender,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PaymentCode& in,
-        proto::BlockchainTransactionProposedNotification& out) const
+        protobuf::BlockchainTransactionProposedNotification& out) const
         noexcept(false) -> void;
     auto serialize_address(
         std::string_view address,
         crypto::AddressStyle type,
-        proto::BlockchainTransactionProposedOutput& out) const noexcept -> void;
+        protobuf::BlockchainTransactionProposedOutput& out) const noexcept
+        -> void;
     auto serialize_amount(
         const Amount& amount,
-        proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
-        -> void;
+        protobuf::BlockchainTransactionProposedOutput& out) const
+        noexcept(false) -> void;
     auto serialize_output(
         const AddressRecipient& in,
-        proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
-        -> void;
+        protobuf::BlockchainTransactionProposedOutput& out) const
+        noexcept(false) -> void;
     auto serialize_output(
         const PaymentCodeRecipient& in,
-        proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
-        -> void;
+        protobuf::BlockchainTransactionProposedOutput& out) const
+        noexcept(false) -> void;
     auto serialize_payment_code(
         const PaymentCodeRecipient& in,
-        proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
-        -> void;
-    auto serialize_sweep(proto::BlockchainTransactionProposedSweep& out) const
+        protobuf::BlockchainTransactionProposedOutput& out) const
         noexcept(false) -> void;
+    auto serialize_sweep(protobuf::BlockchainTransactionProposedSweep& out)
+        const noexcept(false) -> void;
     auto validate_address(std::string_view address) const noexcept(false)
         -> std::pair<crypto::AddressStyle, ByteArray>;
     auto validate_amount(const Amount& amount) const noexcept(false) -> void;
@@ -237,13 +238,13 @@ private:
         ReadView pubkey) noexcept(false) -> void;
     auto check_funding_sweep() noexcept -> std::optional<SendResult>;
     auto deserialize_notification(
-        const proto::BlockchainTransactionProposedNotification&
+        const protobuf::BlockchainTransactionProposedNotification&
             in) noexcept(false) -> void;
     auto deserialize_output(
-        const proto::BlockchainTransactionProposedOutput& in) noexcept(false)
+        const protobuf::BlockchainTransactionProposedOutput& in) noexcept(false)
         -> void;
     auto deserialize_sweep(
-        const proto::BlockchainTransactionProposedSweep& in) noexcept(false)
+        const protobuf::BlockchainTransactionProposedSweep& in) noexcept(false)
         -> void;
 
     SpendPrivate(

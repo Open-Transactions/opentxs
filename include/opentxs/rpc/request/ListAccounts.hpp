@@ -14,10 +14,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -39,7 +39,7 @@ public:
         const UnallocatedCString& filterNotary = {},
         const UnallocatedCString& filterUnit = {},
         const AssociateNyms& nyms = {}) noexcept(false);
-    ListAccounts(const proto::RPCCommand& serialized) noexcept(false);
+    ListAccounts(const protobuf::RPCCommand& serialized) noexcept(false);
     ListAccounts() noexcept;
     ListAccounts(const ListAccounts&) = delete;
     ListAccounts(ListAccounts&&) = delete;

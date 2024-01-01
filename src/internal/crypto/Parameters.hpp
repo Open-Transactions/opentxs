@@ -18,11 +18,11 @@ class Keypair;
 }  // namespace key
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 }  // namespace opentxs
@@ -36,18 +36,18 @@ public:
     virtual auto operator<(const Parameters& rhs) const noexcept -> bool = 0;
     virtual auto operator==(const Parameters& rhs) const noexcept -> bool = 0;
 
-    virtual auto GetContactData(proto::ContactData& serialized) const noexcept
-        -> bool = 0;
+    virtual auto GetContactData(
+        protobuf::ContactData& serialized) const noexcept -> bool = 0;
     virtual auto GetVerificationSet(
-        proto::VerificationSet& serialized) const noexcept -> bool = 0;
+        protobuf::VerificationSet& serialized) const noexcept -> bool = 0;
     virtual auto Hash() const noexcept -> ByteArray = 0;
     virtual auto Keypair() const noexcept -> const key::Keypair& = 0;
 
     virtual auto Keypair() noexcept -> OTKeypair& = 0;
-    virtual auto SetContactData(const proto::ContactData& contactData) noexcept
-        -> void = 0;
+    virtual auto SetContactData(
+        const protobuf::ContactData& contactData) noexcept -> void = 0;
     virtual auto SetVerificationSet(
-        const proto::VerificationSet& verificationSet) noexcept -> void = 0;
+        const protobuf::VerificationSet& verificationSet) noexcept -> void = 0;
 
     virtual ~Parameters() = default;
 };

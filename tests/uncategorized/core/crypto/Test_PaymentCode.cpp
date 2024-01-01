@@ -155,7 +155,7 @@ TEST_F(PaymentCode, factory)
 
     EXPECT_STREQ(paycode_1_.c_str(), factory_1b.asBase58().c_str());
 
-    // Factory 2: proto::PaymentCode&
+    // Factory 2: protobuf::PaymentCode&
     auto bytes = ot::Space{};
     factory_1.Serialize(ot::writer(bytes));
     auto factory_2 = api_.Factory().PaymentCodeFromProtobuf(ot::reader(bytes));

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageRoot.pb.h>
+#include <opentxs/protobuf/StorageRoot.pb.h>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -110,7 +110,7 @@ private:
 
     auto dump(const Lock&, const Log&, Vector<Hash>& out) const noexcept
         -> bool final;
-    auto serialize(const Lock&) const -> proto::StorageRoot;
+    auto serialize(const Lock&) const -> protobuf::StorageRoot;
     auto trunk() const -> tree::Trunk*;
 
     auto blank() noexcept -> void final;

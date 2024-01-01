@@ -46,10 +46,10 @@ struct Notifications;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -104,17 +104,17 @@ public:
     auto Target() const noexcept -> crypto::Target final { return chain_; }
 
     auto AddEthereum(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
     auto AddHD(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
     auto AddPaymentCode(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount& final;
     auto Startup() noexcept -> void final {}
     auto Subaccount(const identifier::Account& id) noexcept(false)
@@ -174,7 +174,7 @@ private:
         Data& data,
         bool checking) noexcept -> crypto::Subaccount&;
     auto init_ethereum(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
     auto init_hd(const Accounts& HDAccounts, Data& data) noexcept -> void;
@@ -183,7 +183,7 @@ private:
         Data& data,
         bool checking) noexcept -> crypto::Subaccount&;
     auto init_hd(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const crypto::HDProtocol standard,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
     auto init_notification(Data& data) noexcept -> void;
@@ -196,7 +196,7 @@ private:
     auto init_payment_code(
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const PasswordPrompt& reason) noexcept -> crypto::Subaccount&;
 };
 }  // namespace opentxs::blockchain::crypto::implementation

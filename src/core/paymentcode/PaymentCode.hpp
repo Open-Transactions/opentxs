@@ -47,12 +47,12 @@ class Base;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class PaymentCode;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -101,7 +101,8 @@ public:
     virtual auto Key() const noexcept -> const crypto::asymmetric::key::HD&;
     virtual auto Locator(Writer&& destination, const std::uint8_t version)
         const noexcept -> bool;
-    auto operator==(const proto::PaymentCode&) const noexcept -> bool override;
+    auto operator==(const protobuf::PaymentCode&) const noexcept
+        -> bool override;
     virtual auto Outgoing(
         const opentxs::PaymentCode& recipient,
         const crypto::Bip32Index index,
@@ -113,7 +114,7 @@ public:
     auto Serialize(Serialized& serialized) const noexcept -> bool override;
     auto Sign(
         const identity::credential::Base&,
-        proto::Signature&,
+        protobuf::Signature&,
         const opentxs::PasswordPrompt&) const noexcept -> bool override;
     virtual auto Sign(
         const Data& data,
@@ -133,8 +134,8 @@ public:
         -> opentxs::PaymentCode;
     virtual auto Valid() const noexcept -> bool;
     auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept
+        const protobuf::Credential& master,
+        const protobuf::Signature& sourceSignature) const noexcept
         -> bool override;
     virtual auto Version() const noexcept -> VersionNumber;
 

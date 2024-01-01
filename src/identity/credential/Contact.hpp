@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ContactData.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
 #include <memory>
 
 #include "identity/credential/Base.hpp"
@@ -36,10 +36,10 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
-}  // namespace proto
+}  // namespace protobuf
 
 class Factory;
 class PasswordPrompt;
@@ -52,7 +52,7 @@ class Contact final : virtual public credential::internal::Contact,
                       public credential::implementation::Base
 {
 public:
-    auto GetContactData(proto::ContactData& contactData) const -> bool final;
+    auto GetContactData(protobuf::ContactData& contactData) const -> bool final;
 
     Contact() = delete;
     Contact(const Contact&) = delete;
@@ -65,7 +65,7 @@ public:
 private:
     friend opentxs::Factory;
 
-    const proto::ContactData data_;
+    const protobuf::ContactData data_;
 
     auto id_form() const -> std::shared_ptr<SerializedType> final;
     auto serialize(
@@ -86,6 +86,6 @@ private:
         const identity::internal::Authority& parent,
         const identity::Source& source,
         const internal::Primary& master,
-        const proto::Credential& credential) noexcept(false);
+        const protobuf::Credential& credential) noexcept(false);
 };
 }  // namespace opentxs::identity::credential::implementation

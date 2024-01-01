@@ -152,7 +152,7 @@ class SymmetricProvider final : public crypto::SymmetricProvider
 {
 public:
     auto Decrypt(
-        const proto::Ciphertext&,
+        const protobuf::Ciphertext&,
         const std::uint8_t*,
         const std::size_t,
         std::uint8_t*) const -> bool final
@@ -182,7 +182,7 @@ public:
         const std::size_t,
         const std::uint8_t*,
         const std::size_t,
-        proto::Ciphertext&) const -> bool final
+        protobuf::Ciphertext&) const -> bool final
     {
         return {};
     }

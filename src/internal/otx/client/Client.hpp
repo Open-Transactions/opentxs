@@ -49,10 +49,10 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Cheque;
 class OTPayment;
@@ -323,7 +323,7 @@ struct Operation {
         const contract::Type type = contract::Type::invalid) -> bool = 0;
     virtual auto GetFuture() -> Future = 0;
     virtual auto IssueUnitDefinition(
-        const std::shared_ptr<const proto::UnitDefinition> unitDefinition,
+        const std::shared_ptr<const protobuf::UnitDefinition> unitDefinition,
         const otx::context::Server::ExtraArgs& args = {}) -> bool = 0;
     virtual auto IssueUnitDefinition(
         const ReadView& unitDefinition,

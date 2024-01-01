@@ -10,7 +10,7 @@ extern "C" {
 #include <sodium.h>
 }
 
-#include <BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -465,7 +465,7 @@ auto Database::Import(Vector<network::blockchain::Address> peers) const noexcept
 }
 
 auto Database::LoadBlockHeader(const block::Hash& hash) const noexcept(false)
-    -> proto::BlockchainBlockHeader
+    -> protobuf::BlockchainBlockHeader
 {
     return imp_->headers_.Load(hash);
 }
@@ -513,7 +513,7 @@ auto Database::LoadTransaction(
 
 auto Database::LoadTransaction(
     const block::TransactionHash& txid,
-    proto::BlockchainTransaction& out,
+    protobuf::BlockchainTransaction& out,
     alloc::Default alloc,
     alloc::Default monotonic) const noexcept -> block::Transaction
 {
@@ -637,7 +637,7 @@ auto Database::StoreTransaction(const block::Transaction& tx) const noexcept
 
 auto Database::StoreTransaction(
     const block::Transaction& tx,
-    proto::BlockchainTransaction& out) const noexcept -> bool
+    protobuf::BlockchainTransaction& out) const noexcept -> bool
 {
     return imp_->wallet_.StoreTransaction(tx, out);
 }

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <mutex>
 #include <span>
 #include <string_view>
@@ -65,7 +65,7 @@ struct make_blank<ui::implementation::AccountActivityRowID> {
     static auto value(const api::Session& api)
         -> ui::implementation::AccountActivityRowID
     {
-        return {identifier::Generic{}, proto::PAYMENTEVENTTYPE_ERROR};
+        return {identifier::Generic{}, protobuf::PAYMENTEVENTTYPE_ERROR};
     }
 };
 }  // namespace opentxs

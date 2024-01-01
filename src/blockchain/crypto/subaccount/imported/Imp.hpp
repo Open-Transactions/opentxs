@@ -39,10 +39,10 @@ class Account;
 }  // namespace crypto
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainImportedAccountData;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -54,7 +54,7 @@ class ImportedPrivate : virtual public internal::Imported,
                         public SubaccountPrivate
 {
 public:
-    using SerializedType = proto::BlockchainImportedAccountData;
+    using SerializedType = protobuf::BlockchainImportedAccountData;
 
     auto AllowedSubchains() const noexcept -> Set<Subchain> final;
     auto BalanceElement(const Subchain type, const Bip32Index index) const

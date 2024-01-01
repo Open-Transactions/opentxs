@@ -13,10 +13,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class AccountEvent;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 }  // namespace opentxs
@@ -34,8 +34,8 @@ public:
     auto Memo() const noexcept -> const UnallocatedCString&;
     auto PendingAmount() const noexcept -> Amount;
     auto PendingAmount_str() const noexcept -> const UnallocatedCString&;
-    OPENTXS_NO_EXPORT auto Serialize(proto::AccountEvent& dest) const noexcept
-        -> bool;
+    OPENTXS_NO_EXPORT auto Serialize(
+        protobuf::AccountEvent& dest) const noexcept -> bool;
     auto State() const noexcept -> int;
     auto Timestamp() const noexcept -> Time;
     auto Type() const noexcept -> AccountEventType;
@@ -43,7 +43,7 @@ public:
     auto WorkflowID() const noexcept -> const UnallocatedCString&;
 
     OPENTXS_NO_EXPORT AccountEvent(
-        const proto::AccountEvent& serialized) noexcept(false);
+        const protobuf::AccountEvent& serialized) noexcept(false);
     OPENTXS_NO_EXPORT AccountEvent(
         const UnallocatedCString& account,
         AccountEventType type,

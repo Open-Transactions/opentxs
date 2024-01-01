@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/reply/bailment/Implementation.hpp"  // IWYU pragma: associated
 
-#include <BailmentReply.pb.h>
-#include <PeerReply.pb.h>
+#include <opentxs/protobuf/BailmentReply.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
 #include <utility>
 
 #include "opentxs/identifier/Generic.hpp"

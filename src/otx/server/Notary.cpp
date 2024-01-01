@@ -5,9 +5,9 @@
 
 #include "otx/server/Notary.hpp"  // IWYU pragma: associated
 
-#include <OTXEnums.pb.h>
-#include <OTXPush.pb.h>
-#include <Purse.pb.h>
+#include <opentxs/protobuf/OTXEnums.pb.h>
+#include <opentxs/protobuf/OTXPush.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
 #include <chrono>
 #include <cstdint>
 #include <filesystem>
@@ -42,11 +42,6 @@
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/consensus/Client.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/OTXPush.hpp"
-#include "internal/serialization/protobuf/verify/Purse.hpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/Exclusive.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -82,6 +77,10 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Token.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/OTXPush.hpp"
+#include "opentxs/protobuf/syntax/Purse.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -8440,9 +8439,10 @@ void Notary::process_cash_deposit(
     } else {
         auto rawPurse = ByteArray{};
         depositItem.GetAttachment(rawPurse);
-        const auto serializedPurse = proto::Factory<proto::Purse>(rawPurse);
+        const auto serializedPurse =
+            protobuf::Factory<protobuf::Purse>(rawPurse);
 
-        if (false == proto::Validate(serializedPurse, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), serializedPurse)) {
             LogError()()("Invalid purse").Flush();
         } else {
             auto purse =
@@ -8553,9 +8553,9 @@ void Notary::process_cash_withdrawal(
 
     auto rawPurse = ByteArray{};
     requestItem.GetAttachment(rawPurse);
-    const auto serializedPurse = proto::Factory<proto::Purse>(rawPurse);
+    const auto serializedPurse = protobuf::Factory<protobuf::Purse>(rawPurse);
 
-    if (false == proto::Validate(serializedPurse, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serializedPurse)) {
         LogError()()("Invalid purse").Flush();
 
         return;
@@ -8642,7 +8642,7 @@ void Notary::process_cash_withdrawal(
     if (bSuccess) {
         // Add the digital cash token to the response message
         responseItem.SetAttachment([&] {
-            auto proto = proto::Purse{};
+            auto proto = protobuf::Purse{};
             replyPurse.Internal().Serialize(proto);
 
             return server_.API().Factory().Internal().Data(proto);
@@ -8772,9 +8772,9 @@ void Notary::send_push_notification(
     item->SaveContractRaw(serializedItem);
     auto message = zmq::Message{};
     message.AddFrame(account.GetNymID().asBase58(api_.Crypto()));
-    proto::OTXPush push;
+    protobuf::OTXPush push;
     push.set_version(otx::OTX_PUSH_VERSION);
-    push.set_type(proto::OTXPUSH_INBOX);
+    push.set_type(protobuf::OTXPUSH_INBOX);
     push.set_accountid(
         server_.API().Factory().Internal().Identifier(account).asBase58(
             api_.Crypto()));
@@ -8786,7 +8786,7 @@ void Notary::send_push_notification(
     push.set_outboxhash(outboxHash.asBase58(api_.Crypto()));
     push.set_item(serializedItem->Get());
 
-    if (false == proto::Validate(push, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), push)) {
         LogError()()("Unable to send push notification.").Flush();
 
         return;

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageCredentials.pb.h>
+#include <opentxs/protobuf/StorageCredentials.pb.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -35,10 +35,10 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Credential;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -63,13 +63,14 @@ public:
     auto Alias(const identifier::Generic& id) const -> UnallocatedCString;
     auto Load(
         const identifier::Generic& id,
-        std::shared_ptr<proto::Credential>& output,
+        std::shared_ptr<protobuf::Credential>& output,
         ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::Generic& id) -> bool;
     auto SetAlias(const identifier::Generic& id, std::string_view alias)
         -> bool;
-    auto Store(const proto::Credential& data, std::string_view alias) -> bool;
+    auto Store(const protobuf::Credential& data, std::string_view alias)
+        -> bool;
 
     Credentials() = delete;
     Credentials(const Credentials&) = delete;
@@ -85,7 +86,7 @@ private:
     auto check_existing(const bool incoming, Metadata& metadata) const -> bool;
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageCredentials;
+    auto serialize() const -> protobuf::StorageCredentials;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Credentials(

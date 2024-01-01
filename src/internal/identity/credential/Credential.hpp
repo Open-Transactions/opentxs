@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <memory>
 #include <optional>
 
@@ -40,13 +40,13 @@ struct Key;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class Credential;
 class Signature;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -55,13 +55,13 @@ namespace opentxs::identity::credential::internal
 class Base : virtual public identity::credential::Base
 {
 public:
-    using SerializedType = proto::Credential;
+    using SerializedType = protobuf::Credential;
 
     virtual auto asKey() const noexcept -> const Key&;
-    virtual auto GetContactData(proto::ContactData& contactData) const
+    virtual auto GetContactData(protobuf::ContactData& contactData) const
         -> bool = 0;
     virtual auto GetVerificationSet(
-        proto::VerificationSet& verificationSet) const -> bool = 0;
+        protobuf::VerificationSet& verificationSet) const -> bool = 0;
     auto Internal() const noexcept -> const internal::Base& final
     {
         return *this;
@@ -77,14 +77,14 @@ public:
     virtual auto SourceSignature() const -> contract::Signature = 0;
     virtual auto Verify(
         const Data& plaintext,
-        const proto::Signature& sig,
+        const protobuf::Signature& sig,
         const opentxs::crypto::asymmetric::Role key =
             opentxs::crypto::asymmetric::Role::Sign) const -> bool = 0;
     virtual auto Verify(
-        const proto::Credential& credential,
+        const protobuf::Credential& credential,
         const identity::CredentialRole& role,
         const identifier::Generic& masterID,
-        const proto::Signature& masterSig) const -> bool = 0;
+        const protobuf::Signature& masterSig) const -> bool = 0;
 
     virtual auto asKey() noexcept -> Key&;
     auto Internal() noexcept -> internal::Base& final { return *this; }
@@ -117,7 +117,7 @@ struct Key : virtual public Base, virtual public identity::credential::Key {
     virtual auto Sign(
         const crypto::GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const PasswordPrompt& reason,
         opentxs::crypto::asymmetric::Role key =
             opentxs::crypto::asymmetric::Role::Sign,
@@ -155,11 +155,11 @@ struct Verification : virtual public Base,
 namespace opentxs
 {
 auto translate(const identity::CredentialRole in) noexcept
-    -> proto::CredentialRole;
+    -> protobuf::CredentialRole;
 auto translate(const identity::CredentialType in) noexcept
-    -> proto::CredentialType;
-auto translate(const proto::CredentialRole in) noexcept
+    -> protobuf::CredentialType;
+auto translate(const protobuf::CredentialRole in) noexcept
     -> identity::CredentialRole;
-auto translate(const proto::CredentialType in) noexcept
+auto translate(const protobuf::CredentialType in) noexcept
     -> identity::CredentialType;
 }  // namespace opentxs

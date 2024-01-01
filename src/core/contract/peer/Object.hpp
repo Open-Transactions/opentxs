@@ -29,10 +29,10 @@ class Client;
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class PeerObject;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -64,7 +64,7 @@ public:
     {
         return reply_;
     }
-    auto Serialize(proto::PeerObject& output) const noexcept -> bool final;
+    auto Serialize(protobuf::PeerObject& output) const noexcept -> bool final;
     auto Type() const noexcept -> contract::peer::ObjectType final
     {
         return type_;
@@ -84,7 +84,7 @@ public:
     Object(
         const api::session::Client& api,
         const Nym_p& signerNym,
-        const proto::PeerObject serialized) noexcept(false);
+        const protobuf::PeerObject serialized) noexcept(false);
     Object(
         const api::Session& api,
         const Nym_p& senderNym,

@@ -7,10 +7,10 @@
 
 #include "core/contract/BasketContract.hpp"  // IWYU pragma: associated
 
-#include <BasketItem.pb.h>
-#include <BasketParams.pb.h>
-#include <Signature.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/BasketItem.pb.h>
+#include <opentxs/protobuf/BasketParams.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -20,11 +20,11 @@
 #include "core/contract/Signable.hpp"
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/BasketContract.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "opentxs/identifier/UnitDefinition.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -62,14 +62,12 @@ auto Factory::BasketContract(
 auto Factory::BasketContract(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) noexcept
+    const protobuf::UnitDefinition serialized) noexcept
     -> std::shared_ptr<contract::unit::Basket>
 {
     using ReturnType = opentxs::contract::unit::implementation::Basket;
 
-    if (false == proto::Validate<ReturnType::SerializedType>(
-                     serialized, VERBOSE, true)) {
-
+    if (false == protobuf::syntax::check(LogError(), serialized, true)) {
         return {};
     }
 
@@ -91,7 +89,7 @@ using namespace std::literals;
 
 auto Basket::CalculateBasketID(
     const api::Session& api,
-    const proto::UnitDefinition& serialized) -> identifier_type
+    const protobuf::UnitDefinition& serialized) -> identifier_type
 {
     auto contract(serialized);
     contract.clear_id();
@@ -108,7 +106,7 @@ auto Basket::CalculateBasketID(
 auto Basket::FinalizeTemplate(
     const api::Session& api,
     const Nym_p& nym,
-    proto::UnitDefinition& serialized,
+    protobuf::UnitDefinition& serialized,
     const PasswordPrompt& reason) -> bool
 {
     using ReturnType = opentxs::contract::unit::implementation::Basket;
@@ -126,7 +124,7 @@ auto Basket::FinalizeTemplate(
 
     if (contract->Signer()) {
         auto basket = contract->SigVersion();
-        auto sig = std::make_shared<proto::Signature>();
+        auto sig = std::make_shared<protobuf::Signature>();
 
         if (contract->update_signature(reason)) {
             if (false == contract->Serialize(serialized, true)) {
@@ -135,7 +133,7 @@ auto Basket::FinalizeTemplate(
                 return false;
             }
 
-            return proto::Validate(serialized, VERBOSE, false);
+            return protobuf::syntax::check(LogError(), serialized, false);
         }
     }
 
@@ -172,7 +170,7 @@ Basket::Basket(
 Basket::Basket(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized)
+    const protobuf::UnitDefinition serialized)
     : Unit(api, nym, serialized)
     , subcontracts_([&] {
         auto out = decltype(subcontracts_){};

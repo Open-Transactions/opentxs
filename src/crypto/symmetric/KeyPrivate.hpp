@@ -33,11 +33,11 @@ namespace crypto
 class SymmetricProvider;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
 class SymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -57,7 +57,7 @@ public:
     [[nodiscard]] virtual auto clone(allocator_type alloc) const noexcept
         -> KeyPrivate*;
     [[nodiscard]] auto Decrypt(
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool override;
     [[nodiscard]] virtual auto Decrypt(
@@ -66,14 +66,14 @@ public:
         const PasswordPrompt& reason) const noexcept -> bool;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool override;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
         Algorithm mode,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool override;
@@ -95,7 +95,7 @@ public:
     [[nodiscard]] virtual auto IsValid() const noexcept -> bool;
     [[nodiscard]] auto RawKey(Secret& output, const PasswordPrompt& reason)
         const noexcept -> bool override;
-    [[nodiscard]] auto Serialize(proto::SymmetricKey& output) const noexcept
+    [[nodiscard]] auto Serialize(protobuf::SymmetricKey& output) const noexcept
         -> bool override;
     [[nodiscard]] virtual auto Unlock(
         const PasswordPrompt& reason) const noexcept -> bool;
@@ -131,7 +131,7 @@ public:
     [[nodiscard]] auto clone(allocator_type alloc) const noexcept
         -> KeyPrivate* final;
     [[nodiscard]] auto Decrypt(
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto Decrypt(
@@ -140,14 +140,14 @@ public:
         const PasswordPrompt& reason) const noexcept -> bool final;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool final;
     [[nodiscard]] auto Encrypt(
         ReadView plaintext,
         Algorithm mode,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey = true,
         ReadView iv = {}) const noexcept -> bool final;
@@ -169,7 +169,7 @@ public:
     auto IsValid() const noexcept -> bool final { return true; }
     [[nodiscard]] auto RawKey(Secret& output, const PasswordPrompt& reason)
         const noexcept -> bool final;
-    [[nodiscard]] auto Serialize(proto::SymmetricKey& output) const noexcept
+    [[nodiscard]] auto Serialize(protobuf::SymmetricKey& output) const noexcept
         -> bool final;
     [[nodiscard]] auto Unlock(const PasswordPrompt& reason) const noexcept
         -> bool final;
@@ -193,7 +193,7 @@ public:
         allocator_type alloc) noexcept;
     Key(const api::Session& api,
         const crypto::SymmetricProvider& engine,
-        const proto::SymmetricKey& serialized,
+        const protobuf::SymmetricKey& serialized,
         allocator_type alloc) noexcept;
     Key(const api::Session& api,
         const crypto::SymmetricProvider& engine,
@@ -215,7 +215,7 @@ public:
         std::uint64_t difficulty,
         std::uint64_t parallel,
         std::optional<Secret> plaintextKey,
-        std::unique_ptr<proto::Ciphertext> encryptedKey,
+        std::unique_ptr<protobuf::Ciphertext> encryptedKey,
         allocator_type alloc) noexcept;
     Key() = delete;
     Key(const Key& rhs, allocator_type alloc = {}) noexcept;
@@ -235,7 +235,7 @@ private:
         std::uint64_t difficulty_;
         std::uint64_t parallel_;
         std::optional<Secret> plaintext_key_;
-        std::unique_ptr<proto::Ciphertext> encrypted_key_;
+        std::unique_ptr<protobuf::Ciphertext> encrypted_key_;
         std::optional<identifier::Generic> id_;
 
         Data(
@@ -245,7 +245,7 @@ private:
             std::uint64_t difficulty,
             std::uint64_t parallel,
             std::optional<Secret> plaintextKey,
-            std::unique_ptr<proto::Ciphertext> encryptedKey,
+            std::unique_ptr<protobuf::Ciphertext> encryptedKey,
             std::optional<identifier::Generic> id,
             allocator_type alloc) noexcept;
         Data() = delete;
@@ -267,7 +267,7 @@ private:
 
     auto decrypt(
         Data& data,
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         Writer&& plaintext,
         const PasswordPrompt& reason) const noexcept(false) -> bool;
     auto derive(
@@ -278,7 +278,7 @@ private:
         Data& data,
         ReadView plaintext,
         Algorithm mode,
-        proto::Ciphertext& ciphertext,
+        protobuf::Ciphertext& ciphertext,
         const PasswordPrompt& reason,
         bool attachKey,
         ReadView iv) const noexcept(false) -> void;
@@ -299,7 +299,7 @@ private:
         noexcept(false) -> bool;
     auto id(Data& data, const PasswordPrompt& reason) const noexcept(false)
         -> const identifier::Generic&;
-    auto serialize(const Data& data, proto::SymmetricKey& output) const
+    auto serialize(const Data& data, protobuf::SymmetricKey& output) const
         noexcept(false) -> bool;
     auto set_raw_key(
         Data& data,

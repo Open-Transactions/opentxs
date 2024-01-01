@@ -7,8 +7,8 @@
 
 #include "api/session/Contacts.hpp"  // IWYU pragma: associated
 
-#include <Contact.pb.h>  // IWYU pragma: keep
-#include <Nym.pb.h>      // IWYU pragma: keep
+#include <opentxs/protobuf/Contact.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/Nym.pb.h>      // IWYU pragma: keep
 #include <algorithm>
 #include <array>
 #include <chrono>
@@ -213,7 +213,7 @@ auto Contacts::contact(const rLock& lock, std::string_view label) const
     auto it = add_contact(lock, contact.release());
     auto& output = it->second.second;
     const auto proto = [&] {
-        auto out = proto::Contact{};
+        auto out = protobuf::Contact{};
         output->Serialize(out);
         return out;
     }();
@@ -893,7 +893,7 @@ auto Contacts::load_contact(const rLock& lock, const identifier::Generic& id)
         throw std::runtime_error("lock error");
     }
 
-    auto serialized = proto::Contact{};
+    auto serialized = protobuf::Contact{};
     using enum opentxs::storage::ErrorReporting;
     const auto loaded = api_.Storage().Internal().Load(id, serialized, silent);
 
@@ -967,12 +967,12 @@ auto Contacts::Merge(
     auto& rhs = const_cast<opentxs::Contact&>(*childContact);
     lhs += rhs;
     const auto lProto = [&] {
-        auto out = proto::Contact{};
+        auto out = protobuf::Contact{};
         lhs.Serialize(out);
         return out;
     }();
     const auto rProto = [&] {
-        auto out = proto::Contact{};
+        auto out = protobuf::Contact{};
         rhs.Serialize(out);
         return out;
     }();
@@ -1154,7 +1154,7 @@ auto Contacts::NewContactFromAddress(
     }
 
     const auto proto = [&] {
-        auto out = proto::Contact{};
+        auto out = protobuf::Contact{};
         contact.Serialize(out);
         return out;
     }();
@@ -1369,7 +1369,7 @@ void Contacts::save(opentxs::Contact* contact) const
     assert_false(nullptr == contact);
 
     const auto proto = [&] {
-        auto out = proto::Contact{};
+        auto out = protobuf::Contact{};
         contact->Serialize(out);
         return out;
     }();
@@ -1874,7 +1874,7 @@ auto Contacts::update(const identity::Nym& nym) const
 
     {
         auto contact = mutable_contact(lock, contactID);
-        auto serialized = proto::Nym{};
+        auto serialized = protobuf::Nym{};
 
         if (false == nym.Internal().Serialize(serialized)) {
             LogError()()("Failed to serialize nym.").Flush();
@@ -1968,7 +1968,7 @@ void Contacts::update_nym_map(
 
             oldContact->RemoveNym(nymID);
             const auto proto = [&] {
-                auto out = proto::Contact{};
+                auto out = protobuf::Contact{};
                 oldContact->Serialize(out);
                 return out;
             }();
@@ -1982,7 +1982,7 @@ void Contacts::update_nym_map(
             LogError()()("Duplicate nym found.").Flush();
             contact.RemoveNym(nymID);
             const auto proto = [&] {
-                auto out = proto::Contact{};
+                auto out = protobuf::Contact{};
                 contact.Serialize(out);
                 return out;
             }();

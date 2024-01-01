@@ -5,8 +5,8 @@
 
 #include "identity/wot/verification/verification/Implementation.hpp"  // IWYU pragma: associated
 
-#include <Signature.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <algorithm>
 #include <exception>
 #include <functional>
@@ -19,16 +19,17 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
 #include "internal/identity/wot/Verification.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Verification.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
+#include "opentxs/core/contract/Signable.hpp"
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/wot/verification/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/Verification.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/Container.hpp"
@@ -62,7 +63,7 @@ Verification::Verification(
 
 Verification::Verification(
     const api::Session& api,
-    const proto::VerificationItem& proto,
+    const protobuf::VerificationItem& proto,
     Nym_p verifier,
     allocator_type alloc) noexcept(false)
     : VerificationPrivate(alloc)
@@ -75,7 +76,8 @@ Verification::Verification(
           api.Factory().Internal().Identifier(proto.id()),
           [&] {
               auto out = Signatures{};
-              out.emplace_back(std::make_shared<proto::Signature>(proto.sig()));
+              out.emplace_back(
+                  std::make_shared<protobuf::Signature>(proto.sig()));
 
               return out;
           }())
@@ -125,7 +127,7 @@ auto Verification::calculate_id() const -> identifier_type
         {});
 }
 
-auto Verification::final_form() const noexcept -> proto::Verification
+auto Verification::final_form() const noexcept -> protobuf::Verification
 {
     auto out = signing_form();
     auto& item = *out.mutable_item();
@@ -147,15 +149,15 @@ auto Verification::Finish(const PasswordPrompt& reason) noexcept -> bool
 
 auto Verification::Serialize(Writer&& out) const noexcept -> bool
 {
-    return proto::write(final_form(), std::move(out));
+    return protobuf::write(final_form(), std::move(out));
 }
 
-auto Verification::Serialize(proto::Verification& out) const noexcept -> void
+auto Verification::Serialize(protobuf::Verification& out) const noexcept -> void
 {
     out = final_form();
 }
 
-auto Verification::signing_form() const noexcept -> proto::Verification
+auto Verification::signing_form() const noexcept -> protobuf::Verification
 {
     auto out = wot::internal::Verification::Serialize(
         Signer()->ID(), claim_, Version(), value_, start_, stop_, superscedes_);
@@ -175,7 +177,7 @@ auto Verification::update_signature(const PasswordPrompt& reason) -> bool
     try {
         add_signatures([&, this] {
             auto out = Signatures{};
-            out.emplace_back(std::make_shared<proto::Signature>(
+            out.emplace_back(std::make_shared<protobuf::Signature>(
                 wot::internal::Verification::Sign(
                     *Signer(),
                     reason,
@@ -206,7 +208,7 @@ auto Verification::validate() const -> bool
         return false;
     }
 
-    if (false == proto::Validate(final_form(), VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), final_form())) {
         LogError()()("invalid syntax").Flush();
 
         return false;
@@ -237,7 +239,7 @@ auto Verification::validate() const -> bool
     return true;
 }
 
-auto Verification::verify_signature(const proto::Signature& signature) const
+auto Verification::verify_signature(const protobuf::Signature& signature) const
     -> bool
 {
     if (false == Signable<wot::Verification::identifier_type>::verify_signature(

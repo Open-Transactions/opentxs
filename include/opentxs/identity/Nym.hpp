@@ -67,12 +67,12 @@ class Nym;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class Nym;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;

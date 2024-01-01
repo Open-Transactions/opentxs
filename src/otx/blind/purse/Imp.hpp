@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <Envelope.pb.h>
+#include <opentxs/protobuf/Envelope.pb.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -57,10 +57,10 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Purse;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -94,7 +94,7 @@ public:
         const identity::Nym& owner,
         const Mint& mint,
         const PasswordPrompt& reason) -> bool final;
-    auto Serialize(proto::Purse& out) const noexcept -> bool final;
+    auto Serialize(protobuf::Purse& out) const noexcept -> bool final;
     auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto size() const noexcept -> std::size_t final { return tokens_.size(); }
     auto State() const -> blind::PurseType final { return state_; }
@@ -115,7 +115,7 @@ public:
         return tokens_.at(position);
     }
     auto begin() noexcept -> iterator final;
-    auto DeserializeTokens(const proto::Purse& in) noexcept -> void;
+    auto DeserializeTokens(const protobuf::Purse& in) noexcept -> void;
     auto end() noexcept -> iterator final;
     auto GeneratePrototokens(
         const identity::Nym& owner,
@@ -154,12 +154,12 @@ public:
         const Time validTo,
         const UnallocatedVector<blind::Token>& tokens,
         const std::shared_ptr<crypto::symmetric::Key> primary,
-        const UnallocatedVector<proto::Envelope>& primaryPasswords,
+        const UnallocatedVector<protobuf::Envelope>& primaryPasswords,
         const std::shared_ptr<const crypto::symmetric::Key> secondaryKey,
         const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
         std::optional<Secret> secondaryKeyPassword) noexcept;
     Purse(const api::Session& api, const Purse& owner) noexcept;
-    Purse(const api::Session& api, const proto::Purse& serialized) noexcept;
+    Purse(const api::Session& api, const protobuf::Purse& serialized) noexcept;
     Purse() = delete;
     Purse(const Purse&) noexcept;
     Purse(Purse&&) = delete;
@@ -184,21 +184,21 @@ private:
     mutable bool unlocked_;
     mutable Secret primary_key_password_;
     std::shared_ptr<crypto::symmetric::Key> primary_;
-    UnallocatedVector<proto::Envelope> primary_passwords_;
+    UnallocatedVector<protobuf::Envelope> primary_passwords_;
     Secret secondary_key_password_;
     const std::shared_ptr<const crypto::symmetric::Key> secondary_;
     const std::shared_ptr<const OTEnvelope> secondary_password_;
 
     static auto deserialize_secondary_key(
         const api::Session& api,
-        const proto::Purse& serialized) noexcept(false)
+        const protobuf::Purse& serialized) noexcept(false)
         -> std::unique_ptr<const crypto::symmetric::Key>;
     static auto deserialize_secondary_password(
         const api::Session& api,
-        const proto::Purse& serialized) noexcept(false)
+        const protobuf::Purse& serialized) noexcept(false)
         -> std::unique_ptr<const OTEnvelope>;
-    static auto get_passwords(const proto::Purse& in)
-        -> UnallocatedVector<proto::Envelope>;
+    static auto get_passwords(const protobuf::Purse& in)
+        -> UnallocatedVector<protobuf::Envelope>;
 
     auto generate_key(Secret& password) const -> crypto::symmetric::Key;
 

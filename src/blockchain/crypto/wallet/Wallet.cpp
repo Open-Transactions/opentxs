@@ -76,7 +76,7 @@ auto Wallet::add(
 
 auto Wallet::AddEthereum(
     const identifier::Nym& nym,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -87,7 +87,7 @@ auto Wallet::AddEthereum(
 
 auto Wallet::AddHD(
     const identifier::Nym& nym,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -99,7 +99,7 @@ auto Wallet::AddHD(
 auto Wallet::AddPaymentCode(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
     return get_or_create(*data_.lock(), local.ID())

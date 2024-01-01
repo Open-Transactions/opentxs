@@ -5,8 +5,8 @@
 
 #include "util/storage/tree/Threads.hpp"  // IWYU pragma: associated
 
-#include <StorageBlockchainTransactions.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/StorageBlockchainTransactions.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <algorithm>
 #include <atomic>
 #include <cstdlib>
@@ -19,10 +19,6 @@
 #include <utility>
 #include <variant>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageBlockchainTransactions.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/blockchain/block/TransactionHash.hpp"
@@ -30,6 +26,10 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/StorageBlockchainTransactions.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -184,7 +184,7 @@ auto Threads::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
         if (false == node.dump(lock, log, out)) { return false; }
     }
 
-    auto index = std::shared_ptr<proto::StorageNymList>{};
+    auto index = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(root_, index, verbose) && index) {
         out.reserve(out.size() + index->localnymid_size());
@@ -235,7 +235,7 @@ auto Threads::FindAndDeleteItem(const identifier::Generic& itemID) -> bool
 
 auto Threads::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -248,8 +248,8 @@ auto Threads::init(const Hash& hash) noexcept(false) -> void
                 init_map(proto.nym());
 
                 for (const auto& id : proto.localnymid()) {
-                    auto index =
-                        std::shared_ptr<proto::StorageBlockchainTransactions>{};
+                    auto index = std::shared_ptr<
+                        protobuf::StorageBlockchainTransactions>{};
 
                     if (LoadProto(read(id), index, verbose) && index) {
                         auto txid = ByteArray{};
@@ -418,7 +418,7 @@ auto Threads::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
@@ -441,9 +441,9 @@ void Threads::save(
     if (!save(lock)) { LogAbort()()("save error").Abort(); }
 }
 
-auto Threads::serialize() const -> proto::StorageNymList
+auto Threads::serialize() const -> protobuf::StorageNymList
 {
-    auto output = proto::StorageNymList{};
+    auto output = protobuf::StorageNymList{};
     output.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -461,7 +461,7 @@ auto Threads::serialize() const -> proto::StorageNymList
     for (const auto& [txid, data] : blockchain_.map_) {
         if (data.empty()) { continue; }
 
-        auto index = proto::StorageBlockchainTransactions{};
+        auto index = protobuf::StorageBlockchainTransactions{};
         index.set_version(1);
         index.set_txid(UnallocatedCString{txid.Bytes()});
         std::ranges::for_each(data, [&](const auto& id) {
@@ -473,7 +473,7 @@ auto Threads::serialize() const -> proto::StorageNymList
         assert_true(
             static_cast<std::size_t>(index.thread_size()) == data.size());
 
-        auto success = proto::Validate(index, VERBOSE);
+        auto success = protobuf::syntax::check(LogError(), index);
 
         assert_true(success);
 

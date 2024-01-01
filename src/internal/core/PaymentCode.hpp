@@ -18,12 +18,12 @@ class Base;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class PaymentCode;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -34,18 +34,18 @@ namespace opentxs::internal
 class PaymentCode
 {
 public:
-    using Serialized = proto::PaymentCode;
+    using Serialized = protobuf::PaymentCode;
 
     virtual auto operator==(const Serialized& rhs) const noexcept -> bool = 0;
 
     virtual auto Serialize(Serialized& serialized) const noexcept -> bool = 0;
     virtual auto Sign(
         const identity::credential::Base& credential,
-        proto::Signature& sig,
+        protobuf::Signature& sig,
         const opentxs::PasswordPrompt& reason) const noexcept -> bool = 0;
     virtual auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept -> bool = 0;
+        const protobuf::Credential& master,
+        const protobuf::Signature& sourceSignature) const noexcept -> bool = 0;
 
     virtual auto AddPrivateKeys(
         const crypto::SeedID& seed,

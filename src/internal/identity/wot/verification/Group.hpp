@@ -17,19 +17,19 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
 class VerificationGroup;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::identity::wot::verification::internal
 {
 struct Group : virtual public verification::Group {
-    using SerializedType = proto::VerificationGroup;
+    using SerializedType = protobuf::VerificationGroup;
 
     virtual operator SerializedType() const noexcept = 0;
 

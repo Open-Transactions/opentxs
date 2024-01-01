@@ -5,10 +5,10 @@
 
 #include "opentxs/rpc/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <RPCEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/RPCEnums.pb.h>
 #include <functional>
 
 #include "opentxs/rpc/AccountEventType.hpp"  // IWYU pragma: keep
@@ -23,34 +23,36 @@
 namespace opentxs::rpc
 {
 using AccountEventMap =
-    frozen::unordered_map<AccountEventType, proto::AccountEventType, 11>;
+    frozen::unordered_map<AccountEventType, protobuf::AccountEventType, 11>;
 using AccountEventReverseMap =
-    frozen::unordered_map<proto::AccountEventType, AccountEventType, 11>;
-using AccountMap = frozen::unordered_map<AccountType, proto::AccountType, 4>;
+    frozen::unordered_map<protobuf::AccountEventType, AccountEventType, 11>;
+using AccountMap = frozen::unordered_map<AccountType, protobuf::AccountType, 4>;
 using AccountReverseMap =
-    frozen::unordered_map<proto::AccountType, AccountType, 4>;
+    frozen::unordered_map<protobuf::AccountType, AccountType, 4>;
 using CommandMap =
-    frozen::unordered_map<CommandType, proto::RPCCommandType, 46>;
+    frozen::unordered_map<CommandType, protobuf::RPCCommandType, 46>;
 using CommandReverseMap =
-    frozen::unordered_map<proto::RPCCommandType, CommandType, 46>;
+    frozen::unordered_map<protobuf::RPCCommandType, CommandType, 46>;
 using ContactEventMap =
-    frozen::unordered_map<ContactEventType, proto::ContactEventType, 5>;
+    frozen::unordered_map<ContactEventType, protobuf::ContactEventType, 5>;
 using ContactEventReverseMap =
-    frozen::unordered_map<proto::ContactEventType, ContactEventType, 5>;
-using PaymentMap = frozen::unordered_map<PaymentType, proto::RPCPaymentType, 7>;
+    frozen::unordered_map<protobuf::ContactEventType, ContactEventType, 5>;
+using PaymentMap =
+    frozen::unordered_map<PaymentType, protobuf::RPCPaymentType, 7>;
 using PaymentReverseMap =
-    frozen::unordered_map<proto::RPCPaymentType, PaymentType, 7>;
-using PushMap = frozen::unordered_map<PushType, proto::RPCPushType, 4>;
-using PushReverseMap = frozen::unordered_map<proto::RPCPushType, PushType, 4>;
+    frozen::unordered_map<protobuf::RPCPaymentType, PaymentType, 7>;
+using PushMap = frozen::unordered_map<PushType, protobuf::RPCPushType, 4>;
+using PushReverseMap =
+    frozen::unordered_map<protobuf::RPCPushType, PushType, 4>;
 using ResponseCodeMap =
-    frozen::unordered_map<ResponseCode, proto::RPCResponseCode, 33>;
+    frozen::unordered_map<ResponseCode, protobuf::RPCResponseCode, 33>;
 using ResponseCodeReverseMap =
-    frozen::unordered_map<proto::RPCResponseCode, ResponseCode, 33>;
+    frozen::unordered_map<protobuf::RPCResponseCode, ResponseCode, 33>;
 
 static auto account_event_map() noexcept -> AccountEventMap
 {
     using enum AccountEventType;
-    using enum proto::AccountEventType;
+    using enum protobuf::AccountEventType;
     static constexpr auto map = AccountEventMap{
         {error, ACCOUNTEVENT_ERROR},
         {incoming_cheque, ACCOUNTEVENT_INCOMINGCHEQUE},
@@ -70,7 +72,7 @@ static auto account_event_map() noexcept -> AccountEventMap
 static auto account_map() noexcept -> AccountMap
 {
     using enum AccountType;
-    using enum proto::AccountType;
+    using enum protobuf::AccountType;
     static constexpr auto map = AccountMap{
         {error, ACCOUNTTYPE_ERROR},
         {normal, ACCOUNTTYPE_NORMAL},
@@ -83,7 +85,7 @@ static auto account_map() noexcept -> AccountMap
 static auto command_map() noexcept -> CommandMap
 {
     using enum CommandType;
-    using enum proto::RPCCommandType;
+    using enum protobuf::RPCCommandType;
     static constexpr auto map = CommandMap{
         {error, RPCCOMMAND_ERROR},
         {add_client_session, RPCCOMMAND_ADDCLIENTSESSION},
@@ -138,7 +140,7 @@ static auto command_map() noexcept -> CommandMap
 static auto contact_event_map() noexcept -> ContactEventMap
 {
     using enum ContactEventType;
-    using enum proto::ContactEventType;
+    using enum protobuf::ContactEventType;
     static constexpr auto map = ContactEventMap{
         {error, CONTACTEVENT_ERROR},
         {incoming_message, CONTACTEVENT_INCOMINGMESSAGE},
@@ -152,7 +154,7 @@ static auto contact_event_map() noexcept -> ContactEventMap
 static auto payment_map() noexcept -> PaymentMap
 {
     using enum PaymentType;
-    using enum proto::RPCPaymentType;
+    using enum protobuf::RPCPaymentType;
     static constexpr auto map = PaymentMap{
         {error, RPCPAYMENTTYPE_ERROR},
         {cheque, RPCPAYMENTTYPE_CHEQUE},
@@ -168,7 +170,7 @@ static auto payment_map() noexcept -> PaymentMap
 static auto push_map() noexcept -> PushMap
 {
     using enum PushType;
-    using enum proto::RPCPushType;
+    using enum protobuf::RPCPushType;
     static constexpr auto map = PushMap{
         {error, RPCPUSH_ERROR},
         {account, RPCPUSH_ACCOUNT},
@@ -181,7 +183,7 @@ static auto push_map() noexcept -> PushMap
 static auto response_code_map() noexcept -> ResponseCodeMap
 {
     using enum ResponseCode;
-    using enum proto::RPCResponseCode;
+    using enum protobuf::RPCResponseCode;
     static constexpr auto map = ResponseCodeMap{
         {invalid, RPCRESPONSE_INVALID},
         {success, RPCRESPONSE_SUCCESS},
@@ -225,79 +227,79 @@ static auto response_code_map() noexcept -> ResponseCodeMap
 
 namespace opentxs::rpc
 {
-auto translate(AccountEventType type) noexcept -> proto::AccountEventType
+auto translate(AccountEventType type) noexcept -> protobuf::AccountEventType
 {
     try {
 
         return rpc::account_event_map().at(type);
     } catch (...) {
 
-        return proto::ACCOUNTEVENT_ERROR;
+        return protobuf::ACCOUNTEVENT_ERROR;
     }
 }
-auto translate(AccountType type) noexcept -> proto::AccountType
+auto translate(AccountType type) noexcept -> protobuf::AccountType
 {
     try {
 
         return rpc::account_map().at(type);
     } catch (...) {
 
-        return proto::ACCOUNTTYPE_ERROR;
+        return protobuf::ACCOUNTTYPE_ERROR;
     }
 }
-auto translate(CommandType type) noexcept -> proto::RPCCommandType
+auto translate(CommandType type) noexcept -> protobuf::RPCCommandType
 {
     try {
 
         return rpc::command_map().at(type);
     } catch (...) {
 
-        return proto::RPCCOMMAND_ERROR;
+        return protobuf::RPCCOMMAND_ERROR;
     }
 }
-auto translate(ContactEventType type) noexcept -> proto::ContactEventType
+auto translate(ContactEventType type) noexcept -> protobuf::ContactEventType
 {
     try {
 
         return rpc::contact_event_map().at(type);
     } catch (...) {
 
-        return proto::CONTACTEVENT_ERROR;
+        return protobuf::CONTACTEVENT_ERROR;
     }
 }
-auto translate(PaymentType type) noexcept -> proto::RPCPaymentType
+auto translate(PaymentType type) noexcept -> protobuf::RPCPaymentType
 {
     try {
 
         return rpc::payment_map().at(type);
     } catch (...) {
 
-        return proto::RPCPAYMENTTYPE_ERROR;
+        return protobuf::RPCPAYMENTTYPE_ERROR;
     }
 }
-auto translate(PushType type) noexcept -> proto::RPCPushType
+auto translate(PushType type) noexcept -> protobuf::RPCPushType
 {
     try {
 
         return rpc::push_map().at(type);
     } catch (...) {
 
-        return proto::RPCPUSH_ERROR;
+        return protobuf::RPCPUSH_ERROR;
     }
 }
-auto translate(ResponseCode type) noexcept -> proto::RPCResponseCode
+auto translate(ResponseCode type) noexcept -> protobuf::RPCResponseCode
 {
     try {
 
         return rpc::response_code_map().at(type);
     } catch (...) {
 
-        return proto::RPCRESPONSE_INVALID;
+        return protobuf::RPCRESPONSE_INVALID;
     }
 }
 }  // namespace opentxs::rpc
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(AccountEventType type) noexcept -> rpc::AccountEventType
 {
@@ -386,4 +388,4 @@ auto translate(RPCResponseCode type) noexcept -> rpc::ResponseCode
         return rpc::ResponseCode::invalid;
     }
 }
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

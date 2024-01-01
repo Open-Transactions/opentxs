@@ -3,13 +3,13 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::ContactItemAttribute
+// IWYU pragma: no_forward_declare opentxs::protobuf::ContactItemAttribute
 
 #include "identity/credential/Contact.hpp"  // IWYU pragma: associated
 
-#include <ContactData.pb.h>
-#include <Credential.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -65,7 +65,7 @@ auto Factory::ContactCredential(
     identity::internal::Authority& parent,
     const identity::Source& source,
     const identity::credential::internal::Primary& master,
-    const proto::Credential& serialized)
+    const protobuf::Credential& serialized)
     -> identity::credential::internal::Contact*
 {
     using ReturnType = identity::credential::implementation::Contact;
@@ -122,8 +122,8 @@ Contact::Contact(
           master.ID())
     , data_(
           [&](const crypto::Parameters& parameters)
-              -> const proto::ContactData {
-              auto proto = proto::ContactData{};
+              -> const protobuf::ContactData {
+              auto proto = protobuf::ContactData{};
               parameters.Internal().GetContactData(proto);
               return proto;
           }(params))
@@ -137,7 +137,7 @@ Contact::Contact(
     const identity::internal::Authority& parent,
     const identity::Source& source,
     const internal::Primary& master,
-    const proto::Credential& serialized) noexcept(false)
+    const protobuf::Credential& serialized) noexcept(false)
     : credential::implementation::Base(
           api,
           parent,
@@ -149,9 +149,9 @@ Contact::Contact(
     init_serialized();
 }
 
-auto Contact::GetContactData(proto::ContactData& contactData) const -> bool
+auto Contact::GetContactData(protobuf::ContactData& contactData) const -> bool
 {
-    contactData = proto::ContactData(data_);
+    contactData = protobuf::ContactData(data_);
 
     return true;
 }

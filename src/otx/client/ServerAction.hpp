@@ -35,10 +35,10 @@ class Nym;
 class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class OTPaymentPlan;
 class OTSmartContract;
@@ -117,7 +117,7 @@ public:
         const PasswordPrompt& reason,
         const identifier::Nym& localNymID,
         const identifier::Notary& serverID,
-        const proto::UnitDefinition& basket,
+        const protobuf::UnitDefinition& basket,
         const UnallocatedCString& label) const -> Action final;
     auto KillMarketOffer(
         const PasswordPrompt& reason,

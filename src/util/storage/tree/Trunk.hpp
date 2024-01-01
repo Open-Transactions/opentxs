@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageItems.pb.h>
+#include <opentxs/protobuf/StorageItems.pb.h>
 #include <memory>
 #include <mutex>
 
@@ -40,10 +40,10 @@ namespace identifier
 class Notary;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -93,10 +93,10 @@ public:
     auto mutable_Units() -> Editor<tree::Units>;
 
     auto Load(
-        std::shared_ptr<proto::Ciphertext>& output,
+        std::shared_ptr<protobuf::Ciphertext>& output,
         ErrorReporting checking = verbose) const -> bool;
 
-    auto Store(const proto::Ciphertext& serialized) -> bool;
+    auto Store(const protobuf::Ciphertext& serialized) -> bool;
 
     Trunk() = delete;
     Trunk(const Trunk&) = delete;
@@ -137,7 +137,7 @@ private:
     mutable std::mutex unit_lock_;
     mutable std::unique_ptr<tree::Units> units_;
     mutable std::mutex master_key_lock_;
-    mutable std::shared_ptr<proto::Ciphertext> master_key_;
+    mutable std::shared_ptr<protobuf::Ciphertext> master_key_;
 
     template <typename T, typename... Args>
     auto get_child(
@@ -167,7 +167,7 @@ private:
     template <typename T>
     void save_child(T*, const Lock& lock, std::mutex& hashLock, Hash& hash)
         const;
-    auto serialize() const -> proto::StorageItems;
+    auto serialize() const -> protobuf::StorageItems;
     auto update_root(const Hash& hash) -> bool;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 

@@ -5,10 +5,10 @@
 
 #include "util/storage/tree/Node.hpp"  // IWYU pragma: associated
 
-#include <Contact.pb.h>
-#include <Nym.pb.h>
-#include <Seed.pb.h>
-#include <StorageItemHash.pb.h>
+#include <opentxs/protobuf/Contact.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/Seed.pb.h>
+#include <opentxs/protobuf/StorageItemHash.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -108,17 +108,18 @@ auto Node::dump(const Lock& lock, const Log& log, Vector<Hash>& out)
     return true;
 }
 
-auto Node::extract_revision(const proto::Contact& input) const -> std::uint64_t
+auto Node::extract_revision(const protobuf::Contact& input) const
+    -> std::uint64_t
 {
     return input.revision();
 }
 
-auto Node::extract_revision(const proto::Nym& input) const -> std::uint64_t
+auto Node::extract_revision(const protobuf::Nym& input) const -> std::uint64_t
 {
     return input.revision();
 }
 
-auto Node::extract_revision(const proto::Seed& input) const -> std::uint64_t
+auto Node::extract_revision(const protobuf::Seed& input) const -> std::uint64_t
 {
     return input.index();
 }
@@ -135,7 +136,7 @@ auto Node::get_alias(const identifier::Generic& id) const -> UnallocatedCString
 }
 
 auto Node::init_map(
-    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+    const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>&
         items) noexcept -> void
 {
     auto lock = Lock{write_lock_};
@@ -144,7 +145,7 @@ auto Node::init_map(
 
 auto Node::init_map(
     const Lock& lock,
-    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>&
+    const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>&
         items) noexcept -> void
 {
     const auto load_metadata = [this, &lock](const auto& proto) {
@@ -154,7 +155,7 @@ auto Node::init_map(
 }
 
 auto Node::init_map(
-    const google::protobuf::RepeatedPtrField<proto::StorageItemHash>& in,
+    const google::protobuf::RepeatedPtrField<protobuf::StorageItemHash>& in,
     Index& out) noexcept -> void
 {
     const auto load_metadata = [this, &out](const auto& proto) {
@@ -163,14 +164,14 @@ auto Node::init_map(
     std::ranges::for_each(in, load_metadata);
 }
 
-auto Node::init_map(const Lock&, const proto::StorageItemHash& item) noexcept
+auto Node::init_map(const Lock&, const protobuf::StorageItemHash& item) noexcept
     -> void
 {
     init_map(item, item_map_);
 }
 
-auto Node::init_map(const proto::StorageItemHash& in, Index& out) const noexcept
-    -> void
+auto Node::init_map(const protobuf::StorageItemHash& in, Index& out)
+    const noexcept -> void
 {
     out.emplace(
         [&] {
@@ -237,8 +238,8 @@ auto Node::serialize_index(
     const identifier::Generic& id,
     const Hash& hash,
     ReadView alias,
-    proto::StorageItemHash& output,
-    const proto::StorageHashType type) const noexcept -> void
+    protobuf::StorageItemHash& output,
+    const protobuf::StorageHashType type) const noexcept -> void
 {
     set_hash(id, hash, output, type);
     output.set_alias(alias.data(), alias.size());
@@ -247,8 +248,8 @@ auto Node::serialize_index(
 auto Node::serialize_index(
     const identifier::Generic& id,
     const Metadata& metadata,
-    proto::StorageItemHash& output,
-    const proto::StorageHashType type) const -> void
+    protobuf::StorageItemHash& output,
+    const protobuf::StorageHashType type) const -> void
 {
     serialize_index(
         id, std::get<0>(metadata), std::get<1>(metadata), output, type);
@@ -282,8 +283,8 @@ auto Node::set_alias(const identifier::Generic& id, std::string_view value)
 auto Node::set_hash(
     const identifier::Generic& id,
     const Hash& hash,
-    proto::StorageItemHash& output,
-    const proto::StorageHashType type) const noexcept -> void
+    protobuf::StorageItemHash& output,
+    const protobuf::StorageHashType type) const noexcept -> void
 {
     output.set_version(storage_item_hash_version_);
     id.Internal().Serialize(*output.mutable_id());

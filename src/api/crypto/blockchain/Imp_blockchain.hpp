@@ -58,10 +58,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransaction;
-}  // namespace proto
+}  // namespace protobuf
 
 class Contact;
 class Data;
@@ -173,7 +173,7 @@ private:
         std::span<const Txid> transactions,
         alloc::Default monotonic) const noexcept -> void;
     auto broadcast_update_signal(
-        const proto::BlockchainTransaction& proto,
+        const protobuf::BlockchainTransaction& proto,
         const opentxs::blockchain::block::Transaction& tx) const noexcept
         -> void;
     auto load_transaction(
@@ -185,7 +185,7 @@ private:
     auto load_transaction(
         const Lock& lock,
         const Txid& id,
-        proto::BlockchainTransaction& out,
+        protobuf::BlockchainTransaction& out,
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept
         -> opentxs::blockchain::block::Transaction;
@@ -198,7 +198,7 @@ private:
     auto load_transaction(
         const Lock& lock,
         const TxidHex& id,
-        proto::BlockchainTransaction& out,
+        protobuf::BlockchainTransaction& out,
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept
         -> opentxs::blockchain::block::Transaction;
@@ -208,7 +208,7 @@ private:
         alloc::Default monotonic) const noexcept -> bool;
     auto reconcile_contact_activities(
         const Lock& lock,
-        const proto::BlockchainTransaction& proto,
+        const protobuf::BlockchainTransaction& proto,
         const opentxs::blockchain::block::Transaction& tx) const noexcept
         -> bool;
 };

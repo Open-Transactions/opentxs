@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <memory>
 #include <mutex>
 
@@ -32,10 +32,10 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class PeerReply;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -59,11 +59,11 @@ class PeerReplies final : public Node
 public:
     auto Load(
         const identifier::Generic& id,
-        std::shared_ptr<proto::PeerReply>& output,
+        std::shared_ptr<protobuf::PeerReply>& output,
         ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::Generic& id) -> bool;
-    auto Store(const proto::PeerReply& data) -> bool;
+    auto Store(const protobuf::PeerReply& data) -> bool;
 
     PeerReplies() = delete;
     PeerReplies(const PeerReplies&) = delete;
@@ -78,7 +78,7 @@ private:
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageNymList;
+    auto serialize() const -> protobuf::StorageNymList;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     PeerReplies(

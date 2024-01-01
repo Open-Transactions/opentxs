@@ -46,11 +46,11 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class PaymentWorkflow;
 class Purse;
-}  // namespace proto
+}  // namespace protobuf
 
 class Cheque;
 class Item;
@@ -150,30 +150,30 @@ public:
         pair<otx::client::PaymentWorkflowState, std::unique_ptr<opentxs::Item>>;
 
     OPENTXS_NO_EXPORT static auto ContainsCash(
-        const proto::PaymentWorkflow& workflow) -> bool;
+        const protobuf::PaymentWorkflow& workflow) -> bool;
     OPENTXS_NO_EXPORT static auto ContainsCheque(
-        const proto::PaymentWorkflow& workflow) -> bool;
+        const protobuf::PaymentWorkflow& workflow) -> bool;
     OPENTXS_NO_EXPORT static auto ContainsTransfer(
-        const proto::PaymentWorkflow& workflow) -> bool;
+        const protobuf::PaymentWorkflow& workflow) -> bool;
     OPENTXS_NO_EXPORT static auto ExtractCheque(
-        const proto::PaymentWorkflow& workflow) -> UnallocatedCString;
+        const protobuf::PaymentWorkflow& workflow) -> UnallocatedCString;
     OPENTXS_NO_EXPORT static auto ExtractPurse(
-        const proto::PaymentWorkflow& workflow,
-        proto::Purse& out) -> bool;
+        const protobuf::PaymentWorkflow& workflow,
+        protobuf::Purse& out) -> bool;
     OPENTXS_NO_EXPORT static auto ExtractTransfer(
-        const proto::PaymentWorkflow& workflow) -> UnallocatedCString;
+        const protobuf::PaymentWorkflow& workflow) -> UnallocatedCString;
     OPENTXS_NO_EXPORT static auto InstantiateCheque(
         const api::Session& api,
-        const proto::PaymentWorkflow& workflow) -> Cheque;
+        const protobuf::PaymentWorkflow& workflow) -> Cheque;
     OPENTXS_NO_EXPORT static auto InstantiatePurse(
         const api::Session& api,
-        const proto::PaymentWorkflow& workflow) -> Purse;
+        const protobuf::PaymentWorkflow& workflow) -> Purse;
     OPENTXS_NO_EXPORT static auto InstantiateTransfer(
         const api::Session& api,
-        const proto::PaymentWorkflow& workflow) -> Transfer;
+        const protobuf::PaymentWorkflow& workflow) -> Transfer;
     OPENTXS_NO_EXPORT static auto UUID(
         const api::Session& api,
-        const proto::PaymentWorkflow& workflown) -> identifier::Generic;
+        const protobuf::PaymentWorkflow& workflown) -> identifier::Generic;
     static auto UUID(
         const api::Session& api,
         const identifier::Generic& notary,
@@ -279,7 +279,7 @@ public:
     OPENTXS_NO_EXPORT virtual auto LoadWorkflow(
         const identifier::Nym& nymID,
         const identifier::Generic& workflowID,
-        proto::PaymentWorkflow& out) const -> bool = 0;
+        protobuf::PaymentWorkflow& out) const -> bool = 0;
     virtual auto ReceiveCash(
         const identifier::Nym& receiver,
         const otx::blind::Purse& purse,

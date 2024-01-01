@@ -30,10 +30,10 @@ namespace crypto
 class Parameters;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
-}  // namespace proto
+}  // namespace protobuf
 
 class Secret;
 class WriteBuffer;
@@ -110,7 +110,7 @@ private:
     static auto blank_private() noexcept -> ReadView;
 
     auto Decrypt(
-        const proto::Ciphertext& ciphertext,
+        const protobuf::Ciphertext& ciphertext,
         const std::uint8_t* key,
         const std::size_t keySize,
         std::uint8_t* plaintext) const -> bool final;
@@ -131,7 +131,7 @@ private:
         const std::size_t inputSize,
         const std::uint8_t* key,
         const std::size_t keySize,
-        proto::Ciphertext& ciphertext) const -> bool final;
+        protobuf::Ciphertext& ciphertext) const -> bool final;
     auto IvSize(const opentxs::crypto::symmetric::Algorithm mode) const
         -> std::size_t final;
     auto KeySize(const opentxs::crypto::symmetric::Algorithm mode) const

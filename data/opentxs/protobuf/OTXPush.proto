@@ -1,0 +1,27 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTOTXPush";
+option optimize_for = LITE_RUNTIME;
+
+import public "OTXEnums.proto";
+
+message OTXPush
+{
+    optional uint32 version = 1;
+    optional OTXPushType type = 2;
+    optional string accountid = 3;
+    optional int64 itemid = 4;
+    optional bytes account = 5;
+    optional bytes inbox = 6;
+    optional string inboxhash = 7;
+    optional bytes outbox = 8;
+    optional string outboxhash = 9;
+    optional bytes item = 10;
+}

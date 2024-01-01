@@ -52,10 +52,10 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Purse;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -85,7 +85,10 @@ public:
     {
         return {};
     }
-    auto Serialize(proto::Purse&) const noexcept -> bool override { return {}; }
+    auto Serialize(protobuf::Purse&) const noexcept -> bool override
+    {
+        return {};
+    }
     virtual auto Serialize(Writer&&) const noexcept -> bool { return {}; }
     virtual auto size() const noexcept -> std::size_t { return {}; }
     virtual auto State() const -> blind::PurseType { return {}; }

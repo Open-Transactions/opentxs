@@ -5,24 +5,23 @@
 
 #include "util/storage/tree/Contexts.hpp"  // IWYU pragma: associated
 
-#include <Context.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Context.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
+#include "opentxs/protobuf/syntax/Context.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -59,7 +58,7 @@ auto Contexts::Delete(const identifier::Nym& id) -> bool
 
 auto Contexts::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -79,11 +78,11 @@ auto Contexts::init(const Hash& hash) noexcept(false) -> void
 
 auto Contexts::Load(
     const identifier::Nym& id,
-    std::shared_ptr<proto::Context>& output,
+    std::shared_ptr<protobuf::Context>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::Context>(id, output, alias, checking);
+    return load_proto<protobuf::Context>(id, output, alias, checking);
 }
 
 auto Contexts::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -95,14 +94,16 @@ auto Contexts::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
 
-auto Contexts::serialize() const -> proto::StorageNymList
+auto Contexts::serialize() const -> protobuf::StorageNymList
 {
-    proto::StorageNymList serialized;
+    protobuf::StorageNymList serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -118,7 +119,8 @@ auto Contexts::serialize() const -> proto::StorageNymList
     return serialized;
 }
 
-auto Contexts::Store(const proto::Context& data, std::string_view alias) -> bool
+auto Contexts::Store(const protobuf::Context& data, std::string_view alias)
+    -> bool
 {
     const auto id = factory_.Internal().NymID(data.remotenym());
 

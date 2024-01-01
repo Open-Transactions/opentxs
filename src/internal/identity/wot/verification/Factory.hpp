@@ -33,11 +33,11 @@ class VerificationPrivate;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Verification;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -57,11 +57,11 @@ auto Verification(
     alloc::Strategy alloc) noexcept -> identity::wot::VerificationPrivate*;
 auto Verification(
     const api::Session& api,
-    const proto::Verification& proto,
+    const protobuf::Verification& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::VerificationPrivate*;
 auto Verification(
     const api::Session& api,
     const identifier::Nym& verifier,
-    const proto::VerificationItem& proto,
+    const protobuf::VerificationItem& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::VerificationPrivate*;
 }  // namespace opentxs::factory

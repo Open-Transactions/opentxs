@@ -30,11 +30,11 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class PaymentEvent;
 class PaymentWorkflow;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -79,7 +79,7 @@ private:
         const implementation::AccountActivitySortKey& key,
         implementation::CustomData& custom) noexcept -> bool final;
     auto startup(
-        const proto::PaymentWorkflow workflow,
-        const proto::PaymentEvent event) noexcept -> bool;
+        const protobuf::PaymentWorkflow workflow,
+        const protobuf::PaymentEvent event) noexcept -> bool;
 };
 }  // namespace opentxs::ui::implementation

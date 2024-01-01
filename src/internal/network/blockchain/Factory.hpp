@@ -31,10 +31,10 @@ class Address;
 }  // namespace blockchain
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class BlockchainPeerAddress;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -70,6 +70,6 @@ auto BlockchainAddress(
 auto BlockchainAddress(
     const api::Crypto& crypto,
     const api::Factory& factory,
-    const proto::BlockchainPeerAddress& serialized) noexcept
+    const protobuf::BlockchainPeerAddress& serialized) noexcept
     -> network::blockchain::Address;
 }  // namespace opentxs::factory

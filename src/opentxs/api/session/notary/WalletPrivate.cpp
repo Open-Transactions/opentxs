@@ -63,7 +63,7 @@ auto WalletPrivate::Context(
 }
 
 void WalletPrivate::instantiate_client_context(
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     const Nym_p& localNym,
     const Nym_p& remoteNym,
     std::shared_ptr<otx::context::internal::Base>& output) const

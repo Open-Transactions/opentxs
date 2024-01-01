@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <VerificationSet.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 #include <memory>
 
 #include "identity/credential/Base.hpp"
@@ -36,10 +36,10 @@ class Authority;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
-}  // namespace proto
+}  // namespace protobuf
 
 class Factory;
 class PasswordPrompt;
@@ -52,7 +52,7 @@ class Verification final : virtual public credential::internal::Verification,
                            public credential::implementation::Base
 {
 public:
-    auto GetVerificationSet(proto::VerificationSet& verificationSet) const
+    auto GetVerificationSet(protobuf::VerificationSet& verificationSet) const
         -> bool final;
 
     Verification() = delete;
@@ -66,7 +66,7 @@ public:
 private:
     friend opentxs::Factory;
 
-    const proto::VerificationSet data_;
+    const protobuf::VerificationSet data_;
 
     auto id_form() const -> std::shared_ptr<SerializedType> final;
     auto serialize(
@@ -88,6 +88,6 @@ private:
         const identity::internal::Authority& parent,
         const identity::Source& source,
         const internal::Primary& master,
-        const proto::Credential& credential) noexcept(false);
+        const protobuf::Credential& credential) noexcept(false);
 };
 }  // namespace opentxs::identity::credential::implementation

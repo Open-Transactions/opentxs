@@ -15,7 +15,6 @@
 #include "interface/ui/base/Widget.hpp"
 #include "internal/interface/ui/ProfileSection.hpp"
 #include "internal/interface/ui/UI.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/api/session/Client.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -34,6 +33,7 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -585,7 +585,7 @@ auto Profile::AllowedSections(const UnallocatedCString& lang) const noexcept
 
     for (const auto& type : allowed_types_) {
         output.emplace_back(
-            type, proto::TranslateSectionName(translate(type), lang));
+            type, protobuf::TranslateSectionName(translate(type), lang));
     }
 
     return output;

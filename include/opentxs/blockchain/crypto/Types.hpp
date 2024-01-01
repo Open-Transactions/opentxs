@@ -113,24 +113,21 @@ using OutputBuilder = std::tuple<
     UnallocatedSet<crypto::Key>>;
 }  // namespace opentxs::blockchain
 
-namespace std
-{
-// NOLINTBEGIN(cert-dcl58-cpp)
-template <>
-struct hash<opentxs::blockchain::crypto::Key> {
-    auto operator()(const opentxs::blockchain::crypto::Key& data) const noexcept
-        -> std::size_t;
-};
-template <>
-struct hash<opentxs::blockchain::crypto::Target> {
-    auto operator()(const opentxs::blockchain::crypto::Target& data)
-        const noexcept -> std::size_t;
-};
-// NOLINTEND(cert-dcl58-cpp)
-}  // namespace std
-
 namespace opentxs
 {
 auto deserialize(const ReadView in) noexcept -> blockchain::crypto::Key;
 auto serialize(const blockchain::crypto::Key& in) noexcept -> Space;
 }  // namespace opentxs
+
+// NOLINTBEGIN(cert-dcl58-cpp)
+template <>
+struct std::hash<opentxs::blockchain::crypto::Key> {
+    auto operator()(const opentxs::blockchain::crypto::Key& data) const noexcept
+        -> std::size_t;
+};
+template <>
+struct std::hash<opentxs::blockchain::crypto::Target> {
+    auto operator()(const opentxs::blockchain::crypto::Target& data)
+        const noexcept -> std::size_t;
+};
+// NOLINTEND(cert-dcl58-cpp)

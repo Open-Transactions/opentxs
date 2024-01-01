@@ -38,10 +38,10 @@ class Bip39;
 class Seed;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class Seed;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Secret;
@@ -91,6 +91,6 @@ auto Seed(
     const api::crypto::Symmetric& symmetric,
     const api::session::Factory& factory,
     const api::session::Storage& storage,
-    const proto::Seed& proto,
+    const protobuf::Seed& proto,
     const opentxs::PasswordPrompt& reason) noexcept(false) -> crypto::Seed;
 }  // namespace opentxs::factory

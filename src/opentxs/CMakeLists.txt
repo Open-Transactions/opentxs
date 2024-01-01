@@ -12,6 +12,7 @@ add_subdirectory(identifier)
 add_subdirectory(identity)
 add_subdirectory(network)
 add_subdirectory(otx)
+add_subdirectory(protobuf)
 add_subdirectory(rpc)
 add_subdirectory(storage)
 

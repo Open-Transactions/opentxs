@@ -1,0 +1,50 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTRPCResponse";
+option optimize_for = LITE_RUNTIME;
+
+import public "AccountData.proto";
+import public "AccountEvent.proto";
+import public "AddClaim.proto";
+import public "Contact.proto";
+import public "ContactEvent.proto";
+import public "CreateNym.proto";
+import public "HDSeed.proto";
+import public "Nym.proto";
+import public "PaymentWorkflow.proto";
+import public "RPCEnums.proto";
+import public "RPCStatus.proto";
+import public "RPCTask.proto";
+import public "ServerContract.proto";
+import public "SessionData.proto";
+import public "TransactionData.proto";
+import public "UnitDefinition.proto";
+
+message RPCResponse
+{
+    optional uint32 version = 1;
+    optional string cookie = 2;        // value from RPCCommand
+    optional RPCCommandType type = 3;  // see RPCEnums.proto
+    repeated RPCStatus status = 4;
+    optional uint32 session = 5;  // session instance value
+    repeated SessionData sessions = 6;
+    repeated string identifier = 7;  // ids (defined by RPCCommandType)
+    repeated HDSeed seed = 8;
+    repeated Nym nym = 9;
+    repeated AccountData balance = 10;
+    repeated Contact contact = 11;
+    repeated AccountEvent accountevent = 12;
+    repeated ContactEvent contactevent = 13;
+    repeated RPCTask task = 14;
+    repeated ServerContract notary = 15;
+    repeated PaymentWorkflow workflow = 16;
+    repeated UnitDefinition unit = 17;
+    repeated TransactionData transactiondata = 18;
+}

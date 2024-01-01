@@ -5,8 +5,8 @@
 
 #include "blockchain/crypto/subaccount/imported/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainAddress.pb.h>
-#include <BlockchainImportedAccountData.pb.h>
+#include <opentxs/protobuf/BlockchainAddress.pb.h>
+#include <opentxs/protobuf/BlockchainImportedAccountData.pb.h>
 #include <stdexcept>
 #include <utility>
 

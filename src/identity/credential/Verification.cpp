@@ -5,12 +5,12 @@
 
 #include "identity/credential/Verification.hpp"  // IWYU pragma: associated
 
-#include <Credential.pb.h>
-#include <Signature.pb.h>
-#include <VerificationGroup.pb.h>
-#include <VerificationIdentity.pb.h>
-#include <VerificationItem.pb.h>
-#include <VerificationSet.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/VerificationGroup.pb.h>
+#include <opentxs/protobuf/VerificationIdentity.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 #include <memory>
 #include <stdexcept>
 
@@ -18,7 +18,6 @@
 #include "internal/crypto/Parameters.hpp"
 #include "internal/crypto/key/Key.hpp"
 #include "internal/identity/Authority.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -32,6 +31,7 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Verification.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -65,7 +65,7 @@ auto Factory::VerificationCredential(
     identity::internal::Authority& parent,
     const identity::Source& source,
     const identity::credential::internal::Primary& master,
-    const proto::Credential& serialized)
+    const protobuf::Credential& serialized)
     -> identity::credential::internal::Verification*
 {
     using ReturnType = identity::credential::implementation::Verification;
@@ -83,10 +83,10 @@ auto Factory::VerificationCredential(
 
 namespace opentxs::identity::credential
 {
-auto Verification::SigningForm(const proto::VerificationItem& item)
-    -> proto::VerificationItem
+auto Verification::SigningForm(const protobuf::VerificationItem& item)
+    -> protobuf::VerificationItem
 {
-    proto::VerificationItem signingForm(item);
+    protobuf::VerificationItem signingForm(item);
     signingForm.clear_sig();
 
     return signingForm;
@@ -94,7 +94,7 @@ auto Verification::SigningForm(const proto::VerificationItem& item)
 
 auto Verification::VerificationID(
     const api::Session& api,
-    const proto::VerificationItem& item) -> UnallocatedCString
+    const protobuf::VerificationItem& item) -> UnallocatedCString
 {
     return api.Factory()
         .Internal()
@@ -125,8 +125,8 @@ Verification::Verification(
           master.ID())
     , data_(
           [&](const crypto::Parameters& parameters)
-              -> const proto::VerificationSet {
-              auto proto = proto::VerificationSet{};
+              -> const protobuf::VerificationSet {
+              auto proto = protobuf::VerificationSet{};
               parameters.Internal().GetVerificationSet(proto);
               return proto;
           }(params))
@@ -140,7 +140,7 @@ Verification::Verification(
     const identity::internal::Authority& parent,
     const identity::Source& source,
     const internal::Primary& master,
-    const proto::Credential& serialized) noexcept(false)
+    const protobuf::Credential& serialized) noexcept(false)
     : credential::implementation::Base(
           api,
           parent,
@@ -153,9 +153,9 @@ Verification::Verification(
 }
 
 auto Verification::GetVerificationSet(
-    proto::VerificationSet& verificationSet) const -> bool
+    protobuf::VerificationSet& verificationSet) const -> bool
 {
-    verificationSet = proto::VerificationSet(data_);
+    verificationSet = protobuf::VerificationSet(data_);
 
     return true;
 }

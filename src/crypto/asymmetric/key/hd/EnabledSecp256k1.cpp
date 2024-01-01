@@ -5,7 +5,7 @@
 
 #include "internal/crypto/asymmetric/Factory.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstddef>
 #include <stdexcept>
 #include <utility>
@@ -38,7 +38,7 @@ auto Secp256k1Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -81,7 +81,7 @@ auto Secp256k1Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,
@@ -121,7 +121,7 @@ auto Secp256k1Key(
 
     try {
         static const auto blank = api.Factory().Secret(0);
-        static const auto path = proto::HDPath{};
+        static const auto path = protobuf::HDPath{};
         using Type = opentxs::crypto::asymmetric::Algorithm;
 
         return pmr::construct<ReturnType>(

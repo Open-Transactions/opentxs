@@ -5,12 +5,12 @@
 
 #include "crypto/asymmetric/base/Imp.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Ciphertext.pb.h>
-#include <Enums.pb.h>
-#include <Signature.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -26,7 +26,6 @@
 #include "internal/crypto/symmetric/Key.hpp"
 #include "internal/identity/credential/Credential.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -50,6 +49,7 @@
 #include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/credential/Key.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -150,7 +150,7 @@ Key::Key(
 Key::Key(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     EncryptedExtractor getEncrypted,
     allocator_type alloc) noexcept(false)
     : Key(api,
@@ -158,7 +158,7 @@ Key::Key(
           opentxs::translate(serialized.type()),
           opentxs::translate(serialized.role()),
           true,
-          proto::KEYMODE_PRIVATE == serialized.mode(),
+          protobuf::KEYMODE_PRIVATE == serialized.mode(),
           serialized.version(),
           serialized.has_key() ? api.Factory().DataFromBytes(serialized.key())
                                : api.Factory().Data(),
@@ -181,7 +181,7 @@ Key::Key(const Key& rhs, allocator_type alloc) noexcept
           [&](auto&, auto&) -> EncryptedKey {
               if (rhs.encrypted_key_) {
 
-                  return std::make_unique<proto::Ciphertext>(
+                  return std::make_unique<protobuf::Ciphertext>(
                       *rhs.encrypted_key_);
               }
 
@@ -370,7 +370,7 @@ auto Key::create_key(
     Writer&& privateKey,
     const opentxs::Secret& prv,
     Writer&& params,
-    const PasswordPrompt& reason) -> std::unique_ptr<proto::Ciphertext>
+    const PasswordPrompt& reason) -> std::unique_ptr<protobuf::Ciphertext>
 {
     generate_key(
         provider,
@@ -379,7 +379,7 @@ auto Key::create_key(
         std::move(publicKey),
         std::move(privateKey),
         std::move(params));
-    auto pOutput = std::make_unique<proto::Ciphertext>();
+    auto pOutput = std::make_unique<protobuf::Ciphertext>();
 
     assert_false(nullptr == pOutput);
 
@@ -396,9 +396,10 @@ auto Key::encrypt_key(
     ReadView plaintext,
     bool attach,
     symmetric::Key& sessionKey,
-    const PasswordPrompt& reason) noexcept -> std::unique_ptr<proto::Ciphertext>
+    const PasswordPrompt& reason) noexcept
+    -> std::unique_ptr<protobuf::Ciphertext>
 {
-    auto output = std::make_unique<proto::Ciphertext>();
+    auto output = std::make_unique<protobuf::Ciphertext>();
 
     if (false == bool(output)) {
         LogError()()("Failed to construct output").Flush();
@@ -422,7 +423,7 @@ auto Key::encrypt_key(
     bool attach,
     symmetric::Key& sessionKey,
     const PasswordPrompt& reason,
-    proto::Ciphertext& out) noexcept -> bool
+    protobuf::Ciphertext& out) noexcept -> bool
 {
     const auto encrypted =
         sessionKey.Internal().Encrypt(plaintext, out, reason, attach);
@@ -588,7 +589,7 @@ auto Key::has_private(const Lock&) const noexcept -> bool
 auto Key::hashtype_map() noexcept -> const HashTypeMap&
 {
     using enum crypto::HashType;
-    using enum proto::HashType;
+    using enum protobuf::HashType;
     static constexpr auto map = HashTypeMap{
         {Error, HASHTYPE_ERROR},
         {None, HASHTYPE_NONE},
@@ -619,9 +620,9 @@ auto Key::IsValid() const noexcept -> bool
 auto Key::new_signature(
     const identifier::Generic& credentialID,
     const crypto::SignatureRole role,
-    const crypto::HashType hash) const -> proto::Signature
+    const crypto::HashType hash) const -> protobuf::Signature
 {
-    proto::Signature output{};
+    protobuf::Signature output{};
     output.set_version(sig_version_.at(role));
     credentialID.Internal().Serialize(*output.mutable_credentialid());
     output.set_role(translate(role));
@@ -633,9 +634,9 @@ auto Key::new_signature(
     return output;
 }
 
-auto Key::operator==(const proto::AsymmetricKey& rhs) const noexcept -> bool
+auto Key::operator==(const protobuf::AsymmetricKey& rhs) const noexcept -> bool
 {
-    auto lhs = proto::AsymmetricKey{};
+    auto lhs = protobuf::AsymmetricKey{};
 
     {
         auto lock = Lock{lock_};
@@ -656,7 +657,7 @@ auto Key::Path() const noexcept -> const UnallocatedCString
     return "";
 }
 
-auto Key::Path(proto::HDPath&) const noexcept -> bool
+auto Key::Path(protobuf::HDPath&) const noexcept -> bool
 {
     LogError()()("Incorrect key type.").Flush();
 
@@ -701,23 +702,23 @@ auto Key::serialize(const Lock&, Serialized& output) const noexcept -> bool
 {
     output.set_version(version_);
     output.set_role(opentxs::translate(role_));
-    output.set_type(static_cast<proto::AsymmetricKeyType>(type_));
+    output.set_type(static_cast<protobuf::AsymmetricKeyType>(type_));
     output.set_key(key_.data(), key_.size());
 
     if (has_private_) {
-        output.set_mode(proto::KEYMODE_PRIVATE);
+        output.set_mode(protobuf::KEYMODE_PRIVATE);
 
         if (encrypted_key_) {
             *output.mutable_encryptedkey() = *encrypted_key_;
         }
     } else {
-        output.set_mode(proto::KEYMODE_PUBLIC);
+        output.set_mode(protobuf::KEYMODE_PUBLIC);
     }
 
     return true;
 }
 
-auto Key::SerializeKeyToData(const proto::AsymmetricKey& serializedKey) const
+auto Key::SerializeKeyToData(const protobuf::AsymmetricKey& serializedKey) const
     -> ByteArray
 {
     return api_.Factory().Internal().Data(serializedKey);
@@ -726,7 +727,7 @@ auto Key::SerializeKeyToData(const proto::AsymmetricKey& serializedKey) const
 auto Key::Sign(
     const GetPreimage input,
     const crypto::SignatureRole role,
-    proto::Signature& signature,
+    protobuf::Signature& signature,
     const identifier::Generic& credential,
     const PasswordPrompt& reason) const noexcept -> bool
 {
@@ -736,7 +737,7 @@ auto Key::Sign(
 auto Key::Sign(
     const GetPreimage input,
     const crypto::SignatureRole role,
-    proto::Signature& signature,
+    protobuf::Signature& signature,
     const identifier::Generic& credential,
     const crypto::HashType hash,
     const PasswordPrompt& reason) const noexcept -> bool
@@ -782,7 +783,7 @@ auto Key::Sign(
 auto Key::signaturerole_map() noexcept -> const SignatureRoleMap&
 {
     using enum SignatureRole;
-    using enum proto::SignatureRole;
+    using enum protobuf::SignatureRole;
     static constexpr auto map = SignatureRoleMap{
         {PublicCredential, SIGROLE_PUBCREDENTIAL},
         {PrivateCredential, SIGROLE_PRIVCREDENTIAL},
@@ -802,25 +803,25 @@ auto Key::signaturerole_map() noexcept -> const SignatureRoleMap&
 }
 
 auto Key::translate(const crypto::SignatureRole in) noexcept
-    -> proto::SignatureRole
+    -> protobuf::SignatureRole
 {
     try {
         return signaturerole_map().at(in);
     } catch (...) {
-        return proto::SIGROLE_ERROR;
+        return protobuf::SIGROLE_ERROR;
     }
 }
 
-auto Key::translate(const crypto::HashType in) noexcept -> proto::HashType
+auto Key::translate(const crypto::HashType in) noexcept -> protobuf::HashType
 {
     try {
         return hashtype_map().at(in);
     } catch (...) {
-        return proto::HASHTYPE_ERROR;
+        return protobuf::HASHTYPE_ERROR;
     }
 }
 
-auto Key::translate(const proto::HashType in) noexcept -> crypto::HashType
+auto Key::translate(const protobuf::HashType in) noexcept -> crypto::HashType
 {
     static const auto map = frozen::invert_unordered_map(hashtype_map());
 
@@ -854,7 +855,7 @@ auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
         return false;
     }
 
-    const auto proto = proto::Factory<proto::Signature>(sig);
+    const auto proto = protobuf::Factory<protobuf::Signature>(sig);
     const auto output = provider_.Verify(
         plaintext, PublicKey(), proto.signature(), translate(proto.hashtype()));
 
@@ -863,7 +864,7 @@ auto Key::Verify(ReadView plaintext, ReadView sig) const noexcept -> bool
     return output;
 }
 
-auto Key::Verify(const Data& plaintext, const proto::Signature& sig)
+auto Key::Verify(const Data& plaintext, const protobuf::Signature& sig)
     const noexcept -> bool
 {
     if (false == HasPublic()) {

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/network/zeromq/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
@@ -30,7 +30,7 @@ public:
     virtual auto Envelope() const noexcept
         -> std::span<const zeromq::Frame> = 0;
 
-    virtual auto AddFrame(const ProtobufType& input) noexcept
+    virtual auto AddFrame(const protobuf::MessageType& input) noexcept
         -> zeromq::Frame& = 0;
     virtual auto EnsureDelimiter() noexcept -> void = 0;
     virtual auto Envelope() noexcept -> std::span<zeromq::Frame> = 0;

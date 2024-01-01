@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/faucet/Implementation.hpp"  // IWYU pragma: associated
 
-#include <Faucet.pb.h>
-#include <PeerRequest.pb.h>
+#include <opentxs/protobuf/Faucet.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
 #include <utility>
 
 #include "opentxs/identity/wot/claim/Types.hpp"

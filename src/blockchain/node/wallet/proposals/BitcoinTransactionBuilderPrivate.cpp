@@ -5,8 +5,8 @@
 
 #include "blockchain/node/wallet/proposals/BitcoinTransactionBuilderPrivate.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
-#include <BlockchainTransactionProposal.pb.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -1072,7 +1072,7 @@ auto BitcoinTransactionBuilderPrivate::finalize(
             return *proto;
         }());
         const auto proto = [&] {
-            auto out = proto::BlockchainTransactionProposal{};
+            auto out = protobuf::BlockchainTransactionProposal{};
 
             if (false == proposal_.Internal().Serialize(out)) {
                 rc = SerializationError;

@@ -29,7 +29,7 @@ auto Ed25519Key(
     const opentxs::Secret& privateKey,
     const opentxs::Secret& chainCode,
     const Data& publicKey,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::Bip32Fingerprint parent,
     const crypto::asymmetric::Role role,
     const VersionNumber version,

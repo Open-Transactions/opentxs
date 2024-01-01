@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ServerRequest.pb.h>
+#include <opentxs/protobuf/ServerRequest.pb.h>
 #include <string_view>
 
 #include "core/contract/Signable.hpp"
@@ -26,10 +26,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -45,7 +45,7 @@ public:
     auto Initiator() const -> const identifier::Nym& { return initiator_; }
     auto Number() const -> RequestNumber;
     auto Serialize(Writer&& destination) const noexcept -> bool final;
-    auto Serialize(proto::ServerRequest& serialized) const -> bool;
+    auto Serialize(protobuf::ServerRequest& serialized) const -> bool;
     auto Server() const -> const identifier::Notary& { return server_; }
     auto Type() const -> otx::ServerRequestType { return type_; }
 
@@ -58,7 +58,7 @@ public:
         const identifier::Notary& server,
         const otx::ServerRequestType type,
         const RequestNumber number);
-    Imp(const api::Session& api, const proto::ServerRequest serialized);
+    Imp(const api::Session& api, const protobuf::ServerRequest serialized);
     Imp() = delete;
     Imp(const Imp& rhs) noexcept;
     Imp(Imp&& rhs) = delete;
@@ -78,18 +78,18 @@ private:
 
     static auto extract_nym(
         const api::Session& api,
-        const proto::ServerRequest serialized) -> Nym_p;
+        const protobuf::ServerRequest serialized) -> Nym_p;
 
     auto calculate_id() const -> identifier_type final;
-    auto full_version() const -> proto::ServerRequest;
-    auto id_version() const -> proto::ServerRequest;
+    auto full_version() const -> protobuf::ServerRequest;
+    auto id_version() const -> protobuf::ServerRequest;
     auto Name() const noexcept -> std::string_view final { return {}; }
     using Signable::serialize;
-    auto serialize(proto::ServerRequest& serialized) const -> bool;
-    auto signature_version() const -> proto::ServerRequest;
+    auto serialize(protobuf::ServerRequest& serialized) const -> bool;
+    auto signature_version() const -> protobuf::ServerRequest;
     auto update_signature(const PasswordPrompt& reason) -> bool final;
     auto validate() const -> bool final;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool final;
 };
 }  // namespace opentxs::otx

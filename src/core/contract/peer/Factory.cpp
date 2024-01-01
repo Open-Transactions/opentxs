@@ -5,7 +5,7 @@
 
 #include "internal/core/contract/peer/Factory.hpp"
 
-#include <PeerObject.pb.h>
+#include <opentxs/protobuf/PeerObject.pb.h>
 #include <stdexcept>
 #include <utility>
 
@@ -13,10 +13,6 @@
 #include "internal/core/String.hpp"
 #include "internal/core/contract/peer/Object.hpp"
 #include "internal/crypto/Envelope.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/PeerObject.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Client.hpp"
@@ -24,6 +20,9 @@
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/api/session/Factory.internal.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/PeerObject.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -134,11 +133,11 @@ auto PeerObject(
 auto PeerObject(
     const api::session::Client& api,
     const Nym_p& signerNym,
-    const proto::PeerObject& serialized) noexcept
+    const protobuf::PeerObject& serialized) noexcept
     -> std::unique_ptr<opentxs::PeerObject>
 {
     try {
-        const bool valid = proto::Validate(serialized, VERBOSE);
+        const auto valid = protobuf::syntax::check(LogError(), serialized);
         std::unique_ptr<opentxs::PeerObject> output;
 
         if (valid) {
@@ -178,8 +177,8 @@ auto PeerObject(
             return nullptr;
         }
 
-        auto serialized =
-            proto::StringToProto<proto::PeerObject>(api.Crypto(), contents);
+        auto serialized = protobuf::StringToProto<protobuf::PeerObject>(
+            api.Crypto(), contents);
 
         return factory::PeerObject(api, notUsed, serialized);
     } catch (const std::exception& e) {

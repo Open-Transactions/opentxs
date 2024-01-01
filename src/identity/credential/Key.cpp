@@ -5,11 +5,11 @@
 
 #include "identity/credential/Key.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <KeyCredential.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/KeyCredential.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -23,7 +23,6 @@
 #include "internal/identity/credential/Blank.hpp"
 #include "internal/otx/common/crypto/OTSignatureMetadata.hpp"
 #include "internal/otx/common/crypto/Signature.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/crypto/Config.hpp"
@@ -42,6 +41,7 @@
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/NymCapability.hpp"   // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -93,13 +93,13 @@ Key::Key(
     , signing_key_(signing_key(api_, params, subversion_, useProvided, reason))
     , authentication_key_(new_key(
           api_,
-          proto::KEYROLE_AUTH,
+          protobuf::KEYROLE_AUTH,
           params,
           subversion_to_key_version_.at(subversion_),
           reason))
     , encryption_key_(new_key(
           api_,
-          proto::KEYROLE_ENCRYPT,
+          protobuf::KEYROLE_ENCRYPT,
           params,
           subversion_to_key_version_.at(subversion_),
           reason))
@@ -111,7 +111,7 @@ Key::Key(
     const api::Session& api,
     const identity::internal::Authority& parent,
     const identity::Source& source,
-    const proto::Credential& serialized,
+    const protobuf::Credential& serialized,
     const identifier_type& masterID) noexcept(false)
     : credential::implementation::Base(
           api,
@@ -120,9 +120,11 @@ Key::Key(
           serialized,
           masterID)
     , subversion_(credential_subversion_.at(Version()))
-    , signing_key_(deserialize_key(api, proto::KEYROLE_SIGN, serialized))
-    , authentication_key_(deserialize_key(api, proto::KEYROLE_AUTH, serialized))
-    , encryption_key_(deserialize_key(api, proto::KEYROLE_ENCRYPT, serialized))
+    , signing_key_(deserialize_key(api, protobuf::KEYROLE_SIGN, serialized))
+    , authentication_key_(
+          deserialize_key(api, protobuf::KEYROLE_AUTH, serialized))
+    , encryption_key_(
+          deserialize_key(api, protobuf::KEYROLE_ENCRYPT, serialized))
 {
 }
 
@@ -130,8 +132,8 @@ auto Key::addKeyCredentialtoSerializedCredential(
     std::shared_ptr<Base::SerializedType> credential,
     const bool addPrivate) const -> bool
 {
-    std::unique_ptr<proto::KeyCredential> keyCredential(
-        new proto::KeyCredential);
+    std::unique_ptr<protobuf::KeyCredential> keyCredential(
+        new protobuf::KeyCredential);
 
     if (!keyCredential) {
         LogError()()("Failed to allocate keyCredential protobuf.").Flush();
@@ -143,11 +145,11 @@ auto Key::addKeyCredentialtoSerializedCredential(
 
     // These must be serialized in this order
     const bool auth = addKeytoSerializedKeyCredential(
-        *keyCredential, addPrivate, proto::KEYROLE_AUTH);
+        *keyCredential, addPrivate, protobuf::KEYROLE_AUTH);
     const bool encrypt = addKeytoSerializedKeyCredential(
-        *keyCredential, addPrivate, proto::KEYROLE_ENCRYPT);
+        *keyCredential, addPrivate, protobuf::KEYROLE_ENCRYPT);
     const bool sign = addKeytoSerializedKeyCredential(
-        *keyCredential, addPrivate, proto::KEYROLE_SIGN);
+        *keyCredential, addPrivate, protobuf::KEYROLE_SIGN);
 
     if (auth && encrypt && sign) {
         if (addPrivate) {
@@ -170,23 +172,23 @@ auto Key::addKeyCredentialtoSerializedCredential(
 }
 
 auto Key::addKeytoSerializedKeyCredential(
-    proto::KeyCredential& credential,
+    protobuf::KeyCredential& credential,
     const bool getPrivate,
-    const proto::KeyRole role) const -> bool
+    const protobuf::KeyRole role) const -> bool
 {
     const crypto::key::Keypair* pKey{nullptr};
 
     switch (role) {
-        case proto::KEYROLE_AUTH: {
+        case protobuf::KEYROLE_AUTH: {
             pKey = &authentication_key_.get();
         } break;
-        case proto::KEYROLE_ENCRYPT: {
+        case protobuf::KEYROLE_ENCRYPT: {
             pKey = &encryption_key_.get();
         } break;
-        case proto::KEYROLE_SIGN: {
+        case protobuf::KEYROLE_SIGN: {
             pKey = &signing_key_.get();
         } break;
-        case proto::KEYROLE_ERROR:
+        case protobuf::KEYROLE_ERROR:
         default: {
             return false;
         }
@@ -194,7 +196,7 @@ auto Key::addKeytoSerializedKeyCredential(
 
     if (nullptr == pKey) { return false; }
 
-    auto key = proto::AsymmetricKey{};
+    auto key = protobuf::AsymmetricKey{};
     if (false == pKey->Serialize(key, getPrivate)) { return false; }
 
     key.set_role(role);
@@ -208,10 +210,10 @@ auto Key::addKeytoSerializedKeyCredential(
 auto Key::deserialize_key(
     const api::Session& api,
     const int index,
-    const proto::Credential& credential) -> OTKeypair
+    const protobuf::Credential& credential) -> OTKeypair
 {
     const bool hasPrivate =
-        (proto::KEYMODE_PRIVATE == credential.mode()) ? true : false;
+        (protobuf::KEYMODE_PRIVATE == credential.mode()) ? true : false;
 
     const auto publicKey = credential.publiccredential().key(index - 1);
 
@@ -385,7 +387,7 @@ auto Key::id_form() const -> std::shared_ptr<SerializedType>
 
 auto Key::new_key(
     const api::Session& api,
-    const proto::KeyRole role,
+    const protobuf::KeyRole role,
     const crypto::Parameters& params,
     const VersionNumber version,
     const PasswordPrompt& reason,
@@ -433,17 +435,15 @@ auto Key::SelfSign(
     const std::optional<Secret>,
     const bool onlyPrivate) const noexcept(false) -> bool
 {
-    auto publicSignature = std::make_shared<proto::Signature>();
-    auto privateSignature = std::make_shared<proto::Signature>();
+    auto publicSignature = std::make_shared<protobuf::Signature>();
+    auto privateSignature = std::make_shared<protobuf::Signature>();
     bool havePublicSig = false;
 
     if (!onlyPrivate) {
         const auto publicVersion = serialize(AS_PUBLIC, WITHOUT_SIGNATURES);
         auto& signature = *publicVersion->add_signature();
         havePublicSig = Sign(
-            [&]() -> UnallocatedCString {
-                return proto::ToString(*publicVersion);
-            },
+            [&]() -> UnallocatedCString { return to_string(*publicVersion); },
             crypto::SignatureRole::PublicCredential,
             signature,
             reason,
@@ -461,9 +461,7 @@ auto Key::SelfSign(
     auto privateVersion = serialize(AS_PRIVATE, WITHOUT_SIGNATURES);
     auto& signature = *privateVersion->add_signature();
     const bool havePrivateSig = Sign(
-        [&]() -> UnallocatedCString {
-            return proto::ToString(*privateVersion);
-        },
+        [&]() -> UnallocatedCString { return to_string(*privateVersion); },
         crypto::SignatureRole::PrivateCredential,
         signature,
         reason,
@@ -495,7 +493,7 @@ auto Key::serialize(
 auto Key::Sign(
     const crypto::GetPreimage input,
     const crypto::SignatureRole role,
-    proto::Signature& signature,
+    protobuf::Signature& signature,
     const PasswordPrompt& reason,
     opentxs::crypto::asymmetric::Role key,
     const crypto::HashType hash) const -> bool
@@ -546,7 +544,7 @@ auto Key::signing_key(
 
         return new_key(
             api,
-            proto::KEYROLE_SIGN,
+            protobuf::KEYROLE_SIGN,
             params,
             subversion_to_key_version_.at(subversion),
             reason);
@@ -563,7 +561,7 @@ auto Key::TransportKey(
 
 auto Key::Verify(
     const Data& plaintext,
-    const proto::Signature& sig,
+    const protobuf::Signature& sig,
     const opentxs::crypto::asymmetric::Role key) const -> bool
 {
     const crypto::key::Keypair* keyToUse = nullptr;
@@ -626,7 +624,7 @@ auto Key::verify_internally() const -> bool
 }
 
 auto Key::VerifySig(
-    const proto::Signature& sig,
+    const protobuf::Signature& sig,
     const CredentialModeFlag asPrivate) const -> bool
 {
     std::shared_ptr<Base::SerializedType> serialized;

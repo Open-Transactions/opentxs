@@ -54,7 +54,7 @@ auto Address::PreviousServices() const noexcept -> Set<bitcoin::Service>
 
 auto Address::RemoveService(const bitcoin::Service) noexcept -> void {}
 
-auto Address::Serialize(proto::BlockchainPeerAddress&) const noexcept -> bool
+auto Address::Serialize(protobuf::BlockchainPeerAddress&) const noexcept -> bool
 {
     return {};
 }

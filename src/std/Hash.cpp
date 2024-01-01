@@ -9,7 +9,6 @@
 #include <functional>
 #include <iterator>
 #include <span>
-#include <string>
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -18,7 +17,6 @@
 #include "blockchain/database/wallet/Pattern.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/crypto/Parameters.hpp"
-#include "internal/serialization/protobuf/Contact.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -349,29 +347,6 @@ auto hash<opentxs::network::zeromq::Frame>::operator()(
     static const auto key = opentxs::crypto::sodium::SiphashKey{};
 
     return opentxs::crypto::sodium::Siphash(key, data.Bytes());
-}
-
-auto hash<opentxs::proto::ContactSectionVersion>::operator()(
-    const opentxs::proto::ContactSectionVersion& data) const noexcept
-    -> std::size_t
-{
-    const auto& [key, value] = data;
-
-    return opentxs::crypto::sodium::Siphash(
-        opentxs::crypto::sodium::MakeSiphashKey(
-            {reinterpret_cast<const char*>(&key), sizeof(key)}),
-        {reinterpret_cast<const char*>(&value), sizeof(value)});
-}
-
-auto hash<opentxs::proto::EnumLang>::operator()(
-    const opentxs::proto::EnumLang& data) const noexcept -> std::size_t
-{
-    const auto& [key, text] = data;
-
-    return opentxs::crypto::sodium::Siphash(
-        opentxs::crypto::sodium::MakeSiphashKey(
-            {reinterpret_cast<const char*>(&key), sizeof(key)}),
-        text);
 }
 
 auto hash<opentxs::Amount>::operator()(

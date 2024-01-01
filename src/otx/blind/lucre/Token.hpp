@@ -41,12 +41,12 @@ class Mint;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Ciphertext;
 class LucreTokenData;
 class Token;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -61,7 +61,7 @@ public:
         -> bool;
     auto ID(const PasswordPrompt& reason) const -> UnallocatedCString final;
     auto IsSpent(const PasswordPrompt& reason) const -> bool final;
-    auto Serialize(proto::Token& out) const noexcept -> bool final;
+    auto Serialize(protobuf::Token& out) const noexcept -> bool final;
 
     auto AddSignature(const String& signature) -> bool;
     auto ChangeOwner(
@@ -83,7 +83,7 @@ public:
     Lucre(
         const api::Session& api,
         blind::internal::Purse& purse,
-        const proto::Token& serialized);
+        const protobuf::Token& serialized);
     Lucre(
         const api::Session& api,
         const identity::Nym& owner,
@@ -103,14 +103,14 @@ public:
 private:
     const VersionNumber lucre_version_;
     OTString signature_;
-    std::shared_ptr<proto::Ciphertext> private_;
-    std::shared_ptr<proto::Ciphertext> public_;
-    std::shared_ptr<proto::Ciphertext> spend_;
+    std::shared_ptr<protobuf::Ciphertext> private_;
+    std::shared_ptr<protobuf::Ciphertext> public_;
+    std::shared_ptr<protobuf::Ciphertext> spend_;
 
-    void serialize_private(proto::LucreTokenData& lucre) const;
-    void serialize_public(proto::LucreTokenData& lucre) const;
-    void serialize_signature(proto::LucreTokenData& lucre) const;
-    void serialize_spendable(proto::LucreTokenData& lucre) const;
+    void serialize_private(protobuf::LucreTokenData& lucre) const;
+    void serialize_public(protobuf::LucreTokenData& lucre) const;
+    void serialize_signature(protobuf::LucreTokenData& lucre) const;
+    void serialize_spendable(protobuf::LucreTokenData& lucre) const;
 
     auto clone() const noexcept -> Imp* final { return new Lucre(*this); }
 
@@ -124,8 +124,8 @@ private:
         const Time validFrom,
         const Time validTo,
         const String& signature,
-        const std::shared_ptr<proto::Ciphertext> publicKey,
-        const std::shared_ptr<proto::Ciphertext> privateKey,
-        const std::shared_ptr<proto::Ciphertext> spendable);
+        const std::shared_ptr<protobuf::Ciphertext> publicKey,
+        const std::shared_ptr<protobuf::Ciphertext> privateKey,
+        const std::shared_ptr<protobuf::Ciphertext> spendable);
 };
 }  // namespace opentxs::otx::blind::token

@@ -5,9 +5,9 @@
 
 #include "otx/blind/purse/Imp.hpp"  // IWYU pragma: associated
 
-#include <Envelope.pb.h>
-#include <Purse.pb.h>
-#include <Token.pb.h>
+#include <opentxs/protobuf/Envelope.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/Token.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
@@ -23,8 +23,6 @@
 #include "internal/otx/blind/Purse.hpp"
 #include "internal/otx/blind/Token.hpp"
 #include "internal/otx/consensus/Server.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/Time.hpp"
@@ -51,6 +49,8 @@
 #include "opentxs/otx/blind/TokenState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/blind/Types.hpp"
 #include "opentxs/otx/blind/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -144,7 +144,7 @@ auto Purse(
     return purse;
 }
 
-auto Purse(const api::Session& api, const proto::Purse& in) noexcept
+auto Purse(const api::Session& api, const protobuf::Purse& in) noexcept
     -> otx::blind::Purse
 {
     using ReturnType = otx::blind::Purse;
@@ -161,7 +161,7 @@ auto Purse(const api::Session& api, const proto::Purse& in) noexcept
 auto Purse(const api::Session& api, const ReadView& in) noexcept
     -> otx::blind::Purse
 {
-    return Purse(api, opentxs::proto::Factory<proto::Purse>(in));
+    return Purse(api, opentxs::protobuf::Factory<protobuf::Purse>(in));
 }
 
 auto Purse(
@@ -233,7 +233,7 @@ Purse::Purse(
     const Time validTo,
     const UnallocatedVector<blind::Token>& tokens,
     const std::shared_ptr<crypto::symmetric::Key> primary,
-    const UnallocatedVector<proto::Envelope>& primaryPasswords,
+    const UnallocatedVector<protobuf::Envelope>& primaryPasswords,
     const std::shared_ptr<const crypto::symmetric::Key> secondaryKey,
     const std::shared_ptr<const OTEnvelope> secondaryEncrypted,
     std::optional<Secret> secondaryKeyPassword) noexcept
@@ -344,7 +344,7 @@ Purse::Purse(
     assert_false(nullptr == primary_);
 }
 
-Purse::Purse(const api::Session& api, const proto::Purse& in) noexcept
+Purse::Purse(const api::Session& api, const protobuf::Purse& in) noexcept
     : Purse(
           api,
           in.version(),
@@ -447,7 +447,7 @@ auto Purse::cbegin() const noexcept -> const_iterator
     return {parent_, 0};
 }
 
-auto Purse::DeserializeTokens(const proto::Purse& in) noexcept -> void
+auto Purse::DeserializeTokens(const protobuf::Purse& in) noexcept -> void
 {
     for (const auto& serialized : in.token()) {
         tokens_.emplace_back(factory::Token(api_, *this, serialized));
@@ -463,7 +463,7 @@ auto Purse::cend() const noexcept -> const_iterator
 
 auto Purse::deserialize_secondary_key(
     const api::Session& api,
-    const proto::Purse& in) noexcept(false)
+    const protobuf::Purse& in) noexcept(false)
     -> std::unique_ptr<const crypto::symmetric::Key>
 {
     switch (opentxs::translate(in.state())) {
@@ -497,7 +497,8 @@ auto Purse::deserialize_secondary_key(
 
 auto Purse::deserialize_secondary_password(
     const api::Session& api,
-    const proto::Purse& in) noexcept(false) -> std::unique_ptr<const OTEnvelope>
+    const protobuf::Purse& in) noexcept(false)
+    -> std::unique_ptr<const OTEnvelope>
 {
     switch (opentxs::translate(in.state())) {
         case blind::PurseType::Request:
@@ -580,10 +581,10 @@ auto Purse::GeneratePrototokens(
     return total_value_ == amount;
 }
 
-auto Purse::get_passwords(const proto::Purse& in)
-    -> UnallocatedVector<proto::Envelope>
+auto Purse::get_passwords(const protobuf::Purse& in)
+    -> UnallocatedVector<protobuf::Envelope>
 {
-    auto output = UnallocatedVector<proto::Envelope>{};
+    auto output = UnallocatedVector<protobuf::Envelope>{};
 
     for (const auto& password : in.primarypassword()) {
         output.emplace_back(password);
@@ -747,7 +748,7 @@ auto Purse::SecondaryKey(
     return secondaryKey;
 }
 
-auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
+auto Purse::Serialize(protobuf::Purse& output) const noexcept -> bool
 {
     try {
         output.set_version(version_);
@@ -819,7 +820,7 @@ auto Purse::Serialize(proto::Purse& output) const noexcept -> bool
 
 auto Purse::Serialize(Writer&& destination) const noexcept -> bool
 {
-    auto proto = proto::Purse{};
+    auto proto = protobuf::Purse{};
 
     if (Serialize(proto)) { return write(proto, std::move(destination)); }
 

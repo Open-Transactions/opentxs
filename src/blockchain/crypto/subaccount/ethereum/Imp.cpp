@@ -43,7 +43,7 @@ EthereumPrivate::EthereumPrivate(
     const api::Session& api,
     const crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const HDProtocol standard,
     const PasswordPrompt& reason,
     opentxs::crypto::SeedID seed) noexcept(false)

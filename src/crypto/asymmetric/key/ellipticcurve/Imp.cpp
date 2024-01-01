@@ -5,9 +5,9 @@
 
 #include "crypto/asymmetric/key/ellipticcurve/Imp.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Ciphertext.pb.h>
-#include <Enums.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -30,7 +30,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 EllipticCurve::EllipticCurve(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     allocator_type alloc) noexcept(false)
     : Key(
           api,
@@ -185,14 +185,15 @@ EllipticCurve::EllipticCurve(
 auto EllipticCurve::extract_key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& proto,
-    Data& publicKey) -> std::unique_ptr<proto::Ciphertext>
+    const protobuf::AsymmetricKey& proto,
+    Data& publicKey) -> std::unique_ptr<protobuf::Ciphertext>
 {
-    auto output = std::unique_ptr<proto::Ciphertext>{};
+    auto output = std::unique_ptr<protobuf::Ciphertext>{};
     publicKey.Assign(proto.key());
 
-    if ((proto::KEYMODE_PRIVATE == proto.mode()) && proto.has_encryptedkey()) {
-        output = std::make_unique<proto::Ciphertext>(proto.encryptedkey());
+    if ((protobuf::KEYMODE_PRIVATE == proto.mode()) &&
+        proto.has_encryptedkey()) {
+        output = std::make_unique<protobuf::Ciphertext>(proto.encryptedkey());
 
         assert_false(nullptr == output);
     }
@@ -244,13 +245,13 @@ auto EllipticCurve::IncrementPublic(const Secret& rhs, allocator_type alloc)
 }
 
 auto EllipticCurve::serialize_public(EllipticCurve* in)
-    -> std::shared_ptr<proto::AsymmetricKey>
+    -> std::shared_ptr<protobuf::AsymmetricKey>
 {
     auto copy = std::unique_ptr<EllipticCurve>{in};
 
     assert_false(nullptr == copy);
 
-    auto serialized = proto::AsymmetricKey{};
+    auto serialized = protobuf::AsymmetricKey{};
 
     {
         auto lock = Lock{copy->lock_};
@@ -259,7 +260,7 @@ auto EllipticCurve::serialize_public(EllipticCurve* in)
         if (false == copy->serialize(lock, serialized)) { return nullptr; }
     }
 
-    return std::make_shared<proto::AsymmetricKey>(serialized);
+    return std::make_shared<protobuf::AsymmetricKey>(serialized);
 }
 
 auto EllipticCurve::SignDER(

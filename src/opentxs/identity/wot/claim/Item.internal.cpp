@@ -65,7 +65,7 @@ auto Item::Section() const noexcept -> claim::SectionType { return {}; }
 
 auto Item::Serialize(Writer&&, bool) const noexcept -> bool { return {}; }
 
-auto Item::Serialize(proto::ContactItem&, bool) const noexcept -> bool
+auto Item::Serialize(protobuf::ContactItem&, bool) const noexcept -> bool
 {
     return {};
 }

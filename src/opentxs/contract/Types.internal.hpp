@@ -15,16 +15,16 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
 namespace opentxs::contract
 {
-using Signature = std::shared_ptr<proto::Signature>;
+using Signature = std::shared_ptr<protobuf::Signature>;
 }  // namespace opentxs::contract
 
 namespace opentxs

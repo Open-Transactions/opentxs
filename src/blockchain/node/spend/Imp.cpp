@@ -5,14 +5,14 @@
 
 #include "blockchain/node/spend/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
-#include <BlockchainTransactionProposal.pb.h>
-#include <BlockchainTransactionProposedNotification.pb.h>
-#include <BlockchainTransactionProposedOutput.pb.h>
-#include <BlockchainTransactionProposedSweep.pb.h>
-#include <BlockchainWalletKey.pb.h>
-#include <HDPath.pb.h>
 #include <boost/container/vector.hpp>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposedNotification.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposedOutput.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposedSweep.pb.h>
+#include <opentxs/protobuf/BlockchainWalletKey.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <compare>
@@ -33,7 +33,6 @@
 #include "internal/core/PaymentCode.hpp"
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "matterfi/PaymentCode.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -63,6 +62,7 @@
 #include "opentxs/identity/NymCapability.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -129,7 +129,7 @@ SpendPrivate::SpendPrivate(
 SpendPrivate::SpendPrivate(
     const api::session::Client& api,
     blockchain::Type chain,
-    const proto::BlockchainTransactionProposal& proto) noexcept(false)
+    const protobuf::BlockchainTransactionProposal& proto) noexcept(false)
     : SpendPrivate(
           api,
           proto.version(),
@@ -175,7 +175,8 @@ auto SpendPrivate::account(const PaymentCode& recipient) const noexcept(false)
     return out;
 }
 
-auto SpendPrivate::Add(const proto::BlockchainTransaction& tx) noexcept -> void
+auto SpendPrivate::Add(const protobuf::BlockchainTransaction& tx) noexcept
+    -> void
 {
     transaction_.emplace(tx);
 }
@@ -351,8 +352,8 @@ auto SpendPrivate::check_sender() const noexcept -> bool
 }
 
 auto SpendPrivate::deserialize_notification(
-    const proto::BlockchainTransactionProposedNotification& in) noexcept(false)
-    -> void
+    const protobuf::BlockchainTransactionProposedNotification&
+        in) noexcept(false) -> void
 {
     const auto sender =
         api_.Factory().Internal().Session().PaymentCode(in.sender());
@@ -370,7 +371,7 @@ auto SpendPrivate::deserialize_notification(
 }
 
 auto SpendPrivate::deserialize_output(
-    const proto::BlockchainTransactionProposedOutput& in) noexcept(false)
+    const protobuf::BlockchainTransactionProposedOutput& in) noexcept(false)
     -> void
 {
     using enum crypto::AddressStyle;
@@ -420,7 +421,8 @@ auto SpendPrivate::deserialize_output(
 }
 
 auto SpendPrivate::deserialize_sweep(
-    const proto::BlockchainTransactionProposedSweep& in) noexcept(false) -> void
+    const protobuf::BlockchainTransactionProposedSweep& in) noexcept(false)
+    -> void
 {
     using enum node::Funding;
 
@@ -597,11 +599,11 @@ auto SpendPrivate::PasswordPrompt() const noexcept -> std::string_view
     return reason_.GetDisplayString();
 }
 
-auto SpendPrivate::path() const noexcept(false) -> const proto::HDPath&
+auto SpendPrivate::path() const noexcept(false) -> const protobuf::HDPath&
 {
     if (false == payment_code_path_.has_value()) {
         payment_code_path_.emplace([&] {
-            auto p = proto::HDPath{};
+            auto p = protobuf::HDPath{};
 
             if (false == nym().Internal().PaymentCodePath(p)) {
                 throw std::runtime_error{"failed to load path"};
@@ -693,7 +695,7 @@ auto SpendPrivate::SendToPaymentCode(
 }
 
 auto SpendPrivate::Serialize(
-    proto::BlockchainTransactionProposal& out) const noexcept -> bool
+    protobuf::BlockchainTransactionProposal& out) const noexcept -> bool
 {
     try {
         out.set_version(version_);
@@ -736,10 +738,10 @@ auto SpendPrivate::Serialize(
 
 auto SpendPrivate::serialize_notification(
     const PaymentCode& sender,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PaymentCode& in,
-    proto::BlockchainTransactionProposedNotification& out) const noexcept(false)
-    -> void
+    protobuf::BlockchainTransactionProposedNotification& out) const
+    noexcept(false) -> void
 {
     out.set_version(notification_version_);
     *out.mutable_path() = path;
@@ -756,7 +758,7 @@ auto SpendPrivate::serialize_notification(
 auto SpendPrivate::serialize_address(
     std::string_view address,
     crypto::AddressStyle type,
-    proto::BlockchainTransactionProposedOutput& out) const noexcept -> void
+    protobuf::BlockchainTransactionProposedOutput& out) const noexcept -> void
 {
     switch (type) {
         using enum crypto::AddressStyle;
@@ -785,7 +787,7 @@ auto SpendPrivate::serialize_address(
 
 auto SpendPrivate::serialize_amount(
     const Amount& amount,
-    proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
+    protobuf::BlockchainTransactionProposedOutput& out) const noexcept(false)
     -> void
 {
     if (false == amount.Serialize(writer(out.mutable_amount()))) {
@@ -795,7 +797,7 @@ auto SpendPrivate::serialize_amount(
 
 auto SpendPrivate::serialize_output(
     const AddressRecipient& in,
-    proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
+    protobuf::BlockchainTransactionProposedOutput& out) const noexcept(false)
     -> void
 {
     const auto& [contact, amount, style, bytes] = in;
@@ -806,7 +808,7 @@ auto SpendPrivate::serialize_output(
 
 auto SpendPrivate::serialize_output(
     const PaymentCodeRecipient& in,
-    proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
+    protobuf::BlockchainTransactionProposedOutput& out) const noexcept(false)
     -> void
 {
     const auto& [contact, amount, recipient, keyID, pubkey] = in;
@@ -817,7 +819,7 @@ auto SpendPrivate::serialize_output(
 
 auto SpendPrivate::serialize_payment_code(
     const PaymentCodeRecipient& in,
-    proto::BlockchainTransactionProposedOutput& out) const noexcept(false)
+    protobuf::BlockchainTransactionProposedOutput& out) const noexcept(false)
     -> void
 {
     const auto& [contact, amount, recipient, keyID, pubkey] = in;
@@ -829,7 +831,7 @@ auto SpendPrivate::serialize_payment_code(
 }
 
 auto SpendPrivate::serialize_sweep(
-    proto::BlockchainTransactionProposedSweep& out) const noexcept(false)
+    protobuf::BlockchainTransactionProposedSweep& out) const noexcept(false)
     -> void
 {
     out.set_version(sweep_version_);

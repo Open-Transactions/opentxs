@@ -5,9 +5,9 @@
 
 #include "util/storage/tree/Credentials.hpp"  // IWYU pragma: associated
 
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <StorageCredentials.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/StorageCredentials.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
@@ -15,10 +15,6 @@
 #include <utility>
 
 #include "internal/crypto/key/Key.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
-#include "internal/serialization/protobuf/verify/StorageCredentials.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -26,6 +22,9 @@
 #include "opentxs/crypto/asymmetric/Mode.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/asymmetric/Types.hpp"
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"
+#include "opentxs/protobuf/syntax/StorageCredentials.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -81,7 +80,7 @@ auto Credentials::check_existing(const bool incoming, Metadata& metadata) const
     // hasn't been updated
     // ...so we have to load the credential just to be sure
     if (!isPrivate) {
-        std::shared_ptr<proto::Credential> existing;
+        std::shared_ptr<protobuf::Credential> existing;
         using enum ErrorReporting;
 
         if (!LoadProto(hash, existing, verbose)) {
@@ -102,7 +101,7 @@ auto Credentials::Delete(const identifier::Generic& id) -> bool
 
 auto Credentials::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageCredentials>{};
+    auto p = std::shared_ptr<protobuf::StorageCredentials>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -122,7 +121,7 @@ auto Credentials::init(const Hash& hash) noexcept(false) -> void
 
 auto Credentials::Load(
     const identifier::Generic& id,
-    std::shared_ptr<proto::Credential>& cred,
+    std::shared_ptr<protobuf::Credential>& cred,
     ErrorReporting checking) const -> bool
 {
     const auto lock = Lock{write_lock_};
@@ -158,14 +157,14 @@ auto Credentials::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Credentials::serialize() const -> proto::StorageCredentials
+auto Credentials::serialize() const -> protobuf::StorageCredentials
 {
-    proto::StorageCredentials serialized;
+    protobuf::StorageCredentials serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -188,14 +187,15 @@ auto Credentials::SetAlias(
     return set_alias(id, alias);
 }
 
-auto Credentials::Store(const proto::Credential& cred, std::string_view alias)
-    -> bool
+auto Credentials::Store(
+    const protobuf::Credential& cred,
+    std::string_view alias) -> bool
 {
     const auto lock = Lock{write_lock_};
     const auto id = factory_.Internal().Identifier(cred.id());
     const bool existingKey = (item_map_.end() != item_map_.find(id));
-    const bool incomingPrivate = (proto::KEYMODE_PRIVATE == cred.mode());
-    const bool incomingPublic = (proto::KEYMODE_PUBLIC == cred.mode());
+    const bool incomingPrivate = (protobuf::KEYMODE_PRIVATE == cred.mode());
+    const bool incomingPublic = (protobuf::KEYMODE_PUBLIC == cred.mode());
 
     auto& metadata = item_map_[id];
     auto& hash = std::get<0>(metadata);

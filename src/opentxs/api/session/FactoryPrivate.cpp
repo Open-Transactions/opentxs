@@ -5,18 +5,18 @@
 
 #include "opentxs/api/session/FactoryPrivate.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <BlockchainBlockHeader.pb.h>
-#include <BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
-#include <Ciphertext.pb.h>
-#include <Claim.pb.h>
-#include <Envelope.pb.h>  // IWYU pragma: keep
-#include <PaymentCode.pb.h>
-#include <PeerEnums.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
-#include <UnitDefinition.pb.h>
-#include <Verification.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Claim.pb.h>
+#include <opentxs/protobuf/Envelope.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/PaymentCode.pb.h>
+#include <opentxs/protobuf/PeerEnums.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
+#include <opentxs/protobuf/Verification.pb.h>
 #include <algorithm>
 #include <array>
 #include <functional>
@@ -66,11 +66,6 @@
 #include "internal/otx/common/trade/OTOffer.hpp"
 #include "internal/otx/common/trade/OTTrade.hpp"
 #include "internal/otx/smartcontract/OTSmartContract.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/BlockchainBlockHeader.hpp"
-#include "internal/serialization/protobuf/verify/Envelope.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/PMR.hpp"
 #include "internal/util/Pimpl.hpp"
@@ -135,6 +130,11 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/BlockchainBlockHeader.hpp"
+#include "opentxs/protobuf/syntax/Envelope.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -214,7 +214,7 @@ auto FactoryPrivate::AsymmetricKey(
     }
 }
 
-auto FactoryPrivate::AsymmetricKey(const proto::AsymmetricKey& serialized)
+auto FactoryPrivate::AsymmetricKey(const protobuf::AsymmetricKey& serialized)
     const noexcept -> opentxs::crypto::asymmetric::Key
 {
     auto output = asymmetric_.Internal().InstantiateKey(serialized);
@@ -449,7 +449,7 @@ auto FactoryPrivate::BasketContract(
 
 auto FactoryPrivate::BasketContract(
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) const noexcept(false)
+    const protobuf::UnitDefinition serialized) const noexcept(false)
     -> OTBasketContract
 {
     auto output =
@@ -610,7 +610,7 @@ auto FactoryPrivate::BlockchainTransaction(
 }
 
 auto FactoryPrivate::BlockchainTransaction(
-    const proto::BlockchainTransaction& serialized,
+    const protobuf::BlockchainTransaction& serialized,
     alloc::Default alloc) const noexcept -> blockchain::block::Transaction
 {
     return factory::BitcoinTransaction(
@@ -618,11 +618,11 @@ auto FactoryPrivate::BlockchainTransaction(
 }
 
 auto FactoryPrivate::BlockHeader(
-    const proto::BlockchainBlockHeader& proto,
+    const protobuf::BlockchainBlockHeader& proto,
     alloc::Default alloc) const noexcept -> blockchain::block::Header
 {
     try {
-        if (false == proto::Validate(proto, VERBOSE)) {
+        if (false == protobuf::syntax::check(LogError(), proto)) {
 
             throw std::runtime_error{"invalid protobuf"};
         }
@@ -670,7 +670,7 @@ auto FactoryPrivate::BlockHeaderFromProtobuf(
     alloc::Default alloc) const noexcept -> blockchain::block::Header
 {
     return BlockHeader(
-        proto::Factory<proto::BlockchainBlockHeader>(bytes), alloc);
+        protobuf::Factory<protobuf::BlockchainBlockHeader>(bytes), alloc);
 }
 
 auto FactoryPrivate::BlockHeaderFromNative(
@@ -801,19 +801,19 @@ auto FactoryPrivate::Claim(
 auto FactoryPrivate::Claim(ReadView serialized, alloc::Strategy alloc)
     const noexcept -> identity::wot::Claim
 {
-    return Claim(proto::Factory<proto::Claim>(serialized), alloc);
+    return Claim(protobuf::Factory<protobuf::Claim>(serialized), alloc);
 }
 
 auto FactoryPrivate::Claim(
     const identity::wot::Claimant& claimant,
     const identity::wot::claim::SectionType section,
-    const proto::ContactItem& proto,
+    const protobuf::ContactItem& proto,
     alloc::Strategy alloc) const noexcept -> identity::wot::Claim
 {
     return factory::Claim(api_.Self(), claimant, section, proto, alloc);
 }
 
-auto FactoryPrivate::Claim(const proto::Claim& proto, alloc::Strategy alloc)
+auto FactoryPrivate::Claim(const protobuf::Claim& proto, alloc::Strategy alloc)
     const noexcept -> identity::wot::Claim
 {
     return factory::Claim(api_.Self(), proto, alloc);
@@ -1023,7 +1023,7 @@ auto FactoryPrivate::CurrencyContract(
 
 auto FactoryPrivate::CurrencyContract(
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) const noexcept(false)
+    const protobuf::UnitDefinition serialized) const noexcept(false)
     -> OTCurrencyContract
 {
     auto output =
@@ -1051,14 +1051,14 @@ auto FactoryPrivate::Envelope(const opentxs::Armored& in) const noexcept(false)
     }
 
     return Envelope(
-        proto::Factory<opentxs::crypto::Envelope::SerializedType>(data));
+        protobuf::Factory<opentxs::crypto::Envelope::SerializedType>(data));
 }
 
 auto FactoryPrivate::Envelope(
     const opentxs::crypto::Envelope::SerializedType& serialized) const
     noexcept(false) -> OTEnvelope
 {
-    if (false == proto::Validate(serialized, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
         throw std::runtime_error("Invalid serialized envelope");
     }
 
@@ -1124,14 +1124,14 @@ auto FactoryPrivate::Identifier(const opentxs::Item& item, alloc::Default alloc)
 }
 
 auto FactoryPrivate::IdentifierFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
     return parent_.Internal().IdentifierFromPreimage(proto, std::move(alloc));
 }
 
 auto FactoryPrivate::IdentifierFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
@@ -1140,7 +1140,7 @@ auto FactoryPrivate::IdentifierFromPreimage(
 }
 
 auto FactoryPrivate::Identifier(
-    const proto::Identifier& in,
+    const protobuf::Identifier& in,
     alloc::Default alloc) const noexcept -> identifier::Generic
 {
     return parent_.Internal().Identifier(in, std::move(alloc));
@@ -1312,8 +1312,8 @@ auto FactoryPrivate::Keypair(
 }
 
 auto FactoryPrivate::Keypair(
-    const proto::AsymmetricKey& serializedPubkey,
-    const proto::AsymmetricKey& serializedPrivkey) const -> OTKeypair
+    const protobuf::AsymmetricKey& serializedPubkey,
+    const protobuf::AsymmetricKey& serializedPrivkey) const -> OTKeypair
 {
     auto pPrivateKey = asymmetric_.Internal().InstantiateKey(serializedPrivkey);
 
@@ -1342,8 +1342,8 @@ auto FactoryPrivate::Keypair(
     }
 }
 
-auto FactoryPrivate::Keypair(const proto::AsymmetricKey& serializedPubkey) const
-    -> OTKeypair
+auto FactoryPrivate::Keypair(
+    const protobuf::AsymmetricKey& serializedPubkey) const -> OTKeypair
 {
     auto pPublicKey = asymmetric_.Internal().InstantiateKey(serializedPubkey);
 
@@ -1622,8 +1622,9 @@ auto FactoryPrivate::Mint(
     return Mint(otx::blind::CashType::Lucre, notary, serverNym, unit);
 }
 
-auto FactoryPrivate::NotaryID(const proto::Identifier& in, alloc::Default alloc)
-    const noexcept -> identifier::Notary
+auto FactoryPrivate::NotaryID(
+    const protobuf::Identifier& in,
+    alloc::Default alloc) const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryID(in, std::move(alloc));
 }
@@ -1636,7 +1637,7 @@ auto FactoryPrivate::NotaryIDConvertSafe(
 }
 
 auto FactoryPrivate::NotaryIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::Notary
 {
@@ -1645,7 +1646,7 @@ auto FactoryPrivate::NotaryIDFromPreimage(
 }
 
 auto FactoryPrivate::NotaryIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::Notary
 {
     return parent_.Internal().NotaryIDFromPreimage(proto, std::move(alloc));
@@ -1770,8 +1771,8 @@ auto FactoryPrivate::Payment(
     return payment;
 }
 
-auto FactoryPrivate::PaymentCode(
-    const proto::PaymentCode& serialized) const noexcept -> opentxs::PaymentCode
+auto FactoryPrivate::PaymentCode(const protobuf::PaymentCode& serialized)
+    const noexcept -> opentxs::PaymentCode
 {
     return factory::PaymentCode(api_.Self(), serialized);
 }
@@ -1805,7 +1806,7 @@ auto FactoryPrivate::PaymentCodeFromBase58(const ReadView base58) const noexcept
 auto FactoryPrivate::PaymentCodeFromProtobuf(
     const ReadView proto) const noexcept -> opentxs::PaymentCode
 {
-    return PaymentCode(proto::Factory<proto::PaymentCode>(proto));
+    return PaymentCode(protobuf::Factory<protobuf::PaymentCode>(proto));
 }
 
 auto FactoryPrivate::PaymentPlan() const -> std::unique_ptr<OTPaymentPlan>
@@ -1904,7 +1905,7 @@ auto FactoryPrivate::PeerObject(
 
 auto FactoryPrivate::PeerObject(
     [[maybe_unused]] const Nym_p& signerNym,
-    [[maybe_unused]] const proto::PeerObject& serialized) const
+    [[maybe_unused]] const protobuf::PeerObject& serialized) const
     -> std::unique_ptr<opentxs::PeerObject>
 {
     LogError()()("Peer objects are only supported in client sessions").Flush();
@@ -1926,7 +1927,7 @@ auto FactoryPrivate::PeerObject(
 auto FactoryPrivate::PeerReply(ReadView bytes, alloc::Strategy alloc)
     const noexcept -> contract::peer::Reply
 {
-    return PeerReply(proto::Factory<proto::PeerReply>(bytes), alloc);
+    return PeerReply(protobuf::Factory<protobuf::PeerReply>(bytes), alloc);
 }
 
 auto FactoryPrivate::PeerReply(
@@ -1937,7 +1938,7 @@ auto FactoryPrivate::PeerReply(
 }
 
 auto FactoryPrivate::PeerReply(
-    const proto::PeerReply& proto,
+    const protobuf::PeerReply& proto,
     alloc::Strategy alloc) const noexcept -> contract::peer::Reply
 {
     const auto signerID = NymID(proto.recipient(), alloc.work_);
@@ -1945,7 +1946,7 @@ auto FactoryPrivate::PeerReply(
 
     if (false == signer.operator bool()) { return {alloc.result_}; }
 
-    using enum proto::PeerRequestType;
+    using enum protobuf::PeerRequestType;
 
     switch (proto.type()) {
         case PEERREQUEST_BAILMENT: {
@@ -1989,7 +1990,7 @@ auto FactoryPrivate::PeerReply(
 auto FactoryPrivate::PeerRequest(ReadView bytes, alloc::Strategy alloc)
     const noexcept -> contract::peer::Request
 {
-    return PeerRequest(proto::Factory<proto::PeerRequest>(bytes), alloc);
+    return PeerRequest(protobuf::Factory<protobuf::PeerRequest>(bytes), alloc);
 }
 
 auto FactoryPrivate::PeerRequest(
@@ -1999,7 +2000,7 @@ auto FactoryPrivate::PeerRequest(
     return PeerRequest(bytes.Bytes(), alloc);
 }
 auto FactoryPrivate::PeerRequest(
-    const proto::PeerRequest& proto,
+    const protobuf::PeerRequest& proto,
     alloc::Strategy alloc) const noexcept -> contract::peer::Request
 {
     const auto signerID = NymID(proto.initiator(), alloc.work_);
@@ -2007,7 +2008,7 @@ auto FactoryPrivate::PeerRequest(
 
     if (false == signer.operator bool()) { return {alloc.result_}; }
 
-    using enum proto::PeerRequestType;
+    using enum protobuf::PeerRequestType;
 
     switch (proto.type()) {
         case PEERREQUEST_BAILMENT: {
@@ -2073,7 +2074,7 @@ auto FactoryPrivate::Purse(
         context, unit, mint, totalValue, otx::blind::CashType::Lucre, reason);
 }
 
-auto FactoryPrivate::Purse(const proto::Purse& serialized) const noexcept
+auto FactoryPrivate::Purse(const protobuf::Purse& serialized) const noexcept
     -> otx::blind::Purse
 {
     return factory::Purse(api_.Self(), serialized);
@@ -2194,7 +2195,7 @@ auto FactoryPrivate::SecurityContract(
 
 auto FactoryPrivate::SecurityContract(
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) const noexcept(false)
+    const protobuf::UnitDefinition serialized) const noexcept(false)
     -> OTSecurityContract
 {
     auto output =
@@ -2362,7 +2363,7 @@ auto FactoryPrivate::SymmetricKey(
 
 auto FactoryPrivate::SymmetricKey(
     const opentxs::crypto::SymmetricProvider& engine,
-    const proto::SymmetricKey serialized,
+    const protobuf::SymmetricKey serialized,
     alloc::Default alloc) const noexcept -> opentxs::crypto::symmetric::Key
 {
     return {factory::SymmetricKey(api_.Self(), engine, serialized, alloc)};
@@ -2621,7 +2622,7 @@ auto FactoryPrivate::UnitDefinition() const noexcept -> OTUnitDefinition
 
 auto FactoryPrivate::UnitDefinition(
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) const noexcept(false)
+    const protobuf::UnitDefinition serialized) const noexcept(false)
     -> OTUnitDefinition
 {
     auto output =
@@ -2634,8 +2635,9 @@ auto FactoryPrivate::UnitDefinition(
     }
 }
 
-auto FactoryPrivate::UnitID(const proto::Identifier& in, alloc::Default alloc)
-    const noexcept -> identifier::UnitDefinition
+auto FactoryPrivate::UnitID(
+    const protobuf::Identifier& in,
+    alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitID(in, std::move(alloc));
 }
@@ -2648,14 +2650,14 @@ auto FactoryPrivate::UnitIDConvertSafe(
 }
 
 auto FactoryPrivate::UnitIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
     return parent_.Internal().UnitIDFromPreimage(proto, std::move(alloc));
 }
 
 auto FactoryPrivate::UnitIDFromPreimage(
-    const ProtobufType& proto,
+    const protobuf::MessageType& proto,
     const identifier::Algorithm type,
     alloc::Default alloc) const noexcept -> identifier::UnitDefinition
 {
@@ -2709,19 +2711,20 @@ auto FactoryPrivate::Verification(
 auto FactoryPrivate::Verification(ReadView serialized, alloc::Strategy alloc)
     const noexcept -> identity::wot::Verification
 {
-    return Verification(proto::Factory<proto::Verification>(serialized), alloc);
+    return Verification(
+        protobuf::Factory<protobuf::Verification>(serialized), alloc);
 }
 
 auto FactoryPrivate::Verification(
     const identifier::Nym& verifier,
-    const proto::VerificationItem& proto,
+    const protobuf::VerificationItem& proto,
     alloc::Strategy alloc) const noexcept -> identity::wot::Verification
 {
     return factory::Verification(api_.Self(), verifier, proto, alloc);
 }
 
 auto FactoryPrivate::Verification(
-    const proto::Verification& proto,
+    const protobuf::Verification& proto,
     alloc::Strategy alloc) const noexcept -> identity::wot::Verification
 {
     return factory::Verification(api_.Self(), proto, alloc);

@@ -766,6 +766,7 @@ if(OPENTXS_BUILD_TESTS)
 endif()
 
 add_subdirectory(generated)
+add_subdirectory(data)
 add_subdirectory(external)
 add_subdirectory(src)
 

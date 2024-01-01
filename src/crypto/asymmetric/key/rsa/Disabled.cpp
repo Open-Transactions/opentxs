@@ -12,7 +12,7 @@ namespace opentxs::factory
 auto RSAKey(
     const api::Session&,
     const crypto::AsymmetricProvider&,
-    const proto::AsymmetricKey&,
+    const protobuf::AsymmetricKey&,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::RSA
 {
     return {alloc};

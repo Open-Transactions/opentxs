@@ -7,7 +7,7 @@
 
 #include "api/crypto/blockchain/Blockchain.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <span>
 #include <utility>
 
@@ -16,7 +16,6 @@
 #include "internal/api/crypto/Null.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/api/crypto/Blockchain.hpp"
 #include "opentxs/api/crypto/Crypto.hpp"
 #include "opentxs/blockchain/protocol/bitcoin/base/block/Transaction.hpp"  // IWYU pragma: keep
@@ -26,6 +25,7 @@
 #include "opentxs/crypto/Bip43Purpose.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/HDSeed.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -71,7 +71,7 @@ auto Blockchain::Bip44Path(
     constexpr auto hard = static_cast<opentxs::crypto::Bip32Index>(
         opentxs::crypto::Bip32Child::HARDENED);
     const auto coin = Bip44(chain);
-    auto output = proto::HDPath{};
+    auto output = protobuf::HDPath{};
     output.set_version(1);
     seed.Internal().Serialize(*output.mutable_seed());
     output.add_child(

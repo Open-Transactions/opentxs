@@ -1,0 +1,30 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTPaymentWorkflow";
+option optimize_for = LITE_RUNTIME;
+
+import public "InstrumentRevision.proto";
+import public "PaymentEvent.proto";
+import public "PaymentWorkflowEnums.proto";
+
+message PaymentWorkflow
+{
+    optional uint32 version = 1;
+    optional string id = 2;
+    optional PaymentWorkflowType type = 3;
+    optional PaymentWorkflowState state = 4;
+    repeated InstrumentRevision source = 5;
+    optional string notary = 6;
+    repeated string party = 7;
+    repeated PaymentEvent event = 8;
+    repeated string unit = 9;
+    repeated string account = 10;
+    optional bool archived = 11;
+}

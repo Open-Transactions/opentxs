@@ -5,14 +5,14 @@
 
 #include "identity/Nym.hpp"  // IWYU pragma: associated
 
-#include <Authority.pb.h>
-#include <ContactData.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
-#include <Identifier.pb.h>
-#include <Nym.pb.h>
-#include <NymIDSource.pb.h>
-#include <Signature.pb.h>
+#include <opentxs/protobuf/Authority.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Identifier.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/NymIDSource.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <atomic>
 #include <iterator>
 #include <limits>
@@ -29,11 +29,6 @@
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Source.hpp"
 #include "internal/otx/common/util/Tag.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/ContactData.hpp"
-#include "internal/serialization/protobuf/verify/Nym.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -72,6 +67,11 @@
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/ContactData.hpp"
+#include "opentxs/protobuf/syntax/Nym.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -119,7 +119,7 @@ auto Factory::Nym(
                 identity::wot::claim::Data::SectionMap{}};
             const auto scope = blank.SetScope(NymToClaim(type), name);
             revised.Internal().SetContactData([&] {
-                auto out = proto::ContactData{};
+                auto out = protobuf::ContactData{};
                 scope.Serialize(out);
 
                 return out;
@@ -136,7 +136,7 @@ auto Factory::Nym(
 
 auto Factory::Nym(
     const api::Session& api,
-    const proto::Nym& serialized,
+    const protobuf::Nym& serialized,
     std::string_view alias) -> identity::internal::Nym*
 {
     try {
@@ -153,7 +153,7 @@ auto Factory::Nym(
     const ReadView& view,
     std::string_view alias) -> identity::internal::Nym*
 {
-    return Nym(api, proto::Factory<proto::Nym>(view), alias);
+    return Nym(api, protobuf::Factory<protobuf::Nym>(view), alias);
 }
 
 }  // namespace opentxs
@@ -195,7 +195,7 @@ Nym::Nym(
     , source_p_(std::move(source))
     , source_(*source_p_)
     , id_(source_.NymID())
-    , mode_(proto::NYM_PRIVATE)
+    , mode_(protobuf::NYM_PRIVATE)
     , version_(DefaultVersion)
     , index_(1)
     , alias_()
@@ -215,7 +215,7 @@ Nym::Nym(
 
 Nym::Nym(
     const api::Session& api,
-    const proto::Nym& serialized,
+    const protobuf::Nym& serialized,
     std::string_view alias) noexcept(false)
     : api_(api)
     , source_p_(opentxs::Factory::NymIDSource(api, serialized.source()))
@@ -242,7 +242,7 @@ Nym::Nym(
 
 auto Nym::add_contact_credential(
     const eLock& lock,
-    const proto::ContactData& data,
+    const protobuf::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     assert_true(verify_lock(lock));
@@ -264,7 +264,7 @@ auto Nym::add_contact_credential(
 
 auto Nym::add_verification_credential(
     const eLock& lock,
-    const proto::VerificationSet& data,
+    const protobuf::VerificationSet& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     assert_true(verify_lock(lock));
@@ -323,7 +323,7 @@ auto Nym::AddClaim(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -354,7 +354,7 @@ auto Nym::AddContract(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -382,7 +382,7 @@ auto Nym::AddEmail(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -413,7 +413,7 @@ auto Nym::AddPaymentCode(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -441,7 +441,7 @@ auto Nym::AddPhoneNumber(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -468,7 +468,7 @@ auto Nym::AddPreferredOTServer(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -497,7 +497,7 @@ auto Nym::AddSocialMediaProfile(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -517,7 +517,7 @@ auto Nym::Alias() const -> std::string_view { return alias_; }
 
 auto Nym::Serialize(Writer&& destination) const -> bool
 {
-    auto serialized = proto::Nym{};
+    auto serialized = protobuf::Nym{};
     if (false == Serialize(serialized)) { return false; }
 
     write(serialized, std::move(destination));
@@ -666,7 +666,7 @@ auto Nym::DeleteClaim(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -1005,7 +1005,7 @@ auto Nym::HasCapability(const NymCapability& capability) const -> bool
 
 auto Nym::HasPath() const -> bool
 {
-    auto path = proto::HDPath{};
+    auto path = protobuf::HDPath{};
 
     if (false == Path(path)) { return false; }
 
@@ -1027,10 +1027,10 @@ void Nym::init_claims(const eLock& lock) const
         assert_false(nullptr == it.second);
 
         const auto& credSet = *it.second;
-        auto serialized = proto::ContactData{};
+        auto serialized = protobuf::ContactData{};
         if (credSet.GetContactData(serialized)) {
-            assert_true(
-                proto::Validate(serialized, VERBOSE, proto::ClaimType::Normal));
+            assert_true(protobuf::syntax::check(
+                LogError(), serialized, protobuf::ClaimType::Normal));
 
             const wot::claim::Data claimCred(
                 api_, nymID, dataVersion, serialized);
@@ -1051,13 +1051,13 @@ auto Nym::load_authorities(
 {
     auto output = CredentialMap{};
 
-    if (false == proto::Validate<proto::Nym>(serialized, VERBOSE)) {
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
         throw std::runtime_error("Invalid serialized nym");
     }
 
-    const auto mode = (proto::NYM_PRIVATE == serialized.mode())
-                          ? proto::KEYMODE_PRIVATE
-                          : proto::KEYMODE_PUBLIC;
+    const auto mode = (protobuf::NYM_PRIVATE == serialized.mode())
+                          ? protobuf::KEYMODE_PRIVATE
+                          : protobuf::KEYMODE_PUBLIC;
 
     for (const auto& it : serialized.activecredentials()) {
         auto pCandidate = std::unique_ptr<identity::internal::Authority>{
@@ -1084,10 +1084,10 @@ auto Nym::load_revoked(
 {
     auto output = String::List{};
 
-    if (!opentxs::operator==(Serialized::default_instance(), serialized)) {
-        const auto mode = (proto::NYM_PRIVATE == serialized.mode())
-                              ? proto::KEYMODE_PRIVATE
-                              : proto::KEYMODE_PUBLIC;
+    if (Serialized::default_instance() != serialized) {
+        const auto mode = (protobuf::NYM_PRIVATE == serialized.mode())
+                              ? protobuf::KEYMODE_PRIVATE
+                              : protobuf::KEYMODE_PUBLIC;
 
         for (const auto& it : serialized.revokedcredentials()) {
             auto pCandidate = std::unique_ptr<identity::internal::Authority>{
@@ -1174,7 +1174,7 @@ auto Nym::normalize(
     return output;
 }
 
-auto Nym::path(const sLock& lock, proto::HDPath& output) const -> bool
+auto Nym::path(const sLock& lock, protobuf::HDPath& output) const -> bool
 {
     for (const auto& it : active_) {
         assert_false(nullptr == it.second);
@@ -1193,7 +1193,7 @@ auto Nym::path(const sLock& lock, proto::HDPath& output) const -> bool
     return false;
 }
 
-auto Nym::Path(proto::HDPath& output) const -> bool
+auto Nym::Path(protobuf::HDPath& output) const -> bool
 {
     auto lock = sLock{shared_lock_};
 
@@ -1205,7 +1205,7 @@ auto Nym::PathRoot() const -> const crypto::SeedID&
     auto lock = sLock{shared_lock_};
 
     if (false == seed_id_.has_value()) {
-        auto proto = proto::HDPath{};
+        auto proto = protobuf::HDPath{};
 
         if (path(lock, proto)) {
             seed_id_.emplace(api_.Factory().Internal().SeedID(proto.seed()));
@@ -1221,7 +1221,7 @@ auto Nym::PathChildSize() const -> int
 {
     auto lock = sLock{shared_lock_};
 
-    auto proto = proto::HDPath{};
+    auto proto = protobuf::HDPath{};
     if (false == path(lock, proto)) { return 0; }
     return proto.child_size();
 }
@@ -1230,7 +1230,7 @@ auto Nym::PathChild(int index) const -> std::uint32_t
 {
     auto lock = sLock{shared_lock_};
 
-    auto proto = proto::HDPath{};
+    auto proto = protobuf::HDPath{};
     if (false == path(lock, proto)) { return 0; }
     return proto.child(index);
 }
@@ -1239,7 +1239,7 @@ auto Nym::PaymentCodePublic() const -> opentxs::PaymentCode
 {
     if (identity::SourceType::Bip47 != source_.Type()) { return {}; }
 
-    auto serialized = proto::NymIDSource{};
+    auto serialized = protobuf::NymIDSource{};
 
     if (false == source_.Internal().Serialize(serialized)) { return {}; }
 
@@ -1251,7 +1251,7 @@ auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
     -> opentxs::PaymentCode
 {
     auto out = PaymentCodePublic();
-    auto path = proto::HDPath{};
+    auto path = protobuf::HDPath{};
 
     if (PaymentCodePath(path)) {
         const auto seed = api_.Factory().Internal().SeedID(path.seed());
@@ -1263,7 +1263,7 @@ auto Nym::PaymentCodeSecret(const PasswordPrompt& reason) const
 
 auto Nym::PaymentCodePath(Writer&& destination) const -> bool
 {
-    auto path = proto::HDPath{};
+    auto path = protobuf::HDPath{};
     if (false == PaymentCodePath(path)) {
         LogError()()("Failed to serialize payment code path to HDPath.")
             .Flush();
@@ -1276,9 +1276,9 @@ auto Nym::PaymentCodePath(Writer&& destination) const -> bool
     return true;
 }
 
-auto Nym::PaymentCodePath(proto::HDPath& output) const -> bool
+auto Nym::PaymentCodePath(protobuf::HDPath& output) const -> bool
 {
-    auto base = proto::HDPath{};
+    auto base = protobuf::HDPath{};
 
     if (false == Path(base)) { return false; }
 
@@ -1350,7 +1350,7 @@ void Nym::revoke_verification_credentials(const eLock& lock)
 auto Nym::SerializeCredentialIndex(Writer&& destination, const Mode mode) const
     -> bool
 {
-    auto serialized = proto::Nym{};
+    auto serialized = protobuf::Nym{};
     if (false == SerializeCredentialIndex(serialized, mode)) { return false; }
 
     return write(serialized, std::move(destination));
@@ -1366,9 +1366,9 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
     if (Mode::Abbreviated == mode) {
         index.set_mode(mode_);
 
-        if (proto::NYM_PRIVATE == mode_) { index.set_index(index_); }
+        if (protobuf::NYM_PRIVATE == mode_) { index.set_index(index_); }
     } else {
-        index.set_mode(proto::NYM_PUBLIC);
+        index.set_mode(protobuf::NYM_PUBLIC);
     }
 
     index.set_revision(revision_.load());
@@ -1379,7 +1379,7 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
-            auto credset = proto::Authority{};
+            auto credset = protobuf::Authority{};
             if (false ==
                 it.second->Serialize(credset, static_cast<bool>(mode))) {
                 return false;
@@ -1392,7 +1392,7 @@ auto Nym::SerializeCredentialIndex(Serialized& index, const Mode mode) const
 
     for (const auto& it : revoked_sets_) {
         if (nullptr != it.second) {
-            auto credset = proto::Authority{};
+            auto credset = protobuf::Authority{};
             if (false ==
                 it.second->Serialize(credset, static_cast<bool>(mode))) {
                 return false;
@@ -1426,12 +1426,12 @@ void Nym::SerializeNymIDSource(Tag& parent) const
 
 auto Nym::set_contact_data(
     const eLock& lock,
-    const proto::ContactData& data,
+    const protobuf::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     assert_true(verify_lock(lock));
 
-    auto version = proto::NymRequiredVersion(data.version(), version_);
+    auto version = protobuf::NymRequiredVersion(data.version(), version_);
 
     if ((0 == version) || version > MaxVersion) {
         LogError()()("Contact data version not supported by this nym.").Flush();
@@ -1445,7 +1445,8 @@ auto Nym::set_contact_data(
         return false;
     }
 
-    if (false == proto::Validate(data, VERBOSE, proto::ClaimType::Normal)) {
+    if (false == protobuf::syntax::check(
+                     LogError(), data, protobuf::ClaimType::Normal)) {
         LogError()()("Invalid contact data.").Flush();
 
         return false;
@@ -1486,7 +1487,7 @@ auto Nym::SetCommonName(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -1497,11 +1498,12 @@ auto Nym::SetContactData(
     const ReadView bytes,
     const opentxs::PasswordPrompt& reason) -> bool
 {
-    return SetContactData(proto::Factory<proto::ContactData>(bytes), reason);
+    return SetContactData(
+        protobuf::Factory<protobuf::ContactData>(bytes), reason);
 }
 
 auto Nym::SetContactData(
-    const proto::ContactData& data,
+    const protobuf::ContactData& data,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     const auto lock = eLock{shared_lock_};
@@ -1536,7 +1538,7 @@ auto Nym::SetScope(
     return set_contact_data(
         lock,
         [&] {
-            auto out = proto::ContactData{};
+            auto out = protobuf::ContactData{};
             contact_data_->Serialize(out);
             return out;
         }(),
@@ -1544,24 +1546,19 @@ auto Nym::SetScope(
 }
 
 auto Nym::Sign(
-    const ProtobufType& input,
+    const protobuf::MessageType& input,
     const crypto::SignatureRole role,
-    proto::Signature& signature,
+    protobuf::Signature& signature,
     const opentxs::PasswordPrompt& reason,
     const crypto::HashType hash) const -> bool
 {
     auto lock = sLock{shared_lock_};
-
-    bool haveSig = false;
-
-    auto preimage = [&input]() -> UnallocatedCString {
-        return proto::ToString(input);
-    };
+    auto haveSig = false;
 
     for (const auto& it : active_) {
         if (nullptr != it.second) {
             const bool success = it.second->Internal().Sign(
-                preimage,
+                [&input] { return protobuf::to_string(input); },
                 role,
                 opentxs::crypto::asymmetric::Role::Sign,
                 hash,
@@ -1671,8 +1668,9 @@ auto Nym::update_nym(
     return false;
 }
 
-auto Nym::Verify(const ProtobufType& input, proto::Signature& signature) const
-    -> bool
+auto Nym::Verify(
+    const protobuf::MessageType& input,
+    protobuf::Signature& signature) const -> bool
 {
     const auto copy{signature};
     signature.clear_signature();

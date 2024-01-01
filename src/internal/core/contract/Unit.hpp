@@ -26,10 +26,10 @@ namespace identifier
 class UnitDefinition;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Account;
 class AccountVisitor;
@@ -47,7 +47,7 @@ class Unit
     : virtual public opentxs::contract::Signable<identifier::UnitDefinition>
 {
 public:
-    using SerializedType = proto::UnitDefinition;
+    using SerializedType = protobuf::UnitDefinition;
 
     static const VersionNumber DefaultVersion;
     static const VersionNumber MaxVersion;

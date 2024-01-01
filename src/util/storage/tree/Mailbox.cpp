@@ -5,8 +5,8 @@
 
 #include "util/storage/tree/Mailbox.hpp"  // IWYU pragma: associated
 
-#include <StorageEnums.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/StorageEnums.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <atomic>
 #include <memory>
 #include <source_location>
@@ -14,12 +14,11 @@
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -56,7 +55,7 @@ auto Mailbox::Delete(const identifier::Generic& id) -> bool
 
 auto Mailbox::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -89,14 +88,14 @@ auto Mailbox::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Mailbox::serialize() const -> proto::StorageNymList
+auto Mailbox::serialize() const -> protobuf::StorageNymList
 {
-    proto::StorageNymList serialized;
+    protobuf::StorageNymList serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -109,7 +108,7 @@ auto Mailbox::serialize() const -> proto::StorageNymList
                 item.first,
                 item.second,
                 *serialized.add_nym(),
-                proto::STORAGEHASH_RAW);
+                protobuf::STORAGEHASH_RAW);
         }
     }
 

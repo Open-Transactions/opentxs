@@ -15,7 +15,7 @@ auto Bip32::Imp::DeriveKey(const EcdsaCurve&, const Secret&, const Path&) const
 
 auto Bip32::Imp::derive_private_key(
     const asymmetric::Algorithm,
-    const proto::HDPath&,
+    const protobuf::HDPath&,
     const ReadView,
     const ReadView,
     const ReadView,
@@ -27,7 +27,7 @@ auto Bip32::Imp::derive_private_key(
 
 auto Bip32::Imp::derive_public_key(
     const asymmetric::Algorithm,
-    const proto::HDPath&,
+    const protobuf::HDPath&,
     const ReadView,
     const ReadView,
     const Path&,

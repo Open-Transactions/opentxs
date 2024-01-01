@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <Ciphertext.pb.h>
 #include <cs_plain_guarded.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/Time.hpp"
@@ -41,10 +41,10 @@ class Bip32;
 class Bip39;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class Seed;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -62,9 +62,9 @@ public:
     const Secret entropy_;
     const identifier_type id_;
     const api::session::Storage* const storage_;
-    const proto::Ciphertext encrypted_words_;
-    const proto::Ciphertext encrypted_phrase_;
-    const proto::Ciphertext encrypted_entropy_;
+    const protobuf::Ciphertext encrypted_words_;
+    const protobuf::Ciphertext encrypted_phrase_;
+    const protobuf::Ciphertext encrypted_entropy_;
     const Time created_time_;
 
     auto Index() const noexcept -> Bip32Index;
@@ -108,7 +108,7 @@ public:
         const api::crypto::Symmetric& symmetric,
         const api::session::Factory& factory,
         const api::session::Storage& storage,
-        const proto::Seed& proto,
+        const protobuf::Seed& proto,
         const PasswordPrompt& reason) noexcept(false);
     Imp(const Imp& rhs) noexcept;
     Imp(Imp&&) = delete;
@@ -140,7 +140,7 @@ private:
         }
     };
     using Guarded = libguarded::plain_guarded<MutableData>;
-    using SerializeType = proto::Seed;
+    using SerializeType = protobuf::Seed;
 
     const api::Session& api_;
     // TODO switch to shared_guarded after
@@ -153,9 +153,9 @@ private:
         const Secret& entropy,
         const Secret& words,
         const Secret& phrase,
-        proto::Ciphertext& cwords,
-        proto::Ciphertext& cphrase,
-        const PasswordPrompt& reason) noexcept(false) -> proto::Ciphertext;
+        protobuf::Ciphertext& cwords,
+        protobuf::Ciphertext& cphrase,
+        const PasswordPrompt& reason) noexcept(false) -> protobuf::Ciphertext;
 
     auto save() const noexcept -> bool;
     auto save(const MutableData& data) const noexcept -> bool;

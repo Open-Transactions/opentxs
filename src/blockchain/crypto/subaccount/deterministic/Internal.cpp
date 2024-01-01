@@ -5,7 +5,7 @@
 
 #include "internal/blockchain/crypto/Deterministic.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 
 #include "internal/blockchain/crypto/HD.hpp"
 #include "internal/blockchain/crypto/PaymentCode.hpp"
@@ -92,7 +92,7 @@ auto Deterministic::LastGenerated(const Subchain) const noexcept
 
 auto Deterministic::Lookahead() const noexcept -> std::size_t { return {}; }
 
-auto Deterministic::Path() const noexcept -> proto::HDPath { return {}; }
+auto Deterministic::Path() const noexcept -> protobuf::HDPath { return {}; }
 
 auto Deterministic::PathRoot() const noexcept -> const opentxs::crypto::SeedID&
 {

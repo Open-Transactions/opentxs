@@ -9,9 +9,9 @@
 #include <cstddef>
 
 #include "internal/network/zeromq/message/Frame.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 
 namespace opentxs::network::zeromq
 {
@@ -46,7 +46,7 @@ public:
     Imp(const void* data, std::size_t size) noexcept;
     Imp(std::size_t size) noexcept;
     Imp() noexcept;
-    Imp(const ProtobufType& input) noexcept;
+    Imp(const protobuf::MessageType& input) noexcept;
     Imp(const Imp&) noexcept;
     Imp(Imp&&) = delete;
     auto operator=(const Imp&) -> Imp& = delete;

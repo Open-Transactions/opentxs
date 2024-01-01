@@ -70,10 +70,10 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionProposal;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -140,9 +140,9 @@ public:
         alloc::Default alloc) const noexcept -> Vector<UTXO>;
     auto GetWalletHeight() const noexcept -> block::Height;
     auto LoadProposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal>;
+        -> std::optional<protobuf::BlockchainTransactionProposal>;
     auto LoadProposals() const noexcept
-        -> UnallocatedVector<proto::BlockchainTransactionProposal>;
+        -> UnallocatedVector<protobuf::BlockchainTransactionProposal>;
     auto LookupContact(const Data& pubkeyHash) const noexcept
         -> UnallocatedSet<identifier::Generic>;
     auto PublishBalance() const noexcept -> void;
@@ -169,7 +169,7 @@ public:
     auto AddProposal(
         const Log& log,
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx,
+        const protobuf::BlockchainTransactionProposal& tx,
         alloc::Strategy alloc) noexcept -> bool;
     auto AdvanceTo(
         const Log& log,
@@ -182,7 +182,7 @@ public:
     auto FinalizeProposal(
         const Log& log,
         const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
+        const protobuf::BlockchainTransactionProposal& proposal,
         const block::Transaction& transaction,
         alloc::Strategy alloc) noexcept -> bool;
     auto FinalizeReorg(

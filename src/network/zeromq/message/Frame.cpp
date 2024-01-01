@@ -38,7 +38,8 @@ auto ZMQFrame(const void* data, const std::size_t size) noexcept
     return std::make_unique<ReturnType::Imp>(data, size).release();
 }
 
-auto ZMQFrame(const ProtobufType& data) noexcept -> network::zeromq::Frame
+auto ZMQFrame(const protobuf::MessageType& data) noexcept
+    -> network::zeromq::Frame
 {
     using ReturnType = network::zeromq::Frame;
 
@@ -85,7 +86,7 @@ Frame::Imp::Imp() noexcept
 {
 }
 
-Frame::Imp::Imp(const ProtobufType& input) noexcept
+Frame::Imp::Imp(const protobuf::MessageType& input) noexcept
     : Imp(input.ByteSizeLong())
 {
     input.SerializeToArray(data(), static_cast<int>(size()));

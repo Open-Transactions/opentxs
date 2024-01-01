@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <StorageServers.pb.h>
+#include <opentxs/protobuf/StorageServers.pb.h>
 #include <memory>
 #include <mutex>
 #include <string_view>
@@ -34,10 +34,10 @@ namespace identifier
 class Notary;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class ServerContract;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -62,14 +62,14 @@ public:
     auto Alias(const identifier::Notary& id) const -> UnallocatedCString;
     auto Load(
         const identifier::Notary& id,
-        std::shared_ptr<proto::ServerContract>& output,
+        std::shared_ptr<protobuf::ServerContract>& output,
         UnallocatedCString& alias,
         ErrorReporting checking) const -> bool;
 
     auto Delete(const identifier::Notary& id) -> bool;
     auto SetAlias(const identifier::Notary& id, std::string_view alias) -> bool;
     auto Store(
-        const proto::ServerContract& data,
+        const protobuf::ServerContract& data,
         std::string_view alias,
         UnallocatedCString& plaintext) -> bool;
 
@@ -86,7 +86,7 @@ private:
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const std::unique_lock<std::mutex>& lock) const -> bool final;
-    auto serialize() const -> proto::StorageServers;
+    auto serialize() const -> protobuf::StorageServers;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 
     Servers(

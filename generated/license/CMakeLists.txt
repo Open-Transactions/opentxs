@@ -55,7 +55,7 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/generated/protobuf/LICENSE.txt"
+  "${opentxs_SOURCE_DIR}/docs/protobuf.license"
   PROTOBUF_LICENSE_TEXT
 )
 file(

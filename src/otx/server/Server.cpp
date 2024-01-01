@@ -5,9 +5,9 @@
 
 #include "otx/server/Server.hpp"  // IWYU pragma: associated
 
-#include <OTXEnums.pb.h>
-#include <OTXPush.pb.h>
-#include <ServerContract.pb.h>
+#include <opentxs/protobuf/OTXEnums.pb.h>
+#include <opentxs/protobuf/OTXPush.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <filesystem>
@@ -27,7 +27,6 @@
 #include "internal/otx/common/Message.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
 #include "internal/otx/common/cron/OTCron.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/SharedPimpl.hpp"
 #include "opentxs/AddressType.hpp"  // IWYU pragma: keep
 #include "opentxs/Types.hpp"
@@ -67,6 +66,7 @@
 #include "opentxs/network/zeromq/socket/Direction.hpp"  // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Types.hpp"
 #include "opentxs/otx/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/NymEditor.hpp"
@@ -376,8 +376,9 @@ void Server::CreateMainFile(bool& mainFileExists)
                          : contract::Server::DefaultVersion);
         } else {
             LogError()()("Existing contract found. Restoring.").Flush();
-            const auto serialized = proto::StringToProto<proto::ServerContract>(
-                api_.Crypto(), existing);
+            const auto serialized =
+                protobuf::StringToProto<protobuf::ServerContract>(
+                    api_.Crypto(), existing);
 
             return wallet.Internal().Server(serialized);
         }
@@ -411,7 +412,7 @@ void Server::CreateMainFile(bool& mainFileExists)
 
     assert_false(nullptr == nym_server_);
 
-    auto proto = proto::ServerContract{};
+    auto proto = protobuf::ServerContract{};
     if (false == contract->Serialize(proto, true)) {
         LogConsole()()("Failed to serialize server contract.").Flush();
 
@@ -923,9 +924,9 @@ auto Server::nymbox_push(
 {
     auto output = zmq::Message{};
     output.AddFrame(nymID.asBase58(API().Crypto()));
-    proto::OTXPush push;
+    protobuf::OTXPush push;
     push.set_version(otx::OTX_PUSH_VERSION);
-    push.set_type(proto::OTXPUSH_NYMBOX);
+    push.set_type(protobuf::OTXPUSH_NYMBOX);
     push.set_item(String::Factory(item)->Get());
     output.Internal().AddFrame(push);
 

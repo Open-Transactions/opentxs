@@ -5,8 +5,8 @@
 
 #include "otx/client/Pair.hpp"  // IWYU pragma: associated
 
-#include <PairEvent.pb.h>
-#include <ZMQEnums.pb.h>
+#include <opentxs/protobuf/PairEvent.pb.h>
+#include <opentxs/protobuf/ZMQEnums.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <initializer_list>
@@ -681,9 +681,9 @@ auto Pair::check_rename(
         const auto published = pair_event_->Send([&] {
             auto out = opentxs::network::zeromq::Message{};
             out.Internal().AddFrame([&] {
-                auto proto = proto::PairEvent{};
+                auto proto = protobuf::PairEvent{};
                 proto.set_version(1);
-                proto.set_type(proto::PAIREVENT_RENAME);
+                proto.set_type(protobuf::PAIREVENT_RENAME);
                 proto.set_issuer(issuer.IssuerID().asBase58(api_.Crypto()));
 
                 return proto;
@@ -1095,9 +1095,9 @@ auto Pair::process_store_secret(
         const auto published = pair_event_->Send([&] {
             auto out = opentxs::network::zeromq::Message{};
             out.Internal().AddFrame([&] {
-                auto event = proto::PairEvent{};
+                auto event = protobuf::PairEvent{};
                 event.set_version(1);
-                event.set_type(proto::PAIREVENT_STORESECRET);
+                event.set_type(protobuf::PAIREVENT_STORESECRET);
                 event.set_issuer(issuerNymID.asBase58(api_.Crypto()));
 
                 return event;

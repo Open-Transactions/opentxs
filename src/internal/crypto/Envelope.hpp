@@ -18,10 +18,10 @@ namespace crypto
 class Envelope;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class Envelope;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class PasswordPrompt;
@@ -37,7 +37,7 @@ class Envelope
 {
 public:
     using Recipients = UnallocatedSet<Nym_p>;
-    using SerializedType = proto::Envelope;
+    using SerializedType = protobuf::Envelope;
 
     virtual auto Armored(opentxs::Armored& ciphertext) const noexcept
         -> bool = 0;

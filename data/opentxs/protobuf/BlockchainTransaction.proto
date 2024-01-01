@@ -1,0 +1,41 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTBlockchainTransaction";
+option optimize_for = LITE_RUNTIME;
+
+import public "BlockchainTransactionInput.proto";
+import public "BlockchainTransactionOutput.proto";
+import public "ContactItemType.proto";
+
+message BlockchainTransaction
+{
+    optional uint32 version = 1;
+    repeated ContactItemType chain = 2;
+    optional string txid = 3;
+    optional uint32 txversion = 4;
+    optional uint32 locktime = 5;
+    optional bytes serialized = 6;
+    repeated BlockchainTransactionInput input = 7;
+    repeated BlockchainTransactionOutput output = 8;
+    optional uint32 confirmations = 9;
+    optional string blockhash = 10;
+    optional uint32 blockindex = 11;
+    optional uint64 fee = 12;
+    optional int64 time = 13;
+    repeated string conflicts = 14;
+    optional string memo = 15;
+    optional uint32 segwit_flag = 16;
+    optional string wtxid = 17;
+    optional bool is_generation = 18;
+    optional int64 mined_height = 19;
+    optional bytes mined_block = 20;
+    optional bool is_dip_2 = 21;
+    optional bytes dip_2_extra_bytes = 22;
+}

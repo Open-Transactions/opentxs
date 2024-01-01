@@ -55,11 +55,11 @@ class Verification;
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class Nym;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -73,7 +73,7 @@ public:
     NymData(const NymData&);
     NymData(NymData&&);
 
-    OPENTXS_NO_EXPORT auto asPublicNym() const -> proto::Nym;
+    OPENTXS_NO_EXPORT auto asPublicNym() const -> protobuf::Nym;
     auto BestEmail() const -> UnallocatedCString;
     auto BestPhoneNumber() const -> UnallocatedCString;
     auto BestSocialMediaProfile(
@@ -149,7 +149,7 @@ public:
         const UnallocatedCString& name,
         const PasswordPrompt& reason) -> bool;
     OPENTXS_NO_EXPORT auto SetContactData(
-        const proto::ContactData& data,
+        const protobuf::ContactData& data,
         const PasswordPrompt& reason) -> bool;
     auto SetContactData(const ReadView& data, const PasswordPrompt& reason)
         -> bool;

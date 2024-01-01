@@ -5,20 +5,19 @@
 
 #include "util/storage/tree/Trunk.hpp"  // IWYU pragma: associated
 
-#include <Ciphertext.pb.h>
-#include <StorageItems.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/StorageItems.pb.h>
 #include <atomic>
 #include <functional>
 #include <source_location>
 #include <stdexcept>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageItems.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/identifier/Account.hpp"         // IWYU pragma: keep
 #include "opentxs/identifier/Notary.hpp"          // IWYU pragma: keep
 #include "opentxs/identifier/UnitDefinition.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/StorageItems.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Accounts.hpp"
 #include "util/storage/tree/Contacts.hpp"
@@ -190,7 +189,7 @@ auto Trunk::get_editor(
 
 auto Trunk::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageItems>{};
+    auto p = std::shared_ptr<protobuf::StorageItems>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -214,7 +213,7 @@ auto Trunk::init(const Hash& hash) noexcept(false) -> void
                 unit_root_ = read(proto.units());
 
                 if (proto.has_master_secret()) {
-                    master_key_ = std::make_shared<proto::Ciphertext>(
+                    master_key_ = std::make_shared<protobuf::Ciphertext>(
                         proto.master_secret());
                 }
             }
@@ -226,7 +225,7 @@ auto Trunk::init(const Hash& hash) noexcept(false) -> void
 }
 
 auto Trunk::Load(
-    std::shared_ptr<proto::Ciphertext>& output,
+    std::shared_ptr<protobuf::Ciphertext>& output,
     ErrorReporting checking) const -> bool
 {
     const auto lock = Lock{master_key_lock_};
@@ -312,7 +311,7 @@ auto Trunk::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
@@ -344,9 +343,9 @@ auto Trunk::seeds() const -> tree::Seeds*
     return get_child<tree::Seeds>(seed_lock_, seeds_, seed_root_);
 }
 
-auto Trunk::serialize() const -> proto::StorageItems
+auto Trunk::serialize() const -> protobuf::StorageItems
 {
-    auto proto = proto::StorageItems{};
+    auto proto = protobuf::StorageItems{};
     proto.set_version(version_);
 
     {
@@ -397,12 +396,12 @@ auto Trunk::servers() const -> tree::Servers*
     return get_child<tree::Servers>(server_lock_, servers_, server_root_);
 }
 
-auto Trunk::Store(const proto::Ciphertext& serialized) -> bool
+auto Trunk::Store(const protobuf::Ciphertext& serialized) -> bool
 {
     auto masterLock = Lock{master_key_lock_, std::defer_lock};
     auto writeLock = Lock{write_lock_, std::defer_lock};
     std::lock(masterLock, writeLock);
-    master_key_ = std::make_shared<proto::Ciphertext>(serialized);
+    master_key_ = std::make_shared<protobuf::Ciphertext>(serialized);
     masterLock.unlock();
 
     return save(writeLock);

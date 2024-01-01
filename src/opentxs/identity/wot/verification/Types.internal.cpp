@@ -15,10 +15,10 @@
 
 namespace opentxs::identity::wot::verification
 {
-using enum proto::VerificationKind;
+using enum protobuf::VerificationKind;
 using enum identity::wot::verification::Type;
 static constexpr auto proto_to_ot_ = frozen::make_unordered_map<
-    proto::VerificationKind,
+    protobuf::VerificationKind,
     identity::wot::verification::Type>({
     {VERIFICATIONKIND_ERROR, invalid},
     {VERIFICATIONKIND_AFFIRM, affirm},
@@ -30,9 +30,9 @@ static constexpr auto proto_to_ot_ = frozen::make_unordered_map<
 namespace opentxs::identity::wot::verification
 {
 auto translate(const identity::wot::verification::Type in) noexcept
-    -> proto::VerificationKind
+    -> protobuf::VerificationKind
 {
-    using enum proto::VerificationKind;
+    using enum protobuf::VerificationKind;
     static constexpr auto map = frozen::invert_unordered_map(proto_to_ot_);
 
     if (const auto* i = map.find(in); map.end() != i) {
@@ -45,7 +45,7 @@ auto translate(const identity::wot::verification::Type in) noexcept
 }
 }  // namespace opentxs::identity::wot::verification
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(const VerificationKind in) noexcept
     -> identity::wot::verification::Type
@@ -61,4 +61,4 @@ auto translate(const VerificationKind in) noexcept
         return invalid;
     }
 }
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

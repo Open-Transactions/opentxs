@@ -5,7 +5,7 @@
 
 #include "blockchain/crypto/subaccount/notification/Imp.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <functional>
 #include <memory>
 #include <utility>
@@ -28,7 +28,7 @@ NotificationPrivate::NotificationPrivate(
     const crypto::Account& parent,
     const identifier::Account& id,
     const opentxs::PaymentCode& code,
-    proto::HDPath&& path) noexcept(false)
+    protobuf::HDPath&& path) noexcept(false)
     : SubaccountPrivate(
           api,
           parent,

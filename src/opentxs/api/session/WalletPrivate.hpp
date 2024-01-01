@@ -112,7 +112,7 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Context;
 class Credential;
@@ -122,7 +122,7 @@ class PeerRequest;
 class ServerContract;
 class UnitDefinition;
 enum ContactItemType : int;
-}  // namespace proto
+}  // namespace protobuf
 
 class NymFile;
 class PasswordPrompt;
@@ -206,7 +206,7 @@ public:
         -> UnallocatedSet<identifier::Nym> final;
     auto LoadCredential(
         const identifier::Generic& id,
-        std::shared_ptr<proto::Credential>& credential) const -> bool final;
+        std::shared_ptr<protobuf::Credential>& credential) const -> bool final;
     auto LocalNymCount() const -> std::size_t final;
     auto LocalNyms() const -> Set<identifier::Nym> final;
     auto Nym(const PasswordPrompt& reason, const UnallocatedCString& name) const
@@ -228,7 +228,7 @@ public:
         const identity::Type type,
         const PasswordPrompt& reason,
         const UnallocatedCString& name) const -> Nym_p final;
-    auto Nym(const proto::Nym& nym) const -> Nym_p final;
+    auto Nym(const protobuf::Nym& nym) const -> Nym_p final;
     auto NymByIDPartialMatch(const UnallocatedCString& partialId) const
         -> Nym_p final;
     auto NymList() const -> ObjectList final;
@@ -246,8 +246,8 @@ public:
         const identifier::Generic& replyOrRequest) const -> bool final;
     auto PeerReplyCreate(
         const identifier::Nym& nym,
-        const proto::PeerRequest& request,
-        const proto::PeerReply& reply) const -> bool final;
+        const protobuf::PeerRequest& request,
+        const protobuf::PeerReply& reply) const -> bool final;
     auto PeerReplyCreateRollback(
         const identifier::Nym& nym,
         const identifier::Generic& request,
@@ -271,7 +271,7 @@ public:
         const identifier::Generic& reply) const -> bool final;
     auto PeerRequestCreate(
         const identifier::Nym& nym,
-        const proto::PeerRequest& request) const -> bool final;
+        const protobuf::PeerRequest& request) const -> bool final;
     auto PeerRequestCreateRollback(
         const identifier::Nym& nym,
         const identifier::Generic& request) const -> bool final;
@@ -306,7 +306,7 @@ public:
     auto RemoveServer(const identifier::Notary& id) const -> bool final;
     auto RemoveUnitDefinition(const identifier::UnitDefinition& id) const
         -> bool final;
-    auto SaveCredential(const proto::Credential& credential) const
+    auto SaveCredential(const protobuf::Credential& credential) const
         -> bool final;
     auto SecurityContract(
         const UnallocatedCString& nymid,
@@ -331,7 +331,7 @@ public:
         const identifier::Notary& id,
         const std::chrono::milliseconds& timeout = 0ms) const
         -> OTServerContract final;
-    auto Server(const proto::ServerContract& contract) const
+    auto Server(const protobuf::ServerContract& contract) const
         -> OTServerContract final;
     auto ServerContext(
         const identifier::Nym& localNymID,
@@ -352,7 +352,7 @@ public:
         const identifier::UnitDefinition& id,
         const std::chrono::milliseconds& timeout = 0ms) const
         -> OTUnitDefinition final;
-    auto UnitDefinition(const proto::UnitDefinition& contract) const
+    auto UnitDefinition(const protobuf::UnitDefinition& contract) const
         -> OTUnitDefinition final;
     auto UnitDefinitionList() const -> ObjectList final;
     auto UpdateAccount(
@@ -454,9 +454,9 @@ private:
         PurseID,
         std::pair<std::shared_mutex, otx::blind::Purse>>;
     using UnitNameMap =
-        UnallocatedMap<UnallocatedCString, proto::ContactItemType>;
+        UnallocatedMap<UnallocatedCString, protobuf::ContactItemType>;
     using UnitNameReverse =
-        UnallocatedMap<proto::ContactItemType, UnallocatedCString>;
+        UnallocatedMap<protobuf::ContactItemType, UnallocatedCString>;
     using GuardedSocket = libguarded::deferred_guarded<
         opentxs::network::zeromq::socket::Raw,
         std::shared_mutex>;
@@ -507,14 +507,14 @@ private:
         std::string_view alias,
         const UnallocatedCString& serialized) const -> opentxs::Account*;
     virtual void instantiate_client_context(
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& localNym,
         const Nym_p& remoteNym,
         std::shared_ptr<otx::context::internal::Base>& output) const
     {
     }
     virtual void instantiate_server_context(
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         const Nym_p& localNym,
         const Nym_p& remoteNym,
         std::shared_ptr<otx::context::internal::Base>& output) const

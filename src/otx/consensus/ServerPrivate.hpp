@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::DeliveryState
+// IWYU pragma: no_forward_declare opentxs::protobuf::DeliveryState
 
 #pragma once
 
-#include <ConsensusEnums.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/ConsensusEnums.pb.h>  // IWYU pragma: keep
 #include <atomic>
 #include <cstdint>
 #include <future>
@@ -56,10 +56,10 @@ class ManagedNumber;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Context;
-}  // namespace proto
+}  // namespace protobuf
 
 class Ledger;
 class Message;
@@ -89,7 +89,7 @@ public:
     std::atomic<std::uint64_t> revision_;
     std::atomic<TransactionNumber> highest_transaction_number_;
     TransactionNumbers tentative_transaction_numbers_;
-    std::atomic<proto::DeliveryState> state_;
+    std::atomic<protobuf::DeliveryState> state_;
     std::atomic<otx::LastReplyStatus> last_status_;
     std::shared_ptr<opentxs::Message> pending_message_;
     ExtraArgs pending_args_;
@@ -116,7 +116,7 @@ public:
         const VersionNumber targetVersion,
         const network::zeromq::socket::Publish& requestSent,
         const network::zeromq::socket::Publish& replyReceived,
-        const proto::Context& serialized,
+        const protobuf::Context& serialized,
         network::ServerConnection& connection) noexcept;
     ServerPrivate() = delete;
     ServerPrivate(const ServerPrivate&) = delete;

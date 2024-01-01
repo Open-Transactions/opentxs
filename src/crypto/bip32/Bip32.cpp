@@ -7,8 +7,8 @@
 
 #include "opentxs/crypto/Bip32.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
-#include <Identifier.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Identifier.pb.h>
 #include <cstddef>
 #include <memory>
 #include <sstream>
@@ -25,12 +25,12 @@
 
 namespace opentxs::crypto
 {
-auto Print(const proto::HDPath& node) noexcept -> UnallocatedCString
+auto Print(const protobuf::HDPath& node) noexcept -> UnallocatedCString
 {
     return Print(node, true);
 }
 
-auto Print(const proto::HDPath& node, bool showSeedID) noexcept
+auto Print(const protobuf::HDPath& node, bool showSeedID) noexcept
     -> UnallocatedCString
 {
     auto output = std::stringstream{};

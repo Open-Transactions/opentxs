@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCResponse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -57,10 +57,11 @@ struct Message::Imp {
     virtual auto asListNyms() const noexcept -> const response::ListNyms&;
     virtual auto asSendPayment() const noexcept -> const response::SendPayment&;
 
-    virtual auto serialize(proto::RPCResponse& dest) const noexcept -> bool;
+    virtual auto serialize(protobuf::RPCResponse& dest) const noexcept -> bool;
     auto serialize(Writer&& dest) const noexcept -> bool;
-    auto serialize_identifiers(proto::RPCResponse& dest) const noexcept -> void;
-    auto serialize_tasks(proto::RPCResponse& dest) const noexcept -> void;
+    auto serialize_identifiers(protobuf::RPCResponse& dest) const noexcept
+        -> void;
+    auto serialize_tasks(protobuf::RPCResponse& dest) const noexcept -> void;
 
     Imp(const Message* parent) noexcept;
     Imp(const Message* parent,
@@ -74,7 +75,8 @@ struct Message::Imp {
         const request::Message& request,
         Responses&& response,
         Tasks&& tasks) noexcept;
-    Imp(const Message* parent, const proto::RPCResponse& serialized) noexcept;
+    Imp(const Message* parent,
+        const protobuf::RPCResponse& serialized) noexcept;
     Imp() noexcept = delete;
     Imp(const Imp&) = delete;
     Imp(Imp&&) = delete;

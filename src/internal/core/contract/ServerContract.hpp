@@ -29,10 +29,10 @@ namespace identifier
 class Notary;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class ServerContract;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -64,7 +64,7 @@ public:
     using Signable::Serialize;
     virtual auto Serialize(Writer&& destination, bool includeNym) const
         -> bool = 0;
-    virtual auto Serialize(proto::ServerContract&, bool includeNym = false)
+    virtual auto Serialize(protobuf::ServerContract&, bool includeNym = false)
         const -> bool = 0;
     virtual auto Statistics(String& strContents) const -> bool = 0;
     virtual auto TransportKey() const -> const Data& = 0;

@@ -5,9 +5,9 @@
 
 #include "interface/ui/accountactivity/TransferBalanceItem.hpp"  // IWYU pragma: associated
 
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <cstdint>
 #include <memory>
 
@@ -42,8 +42,8 @@ TransferBalanceItem::TransferBalanceItem(
     , transfer_()
 {
     startup(
-        extract_custom<proto::PaymentWorkflow>(custom, 0),
-        extract_custom<proto::PaymentEvent>(custom, 1));
+        extract_custom<protobuf::PaymentWorkflow>(custom, 0),
+        extract_custom<protobuf::PaymentEvent>(custom, 1));
 }
 
 auto TransferBalanceItem::effective_amount() const noexcept -> opentxs::Amount
@@ -116,15 +116,15 @@ auto TransferBalanceItem::reindex(
 {
     auto output = BalanceItem::reindex(key, custom);
     output |= startup(
-        extract_custom<proto::PaymentWorkflow>(custom, 0),
-        extract_custom<proto::PaymentEvent>(custom, 1));
+        extract_custom<protobuf::PaymentWorkflow>(custom, 0),
+        extract_custom<protobuf::PaymentEvent>(custom, 1));
 
     return output;
 }
 
 auto TransferBalanceItem::startup(
-    const proto::PaymentWorkflow workflow,
-    const proto::PaymentEvent event) noexcept -> bool
+    const protobuf::PaymentWorkflow workflow,
+    const protobuf::PaymentEvent event) noexcept -> bool
 {
     auto lock = eLock{shared_lock_};
 
@@ -142,7 +142,7 @@ auto TransferBalanceItem::startup(
     switch (type_) {
         case otx::client::StorageBox::OUTGOINGTRANSFER: {
             switch (event.type()) {
-                case proto::PAYMENTEVENTTYPE_ACKNOWLEDGE: {
+                case protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE: {
                     text = "Sent transfer #" + number + " to ";
 
                     if (0 < workflow.party_size()) {
@@ -154,7 +154,7 @@ auto TransferBalanceItem::startup(
                                     api_.Crypto());
                     }
                 } break;
-                case proto::PAYMENTEVENTTYPE_COMPLETE: {
+                case protobuf::PAYMENTEVENTTYPE_COMPLETE: {
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {
@@ -165,7 +165,7 @@ auto TransferBalanceItem::startup(
         } break;
         case otx::client::StorageBox::INCOMINGTRANSFER: {
             switch (event.type()) {
-                case proto::PAYMENTEVENTTYPE_CONVEY: {
+                case protobuf::PAYMENTEVENTTYPE_CONVEY: {
                     text = "Received transfer #" + number + " from ";
 
                     if (0 < workflow.party_size()) {
@@ -177,7 +177,7 @@ auto TransferBalanceItem::startup(
                                     api_.Crypto());
                     }
                 } break;
-                case proto::PAYMENTEVENTTYPE_COMPLETE: {
+                case protobuf::PAYMENTEVENTTYPE_COMPLETE: {
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {
@@ -192,7 +192,7 @@ auto TransferBalanceItem::startup(
                 transfer_->GetDestinationAcctID().asBase58(api_.Crypto());
 
             switch (event.type()) {
-                case proto::PAYMENTEVENTTYPE_ACKNOWLEDGE: {
+                case protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE: {
                     if (in) {
                         text = "Received internal transfer #" + number +
                                " from account " +
@@ -205,7 +205,7 @@ auto TransferBalanceItem::startup(
                                    api_.Crypto());
                     }
                 } break;
-                case proto::PAYMENTEVENTTYPE_COMPLETE: {
+                case protobuf::PAYMENTEVENTTYPE_COMPLETE: {
                     text = "Transfer #" + number + " cleared.";
                 } break;
                 default: {

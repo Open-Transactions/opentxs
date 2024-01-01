@@ -5,21 +5,17 @@
 
 #include "util/storage/tree/PaymentWorkflows.hpp"  // IWYU pragma: associated
 
-#include <InstrumentRevision.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <StoragePaymentWorkflows.pb.h>
-#include <StorageWorkflowIndex.pb.h>
-#include <StorageWorkflowType.pb.h>
+#include <opentxs/protobuf/InstrumentRevision.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/StoragePaymentWorkflows.pb.h>
+#include <opentxs/protobuf/StorageWorkflowIndex.pb.h>
+#include <opentxs/protobuf/StorageWorkflowType.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 
 #include "internal/api/session/Types.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/PaymentWorkflow.hpp"
-#include "internal/serialization/protobuf/verify/StoragePaymentWorkflows.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -27,6 +23,10 @@
 #include "opentxs/otx/client/PaymentWorkflowState.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/PaymentWorkflowType.hpp"   // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/PaymentWorkflow.hpp"
+#include "opentxs/protobuf/syntax/StoragePaymentWorkflows.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -124,7 +124,7 @@ auto PaymentWorkflows::GetState(const identifier::Generic& workflowID) const
 
 auto PaymentWorkflows::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StoragePaymentWorkflows>{};
+    auto p = std::shared_ptr<protobuf::StoragePaymentWorkflows>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -212,12 +212,12 @@ auto PaymentWorkflows::ListByState(
 
 auto PaymentWorkflows::Load(
     const identifier::Generic& id,
-    std::shared_ptr<proto::PaymentWorkflow>& output,
+    std::shared_ptr<protobuf::PaymentWorkflow>& output,
     ErrorReporting checking) const -> bool
 {
     UnallocatedCString alias;
 
-    return load_proto<proto::PaymentWorkflow>(id, output, alias, checking);
+    return load_proto<protobuf::PaymentWorkflow>(id, output, alias, checking);
 }
 
 auto PaymentWorkflows::LookupBySource(const identifier::Generic& sourceID) const
@@ -265,14 +265,14 @@ auto PaymentWorkflows::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
+auto PaymentWorkflows::serialize() const -> protobuf::StoragePaymentWorkflows
 {
-    proto::StoragePaymentWorkflows serialized;
+    protobuf::StoragePaymentWorkflows serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -344,7 +344,7 @@ auto PaymentWorkflows::serialize() const -> proto::StoragePaymentWorkflows
 }
 
 auto PaymentWorkflows::Store(
-    const proto::PaymentWorkflow& data,
+    const protobuf::PaymentWorkflow& data,
     UnallocatedCString& plaintext) -> bool
 {
     const auto lock = Lock{write_lock_};

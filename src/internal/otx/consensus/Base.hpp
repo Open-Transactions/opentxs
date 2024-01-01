@@ -30,10 +30,10 @@ class Base;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Context;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 }  // namespace opentxs
@@ -81,7 +81,7 @@ public:
     virtual auto RemoveAcknowledgedNumber(const RequestNumbers& req)
         -> bool = 0;
     virtual void Reset() = 0;
-    virtual auto Refresh(proto::Context& out, const PasswordPrompt& reason)
+    virtual auto Refresh(protobuf::Context& out, const PasswordPrompt& reason)
         -> bool = 0;
     virtual void SetLocalNymboxHash(const identifier::Generic& hash) = 0;
     virtual void SetRemoteNymboxHash(const identifier::Generic& hash) = 0;

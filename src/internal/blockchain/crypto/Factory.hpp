@@ -54,13 +54,13 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Bip47Channel;
 class BlockchainEthereumAccountData;
 class HDAccount;
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class PaymentCode;
@@ -82,7 +82,7 @@ auto BlockchainEthereumSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
@@ -90,13 +90,13 @@ auto BlockchainEthereumSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::BlockchainEthereumAccountData& proto) noexcept
+    const protobuf::BlockchainEthereumAccountData& proto) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const blockchain::crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
@@ -104,7 +104,7 @@ auto BlockchainHDSubaccount(
     const api::Session& api,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::HDAccount& serialized) noexcept
+    const protobuf::HDAccount& serialized) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainNotificationSubaccount(
     const api::Session& api,
@@ -120,7 +120,7 @@ auto BlockchainPCSubaccount(
     const identifier::Account& id,
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainPCSubaccount(
@@ -128,7 +128,7 @@ auto BlockchainPCSubaccount(
     const api::session::Contacts& contacts,
     const blockchain::crypto::Account& parent,
     const identifier::Account& id,
-    const proto::Bip47Channel& serialized) noexcept
+    const protobuf::Bip47Channel& serialized) noexcept
     -> std::shared_ptr<blockchain::crypto::internal::Subaccount>;
 auto BlockchainWalletKeys(
     const api::Session& api,

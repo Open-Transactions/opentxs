@@ -5,8 +5,8 @@
 
 #include "interface/ui/accountactivity/BlockchainBalanceItem.hpp"  // IWYU pragma: associated
 
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
 #include <memory>
 #include <utility>
 
@@ -83,8 +83,8 @@ BlockchainBalanceItem::BlockchainBalanceItem(
     , confirmations_(extract_custom<int>(custom, 6))
 {
     // NOTE Avoids memory leaks
-    extract_custom<proto::PaymentWorkflow>(custom, 0);
-    extract_custom<proto::PaymentEvent>(custom, 1);
+    extract_custom<protobuf::PaymentWorkflow>(custom, 0);
+    extract_custom<protobuf::PaymentEvent>(custom, 1);
 }
 
 auto BlockchainBalanceItem::Contacts() const noexcept
@@ -120,8 +120,8 @@ auto BlockchainBalanceItem::reindex(
 {
     using Transaction = opentxs::blockchain::block::Transaction;
 
-    extract_custom<proto::PaymentWorkflow>(custom, 0);
-    extract_custom<proto::PaymentEvent>(custom, 1);
+    extract_custom<protobuf::PaymentWorkflow>(custom, 0);
+    extract_custom<protobuf::PaymentEvent>(custom, 1);
     const auto tx =
         std::move(extract_custom<Transaction>(custom, 2)).asBitcoin();
     auto output = BalanceItem::reindex(key, custom);

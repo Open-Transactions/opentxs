@@ -5,8 +5,8 @@
 
 #include "util/storage/tree/Nyms.hpp"  // IWYU pragma: associated
 
-#include <Nym.pb.h>
-#include <StorageNymList.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/StorageNymList.pb.h>
 #include <atomic>
 #include <functional>
 #include <source_location>
@@ -16,9 +16,6 @@
 #include <variant>
 
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageNymList.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Flag.hpp"
 #include "internal/util/P0330.hpp"
@@ -28,6 +25,9 @@
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/StorageNymList.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Node.hpp"
@@ -96,7 +96,7 @@ auto Nyms::Exists(const identifier::Nym& id) const -> bool
 
 auto Nyms::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageNymList>{};
+    auto p = std::shared_ptr<protobuf::StorageNymList>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -220,7 +220,7 @@ auto Nyms::save(const Lock& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     assert_true(current_version_ == serialized.version());
 
@@ -245,9 +245,9 @@ auto Nyms::save(tree::Nym* nym, const Lock& lock, const identifier::Nym& id)
     if (false == save(lock)) { LogAbort()()("failed to save nym").Abort(); }
 }
 
-auto Nyms::serialize() const -> proto::StorageNymList
+auto Nyms::serialize() const -> protobuf::StorageNymList
 {
-    auto output = proto::StorageNymList{};
+    auto output = protobuf::StorageNymList{};
     output.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -322,7 +322,7 @@ auto Nyms::upgrade_create_local_nym_index(const Lock& lock) noexcept -> void
     for (const auto& index : item_map_) {
         const auto id = factory_.Internal().NymIDConvertSafe(index.first);
         const auto& node = *nym(lock, id);
-        auto credentials = std::make_shared<proto::Nym>();
+        auto credentials = std::make_shared<protobuf::Nym>();
         auto alias = UnallocatedCString{};
         using enum ErrorReporting;
         const auto loaded = node.Load(credentials, alias, verbose);

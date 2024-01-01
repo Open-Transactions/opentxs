@@ -5,8 +5,8 @@
 
 #include "internal/otx/common/Contract.hpp"  // IWYU pragma: associated
 
-#include <Nym.pb.h>
 #include <irrxml/irrXML.hpp>
+#include <opentxs/protobuf/Nym.pb.h>
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -1444,7 +1444,7 @@ void Contract::CreateInnerContents(Tag& parent)
                 auto strNymID = String::Factory();
                 pNym->GetIdentifier(strNymID);
 
-                auto publicNym = proto::Nym{};
+                auto publicNym = protobuf::Nym{};
                 assert_true(pNym->Internal().Serialize(publicNym));
 
                 TagPtr pTag(new Tag(str_name));  // "signer"

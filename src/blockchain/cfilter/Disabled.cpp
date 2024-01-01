@@ -20,7 +20,7 @@ auto GCS(
     return {};
 }
 
-auto GCS(const api::Session&, const proto::GCS&, alloc::Default) noexcept
+auto GCS(const api::Session&, const protobuf::GCS&, alloc::Default) noexcept
     -> blockchain::cfilter::GCS
 {
     return {};

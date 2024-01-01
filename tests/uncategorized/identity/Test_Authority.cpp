@@ -3,15 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include <Authority.pb.h>
-#include <ContactData.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
-#include <Signature.pb.h>
-#include <VerificationItem.pb.h>
-#include <VerificationSet.pb.h>
 #include <gtest/gtest.h>
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/Authority.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
+#include <opentxs/protobuf/VerificationSet.pb.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -70,7 +70,7 @@ TEST_F(Authority, GetPrivateAuthKey_DefaultSetup_ShouldReturnProperData)
 
 TEST_F(Authority, GetVerificationSet_DefaultSetup_ShouldReturnFalse)
 {
-    ot::proto::VerificationSet verificationSet;
+    ot::protobuf::VerificationSet verificationSet;
     EXPECT_FALSE(authority_->GetVerificationSet(verificationSet));
     EXPECT_FALSE(verificationSet.has_version());
 }
@@ -79,19 +79,19 @@ TEST_F(
     Authority,
     GetVerificationSet_AddVerificationCredentialCalledFirst_ShouldReturnProperData)
 {
-    ot::proto::VerificationSet verificationSet;
+    ot::protobuf::VerificationSet verificationSet;
     verificationSet.set_version(1);
     EXPECT_TRUE(
         authority_->AddVerificationCredential(verificationSet, reason_));
 
-    ot::proto::VerificationSet verificationSet2;
+    ot::protobuf::VerificationSet verificationSet2;
     EXPECT_TRUE(authority_->GetVerificationSet(verificationSet2));
     EXPECT_EQ(verificationSet.version(), 1);
 }
 
 TEST_F(Authority, GetContactData_DefaultSetup_ShouldReturnFalse)
 {
-    ot::proto::ContactData contactData;
+    ot::protobuf::ContactData contactData;
     EXPECT_FALSE(authority_->GetContactData(contactData));
     EXPECT_FALSE(contactData.has_version());
 }
@@ -100,11 +100,11 @@ TEST_F(
     Authority,
     GetContactData_AddContactCredentialCalledFirst_ShouldReturnCorrectData)
 {
-    ot::proto::ContactData contactData;
+    ot::protobuf::ContactData contactData;
     contactData.set_version(version_);
     EXPECT_TRUE(authority_->AddContactCredential(contactData, reason_));
 
-    ot::proto::ContactData contactData2;
+    ot::protobuf::ContactData contactData2;
     EXPECT_TRUE(authority_->GetContactData(contactData2));
     EXPECT_EQ(contactData2.version(), version_);
 }
@@ -185,7 +185,7 @@ TEST_F(
     authority_->RevokeContactCredentials(list);
     EXPECT_TRUE(list.empty());
 
-    ot::proto::ContactData contactData;
+    ot::protobuf::ContactData contactData;
     contactData.set_version(version_);
     EXPECT_TRUE(authority_->AddContactCredential(contactData, reason_));
 
@@ -201,7 +201,7 @@ TEST_F(
     authority_->RevokeVerificationCredentials(list);
     EXPECT_TRUE(list.empty());
 
-    ot::proto::VerificationSet verificationSet;
+    ot::protobuf::VerificationSet verificationSet;
     verificationSet.set_version(1);
     EXPECT_TRUE(
         authority_->AddVerificationCredential(verificationSet, reason_));
@@ -327,7 +327,7 @@ TEST_F(
 
 TEST_F(Authority, Path_DefaultSetup_ShouldReturnProperData)
 {
-    ot::proto::HDPath output;
+    ot::protobuf::HDPath output;
     EXPECT_EQ(output.child_size(), 0);
     EXPECT_EQ(output.has_version(), false);
 
@@ -339,21 +339,21 @@ TEST_F(Authority, Path_DefaultSetup_ShouldReturnProperData)
 
 TEST_F(Authority, Serialize_AddedCredentialsFirst_ShouldReturnProperData)
 {
-    ot::proto::ContactData contactData;
+    ot::protobuf::ContactData contactData;
     contactData.set_version(version_);
     authority_->AddContactCredential(contactData, reason_);
 
-    ot::proto::VerificationSet verificationSet;
+    ot::protobuf::VerificationSet verificationSet;
     verificationSet.set_version(1);
     authority_->AddVerificationCredential(verificationSet, reason_);
 
-    ot::proto::Authority serialized;
+    ot::protobuf::Authority serialized;
     ot::identity::CredentialIndexModeFlag mode =
         ot::identity::CREDENTIAL_INDEX_MODE_ONLY_IDS;
     EXPECT_TRUE(authority_->Serialize(serialized, mode));
 
     EXPECT_EQ(serialized.version(), version_);
-    EXPECT_EQ(serialized.mode(), ot::proto::AUTHORITYMODE_INDEX);
+    EXPECT_EQ(serialized.mode(), ot::protobuf::AUTHORITYMODE_INDEX);
 
     ot::UnallocatedList<ot::identifier::Generic> list, list2;
     authority_->RevokeContactCredentials(list);
@@ -385,7 +385,7 @@ TEST_F(Authority, Sign_ShouldReturnProperData)
 
     ot::crypto::SignatureRole role =
         ot::crypto::SignatureRole::PublicCredential;
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     EXPECT_TRUE(authority_->Sign(fc, role, signature, reason_));
 
     EXPECT_EQ(signature.version(), 1);
@@ -396,7 +396,7 @@ TEST_F(Authority, Sign_SignatureRoleIsNymIDSource_ShouldReturnProperData)
     std::function<ot::UnallocatedCString()> fc = func;
 
     ot::crypto::SignatureRole role = ot::crypto::SignatureRole::NymIDSource;
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     EXPECT_FALSE(authority_->Sign(fc, role, signature, reason_));
 
     EXPECT_FALSE(signature.has_version());
@@ -408,7 +408,7 @@ TEST_F(Authority, Sign_SignatureRoleIsPrivateCredential_ShouldReturnProperData)
 
     ot::crypto::SignatureRole role =
         ot::crypto::SignatureRole::PrivateCredential;
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     EXPECT_FALSE(authority_->Sign(fc, role, signature, reason_));
 
     EXPECT_FALSE(signature.has_version());
@@ -419,7 +419,7 @@ TEST_F(Authority, Sign_SignatureRoleIsServerContract_ShouldReturnProperData)
     std::function<ot::UnallocatedCString()> fc = func;
 
     ot::crypto::SignatureRole role = ot::crypto::SignatureRole::ServerContract;
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     EXPECT_TRUE(authority_->Sign(fc, role, signature, reason_));
 
     EXPECT_TRUE(signature.has_version());
@@ -494,7 +494,7 @@ TEST_F(
 TEST_F(Authority, Verify_DefaultSetup_ShouldReturnProperData)
 {
     auto publicKey2 = ot::ByteArray{};
-    ot::proto::Signature signature2;
+    ot::protobuf::Signature signature2;
     EXPECT_FALSE(authority_->Verify(
         publicKey2, signature2, opentxs::crypto::asymmetric::Role::Auth));
 }
@@ -502,7 +502,7 @@ TEST_F(Authority, Verify_DefaultSetup_ShouldReturnProperData)
 TEST_F(Authority, Verify_WithCredentialsEqualToMasterCredID_ShouldReturnFalse)
 {
     auto publicKey = ot::ByteArray{};
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     serialize_identifier_to_pb(
         authority_->GetMasterCredID(), *signature.mutable_credentialid());
 
@@ -523,7 +523,7 @@ TEST_F(Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
     parameters.SetSeed(parameters_.Seed());
     auto credential = authority_->AddChildKeyCredential(parameters, reason_);
 
-    ot::proto::Signature signature;
+    ot::protobuf::Signature signature;
     serialize_identifier_to_pb(credential, *signature.mutable_credentialid());
 
     EXPECT_FALSE(authority_->Verify(
@@ -532,7 +532,7 @@ TEST_F(Authority, Verify_WithChildKeyCredential_ShouldReturnFalse)
 
 TEST_F(Authority, Verify_DefaultSetup_ShouldReturnFalse)
 {
-    ot::proto::VerificationItem verification;
+    ot::protobuf::VerificationItem verification;
     EXPECT_FALSE(authority_->Verify(verification));
 }
 TEST_F(Authority, VerifyInternally_DefaultSetup_ShouldReturnTrue)
@@ -544,13 +544,13 @@ TEST_F(Authority, WriteCredentials_DefaultSetup_ShouldReturnProperData)
 {
     EXPECT_TRUE(authority_->WriteCredentials());
 
-    ot::proto::VerificationSet verificationSet;
+    ot::protobuf::VerificationSet verificationSet;
     verificationSet.set_version(1);
     authority_->AddVerificationCredential(verificationSet, reason_);
 
     EXPECT_TRUE(authority_->WriteCredentials());
 
-    ot::proto::ContactData contactData;
+    ot::protobuf::ContactData contactData;
     contactData.set_version(version_);
     authority_->AddContactCredential(contactData, reason_);
 

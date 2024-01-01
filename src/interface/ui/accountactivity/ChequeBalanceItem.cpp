@@ -5,9 +5,9 @@
 
 #include "interface/ui/accountactivity/ChequeBalanceItem.hpp"  // IWYU pragma: associated
 
-#include <PaymentEvent.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PaymentWorkflowEnums.pb.h>
+#include <opentxs/protobuf/PaymentEvent.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PaymentWorkflowEnums.pb.h>
 #include <cstdint>
 #include <memory>
 
@@ -40,8 +40,8 @@ ChequeBalanceItem::ChequeBalanceItem(
     , cheque_(nullptr)
 {
     startup(
-        extract_custom<proto::PaymentWorkflow>(custom, 0),
-        extract_custom<proto::PaymentEvent>(custom, 1));
+        extract_custom<protobuf::PaymentWorkflow>(custom, 0),
+        extract_custom<protobuf::PaymentEvent>(custom, 1));
 }
 
 auto ChequeBalanceItem::effective_amount() const noexcept -> opentxs::Amount
@@ -94,15 +94,15 @@ auto ChequeBalanceItem::reindex(
 {
     auto output = BalanceItem::reindex(key, custom);
     output |= startup(
-        extract_custom<proto::PaymentWorkflow>(custom, 0),
-        extract_custom<proto::PaymentEvent>(custom, 1));
+        extract_custom<protobuf::PaymentWorkflow>(custom, 0),
+        extract_custom<protobuf::PaymentEvent>(custom, 1));
 
     return output;
 }
 
 auto ChequeBalanceItem::startup(
-    const proto::PaymentWorkflow workflow,
-    const proto::PaymentEvent event) noexcept -> bool
+    const protobuf::PaymentWorkflow workflow,
+    const protobuf::PaymentEvent event) noexcept -> bool
 {
     auto lock = eLock{shared_lock_};
 
@@ -126,19 +126,19 @@ auto ChequeBalanceItem::startup(
             if (otherNymID.empty()) { otherNymID = nym_id_; }
 
             switch (event.type()) {
-                case proto::PAYMENTEVENTTYPE_CONVEY: {
+                case protobuf::PAYMENTEVENTTYPE_CONVEY: {
                     text = "Received cheque #" + number + " from " +
                            get_contact_name(otherNymID);
                 } break;
-                case proto::PAYMENTEVENTTYPE_ERROR:
-                case proto::PAYMENTEVENTTYPE_CREATE:
-                case proto::PAYMENTEVENTTYPE_ACCEPT:
-                case proto::PAYMENTEVENTTYPE_CANCEL:
-                case proto::PAYMENTEVENTTYPE_COMPLETE:
-                case proto::PAYMENTEVENTTYPE_ABORT:
-                case proto::PAYMENTEVENTTYPE_ACKNOWLEDGE:
-                case proto::PAYMENTEVENTTYPE_EXPIRE:
-                case proto::PAYMENTEVENTTYPE_REJECT:
+                case protobuf::PAYMENTEVENTTYPE_ERROR:
+                case protobuf::PAYMENTEVENTTYPE_CREATE:
+                case protobuf::PAYMENTEVENTTYPE_ACCEPT:
+                case protobuf::PAYMENTEVENTTYPE_CANCEL:
+                case protobuf::PAYMENTEVENTTYPE_COMPLETE:
+                case protobuf::PAYMENTEVENTTYPE_ABORT:
+                case protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE:
+                case protobuf::PAYMENTEVENTTYPE_EXPIRE:
+                case protobuf::PAYMENTEVENTTYPE_REJECT:
                 default: {
                     LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();
@@ -149,24 +149,24 @@ auto ChequeBalanceItem::startup(
             otherNymID.Assign(cheque_->GetRecipientNymID());
 
             switch (event.type()) {
-                case proto::PAYMENTEVENTTYPE_CREATE: {
+                case protobuf::PAYMENTEVENTTYPE_CREATE: {
                     text = "Wrote cheque #" + number;
 
                     if (false == otherNymID.empty()) {
                         text += " for " + get_contact_name(otherNymID);
                     }
                 } break;
-                case proto::PAYMENTEVENTTYPE_ACCEPT: {
+                case protobuf::PAYMENTEVENTTYPE_ACCEPT: {
                     text = "Cheque #" + number + " cleared";
                 } break;
-                case proto::PAYMENTEVENTTYPE_ERROR:
-                case proto::PAYMENTEVENTTYPE_CONVEY:
-                case proto::PAYMENTEVENTTYPE_CANCEL:
-                case proto::PAYMENTEVENTTYPE_COMPLETE:
-                case proto::PAYMENTEVENTTYPE_ABORT:
-                case proto::PAYMENTEVENTTYPE_ACKNOWLEDGE:
-                case proto::PAYMENTEVENTTYPE_EXPIRE:
-                case proto::PAYMENTEVENTTYPE_REJECT:
+                case protobuf::PAYMENTEVENTTYPE_ERROR:
+                case protobuf::PAYMENTEVENTTYPE_CONVEY:
+                case protobuf::PAYMENTEVENTTYPE_CANCEL:
+                case protobuf::PAYMENTEVENTTYPE_COMPLETE:
+                case protobuf::PAYMENTEVENTTYPE_ABORT:
+                case protobuf::PAYMENTEVENTTYPE_ACKNOWLEDGE:
+                case protobuf::PAYMENTEVENTTYPE_EXPIRE:
+                case protobuf::PAYMENTEVENTTYPE_REJECT:
                 default: {
                     LogError()()("Invalid event state (")(event.type())(")")
                         .Flush();

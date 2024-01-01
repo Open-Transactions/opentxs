@@ -5,11 +5,11 @@
 
 #include "opentxs/contract/peer/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <PeerEnums.pb.h>
-#include <ZMQEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/PeerEnums.pb.h>
+#include <opentxs/protobuf/ZMQEnums.pb.h>
 #include <functional>
 #include <utility>
 
@@ -23,10 +23,10 @@ namespace opentxs::contract::peer
 {
 constexpr auto connection_info_map_ = [] {
     using enum ConnectionInfoType;
-    using enum proto::ConnectionInfoType;
+    using enum protobuf::ConnectionInfoType;
 
     return frozen::
-        make_unordered_map<ConnectionInfoType, proto::ConnectionInfoType>({
+        make_unordered_map<ConnectionInfoType, protobuf::ConnectionInfoType>({
             {Error, CONNECTIONINFO_ERROR},
             {Bitcoin, CONNECTIONINFO_BITCOIN},
             {BtcRpc, CONNECTIONINFO_BTCRPC},
@@ -38,10 +38,10 @@ constexpr auto connection_info_map_ = [] {
 }();
 constexpr auto pair_event_type_map_ = [] {
     using enum internal::PairEventType;
-    using enum proto::PairEventType;
+    using enum protobuf::PairEventType;
 
     return frozen::
-        make_unordered_map<internal::PairEventType, proto::PairEventType>({
+        make_unordered_map<internal::PairEventType, protobuf::PairEventType>({
             {Error, PAIREVENT_ERROR},
             {Rename, PAIREVENT_RENAME},
             {StoreSecret, PAIREVENT_STORESECRET},
@@ -49,9 +49,9 @@ constexpr auto pair_event_type_map_ = [] {
 }();
 constexpr auto peer_object_type_map_ = [] {
     using enum ObjectType;
-    using enum proto::PeerObjectType;
+    using enum protobuf::PeerObjectType;
 
-    return frozen::make_unordered_map<ObjectType, proto::PeerObjectType>({
+    return frozen::make_unordered_map<ObjectType, protobuf::PeerObjectType>({
         {Error, PEEROBJECT_ERROR},
         {Message, PEEROBJECT_MESSAGE},
         {Request, PEEROBJECT_REQUEST},
@@ -62,9 +62,9 @@ constexpr auto peer_object_type_map_ = [] {
 }();
 constexpr auto peer_request_type_map_ = [] {
     using enum RequestType;
-    using enum proto::PeerRequestType;
+    using enum protobuf::PeerRequestType;
 
-    return frozen::make_unordered_map<RequestType, proto::PeerRequestType>({
+    return frozen::make_unordered_map<RequestType, protobuf::PeerRequestType>({
         {Error, PEERREQUEST_ERROR},
         {Bailment, PEERREQUEST_BAILMENT},
         {OutBailment, PEERREQUEST_OUTBAILMENT},
@@ -78,18 +78,18 @@ constexpr auto peer_request_type_map_ = [] {
 }();
 constexpr auto secret_type_map_ = [] {
     using enum SecretType;
-    using enum proto::SecretType;
+    using enum protobuf::SecretType;
 
-    return frozen::make_unordered_map<SecretType, proto::SecretType>({
-        {SecretType::Error, proto::SECRETTYPE_ERROR},
-        {SecretType::Bip39, proto::SECRETTYPE_BIP39},
+    return frozen::make_unordered_map<SecretType, protobuf::SecretType>({
+        {SecretType::Error, protobuf::SECRETTYPE_ERROR},
+        {SecretType::Bip39, protobuf::SECRETTYPE_BIP39},
     });
 }();
 }  // namespace opentxs::contract::peer
 
 namespace opentxs::contract::peer::internal
 {
-auto translate(PairEventType in) noexcept -> proto::PairEventType
+auto translate(PairEventType in) noexcept -> protobuf::PairEventType
 {
     static constexpr const auto& map = pair_event_type_map_;
 
@@ -98,14 +98,14 @@ auto translate(PairEventType in) noexcept -> proto::PairEventType
         return i->second;
     } else {
 
-        return proto::PAIREVENT_ERROR;
+        return protobuf::PAIREVENT_ERROR;
     }
 }
 }  // namespace opentxs::contract::peer::internal
 
 namespace opentxs::contract::peer
 {
-auto translate(ConnectionInfoType in) noexcept -> proto::ConnectionInfoType
+auto translate(ConnectionInfoType in) noexcept -> protobuf::ConnectionInfoType
 {
     static constexpr const auto& map = connection_info_map_;
 
@@ -114,11 +114,11 @@ auto translate(ConnectionInfoType in) noexcept -> proto::ConnectionInfoType
         return i->second;
     } else {
 
-        return proto::CONNECTIONINFO_ERROR;
+        return protobuf::CONNECTIONINFO_ERROR;
     }
 }
 
-auto translate(ObjectType in) noexcept -> proto::PeerObjectType
+auto translate(ObjectType in) noexcept -> protobuf::PeerObjectType
 {
     static constexpr const auto& map = peer_object_type_map_;
 
@@ -127,11 +127,11 @@ auto translate(ObjectType in) noexcept -> proto::PeerObjectType
         return i->second;
     } else {
 
-        return proto::PEEROBJECT_ERROR;
+        return protobuf::PEEROBJECT_ERROR;
     }
 }
 
-auto translate(RequestType in) noexcept -> proto::PeerRequestType
+auto translate(RequestType in) noexcept -> protobuf::PeerRequestType
 {
     static constexpr const auto& map = peer_request_type_map_;
 
@@ -140,11 +140,11 @@ auto translate(RequestType in) noexcept -> proto::PeerRequestType
         return i->second;
     } else {
 
-        return proto::PEERREQUEST_ERROR;
+        return protobuf::PEERREQUEST_ERROR;
     }
 }
 
-auto translate(SecretType in) noexcept -> proto::SecretType
+auto translate(SecretType in) noexcept -> protobuf::SecretType
 {
     static constexpr const auto& map = secret_type_map_;
 
@@ -153,12 +153,12 @@ auto translate(SecretType in) noexcept -> proto::SecretType
         return i->second;
     } else {
 
-        return proto::SECRETTYPE_ERROR;
+        return protobuf::SECRETTYPE_ERROR;
     }
 }
 }  // namespace opentxs::contract::peer
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(ConnectionInfoType in) noexcept
     -> contract::peer::ConnectionInfoType
@@ -231,4 +231,4 @@ auto translate(SecretType in) noexcept -> contract::peer::SecretType
         return contract::peer::SecretType::Error;
     }
 }
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

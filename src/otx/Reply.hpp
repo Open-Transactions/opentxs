@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <ServerReply.pb.h>
+#include <opentxs/protobuf/ServerReply.pb.h>
 #include <memory>
 #include <string_view>
 
@@ -26,11 +26,11 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class OTXPush;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -44,12 +44,12 @@ class Reply::Imp final
 {
 public:
     auto Number() const -> RequestNumber { return number_; }
-    auto Push() const -> std::shared_ptr<const proto::OTXPush>
+    auto Push() const -> std::shared_ptr<const protobuf::OTXPush>
     {
         return payload_;
     }
     auto Recipient() const -> const identifier::Nym& { return recipient_; }
-    auto Serialize(proto::ServerReply& serialize) const -> bool;
+    auto Serialize(protobuf::ServerReply& serialize) const -> bool;
     auto Serialize(Writer&& destination) const noexcept -> bool final;
     auto Server() const -> const identifier::Notary& { return server_; }
     auto Success() const -> bool { return success_; }
@@ -62,8 +62,8 @@ public:
         const otx::ServerReplyType type,
         const RequestNumber number,
         const bool success,
-        std::shared_ptr<const proto::OTXPush>&& push);
-    Imp(const api::Session& api, const proto::ServerReply serialized);
+        std::shared_ptr<const protobuf::OTXPush>&& push);
+    Imp(const api::Session& api, const protobuf::ServerReply serialized);
     Imp() = delete;
     Imp(const Imp& rhs) noexcept;
     Imp(Imp&& rhs) = delete;
@@ -80,22 +80,22 @@ private:
     const otx::ServerReplyType type_;
     const bool success_;
     const RequestNumber number_;
-    const std::shared_ptr<const proto::OTXPush> payload_;
+    const std::shared_ptr<const protobuf::OTXPush> payload_;
 
     static auto extract_nym(
         const api::Session& api,
-        const proto::ServerReply serialized) -> Nym_p;
+        const protobuf::ServerReply serialized) -> Nym_p;
 
     auto calculate_id() const -> identifier_type final;
-    auto full_version() const -> proto::ServerReply;
-    auto id_version() const -> proto::ServerReply;
+    auto full_version() const -> protobuf::ServerReply;
+    auto id_version() const -> protobuf::ServerReply;
     auto Name() const noexcept -> std::string_view final { return {}; }
     using Signable::serialize;
-    auto serialize(proto::ServerReply& output) const -> bool;
-    auto signature_version() const -> proto::ServerReply;
+    auto serialize(protobuf::ServerReply& output) const -> bool;
+    auto signature_version() const -> protobuf::ServerReply;
     auto update_signature(const PasswordPrompt& reason) -> bool final;
     auto validate() const -> bool final;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool final;
 };
 }  // namespace opentxs::otx

@@ -5,8 +5,8 @@
 
 #include "ottest/fixtures/identity/Source.hpp"  // IWYU pragma: associated
 
-#include <NymIDSource.pb.h>  // IWYU pragma: keep
 #include <opentxs/opentxs.hpp>
+#include <opentxs/protobuf/NymIDSource.pb.h>  // IWYU pragma: keep
 #include <cstdint>
 #include <memory>
 

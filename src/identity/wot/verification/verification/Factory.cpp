@@ -5,7 +5,7 @@
 
 #include "internal/identity/wot/verification/Factory.hpp"  // IWYU pragma: associated
 
-#include <Verification.pb.h>
+#include <opentxs/protobuf/Verification.pb.h>
 #include <stdexcept>
 #include <utility>
 
@@ -69,7 +69,7 @@ auto Verification(
 
 auto Verification(
     const api::Session& api,
-    const proto::Verification& proto,
+    const protobuf::Verification& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::VerificationPrivate*
 {
     using ReturnType =
@@ -104,7 +104,7 @@ auto Verification(
 auto Verification(
     const api::Session& api,
     const identifier::Nym& verifier,
-    const proto::VerificationItem& proto,
+    const protobuf::VerificationItem& proto,
     alloc::Strategy alloc) noexcept -> identity::wot::VerificationPrivate*
 {
     using ReturnType =

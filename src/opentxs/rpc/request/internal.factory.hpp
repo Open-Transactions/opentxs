@@ -12,10 +12,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCCommand;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -31,6 +31,6 @@ namespace opentxs::factory
 {
 auto RPCRequest(ReadView protobuf) noexcept
     -> std::unique_ptr<rpc::request::Message>;
-auto RPCRequest(const proto::RPCCommand& serialized) noexcept
+auto RPCRequest(const protobuf::RPCCommand& serialized) noexcept
     -> std::unique_ptr<rpc::request::Message>;
 }  // namespace opentxs::factory

@@ -26,7 +26,7 @@ namespace opentxs::factory
 auto Ed25519Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Ed25519
 {
     using ReturnType = crypto::asymmetric::key::implementation::Ed25519;

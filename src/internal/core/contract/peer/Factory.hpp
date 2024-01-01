@@ -41,10 +41,10 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class PeerObject;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class PasswordPrompt;
@@ -82,7 +82,7 @@ auto PeerObject(
 auto PeerObject(
     const api::session::Client& api,
     const Nym_p& signerNym,
-    const proto::PeerObject& serialized) noexcept
+    const protobuf::PeerObject& serialized) noexcept
     -> std::unique_ptr<opentxs::PeerObject>;
 auto PeerObject(
     const api::session::Client& api,

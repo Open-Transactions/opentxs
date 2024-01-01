@@ -198,10 +198,10 @@ auto Signable<IDType>::Name() const noexcept -> std::string_view
 }
 
 template <typename IDType>
-auto Signable<IDType>::serialize(const ProtobufType& in, Writer&& out)
+auto Signable<IDType>::serialize(const protobuf::MessageType& in, Writer&& out)
     const noexcept -> bool
 {
-    return proto::write(in, std::move(out));
+    return protobuf::write(in, std::move(out));
 }
 
 template <typename IDType>
@@ -251,7 +251,8 @@ auto Signable<IDType>::Validate() const noexcept -> bool
 }
 
 template <typename IDType>
-auto Signable<IDType>::verify_signature(const proto::Signature&) const -> bool
+auto Signable<IDType>::verify_signature(const protobuf::Signature&) const
+    -> bool
 {
     if (!Signer()) {
         LogError()()("Missing nym.").Flush();

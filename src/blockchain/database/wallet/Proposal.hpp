@@ -23,10 +23,10 @@ namespace identifier
 class Generic;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionProposal;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -48,13 +48,13 @@ public:
         -> UnallocatedSet<identifier::Generic>;
     auto Exists(const identifier::Generic& id) const noexcept -> bool;
     auto LoadProposal(const identifier::Generic& id) const noexcept
-        -> std::optional<proto::BlockchainTransactionProposal>;
+        -> std::optional<protobuf::BlockchainTransactionProposal>;
     auto LoadProposals() const noexcept
-        -> UnallocatedVector<proto::BlockchainTransactionProposal>;
+        -> UnallocatedVector<protobuf::BlockchainTransactionProposal>;
 
     auto AddProposal(
         const identifier::Generic& id,
-        const proto::BlockchainTransactionProposal& tx) noexcept -> bool;
+        const protobuf::BlockchainTransactionProposal& tx) noexcept -> bool;
     auto CancelProposal(
         storage::lmdb::Transaction& tx,
         const identifier::Generic& id) noexcept -> bool;

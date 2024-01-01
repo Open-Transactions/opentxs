@@ -5,19 +5,19 @@
 
 #include "identity/wot/verification/Group.hpp"  // IWYU pragma: associated
 
-#include <VerificationGroup.pb.h>
-#include <VerificationIdentity.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/VerificationGroup.pb.h>
+#include <opentxs/protobuf/VerificationIdentity.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Group.hpp"
 #include "opentxs/identity/wot/verification/Nym.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -44,7 +44,7 @@ auto Factory::VerificationGroup(
 
 auto Factory::VerificationGroup(
     identity::wot::verification::internal::Set& parent,
-    const proto::VerificationGroup& serialized,
+    const protobuf::VerificationGroup& serialized,
     bool external) -> identity::wot::verification::internal::Group*
 {
     using ReturnType =
@@ -220,7 +220,7 @@ auto Group::UpgradeNymVersion(const VersionNumber nymVersion) noexcept -> bool
     try {
         while (true) {
             const auto [min, max] =
-                proto::VerificationGroupAllowedIdentity().at(groupVersion);
+                protobuf::VerificationGroupAllowedIdentity().at(groupVersion);
 
             if (nymVersion < min) {
                 LogError()()("Version ")(nymVersion)(" too old").Flush();

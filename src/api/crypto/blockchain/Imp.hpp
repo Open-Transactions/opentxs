@@ -97,10 +97,10 @@ namespace identity
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class Contact;
@@ -241,7 +241,7 @@ struct Blockchain::Imp : public pmr::AllocatesChildren<alloc::PoolSync> {
         const identifier::Nym& nymID,
         const opentxs::PaymentCode& local,
         const opentxs::PaymentCode& remote,
-        const proto::HDPath path,
+        const protobuf::HDPath path,
         const opentxs::blockchain::Type chain,
         const PasswordPrompt& reason) const noexcept -> identifier::Account;
     auto Owner(const identifier::Account& accountID) const noexcept
@@ -334,7 +334,7 @@ protected:
         const UnitType chain,
         const opentxs::crypto::Bip32Index account,
         const opentxs::blockchain::crypto::HDProtocol standard,
-        proto::HDPath& path) const noexcept -> void;
+        protobuf::HDPath& path) const noexcept -> void;
     auto p2pkh(const opentxs::blockchain::Type chain, const Data& pubkeyHash)
         const noexcept -> UnallocatedCString;
     auto p2sh(const opentxs::blockchain::Type chain, const Data& scriptHash)

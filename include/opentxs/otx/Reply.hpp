@@ -33,11 +33,11 @@ namespace otx
 class Reply;
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class OTXPush;
 class ServerReply;
-}  // namespace proto
+}  // namespace protobuf
 
 class ByteArray;
 class PasswordPrompt;
@@ -64,7 +64,7 @@ public:
         const RequestNumber number,
         const bool success,
         const PasswordPrompt& reason,
-        std::shared_ptr<const proto::OTXPush>&& push = {}) -> Reply;
+        std::shared_ptr<const protobuf::OTXPush>&& push = {}) -> Reply;
     static auto Factory(
         const api::Session& api,
         const Nym_p signer,
@@ -78,14 +78,14 @@ public:
         const UnallocatedCString& payload) -> Reply;
     OPENTXS_NO_EXPORT static auto Factory(
         const api::Session& api,
-        const proto::ServerReply serialized) -> Reply;
+        const protobuf::ServerReply serialized) -> Reply;
     static auto Factory(const api::Session& api, const ReadView& view) -> Reply;
 
     auto Number() const -> RequestNumber;
-    auto Push() const -> std::shared_ptr<const proto::OTXPush>;
+    auto Push() const -> std::shared_ptr<const protobuf::OTXPush>;
     auto Recipient() const -> const identifier::Nym&;
     auto Serialize(Writer&& destination) const noexcept -> bool;
-    auto Serialize(proto::ServerReply& serialized) const -> bool;
+    auto Serialize(protobuf::ServerReply& serialized) const -> bool;
     auto Server() const -> const identifier::Notary&;
     auto Success() const -> bool;
     auto Type() const -> otx::ServerReplyType;

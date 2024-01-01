@@ -5,8 +5,8 @@
 
 #include "blockchain/block/header/Imp.hpp"  // IWYU pragma: associated
 
-#include <BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
-#include <BlockchainBlockLocalData.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/BlockchainBlockLocalData.pb.h>
 #include <compare>
 #include <cstdint>
 #include <stdexcept>

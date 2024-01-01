@@ -5,7 +5,7 @@
 
 #include "blockchain/node/wallet/proposals/ProposalsPrivate.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionProposal.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionProposal.pb.h>
 #include <chrono>
 #include <compare>
 #include <functional>
@@ -77,7 +77,7 @@ auto ProposalsPrivate::Add(
         const auto& id = spend.ID();
         using enum SendResult;
         const auto proto = [&] {
-            auto out = proto::BlockchainTransactionProposal{};
+            auto out = protobuf::BlockchainTransactionProposal{};
 
             if (false == spend.Internal().Serialize(out)) {
                 promise.set_value({SerializationError, blank});

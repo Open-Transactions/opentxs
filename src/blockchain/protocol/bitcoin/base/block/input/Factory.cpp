@@ -5,11 +5,11 @@
 
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"  // IWYU pragma: associated
 
-#include <BlockchainInputWitness.pb.h>
-#include <BlockchainPreviousOutput.pb.h>
-#include <BlockchainTransactionInput.pb.h>
-#include <BlockchainWalletKey.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <opentxs/protobuf/BlockchainInputWitness.pb.h>
+#include <opentxs/protobuf/BlockchainPreviousOutput.pb.h>
+#include <opentxs/protobuf/BlockchainTransactionInput.pb.h>
+#include <opentxs/protobuf/BlockchainWalletKey.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -22,7 +22,6 @@
 #include "blockchain/protocol/bitcoin/base/block/output/OutputPrivate.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Script.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Types.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/PMR.hpp"
 #include "opentxs/api/Factory.hpp"
 #include "opentxs/blockchain/Types.hpp"
@@ -39,6 +38,7 @@
 #include "opentxs/core/ByteArray.hpp"
 #include "opentxs/identifier/Account.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -201,7 +201,7 @@ auto BitcoinTransactionInput(
     const api::crypto::Blockchain& crypto,
     const api::Factory& factory,
     const blockchain::Type chain,
-    const proto::BlockchainTransactionInput& in,
+    const protobuf::BlockchainTransactionInput& in,
     const bool coinbase,
     alloc::Strategy alloc) noexcept
     -> blockchain::protocol::bitcoin::base::block::Input

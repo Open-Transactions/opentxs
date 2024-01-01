@@ -5,12 +5,11 @@
 
 #include "opentxs/util/NymEditor.hpp"  // IWYU pragma: associated
 
-#include <ContactData.pb.h>
-#include <Nym.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>  // IWYU pragma: keep
 #include <utility>
 
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
@@ -22,6 +21,7 @@
 #include "opentxs/identity/wot/claim/Attribute.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Item.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -166,9 +166,9 @@ auto NymData::AddVerification(
     return nym().AddVerification(verification, reason);
 }
 
-auto NymData::asPublicNym() const -> proto::Nym
+auto NymData::asPublicNym() const -> protobuf::Nym
 {
-    auto serialized = proto::Nym{};
+    auto serialized = protobuf::Nym{};
     if (false == nym().Internal().Serialize(serialized)) {}
     return serialized;
 }
@@ -272,7 +272,7 @@ auto NymData::PreferredOTServer() const -> UnallocatedCString
 auto NymData::PrintContactData() const -> UnallocatedCString
 {
     return identity::wot::claim::Data::PrintContactData([&] {
-        auto proto = proto::ContactData{};
+        auto proto = protobuf::ContactData{};
         data().Serialize(proto, true);
 
         return proto;
@@ -306,7 +306,7 @@ auto NymData::SetCommonName(
 }
 
 auto NymData::SetContactData(
-    const proto::ContactData& data,
+    const protobuf::ContactData& data,
     const PasswordPrompt& reason) -> bool
 {
     return nym().Internal().SetContactData(data, reason);
@@ -316,7 +316,7 @@ auto NymData::SetContactData(
     const ReadView& bytes,
     const PasswordPrompt& reason) -> bool
 {
-    auto data = proto::Factory<proto::ContactData>(bytes);
+    auto data = protobuf::Factory<protobuf::ContactData>(bytes);
     return SetContactData(data, reason);
 }
 

@@ -5,8 +5,8 @@
 
 #include "identity/wot/verification/Nym.hpp"  // IWYU pragma: associated
 
-#include <VerificationIdentity.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/VerificationIdentity.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <chrono>
 #include <compare>
 #include <memory>
@@ -15,8 +15,6 @@
 #include <utility>
 
 #include "internal/core/identifier/Identifier.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Crypto.hpp"
@@ -26,6 +24,8 @@
 #include "opentxs/identifier/Nym.hpp"
 #include "opentxs/identity/wot/verification/Nym.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -52,7 +52,7 @@ auto Factory::VerificationNym(
 
 auto Factory::VerificationNym(
     identity::wot::verification::internal::Group& parent,
-    const proto::VerificationIdentity& serialized)
+    const protobuf::VerificationIdentity& serialized)
     -> identity::wot::verification::internal::Nym*
 {
     using ReturnType =
@@ -266,7 +266,7 @@ auto Nym::UpgradeItemVersion(
     try {
         while (true) {
             const auto [min, max] =
-                proto::VerificationIdentityAllowedVerificationItem().at(
+                protobuf::VerificationIdentityAllowedVerificationItem().at(
                     nymVersion);
 
             if (itemVersion < min) {

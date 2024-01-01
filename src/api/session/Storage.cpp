@@ -7,24 +7,24 @@
 
 #include "api/session/Storage.hpp"  // IWYU pragma: associated
 
-#include <Bip47Channel.pb.h>
-#include <BlockchainEthereumAccountData.pb.h>
-#include <Ciphertext.pb.h>
-#include <Contact.pb.h>
-#include <Context.pb.h>
-#include <Credential.pb.h>
-#include <HDAccount.pb.h>
-#include <Issuer.pb.h>
-#include <Nym.pb.h>
-#include <PaymentWorkflow.pb.h>
-#include <PeerReply.pb.h>
-#include <PeerRequest.pb.h>
-#include <Purse.pb.h>
-#include <Seed.pb.h>
-#include <ServerContract.pb.h>
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
+#include <opentxs/protobuf/BlockchainEthereumAccountData.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
+#include <opentxs/protobuf/Contact.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/HDAccount.pb.h>
+#include <opentxs/protobuf/Issuer.pb.h>
+#include <opentxs/protobuf/Nym.pb.h>
+#include <opentxs/protobuf/PaymentWorkflow.pb.h>
+#include <opentxs/protobuf/PeerReply.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
+#include <opentxs/protobuf/Purse.pb.h>
+#include <opentxs/protobuf/Seed.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <cstdint>
 #include <ctime>
 #include <functional>
@@ -32,8 +32,6 @@
 #include <utility>
 
 #include "internal/network/zeromq/Context.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Editor.hpp"
 #include "internal/util/alloc/Logging.hpp"
 #include "internal/util/storage/drivers/Factory.hpp"
@@ -58,6 +56,8 @@
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -476,10 +476,10 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
-    proto::HDAccount& output,
+    protobuf::HDAccount& output,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::HDAccount>(output);
+    auto temp = std::make_shared<protobuf::HDAccount>(output);
     const auto rc =
         Root().Trunk().Nyms().Nym(nymID).Load(accountID, temp, checking);
 
@@ -491,7 +491,7 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Account& channelID,
-    proto::Bip47Channel& output,
+    protobuf::Bip47Channel& output,
     ErrorReporting checking) const noexcept -> bool
 {
     const bool exists = Root().Trunk().Nyms().Exists(nymID);
@@ -502,7 +502,7 @@ auto Storage::Load(
         return false;
     }
 
-    auto temp = std::make_shared<proto::Bip47Channel>(output);
+    auto temp = std::make_shared<protobuf::Bip47Channel>(output);
     const auto rc = Root().Trunk().Nyms().Nym(nymID).Bip47Channels().Load(
         channelID, temp, checking);
 
@@ -514,10 +514,11 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Account& accountID,
-    proto::BlockchainEthereumAccountData& output,
+    protobuf::BlockchainEthereumAccountData& output,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::BlockchainEthereumAccountData>(output);
+    auto temp =
+        std::make_shared<protobuf::BlockchainEthereumAccountData>(output);
     const auto rc =
         Root().Trunk().Nyms().Nym(nymID).Load(accountID, temp, checking);
 
@@ -528,7 +529,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Generic& id,
-    proto::Contact& output,
+    protobuf::Contact& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
@@ -538,11 +539,11 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Generic& id,
-    proto::Contact& output,
+    protobuf::Contact& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Contact>(output);
+    auto temp = std::make_shared<protobuf::Contact>(output);
     const auto rc = Root().Trunk().Contacts().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
@@ -553,11 +554,11 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& localNym,
     const identifier::Nym& remoteNym,
-    proto::Context& output,
+    protobuf::Context& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
-    auto temp = std::make_shared<proto::Context>(output);
+    auto temp = std::make_shared<protobuf::Context>(output);
     const auto rc = Root().Trunk().Nyms().Nym(localNym).Contexts().Load(
         remoteNym, temp, notUsed, checking);
 
@@ -568,10 +569,10 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Generic& id,
-    proto::Credential& output,
+    protobuf::Credential& output,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Credential>(output);
+    auto temp = std::make_shared<protobuf::Credential>(output);
     const auto rc = Root().Trunk().Credentials().Load(id, temp, checking);
 
     if (rc && temp) { output = *temp; }
@@ -581,7 +582,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Nym& id,
-    proto::Nym& output,
+    protobuf::Nym& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
@@ -594,7 +595,7 @@ auto Storage::LoadNym(
     Writer&& destination,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Nym>();
+    auto temp = std::make_shared<protobuf::Nym>();
     auto alias = UnallocatedCString{};
 
     if (false == Root().Trunk().Nyms().Nym(id).Load(temp, alias, checking)) {
@@ -610,11 +611,11 @@ auto Storage::LoadNym(
 
 auto Storage::Load(
     const identifier::Nym& id,
-    proto::Nym& output,
+    protobuf::Nym& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Nym>(output);
+    auto temp = std::make_shared<protobuf::Nym>(output);
     const auto rc = Root().Trunk().Nyms().Nym(id).Load(temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
@@ -625,7 +626,7 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Nym& id,
-    proto::Issuer& output,
+    protobuf::Issuer& output,
     ErrorReporting checking) const noexcept -> bool
 {
     if (false == Root().Trunk().Nyms().Exists(nymID)) {
@@ -635,7 +636,7 @@ auto Storage::Load(
     }
 
     auto notUsed = UnallocatedCString{};
-    auto temp = std::make_shared<proto::Issuer>(output);
+    auto temp = std::make_shared<protobuf::Issuer>(output);
     const auto rc = Root().Trunk().Nyms().Nym(nymID).Issuers().Load(
         id, temp, notUsed, checking);
 
@@ -647,7 +648,7 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Generic& workflowID,
-    proto::PaymentWorkflow& output,
+    protobuf::PaymentWorkflow& output,
     ErrorReporting checking) const noexcept -> bool
 {
     if (false == Root().Trunk().Nyms().Exists(nymID)) {
@@ -656,7 +657,7 @@ auto Storage::Load(
         return false;
     }
 
-    auto temp = std::make_shared<proto::PaymentWorkflow>(output);
+    auto temp = std::make_shared<protobuf::PaymentWorkflow>(output);
     const auto rc = Root().Trunk().Nyms().Nym(nymID).PaymentWorkflows().Load(
         workflowID, temp, checking);
 
@@ -692,10 +693,10 @@ auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Generic& id,
     const otx::client::StorageBox box,
-    proto::PeerReply& output,
+    protobuf::PeerReply& output,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::PeerReply>(output);
+    auto temp = std::make_shared<protobuf::PeerReply>(output);
     const auto rc = [&] {
         switch (box) {
             case otx::client::StorageBox::SENTPEERREPLY: {
@@ -733,11 +734,11 @@ auto Storage::Load(
     const identifier::Nym& nymID,
     const identifier::Generic& id,
     const otx::client::StorageBox box,
-    proto::PeerRequest& output,
+    protobuf::PeerRequest& output,
     Time& time,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::PeerRequest>(output);
+    auto temp = std::make_shared<protobuf::PeerRequest>(output);
     auto alias = UnallocatedCString{};
     const auto rc = [&] {
         switch (box) {
@@ -797,7 +798,7 @@ auto Storage::Load(
     const identifier::Nym& nym,
     const identifier::Notary& notary,
     const identifier::UnitDefinition& unit,
-    proto::Purse& output,
+    protobuf::Purse& output,
     ErrorReporting checking) const noexcept -> bool
 {
     const auto& nymNode = Root().Trunk().Nyms();
@@ -808,7 +809,7 @@ auto Storage::Load(
         return false;
     }
 
-    auto temp = std::make_shared<proto::Purse>(output);
+    auto temp = std::make_shared<protobuf::Purse>(output);
     const auto rc = nymNode.Nym(nym).Load(notary, unit, temp, checking);
 
     if (rc && temp) { output = *temp; }
@@ -818,7 +819,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const opentxs::crypto::SeedID& id,
-    proto::Seed& output,
+    protobuf::Seed& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
@@ -828,11 +829,11 @@ auto Storage::Load(
 
 auto Storage::Load(
     const opentxs::crypto::SeedID& id,
-    proto::Seed& output,
+    protobuf::Seed& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Seed>(output);
+    auto temp = std::make_shared<protobuf::Seed>(output);
     const auto rc = Root().Trunk().Seeds().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
@@ -842,7 +843,7 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Notary& id,
-    proto::ServerContract& output,
+    protobuf::ServerContract& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
@@ -852,11 +853,11 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::Notary& id,
-    proto::ServerContract& output,
+    protobuf::ServerContract& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::ServerContract>(output);
+    auto temp = std::make_shared<protobuf::ServerContract>(output);
     const auto rc = Root().Trunk().Servers().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
@@ -867,7 +868,7 @@ auto Storage::Load(
 auto Storage::Load(
     const identifier::Nym& nymId,
     const identifier::Generic& threadId,
-    proto::StorageThread& output) const noexcept -> bool
+    protobuf::StorageThread& output) const noexcept -> bool
 {
     const bool exists =
         Root().Trunk().Nyms().Nym(nymId).Threads().Exists(threadId);
@@ -880,10 +881,10 @@ auto Storage::Load(
     return true;
 }
 
-auto Storage::Load(proto::Ciphertext& output, ErrorReporting checking)
+auto Storage::Load(protobuf::Ciphertext& output, ErrorReporting checking)
     const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::Ciphertext>(output);
+    auto temp = std::make_shared<protobuf::Ciphertext>(output);
     const auto rc = Root().Trunk().Load(temp, checking);
 
     if (rc && temp) { output = *temp; }
@@ -893,7 +894,7 @@ auto Storage::Load(proto::Ciphertext& output, ErrorReporting checking)
 
 auto Storage::Load(
     const identifier::UnitDefinition& id,
-    proto::UnitDefinition& output,
+    protobuf::UnitDefinition& output,
     ErrorReporting checking) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
@@ -903,11 +904,11 @@ auto Storage::Load(
 
 auto Storage::Load(
     const identifier::UnitDefinition& id,
-    proto::UnitDefinition& output,
+    protobuf::UnitDefinition& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const noexcept -> bool
 {
-    auto temp = std::make_shared<proto::UnitDefinition>(output);
+    auto temp = std::make_shared<protobuf::UnitDefinition>(output);
     const auto rc = Root().Trunk().Units().Load(id, temp, alias, checking);
 
     if (rc && temp) { output = *temp; }
@@ -1860,7 +1861,7 @@ auto Storage::Store(
 auto Storage::Store(
     const identifier::Nym& nymID,
     const UnitType type,
-    const proto::HDAccount& data) const noexcept -> bool
+    const protobuf::HDAccount& data) const noexcept -> bool
 {
     return mutable_Root()
         .get()
@@ -1876,7 +1877,7 @@ auto Storage::Store(
 auto Storage::Store(
     const identifier::Nym& nymID,
     const identifier::Account& channelID,
-    const proto::Bip47Channel& data) const noexcept -> bool
+    const protobuf::Bip47Channel& data) const noexcept -> bool
 {
     const bool exists = Root().Trunk().Nyms().Exists(nymID);
 
@@ -1902,7 +1903,7 @@ auto Storage::Store(
 auto Storage::Store(
     const identifier::Nym& nymID,
     const UnitType type,
-    const proto::BlockchainEthereumAccountData& data) const noexcept -> bool
+    const protobuf::BlockchainEthereumAccountData& data) const noexcept -> bool
 {
     return mutable_Root()
         .get()
@@ -1915,7 +1916,7 @@ auto Storage::Store(
         .Store(type, data);
 }
 
-auto Storage::Store(const proto::Contact& data) const noexcept -> bool
+auto Storage::Store(const protobuf::Contact& data) const noexcept -> bool
 {
     return mutable_Root()
         .get()
@@ -1926,7 +1927,7 @@ auto Storage::Store(const proto::Contact& data) const noexcept -> bool
         .Store(data, data.label());
 }
 
-auto Storage::Store(const proto::Context& data) const noexcept -> bool
+auto Storage::Store(const protobuf::Context& data) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
 
@@ -1943,7 +1944,7 @@ auto Storage::Store(const proto::Context& data) const noexcept -> bool
         .Store(data, notUsed);
 }
 
-auto Storage::Store(const proto::Credential& data) const noexcept -> bool
+auto Storage::Store(const protobuf::Credential& data) const noexcept -> bool
 {
     auto notUsed = UnallocatedCString{};
 
@@ -1956,7 +1957,7 @@ auto Storage::Store(const proto::Credential& data) const noexcept -> bool
         .Store(data, notUsed);
 }
 
-auto Storage::Store(const proto::Nym& data, std::string_view alias)
+auto Storage::Store(const protobuf::Nym& data, std::string_view alias)
     const noexcept -> bool
 {
     auto plaintext = UnallocatedCString{};
@@ -1976,10 +1977,10 @@ auto Storage::Store(const proto::Nym& data, std::string_view alias)
 auto Storage::Store(const ReadView& view, std::string_view alias) const noexcept
     -> bool
 {
-    return Store(proto::Factory<proto::Nym>(view), alias);
+    return Store(protobuf::Factory<protobuf::Nym>(view), alias);
 }
 
-auto Storage::Store(const identifier::Nym& nymID, const proto::Issuer& data)
+auto Storage::Store(const identifier::Nym& nymID, const protobuf::Issuer& data)
     const noexcept -> bool
 {
     const bool exists = Root().Trunk().Nyms().Exists(nymID);
@@ -2005,7 +2006,7 @@ auto Storage::Store(const identifier::Nym& nymID, const proto::Issuer& data)
 
 auto Storage::Store(
     const identifier::Nym& nymID,
-    const proto::PaymentWorkflow& data) const noexcept -> bool
+    const protobuf::PaymentWorkflow& data) const noexcept -> bool
 {
     const bool exists = Root().Trunk().Nyms().Exists(nymID);
 
@@ -2090,7 +2091,7 @@ auto Storage::Store(
 }
 
 auto Storage::Store(
-    const proto::PeerReply& data,
+    const protobuf::PeerReply& data,
     const identifier::Nym& nymID,
     const otx::client::StorageBox box) const noexcept -> bool
 {
@@ -2154,7 +2155,7 @@ auto Storage::Store(
 }
 
 auto Storage::Store(
-    const proto::PeerRequest& data,
+    const protobuf::PeerRequest& data,
     const identifier::Nym& nymID,
     const otx::client::StorageBox box) const noexcept -> bool
 {
@@ -2221,7 +2222,7 @@ auto Storage::Store(
     }
 }
 
-auto Storage::Store(const identifier::Nym& nym, const proto::Purse& purse)
+auto Storage::Store(const identifier::Nym& nym, const protobuf::Purse& purse)
     const noexcept -> bool
 {
     auto nymNode = mutable_Root().get().mutable_Trunk().get().mutable_Nyms();
@@ -2235,8 +2236,9 @@ auto Storage::Store(const identifier::Nym& nym, const proto::Purse& purse)
     return nymNode.get().mutable_Nym(nym).get().Store(purse);
 }
 
-auto Storage::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
-    const noexcept -> bool
+auto Storage::Store(
+    const opentxs::crypto::SeedID& id,
+    const protobuf::Seed& data) const noexcept -> bool
 {
     return mutable_Root()
         .get()
@@ -2247,8 +2249,9 @@ auto Storage::Store(const opentxs::crypto::SeedID& id, const proto::Seed& data)
         .Store(id, data);
 }
 
-auto Storage::Store(const proto::ServerContract& data, std::string_view alias)
-    const noexcept -> bool
+auto Storage::Store(
+    const protobuf::ServerContract& data,
+    std::string_view alias) const noexcept -> bool
 {
     auto storageVersion(data);
     storageVersion.clear_publicnym();
@@ -2263,13 +2266,15 @@ auto Storage::Store(const proto::ServerContract& data, std::string_view alias)
         .Store(data, alias, plaintext);
 }
 
-auto Storage::Store(const proto::Ciphertext& serialized) const noexcept -> bool
+auto Storage::Store(const protobuf::Ciphertext& serialized) const noexcept
+    -> bool
 {
     return mutable_Root().get().mutable_Trunk().get().Store(serialized);
 }
 
-auto Storage::Store(const proto::UnitDefinition& data, std::string_view alias)
-    const noexcept -> bool
+auto Storage::Store(
+    const protobuf::UnitDefinition& data,
+    std::string_view alias) const noexcept -> bool
 {
     auto storageVersion(data);
     storageVersion.clear_issuer_nym();

@@ -18,7 +18,7 @@ struct ListNyms final : public Message::Imp {
     {
         return static_cast<const response::ListNyms&>(*parent_);
     }
-    auto serialize(proto::RPCResponse& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCResponse& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             serialize_identifiers(dest);
@@ -39,7 +39,7 @@ struct ListNyms final : public Message::Imp {
     }
     ListNyms(
         const response::ListNyms* parent,
-        const proto::RPCResponse& in) noexcept(false)
+        const protobuf::RPCResponse& in) noexcept(false)
         : Imp(parent, in)
     {
     }
@@ -67,7 +67,7 @@ ListNyms::ListNyms(
 {
 }
 
-ListNyms::ListNyms(const proto::RPCResponse& serialized) noexcept(false)
+ListNyms::ListNyms(const protobuf::RPCResponse& serialized) noexcept(false)
     : Message(std::make_unique<implementation::ListNyms>(this, serialized))
 {
 }

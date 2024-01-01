@@ -5,11 +5,11 @@
 
 #include "opentxs/otx/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <ConsensusEnums.pb.h>
-#include <OTXEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/ConsensusEnums.pb.h>
+#include <opentxs/protobuf/OTXEnums.pb.h>
 #include <functional>
 
 #include "opentxs/otx/ConsensusType.hpp"      // IWYU pragma: keep
@@ -22,24 +22,24 @@
 namespace opentxs::otx
 {
 using ConsensusTypeMap =
-    frozen::unordered_map<ConsensusType, proto::ConsensusType, 4>;
+    frozen::unordered_map<ConsensusType, protobuf::ConsensusType, 4>;
 using ConsensusTypeReverseMap =
-    frozen::unordered_map<proto::ConsensusType, ConsensusType, 4>;
+    frozen::unordered_map<protobuf::ConsensusType, ConsensusType, 4>;
 using LastReplyStatusMap =
-    frozen::unordered_map<LastReplyStatus, proto::LastReplyStatus, 6>;
+    frozen::unordered_map<LastReplyStatus, protobuf::LastReplyStatus, 6>;
 using LastReplyStatusReverseMap =
-    frozen::unordered_map<proto::LastReplyStatus, LastReplyStatus, 6>;
-using PushTypeMap = frozen::unordered_map<PushType, proto::OTXPushType, 4>;
+    frozen::unordered_map<protobuf::LastReplyStatus, LastReplyStatus, 6>;
+using PushTypeMap = frozen::unordered_map<PushType, protobuf::OTXPushType, 4>;
 using PushTypeReverseMap =
-    frozen::unordered_map<proto::OTXPushType, PushType, 4>;
+    frozen::unordered_map<protobuf::OTXPushType, PushType, 4>;
 using ServerReplyTypeMap =
-    frozen::unordered_map<ServerReplyType, proto::ServerReplyType, 3>;
+    frozen::unordered_map<ServerReplyType, protobuf::ServerReplyType, 3>;
 using ServerReplyTypeReverseMap =
-    frozen::unordered_map<proto::ServerReplyType, ServerReplyType, 3>;
+    frozen::unordered_map<protobuf::ServerReplyType, ServerReplyType, 3>;
 using ServerRequestTypeMap =
-    frozen::unordered_map<ServerRequestType, proto::ServerRequestType, 2>;
+    frozen::unordered_map<ServerRequestType, protobuf::ServerRequestType, 2>;
 using ServerRequestTypeReverseMap =
-    frozen::unordered_map<proto::ServerRequestType, ServerRequestType, 2>;
+    frozen::unordered_map<protobuf::ServerRequestType, ServerRequestType, 2>;
 
 auto consensustype_map() noexcept -> const ConsensusTypeMap&;
 auto lastreplystatus_map() noexcept -> const LastReplyStatusMap&;
@@ -53,7 +53,7 @@ namespace opentxs::otx
 auto consensustype_map() noexcept -> const ConsensusTypeMap&
 {
     using enum ConsensusType;
-    using enum proto::ConsensusType;
+    using enum protobuf::ConsensusType;
     static constexpr auto map = ConsensusTypeMap{
         {Error, CONSENSUSTYPE_ERROR},
         {Server, CONSENSUSTYPE_SERVER},
@@ -67,7 +67,7 @@ auto consensustype_map() noexcept -> const ConsensusTypeMap&
 auto lastreplystatus_map() noexcept -> const LastReplyStatusMap&
 {
     using enum LastReplyStatus;
-    using enum proto::LastReplyStatus;
+    using enum protobuf::LastReplyStatus;
     static constexpr auto map = LastReplyStatusMap{
         {Invalid, LASTREPLYSTATUS_INVALID},
         {None, LASTREPLYSTATUS_NONE},
@@ -83,7 +83,7 @@ auto lastreplystatus_map() noexcept -> const LastReplyStatusMap&
 auto otxpushtype_map() noexcept -> const PushTypeMap&
 {
     using enum PushType;
-    using enum proto::OTXPushType;
+    using enum protobuf::OTXPushType;
     static constexpr auto map = PushTypeMap{
         {Error, OTXPUSH_ERROR},
         {Nymbox, OTXPUSH_NYMBOX},
@@ -97,7 +97,7 @@ auto otxpushtype_map() noexcept -> const PushTypeMap&
 auto serverreplytype_map() noexcept -> const ServerReplyTypeMap&
 {
     using enum ServerReplyType;
-    using enum proto::ServerReplyType;
+    using enum protobuf::ServerReplyType;
     static constexpr auto map = ServerReplyTypeMap{
         {Error, SERVERREPLY_ERROR},
         {Activate, SERVERREPLY_ACTIVATE},
@@ -110,7 +110,7 @@ auto serverreplytype_map() noexcept -> const ServerReplyTypeMap&
 auto serverrequesttype_map() noexcept -> const ServerRequestTypeMap&
 {
     using enum ServerRequestType;
-    using enum proto::ServerRequestType;
+    using enum protobuf::ServerRequestType;
     static constexpr auto map = ServerRequestTypeMap{
         {Error, SERVERREQUEST_ERROR},
         {Activate, SERVERREQUEST_ACTIVATE},
@@ -122,52 +122,52 @@ auto serverrequesttype_map() noexcept -> const ServerRequestTypeMap&
 
 namespace opentxs::otx
 {
-auto translate(ConsensusType in) noexcept -> proto::ConsensusType
+auto translate(ConsensusType in) noexcept -> protobuf::ConsensusType
 {
     try {
         return consensustype_map().at(in);
     } catch (...) {
-        return proto::CONSENSUSTYPE_ERROR;
+        return protobuf::CONSENSUSTYPE_ERROR;
     }
 }
 
-auto translate(LastReplyStatus in) noexcept -> proto::LastReplyStatus
+auto translate(LastReplyStatus in) noexcept -> protobuf::LastReplyStatus
 {
     try {
         return lastreplystatus_map().at(in);
     } catch (...) {
-        return proto::LASTREPLYSTATUS_INVALID;
+        return protobuf::LASTREPLYSTATUS_INVALID;
     }
 }
 
-auto translate(PushType in) noexcept -> proto::OTXPushType
+auto translate(PushType in) noexcept -> protobuf::OTXPushType
 {
     try {
         return otxpushtype_map().at(in);
     } catch (...) {
-        return proto::OTXPUSH_ERROR;
+        return protobuf::OTXPUSH_ERROR;
     }
 }
 
-auto translate(ServerReplyType in) noexcept -> proto::ServerReplyType
+auto translate(ServerReplyType in) noexcept -> protobuf::ServerReplyType
 {
     try {
         return serverreplytype_map().at(in);
     } catch (...) {
-        return proto::SERVERREPLY_ERROR;
+        return protobuf::SERVERREPLY_ERROR;
     }
 }
 
-auto translate(ServerRequestType in) noexcept -> proto::ServerRequestType
+auto translate(ServerRequestType in) noexcept -> protobuf::ServerRequestType
 {
     try {
         return serverrequesttype_map().at(in);
     } catch (...) {
-        return proto::SERVERREQUEST_ERROR;
+        return protobuf::SERVERREQUEST_ERROR;
     }
 }
 
-auto translate(const proto::ConsensusType in) noexcept -> ConsensusType
+auto translate(const protobuf::ConsensusType in) noexcept -> ConsensusType
 {
     static const auto map = frozen::invert_unordered_map(consensustype_map());
 
@@ -178,7 +178,7 @@ auto translate(const proto::ConsensusType in) noexcept -> ConsensusType
     }
 }
 
-auto translate(const proto::LastReplyStatus in) noexcept -> LastReplyStatus
+auto translate(const protobuf::LastReplyStatus in) noexcept -> LastReplyStatus
 {
     static const auto map = frozen::invert_unordered_map(lastreplystatus_map());
 
@@ -189,7 +189,7 @@ auto translate(const proto::LastReplyStatus in) noexcept -> LastReplyStatus
     }
 }
 
-auto translate(const proto::OTXPushType in) noexcept -> PushType
+auto translate(const protobuf::OTXPushType in) noexcept -> PushType
 {
     static const auto map = frozen::invert_unordered_map(otxpushtype_map());
 
@@ -200,7 +200,7 @@ auto translate(const proto::OTXPushType in) noexcept -> PushType
     }
 }
 
-auto translate(const proto::ServerReplyType in) noexcept -> ServerReplyType
+auto translate(const protobuf::ServerReplyType in) noexcept -> ServerReplyType
 {
     static const auto map = frozen::invert_unordered_map(serverreplytype_map());
 
@@ -211,7 +211,8 @@ auto translate(const proto::ServerReplyType in) noexcept -> ServerReplyType
     }
 }
 
-auto translate(const proto::ServerRequestType in) noexcept -> ServerRequestType
+auto translate(const protobuf::ServerRequestType in) noexcept
+    -> ServerRequestType
 {
     static const auto map =
         frozen::invert_unordered_map(serverrequesttype_map());

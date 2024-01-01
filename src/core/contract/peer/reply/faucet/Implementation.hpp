@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <BlockchainTransaction.pb.h>
 #include <cs_plain_guarded.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
 #include <optional>
 
 #include "core/contract/peer/reply/base/Implementation.hpp"
@@ -85,7 +85,7 @@ public:
     ~Implementation() final;
 
 private:
-    using OptionalTransaction = std::optional<proto::BlockchainTransaction>;
+    using OptionalTransaction = std::optional<protobuf::BlockchainTransaction>;
     using GuardedTransaction = libguarded::plain_guarded<OptionalTransaction>;
 
     static constexpr auto default_version_ = VersionNumber{4};

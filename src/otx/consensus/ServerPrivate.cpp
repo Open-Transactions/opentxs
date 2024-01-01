@@ -5,10 +5,10 @@
 
 #include "otx/consensus/ServerPrivate.hpp"  // IWYU pragma: associated
 
-#include <ConsensusEnums.pb.h>
-#include <Context.pb.h>
-#include <PendingCommand.pb.h>
-#include <ServerContext.pb.h>
+#include <opentxs/protobuf/ConsensusEnums.pb.h>
+#include <opentxs/protobuf/Context.pb.h>
+#include <opentxs/protobuf/PendingCommand.pb.h>
+#include <opentxs/protobuf/ServerContext.pb.h>
 #include <atomic>
 
 #include "internal/network/zeromq/Context.hpp"
@@ -45,7 +45,7 @@ ServerPrivate::ServerPrivate(
     , revision_(0)
     , highest_transaction_number_(0)
     , tentative_transaction_numbers_()
-    , state_(proto::DELIVERTYSTATE_IDLE)
+    , state_(protobuf::DELIVERTYSTATE_IDLE)
     , last_status_(otx::LastReplyStatus::None)
     , pending_message_()
     , pending_args_("", false)
@@ -73,7 +73,7 @@ ServerPrivate::ServerPrivate(
     const VersionNumber targetVersion,
     const network::zeromq::socket::Publish& requestSent,
     const network::zeromq::socket::Publish& replyReceived,
-    const proto::Context& serialized,
+    const protobuf::Context& serialized,
     network::ServerConnection& connection) noexcept
     : ConsensusPrivate(api, targetVersion, serialized)
     , request_sent_(requestSent)
@@ -118,7 +118,7 @@ ServerPrivate::ServerPrivate(
     }
 
     if (3 > serialized.version()) {
-        state_.store(proto::DELIVERTYSTATE_IDLE);
+        state_.store(protobuf::DELIVERTYSTATE_IDLE);
         last_status_.store(otx::LastReplyStatus::None);
     }
 }

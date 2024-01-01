@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Verification.pb.h>
+#include <opentxs/protobuf/Verification.pb.h>
 #include <span>
 
 #include "core/contract/Signable.hpp"
@@ -29,11 +29,11 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class Signature;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class PasswordPrompt;
 class Writer;
@@ -67,7 +67,7 @@ public:
     }
     [[nodiscard]] auto IsValid() const noexcept -> bool final { return true; }
     [[nodiscard]] auto Serialize(Writer&& out) const noexcept -> bool final;
-    auto Serialize(proto::Verification& out) const noexcept -> void final;
+    auto Serialize(protobuf::Verification& out) const noexcept -> void final;
     [[nodiscard]] auto Start() const noexcept -> Time final { return start_; }
     [[nodiscard]] auto Stop() const noexcept -> Time final { return stop_; }
     [[nodiscard]] auto Superscedes() const noexcept
@@ -97,7 +97,7 @@ public:
         allocator_type alloc) noexcept(false);
     Verification(
         const api::Session& api,
-        const proto::VerificationItem& proto,
+        const protobuf::VerificationItem& proto,
         Nym_p verifier,
         allocator_type alloc) noexcept(false);
     Verification() = delete;
@@ -119,10 +119,10 @@ private:
     const Vector<VerificationID> superscedes_;
 
     auto calculate_id() const -> identifier_type final;
-    auto final_form() const noexcept -> proto::Verification;
-    auto signing_form() const noexcept -> proto::Verification;
+    auto final_form() const noexcept -> protobuf::Verification;
+    auto signing_form() const noexcept -> protobuf::Verification;
     auto validate() const -> bool final;
-    auto verify_signature(const proto::Signature& signature) const
+    auto verify_signature(const protobuf::Signature& signature) const
         -> bool final;
 
     auto update_signature(const PasswordPrompt& reason) -> bool final;

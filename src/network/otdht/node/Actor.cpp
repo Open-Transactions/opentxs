@@ -9,8 +9,8 @@
 
 #include "network/otdht/node/Actor.hpp"  // IWYU pragma: associated
 
-#include <BlockchainPeerAddress.pb.h>
 #include <frozen/bits/algorithms.h>
+#include <opentxs/protobuf/BlockchainPeerAddress.pb.h>
 #include <algorithm>
 #include <chrono>
 #include <functional>
@@ -30,7 +30,6 @@
 #include "internal/network/zeromq/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Pipeline.hpp"
 #include "internal/network/zeromq/socket/Raw.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Options.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/Types.hpp"
@@ -69,6 +68,7 @@
 #include "opentxs/network/zeromq/socket/Direction.hpp"   // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/Policy.hpp"      // IWYU pragma: keep
 #include "opentxs/network/zeromq/socket/SocketType.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -878,10 +878,10 @@ auto Node::Actor::process_connect_peer_manager(Message&& msg) noexcept -> void
             std::move(envelope), register_ack, true);
 
         for (const auto& addr : external_endpoints_) {
-            auto proto = proto::BlockchainPeerAddress{};
+            auto proto = protobuf::BlockchainPeerAddress{};
 
             if (addr.Internal().Serialize(proto)) {
-                proto::write(proto, out.AppendBytes());
+                protobuf::write(proto, out.AppendBytes());
             } else {
                 LogError()()(name_)(": failed to serialize address").Flush();
             }

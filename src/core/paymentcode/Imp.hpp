@@ -49,12 +49,12 @@ class Base;
 }  // namespace credential
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class PaymentCode;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -72,7 +72,8 @@ public:
 
     operator const opentxs::crypto::asymmetric::Key&() const noexcept final;
 
-    auto operator==(const proto::PaymentCode& rhs) const noexcept -> bool final;
+    auto operator==(const protobuf::PaymentCode& rhs) const noexcept
+        -> bool final;
 
     auto asBase58() const noexcept -> UnallocatedCString final;
     auto Blind(
@@ -122,7 +123,7 @@ public:
     auto Serialize(Serialized& serialized) const noexcept -> bool final;
     auto Sign(
         const identity::credential::Base& credential,
-        proto::Signature& sig,
+        protobuf::Signature& sig,
         const opentxs::PasswordPrompt& reason) const noexcept -> bool final;
     auto Sign(
         const opentxs::Data& data,
@@ -142,8 +143,9 @@ public:
         -> opentxs::PaymentCode final;
     auto Valid() const noexcept -> bool final;
     auto Verify(
-        const proto::Credential& master,
-        const proto::Signature& sourceSignature) const noexcept -> bool final;
+        const protobuf::Credential& master,
+        const protobuf::Signature& sourceSignature) const noexcept
+        -> bool final;
     auto Version() const noexcept -> VersionNumber final { return version_; }
 
     auto AddPrivateKeys(

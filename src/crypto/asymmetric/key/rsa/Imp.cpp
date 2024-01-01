@@ -5,8 +5,8 @@
 
 #include "crypto/asymmetric/key/rsa/Imp.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Ciphertext.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Ciphertext.pb.h>
 #include <stdexcept>
 #include <string>
 
@@ -28,7 +28,7 @@ namespace opentxs::crypto::asymmetric::key::implementation
 RSA::RSA(
     const api::Session& api,
     const crypto::AsymmetricProvider& engine,
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     allocator_type alloc) noexcept(false)
     : KeyPrivate(alloc)
     , RSAPrivate(alloc)
@@ -95,15 +95,15 @@ RSA::RSA(const RSA& rhs, allocator_type alloc) noexcept
 
 auto RSA::deserialize_key(
     const api::Session& api,
-    const proto::AsymmetricKey& proto,
+    const protobuf::AsymmetricKey& proto,
     Data& publicKey,
-    Secret&) noexcept(false) -> std::unique_ptr<proto::Ciphertext>
+    Secret&) noexcept(false) -> std::unique_ptr<protobuf::Ciphertext>
 {
-    auto output = std::unique_ptr<proto::Ciphertext>{};
+    auto output = std::unique_ptr<protobuf::Ciphertext>{};
     publicKey.Assign(proto.key());
 
     if (proto.has_encryptedkey()) {
-        output = std::make_unique<proto::Ciphertext>(proto.encryptedkey());
+        output = std::make_unique<protobuf::Ciphertext>(proto.encryptedkey());
 
         assert_false(nullptr == output);
     }

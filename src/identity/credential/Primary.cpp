@@ -5,14 +5,14 @@
 
 #include "identity/credential/Primary.hpp"  // IWYU pragma: associated
 
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
-#include <MasterCredentialParameters.pb.h>
-#include <Signature.pb.h>
-#include <SourceProof.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/MasterCredentialParameters.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/SourceProof.pb.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -23,9 +23,6 @@
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Source.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
@@ -43,6 +40,8 @@
 #include "opentxs/identity/SourceType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -72,7 +71,7 @@ auto Factory::PrimaryCredential(
     const api::Session& api,
     identity::internal::Authority& parent,
     const identity::Source& source,
-    const proto::Credential& serialized)
+    const protobuf::Credential& serialized)
     -> identity::credential::internal::Primary*
 {
     using ReturnType = identity::credential::implementation::Primary;
@@ -126,7 +125,7 @@ Primary::Primary(
     const api::Session& api,
     const identity::internal::Authority& parent,
     const identity::Source& source,
-    const proto::Credential& serialized) noexcept(false)
+    const protobuf::Credential& serialized) noexcept(false)
     : credential::implementation::Key(api, parent, source, serialized, {})
     , source_proof_(serialized.masterdata().sourceproof())
 {
@@ -150,7 +149,7 @@ auto Primary::hasCapability(const NymCapability& capability) const -> bool
     }
 }
 
-auto Primary::Path(proto::HDPath& output) const -> bool
+auto Primary::Path(protobuf::HDPath& output) const -> bool
 {
     try {
         const auto found =
@@ -200,8 +199,8 @@ void Primary::sign(
 {
     Key::sign(master, reason, out);
 
-    if (proto::SOURCEPROOFTYPE_SELF_SIGNATURE != source_proof_.type()) {
-        auto sig = std::make_shared<proto::Signature>();
+    if (protobuf::SOURCEPROOFTYPE_SELF_SIGNATURE != source_proof_.type()) {
+        auto sig = std::make_shared<protobuf::Signature>();
 
         assert_false(nullptr == sig);
 
@@ -214,9 +213,9 @@ void Primary::sign(
 }
 
 auto Primary::source_proof(const crypto::Parameters& params)
-    -> proto::SourceProof
+    -> protobuf::SourceProof
 {
-    auto output = proto::SourceProof{};
+    auto output = protobuf::SourceProof{};
     output.set_version(1);
     output.set_type(translate(params.SourceProofType()));
 
@@ -226,7 +225,7 @@ auto Primary::source_proof(const crypto::Parameters& params)
 auto Primary::sourceprooftype_map() noexcept -> const SourceProofTypeMap&
 {
     using enum identity::SourceProofType;
-    using enum proto::SourceProofType;
+    using enum protobuf::SourceProofType;
     static constexpr auto map = SourceProofTypeMap{
         {Error, SOURCEPROOFTYPE_ERROR},
         {SelfSignature, SOURCEPROOFTYPE_SELF_SIGNATURE},
@@ -237,16 +236,16 @@ auto Primary::sourceprooftype_map() noexcept -> const SourceProofTypeMap&
 }
 
 auto Primary::translate(const identity::SourceProofType in) noexcept
-    -> proto::SourceProofType
+    -> protobuf::SourceProofType
 {
     try {
         return sourceprooftype_map().at(in);
     } catch (...) {
-        return proto::SOURCEPROOFTYPE_ERROR;
+        return protobuf::SOURCEPROOFTYPE_ERROR;
     }
 }
 
-auto Primary::translate(const proto::SourceProofType in) noexcept
+auto Primary::translate(const protobuf::SourceProofType in) noexcept
     -> identity::SourceProofType
 {
     static const auto map = frozen::invert_unordered_map(sourceprooftype_map());
@@ -259,14 +258,14 @@ auto Primary::translate(const proto::SourceProofType in) noexcept
 }
 
 auto Primary::Verify(
-    const proto::Credential& credential,
+    const protobuf::Credential& credential,
     const identity::CredentialRole& role,
     const identifier_type& masterID,
-    const proto::Signature& masterSig) const -> bool
+    const protobuf::Signature& masterSig) const -> bool
 {
-    if (!proto::Validate<proto::Credential>(
+    if (!protobuf::syntax::check(
+            LogError(),
             credential,
-            VERBOSE,
             opentxs::translate(crypto::asymmetric::Mode::Public),
             opentxs::translate(role),
             false)) {
@@ -285,7 +284,7 @@ auto Primary::Verify(
         return false;
     }
 
-    proto::Credential copy;
+    protobuf::Credential copy;
     copy.CopyFrom(credential);
     auto& signature = *copy.add_signature();
     signature.CopyFrom(masterSig);
@@ -296,7 +295,7 @@ auto Primary::Verify(
 
 auto Primary::verify_against_source() const -> bool
 {
-    auto pSerialized = std::shared_ptr<proto::Credential>{};
+    auto pSerialized = std::shared_ptr<protobuf::Credential>{};
     auto hasSourceSignature{true};
 
     switch (source_.Type()) {

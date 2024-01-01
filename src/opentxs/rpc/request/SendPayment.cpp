@@ -6,8 +6,8 @@
 #include "opentxs/rpc/request/MessagePrivate.hpp"  // IWYU pragma: associated
 #include "opentxs/rpc/request/SendPayment.hpp"     // IWYU pragma: associated
 
-#include <RPCCommand.pb.h>
-#include <SendPayment.pb.h>
+#include <opentxs/protobuf/RPCCommand.pb.h>
+#include <opentxs/protobuf/SendPayment.pb.h>
 #include <memory>
 
 #include "internal/core/Factory.hpp"
@@ -34,7 +34,7 @@ struct SendPayment final : public Message::Imp {
     {
         return static_cast<const request::SendPayment&>(*parent_);
     }
-    auto serialize(proto::RPCCommand& dest) const noexcept -> bool final
+    auto serialize(protobuf::RPCCommand& dest) const noexcept -> bool final
     {
         if (Imp::serialize(dest)) {
             auto& payment = *dest.mutable_sendpayment();
@@ -76,7 +76,7 @@ struct SendPayment final : public Message::Imp {
     }
     SendPayment(
         const request::SendPayment* parent,
-        const proto::RPCCommand& in) noexcept(false)
+        const protobuf::RPCCommand& in) noexcept(false)
         : Imp(parent, in)
         , send_payment_version_(in.sendpayment().version())
         , payment_type_(translate(in.sendpayment().type()))
@@ -166,7 +166,7 @@ SendPayment::SendPayment(
 {
 }
 
-SendPayment::SendPayment(const proto::RPCCommand& in) noexcept(false)
+SendPayment::SendPayment(const protobuf::RPCCommand& in) noexcept(false)
     : Message(std::make_unique<implementation::SendPayment>(this, in))
 {
 }

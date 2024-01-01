@@ -64,7 +64,7 @@ auto Claim::Remove(claim::Attribute) noexcept -> void {}
 
 auto Claim::Section() const noexcept -> claim::SectionType { return {}; }
 
-auto Claim::Serialize(proto::Claim&) const noexcept -> void {}
+auto Claim::Serialize(protobuf::Claim&) const noexcept -> void {}
 
 auto Claim::Serialize(Writer&&) const noexcept -> bool { return false; }
 

@@ -20,10 +20,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class GCS;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -74,7 +74,7 @@ public:
     virtual auto Match(const gcs::Hashes& prehashed, alloc::Default monotonic)
         const noexcept -> PrehashedMatches = 0;
     virtual auto Range() const noexcept -> gcs::Range = 0;
-    virtual auto Serialize(proto::GCS& out) const noexcept -> bool = 0;
+    virtual auto Serialize(protobuf::GCS& out) const noexcept -> bool = 0;
     virtual auto Test(const gcs::Hashes& targets, alloc::Default monotonic)
         const noexcept -> bool = 0;
 

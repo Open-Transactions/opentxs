@@ -5,13 +5,13 @@
 
 #include "opentxs/network/otdht/Block.hpp"  // IWYU pragma: associated
 
-#include <P2PBlockchainSync.pb.h>
+#include <opentxs/protobuf/P2PBlockchainSync.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Numbers.hpp"
 #include "opentxs/util/Writer.hpp"
@@ -64,7 +64,7 @@ struct Block::Imp {
     auto operator=(Imp&&) -> Imp& = delete;
 };
 
-Block::Block(const proto::P2PBlockchainSync& in) noexcept(false)
+Block::Block(const protobuf::P2PBlockchainSync& in) noexcept(false)
     : Block(
           static_cast<opentxs::blockchain::Type>(in.chain()),
           in.height(),
@@ -127,7 +127,7 @@ auto Block::Height() const noexcept -> opentxs::blockchain::block::Height
     return imp_->height_;
 }
 
-auto Block::Serialize(proto::P2PBlockchainSync& dest) const noexcept -> bool
+auto Block::Serialize(protobuf::P2PBlockchainSync& dest) const noexcept -> bool
 {
     const auto header = reader(imp_->header_);
     const auto filter = reader(imp_->filter_);
@@ -145,13 +145,13 @@ auto Block::Serialize(proto::P2PBlockchainSync& dest) const noexcept -> bool
 auto Block::Serialize(Writer&& dest) const noexcept -> bool
 {
     const auto proto = [&] {
-        auto out = proto::P2PBlockchainSync{};
+        auto out = protobuf::P2PBlockchainSync{};
         Serialize(out);
 
         return out;
     }();
 
-    return proto::write(proto, std::move(dest));
+    return protobuf::write(proto, std::move(dest));
 }
 
 Block::~Block() { std::unique_ptr<Imp>(imp_).reset(); }

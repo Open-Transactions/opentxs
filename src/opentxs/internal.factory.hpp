@@ -3,11 +3,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::CredentialRole
+// IWYU pragma: no_forward_declare opentxs::protobuf::CredentialRole
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <cstdint>
 #include <memory>
 #include <span>
@@ -126,7 +126,7 @@ class Nym;
 class Source;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class Authority;
 class Credential;
@@ -139,7 +139,7 @@ class VerificationGroup;
 class VerificationIdentity;
 class VerificationItem;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class Data;
@@ -166,8 +166,9 @@ public:
         const api::Session& api,
         const identity::Nym& parent,
         const identity::Source& source,
-        const proto::KeyMode mode,
-        const proto::Authority& serialized) -> identity::internal::Authority*;
+        const protobuf::KeyMode mode,
+        const protobuf::Authority& serialized)
+        -> identity::internal::Authority*;
     static auto Authority(
         const api::Session& api,
         const identity::Nym& parent,
@@ -190,7 +191,7 @@ public:
     static auto BasketContract(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) noexcept
+        const protobuf::UnitDefinition serialized) noexcept
         -> std::shared_ptr<contract::unit::Basket>;
     static auto Bitcoin(const api::Crypto& crypto) -> crypto::Bitcoin*;
     static auto Bip39(const api::Crypto& api) noexcept
@@ -209,7 +210,7 @@ public:
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& credential)
+        const protobuf::Credential& credential)
         -> identity::credential::internal::Contact*;
     template <class C>
     static auto Credential(
@@ -219,7 +220,7 @@ public:
         const identity::credential::internal::Primary& master,
         const VersionNumber version,
         const crypto::Parameters& parameters,
-        const proto::CredentialRole role,
+        const protobuf::CredentialRole role,
         const opentxs::PasswordPrompt& reason) -> C*;
     template <class C>
     static auto Credential(
@@ -227,9 +228,9 @@ public:
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& serialized,
-        const proto::KeyMode mode,
-        const proto::CredentialRole role) -> C*;
+        const protobuf::Credential& serialized,
+        const protobuf::KeyMode mode,
+        const protobuf::CredentialRole role) -> C*;
     static auto CurrencyContract(
         const api::Session& api,
         const Nym_p& nym,
@@ -244,13 +245,13 @@ public:
     static auto CurrencyContract(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) noexcept
+        const protobuf::UnitDefinition serialized) noexcept
         -> std::shared_ptr<contract::unit::Currency>;
     static auto Envelope(const api::Session& api) noexcept
         -> std::unique_ptr<crypto::Envelope>;
     static auto Envelope(
         const api::Session& api,
-        const proto::Envelope& serialized) noexcept(false)
+        const protobuf::Envelope& serialized) noexcept(false)
         -> std::unique_ptr<crypto::Envelope>;
     static auto Envelope(
         const api::Session& api,
@@ -265,7 +266,7 @@ public:
         const opentxs::PasswordPrompt& reason) -> identity::internal::Nym*;
     static auto Nym(
         const api::Session& api,
-        const proto::Nym& serialized,
+        const protobuf::Nym& serialized,
         std::string_view alias) -> identity::internal::Nym*;
     static auto Nym(
         const api::Session& api,
@@ -281,7 +282,7 @@ public:
         const opentxs::PasswordPrompt& reason) -> identity::Source*;
     static auto NymIDSource(
         const api::Session& api,
-        const proto::NymIDSource& serialized) -> identity::Source*;
+        const protobuf::NymIDSource& serialized) -> identity::Source*;
     static auto Operation(
         const api::session::Client& api,
         const identifier::Nym& nym,
@@ -300,7 +301,7 @@ public:
         const api::Session& api,
         identity::internal::Authority& parent,
         const identity::Source& source,
-        const proto::Credential& credential)
+        const protobuf::Credential& credential)
         -> identity::credential::internal::Primary*;
     static auto SecondaryCredential(
         const api::Session& api,
@@ -316,7 +317,7 @@ public:
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& credential)
+        const protobuf::Credential& credential)
         -> identity::credential::internal::Secondary*;
     static auto SecurityContract(
         const api::Session& api,
@@ -332,7 +333,7 @@ public:
     static auto SecurityContract(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) noexcept
+        const protobuf::UnitDefinition serialized) noexcept
         -> std::shared_ptr<contract::unit::Security>;
     static auto ServerContract(const api::Session& api) noexcept
         -> std::unique_ptr<contract::Server>;
@@ -348,14 +349,14 @@ public:
     static auto ServerContract(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::ServerContract& serialized) noexcept
+        const protobuf::ServerContract& serialized) noexcept
         -> std::unique_ptr<contract::Server>;
     static auto UnitDefinition(const api::Session& api) noexcept
         -> std::shared_ptr<contract::Unit>;
     static auto UnitDefinition(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) noexcept
+        const protobuf::UnitDefinition serialized) noexcept
         -> std::shared_ptr<contract::Unit>;
     static auto VerificationCredential(
         const api::Session& api,
@@ -371,7 +372,7 @@ public:
         identity::internal::Authority& parent,
         const identity::Source& source,
         const identity::credential::internal::Primary& master,
-        const proto::Credential& credential)
+        const protobuf::Credential& credential)
         -> identity::credential::internal::Verification*;
     static auto VerificationGroup(
         identity::wot::verification::internal::Set& parent,
@@ -379,7 +380,7 @@ public:
         bool external) -> identity::wot::verification::internal::Group*;
     static auto VerificationGroup(
         identity::wot::verification::internal::Set& parent,
-        const proto::VerificationGroup& serialized,
+        const protobuf::VerificationGroup& serialized,
         bool external) -> identity::wot::verification::internal::Group*;
     static auto VerificationItem(
         const identity::wot::verification::internal::Nym& parent,
@@ -394,7 +395,7 @@ public:
         -> identity::wot::verification::internal::Item*;
     static auto VerificationItem(
         const identity::wot::verification::internal::Nym& parent,
-        const proto::VerificationItem& serialized)
+        const protobuf::VerificationItem& serialized)
         -> identity::wot::verification::internal::Item*;
     static auto VerificationNym(
         identity::wot::verification::internal::Group& parent,
@@ -403,7 +404,7 @@ public:
         -> identity::wot::verification::internal::Nym*;
     static auto VerificationNym(
         identity::wot::verification::internal::Group& parent,
-        const proto::VerificationIdentity& serialized)
+        const protobuf::VerificationIdentity& serialized)
         -> identity::wot::verification::internal::Nym*;
     static auto VerificationSet(
         const api::Session& api,
@@ -413,7 +414,7 @@ public:
     static auto VerificationSet(
         const api::Session& api,
         const identifier::Nym& nym,
-        const proto::VerificationSet& serialized)
+        const protobuf::VerificationSet& serialized)
         -> identity::wot::verification::internal::Set*;
 };
 }  // namespace opentxs

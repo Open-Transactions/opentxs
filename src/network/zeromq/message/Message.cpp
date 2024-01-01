@@ -308,7 +308,8 @@ auto Message::Imp::AddFrame(const void* input, const std::size_t size) noexcept
     return AddFrame(factory::ZMQFrame(input, size));
 }
 
-auto Message::Imp::AddFrame(const ProtobufType& input) noexcept -> Frame&
+auto Message::Imp::AddFrame(const protobuf::MessageType& input) noexcept
+    -> Frame&
 {
     return AddFrame(factory::ZMQFrame(input));
 }

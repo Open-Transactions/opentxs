@@ -42,10 +42,10 @@ class Bulk;
 }  // namespace database
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransaction;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -76,7 +76,7 @@ public:
         alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LoadTransaction(
         const block::TransactionHash& txid,
-        proto::BlockchainTransaction& out,
+        protobuf::BlockchainTransaction& out,
         alloc::Default alloc,
         alloc::Default monotonic) const noexcept -> block::Transaction;
     auto LookupContact(const Data& pubkeyHash) const noexcept
@@ -86,7 +86,7 @@ public:
     auto StoreTransaction(const block::Transaction& tx) const noexcept -> bool;
     auto StoreTransaction(
         const block::Transaction& tx,
-        proto::BlockchainTransaction& out) const noexcept -> bool;
+        protobuf::BlockchainTransaction& out) const noexcept -> bool;
     auto UpdateContact(const Contact& contact) const noexcept
         -> UnallocatedVector<block::TransactionHash>;
     auto UpdateMergedContact(const Contact& parent, const Contact& child)

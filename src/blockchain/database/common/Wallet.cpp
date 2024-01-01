@@ -5,7 +5,7 @@
 
 #include "blockchain/database/common/Wallet.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransaction.pb.h>
+#include <opentxs/protobuf/BlockchainTransaction.pb.h>
 #include <algorithm>
 #include <iterator>
 #include <optional>
@@ -21,8 +21,6 @@
 #include "internal/blockchain/database/common/Common.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Factory.hpp"
 #include "internal/blockchain/protocol/bitcoin/base/block/Transaction.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
 #include "internal/util/Mutex.hpp"
 #include "internal/util/storage/file/Index.hpp"
 #include "internal/util/storage/file/Mapped.hpp"
@@ -38,6 +36,8 @@
 #include "opentxs/core/Contact.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/core/FixedByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -118,14 +118,14 @@ auto Wallet::LoadTransaction(
     alloc::Default alloc,
     alloc::Default monotonic) const noexcept -> block::Transaction
 {
-    auto proto = proto::BlockchainTransaction{};
+    auto proto = protobuf::BlockchainTransaction{};
 
     return LoadTransaction(txid, proto, alloc, monotonic);
 }
 
 auto Wallet::LoadTransaction(
     const block::TransactionHash& txid,
-    proto::BlockchainTransaction& proto,
+    protobuf::BlockchainTransaction& proto,
     alloc::Default alloc,
     alloc::Default monotonic) const noexcept -> block::Transaction
 {
@@ -159,7 +159,7 @@ auto Wallet::LoadTransaction(
                     "failed to load serialized transaction");
             }
 
-            return proto::Factory<proto::BlockchainTransaction>(bytes);
+            return protobuf::Factory<protobuf::BlockchainTransaction>(bytes);
         }();
 
         return factory::BitcoinTransaction(
@@ -200,14 +200,14 @@ auto Wallet::LookupTransactions(const ElementHash pattern) const noexcept
 auto Wallet::StoreTransaction(const block::Transaction& in) const noexcept
     -> bool
 {
-    auto out = proto::BlockchainTransaction{};
+    auto out = protobuf::BlockchainTransaction{};
 
     return StoreTransaction(in, out);
 }
 
 auto Wallet::StoreTransaction(
     const block::Transaction& in,
-    proto::BlockchainTransaction& proto) const noexcept -> bool
+    protobuf::BlockchainTransaction& proto) const noexcept -> bool
 {
     try {
         proto = [&] {
@@ -227,7 +227,7 @@ auto Wallet::StoreTransaction(
         const auto& [_, view] = location;
         const auto cb = storage::file::SourceData{std::make_pair(
             [&](auto&& writer) {
-                return proto::write(proto, std::move(writer));
+                return protobuf::write(proto, std::move(writer));
             },
             bytes)};
 

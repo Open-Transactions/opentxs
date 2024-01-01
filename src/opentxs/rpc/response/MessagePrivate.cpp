@@ -5,15 +5,15 @@
 
 #include "opentxs/rpc/response/MessagePrivate.hpp"  // IWYU pragma: associated
 
-#include <RPCResponse.pb.h>
-#include <RPCStatus.pb.h>
-#include <RPCTask.pb.h>
+#include <opentxs/protobuf/RPCResponse.pb.h>
+#include <opentxs/protobuf/RPCStatus.pb.h>
+#include <opentxs/protobuf/RPCTask.pb.h>
 #include <cassert>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/rpc/CommandType.hpp"  // IWYU pragma: keep
 #include "opentxs/rpc/Types.hpp"
 #include "opentxs/rpc/Types.internal.hpp"
@@ -94,7 +94,9 @@ Message::Imp::Imp(
 {
 }
 
-Message::Imp::Imp(const Message* parent, const proto::RPCResponse& in) noexcept
+Message::Imp::Imp(
+    const Message* parent,
+    const protobuf::RPCResponse& in) noexcept
     : Imp(
           parent,
           in.version(),
@@ -185,7 +187,7 @@ auto Message::Imp::asSendPayment() const noexcept
     return blank;
 }
 
-auto Message::Imp::serialize(proto::RPCResponse& dest) const noexcept -> bool
+auto Message::Imp::serialize(protobuf::RPCResponse& dest) const noexcept -> bool
 {
     dest.set_version(version_);
     dest.set_cookie(cookie_);
@@ -207,7 +209,7 @@ auto Message::Imp::serialize(Writer&& dest) const noexcept -> bool
 {
     try {
         const auto proto = [&] {
-            auto out = proto::RPCResponse{};
+            auto out = protobuf::RPCResponse{};
 
             if (false == serialize(out)) {
                 throw std::runtime_error{"serialization error"};
@@ -216,7 +218,7 @@ auto Message::Imp::serialize(Writer&& dest) const noexcept -> bool
             return out;
         }();
 
-        return proto::write(proto, std::move(dest));
+        return protobuf::write(proto, std::move(dest));
     } catch (...) {
 
         return false;
@@ -224,12 +226,12 @@ auto Message::Imp::serialize(Writer&& dest) const noexcept -> bool
 }
 
 auto Message::Imp::serialize_identifiers(
-    proto::RPCResponse& dest) const noexcept -> void
+    protobuf::RPCResponse& dest) const noexcept -> void
 {
     for (const auto& id : identifiers_) { dest.add_identifier(id); }
 }
 
-auto Message::Imp::serialize_tasks(proto::RPCResponse& dest) const noexcept
+auto Message::Imp::serialize_tasks(protobuf::RPCResponse& dest) const noexcept
     -> void
 {
     for (const auto& [index, id] : tasks_) {
@@ -294,7 +296,7 @@ auto Message::Serialize(Writer&& dest) const noexcept -> bool
     return imp_->serialize(std::move(dest));
 }
 
-auto Message::Serialize(proto::RPCResponse& dest) const noexcept -> bool
+auto Message::Serialize(protobuf::RPCResponse& dest) const noexcept -> bool
 {
     return imp_->serialize(dest);
 }

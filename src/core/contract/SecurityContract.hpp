@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 
 #include "core/contract/Unit.hpp"
 #include "internal/core/contract/SecurityContract.hpp"
@@ -57,7 +57,7 @@ public:
     Security(
         const api::Session& api,
         const Nym_p& nym,
-        const proto::UnitDefinition serialized);
+        const protobuf::UnitDefinition serialized);
     Security(Security&&) = delete;
     auto operator=(const Security&) -> Security& = delete;
     auto operator=(Security&&) -> Security& = delete;
@@ -67,7 +67,7 @@ public:
 private:
     friend opentxs::Factory;
 
-    auto IDVersion() const -> proto::UnitDefinition final;
+    auto IDVersion() const -> protobuf::UnitDefinition final;
 
     Security(const Security&);
 };

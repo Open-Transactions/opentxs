@@ -5,10 +5,10 @@
 
 #include "opentxs/Types.internal.hpp"  // IWYU pragma: associated
 
-#include <ContractEnums.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/ContractEnums.pb.h>
 #include <limits>
 
 #include "opentxs/AddressType.hpp"  // IWYU pragma: keep
@@ -17,9 +17,9 @@ namespace opentxs
 {
 static constexpr auto address_type_to_proto_ = [] {
     using enum AddressType;
-    using enum proto::AddressType;
+    using enum protobuf::AddressType;
 
-    return frozen::make_unordered_map<AddressType, proto::AddressType>({
+    return frozen::make_unordered_map<AddressType, protobuf::AddressType>({
         {Error, ADDRESSTYPE_ERROR},
         {IPV4, ADDRESSTYPE_IPV4},
         {IPV6, ADDRESSTYPE_IPV6},
@@ -49,7 +49,7 @@ auto check_subset(
     return true;
 }
 
-auto translate(AddressType in) noexcept -> proto::AddressType
+auto translate(AddressType in) noexcept -> protobuf::AddressType
 {
     const auto& map = address_type_to_proto_;
 
@@ -58,12 +58,12 @@ auto translate(AddressType in) noexcept -> proto::AddressType
         return i->second;
     } else {
 
-        return proto::ADDRESSTYPE_ERROR;
+        return protobuf::ADDRESSTYPE_ERROR;
     }
 }
 }  // namespace opentxs
 
-namespace opentxs::proto
+namespace opentxs::protobuf
 {
 auto translate(AddressType in) noexcept -> opentxs::AddressType
 {
@@ -78,4 +78,4 @@ auto translate(AddressType in) noexcept -> opentxs::AddressType
         return opentxs::AddressType::Error;
     }
 }
-}  // namespace opentxs::proto
+}  // namespace opentxs::protobuf

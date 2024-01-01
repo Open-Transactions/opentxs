@@ -17,10 +17,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class P2PBlockchainChainState;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -33,11 +33,11 @@ public:
     auto Position() const noexcept
         -> const opentxs::blockchain::block::Position&;
     OPENTXS_NO_EXPORT auto Serialize(
-        proto::P2PBlockchainChainState& dest) const noexcept -> bool;
+        protobuf::P2PBlockchainChainState& dest) const noexcept -> bool;
 
     OPENTXS_NO_EXPORT State(
         const api::Session& api,
-        const proto::P2PBlockchainChainState& serialized) noexcept(false);
+        const protobuf::P2PBlockchainChainState& serialized) noexcept(false);
     State(
         opentxs::blockchain::Type chain,
         opentxs::blockchain::block::Position position) noexcept(false);

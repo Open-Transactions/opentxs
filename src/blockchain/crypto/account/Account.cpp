@@ -7,10 +7,10 @@
 
 #include "blockchain/crypto/account/Account.hpp"  // IWYU pragma: associated
 
-#include <Bip47Channel.pb.h>
-#include <BlockchainEthereumAccountData.pb.h>
-#include <HDAccount.pb.h>
 #include <boost/endian/conversion.hpp>
+#include <opentxs/protobuf/Bip47Channel.pb.h>
+#include <opentxs/protobuf/BlockchainEthereumAccountData.pb.h>
+#include <opentxs/protobuf/HDAccount.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -153,7 +153,7 @@ Account::Account(
 }
 
 auto Account::AddEthereum(
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -161,7 +161,7 @@ auto Account::AddEthereum(
 }
 
 auto Account::AddHD(
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -171,7 +171,7 @@ auto Account::AddHD(
 auto Account::AddPaymentCode(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
     return init_payment_code(local, remote, path, reason);
@@ -355,7 +355,7 @@ auto Account::init_ethereum(
             return i->second->Self();
         }
 
-        auto proto = proto::BlockchainEthereumAccountData{};
+        auto proto = protobuf::BlockchainEthereumAccountData{};
         const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
 
         if (false == loaded) {
@@ -392,7 +392,7 @@ auto Account::init_ethereum(
 }
 
 auto Account::init_ethereum(
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -448,7 +448,7 @@ auto Account::init_hd(
             return i->second->Self();
         }
 
-        auto proto = proto::HDAccount{};
+        auto proto = protobuf::HDAccount{};
         const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
 
         if (false == loaded) {
@@ -485,7 +485,7 @@ auto Account::init_hd(
 }
 
 auto Account::init_hd(
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const crypto::HDProtocol standard,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
@@ -570,7 +570,7 @@ auto Account::init_payment_code(
             return i->second->Self();
         }
 
-        auto proto = proto::Bip47Channel{};
+        auto proto = protobuf::Bip47Channel{};
         const auto loaded = api_.Storage().Internal().Load(nym_id_, id, proto);
 
         if (false == loaded) {
@@ -609,7 +609,7 @@ auto Account::init_payment_code(
 auto Account::init_payment_code(
     const opentxs::PaymentCode& local,
     const opentxs::PaymentCode& remote,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const PasswordPrompt& reason) noexcept -> crypto::Subaccount&
 {
     const auto id = internal::PaymentCode::GetID(api_, chain_, local, remote);

@@ -5,8 +5,8 @@
 
 #include "util/storage/tree/Thread.hpp"  // IWYU pragma: associated
 
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
 #include <atomic>
 #include <memory>
 #include <optional>
@@ -14,16 +14,16 @@
 #include <stdexcept>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/StorageThread.hpp"
-#include "internal/serialization/protobuf/verify/StorageThreadItem.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "internal/util/Size.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
 #include "opentxs/otx/client/StorageBox.hpp"  // IWYU pragma: keep
 #include "opentxs/otx/client/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/StorageThread.hpp"
+#include "opentxs/protobuf/syntax/StorageThreadItem.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "util/storage/tree/Mailbox.hpp"
@@ -153,7 +153,7 @@ auto Thread::Add(
         item.set_txid(contents);
     }
 
-    const auto valid = proto::Validate(item, VERBOSE);
+    const auto valid = protobuf::syntax::check(LogError(), item);
 
     if (false == valid) {
         items_.erase(id);
@@ -173,7 +173,7 @@ auto Thread::Alias() const -> UnallocatedCString
 
 auto Thread::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageThread>{};
+    auto p = std::shared_ptr<protobuf::StorageThread>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -209,7 +209,7 @@ auto Thread::Check(const identifier::Generic& id) const -> bool
 
 auto Thread::ID() const -> identifier::Generic { return id_; }
 
-auto Thread::Items() const -> proto::StorageThread
+auto Thread::Items() const -> protobuf::StorageThread
 {
     const auto lock = Lock{write_lock_};
 
@@ -284,16 +284,16 @@ auto Thread::save(const Lock& lock) const -> bool
 
     auto serialized = serialize(lock);
 
-    if (!proto::Validate(serialized, VERBOSE)) { return false; }
+    if (!protobuf::syntax::check(LogError(), serialized)) { return false; }
 
     return StoreProto(serialized, root_);
 }
 
-auto Thread::serialize(const Lock& lock) const -> proto::StorageThread
+auto Thread::serialize(const Lock& lock) const -> protobuf::StorageThread
 {
     assert_true(verify_write_lock(lock));
 
-    proto::StorageThread serialized;
+    protobuf::StorageThread serialized;
     serialized.set_version(version_);
     serialized.set_id(id_.asBase58(crypto_));
 

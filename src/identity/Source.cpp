@@ -6,15 +6,15 @@
 #include "identity/Source.hpp"           // IWYU pragma: associated
 #include "opentxs/internal.factory.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <KeyCredential.pb.h>
-#include <MasterCredentialParameters.pb.h>
-#include <NymIDSource.pb.h>
-#include <SourceProof.pb.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/KeyCredential.pb.h>
+#include <opentxs/protobuf/MasterCredentialParameters.pb.h>
+#include <opentxs/protobuf/NymIDSource.pb.h>
+#include <opentxs/protobuf/SourceProof.pb.h>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -26,7 +26,6 @@
 #include "internal/crypto/asymmetric/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -49,6 +48,7 @@
 #include "opentxs/identity/CredentialType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/SourceType.hpp"
 #include "opentxs/identity/credential/Primary.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -134,7 +134,7 @@ auto Factory::NymIDSource(
 
 auto Factory::NymIDSource(
     const api::Session& api,
-    const proto::NymIDSource& serialized) -> identity::Source*
+    const protobuf::NymIDSource& serialized) -> identity::Source*
 {
     using ReturnType = identity::implementation::Source;
 
@@ -153,7 +153,7 @@ const VersionConversionMap Source::key_to_source_version_{
 Source::Source(
     const api::Crypto& crypto,
     const api::session::Factory& factory,
-    const proto::NymIDSource& serialized) noexcept
+    const protobuf::NymIDSource& serialized) noexcept
     : crypto_(crypto)
     , factory_(factory)
     , type_(translate(serialized.type()))
@@ -197,8 +197,8 @@ Source::Source(const Source& rhs) noexcept
     : Source(
           rhs.crypto_,
           rhs.factory_,
-          [&](const Source& source) -> proto::NymIDSource {
-              auto serialized = proto::NymIDSource{};
+          [&](const Source& source) -> protobuf::NymIDSource {
+              auto serialized = protobuf::NymIDSource{};
               source.Serialize(serialized);
               return serialized;
           }(rhs))
@@ -207,7 +207,7 @@ Source::Source(const Source& rhs) noexcept
 
 auto Source::asData() const -> ByteArray
 {
-    auto serialized = proto::NymIDSource{};
+    auto serialized = protobuf::NymIDSource{};
     if (false == Serialize(serialized)) { return ByteArray{nullptr}; }
 
     return factory_.Internal().Data(serialized);
@@ -216,7 +216,7 @@ auto Source::asData() const -> ByteArray
 auto Source::deserialize_paymentcode(
     const api::session::Factory& factory,
     const identity::SourceType type,
-    const proto::NymIDSource& serialized) -> PaymentCode
+    const protobuf::NymIDSource& serialized) -> PaymentCode
 {
     if (identity::SourceType::Bip47 == type) {
 
@@ -231,7 +231,7 @@ auto Source::deserialize_paymentcode(
 auto Source::deserialize_pubkey(
     const api::session::Factory& factory,
     const identity::SourceType type,
-    const proto::NymIDSource& serialized) -> crypto::asymmetric::Key
+    const protobuf::NymIDSource& serialized) -> crypto::asymmetric::Key
 {
     if (identity::SourceType::PubKey == type) {
 
@@ -243,13 +243,13 @@ auto Source::deserialize_pubkey(
 }
 
 auto Source::extract_key(
-    const proto::Credential& credential,
-    const proto::KeyRole role) -> std::unique_ptr<proto::AsymmetricKey>
+    const protobuf::Credential& credential,
+    const protobuf::KeyRole role) -> std::unique_ptr<protobuf::AsymmetricKey>
 {
-    std::unique_ptr<proto::AsymmetricKey> output;
+    std::unique_ptr<protobuf::AsymmetricKey> output;
 
-    const bool master = (proto::CREDROLE_MASTERKEY == credential.role());
-    const bool child = (proto::CREDROLE_CHILDKEY == credential.role());
+    const bool master = (protobuf::CREDROLE_MASTERKEY == credential.role());
+    const bool child = (protobuf::CREDROLE_CHILDKEY == credential.role());
     const bool keyCredential = master || child;
 
     if (!keyCredential) { return output; }
@@ -258,7 +258,7 @@ auto Source::extract_key(
 
     for (const auto& key : publicCred.key()) {
         if (role == key.role()) {
-            output = std::make_unique<proto::AsymmetricKey>(key);
+            output = std::make_unique<protobuf::AsymmetricKey>(key);
 
             break;
         }
@@ -286,7 +286,7 @@ auto Source::NymID() const noexcept -> identifier::Nym
     }
 }
 
-auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
+auto Source::Serialize(protobuf::NymIDSource& source) const noexcept -> bool
 {
     source.set_version(version_);
     source.set_type(translate(type_));
@@ -295,9 +295,9 @@ auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
         case identity::SourceType::PubKey: {
             assert_true(pubkey_.IsValid());
 
-            auto key = proto::AsymmetricKey{};
+            auto key = protobuf::AsymmetricKey{};
             if (false == pubkey_.Internal().Serialize(key)) { return false; }
-            key.set_role(proto::KEYROLE_SIGN);
+            key.set_role(protobuf::KEYROLE_SIGN);
             *(source.mutable_key()) = key;
 
         } break;
@@ -319,7 +319,7 @@ auto Source::Serialize(proto::NymIDSource& source) const noexcept -> bool
 auto Source::sourcetype_map() noexcept -> const SourceTypeMap&
 {
     using enum identity::SourceType;
-    using enum proto::SourceType;
+    using enum protobuf::SourceType;
     static constexpr auto map = SourceTypeMap{
         {Error, SOURCETYPE_ERROR},
         {PubKey, SOURCETYPE_PUBKEY},
@@ -329,16 +329,16 @@ auto Source::sourcetype_map() noexcept -> const SourceTypeMap&
     return map;
 }
 auto Source::translate(const identity::SourceType in) noexcept
-    -> proto::SourceType
+    -> protobuf::SourceType
 {
     try {
         return sourcetype_map().at(in);
     } catch (...) {
-        return proto::SOURCETYPE_ERROR;
+        return protobuf::SOURCETYPE_ERROR;
     }
 }
 
-auto Source::translate(const proto::SourceType in) noexcept
+auto Source::translate(const protobuf::SourceType in) noexcept
     -> identity::SourceType
 {
     static const auto map = frozen::invert_unordered_map(sourcetype_map());
@@ -353,19 +353,19 @@ auto Source::translate(const proto::SourceType in) noexcept
 // This function assumes that all internal verification checks are complete
 // except for the source proof
 auto Source::Verify(
-    const proto::Credential& master,
-    [[maybe_unused]] const proto::Signature& sourceSignature) const noexcept
+    const protobuf::Credential& master,
+    [[maybe_unused]] const protobuf::Signature& sourceSignature) const noexcept
     -> bool
 {
     bool isSelfSigned, sameSource;
-    std::unique_ptr<proto::AsymmetricKey> signingKey;
+    std::unique_ptr<protobuf::AsymmetricKey> signingKey;
 
     switch (type_) {
         case identity::SourceType::PubKey: {
             if (false == pubkey_.IsValid()) { return false; }
 
             isSelfSigned =
-                (proto::SOURCEPROOFTYPE_SELF_SIGNATURE ==
+                (protobuf::SOURCEPROOFTYPE_SELF_SIGNATURE ==
                  master.masterdata().sourceproof().type());
 
             if (!isSelfSigned) {
@@ -374,7 +374,7 @@ auto Source::Verify(
                 return false;
             }
 
-            signingKey = extract_key(master, proto::KEYROLE_SIGN);
+            signingKey = extract_key(master, protobuf::KEYROLE_SIGN);
 
             if (!signingKey) {
                 LogError()()("Failed to extract signing key.").Flush();
@@ -382,7 +382,7 @@ auto Source::Verify(
                 return false;
             }
 
-            auto sourceKey = proto::AsymmetricKey{};
+            auto sourceKey = protobuf::AsymmetricKey{};
             if (false == pubkey_.Internal().Serialize(sourceKey)) {
                 LogError()()("Failed to serialize key").Flush();
 
@@ -416,7 +416,7 @@ auto Source::Verify(
 
 auto Source::Sign(
     [[maybe_unused]] const identity::credential::Primary& credential,
-    [[maybe_unused]] proto::Signature& sig,
+    [[maybe_unused]] protobuf::Signature& sig,
     [[maybe_unused]] const PasswordPrompt& reason) const noexcept -> bool
 {
     bool goodsig = false;

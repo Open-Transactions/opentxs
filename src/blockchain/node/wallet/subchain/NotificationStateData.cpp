@@ -5,7 +5,7 @@
 
 #include "blockchain/node/wallet/subchain/NotificationStateData.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <functional>

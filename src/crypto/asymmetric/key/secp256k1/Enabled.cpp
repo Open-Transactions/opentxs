@@ -26,7 +26,7 @@ namespace opentxs::factory
 auto Secp256k1Key(
     const api::Session& api,
     const crypto::EcdsaProvider& ecdsa,
-    const proto::AsymmetricKey& serializedKey,
+    const protobuf::AsymmetricKey& serializedKey,
     alloc::Default alloc) noexcept -> crypto::asymmetric::key::Secp256k1
 {
     using ReturnType = crypto::asymmetric::key::implementation::Secp256k1;

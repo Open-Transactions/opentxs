@@ -5,8 +5,8 @@
 
 #include "identity/wot/verification/Item.hpp"  // IWYU pragma: associated
 
-#include <Signature.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -16,7 +16,6 @@
 #include "internal/core/identifier/Identifier.hpp"
 #include "internal/identity/wot/Verification.hpp"
 #include "internal/identity/wot/verification/Nym.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -26,6 +25,7 @@
 #include "opentxs/identity/wot/verification/Item.hpp"
 #include "opentxs/identity/wot/verification/Types.internal.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 
 namespace opentxs
@@ -67,7 +67,7 @@ auto Factory::VerificationItem(
 
 auto Factory::VerificationItem(
     const identity::wot::verification::internal::Nym& parent,
-    const proto::VerificationItem& serialized)
+    const protobuf::VerificationItem& serialized)
     -> identity::wot::verification::internal::Item*
 {
     using ReturnType =
@@ -182,7 +182,7 @@ auto Item::get_sig(
     Time start,
     Time end,
     std::span<const identity::wot::VerificationID> superscedes,
-    const PasswordPrompt& reason) noexcept(false) -> proto::Signature
+    const PasswordPrompt& reason) noexcept(false) -> protobuf::Signature
 {
 
     return wot::internal::Verification::Sign(

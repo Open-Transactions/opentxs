@@ -1,0 +1,57 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTRPCCommand";
+option optimize_for = LITE_RUNTIME;
+
+import public "AcceptPendingPayment.proto";
+import public "AddClaim.proto";
+import public "AddContact.proto";
+import public "APIArgument.proto";
+import public "CreateInstrumentDefinition.proto";
+import public "CreateNym.proto";
+import public "GetWorkflow.proto";
+import public "HDSeed.proto";
+import public "ModifyAccount.proto";
+import public "MoveFunds.proto";
+import public "RPCEnums.proto";
+import public "SendMessage.proto";
+import public "SendPayment.proto";
+import public "ServerContract.proto";
+import public "VerificationItem.proto";
+import public "VerifyClaim.proto";
+
+message RPCCommand
+{
+    optional uint32 version = 1;
+    optional string cookie = 2;        // unique value between 20 and 116 bytes
+    optional RPCCommandType type = 3;  // see RPCEnums.proto
+    optional int32 session = 4;        // session instance value
+    repeated string associatenym = 5;  // nym ids for push notifications
+    optional string owner = 6;         // nym id
+    optional string notary = 7;        // notary id
+    optional string unit = 8;          // unitdefinition id
+    repeated string identifier = 9;    // ids (defined by RPCCommandType)
+    repeated APIArgument arg = 10;
+    optional HDSeed hdseed = 11;
+    optional CreateNym createnym = 12;
+    repeated AddClaim claim = 13;
+    repeated ServerContract server = 14;
+    optional CreateInstrumentDefinition createunit = 15;
+    optional SendPayment sendpayment = 16;
+    optional MoveFunds movefunds = 17;
+    repeated AddContact addcontact = 18;
+    repeated VerifyClaim verifyclaim = 19;
+    repeated SendMessage sendmessage = 20;
+    repeated VerificationItem acceptverification = 21;
+    repeated AcceptPendingPayment acceptpendingpayment = 22;
+    repeated GetWorkflow getworkflow = 23;
+    optional string param = 24;
+    repeated ModifyAccount modifyaccount = 25;
+}

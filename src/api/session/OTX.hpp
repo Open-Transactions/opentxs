@@ -89,10 +89,10 @@ class Message;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class ServerContract;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -492,7 +492,7 @@ private:
         const contract::Server& contract) const noexcept -> identifier::Notary;
     auto set_introduction_server(
         const Lock& lock,
-        const proto::ServerContract& contract) const noexcept
+        const protobuf::ServerContract& contract) const noexcept
         -> identifier::Notary;
     auto start_task(const TaskID taskID, bool success) const
         -> BackgroundTask final;

@@ -5,16 +5,12 @@
 
 #include "opentxs/network/otdht/Data.hpp"  // IWYU pragma: associated
 
-#include <P2PBlockchainSync.pb.h>
+#include <opentxs/protobuf/P2PBlockchainSync.pb.h>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
 #include "internal/network/otdht/Factory.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/P2PBlockchainSync.hpp"
 #include "network/otdht/messages/Base.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Session.hpp"
@@ -24,6 +20,9 @@
 #include "opentxs/network/otdht/Block.hpp"
 #include "opentxs/network/otdht/MessageType.hpp"  // IWYU pragma: keep
 #include "opentxs/network/otdht/State.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/P2PBlockchainSync.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 
@@ -133,9 +132,9 @@ Data::Data(Imp* imp) noexcept
 
 auto Data::Add(ReadView data) noexcept -> bool
 {
-    const auto proto = proto::Factory<proto::P2PBlockchainSync>(data);
+    const auto proto = protobuf::Factory<protobuf::P2PBlockchainSync>(data);
 
-    if (false == proto::Validate(proto, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), proto)) { return false; }
 
     auto& blocks = const_cast<SyncData&>(imp_->blocks_);
 

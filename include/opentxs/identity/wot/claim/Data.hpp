@@ -43,10 +43,10 @@ class Claim;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -61,7 +61,7 @@ public:
         UnallocatedMap<claim::SectionType, std::shared_ptr<claim::Section>>;
 
     OPENTXS_NO_EXPORT static auto PrintContactData(
-        const proto::ContactData& data) -> UnallocatedCString;
+        const protobuf::ContactData& data) -> UnallocatedCString;
 
     Data(
         const api::Session& api,
@@ -73,7 +73,7 @@ public:
         const api::Session& api,
         const UnallocatedCString& nym,
         const VersionNumber targetVersion,
-        const proto::ContactData& serialized);
+        const protobuf::ContactData& serialized);
     Data(
         const api::Session& api,
         const UnallocatedCString& nym,
@@ -138,7 +138,7 @@ public:
     auto Serialize(Writer&& destination, const bool withID = false) const
         -> bool;
     OPENTXS_NO_EXPORT auto Serialize(
-        proto::ContactData& out,
+        protobuf::ContactData& out,
         const bool withID = false) const -> bool;
     auto SetCommonName(const UnallocatedCString& name) const -> Data;
     auto SetName(const UnallocatedCString& name, const bool primary = true)

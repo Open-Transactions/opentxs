@@ -3,15 +3,15 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::HashType
+// IWYU pragma: no_forward_declare opentxs::protobuf::HashType
 // IWYU pragma: no_include "internal/crypto/library/AsymmetricProvider.hpp"
 // IWYU pragma: no_include <Ciphertext.pb.h>
 // IWYU pragma: no_include <Signature.pb.h>
 
 #pragma once
 
-#include <Enums.pb.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -59,13 +59,13 @@ namespace identity
 class Authority;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class Ciphertext;  // IWYU pragma: keep
 class HDPath;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class OTSignatureMetadata;
@@ -108,7 +108,7 @@ public:
     auto operator==(const Serialized& rhs) const noexcept -> bool final;
     auto IsValid() const noexcept -> bool override;
     auto Path() const noexcept -> const UnallocatedCString override;
-    auto Path(proto::HDPath& output) const noexcept -> bool override;
+    auto Path(protobuf::HDPath& output) const noexcept -> bool override;
     auto PreferredHash() const noexcept -> crypto::HashType override;
     auto PrivateKey(const PasswordPrompt& reason) const noexcept
         -> ReadView final;
@@ -122,14 +122,14 @@ public:
     auto Sign(
         const GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const identifier::Generic& credential,
         const crypto::HashType hash,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto Sign(
         const GetPreimage input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const identifier::Generic& credential,
         const PasswordPrompt& reason) const noexcept -> bool final;
     auto Sign(
@@ -142,7 +142,7 @@ public:
         Secret& privateKey,
         const PasswordPrompt& reason) const noexcept -> bool override;
     auto Type() const noexcept -> asymmetric::Algorithm final { return type_; }
-    auto Verify(const Data& plaintext, const proto::Signature& sig)
+    auto Verify(const Data& plaintext, const protobuf::Signature& sig)
         const noexcept -> bool final;
     auto Verify(ReadView plaintext, ReadView sig) const noexcept -> bool final;
     auto Version() const noexcept -> VersionNumber final { return version_; }
@@ -158,7 +158,7 @@ public:
     ~Key() override;
 
 protected:
-    using EncryptedKey = std::unique_ptr<proto::Ciphertext>;
+    using EncryptedKey = std::unique_ptr<protobuf::Ciphertext>;
     using EncryptedExtractor = std::function<EncryptedKey(Data&, Secret&)>;
     using PlaintextExtractor = std::function<Secret()>;
 
@@ -169,7 +169,7 @@ protected:
     const ByteArray key_;
     mutable Secret plaintext_key_;
     mutable std::mutex lock_;
-    std::unique_ptr<const proto::Ciphertext> encrypted_key_;
+    std::unique_ptr<const protobuf::Ciphertext> encrypted_key_;
 
     static auto create_key(
         symmetric::Key& sessionKey,
@@ -181,19 +181,19 @@ protected:
         const opentxs::Secret& prv,
         Writer&& params,
         const PasswordPrompt& reason) noexcept(false)
-        -> std::unique_ptr<proto::Ciphertext>;
+        -> std::unique_ptr<protobuf::Ciphertext>;
     static auto encrypt_key(
         ReadView plaintext,
         bool attach,
         symmetric::Key& sessionKey,
         const PasswordPrompt& reason) noexcept
-        -> std::unique_ptr<proto::Ciphertext>;
+        -> std::unique_ptr<protobuf::Ciphertext>;
     static auto encrypt_key(
         ReadView plaintext,
         bool attach,
         symmetric::Key& sessionKey,
         const PasswordPrompt& reason,
-        proto::Ciphertext& out) noexcept -> bool;
+        protobuf::Ciphertext& out) noexcept -> bool;
     static auto generate_key(
         const crypto::AsymmetricProvider& provider,
         const Parameters& options,
@@ -232,7 +232,7 @@ protected:
         allocator_type alloc) noexcept(false);
     Key(const api::Session& api,
         const crypto::AsymmetricProvider& engine,
-        const proto::AsymmetricKey& serializedKey,
+        const protobuf::AsymmetricKey& serializedKey,
         EncryptedExtractor get,
         allocator_type alloc) noexcept(false);
     Key(const Key& rhs, allocator_type alloc) noexcept;
@@ -247,13 +247,13 @@ protected:
 private:
     static constexpr auto HashTypeMapSize = std::size_t{16};
     using HashTypeMap = frozen::
-        unordered_map<crypto::HashType, proto::HashType, HashTypeMapSize>;
+        unordered_map<crypto::HashType, protobuf::HashType, HashTypeMapSize>;
     using HashTypeReverseMap = frozen::
-        unordered_map<proto::HashType, crypto::HashType, HashTypeMapSize>;
+        unordered_map<protobuf::HashType, crypto::HashType, HashTypeMapSize>;
     static constexpr auto SignatureRoleMapSize = std::size_t{12};
     using SignatureRoleMap = frozen::unordered_map<
         crypto::SignatureRole,
-        proto::SignatureRole,
+        protobuf::SignatureRole,
         SignatureRoleMapSize>;
 
     static const frozen::unordered_map<
@@ -267,15 +267,16 @@ private:
     const std::unique_ptr<const OTSignatureMetadata> metadata_;
     bool has_private_;
 
-    auto SerializeKeyToData(const proto::AsymmetricKey& rhs) const -> ByteArray;
+    auto SerializeKeyToData(const protobuf::AsymmetricKey& rhs) const
+        -> ByteArray;
 
     static auto hashtype_map() noexcept -> const HashTypeMap&;
     static auto signaturerole_map() noexcept -> const SignatureRoleMap&;
     static auto translate(const crypto::SignatureRole in) noexcept
-        -> proto::SignatureRole;
+        -> protobuf::SignatureRole;
     static auto translate(const crypto::HashType in) noexcept
-        -> proto::HashType;
-    static auto translate(const proto::HashType in) noexcept
+        -> protobuf::HashType;
+    static auto translate(const protobuf::HashType in) noexcept
         -> crypto::HashType;
 
     auto get_password(
@@ -292,6 +293,6 @@ private:
     auto new_signature(
         const identifier::Generic& credentialID,
         const crypto::SignatureRole role,
-        const crypto::HashType hash) const -> proto::Signature;
+        const crypto::HashType hash) const -> protobuf::Signature;
 };
 }  // namespace opentxs::crypto::asymmetric::implementation

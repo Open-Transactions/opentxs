@@ -20,10 +20,10 @@ namespace api
 class Session;
 }  // namespace api
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -47,7 +47,7 @@ public:
         Keys& listOutput,
         const Signature& theSignature,
         bool bInclusive = false) const noexcept -> std::int32_t final;
-    auto Serialize(proto::AsymmetricKey& serialized, bool privateKey = false)
+    auto Serialize(protobuf::AsymmetricKey& serialized, bool privateKey = false)
         const noexcept -> bool final;
     auto GetTransportKey(
         Data& publicKey,

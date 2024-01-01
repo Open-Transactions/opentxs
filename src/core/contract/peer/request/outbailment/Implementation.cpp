@@ -5,8 +5,8 @@
 
 #include "core/contract/peer/request/outbailment/Implementation.hpp"  // IWYU pragma: associated
 
-#include <OutBailment.pb.h>
-#include <PeerRequest.pb.h>
+#include <opentxs/protobuf/OutBailment.pb.h>
+#include <opentxs/protobuf/PeerRequest.pb.h>
 #include <utility>
 
 #include "internal/core/Factory.hpp"

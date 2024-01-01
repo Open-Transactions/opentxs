@@ -5,8 +5,8 @@
 
 #include "otx/common/OTStorage.hpp"  // IWYU pragma: associated
 
-#include <Generics.pb.h>
-#include <Markets.pb.h>
+#include <opentxs/OTDB/Generics.pb.h>
+#include <opentxs/OTDB/Markets.pb.h>
 #include <cstdio>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
@@ -15,7 +15,6 @@
 
 #include "internal/core/Armored.hpp"
 #include "internal/core/String.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Pimpl.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -24,6 +23,7 @@
 #include "opentxs/api/Session.internal.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Log.hpp"
 #include "otx/common/OTStoragePB.hpp"
 

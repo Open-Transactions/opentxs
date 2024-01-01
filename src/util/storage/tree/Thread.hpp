@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <StorageThread.pb.h>
-#include <StorageThreadItem.pb.h>
+#include <opentxs/protobuf/StorageThread.pb.h>
+#include <opentxs/protobuf/StorageThreadItem.pb.h>
 #include <cstddef>
 #include <cstdint>
 #include <string_view>
@@ -57,7 +57,7 @@ public:
     auto Alias() const -> UnallocatedCString;
     auto Check(const identifier::Generic& id) const -> bool;
     auto ID() const -> identifier::Generic;
-    auto Items() const -> proto::StorageThread;
+    auto Items() const -> protobuf::StorageThread;
     auto UnreadCount() const -> std::size_t;
 
     auto Add(
@@ -86,21 +86,21 @@ private:
     friend Threads;
     using SortKey = std::tuple<std::size_t, std::int64_t, identifier::Generic>;
     using SortedItems =
-        UnallocatedMap<SortKey, const proto::StorageThreadItem*>;
+        UnallocatedMap<SortKey, const protobuf::StorageThreadItem*>;
 
     identifier::Generic id_;
     UnallocatedCString alias_;
     std::size_t index_;
     Mailbox& mail_inbox_;
     Mailbox& mail_outbox_;
-    UnallocatedMap<identifier::Generic, proto::StorageThreadItem> items_;
+    UnallocatedMap<identifier::Generic, protobuf::StorageThreadItem> items_;
     // It's important to use a sorted container for this so the thread ID can be
     // calculated deterministically
     UnallocatedSet<identifier::Generic> participants_;
 
     auto init(const Hash& hash) noexcept(false) -> void final;
     auto save(const Lock& lock) const -> bool final;
-    auto serialize(const Lock& lock) const -> proto::StorageThread;
+    auto serialize(const Lock& lock) const -> protobuf::StorageThread;
     auto sort(const Lock& lock) const -> SortedItems;
     auto upgrade(const Lock& lock) noexcept -> bool final;
 

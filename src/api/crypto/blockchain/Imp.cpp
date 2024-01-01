@@ -5,10 +5,10 @@
 
 #include "api/crypto/blockchain/Imp.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
 #include <bech32.h>
 #include <frozen/bits/algorithms.h>
 #include <frozen/unordered_set.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <segwit_addr.h>
 #include <algorithm>
 #include <cctype>
@@ -911,7 +911,7 @@ auto Blockchain::Imp::init_path(
     const UnitType chain,
     const opentxs::crypto::Bip32Index account,
     const opentxs::blockchain::crypto::HDProtocol standard,
-    proto::HDPath& path) const noexcept -> void
+    protobuf::HDPath& path) const noexcept -> void
 {
     using Standard = opentxs::blockchain::crypto::HDProtocol;
     path.set_version(PATH_VERSION);
@@ -1022,7 +1022,7 @@ auto Blockchain::Imp::LoadOrCreateSubaccount(
         const auto& api = api_.Crypto();
         const auto& nymID = nym.ID();
         const auto path = [&] {
-            auto out = proto::HDPath{};
+            auto out = protobuf::HDPath{};
 
             if (false == nym.Internal().PaymentCodePath(out)) {
                 throw std::runtime_error{
@@ -1153,7 +1153,7 @@ auto Blockchain::Imp::NewEthereumSubaccount(
         return blank;
     }
 
-    auto nymPath = proto::HDPath{};
+    auto nymPath = protobuf::HDPath{};
 
     if (false == nym->Internal().Path(nymPath)) {
         LogError()()("No nym path.").Flush();
@@ -1173,7 +1173,7 @@ auto Blockchain::Imp::NewEthereumSubaccount(
         return blank;
     }
 
-    auto accountPath = proto::HDPath{};
+    auto accountPath = protobuf::HDPath{};
     init_path(
         api_.Factory().Internal().SeedID(nymPath.seed()),
         blockchain_to_unit(derivationChain),
@@ -1238,7 +1238,7 @@ auto Blockchain::Imp::NewHDSubaccount(
         return blank;
     }
 
-    auto nymPath = proto::HDPath{};
+    auto nymPath = protobuf::HDPath{};
 
     if (false == nym->Internal().Path(nymPath)) {
         LogError()()("No nym path.").Flush();
@@ -1258,7 +1258,7 @@ auto Blockchain::Imp::NewHDSubaccount(
         return blank;
     }
 
-    auto accountPath = proto::HDPath{};
+    auto accountPath = protobuf::HDPath{};
     init_path(
         api_.Factory().Internal().SeedID(nymPath.seed()),
         blockchain_to_unit(derivationChain),

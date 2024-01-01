@@ -5,8 +5,8 @@
 
 #include "blockchain/cfilter/GCSImp.hpp"  // IWYU pragma: associated
 
-#include <GCS.pb.h>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <opentxs/protobuf/GCS.pb.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -21,7 +21,6 @@
 
 #include "internal/blockchain/Blockchain.hpp"
 #include "internal/blockchain/cfilter/GCS.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Session.hpp"
@@ -36,6 +35,7 @@
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/crypto/Types.hpp"
 #include "opentxs/network/blockchain/bitcoin/CompactSize.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
@@ -488,7 +488,7 @@ auto GCS::Range() const noexcept -> gcs::Range
     return range(count_, false_positive_rate_);
 }
 
-auto GCS::Serialize(proto::GCS& output) const noexcept -> bool
+auto GCS::Serialize(protobuf::GCS& output) const noexcept -> bool
 {
     output.set_version(version_);
     output.set_bits(bits_);
@@ -503,11 +503,11 @@ auto GCS::Serialize(proto::GCS& output) const noexcept -> bool
 
 auto GCS::Serialize(Writer&& out) const noexcept -> bool
 {
-    auto proto = proto::GCS{};
+    auto proto = protobuf::GCS{};
 
     if (false == Serialize(proto)) { return false; }
 
-    return proto::write(proto, std::move(out));
+    return protobuf::write(proto, std::move(out));
 }
 
 auto GCS::Test(const Data& target, allocator_type monotonic) const noexcept

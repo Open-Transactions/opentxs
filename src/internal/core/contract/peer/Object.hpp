@@ -34,10 +34,10 @@ class Purse;
 }  // namespace blind
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class PeerObject;
-}  // namespace proto
+}  // namespace protobuf
 
 class PeerObject;
 
@@ -58,7 +58,7 @@ public:
     virtual auto Purse() const noexcept -> const otx::blind::Purse& = 0;
     virtual auto Request() const noexcept -> const contract::peer::Request& = 0;
     virtual auto Reply() const noexcept -> const contract::peer::Reply& = 0;
-    virtual auto Serialize(proto::PeerObject&) const noexcept -> bool = 0;
+    virtual auto Serialize(protobuf::PeerObject&) const noexcept -> bool = 0;
     virtual auto Type() const noexcept -> contract::peer::ObjectType = 0;
     virtual auto Validate() const noexcept -> bool = 0;
 

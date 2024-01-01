@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <HDPath.pb.h>
 #include <cs_shared_guarded.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -76,7 +76,7 @@ public:
     {
         return code_;
     }
-    auto Path() const noexcept -> proto::HDPath final { return path_; }
+    auto Path() const noexcept -> protobuf::HDPath final { return path_; }
     auto ScanProgress(Subchain type) const noexcept -> block::Position final;
     auto Self() const noexcept -> const crypto::Subaccount& final
     {
@@ -105,7 +105,7 @@ public:
         const crypto::Account& parent,
         const identifier::Account& id,
         const opentxs::PaymentCode& code,
-        proto::HDPath&& path) noexcept(false);
+        protobuf::HDPath&& path) noexcept(false);
     NotificationPrivate(const NotificationPrivate&) = delete;
     NotificationPrivate(NotificationPrivate&&) = delete;
     auto operator=(const NotificationPrivate&) -> NotificationPrivate& = delete;
@@ -120,7 +120,7 @@ private:
     using Me = std::optional<crypto::Notification>;
 
     const opentxs::PaymentCode code_;
-    const proto::HDPath path_;
+    const protobuf::HDPath path_;
     GuardedProgressMap progress_;
     mutable Me self_;
 

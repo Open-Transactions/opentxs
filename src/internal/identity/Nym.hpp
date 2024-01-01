@@ -11,25 +11,26 @@
 #include "opentxs/crypto/HashType.hpp"  // IWYU pragma: keep
 #include "opentxs/identity/Nym.hpp"
 #include "opentxs/identity/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace google
 {
-namespace protobuf
+namespace protobufbuf
 {
 class MessageLite;
-}  // namespace protobuf
+}  // namespace protobufbuf
 }  // namespace google
 
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class HDPath;
 class Nym;
 class Signature;
-}  // namespace proto
+}  // namespace protobuf
 
 class Writer;
 }  // namespace opentxs
@@ -40,7 +41,7 @@ namespace opentxs::identity::internal
 class Nym : virtual public identity::Nym
 {
 public:
-    using Serialized = proto::Nym;
+    using Serialized = protobuf::Nym;
 
     enum class Mode : bool {
         Abbreviated = true,
@@ -60,9 +61,9 @@ public:
     {
         return *this;
     }
-    virtual auto Path(proto::HDPath& output) const -> bool = 0;
+    virtual auto Path(protobuf::HDPath& output) const -> bool = 0;
     using identity::Nym::PaymentCodePath;
-    virtual auto PaymentCodePath(proto::HDPath& output) const -> bool = 0;
+    virtual auto PaymentCodePath(protobuf::HDPath& output) const -> bool = 0;
     using identity::Nym::Serialize;
     virtual auto Serialize(Serialized& serialized) const -> bool = 0;
     virtual auto SerializeCredentialIndex(Writer&& destination, const Mode mode)
@@ -73,13 +74,13 @@ public:
     virtual auto Sign(
         const google::protobuf::MessageLite& input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const PasswordPrompt& reason,
         const crypto::HashType hash = crypto::HashType::Error) const
         -> bool = 0;
     virtual auto Verify(
         const google::protobuf::MessageLite& input,
-        proto::Signature& signature) const -> bool = 0;
+        protobuf::Signature& signature) const -> bool = 0;
     virtual auto WriteCredentials() const -> bool = 0;
 
     auto Internal() noexcept -> internal::Nym& final { return *this; }
@@ -87,7 +88,7 @@ public:
     virtual void SetAliasStartup(std::string_view alias) = 0;
     using identity::Nym::SetContactData;
     virtual auto SetContactData(
-        const proto::ContactData& data,
+        const protobuf::ContactData& data,
         const PasswordPrompt& reason) -> bool = 0;
 
     ~Nym() override = default;

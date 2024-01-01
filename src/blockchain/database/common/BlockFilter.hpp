@@ -53,10 +53,10 @@ class Bulk;
 }  // namespace database
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class GCS;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -123,7 +123,7 @@ public:
 
 private:
     using Hashes = Vector<ReadView>;
-    using Protos = Vector<proto::GCS*>;
+    using Protos = Vector<protobuf::GCS*>;
     using Sizes = Vector<std::size_t>;
     using Parsed = std::tuple<Hashes, Protos, Sizes>;
 

@@ -5,7 +5,7 @@
 
 #include "internal/core/Factory.hpp"  // IWYU pragma: associated
 
-#include <PaymentCode.pb.h>
+#include <opentxs/protobuf/PaymentCode.pb.h>
 #include <array>
 #include <cstddef>
 #include <cstring>
@@ -118,7 +118,7 @@ auto PaymentCode(
 
 auto PaymentCode(
     const api::Session& api,
-    const proto::PaymentCode& serialized) noexcept -> opentxs::PaymentCode
+    const protobuf::PaymentCode& serialized) noexcept -> opentxs::PaymentCode
 {
     auto key = factory::Secp256k1Key(
         api, serialized.key(), serialized.chaincode(), {}  // TODO allocator

@@ -9,8 +9,8 @@
 
 #include "blockchain/database/wallet/Output.hpp"  // IWYU pragma: associated
 
-#include <BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
 #include <boost/container/vector.hpp>
+#include <opentxs/protobuf/BlockchainTransactionOutput.pb.h>  // IWYU pragma: keep
 #include <algorithm>
 #include <cstdint>
 #include <functional>
@@ -597,7 +597,7 @@ auto Output::fail_transaction() noexcept -> bool
 auto Output::FinalizeProposal(
     const Log& log,
     const identifier::Generic& proposalID,
-    const proto::BlockchainTransactionProposal& proposal,
+    const protobuf::BlockchainTransactionProposal& proposal,
     const block::Transaction& transaction,
     alloc::Strategy alloc) noexcept -> bool
 {

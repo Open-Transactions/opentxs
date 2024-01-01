@@ -5,7 +5,7 @@
 
 #include "crypto/bip32/Imp.hpp"  // IWYU pragma: associated
 
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
@@ -76,7 +76,7 @@ auto Bip32::Imp::DeriveKey(
 
 auto Bip32::Imp::derive_private_key(
     const asymmetric::Algorithm type,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const ReadView parentPrivate,
     const ReadView parentChaincode,
     const ReadView parentPublic,
@@ -144,7 +144,7 @@ auto Bip32::Imp::derive_private_key(
 
 auto Bip32::Imp::derive_public_key(
     const asymmetric::Algorithm type,
-    const proto::HDPath& path,
+    const protobuf::HDPath& path,
     const ReadView parentChaincode,
     const ReadView parentPublic,
     const Path& pathAppend,

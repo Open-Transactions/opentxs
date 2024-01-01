@@ -7,7 +7,7 @@
 
 namespace opentxs::contract::peer::internal
 {
-auto Reply::Serialize(proto::PeerReply&) const noexcept -> bool
+auto Reply::Serialize(protobuf::PeerReply&) const noexcept -> bool
 {
     return false;
 }

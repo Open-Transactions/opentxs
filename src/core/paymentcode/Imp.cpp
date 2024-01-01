@@ -5,14 +5,14 @@
 
 #include "core/paymentcode/Imp.hpp"  // IWYU pragma: associated
 
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
-#include <MasterCredentialParameters.pb.h>
-#include <NymIDSource.pb.h>
-#include <PaymentCode.pb.h>
-#include <Signature.pb.h>
 #include <boost/endian/buffers.hpp>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/MasterCredentialParameters.pb.h>
+#include <opentxs/protobuf/NymIDSource.pb.h>
+#include <opentxs/protobuf/PaymentCode.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -28,11 +28,6 @@
 #include "internal/crypto/asymmetric/key/EllipticCurve.hpp"
 #include "internal/crypto/library/AsymmetricProvider.hpp"
 #include "internal/identity/credential/Credential.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
-#include "internal/serialization/protobuf/verify/PaymentCode.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "opentxs/api/Factory.internal.hpp"
@@ -59,6 +54,10 @@
 #include "opentxs/identifier/Types.hpp"
 #include "opentxs/identity/Types.internal.hpp"
 #include "opentxs/identity/credential/Base.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"
+#include "opentxs/protobuf/syntax/PaymentCode.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -115,10 +114,10 @@ PaymentCode::operator const crypto::asymmetric::Key&() const noexcept
     return key_;
 }
 
-auto PaymentCode::operator==(const proto::PaymentCode& rhs) const noexcept
+auto PaymentCode::operator==(const protobuf::PaymentCode& rhs) const noexcept
     -> bool
 {
-    auto lhs = proto::PaymentCode{};
+    auto lhs = protobuf::PaymentCode{};
 
     if (false == Serialize(lhs)) { return false; }
 
@@ -888,7 +887,7 @@ auto PaymentCode::postprocess(const Secret& in) const noexcept(false) -> Secret
 
 auto PaymentCode::Serialize(Writer&& destination) const noexcept -> bool
 {
-    auto serialized = proto::PaymentCode{};
+    auto serialized = protobuf::PaymentCode{};
     if (false == Serialize(serialized)) { return false; }
 
     return write(serialized, std::move(destination));
@@ -964,10 +963,10 @@ auto PaymentCode::shared_secret_payment_v3(
 
 auto PaymentCode::Sign(
     const identity::credential::Base& credential,
-    proto::Signature& sig,
+    protobuf::Signature& sig,
     const opentxs::PasswordPrompt& reason) const noexcept -> bool
 {
-    auto serialized = proto::Credential{};
+    auto serialized = protobuf::Credential{};
 
     if (false ==
         credential.Internal().Serialize(
@@ -977,7 +976,7 @@ auto PaymentCode::Sign(
 
     auto& signature = *serialized.add_signature();
     const bool output = key_.Internal().Sign(
-        [&]() -> UnallocatedCString { return proto::ToString(serialized); },
+        [&]() -> UnallocatedCString { return to_string(serialized); },
         crypto::SignatureRole::NymIDSource,
         signature,
         ID(),
@@ -1049,7 +1048,7 @@ auto PaymentCode::Unblind(
                        api_.Factory().Secret(0),
                        api_.Factory().SecretFromBytes(pre.xpub_.Chaincode()),
                        api_.Factory().DataFromBytes(pre.xpub_.Key()),
-                       proto::HDPath{},
+                       protobuf::HDPath{},
                        crypto::Bip32Fingerprint{},
                        crypto::asymmetric::Role::Sign,
                        crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
@@ -1141,7 +1140,7 @@ auto PaymentCode::unblind_v1(
                    api_.Factory().Secret(0),
                    api_.Factory().SecretFromBytes(pre.xpub_.Chaincode()),
                    api_.Factory().DataFromBytes(pre.xpub_.Key()),
-                   proto::HDPath{},
+                   protobuf::HDPath{},
                    crypto::Bip32Fingerprint{},
                    crypto::asymmetric::Role::Sign,
                    crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
@@ -1198,7 +1197,7 @@ auto PaymentCode::unblind_v3(
                    api_.Factory().Secret(0),
                    code,
                    api_.Factory().DataFromBytes(pre.Key()),
-                   proto::HDPath{},
+                   protobuf::HDPath{},
                    crypto::Bip32Fingerprint{},
                    crypto::asymmetric::Role::Sign,
                    crypto::asymmetric::key::EllipticCurve::DefaultVersion(),
@@ -1216,22 +1215,22 @@ auto PaymentCode::Valid() const noexcept -> bool
 
     if (chain_code_size_ != chain_code_.size()) { return false; }
 
-    auto serialized = proto::PaymentCode{};
+    auto serialized = protobuf::PaymentCode{};
 
     if (false == Serialize(serialized)) { return false; }
 
-    return proto::Validate<proto::PaymentCode>(serialized, SILENT);
+    return protobuf::syntax::check(LogTrace(), serialized);
 }
 
 auto PaymentCode::Verify(
-    const proto::Credential& master,
-    const proto::Signature& sourceSignature) const noexcept -> bool
+    const protobuf::Credential& master,
+    const protobuf::Signature& sourceSignature) const noexcept -> bool
 {
-    if (false == proto::Validate<proto::Credential>(
+    if (false == protobuf::syntax::check(
+                     LogError(),
                      master,
-                     VERBOSE,
-                     proto::KEYMODE_PUBLIC,
-                     proto::CREDROLE_MASTERKEY,
+                     protobuf::KEYMODE_PUBLIC,
+                     protobuf::CREDROLE_MASTERKEY,
                      false)) {
         LogError()()("Invalid master credential syntax.").Flush();
 
@@ -1248,7 +1247,7 @@ auto PaymentCode::Verify(
         return false;
     }
 
-    auto copy = proto::Credential{};
+    auto copy = protobuf::Credential{};
     copy.CopyFrom(master);
     auto& signature = *copy.add_signature();
     signature.CopyFrom(sourceSignature);

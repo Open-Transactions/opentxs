@@ -12,10 +12,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class Identifier;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -25,7 +25,7 @@ namespace ot = opentxs;
 
 OPENTXS_EXPORT auto serialize_identifier_to_pb(
     const opentxs::identifier::Generic& id,
-    opentxs::proto::Identifier& out) noexcept -> void;
+    opentxs::protobuf::Identifier& out) noexcept -> void;
 
 class OPENTXS_EXPORT Identifier : public LowLevel
 {

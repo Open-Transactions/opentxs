@@ -5,23 +5,22 @@
 
 #include "util/storage/tree/Issuers.hpp"  // IWYU pragma: associated
 
-#include <Issuer.pb.h>
-#include <StorageIssuers.pb.h>
+#include <opentxs/protobuf/Issuer.pb.h>
+#include <opentxs/protobuf/StorageIssuers.pb.h>
 #include <atomic>
 #include <source_location>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
 
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Issuer.hpp"
-#include "internal/serialization/protobuf/verify/StorageIssuers.hpp"
 #include "internal/util/DeferredConstruction.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/FixedByteArray.hpp"  // IWYU pragma: keep
 #include "opentxs/identifier/Generic.hpp"
 #include "opentxs/identifier/Nym.hpp"
+#include "opentxs/protobuf/syntax/Issuer.hpp"
+#include "opentxs/protobuf/syntax/StorageIssuers.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
 #include "opentxs/storage/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
@@ -58,7 +57,7 @@ auto Issuers::Delete(const identifier::Nym& id) -> bool
 
 auto Issuers::init(const Hash& hash) noexcept(false) -> void
 {
-    auto p = std::shared_ptr<proto::StorageIssuers>{};
+    auto p = std::shared_ptr<protobuf::StorageIssuers>{};
 
     if (LoadProto(hash, p, verbose) && p) {
         const auto& proto = *p;
@@ -77,11 +76,11 @@ auto Issuers::init(const Hash& hash) noexcept(false) -> void
 
 auto Issuers::Load(
     const identifier::Nym& id,
-    std::shared_ptr<proto::Issuer>& output,
+    std::shared_ptr<protobuf::Issuer>& output,
     UnallocatedCString& alias,
     ErrorReporting checking) const -> bool
 {
-    return load_proto<proto::Issuer>(id, output, alias, checking);
+    return load_proto<protobuf::Issuer>(id, output, alias, checking);
 }
 
 auto Issuers::save(const std::unique_lock<std::mutex>& lock) const -> bool
@@ -90,14 +89,16 @@ auto Issuers::save(const std::unique_lock<std::mutex>& lock) const -> bool
 
     auto serialized = serialize();
 
-    if (false == proto::Validate(serialized, VERBOSE)) { return false; }
+    if (false == protobuf::syntax::check(LogError(), serialized)) {
+        return false;
+    }
 
     return StoreProto(serialized, root_);
 }
 
-auto Issuers::serialize() const -> proto::StorageIssuers
+auto Issuers::serialize() const -> protobuf::StorageIssuers
 {
-    proto::StorageIssuers serialized;
+    protobuf::StorageIssuers serialized;
     serialized.set_version(version_);
 
     for (const auto& item : item_map_) {
@@ -113,7 +114,8 @@ auto Issuers::serialize() const -> proto::StorageIssuers
     return serialized;
 }
 
-auto Issuers::Store(const proto::Issuer& data, std::string_view alias) -> bool
+auto Issuers::Store(const protobuf::Issuer& data, std::string_view alias)
+    -> bool
 {
     return store_proto(data, factory_.IdentifierFromBase58(data.id()), alias);
 }

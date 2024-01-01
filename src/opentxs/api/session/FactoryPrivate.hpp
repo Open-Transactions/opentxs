@@ -28,7 +28,6 @@
 #include "internal/otx/common/Item.hpp"
 #include "internal/otx/common/Ledger.hpp"
 #include "internal/otx/common/OTTransaction.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Time.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/api/Factory.hpp"
@@ -89,6 +88,7 @@
 #include "opentxs/otx/blind/Mint.hpp"
 #include "opentxs/otx/blind/Purse.hpp"
 #include "opentxs/otx/blind/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Allocator.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
@@ -167,7 +167,7 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class AsymmetricKey;
 class BlockchainBlockHeader;
@@ -186,7 +186,7 @@ class SymmetricKey;
 class UnitDefinition;
 class Verification;
 class VerificationItem;
-}  // namespace proto
+}  // namespace protobuf
 
 class Basket;
 class Cheque;
@@ -214,12 +214,12 @@ class opentxs::api::session::FactoryPrivate : virtual public internal::Factory
 public:
     auto AccountID(
         const identity::wot::claim::ClaimType type,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         alloc::Default alloc) const noexcept -> identifier::Account final
     {
         return parent_.Internal().AccountID(type, path, std::move(alloc));
     }
-    auto AccountID(const proto::Identifier& in, alloc::Default alloc)
+    auto AccountID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Account final
     {
         return parent_.Internal().AccountID(in, std::move(alloc));
@@ -329,12 +329,13 @@ public:
     {
         return parent_.Internal().Armored(input);
     }
-    auto Armored(const ProtobufType& input) const -> OTArmored final
+    auto Armored(const protobuf::MessageType& input) const -> OTArmored final
     {
         return parent_.Internal().Armored(input);
     }
-    auto Armored(const ProtobufType& input, const UnallocatedCString& header)
-        const -> OTString final
+    auto Armored(
+        const protobuf::MessageType& input,
+        const UnallocatedCString& header) const -> OTString final
     {
         return parent_.Internal().Armored(input, header);
     }
@@ -362,7 +363,7 @@ public:
         const opentxs::crypto::Parameters& params,
         const opentxs::PasswordPrompt& reason) const noexcept(false)
         -> opentxs::crypto::asymmetric::Key final;
-    auto AsymmetricKey(const proto::AsymmetricKey& serialized) const noexcept
+    auto AsymmetricKey(const protobuf::AsymmetricKey& serialized) const noexcept
         -> opentxs::crypto::asymmetric::Key final;
     auto AsymmetricKey(
         opentxs::crypto::asymmetric::Algorithm type,
@@ -444,7 +445,7 @@ public:
         -> OTBasketContract final;
     auto BasketContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTBasketContract final;
     auto BitcoinBlock(
         const blockchain::block::Header& previous,
@@ -516,7 +517,7 @@ public:
         return parent_.Internal().BlockchainAddress(
             protocol, address, port, chain, lastConnected, services);
     }
-    auto BlockchainAddress(const proto::BlockchainPeerAddress& serialized)
+    auto BlockchainAddress(const protobuf::BlockchainPeerAddress& serialized)
         const noexcept -> opentxs::network::blockchain::Address final
     {
         return parent_.Internal().BlockchainAddress(serialized);
@@ -591,11 +592,11 @@ public:
         alloc::Default alloc) const noexcept
         -> blockchain::block::Transaction final;
     auto BlockchainTransaction(
-        const proto::BlockchainTransaction& serialized,
+        const protobuf::BlockchainTransaction& serialized,
         alloc::Default alloc) const noexcept
         -> blockchain::block::Transaction final;
     auto BlockHeader(
-        const proto::BlockchainBlockHeader& proto,
+        const protobuf::BlockchainBlockHeader& proto,
         alloc::Default alloc) const noexcept -> blockchain::block::Header final;
     auto BlockHeaderForUnitTests(
         const blockchain::block::Hash& hash,
@@ -642,10 +643,10 @@ public:
     auto Claim(
         const identity::wot::Claimant& claimant,
         const identity::wot::claim::SectionType section,
-        const proto::ContactItem& proto,
+        const protobuf::ContactItem& proto,
         alloc::Strategy alloc) const noexcept -> identity::wot::Claim final;
-    auto Claim(const proto::Claim& proto, alloc::Strategy alloc) const noexcept
-        -> identity::wot::Claim final;
+    auto Claim(const protobuf::Claim& proto, alloc::Strategy alloc)
+        const noexcept -> identity::wot::Claim final;
     auto ConnectionReply(
         const Nym_p& responder,
         const identifier::Nym& initiator,
@@ -682,14 +683,14 @@ public:
         -> OTCurrencyContract final;
     auto CurrencyContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTCurrencyContract final;
     auto Data() const -> ByteArray final { return parent_.Data(); }
     auto Data(const opentxs::Armored& input) const -> ByteArray final
     {
         return parent_.Data(input);
     }
-    auto Data(const ProtobufType& input) const -> ByteArray final
+    auto Data(const protobuf::MessageType& input) const -> ByteArray final
     {
         return parent_.Internal().Data(input);
     }
@@ -753,7 +754,7 @@ public:
         const noexcept -> identifier::Generic final;
     auto Identifier(const opentxs::Item& item, alloc::Default alloc)
         const noexcept -> identifier::Generic final;
-    auto Identifier(const proto::Identifier& in, alloc::Default alloc)
+    auto Identifier(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Generic final;
     auto IdentifierFromBase58(
         const std::string_view base58,
@@ -785,10 +786,11 @@ public:
     {
         return parent_.IdentifierFromPreimage(preimage, type, std::move(alloc));
     }
-    auto IdentifierFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::Generic final;
     auto IdentifierFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept -> identifier::Generic final;
+    auto IdentifierFromPreimage(
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Generic final;
     auto IdentifierFromProtobuf(const ReadView bytes, alloc::Default alloc)
@@ -837,9 +839,10 @@ public:
         const opentxs::crypto::asymmetric::Role role,
         const opentxs::PasswordPrompt& reason) const -> OTKeypair final;
     auto Keypair(
-        const proto::AsymmetricKey& serializedPubkey,
-        const proto::AsymmetricKey& serializedPrivkey) const -> OTKeypair final;
-    auto Keypair(const proto::AsymmetricKey& serializedPubkey) const
+        const protobuf::AsymmetricKey& serializedPubkey,
+        const protobuf::AsymmetricKey& serializedPrivkey) const
+        -> OTKeypair final;
+    auto Keypair(const protobuf::AsymmetricKey& serializedPubkey) const
         -> OTKeypair final;
     auto Keypair(
         const opentxs::crypto::SeedID& fingerprint,
@@ -908,7 +911,7 @@ public:
         const identifier::Nym& serverNym,
         const identifier::UnitDefinition& unit) const noexcept
         -> otx::blind::Mint final;
-    auto NotaryID(const proto::Identifier& in, alloc::Default alloc)
+    auto NotaryID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::Notary final;
     auto NotaryIDConvertSafe(
         const identifier::Generic& in,
@@ -943,11 +946,12 @@ public:
         return parent_.NotaryIDFromPreimage(preimage, type, std::move(alloc));
     }
     auto NotaryIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept -> identifier::Notary final;
-    auto NotaryIDFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::Notary final;
+    auto NotaryIDFromPreimage(
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept -> identifier::Notary final;
     auto NotaryIDFromProtobuf(const ReadView bytes, alloc::Default alloc)
         const noexcept -> identifier::Notary final
     {
@@ -964,8 +968,8 @@ public:
     {
         return parent_.NotaryIDFromRandom(type, std::move(alloc));
     }
-    auto NymID(const proto::Identifier& in, alloc::Default alloc) const noexcept
-        -> identifier::Nym final
+    auto NymID(const protobuf::Identifier& in, alloc::Default alloc)
+        const noexcept -> identifier::Nym final
     {
         return parent_.Internal().NymID(in, std::move(alloc));
     }
@@ -1056,7 +1060,7 @@ public:
         const opentxs::Contract& contract,
         const opentxs::PasswordPrompt& reason) const
         -> std::unique_ptr<OTPayment> final;
-    auto PaymentCode(const proto::PaymentCode& serialized) const noexcept
+    auto PaymentCode(const protobuf::PaymentCode& serialized) const noexcept
         -> opentxs::PaymentCode final;
     auto PaymentCode(
         const opentxs::crypto::SeedID& seed,
@@ -1102,8 +1106,10 @@ public:
         const contract::peer::Request& request,
         const VersionNumber version) const
         -> std::unique_ptr<opentxs::PeerObject> override;
-    auto PeerObject(const Nym_p& signerNym, const proto::PeerObject& serialized)
-        const -> std::unique_ptr<opentxs::PeerObject> override;
+    auto PeerObject(
+        const Nym_p& signerNym,
+        const protobuf::PeerObject& serialized) const
+        -> std::unique_ptr<opentxs::PeerObject> override;
     auto PeerObject(
         const Nym_p& recipientNym,
         const opentxs::Armored& encrypted,
@@ -1114,14 +1120,14 @@ public:
     auto PeerReply(
         const opentxs::network::zeromq::Frame& bytes,
         alloc::Strategy alloc) const noexcept -> contract::peer::Reply final;
-    auto PeerReply(const proto::PeerReply& proto, alloc::Strategy alloc)
+    auto PeerReply(const protobuf::PeerReply& proto, alloc::Strategy alloc)
         const noexcept -> contract::peer::Reply final;
     auto PeerRequest(ReadView bytes, alloc::Strategy alloc) const noexcept
         -> contract::peer::Request final;
     auto PeerRequest(
         const opentxs::network::zeromq::Frame& bytes,
         alloc::Strategy alloc) const noexcept -> contract::peer::Request final;
-    auto PeerRequest(const proto::PeerRequest& proto, alloc::Strategy alloc)
+    auto PeerRequest(const protobuf::PeerRequest& proto, alloc::Strategy alloc)
         const noexcept -> contract::peer::Request final;
     auto Purse(
         const otx::context::Server& context,
@@ -1138,7 +1144,7 @@ public:
         const otx::blind::CashType type,
         const opentxs::PasswordPrompt& reason) const noexcept
         -> otx::blind::Purse final;
-    auto Purse(const proto::Purse& serialized) const noexcept
+    auto Purse(const protobuf::Purse& serialized) const noexcept
         -> otx::blind::Purse final;
     auto Purse(
         const identity::Nym& owner,
@@ -1181,9 +1187,9 @@ public:
         -> OTSecurityContract final;
     auto SecurityContract(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTSecurityContract final;
-    auto SeedID(const proto::Identifier& in, alloc::Default alloc)
+    auto SeedID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::HDSeed final
     {
         return parent_.Internal().SeedID(in, std::move(alloc));
@@ -1308,7 +1314,7 @@ public:
         -> opentxs::crypto::symmetric::Key final;
     auto SymmetricKey(
         const opentxs::crypto::SymmetricProvider& engine,
-        const proto::SymmetricKey serialized,
+        const protobuf::SymmetricKey serialized,
         alloc::Default alloc) const noexcept
         -> opentxs::crypto::symmetric::Key final;
     auto Trade() const -> std::unique_ptr<OTTrade> final;
@@ -1370,7 +1376,7 @@ public:
         otx::originType theOriginType = otx::originType::not_applicable,
         std::int64_t lTransactionNum = 0) const
         -> std::unique_ptr<OTTransaction> final;
-    auto UnitID(const proto::Identifier& in, alloc::Default alloc)
+    auto UnitID(const protobuf::Identifier& in, alloc::Default alloc)
         const noexcept -> identifier::UnitDefinition final;
     auto UnitIDConvertSafe(const identifier::Generic& in, alloc::Default alloc)
         const noexcept -> identifier::UnitDefinition final;
@@ -1403,10 +1409,12 @@ public:
     {
         return parent_.UnitIDFromPreimage(preimage, type, std::move(alloc));
     }
-    auto UnitIDFromPreimage(const ProtobufType& proto, alloc::Default alloc)
-        const noexcept -> identifier::UnitDefinition final;
     auto UnitIDFromPreimage(
-        const ProtobufType& proto,
+        const protobuf::MessageType& proto,
+        alloc::Default alloc) const noexcept
+        -> identifier::UnitDefinition final;
+    auto UnitIDFromPreimage(
+        const protobuf::MessageType& proto,
         const identifier::Algorithm type,
         alloc::Default alloc) const noexcept
         -> identifier::UnitDefinition final;
@@ -1429,7 +1437,7 @@ public:
     auto UnitDefinition() const noexcept -> OTUnitDefinition final;
     auto UnitDefinition(
         const Nym_p& nym,
-        const proto::UnitDefinition serialized) const noexcept(false)
+        const protobuf::UnitDefinition serialized) const noexcept(false)
         -> OTUnitDefinition final;
     auto Verification(
         const identifier::Nym& verifier,
@@ -1455,11 +1463,13 @@ public:
         -> identity::wot::Verification final;
     auto Verification(
         const identifier::Nym& verifier,
-        const proto::VerificationItem& proto,
+        const protobuf::VerificationItem& proto,
         alloc::Strategy alloc) const noexcept
         -> identity::wot::Verification final;
-    auto Verification(const proto::Verification& proto, alloc::Strategy alloc)
-        const noexcept -> identity::wot::Verification final;
+    auto Verification(
+        const protobuf::Verification& proto,
+        alloc::Strategy alloc) const noexcept
+        -> identity::wot::Verification final;
     auto VerificationReply(
         const Nym_p& responder,
         const identifier::Nym& initiator,

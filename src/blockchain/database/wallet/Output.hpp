@@ -77,10 +77,10 @@ class Output;
 }  // namespace protocol
 }  // namespace blockchain
 
-namespace proto
+namespace protobuf
 {
 class BlockchainTransactionProposal;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace storage
 {
@@ -165,7 +165,7 @@ public:
     auto FinalizeProposal(
         const Log& log,
         const identifier::Generic& proposalID,
-        const proto::BlockchainTransactionProposal& proposal,
+        const protobuf::BlockchainTransactionProposal& proposal,
         const block::Transaction& transaction,
         alloc::Strategy alloc) noexcept -> bool;
     auto FinalizeReorg(

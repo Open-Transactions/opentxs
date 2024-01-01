@@ -95,7 +95,7 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class Credential;
 class Nym;
@@ -103,7 +103,7 @@ class PeerReply;
 class PeerRequest;
 class ServerContract;
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class NymFile;
 class PasswordPrompt;
@@ -210,7 +210,7 @@ public:
         -> UnallocatedSet<identifier::Nym> = 0;
     virtual auto LoadCredential(
         const identifier::Generic& id,
-        std::shared_ptr<proto::Credential>& credential) const -> bool = 0;
+        std::shared_ptr<protobuf::Credential>& credential) const -> bool = 0;
     virtual auto LocalNymCount() const -> std::size_t = 0;
     virtual auto LocalNyms() const -> Set<identifier::Nym> = 0;
     virtual auto Nym(
@@ -233,7 +233,7 @@ public:
         const identity::Type type,
         const PasswordPrompt& reason,
         const UnallocatedCString& name) const -> Nym_p = 0;
-    virtual auto Nym(const proto::Nym& nym) const -> Nym_p = 0;
+    virtual auto Nym(const protobuf::Nym& nym) const -> Nym_p = 0;
     virtual auto NymByIDPartialMatch(const UnallocatedCString& partialId) const
         -> Nym_p = 0;
     virtual auto NymList() const -> ObjectList = 0;
@@ -253,8 +253,8 @@ public:
         const identifier::Generic& replyOrRequest) const -> bool = 0;
     virtual auto PeerReplyCreate(
         const identifier::Nym& nym,
-        const proto::PeerRequest& request,
-        const proto::PeerReply& reply) const -> bool = 0;
+        const protobuf::PeerRequest& request,
+        const protobuf::PeerReply& reply) const -> bool = 0;
     virtual auto PeerReplyCreateRollback(
         const identifier::Nym& nym,
         const identifier::Generic& request,
@@ -281,7 +281,7 @@ public:
         const identifier::Generic& reply) const -> bool = 0;
     virtual auto PeerRequestCreate(
         const identifier::Nym& nym,
-        const proto::PeerRequest& request) const -> bool = 0;
+        const protobuf::PeerRequest& request) const -> bool = 0;
     virtual auto PeerRequestCreateRollback(
         const identifier::Nym& nym,
         const identifier::Generic& request) const -> bool = 0;
@@ -318,7 +318,7 @@ public:
     virtual auto RemoveServer(const identifier::Notary& id) const -> bool = 0;
     virtual auto RemoveUnitDefinition(
         const identifier::UnitDefinition& id) const -> bool = 0;
-    virtual auto SaveCredential(const proto::Credential& credential) const
+    virtual auto SaveCredential(const protobuf::Credential& credential) const
         -> bool = 0;
     virtual auto SecurityContract(
         const UnallocatedCString& nymid,
@@ -345,7 +345,7 @@ public:
         const identifier::Notary& id,
         const std::chrono::milliseconds& timeout = std::chrono::milliseconds(
             0)) const noexcept(false) -> OTServerContract = 0;
-    virtual auto Server(const proto::ServerContract& contract) const
+    virtual auto Server(const protobuf::ServerContract& contract) const
         noexcept(false) -> OTServerContract = 0;
     virtual auto ServerContext(
         const identifier::Nym& localNymID,
@@ -368,7 +368,7 @@ public:
         const identifier::UnitDefinition& id,
         const std::chrono::milliseconds& timeout = std::chrono::milliseconds(
             0)) const noexcept(false) -> OTUnitDefinition = 0;
-    virtual auto UnitDefinition(const proto::UnitDefinition& contract) const
+    virtual auto UnitDefinition(const protobuf::UnitDefinition& contract) const
         noexcept(false) -> OTUnitDefinition = 0;
     virtual auto UnitDefinitionList() const -> ObjectList = 0;
     virtual auto UpdateAccount(

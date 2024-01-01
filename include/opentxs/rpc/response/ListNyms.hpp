@@ -11,10 +11,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class RPCResponse;
-}  // namespace proto
+}  // namespace protobuf
 
 namespace rpc
 {
@@ -38,8 +38,8 @@ public:
         const request::ListNyms& request,
         Responses&& response,
         Identifiers&& accounts) noexcept(false);
-    OPENTXS_NO_EXPORT ListNyms(const proto::RPCResponse& serialized) noexcept(
-        false);
+    OPENTXS_NO_EXPORT ListNyms(
+        const protobuf::RPCResponse& serialized) noexcept(false);
     ListNyms() noexcept;
     ListNyms(const ListNyms&) = delete;
     ListNyms(ListNyms&&) = delete;

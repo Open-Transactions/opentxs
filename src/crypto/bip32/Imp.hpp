@@ -47,10 +47,10 @@ class HDPrivate;
 class EcdsaProvider;
 }  // namespace crypto
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class PasswordPrompt;
@@ -155,7 +155,7 @@ private:
         const Bip32Index child) const noexcept -> bool;
     auto derive_private_key(
         const asymmetric::Algorithm type,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const ReadView parentPrivate,
         const ReadView parentChaincode,
         const ReadView parentPublic,
@@ -163,7 +163,7 @@ private:
         const PasswordPrompt& reason) const noexcept(false) -> Key;
     auto derive_public_key(
         const asymmetric::Algorithm type,
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const ReadView parentChaincode,
         const ReadView parentPublic,
         const Path& pathAppend,

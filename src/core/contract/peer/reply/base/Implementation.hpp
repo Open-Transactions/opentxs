@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <Signature.pb.h>  // IWYU pragma: keep
 #include <cs_shared_guarded.h>
+#include <opentxs/protobuf/Signature.pb.h>  // IWYU pragma: keep
 #include <shared_mutex>
 
 #include "core/contract/peer/reply/base/ReplyPrivate.hpp"
@@ -119,7 +119,7 @@ private:
     const identifier::Nym responder_;
     const peer::Request::identifier_type in_reference_to_;
     DeferredConstruction<identifier_type> id_;
-    DeferredConstruction<proto::Signature> sig_;
+    DeferredConstruction<protobuf::Signature> sig_;
     GuardedTime time_;
 
     static auto calculate_id(
@@ -131,7 +131,7 @@ private:
     auto final_form() const noexcept -> serialized_type;
     auto signing_form() const noexcept -> serialized_type;
     auto validate() const noexcept -> bool;
-    auto verify_signature(const proto::Signature& signature) const noexcept
+    auto verify_signature(const protobuf::Signature& signature) const noexcept
         -> bool;
 
     auto add_signature(const PasswordPrompt& reason) -> bool;

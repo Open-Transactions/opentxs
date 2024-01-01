@@ -45,10 +45,10 @@ class Claim;
 }  // namespace wot
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class PeerRequest;
-}  // namespace proto
+}  // namespace protobuf
 
 class Amount;
 class PasswordPrompt;
@@ -71,7 +71,7 @@ auto BailmentNoticeRequest(
 auto BailmentNoticeRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto BailmentRequest(
     const api::Session& api,
@@ -84,7 +84,7 @@ auto BailmentRequest(
 auto BailmentRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto ConnectionRequest(
     const api::Session& api,
@@ -96,7 +96,7 @@ auto ConnectionRequest(
 auto ConnectionRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto FaucetRequest(
     const api::Session& api,
@@ -109,7 +109,7 @@ auto FaucetRequest(
 auto FaucetRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto OutbailmentRequest(
     const api::Session& api,
@@ -124,7 +124,7 @@ auto OutbailmentRequest(
 auto OutbailmentRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto StoreSecretRequest(
     const api::Session& api,
@@ -137,7 +137,7 @@ auto StoreSecretRequest(
 auto StoreSecretRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 auto VerificationRequest(
     const api::Session& api,
@@ -149,6 +149,6 @@ auto VerificationRequest(
 auto VerificationRequest(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::PeerRequest& serialized,
+    const protobuf::PeerRequest& serialized,
     alloc::Strategy alloc) noexcept -> contract::peer::RequestPrivate*;
 }  // namespace opentxs::factory

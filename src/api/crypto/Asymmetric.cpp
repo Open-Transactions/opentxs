@@ -7,9 +7,9 @@
 
 #include "api/crypto/Asymmetric.hpp"  // IWYU pragma: associated
 
-#include <AsymmetricKey.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
+#include <opentxs/protobuf/AsymmetricKey.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
 #include <memory>
 
 #include "internal/api/Crypto.hpp"
@@ -130,7 +130,7 @@ auto Asymmetric::instantiate_hd_key(
 
 template <typename ReturnType>
 auto Asymmetric::instantiate_serialized_key(
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     alloc::Default alloc) const noexcept -> ReturnType
 
 {
@@ -164,23 +164,23 @@ auto Asymmetric::instantiate_serialized_key(
 }
 
 auto Asymmetric::InstantiateECKey(
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     alloc::Default alloc) const noexcept
     -> opentxs::crypto::asymmetric::key::EllipticCurve
 {
     using ReturnType = opentxs::crypto::asymmetric::key::EllipticCurve;
 
     switch (serialized.type()) {
-        case proto::AKEYTYPE_ED25519:
-        case proto::AKEYTYPE_SECP256K1: {
+        case protobuf::AKEYTYPE_ED25519:
+        case protobuf::AKEYTYPE_SECP256K1: {
 
             return instantiate_serialized_key<ReturnType>(serialized, alloc);
         }
-        case proto::AKEYTYPE_LEGACY: {
+        case protobuf::AKEYTYPE_LEGACY: {
             LogError()()("Wrong key type (RSA)").Flush();
         } break;
-        case proto::AKEYTYPE_ERROR:
-        case proto::AKEYTYPE_NULL:
+        case protobuf::AKEYTYPE_ERROR:
+        case protobuf::AKEYTYPE_NULL:
         default: {
         }
     }
@@ -189,22 +189,22 @@ auto Asymmetric::InstantiateECKey(
 }
 
 auto Asymmetric::InstantiateHDKey(
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::key::HD
 {
     using ReturnType = opentxs::crypto::asymmetric::key::HD;
 
     switch (serialized.type()) {
-        case proto::AKEYTYPE_ED25519:
-        case proto::AKEYTYPE_SECP256K1: {
+        case protobuf::AKEYTYPE_ED25519:
+        case protobuf::AKEYTYPE_SECP256K1: {
 
             return instantiate_serialized_key<ReturnType>(serialized, alloc);
         }
-        case proto::AKEYTYPE_LEGACY: {
+        case protobuf::AKEYTYPE_LEGACY: {
             LogError()()("Wrong key type (RSA)").Flush();
         } break;
-        case proto::AKEYTYPE_ERROR:
-        case proto::AKEYTYPE_NULL:
+        case protobuf::AKEYTYPE_ERROR:
+        case protobuf::AKEYTYPE_NULL:
         default: {
         }
     }
@@ -281,7 +281,7 @@ auto Asymmetric::InstantiateKey(
 }
 
 auto Asymmetric::InstantiateKey(
-    const proto::AsymmetricKey& serialized,
+    const protobuf::AsymmetricKey& serialized,
     alloc::Default alloc) const noexcept -> opentxs::crypto::asymmetric::Key
 {
     const auto type = translate(serialized.type());
@@ -692,9 +692,9 @@ auto Asymmetric::NewSecp256k1Key(
 auto Asymmetric::serialize_path(
     const api::Crypto& api,
     const opentxs::crypto::SeedID& seedID,
-    const opentxs::crypto::Bip32::Path& children) -> proto::HDPath
+    const opentxs::crypto::Bip32::Path& children) -> protobuf::HDPath
 {
-    proto::HDPath output;
+    protobuf::HDPath output;
     output.set_version(serialized_path_version_);
     seedID.Internal().Serialize(*output.mutable_seed());
 

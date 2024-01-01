@@ -1,0 +1,22 @@
+// Copyright (c) 2018 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package opentxs.protobuf;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTBitcoinBlockHeaderFields";
+option optimize_for = LITE_RUNTIME;
+
+message BitcoinBlockHeaderFields
+{
+    optional uint32 version = 1;
+    optional int32 block_version = 2;
+    optional bytes previous_header = 3;
+    optional bytes merkle_hash = 4;
+    optional uint32 timestamp = 5;
+    optional uint32 nbits = 6;
+    optional uint32 nonce = 7;
+}

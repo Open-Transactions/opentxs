@@ -33,11 +33,11 @@ namespace identifier
 class Nym;
 }  // namespace identifier
 
-namespace proto
+namespace protobuf
 {
 class StorageThread;
 class StorageThreadItem;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -165,12 +165,12 @@ private:
     auto validate_account(
         const identifier::Account& sourceAccount) const noexcept -> bool;
 
-    auto load_contacts(const proto::StorageThread& thread) noexcept -> void;
-    auto load_thread(const proto::StorageThread& thread) noexcept -> void;
+    auto load_contacts(const protobuf::StorageThread& thread) noexcept -> void;
+    auto load_thread(const protobuf::StorageThread& thread) noexcept -> void;
     auto new_thread() noexcept -> void;
     auto pipeline(Message&& in) noexcept -> void;
     auto process_contact(const Message& message) noexcept -> void;
-    auto process_item(const proto::StorageThreadItem& item) noexcept(false)
+    auto process_item(const protobuf::StorageThreadItem& item) noexcept(false)
         -> ContactActivityRowID;
     auto process_messagability(const Message& message) noexcept -> void;
     auto process_message_loaded(const Message& message) noexcept -> void;

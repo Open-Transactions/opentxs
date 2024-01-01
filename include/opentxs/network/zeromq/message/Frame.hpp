@@ -8,6 +8,7 @@
 #include <compare>
 #include <cstring>  // IWYU pragma: keep
 #include <functional>
+#include <stdexcept>
 #include <type_traits>
 
 #include "opentxs/Export.hpp"

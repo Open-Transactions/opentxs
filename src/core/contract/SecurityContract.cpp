@@ -7,19 +7,19 @@
 
 #include "core/contract/SecurityContract.hpp"  // IWYU pragma: associated
 
-#include <ContractEnums.pb.h>
-#include <EquityParams.pb.h>
-#include <Signature.pb.h>
-#include <UnitDefinition.pb.h>
+#include <opentxs/protobuf/ContractEnums.pb.h>
+#include <opentxs/protobuf/EquityParams.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <memory>
 #include <string_view>
 
 #include "core/contract/Signable.hpp"
 #include "core/contract/Unit.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/UnitDefinition.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/UnitDefinition.hpp"
+#include "opentxs/util/Log.hpp"
 
 namespace opentxs
 {
@@ -52,7 +52,7 @@ auto Factory::SecurityContract(
 
     if (contract.Signer()) {
         auto serialized = contract.SigVersion();
-        auto sig = std::make_shared<proto::Signature>();
+        auto sig = std::make_shared<protobuf::Signature>();
 
         if (!contract.update_signature(reason)) { return {}; }
     }
@@ -65,14 +65,12 @@ auto Factory::SecurityContract(
 auto Factory::SecurityContract(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized) noexcept
+    const protobuf::UnitDefinition serialized) noexcept
     -> std::shared_ptr<contract::unit::Security>
 {
     using ReturnType = contract::unit::implementation::Security;
 
-    if (false == proto::Validate<ReturnType::SerializedType>(
-                     serialized, VERBOSE, true)) {
-
+    if (false == protobuf::syntax::check(LogError(), serialized, true)) {
         return {};
     }
 
@@ -117,7 +115,7 @@ Security::Security(
 Security::Security(
     const api::Session& api,
     const Nym_p& nym,
-    const proto::UnitDefinition serialized)
+    const protobuf::UnitDefinition serialized)
     : Unit(api, nym, serialized)
 {
     init_serialized();
@@ -128,13 +126,13 @@ Security::Security(const Security& rhs)
 {
 }
 
-auto Security::IDVersion() const -> proto::UnitDefinition
+auto Security::IDVersion() const -> protobuf::UnitDefinition
 {
     auto contract = Unit::IDVersion();
 
     auto& security = *contract.mutable_security();
     security.set_version(1);
-    security.set_type(proto::EQUITYTYPE_SHARES);
+    security.set_type(protobuf::EQUITYTYPE_SHARES);
 
     return contract;
 }

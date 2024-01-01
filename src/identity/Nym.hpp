@@ -3,12 +3,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-// IWYU pragma: no_forward_declare opentxs::proto::NymMode
+// IWYU pragma: no_forward_declare opentxs::protobuf::NymMode
 // IWYU pragma: no_include "opentxs/util/Writer.hpp"
 
 #pragma once
 
-#include <Enums.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -20,7 +20,6 @@
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
 #include "internal/identity/Nym.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Lockable.hpp"
 #include "internal/util/Mutex.hpp"
 #include "opentxs/Types.hpp"
@@ -37,6 +36,7 @@
 #include "opentxs/identity/Types.hpp"
 #include "opentxs/identity/wot/claim/Data.hpp"
 #include "opentxs/identity/wot/claim/Types.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Numbers.hpp"
 
@@ -77,14 +77,14 @@ class Verification;
 class Nym;
 }  // namespace identity
 
-namespace proto
+namespace protobuf
 {
 class ContactData;
 class HDPath;
 class Nym;
 class Signature;
 class VerificationSet;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 class Factory;
@@ -158,14 +158,14 @@ public:
     auto HasPath() const -> bool final;
     auto ID() const -> const identifier::Nym& final { return id_; }
     auto Name() const -> UnallocatedCString final;
-    auto Path(proto::HDPath& output) const -> bool final;
+    auto Path(protobuf::HDPath& output) const -> bool final;
     auto PathRoot() const -> const crypto::SeedID& final;
     auto PathChildSize() const -> int final;
     auto PathChild(int index) const -> std::uint32_t final;
     auto PaymentCodePublic() const -> opentxs::PaymentCode final;
     auto PaymentCodeSecret(const PasswordPrompt& reason) const
         -> opentxs::PaymentCode final;
-    auto PaymentCodePath(proto::HDPath& output) const -> bool final;
+    auto PaymentCodePath(protobuf::HDPath& output) const -> bool final;
     auto PaymentCodePath(Writer&& destination) const -> bool final;
     auto PhoneNumbers(bool active) const -> UnallocatedCString final;
     auto Revision() const -> std::uint64_t final;
@@ -245,7 +245,7 @@ public:
     auto SetContactData(const ReadView protobuf, const PasswordPrompt& reason)
         -> bool final;
     auto SetContactData(
-        const proto::ContactData& data,
+        const protobuf::ContactData& data,
         const PasswordPrompt& reason) -> bool final;
     auto SetScope(
         const wot::claim::ClaimType type,
@@ -253,13 +253,14 @@ public:
         const PasswordPrompt& reason,
         const bool primary) -> bool final;
     auto Sign(
-        const ProtobufType& input,
+        const protobuf::MessageType& input,
         const crypto::SignatureRole role,
-        proto::Signature& signature,
+        protobuf::Signature& signature,
         const PasswordPrompt& reason,
         const crypto::HashType hash) const -> bool final;
-    auto Verify(const ProtobufType& input, proto::Signature& signature) const
-        -> bool final;
+    auto Verify(
+        const protobuf::MessageType& input,
+        protobuf::Signature& signature) const -> bool final;
 
     Nym() = delete;
     Nym(const Nym&) = delete;
@@ -285,7 +286,7 @@ private:
     const std::unique_ptr<const identity::Source> source_p_;
     const identity::Source& source_;
     const identifier::Nym id_;
-    const proto::NymMode mode_;
+    const protobuf::NymMode mode_;
     std::int32_t version_;
     std::uint32_t index_;
     UnallocatedCString alias_;
@@ -340,17 +341,17 @@ private:
     void init_claims(const eLock& lock) const;
     auto set_contact_data(
         const eLock& lock,
-        const proto::ContactData& data,
+        const protobuf::ContactData& data,
         const PasswordPrompt& reason) -> bool;
     auto verify_pseudonym(const eLock& lock) const -> bool;
 
     auto add_contact_credential(
         const eLock& lock,
-        const proto::ContactData& data,
+        const protobuf::ContactData& data,
         const PasswordPrompt& reason) -> bool;
     auto add_verification_credential(
         const eLock& lock,
-        const proto::VerificationSet& data,
+        const protobuf::VerificationSet& data,
         const PasswordPrompt& reason) -> bool;
     void revoke_contact_credentials(const eLock& lock);
     void revoke_verification_credentials(const eLock& lock);
@@ -358,14 +359,14 @@ private:
         const eLock& lock,
         const std::int32_t version,
         const PasswordPrompt& reason) -> bool;
-    auto path(const sLock& lock, proto::HDPath& output) const -> bool;
+    auto path(const sLock& lock, protobuf::HDPath& output) const -> bool;
 
     Nym(const api::Session& api,
         crypto::Parameters& nymParameters,
         std::unique_ptr<const identity::Source> source,
         const PasswordPrompt& reason) noexcept(false);
     Nym(const api::Session& api,
-        const proto::Nym& serialized,
+        const protobuf::Nym& serialized,
         std::string_view alias) noexcept(false);
 };
 }  // namespace opentxs::identity::implementation

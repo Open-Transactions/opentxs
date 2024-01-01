@@ -39,10 +39,10 @@ class Message;
 }  // namespace zeromq
 }  // namespace network
 
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 
 class Data;
 }  // namespace opentxs
@@ -69,9 +69,9 @@ struct Notifications {
 using NotificationStatus = Map<blockchain::Type, Notifications>;
 
 auto deserialize(std::span<const network::zeromq::Frame> in) noexcept -> Target;
-auto get_name(const proto::HDPath& path, HDProtocol type) noexcept
+auto get_name(const protobuf::HDPath& path, HDProtocol type) noexcept
     -> UnallocatedCString;
-auto get_standard(const proto::HDPath& path) noexcept -> HDProtocol;
+auto get_standard(const protobuf::HDPath& path) noexcept -> HDProtocol;
 auto serialize(const Target& target, Data& out) noexcept -> void;
 auto serialize(const Target& target, network::zeromq::Message& out) noexcept
     -> void;

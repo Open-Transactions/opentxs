@@ -10,12 +10,12 @@
 #include <span>
 
 #include "internal/network/zeromq/message/Message.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "opentxs/Types.hpp"
 #include "opentxs/core/Amount.hpp"
 #include "opentxs/network/zeromq/Types.hpp"
 #include "opentxs/network/zeromq/message/Frame.hpp"
 #include "opentxs/network/zeromq/message/Message.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Container.hpp"
 
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
@@ -41,7 +41,7 @@ public:
     auto AddFrame(const Amount& amount) noexcept -> Frame&;
     auto AddFrame(Frame&& frame) noexcept -> Frame&;
     auto AddFrame(const char* in) noexcept -> Frame&;
-    auto AddFrame(const ProtobufType& input) noexcept -> Frame& final;
+    auto AddFrame(const protobuf::MessageType& input) noexcept -> Frame& final;
     auto AddFrame(const ReadView bytes) noexcept -> Frame&;
     auto AddFrame(const void* input, const std::size_t size) noexcept -> Frame&;
     auto AppendBytes() noexcept -> Writer;

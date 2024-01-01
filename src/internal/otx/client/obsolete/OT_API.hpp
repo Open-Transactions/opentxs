@@ -65,10 +65,10 @@ class Server;
 }  // namespace context
 }  // namespace otx
 
-namespace proto
+namespace protobuf
 {
 class UnitDefinition;
-}  // namespace proto
+}  // namespace protobuf
 
 class Armored;
 class Basket;
@@ -225,13 +225,13 @@ public:
         const identifier::Account& account_ID) const -> CommandResult;
 
     auto AddBasketCreationItem(
-        proto::UnitDefinition& basketTemplate,
+        protobuf::UnitDefinition& basketTemplate,
         const String& currencyID,
         const std::uint64_t weight) const -> bool;
 
     auto issueBasket(
         otx::context::Server& context,
-        const proto::UnitDefinition& basket,
+        const protobuf::UnitDefinition& basket,
         const UnallocatedCString& label) const -> CommandResult;
 
     auto GenerateBasketExchange(

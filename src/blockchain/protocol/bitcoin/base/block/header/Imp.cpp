@@ -7,9 +7,9 @@
 
 #include "blockchain/protocol/bitcoin/base/block/header/Imp.hpp"  // IWYU pragma: associated
 
-#include <BitcoinBlockHeaderFields.pb.h>
-#include <BlockchainBlockHeader.pb.h>
-#include <BlockchainBlockLocalData.pb.h>
+#include <opentxs/protobuf/BitcoinBlockHeaderFields.pb.h>
+#include <opentxs/protobuf/BlockchainBlockHeader.pb.h>
+#include <opentxs/protobuf/BlockchainBlockLocalData.pb.h>
 #include <array>
 #include <compare>
 #include <cstring>
@@ -23,7 +23,6 @@
 
 #include "blockchain/block/header/HeaderPrivate.hpp"
 #include "internal/blockchain/params/ChainData.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
 #include "internal/util/Bytes.hpp"
 #include "internal/util/P0330.hpp"
 #include "internal/util/Size.hpp"
@@ -35,6 +34,7 @@
 #include "opentxs/blockchain/Work.hpp"
 #include "opentxs/blockchain/block/NumericHash.hpp"
 #include "opentxs/core/ByteArray.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
 #include "opentxs/util/Bytes.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"

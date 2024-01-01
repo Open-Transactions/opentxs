@@ -5,14 +5,14 @@
 
 #include "identity/Authority.hpp"  // IWYU pragma: associated
 
-#include <Authority.pb.h>  // IWYU pragma: keep
-#include <ContactData.pb.h>
-#include <Credential.pb.h>
-#include <Enums.pb.h>
-#include <HDPath.pb.h>
-#include <Identifier.pb.h>
-#include <Signature.pb.h>
-#include <VerificationItem.pb.h>
+#include <opentxs/protobuf/Authority.pb.h>  // IWYU pragma: keep
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/Credential.pb.h>
+#include <opentxs/protobuf/Enums.pb.h>
+#include <opentxs/protobuf/HDPath.pb.h>
+#include <opentxs/protobuf/Identifier.pb.h>
+#include <opentxs/protobuf/Signature.pb.h>
+#include <opentxs/protobuf/VerificationItem.pb.h>
 #include <algorithm>
 #include <cstdint>
 #include <functional>
@@ -29,10 +29,6 @@
 #include "internal/crypto/key/Key.hpp"
 #include "internal/crypto/key/Keypair.hpp"
 #include "internal/identity/Authority.hpp"
-#include "internal/serialization/protobuf/Check.hpp"
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/verify/Credential.hpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "internal/util/PasswordPrompt.hpp"
 #include "opentxs/api/Factory.internal.hpp"
 #include "opentxs/api/Session.hpp"
@@ -60,6 +56,10 @@
 #include "opentxs/identity/credential/Key.hpp"
 #include "opentxs/identity/credential/Verification.hpp"
 #include "opentxs/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/syntax/Credential.hpp"  // IWYU pragma: keep
+#include "opentxs/protobuf/syntax/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Container.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/PasswordPrompt.hpp"
@@ -76,8 +76,8 @@ auto Factory::Authority(
     const api::Session& api,
     const identity::Nym& parent,
     const identity::Source& source,
-    const proto::KeyMode mode,
-    const proto::Authority& serialized) -> identity::internal::Authority*
+    const protobuf::KeyMode mode,
+    const protobuf::Authority& serialized) -> identity::internal::Authority*
 {
     using ReturnType = identity::implementation::Authority;
 
@@ -172,7 +172,7 @@ Authority::Authority(
     const api::Session& api,
     const identity::Nym& parent,
     const identity::Source& source,
-    const proto::KeyMode mode,
+    const protobuf::KeyMode mode,
     const Serialized& serialized) noexcept(false)
     : api_(api)
     , parent_(parent)
@@ -186,7 +186,7 @@ Authority::Authority(
           *master_,
           serialized,
           mode,
-          proto::CREDROLE_CHILDKEY))
+          protobuf::CREDROLE_CHILDKEY))
     , contact_credentials_(load_child<credential::internal::Contact>(
           api,
           source,
@@ -194,7 +194,7 @@ Authority::Authority(
           *master_,
           serialized,
           mode,
-          proto::CREDROLE_CONTACT))
+          protobuf::CREDROLE_CONTACT))
     , verification_credentials_(load_child<credential::internal::Verification>(
           api,
           source,
@@ -202,7 +202,7 @@ Authority::Authority(
           *master_,
           serialized,
           mode,
-          proto::CREDROLE_VERIFY))
+          protobuf::CREDROLE_VERIFY))
     , revoked_credentials_()
     , mode_(mode)
 {
@@ -255,7 +255,7 @@ Authority::Authority(
           reason))
     , verification_credentials_()
     , revoked_credentials_()
-    , mode_(proto::KEYMODE_PRIVATE)
+    , mode_(protobuf::KEYMODE_PRIVATE)
 {
     if (false == bool(master_)) {
         throw std::runtime_error("Invalid master credential");
@@ -277,7 +277,7 @@ auto Authority::AddChildKeyCredential(
             *master_,
             authority_to_secondary_.at(version_),
             revisedParameters,
-            proto::CREDROLE_CHILDKEY,
+            protobuf::CREDROLE_CHILDKEY,
             reason)};
 
     if (!child) {
@@ -293,7 +293,7 @@ auto Authority::AddChildKeyCredential(
 }
 
 auto Authority::AddContactCredential(
-    const proto::ContactData& contactData,
+    const protobuf::ContactData& contactData,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     LogDetail()()("Adding a contact credential.").Flush();
@@ -310,7 +310,7 @@ auto Authority::AddContactCredential(
             *master_,
             authority_to_contact_.at(version_),
             parameters,
-            proto::CREDROLE_CONTACT,
+            protobuf::CREDROLE_CONTACT,
             reason)};
 
     if (false == bool(credential)) {
@@ -322,7 +322,7 @@ auto Authority::AddContactCredential(
     auto id{credential->ID()};
     contact_credentials_.emplace(std::move(id), credential.release());
     const auto version =
-        proto::RequiredAuthorityVersion(contactData.version(), version_);
+        protobuf::RequiredAuthorityVersion(contactData.version(), version_);
 
     if (version > version_) { const_cast<VersionNumber&>(version_) = version; }
 
@@ -330,7 +330,7 @@ auto Authority::AddContactCredential(
 }
 
 auto Authority::AddVerificationCredential(
-    const proto::VerificationSet& verificationSet,
+    const protobuf::VerificationSet& verificationSet,
     const opentxs::PasswordPrompt& reason) -> bool
 {
     LogDetail()()("Adding a verification credential.").Flush();
@@ -347,7 +347,7 @@ auto Authority::AddVerificationCredential(
             *master_,
             authority_to_verification_.at(version_),
             parameters,
-            proto::CREDROLE_VERIFY,
+            protobuf::CREDROLE_VERIFY,
             reason)};
 
     if (false == bool(credential)) {
@@ -438,7 +438,7 @@ auto Authority::create_contact_credental(
 {
     auto output = ContactCredentialMap{};
 
-    auto serialized = proto::ContactData{};
+    auto serialized = protobuf::ContactData{};
     if (parameters.Internal().GetContactData(serialized)) {
         auto pCredential = std::unique_ptr<credential::internal::Contact>{
             opentxs::Factory::Credential<credential::internal::Contact>(
@@ -448,7 +448,7 @@ auto Authority::create_contact_credental(
                 master,
                 authority_to_contact_.at(parentVersion),
                 parameters,
-                proto::CREDROLE_CONTACT,
+                protobuf::CREDROLE_CONTACT,
                 reason)};
 
         if (false == bool(pCredential)) {
@@ -488,7 +488,7 @@ auto Authority::create_key_credential(
         master,
         authority_to_secondary_.at(parentVersion),
         revised,
-        proto::CREDROLE_CHILDKEY,
+        protobuf::CREDROLE_CHILDKEY,
         reason));
 
     if (false == bool(pChild)) {
@@ -568,15 +568,15 @@ void Authority::extract_child(
     internal::Authority& authority,
     const credential::internal::Primary& master,
     const credential::internal::Base::SerializedType& serialized,
-    const proto::KeyMode mode,
-    const proto::CredentialRole role,
+    const protobuf::KeyMode mode,
+    const protobuf::CredentialRole role,
     UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>&
         map) noexcept(false)
 {
     if (role != serialized.role()) { return; }
 
-    const bool valid = proto::Validate<proto::Credential>(
-        serialized, VERBOSE, mode, role, true);
+    const bool valid =
+        protobuf::syntax::check(LogError(), serialized, mode, role, true);
 
     if (false == valid) {
         throw std::runtime_error("Invalid serialized credential");
@@ -595,7 +595,7 @@ void Authority::extract_child(
 
 auto Authority::get_keypair(
     const crypto::asymmetric::Algorithm type,
-    const proto::KeyRole role,
+    const protobuf::KeyRole role,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
     for (const auto& [id, pCredential] : key_credentials_) {
@@ -628,7 +628,7 @@ auto Authority::get_secondary_credential(
     return it->second.get();
 }
 
-auto Authority::GetContactData(proto::ContactData& contactData) const -> bool
+auto Authority::GetContactData(protobuf::ContactData& contactData) const -> bool
 {
     if (contact_credentials_.empty()) { return false; }
 
@@ -650,14 +650,14 @@ auto Authority::GetAuthKeypair(
     crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
-    return get_keypair(keytype, proto::KEYROLE_AUTH, plistRevokedIDs);
+    return get_keypair(keytype, protobuf::KEYROLE_AUTH, plistRevokedIDs);
 }
 
 auto Authority::GetEncrKeypair(
     crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
-    return get_keypair(keytype, proto::KEYROLE_ENCRYPT, plistRevokedIDs);
+    return get_keypair(keytype, protobuf::KEYROLE_ENCRYPT, plistRevokedIDs);
 }
 
 auto Authority::GetPublicAuthKey(
@@ -722,7 +722,7 @@ auto Authority::GetSignKeypair(
     crypto::asymmetric::Algorithm keytype,
     const String::List* plistRevokedIDs) const -> const crypto::key::Keypair&
 {
-    return get_keypair(keytype, proto::KEYROLE_SIGN, plistRevokedIDs);
+    return get_keypair(keytype, protobuf::KEYROLE_SIGN, plistRevokedIDs);
 }
 
 auto Authority::GetTagCredential(crypto::asymmetric::Algorithm type) const
@@ -744,7 +744,8 @@ auto Authority::GetTagCredential(crypto::asymmetric::Algorithm type) const
     throw std::out_of_range("No matching credential");
 }
 
-auto Authority::GetVerificationSet(proto::VerificationSet& output) const -> bool
+auto Authority::GetVerificationSet(protobuf::VerificationSet& output) const
+    -> bool
 {
     if (verification_credentials_.empty()) { return false; }
 
@@ -798,16 +799,16 @@ auto Authority::load_child(
     internal::Authority& authority,
     const credential::internal::Primary& master,
     const Serialized& serialized,
-    const proto::KeyMode mode,
-    const proto::CredentialRole role) noexcept(false)
+    const protobuf::KeyMode mode,
+    const protobuf::CredentialRole role) noexcept(false)
     -> UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>
 {
     auto output = UnallocatedMap<identifier::Generic, std::unique_ptr<Type>>{};
 
-    if (proto::AUTHORITYMODE_INDEX == serialized.mode()) {
+    if (protobuf::AUTHORITYMODE_INDEX == serialized.mode()) {
         for (const auto& it : serialized.activechildids()) {
             const auto id = api.Factory().Internal().Identifier(it);
-            auto child = std::shared_ptr<proto::Credential>{};
+            auto child = std::shared_ptr<protobuf::Credential>{};
             const auto loaded =
                 api.Wallet().Internal().LoadCredential(id, child);
 
@@ -833,7 +834,7 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
 
     assert_false(parent_.Source().NymID().empty());
 
-    std::shared_ptr<proto::Credential> child;
+    std::shared_ptr<protobuf::Credential> child;
     const auto id = api_.Factory().IdentifierFromBase58(strSubID.Bytes());
     const auto loaded = api_.Wallet().Internal().LoadCredential(id, child);
 
@@ -848,25 +849,25 @@ auto Authority::LoadChildKeyCredential(const String& strSubID) -> bool
     return LoadChildKeyCredential(*child);
 }
 
-auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
-    -> bool
+auto Authority::LoadChildKeyCredential(
+    const protobuf::Credential& serializedCred) -> bool
 {
-    const bool validProto = proto::Validate<proto::Credential>(
-        serializedCred, VERBOSE, mode_, proto::CREDROLE_ERROR, true);
+    const auto validProto = protobuf::syntax::check(
+        LogError(), serializedCred, mode_, protobuf::CREDROLE_ERROR, true);
 
     if (!validProto) {
         LogError()()("Invalid serialized child key credential.").Flush();
         return false;
     }
 
-    if (proto::CREDROLE_MASTERKEY == serializedCred.role()) {
+    if (protobuf::CREDROLE_MASTERKEY == serializedCred.role()) {
         LogError()()("Unexpected master credential.").Flush();
 
         return false;
     }
 
     switch (serializedCred.role()) {
-        case proto::CREDROLE_CHILDKEY: {
+        case protobuf::CREDROLE_CHILDKEY: {
             std::unique_ptr<credential::internal::Secondary> child{
                 opentxs::Factory::Credential<credential::internal::Secondary>(
                     api_,
@@ -875,7 +876,7 @@ auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
                     *master_,
                     serializedCred,
                     mode_,
-                    proto::CREDROLE_CHILDKEY)};
+                    protobuf::CREDROLE_CHILDKEY)};
 
             if (false == bool(child)) { return false; }
 
@@ -883,7 +884,7 @@ auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
 
             key_credentials_.emplace(std::move(id), child.release());
         } break;
-        case proto::CREDROLE_CONTACT: {
+        case protobuf::CREDROLE_CONTACT: {
             std::unique_ptr<credential::internal::Contact> child{
                 opentxs::Factory::Credential<credential::internal::Contact>(
                     api_,
@@ -892,7 +893,7 @@ auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
                     *master_,
                     serializedCred,
                     mode_,
-                    proto::CREDROLE_CONTACT)};
+                    protobuf::CREDROLE_CONTACT)};
 
             if (false == bool(child)) { return false; }
 
@@ -900,7 +901,7 @@ auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
 
             contact_credentials_.emplace(std::move(id), child.release());
         } break;
-        case proto::CREDROLE_VERIFY: {
+        case protobuf::CREDROLE_VERIFY: {
             std::unique_ptr<credential::internal::Verification> child{
                 opentxs::Factory::Credential<
                     credential::internal::Verification>(
@@ -910,15 +911,15 @@ auto Authority::LoadChildKeyCredential(const proto::Credential& serializedCred)
                     *master_,
                     serializedCred,
                     mode_,
-                    proto::CREDROLE_VERIFY)};
+                    protobuf::CREDROLE_VERIFY)};
 
             if (false == bool(child)) { return false; }
 
             auto id{child->ID()};
             verification_credentials_.emplace(std::move(id), child.release());
         } break;
-        case proto::CREDROLE_ERROR:
-        case proto::CREDROLE_MASTERKEY:
+        case protobuf::CREDROLE_ERROR:
+        case protobuf::CREDROLE_MASTERKEY:
         default: {
             LogError()()("Invalid credential type").Flush();
 
@@ -933,14 +934,14 @@ auto Authority::load_master(
     const api::Session& api,
     identity::internal::Authority& owner,
     const identity::Source& source,
-    const proto::KeyMode mode,
+    const protobuf::KeyMode mode,
     const Serialized& serialized) noexcept(false)
     -> std::unique_ptr<credential::internal::Primary>
 {
     auto output = std::unique_ptr<credential::internal::Primary>{};
 
-    if (proto::AUTHORITYMODE_INDEX == serialized.mode()) {
-        auto credential = std::shared_ptr<proto::Credential>{};
+    if (protobuf::AUTHORITYMODE_INDEX == serialized.mode()) {
+        auto credential = std::shared_ptr<protobuf::Credential>{};
         const auto id =
             api.Factory().Internal().Identifier(serialized.masterid());
 
@@ -982,7 +983,7 @@ auto Authority::Params(const crypto::asymmetric::Algorithm type) const noexcept
     }
 }
 
-auto Authority::Path(proto::HDPath& output) const -> bool
+auto Authority::Path(protobuf::HDPath& output) const -> bool
 {
     if (master_) {
         const auto found = master_->Path(output);
@@ -1042,15 +1043,15 @@ auto Authority::Serialize(
     };
 
     if (CREDENTIAL_INDEX_MODE_ONLY_IDS == mode) {
-        if (proto::KEYMODE_PRIVATE == mode_) { credSet.set_index(index_); }
+        if (protobuf::KEYMODE_PRIVATE == mode_) { credSet.set_index(index_); }
 
-        credSet.set_mode(proto::AUTHORITYMODE_INDEX);
+        credSet.set_mode(protobuf::AUTHORITYMODE_INDEX);
         for_each(key_credentials_, add_active_id);
         for_each(contact_credentials_, add_active_id);
         for_each(verification_credentials_, add_active_id);
         for_each(revoked_credentials_, add_revoked_id);
     } else {
-        credSet.set_mode(proto::AUTHORITYMODE_FULL);
+        credSet.set_mode(protobuf::AUTHORITYMODE_FULL);
         master_->Serialize(
             *(credSet.mutable_mastercredential()), AS_PUBLIC, WITH_SIGNATURES);
 
@@ -1066,7 +1067,7 @@ auto Authority::Serialize(
 auto Authority::Sign(
     const crypto::GetPreimage input,
     crypto::SignatureRole role,
-    proto::Signature& output,
+    protobuf::Signature& output,
     const PasswordPrompt& reason) const -> bool
 {
     return Sign(
@@ -1082,7 +1083,7 @@ auto Authority::Sign(
     const crypto::GetPreimage input,
     crypto::SignatureRole role,
     crypto::HashType hash,
-    proto::Signature& output,
+    protobuf::Signature& output,
     const PasswordPrompt& reason) const -> bool
 {
     return Sign(
@@ -1093,7 +1094,7 @@ auto Authority::Sign(
     const crypto::GetPreimage input,
     crypto::SignatureRole role,
     opentxs::crypto::asymmetric::Role key,
-    proto::Signature& output,
+    protobuf::Signature& output,
     const PasswordPrompt& reason) const -> bool
 {
     return Sign(input, role, key, crypto::HashType::Error, output, reason);
@@ -1104,7 +1105,7 @@ auto Authority::Sign(
     crypto::SignatureRole role,
     opentxs::crypto::asymmetric::Role key,
     crypto::HashType hash,
-    proto::Signature& output,
+    protobuf::Signature& output,
     const PasswordPrompt& reason) const -> bool
 {
     switch (role) {
@@ -1253,15 +1254,15 @@ auto Authority::validate_credential(const Item& item) const -> bool
     return false;
 }
 
-auto Authority::Verify(const Data& plaintext, const proto::Signature& sig) const
-    -> bool
+auto Authority::Verify(const Data& plaintext, const protobuf::Signature& sig)
+    const -> bool
 {
     return Verify(plaintext, sig, crypto::asymmetric::Role::Sign);
 }
 
 auto Authority::Verify(
     const Data& plaintext,
-    const proto::Signature& sig,
+    const protobuf::Signature& sig,
     const crypto::asymmetric::Role key) const -> bool
 {
     const auto signerID =
@@ -1289,11 +1290,11 @@ auto Authority::Verify(
     return credential->Internal().Verify(plaintext, sig, key);
 }
 
-auto Authority::Verify(const proto::VerificationItem& item) const -> bool
+auto Authority::Verify(const protobuf::VerificationItem& item) const -> bool
 {
     auto serialized = credential::Verification::SigningForm(item);
     auto& signature = *serialized.mutable_sig();
-    proto::Signature signatureCopy;
+    protobuf::Signature signatureCopy;
     signatureCopy.CopyFrom(signature);
     signature.clear_signature();
 

@@ -7,7 +7,7 @@
 
 namespace opentxs::contract::peer::internal
 {
-auto Request::Serialize(proto::PeerRequest&) const noexcept -> bool
+auto Request::Serialize(protobuf::PeerRequest&) const noexcept -> bool
 {
     return false;
 }

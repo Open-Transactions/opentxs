@@ -5,16 +5,13 @@
 
 #include "opentxs/identity/wot/claim/Section.hpp"  // IWYU pragma: associated
 
-#include <ContactData.pb.h>
-#include <ContactItem.pb.h>
-#include <ContactSection.pb.h>
+#include <opentxs/protobuf/ContactData.pb.h>
+#include <opentxs/protobuf/ContactItem.pb.h>
+#include <opentxs/protobuf/ContactSection.pb.h>
 #include <algorithm>
 #include <functional>
 #include <utility>
 
-#include "internal/serialization/protobuf/Proto.hpp"
-#include "internal/serialization/protobuf/Proto.tpp"
-#include "internal/serialization/protobuf/verify/VerifyContacts.hpp"
 #include "opentxs/api/Session.hpp"
 #include "opentxs/api/session/Factory.hpp"
 #include "opentxs/core/Data.hpp"
@@ -26,6 +23,9 @@
 #include "opentxs/identity/wot/claim/Types.hpp"
 #include "opentxs/identity/wot/claim/Types.internal.hpp"
 #include "opentxs/identity/wot/claim/internal.factory.hpp"
+#include "opentxs/protobuf/Types.internal.hpp"
+#include "opentxs/protobuf/Types.internal.tpp"
+#include "opentxs/protobuf/syntax/VerifyContacts.hpp"
 #include "opentxs/util/Log.hpp"
 #include "opentxs/util/Writer.hpp"
 
@@ -50,7 +50,7 @@ static auto extract_groups(
     const api::Session& api,
     const UnallocatedCString& nym,
     const VersionNumber parentVersion,
-    const proto::ContactSection& serialized) -> Section::GroupMap
+    const protobuf::ContactSection& serialized) -> Section::GroupMap
 {
     Section::GroupMap groupMap{};
     UnallocatedMap<claim::ClaimType, Group::ItemMap> itemMaps{};
@@ -116,7 +116,7 @@ struct Section::Imp {
 
         groups[groupID].reset(new claim::Group(nym_, section_, scope));
 
-        auto version = proto::RequiredVersion(
+        auto version = protobuf::RequiredVersion(
             translate(section_), translate(item->Type()), version_);
 
         return {api_, nym_, version, version, section_, groups};
@@ -200,7 +200,7 @@ Section::Section(
     const api::Session& api,
     const UnallocatedCString& nym,
     const VersionNumber parentVersion,
-    const proto::ContactSection& serialized)
+    const protobuf::ContactSection& serialized)
     : Section(
           api,
           nym,
@@ -220,7 +220,7 @@ Section::Section(
           api,
           nym,
           parentVersion,
-          proto::Factory<proto::ContactSection>(serialized))
+          protobuf::Factory<protobuf::ContactSection>(serialized))
 {
 }
 
@@ -280,7 +280,7 @@ auto Section::AddItem(const std::shared_ptr<Item>& item) const -> Section
         map[groupID].reset(new claim::Group(imp_->nym_, imp_->section_, item));
     }
 
-    auto version = proto::RequiredVersion(
+    auto version = protobuf::RequiredVersion(
         translate(imp_->section_), translate(item->Type()), imp_->version_);
 
     return {imp_->api_, imp_->nym_, version, version, imp_->section_, map};
@@ -364,7 +364,7 @@ auto Section::HaveClaim(const identifier::Generic& item) const -> bool
 
 auto Section::Serialize(Writer&& destination, const bool withIDs) const -> bool
 {
-    proto::ContactData data;
+    protobuf::ContactData data;
     if (false == SerializeTo(data, withIDs) || data.section_size() != 1) {
         LogError()()("Failed to serialize the contactsection.").Flush();
         return false;
@@ -377,8 +377,8 @@ auto Section::Serialize(Writer&& destination, const bool withIDs) const -> bool
     return true;
 }
 
-auto Section::SerializeTo(proto::ContactData& section, const bool withIDs) const
-    -> bool
+auto Section::SerializeTo(protobuf::ContactData& section, const bool withIDs)
+    const -> bool
 {
     bool output = true;
     auto& serialized = *section.add_section();

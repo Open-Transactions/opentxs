@@ -10,10 +10,10 @@
 // NOLINTBEGIN(modernize-concat-nested-namespaces)
 namespace opentxs
 {
-namespace proto
+namespace protobuf
 {
 class HDPath;
-}  // namespace proto
+}  // namespace protobuf
 }  // namespace opentxs
 // NOLINTEND(modernize-concat-nested-namespaces)
 
@@ -24,13 +24,13 @@ class Seed : virtual public crypto::Seed
 public:
     using api::crypto::Seed::AccountChildKey;
     virtual auto AccountChildKey(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const opentxs::crypto::Bip32Index index,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;
     virtual auto AccountKey(
-        const proto::HDPath& path,
+        const protobuf::HDPath& path,
         const opentxs::blockchain::crypto::Bip44Subchain subchain,
         const PasswordPrompt& reason) const
         -> opentxs::crypto::asymmetric::key::HD = 0;

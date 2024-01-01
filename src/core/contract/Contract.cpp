@@ -9,13 +9,13 @@
 
 #include "internal/core/contract/Contract.hpp"  // IWYU pragma: associated
 
-#include <ContractEnums.pb.h>
-#include <ServerContract.pb.h>
-#include <UnitDefinition.pb.h>
 #include <boost/unordered/unordered_flat_map.hpp>
 #include <frozen/bits/algorithms.h>
 #include <frozen/bits/elsa.h>
 #include <frozen/unordered_map.h>
+#include <opentxs/protobuf/ContractEnums.pb.h>
+#include <opentxs/protobuf/ServerContract.pb.h>
+#include <opentxs/protobuf/UnitDefinition.pb.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -26,14 +26,14 @@
 
 namespace opentxs::contract::blank
 {
-auto Server::Serialize(proto::ServerContract& output, bool includeNym) const
+auto Server::Serialize(protobuf::ServerContract& output, bool includeNym) const
     -> bool
 {
     output = {};
     return true;
 }
 
-auto Unit::Serialize(proto::UnitDefinition& output, bool includeNym) const
+auto Unit::Serialize(protobuf::UnitDefinition& output, bool includeNym) const
     -> bool
 {
     output = {};
@@ -45,19 +45,20 @@ namespace opentxs::contract
 {
 static constexpr auto protocol_version_map_ = [] {
     using enum ProtocolVersion;
-    using enum proto::ProtocolVersion;
+    using enum protobuf::ProtocolVersion;
 
-    return frozen::make_unordered_map<ProtocolVersion, proto::ProtocolVersion>({
-        {Error, PROTOCOLVERSION_ERROR},
-        {Legacy, PROTOCOLVERSION_LEGACY},
-        {Notify, PROTOCOLVERSION_NOTIFY},
-    });
+    return frozen::
+        make_unordered_map<ProtocolVersion, protobuf::ProtocolVersion>({
+            {Error, PROTOCOLVERSION_ERROR},
+            {Legacy, PROTOCOLVERSION_LEGACY},
+            {Notify, PROTOCOLVERSION_NOTIFY},
+        });
 }();
 static constexpr auto unit_type_map_ = [] {
     using enum UnitDefinitionType;
-    using enum proto::UnitType;
+    using enum protobuf::UnitType;
 
-    return frozen::make_unordered_map<UnitDefinitionType, proto::UnitType>({
+    return frozen::make_unordered_map<UnitDefinitionType, protobuf::UnitType>({
         {Error, UNITTYPE_ERROR},
         {Currency, UNITTYPE_CURRENCY},
         {Security, UNITTYPE_SECURITY},
@@ -69,7 +70,7 @@ static constexpr auto unit_type_map_ = [] {
 namespace opentxs
 {
 auto translate(const contract::ProtocolVersion in) noexcept
-    -> proto::ProtocolVersion
+    -> protobuf::ProtocolVersion
 {
     const auto& map = contract::protocol_version_map_;
 
@@ -78,12 +79,12 @@ auto translate(const contract::ProtocolVersion in) noexcept
         return i->second;
     } else {
 
-        return proto::PROTOCOLVERSION_ERROR;
+        return protobuf::PROTOCOLVERSION_ERROR;
     }
 }
 
 auto translate(const contract::UnitDefinitionType in) noexcept
-    -> proto::UnitType
+    -> protobuf::UnitType
 {
     const auto& map = contract::unit_type_map_;
 
@@ -92,11 +93,11 @@ auto translate(const contract::UnitDefinitionType in) noexcept
         return i->second;
     } else {
 
-        return proto::UNITTYPE_ERROR;
+        return protobuf::UNITTYPE_ERROR;
     }
 }
 
-auto translate(const proto::ProtocolVersion in) noexcept
+auto translate(const protobuf::ProtocolVersion in) noexcept
     -> contract::ProtocolVersion
 {
     static constexpr auto map =
@@ -111,14 +112,15 @@ auto translate(const proto::ProtocolVersion in) noexcept
     }
 }
 
-auto translate(const proto::UnitType in) noexcept
+auto translate(const protobuf::UnitType in) noexcept
     -> contract::UnitDefinitionType
 {
     // NOTE unit_type_map_ sometimes takes too long to invert as a frozen map
     static const auto map = [] {
         const auto& unittypes = contract::unit_type_map_;
-        auto out = boost::
-            unordered_flat_map<proto::UnitType, contract::UnitDefinitionType>{};
+        auto out = boost::unordered_flat_map<
+            protobuf::UnitType,
+            contract::UnitDefinitionType>{};
         std::ranges::transform(
             unittypes, std::inserter(out, out.end()), [](const auto& data) {
                 const auto& [key, value] = data;
