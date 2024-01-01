@@ -3,15 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-set(PROTO_SOURCES Generics.proto Markets.proto)
-
-protobuf_generate_cpp(
-  PROTO_SRC
-  PROTO_HEADER
-  ${PROTO_SOURCES}
+add_library(opentxs-otdb OBJECT "Generics.proto" "Markets.proto")
+protobuf_generate(
+  TARGET
+  opentxs-otdb
+  LANGUAGE
+  cpp
 )
-
-add_library(opentxs-otdb OBJECT ${PROTO_SRC} ${PROTO_HEADER})
 libopentxs_configure_cxx_target(opentxs-otdb)
 target_link_libraries(opentxs-otdb PUBLIC protobuf::libprotobuf-lite)
 target_include_directories(

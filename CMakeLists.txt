@@ -695,6 +695,7 @@ include(libopentxs-target-helpers)
 libopentxs_generate_export_macro()
 
 add_custom_target(generated_code)
+define_property(TARGET PROPERTY OPENTXS_PROTOBUF_FILES)
 
 if(OPENTXS_STANDALONE)
   # library type controlled by BUILD_SHARED_LIBS
@@ -733,6 +734,12 @@ set_target_properties(
     VERSION
     "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}"
     SOVERSION 1
+    OPENTXS_PROTOBUF_FILES ""
+)
+set_property(
+  TARGET libopentxs
+  APPEND
+  PROPERTY EXPORT_PROPERTIES OPENTXS_PROTOBUF_FILES
 )
 
 define_property(TARGET PROPERTY QT_MOC_PUBLIC)

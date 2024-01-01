@@ -1,0 +1,26 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package @OPENTXS_PROTO_PACKAGE@;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTRPCPush";
+option optimize_for = LITE_RUNTIME;
+
+import public "AccountEvent.proto";
+import public "ContactEvent.proto";
+import public "RPCEnums.proto";
+import public "TaskComplete.proto";
+
+message RPCPush
+{
+    optional uint32 version = 1;
+    optional RPCPushType type = 2;  // see RPCEnums.proto
+    optional string id = 3;         // nym id
+    optional AccountEvent accountevent = 4;
+    optional ContactEvent contactevent = 5;
+    optional TaskComplete taskcomplete = 6;
+}
