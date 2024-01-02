@@ -1,0 +1,23 @@
+// Copyright (c) 2020-2022 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package @OPENTXS_PROTO_PACKAGE@;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTPaymentCode";
+option optimize_for = LITE_RUNTIME;
+
+import public "Enums.proto";
+
+message PaymentCode
+{
+    optional uint32 version = 1;
+    optional bytes key = 2;
+    optional bytes chaincode = 3;
+    optional bool bitmessage = 15;
+    optional uint32 bitmessageVersion = 16;
+    optional uint32 bitmessageStream = 17;
+}

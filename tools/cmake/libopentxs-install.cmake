@@ -28,6 +28,11 @@ macro(libopentxs_install)
       COMPONENT opentxs_cmake_modules
     )
 
+    get_target_property(
+      PROTO_SOURCES_INSTALL
+      libopentxs
+      OPENTXS_PROTOBUF_FILES
+    )
     configure_file(
       "${opentxs_SOURCE_DIR}/tools/cmake/opentxsConfig.cmake.in"
       "${opentxs_BINARY_DIR}/tools/cmake/opentxsConfig.cmake.in"

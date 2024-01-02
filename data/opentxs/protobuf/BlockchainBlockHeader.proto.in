@@ -1,0 +1,27 @@
+// Copyright (c) 2018 The Open-Transactions developers
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+syntax = "proto2";
+
+package @OPENTXS_PROTO_PACKAGE@;
+option java_package = "org.opentransactions.proto";
+option java_outer_classname = "OTBlockchainBlockHeader";
+option optimize_for = LITE_RUNTIME;
+
+import public "BitcoinBlockHeaderFields.proto";
+import public "BlockchainBlockLocalData.proto";
+import public "EthereumBlockHeaderFields.proto";
+
+message BlockchainBlockHeader
+{
+    optional uint32 version = 1;
+    optional uint32 type = 2;
+    optional BlockchainBlockLocalData local = 3;
+    oneof chain_data
+    {
+        BitcoinBlockHeaderFields bitcoin = 4;
+        EthereumBlockHeaderFields ethereum = 5;
+    }
+}
