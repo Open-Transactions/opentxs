@@ -711,8 +711,8 @@ target "fedora-sdk" {
     OT_LIB_DIR = "lib64"
   }
   tags = [
-    "opentransactions/fedora-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/fedora-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/fedora-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/fedora-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
@@ -889,8 +889,8 @@ target "ubuntu-sdk" {
     OT_LIB_DIR = "lib"
   }
   tags = [
-    "opentransactions/ubuntu-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/ubuntu-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/ubuntu-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/ubuntu-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
@@ -1034,8 +1034,8 @@ target "alpine-sdk" {
     OT_LIB_DIR = "lib"
   }
   tags = [
-    "opentransactions/alpine-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/alpine-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/alpine-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/alpine-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
