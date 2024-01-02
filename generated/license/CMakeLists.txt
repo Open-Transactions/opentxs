@@ -60,7 +60,7 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/external/simpleini/LICENCE.txt"
+  "${opentxs_SOURCE_DIR}/docs/simpleini.license"
   SIMPLEINI_LICENSE_TEXT
 )
 file(

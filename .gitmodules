@@ -6,10 +6,6 @@
 	path = external/lucre
 	url = https://github.com/Open-Transactions/lucre.git
 	shallow = true
-[submodule "deps/simpleini"]
-	path = external/simpleini
-	url = https://github.com/brofield/simpleini.git
-	shallow = true
 [submodule "deps/smhasher"]
 	path = external/smhasher
 	url = https://github.com/aappleby/smhasher

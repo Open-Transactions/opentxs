@@ -15,6 +15,10 @@ COPY --from=zeromq /usr/android /usr/android
 COPY --from=gtest /usr/android /usr/android
 COPY --from=cmake /opt/cmake /opt/cmake
 COPY --from=otcommon /opt/otcommon /opt/otcommon
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/arm/include/
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/arm64/include/
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/x64/include/
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/x86/include/
 COPY --from=files build /usr/bin
 ENTRYPOINT [ "/usr/bin/build" ]
 CMD []

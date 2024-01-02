@@ -52,6 +52,7 @@
         },
         "qtdeclarative",
         "secp256k1",
+        "simpleini",
         "sqlite3",
         "tbb",
         {

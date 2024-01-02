@@ -1,7 +1,7 @@
-variable "ci_39_revision" { default = "5" }
-variable "ci_38_revision" { default = "11" }
-variable "ci_37_revision" { default = "14" }
-variable "android_revision" { default = "27" }
+variable "ci_39_revision" { default = "6" }
+variable "ci_38_revision" { default = "12" }
+variable "ci_37_revision" { default = "15" }
+variable "android_revision" { default = "28" }
 
 variable "OT_DOCKER_ARCH" {
   default = "amd64"
@@ -116,6 +116,17 @@ target "otcommon-download" {
   ]
 }
 
+target "simpleini-download" {
+  dockerfile = "common/download"
+  target = "simpleini-download"
+  contexts = {
+    download = "target:downloader"
+  }
+  tags = [
+    "temp-opentxs/simpleini-download"
+  ]
+}
+
 group "ci" {
   targets = ["ci_39", "ci_38", "ci_37"]
 }
@@ -152,6 +163,7 @@ target "ci-baseline-39" {
   target = "build"
   contexts = {
     base = "target:ci-base-39"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-39"
@@ -296,6 +308,7 @@ target "ci-baseline-38" {
   target = "build"
   contexts = {
     base = "target:ci-base-38"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-38"
@@ -439,6 +452,7 @@ target "ci-baseline-37" {
   target = "build"
   contexts = {
     base = "target:ci-base-37"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-37"
@@ -585,11 +599,13 @@ target "fedora-base" {
   ]
 }
 
+# NOTE simpleini-devel not available in fedora 37 or earlier
 target "fedora-build" {
   dockerfile = "runtime/fedora.build"
   target = "build"
   contexts = {
     base = "target:fedora-base"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/fedora-build"
@@ -913,6 +929,7 @@ target "alpine-build" {
   target = "build"
   contexts = {
     base = "target:alpine-base"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/alpine-build"
@@ -1438,6 +1455,7 @@ target "android" {
     gtest = "target:android-gtest"
     cmake = "target:android-cmake"
     otcommon = "target:android-otcommon"
+    simpleini-download = "target:simpleini-download"
     files = "android/"
   }
   args = {

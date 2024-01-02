@@ -13,3 +13,4 @@ RUN --mount=type=tmpfs,target=/var/cache/apk apk add \
     rsync \
     samurai \
     zeromq-dev
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/include
