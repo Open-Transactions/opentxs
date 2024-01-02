@@ -1,0 +1,9 @@
+FROM build AS libguarded
+COPY --from=cmake /opt/cmake /opt/cmake
+COPY --from=libguarded-download /usr/src/libguarded /usr/src/libguarded
+RUN --mount=type=tmpfs,target=/tmp/build /opt/cmake/bin/cmake \
+        -S /usr/src/libguarded \
+        -B /tmp/build \
+        -GNinja \
+        -DCMAKE_INSTALL_PREFIX=/opt/libguarded \
+    && /opt/cmake/bin/cmake --install /tmp/build

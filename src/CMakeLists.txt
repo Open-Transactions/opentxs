@@ -200,6 +200,8 @@ if(OPENTXS_BUILD_TESTS)
   target_sources(opentxs-testlib PRIVATE $<TARGET_OBJECTS:opentxs-common>)
 endif()
 
+libopentxs_link_internal(CsLibGuarded::CsLibGuarded)
+
 if(Threads_FOUND)
   libopentxs_link_external(Threads::Threads)
 endif()

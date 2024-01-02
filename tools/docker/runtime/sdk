@@ -1,0 +1,11 @@
+FROM build AS sdk
+RUN git config --global --add safe.directory '*'
+ENV Boost_ROOT=/opt/boost
+ENV otcommon_ROOT=/opt/otcommon
+ENV opentxs_ROOT=/opt/opentxs
+ENV CsLibGuarded_ROOT=/opt/libguarded
+COPY --from=boost /opt/boost /opt/boost
+COPY --from=cmake /opt/cmake /opt/cmake
+COPY --from=otcommon /opt/otcommon /opt/otcommon
+COPY --from=libguarded /opt/libguarded /opt/libguarded
+COPY --from=opentxs /opt/opentxs /opt/opentxs

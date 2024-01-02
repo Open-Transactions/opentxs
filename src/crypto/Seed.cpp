@@ -282,7 +282,7 @@ Seed::Imp::Imp(const Imp& rhs) noexcept
     , encrypted_entropy_(rhs.encrypted_entropy_)
     , created_time_(rhs.created_time_)
     , api_(rhs.api_)
-    , data_(*rhs.data_.lock())
+    , data_(*rhs.data_.lock_shared())
 {
 }
 
@@ -561,7 +561,7 @@ auto Seed::Imp::encrypt(
 
 auto Seed::Imp::Index() const noexcept -> Bip32Index
 {
-    return data_.lock()->index_;
+    return data_.lock_shared()->index_;
 }
 
 auto Seed::Imp::IncrementIndex(const Bip32Index index) noexcept -> bool

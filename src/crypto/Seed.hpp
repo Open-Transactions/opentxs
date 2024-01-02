@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include <cs_plain_guarded.h>
+#include <cs_shared_guarded.h>
 #include <opentxs/protobuf/Ciphertext.pb.h>
+#include <shared_mutex>
 
 #include "internal/crypto/Seed.hpp"
 #include "opentxs/Time.hpp"
@@ -139,12 +140,10 @@ private:
         {
         }
     };
-    using Guarded = libguarded::plain_guarded<MutableData>;
+    using Guarded = libguarded::shared_guarded<MutableData, std::shared_mutex>;
     using SerializeType = protobuf::Seed;
 
     const api::Session& api_;
-    // TODO switch to shared_guarded after
-    // https://github.com/copperspice/cs_libguarded/pull/18 is merged upstream
     mutable Guarded data_;
 
     static auto encrypt(

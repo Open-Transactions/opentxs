@@ -35,7 +35,7 @@ file(
 )
 file(
   READ
-  "${opentxs_SOURCE_DIR}/external/cs_libguarded/LICENSE"
+  "${opentxs_SOURCE_DIR}/docs/BSD2-clause"
   LIBGUARDED_LICENSE_TEXT
 )
 file(

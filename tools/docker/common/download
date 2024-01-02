@@ -11,6 +11,7 @@ ARG QT_BRANCH=6.6
 ARG QT_RELEASE=official_releases
 ARG QT_VERSION=6.6.1
 ARG SIMPLEINI_COMMIT_HASH=09c21bda1dc1b578fa55f4a005d79b0afd481296
+ARG LIBGUARDED_COMMIT_HASH=9c1e82f42f228345f3b024bed5d08be643c00f8a
 
 FROM download AS cmake-download
 ARG CMAKE_VERSION
@@ -112,3 +113,8 @@ FROM download AS simpleini-download
 ARG SIMPLEINI_COMMIT_HASH
 RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/brofield/simpleini/archive/${SIMPLEINI_COMMIT_HASH}.zip" \
     && unzip "${SIMPLEINI_COMMIT_HASH}.zip" && rm "${SIMPLEINI_COMMIT_HASH}.zip" && mv "simpleini-${SIMPLEINI_COMMIT_HASH}" simpleini
+
+FROM download AS libguarded-download
+ARG LIBGUARDED_COMMIT_HASH
+RUN mkdir -p /usr/src && cd /usr/src && wget "https://github.com/copperspice/cs_libguarded/archive/${LIBGUARDED_COMMIT_HASH}.zip" \
+    && unzip "${LIBGUARDED_COMMIT_HASH}.zip" && rm "${LIBGUARDED_COMMIT_HASH}.zip" && mv "cs_libguarded-${LIBGUARDED_COMMIT_HASH}" libguarded

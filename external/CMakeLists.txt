@@ -146,8 +146,5 @@ libopentxs_link_internal(Boost::headers)
 libopentxs_link_external(Boost::system)
 
 libopentxs_include_directories("${opentxs_SOURCE_DIR}/external/")
-libopentxs_include_directories(
-  "${opentxs_SOURCE_DIR}/external/cs_libguarded/src"
-)
 libopentxs_include_directories("${opentxs_SOURCE_DIR}/external/frozen/include")
 libopentxs_link_internal(Boost::headers)

@@ -19,6 +19,7 @@ COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/arm/i
 COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/arm64/include/
 COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/x64/include/
 COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/android/x86/include/
+COPY --from=libguarded /opt/libguarded /opt/libguarded
 COPY --from=files build /usr/bin
 ENTRYPOINT [ "/usr/bin/build" ]
 CMD []

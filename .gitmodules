@@ -22,10 +22,6 @@
 	path = external/packetcrypt/packetcrypt_rs
 	url = https://github.com/cjdelisle/packetcrypt_rs
 	shallow = true
-[submodule "deps/cs_libguarded"]
-	path = external/cs_libguarded
-	url = https://github.com/copperspice/cs_libguarded
-	shallow = true
 [submodule "tests/ottest/data/blockchain/ethereum"]
 	path = tests/ottest/data/blockchain/ethereum
 	url = https://github.com/ethereum/tests

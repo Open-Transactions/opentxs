@@ -1,9 +1,11 @@
 FROM build AS opentxs
-ENV BOOST_ROOT=/opt/boost
-ENV OTCOMMON_ROOT=/opt/otcommon
-COPY --from=cmake /opt/cmake /opt/cmake
+ENV Boost_ROOT=/opt/boost
+ENV otcommon_ROOT=/opt/otcommon
+ENV CsLibGuarded_ROOT=/opt/libguarded
 COPY --from=boost /opt/boost /opt/boost
+COPY --from=cmake /opt/cmake /opt/cmake
 COPY --from=otcommon /opt/otcommon /opt/otcommon
+COPY --from=libguarded /opt/libguarded /opt/libguarded
 COPY --from=opentxs-download /usr/src/opentxs /usr/src/opentxs
 ARG OT_CMAKE_ARGS
 RUN --mount=type=tmpfs,target=/tmp/opentxs /opt/cmake/bin/cmake \

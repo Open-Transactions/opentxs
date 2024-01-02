@@ -31,6 +31,7 @@
         "boost-type-index",
         "boost-unordered",
         "gtest",
+        "libguarded",
         "libsodium",
         "lmdb",
         "openssl",
