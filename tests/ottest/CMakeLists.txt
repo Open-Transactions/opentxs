@@ -19,11 +19,8 @@ target_include_directories(
   opentxs-testlib PUBLIC "${opentxs_SOURCE_DIR}/tests/"
 )
 target_include_directories(
-  opentxs-testlib SYSTEM
-  PUBLIC
-    "${opentxs_SOURCE_DIR}/external/"
-    "${opentxs_SOURCE_DIR}/external/cs_libguarded/src"
-    "${opentxs_SOURCE_DIR}/external/frozen/include"
+  opentxs-testlib SYSTEM PUBLIC "${opentxs_SOURCE_DIR}/external/"
+                                "${opentxs_SOURCE_DIR}/external/frozen/include"
 )
 target_compile_definitions(
   opentxs-testlib
@@ -39,6 +36,8 @@ if(OT_QT_EXPORT)
 else()
   target_sources(opentxs-testlib PRIVATE "no-Qt.cpp")
 endif()
+
+target_link_libraries(opentxs-testlib PUBLIC CsLibGuarded::CsLibGuarded)
 
 if(OT_USE_VCPKG_TARGETS)
   target_link_libraries(opentxs-testlib PUBLIC GTest::gtest GTest::gmock)

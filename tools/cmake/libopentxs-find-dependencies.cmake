@@ -33,6 +33,11 @@ find_package(
     type_index
     unordered
 )
+find_package(
+  CsLibGuarded
+  CONFIG
+  REQUIRED
+)
 find_package(OpenSSL REQUIRED)
 
 if(OT_USE_VCPKG_TARGETS)

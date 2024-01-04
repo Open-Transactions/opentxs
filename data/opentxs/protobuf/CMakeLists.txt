@@ -239,6 +239,7 @@ protobuf_generate(
   cpp
   IMPORT_DIRS
   "${CMAKE_CURRENT_BINARY_DIR}"
+  APPEND_PATH
 )
 libopentxs_configure_cxx_target(opentxs-protobuf)
 target_link_libraries(opentxs-protobuf PUBLIC protobuf::libprotobuf-lite)

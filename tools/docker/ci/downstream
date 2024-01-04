@@ -1,3 +1,3 @@
 FROM ci AS sdk
-ENV OPENTXS_ROOT=/opt/opentxs
+ENV opentxs_ROOT=/opt/opentxs
 COPY --from=opentxs /opt/opentxs /opt/opentxs

@@ -1,7 +1,7 @@
-variable "ci_39_revision" { default = "5" }
-variable "ci_38_revision" { default = "11" }
-variable "ci_37_revision" { default = "14" }
-variable "android_revision" { default = "27" }
+variable "ci_39_revision" { default = "6" }
+variable "ci_38_revision" { default = "12" }
+variable "ci_37_revision" { default = "15" }
+variable "android_revision" { default = "28" }
 
 variable "OT_DOCKER_ARCH" {
   default = "amd64"
@@ -116,6 +116,28 @@ target "otcommon-download" {
   ]
 }
 
+target "simpleini-download" {
+  dockerfile = "common/download"
+  target = "simpleini-download"
+  contexts = {
+    download = "target:downloader"
+  }
+  tags = [
+    "temp-opentxs/simpleini-download"
+  ]
+}
+
+target "libguarded-download" {
+  dockerfile = "common/download"
+  target = "libguarded-download"
+  contexts = {
+    download = "target:downloader"
+  }
+  tags = [
+    "temp-opentxs/libguarded-download"
+  ]
+}
+
 group "ci" {
   targets = ["ci_39", "ci_38", "ci_37"]
 }
@@ -152,6 +174,7 @@ target "ci-baseline-39" {
   target = "build"
   contexts = {
     base = "target:ci-base-39"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-39"
@@ -232,6 +255,19 @@ target "ci-otcommon-39" {
   ]
 }
 
+target "ci-libguarded-39" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:ci-baseline-39"
+    cmake = "target:ci-cmake-39"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/ci-libguarded-39"
+  ]
+}
+
 target "ci-iwyu-39" {
   dockerfile = "common/iwyu"
   target = "iwyu"
@@ -255,6 +291,7 @@ target "ci_39" {
     cmake = "target:ci-cmake-39"
     boost = "target:ci-boost-39"
     otcommon = "target:ci-otcommon-39"
+    libguarded = "target:ci-libguarded-39"
     iwyu = "target:ci-iwyu-39"
     files = "ci/"
   }
@@ -296,6 +333,7 @@ target "ci-baseline-38" {
   target = "build"
   contexts = {
     base = "target:ci-base-38"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-38"
@@ -376,6 +414,19 @@ target "ci-otcommon-38" {
   ]
 }
 
+target "ci-libguarded-38" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:ci-baseline-38"
+    cmake = "target:ci-cmake-38"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/ci-libguarded-38"
+  ]
+}
+
 target "ci-iwyu-38" {
   dockerfile = "common/iwyu"
   target = "iwyu"
@@ -399,6 +450,7 @@ target "ci_38" {
     cmake = "target:ci-cmake-38"
     boost = "target:ci-boost-38"
     otcommon = "target:ci-otcommon-38"
+    libguarded = "target:ci-libguarded-38"
     iwyu = "target:ci-iwyu-38"
     files = "ci/"
   }
@@ -439,6 +491,7 @@ target "ci-baseline-37" {
   target = "build"
   contexts = {
     base = "target:ci-base-37"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/ci-baseline-37"
@@ -519,6 +572,19 @@ target "ci-otcommon-37" {
   ]
 }
 
+target "ci-libguarded-37" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:ci-baseline-37"
+    cmake = "target:ci-cmake-37"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/ci-libguarded-37"
+  ]
+}
+
 target "ci-iwyu-37" {
   dockerfile = "common/iwyu"
   target = "iwyu"
@@ -542,6 +608,7 @@ target "ci_37" {
     cmake = "target:ci-cmake-37"
     boost = "target:ci-boost-37"
     otcommon = "target:ci-otcommon-37"
+    libguarded = "target:ci-libguarded-37"
     iwyu = "target:ci-iwyu-37"
     files = "ci/"
   }
@@ -585,11 +652,13 @@ target "fedora-base" {
   ]
 }
 
+# NOTE simpleini-devel not available in fedora 37 or earlier
 target "fedora-build" {
   dockerfile = "runtime/fedora.build"
   target = "build"
   contexts = {
     base = "target:fedora-base"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/fedora-build"
@@ -658,6 +727,19 @@ target "fedora-otcommon" {
   ]
 }
 
+target "fedora-libguarded" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:fedora-build"
+    cmake = "target:fedora-cmake"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/fedora-libguarded"
+  ]
+}
+
 target "fedora-opentxs" {
   dockerfile = "common/opentxs"
   target = "opentxs"
@@ -667,6 +749,7 @@ target "fedora-opentxs" {
     boost = "target:fedora-boost"
     otcommon = "target:fedora-otcommon"
     opentxs-download = "target:opentxs-download"
+    libguarded = "target:fedora-libguarded"
   }
   args = {
     OT_CMAKE_ARGS = "-DOT_WITH_QT=OFF -DOT_WITH_QML=OFF"
@@ -677,7 +760,7 @@ target "fedora-opentxs" {
 }
 
 target "fedora-runtime" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/runtime"
   target = "runtime"
   contexts = {
     build = "target:fedora-build"
@@ -697,7 +780,7 @@ target "fedora-runtime" {
 }
 
 target "fedora-sdk" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/sdk"
   target = "sdk"
   contexts = {
     build = "target:fedora-build"
@@ -706,13 +789,14 @@ target "fedora-sdk" {
     boost = "target:fedora-boost"
     otcommon = "target:fedora-otcommon"
     opentxs = "target:fedora-opentxs"
+    libguarded = "target:fedora-libguarded"
   }
   args = {
     OT_LIB_DIR = "lib64"
   }
   tags = [
-    "opentransactions/fedora-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/fedora-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/fedora-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/fedora-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
@@ -726,6 +810,7 @@ target "downstream-opentxs" {
     cmake = "target:ci-cmake-39"
     boost = "target:ci-boost-39"
     otcommon = "target:ci-otcommon-39"
+    libguarded = "target:ci-libguarded-39"
     opentxs-download = "target:opentxs-download"
   }
   args = {
@@ -836,6 +921,19 @@ target "ubuntu-otcommon" {
   ]
 }
 
+target "ubuntu-libguarded" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:ubuntu-build"
+    cmake = "target:ubuntu-cmake"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/ubuntu-libguarded"
+  ]
+}
+
 target "ubuntu-opentxs" {
   dockerfile = "common/opentxs"
   target = "opentxs"
@@ -845,6 +943,7 @@ target "ubuntu-opentxs" {
     boost = "target:ubuntu-boost"
     otcommon = "target:ubuntu-otcommon"
     opentxs-download = "target:opentxs-download"
+    libguarded = "target:ubuntu-libguarded"
   }
   args = {
     OT_CMAKE_ARGS = "-DOT_WITH_QT=OFF -DOT_WITH_QML=OFF"
@@ -855,7 +954,7 @@ target "ubuntu-opentxs" {
 }
 
 target "ubuntu-runtime" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/runtime"
   target = "runtime"
   contexts = {
     build = "target:ubuntu-build"
@@ -875,7 +974,7 @@ target "ubuntu-runtime" {
 }
 
 target "ubuntu-sdk" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/sdk"
   target = "sdk"
   contexts = {
     build = "target:ubuntu-build"
@@ -884,13 +983,14 @@ target "ubuntu-sdk" {
     boost = "target:ubuntu-boost"
     otcommon = "target:ubuntu-otcommon"
     opentxs = "target:ubuntu-opentxs"
+    libguarded = "target:ubuntu-libguarded"
   }
   args = {
     OT_LIB_DIR = "lib"
   }
   tags = [
-    "opentransactions/ubuntu-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/ubuntu-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/ubuntu-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/ubuntu-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
@@ -913,6 +1013,7 @@ target "alpine-build" {
   target = "build"
   contexts = {
     base = "target:alpine-base"
+    simpleini-download = "target:simpleini-download"
   }
   tags = [
     "temp-opentxs/alpine-build"
@@ -981,6 +1082,19 @@ target "alpine-otcommon" {
   ]
 }
 
+target "alpine-libguarded" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:alpine-build"
+    cmake = "target:alpine-cmake"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/alpine-libguarded"
+  ]
+}
+
 target "alpine-opentxs" {
   dockerfile = "common/opentxs"
   target = "opentxs"
@@ -990,6 +1104,7 @@ target "alpine-opentxs" {
     boost = "target:alpine-boost"
     otcommon = "target:alpine-otcommon"
     opentxs-download = "target:opentxs-download"
+    libguarded = "target:alpine-libguarded"
   }
   args = {
     OT_CMAKE_ARGS = "-DOT_WITH_QT=OFF -DOT_WITH_QML=OFF"
@@ -1000,7 +1115,7 @@ target "alpine-opentxs" {
 }
 
 target "alpine-runtime" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/runtime"
   target = "runtime"
   contexts = {
     build = "target:alpine-build"
@@ -1020,7 +1135,7 @@ target "alpine-runtime" {
 }
 
 target "alpine-sdk" {
-  dockerfile = "runtime/Dockerfile"
+  dockerfile = "runtime/sdk"
   target = "sdk"
   contexts = {
     build = "target:alpine-build"
@@ -1029,13 +1144,14 @@ target "alpine-sdk" {
     boost = "target:alpine-boost"
     otcommon = "target:alpine-otcommon"
     opentxs = "target:alpine-opentxs"
+    libguarded = "target:alpine-libguarded"
   }
   args = {
     OT_LIB_DIR = "lib"
   }
   tags = [
-    "opentransactions/alpine-runtime:${OT_VERSION}-${OT_DOCKER_ARCH}",
-    "opentransactions/alpine-runtime:latest-${OT_DOCKER_ARCH}"
+    "opentransactions/alpine-sdk:${OT_VERSION}-${OT_DOCKER_ARCH}",
+    "opentransactions/alpine-sdk:latest-${OT_DOCKER_ARCH}"
   ]
 }
 
@@ -1372,6 +1488,19 @@ target "android-otcommon" {
   ]
 }
 
+target "android-libguarded" {
+  dockerfile = "common/libguarded"
+  target = "libguarded"
+  contexts = {
+    build = "target:android-build-base"
+    cmake = "target:android-cmake"
+    libguarded-download = "target:libguarded-download"
+  }
+  tags = [
+    "temp-opentxs/android-libguarded"
+  ]
+}
+
 target "android-qt-bootstrap" {
   dockerfile = "android/qt-bootstrap"
   target = "qt-bootstrap"
@@ -1438,6 +1567,8 @@ target "android" {
     gtest = "target:android-gtest"
     cmake = "target:android-cmake"
     otcommon = "target:android-otcommon"
+    simpleini-download = "target:simpleini-download"
+    libguarded = "target:android-libguarded"
     files = "android/"
   }
   args = {

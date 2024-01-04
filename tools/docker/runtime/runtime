@@ -1,0 +1,5 @@
+FROM run AS runtime
+ARG OT_LIB_DIR
+ENV LD_LIBRARY_PATH="/opt/boost/lib:/opt/opentxs/${OT_LIB_DIR}"
+COPY --from=boost /opt/boost/lib /opt/boost/lib
+COPY --from=opentxs /opt/opentxs/${OT_LIB_DIR} /opt/opentxs/${OT_LIB_DIR}

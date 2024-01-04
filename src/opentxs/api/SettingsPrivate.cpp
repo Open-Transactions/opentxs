@@ -5,7 +5,17 @@
 
 #include "opentxs/api/SettingsPrivate.hpp"  // IWYU pragma: associated
 
+#define SI_NO_CONVERSION
+
+#if __has_include(<SimpleIni.h>)
+#include <SimpleIni.h>
+#elif __has_include(<simpleini/SimpleIni.h>)
 #include <simpleini/SimpleIni.h>
+#elif __has_include(<SimpleIni/SimpleIni.h>)
+#include <SimpleIni/SimpleIni.h>
+#else
+#error SimpleIni.h not found
+#endif
 #include <cstdint>
 #include <cstdlib>  // IWYU pragma: keep
 #include <memory>

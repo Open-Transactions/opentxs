@@ -13,3 +13,4 @@ RUN --mount=type=tmpfs,target=/var/cache/dnf dnf install -y \
     rsync \
     tbb-devel \
     zeromq-devel
+COPY --from=simpleini-download /usr/src/simpleini/SimpleIni.h /usr/include

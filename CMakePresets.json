@@ -384,6 +384,8 @@
                 "CMAKE_EXE_LINKER_FLAGS": "-Wl,-lGLESv2",
                 "Protobuf_PROTOC_EXECUTABLE": "/opt/protobuf/bin/protoc",
                 "QT_HOST_PATH": "/opt/qt",
+                "otcommon_DIR": "/opt/otcommon/share/otcommon/cmake",
+                "CsLibGuarded_DIR": "/opt/libguarded/lib64/cmake/CsLibGuarded",
                 "HAVE_GLESv2": "ON",
                 "BUILD_SHARED_LIBS": "ON",
                 "OPENTXS_PEDANTIC_BUILD": "ON",
@@ -406,7 +408,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "arm64-v8a",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/arm64;/usr/qt-for-android/arm64;/opt/otcommon"
+                    "/usr/android/arm64;/usr/qt-for-android/arm64"
             }
         },
         {
@@ -419,7 +421,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "armeabi-v7a",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/arm;/usr/qt-for-android/arm;/opt/otcommon"
+                    "/usr/android/arm;/usr/qt-for-android/arm"
             }
         },
         {
@@ -432,7 +434,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "x86_64",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/x64;/usr/qt-for-android/x64;/opt/otcommon"
+                    "/usr/android/x64;/usr/qt-for-android/x64"
             }
         },
         {
@@ -445,7 +447,7 @@
             "cacheVariables": {
                 "ANDROID_ABI": "x86",
                 "CMAKE_FIND_ROOT_PATH":
-                    "/usr/android/x86;/usr/qt-for-android/x86;/opt/otcommon"
+                    "/usr/android/x86;/usr/qt-for-android/x86"
             }
         },
         {

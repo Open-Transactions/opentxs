@@ -31,6 +31,7 @@
         "boost-type-index",
         "boost-unordered",
         "gtest",
+        "libguarded",
         "libsodium",
         "lmdb",
         "openssl",
@@ -52,6 +53,7 @@
         },
         "qtdeclarative",
         "secp256k1",
+        "simpleini",
         "sqlite3",
         "tbb",
         {
