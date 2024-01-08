@@ -13,7 +13,7 @@
                 "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
             "environment": {
                 "VCPKG_OVERLAY_TRIPLETS":
-                    "${sourceDir}/deps/vcpkg-overlay/triplets"
+                    "${sourceDir}/external/vcpkg-overlay/triplets"
             },
             "cacheVariables": {
                 "OT_BOOST_JSON_HEADER_ONLY": "OFF"
