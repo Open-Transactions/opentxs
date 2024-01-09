@@ -859,6 +859,18 @@ target "ubuntu-build" {
   ]
 }
 
+target "ubuntu-build-patched" {
+  dockerfile = "runtime/patch-simpleini"
+  target = "patched"
+  contexts = {
+    build = "target:ubuntu-build"
+    files = "runtime/"
+  }
+  tags = [
+    "temp-opentxs/ubuntu-build-patched"
+  ]
+}
+
 target "ubuntu-run" {
   dockerfile = "runtime/ubuntu.run"
   target = "run"
@@ -874,7 +886,7 @@ target "ubuntu-cmake-bootstrap" {
   dockerfile = "runtime/ubuntu.cmake-bootstrap"
   target = "cmake-bootstrap"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
   }
   tags = [
     "temp-opentxs/ubuntu-cmake-bootstrap"
@@ -909,7 +921,7 @@ target "ubuntu-otcommon" {
   dockerfile = "common/otcommon"
   target = "otcommon"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
     cmake = "target:ubuntu-cmake"
     otcommon-download = "target:otcommon-download"
   }
@@ -925,7 +937,7 @@ target "ubuntu-libguarded" {
   dockerfile = "common/libguarded"
   target = "libguarded"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
     cmake = "target:ubuntu-cmake"
     libguarded-download = "target:libguarded-download"
   }
@@ -938,7 +950,7 @@ target "ubuntu-opentxs" {
   dockerfile = "common/opentxs"
   target = "opentxs"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
     cmake = "target:ubuntu-cmake"
     boost = "target:ubuntu-boost"
     otcommon = "target:ubuntu-otcommon"
@@ -957,7 +969,7 @@ target "ubuntu-runtime" {
   dockerfile = "runtime/runtime"
   target = "runtime"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
     run = "target:ubuntu-run"
     cmake = "target:ubuntu-cmake"
     boost = "target:ubuntu-boost"
@@ -977,7 +989,7 @@ target "ubuntu-sdk" {
   dockerfile = "runtime/sdk"
   target = "sdk"
   contexts = {
-    build = "target:ubuntu-build"
+    build = "target:ubuntu-build-patched"
     run = "target:ubuntu-run"
     cmake = "target:ubuntu-cmake"
     boost = "target:ubuntu-boost"
